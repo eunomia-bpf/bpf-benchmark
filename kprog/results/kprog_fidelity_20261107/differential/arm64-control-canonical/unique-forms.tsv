@@ -1,0 +1,96 @@
+assembly	matrix_rows	cases	cpu_mismatches	simulator_mismatches
+b.eq forward	1	1024	0	0
+b.eq backward	1	1024	0	0
+b.ne forward	1	1024	0	0
+b.ne backward	1	1024	0	0
+b.cs forward	1	1024	0	0
+b.cs backward	1	1024	0	0
+b.cc forward	1	1024	0	0
+b.cc backward	1	1024	0	0
+b.mi forward	1	1024	0	0
+b.mi backward	1	1024	0	0
+b.pl forward	1	1024	0	0
+b.pl backward	1	1024	0	0
+b.vs forward	1	1024	0	0
+b.vs backward	1	1024	0	0
+b.vc forward	1	1024	0	0
+b.vc backward	1	1024	0	0
+b.hi forward	1	1024	0	0
+b.hi backward	1	1024	0	0
+b.ls forward	1	1024	0	0
+b.ls backward	1	1024	0	0
+b.ge forward	1	1024	0	0
+b.ge backward	1	1024	0	0
+b.lt forward	1	1024	0	0
+b.lt backward	1	1024	0	0
+b.gt forward	1	1024	0	0
+b.gt backward	1	1024	0	0
+b.le forward	1	1024	0	0
+b.le backward	1	1024	0	0
+cbz w1 False	1	1024	0	0
+cbz w1 True	1	1024	0	0
+cbnz w1 False	1	1024	0	0
+cbnz w1 True	1	1024	0	0
+tbz w1 #0 False	1	1024	0	0
+tbz w1 #0 True	1	1024	0	0
+tbz w1 #7 False	1	1024	0	0
+tbz w1 #7 True	1	1024	0	0
+tbz w1 #31 False	1	1024	0	0
+tbz w1 #31 True	1	1024	0	0
+tbnz w1 #0 False	1	1024	0	0
+tbnz w1 #0 True	1	1024	0	0
+tbnz w1 #7 False	1	1024	0	0
+tbnz w1 #7 True	1	1024	0	0
+tbnz w1 #31 False	1	1024	0	0
+tbnz w1 #31 True	1	1024	0	0
+cbz x1 False	1	1024	0	0
+cbz x1 True	1	1024	0	0
+cbnz x1 False	1	1024	0	0
+cbnz x1 True	1	1024	0	0
+tbz x1 #0 False	1	1024	0	0
+tbz x1 #0 True	1	1024	0	0
+tbz x1 #7 False	1	1024	0	0
+tbz x1 #7 True	1	1024	0	0
+tbz x1 #31 False	1	1024	0	0
+tbz x1 #31 True	1	1024	0	0
+tbz x1 #63 False	1	1024	0	0
+tbz x1 #63 True	1	1024	0	0
+tbnz x1 #0 False	1	1024	0	0
+tbnz x1 #0 True	1	1024	0	0
+tbnz x1 #7 False	1	1024	0	0
+tbnz x1 #7 True	1	1024	0	0
+tbnz x1 #31 False	1	1024	0	0
+tbnz x1 #31 True	1	1024	0	0
+tbnz x1 #63 False	1	1024	0	0
+tbnz x1 #63 True	1	1024	0	0
+cmp w1,w2 / b.gt	1	1024	0	0
+cmp x1,x2 / b.gt	1	1024	0	0
+BR finite code choice	1	1024	0	0
+BL / RET x30	1	1024	0	0
+BL / RET x17	1	1024	0	0
+BLR code / RET	1	1024	0	0
+nested BL saved LR stack	1	1024	0	0
+BLR saved LR stack	1	1024	0	0
+stack pair pre/post	1	1024	0	0
+stack scalar pre/post	1	1024	0	0
+MOV SP register round-trip	1	1024	0	0
+SP observation offset	1	1024	0	0
+SP compare flags	1	1024	0	0
+entry LR compare flags	1	1024	0	0
+SP numeric W move	1	1024	0	0
+SP tagged numeric ADD	1	1024	0	0
+SP tagged numeric SUB	1	1024	0	0
+sp spill bytes1 offset0	1	1024	0	0
+sp spill bytes1 offset7	1	1024	0	0
+sp spill bytes2 offset0	1	1024	0	0
+sp spill bytes2 offset6	1	1024	0	0
+sp spill bytes4 offset0	1	1024	0	0
+sp spill bytes4 offset4	1	1024	0	0
+sp spill bytes8 offset0	2	2048	0	0
+x30 spill bytes1 offset0	1	1024	0	0
+x30 spill bytes1 offset7	1	1024	0	0
+x30 spill bytes2 offset0	1	1024	0	0
+x30 spill bytes2 offset6	1	1024	0	0
+x30 spill bytes4 offset0	1	1024	0	0
+x30 spill bytes4 offset4	1	1024	0	0
+x30 spill bytes8 offset0	2	2048	0	0

@@ -1,0 +1,98 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	min_steps	max_steps
+0	b.eq forward	1024	1024	0	0	4	4
+1	b.eq backward	1024	1024	0	0	5	5
+2	b.ne forward	1024	1024	0	0	4	4
+3	b.ne backward	1024	1024	0	0	5	5
+4	b.cs forward	1024	1024	0	0	4	4
+5	b.cs backward	1024	1024	0	0	5	5
+6	b.cc forward	1024	1024	0	0	4	4
+7	b.cc backward	1024	1024	0	0	5	5
+8	b.mi forward	1024	1024	0	0	4	4
+9	b.mi backward	1024	1024	0	0	5	5
+10	b.pl forward	1024	1024	0	0	4	4
+11	b.pl backward	1024	1024	0	0	5	5
+12	b.vs forward	1024	1024	0	0	4	4
+13	b.vs backward	1024	1024	0	0	5	5
+14	b.vc forward	1024	1024	0	0	4	4
+15	b.vc backward	1024	1024	0	0	5	5
+16	b.hi forward	1024	1024	0	0	4	4
+17	b.hi backward	1024	1024	0	0	5	5
+18	b.ls forward	1024	1024	0	0	4	4
+19	b.ls backward	1024	1024	0	0	5	5
+20	b.ge forward	1024	1024	0	0	4	4
+21	b.ge backward	1024	1024	0	0	5	5
+22	b.lt forward	1024	1024	0	0	4	4
+23	b.lt backward	1024	1024	0	0	5	5
+24	b.gt forward	1024	1024	0	0	4	4
+25	b.gt backward	1024	1024	0	0	5	5
+26	b.le forward	1024	1024	0	0	4	4
+27	b.le backward	1024	1024	0	0	5	5
+28	cbz w1 False	1024	1024	0	0	4	4
+29	cbz w1 True	1024	1024	0	0	5	5
+30	cbnz w1 False	1024	1024	0	0	4	4
+31	cbnz w1 True	1024	1024	0	0	5	5
+32	tbz w1 #0 False	1024	1024	0	0	4	4
+33	tbz w1 #0 True	1024	1024	0	0	5	5
+34	tbz w1 #7 False	1024	1024	0	0	4	4
+35	tbz w1 #7 True	1024	1024	0	0	5	5
+36	tbz w1 #31 False	1024	1024	0	0	4	4
+37	tbz w1 #31 True	1024	1024	0	0	5	5
+38	tbnz w1 #0 False	1024	1024	0	0	4	4
+39	tbnz w1 #0 True	1024	1024	0	0	5	5
+40	tbnz w1 #7 False	1024	1024	0	0	4	4
+41	tbnz w1 #7 True	1024	1024	0	0	5	5
+42	tbnz w1 #31 False	1024	1024	0	0	4	4
+43	tbnz w1 #31 True	1024	1024	0	0	5	5
+44	cbz x1 False	1024	1024	0	0	4	4
+45	cbz x1 True	1024	1024	0	0	5	5
+46	cbnz x1 False	1024	1024	0	0	4	4
+47	cbnz x1 True	1024	1024	0	0	5	5
+48	tbz x1 #0 False	1024	1024	0	0	4	4
+49	tbz x1 #0 True	1024	1024	0	0	5	5
+50	tbz x1 #7 False	1024	1024	0	0	4	4
+51	tbz x1 #7 True	1024	1024	0	0	5	5
+52	tbz x1 #31 False	1024	1024	0	0	4	4
+53	tbz x1 #31 True	1024	1024	0	0	5	5
+54	tbz x1 #63 False	1024	1024	0	0	4	4
+55	tbz x1 #63 True	1024	1024	0	0	5	5
+56	tbnz x1 #0 False	1024	1024	0	0	4	4
+57	tbnz x1 #0 True	1024	1024	0	0	5	5
+58	tbnz x1 #7 False	1024	1024	0	0	4	4
+59	tbnz x1 #7 True	1024	1024	0	0	5	5
+60	tbnz x1 #31 False	1024	1024	0	0	4	4
+61	tbnz x1 #31 True	1024	1024	0	0	5	5
+62	tbnz x1 #63 False	1024	1024	0	0	4	4
+63	tbnz x1 #63 True	1024	1024	0	0	5	5
+64	cmp w1,w2 / b.gt	1024	1024	0	0	5	5
+65	cmp x1,x2 / b.gt	1024	1024	0	0	5	5
+66	BR finite code choice	1024	1024	0	0	6	7
+67	BL / RET x30	1024	1024	0	0	5	5
+68	BL / RET x17	1024	1024	0	0	6	6
+69	BLR code / RET	1024	1024	0	0	6	6
+70	nested BL saved LR stack	1024	1024	0	0	9	9
+71	BLR saved LR stack	1024	1024	0	0	10	10
+72	stack pair pre/post	1024	1024	0	0	4	4
+73	stack scalar pre/post	1024	1024	0	0	4	4
+74	MOV SP register round-trip	1024	1024	0	0	7	7
+75	SP observation offset	1024	1024	0	0	4	4
+76	SP compare flags	1024	1024	0	0	5	5
+77	entry LR compare flags	1024	1024	0	0	5	5
+78	SP numeric W move	1024	1024	0	0	3	3
+79	SP tagged numeric ADD	1024	1024	0	0	4	4
+80	SP tagged numeric SUB	1024	1024	0	0	4	4
+81	sp spill bytes1 offset0	1024	1024	0	0	6	6
+82	sp spill bytes1 offset7	1024	1024	0	0	6	6
+83	sp spill bytes2 offset0	1024	1024	0	0	6	6
+84	sp spill bytes2 offset6	1024	1024	0	0	6	6
+85	sp spill bytes4 offset0	1024	1024	0	0	6	6
+86	sp spill bytes4 offset4	1024	1024	0	0	6	6
+87	sp spill bytes8 offset0	1024	1024	0	0	6	6
+88	sp spill bytes8 offset0	1024	1024	0	0	6	6
+89	x30 spill bytes1 offset0	1024	1024	0	0	6	6
+90	x30 spill bytes1 offset7	1024	1024	0	0	6	6
+91	x30 spill bytes2 offset0	1024	1024	0	0	6	6
+92	x30 spill bytes2 offset6	1024	1024	0	0	6	6
+93	x30 spill bytes4 offset0	1024	1024	0	0	6	6
+94	x30 spill bytes4 offset4	1024	1024	0	0	6	6
+95	x30 spill bytes8 offset0	1024	1024	0	0	6	6
+96	x30 spill bytes8 offset0	1024	1024	0	0	6	6

@@ -1,0 +1,487 @@
+[
+  {
+    "assembly": "b.eq forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.eq backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ne forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ne backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.cs forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.cs backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.cc forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.cc backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.mi forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.mi backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.pl forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.pl backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.vs forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.vs backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.vc forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.vc backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.hi forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.hi backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ls forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ls backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ge forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.ge backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.lt forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.lt backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.gt forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.gt backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.le forward",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "b.le backward",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbz w1 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbz w1 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbnz w1 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbnz w1 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #0 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #0 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #7 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #7 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #31 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz w1 #31 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #0 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #0 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #7 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #7 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #31 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz w1 #31 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbz x1 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbz x1 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbnz x1 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cbnz x1 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #0 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #0 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #7 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #7 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #31 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #31 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #63 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbz x1 #63 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #0 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #0 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #7 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #7 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #31 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #31 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #63 False",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "tbnz x1 #63 True",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cmp w1,w2 / b.gt",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "cmp x1,x2 / b.gt",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "BR finite code choice",
+    "native_instructions": 10,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "BL / RET x30",
+    "native_instructions": 5,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "BL / RET x17",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "BLR code / RET",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "nested BL saved LR stack",
+    "native_instructions": 9,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "BLR saved LR stack",
+    "native_instructions": 10,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "stack pair pre/post",
+    "native_instructions": 4,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "stack scalar pre/post",
+    "native_instructions": 4,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "MOV SP register round-trip",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "SP observation offset",
+    "native_instructions": 4,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "SP compare flags",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "entry LR compare flags",
+    "native_instructions": 7,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "SP numeric W move",
+    "native_instructions": 3,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "SP tagged numeric ADD",
+    "native_instructions": 4,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "SP tagged numeric SUB",
+    "native_instructions": 4,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes1 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes1 offset7",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes2 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes2 offset6",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes4 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes4 offset4",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes8 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "sp spill bytes8 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes1 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes1 offset7",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes2 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes2 offset6",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes4 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes4 offset4",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes8 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  },
+  {
+    "assembly": "x30 spill bytes8 offset0",
+    "native_instructions": 6,
+    "opcode": "ARM64_CONTROL"
+  }
+]
