@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/unbounded_loop.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/unbounded_loop.bpf.o",
+      "simulator_program": "unbounded_loop_x86_sim_xdp"
+    }
+  ]
+}

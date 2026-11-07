@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/divide-fault/uninitialized_stack.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/divide-fault/uninitialized_stack.bpf.o",
+      "simulator_program": "uninitialized_stack_x86_sim_xdp"
+    }
+  ]
+}

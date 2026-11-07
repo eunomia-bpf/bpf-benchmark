@@ -1,0 +1,29 @@
+--- private-candidate/kprog/x86/x86_sim_local_bpf.h
++++ working-tree-first/kprog/x86/x86_sim_local_bpf.h
+@@ -567,15 +567,13 @@
+ 			__x86_stack_mem.q                               \
+ 				[KPROG_X86_STACK_WORD_INDEX(             \
+ 					__x86_stw_index)] = (VALUE);     \
+-		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_64) { \
+-			KPROG_X86_MEM_STORE(                              \
+-				(void *)&__x86_stack_mem.b[__x86_stw_index], \
+-				X86_WIDTH_64, (VALUE));                   \
+ 		} else {                                                  \
+ 			__u8 __x86_stw_width =                            \
+ 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
+ 			__u64 __x86_stw_narrowed = (VALUE) &              \
+ 				x86_width_mask(__x86_stw_width);          \
++			if (__x86_stw_width == X86_WIDTH_64)              \
++				X86_SIM_L_BARRIER_VAR(__x86_stw_narrowed);  \
+ 			__x86_stack_mem.b[__x86_stw_index] =              \
+ 				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
+ 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
+@@ -2297,7 +2295,7 @@
+ 				X86_SIM_L_WRITE_REG_WIDTH((SRC),           \
+ 					__x86_l_dst_value, __x86_l_width);  \
+ 			}                                                   \
+-		} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) { \
++        } else if (KPROG_X86_DISP_DIV_HANDLED(OP)) { \
+             __u64 __x86_l_divisor = (SRC) == X86_REG_NONE ? (IMM) : X86_SIM_L_READ_REG(SRC); \
+             __u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX); \
+             __u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX); \

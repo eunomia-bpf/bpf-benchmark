@@ -1,0 +1,564 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	nop	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+1	add w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+2	add w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+3	add w0, w1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+4	sub w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+5	sub w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+6	sub w0, w1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+7	and w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+8	and w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+9	bic w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+10	bic w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+11	eor w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+12	eor w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+13	orr w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+14	orr w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+15	orn w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+16	orn w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+17	adds w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+18	adds w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+19	adds w0, w1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+20	subs w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+21	subs w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+22	subs w0, w1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+23	ands w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+24	ands w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+25	bics w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+26	bics w0, w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+27	cmp w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+28	cmp w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+29	cmn w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+30	cmn w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+31	tst w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+32	tst w1, w2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+33	mov w0, w1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+34	mov w0, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+35	movk w0, #0xdead, lsl #16	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+36	mvn w0, w1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+37	neg w0, w1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+38	rev w0, w1	1024	1024	0	0	checked	
+39	rev16 w0, w1	1024	1024	0	0	checked	
+40	sxtb w0, w1	1024	1024	0	0	checked	
+41	sxth w0, w1	1024	1024	0	0	checked	
+42	mvn w0, w1, lsl #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+43	mvn w0, w1, lsl #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+44	mvn w0, w1, lsl #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+45	mvn w0, w1, lsr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+46	mvn w0, w1, lsr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+47	mvn w0, w1, lsr #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+48	mvn w0, w1, asr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+49	mvn w0, w1, asr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+50	mvn w0, w1, asr #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+51	mvn w0, w1, ror #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+52	mvn w0, w1, ror #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+53	mvn w0, w1, ror #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+54	neg w0, w1, lsl #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+55	neg w0, w1, lsl #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+56	neg w0, w1, lsl #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+57	neg w0, w1, lsr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+58	neg w0, w1, lsr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+59	neg w0, w1, lsr #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+60	neg w0, w1, asr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+61	neg w0, w1, asr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+62	neg w0, w1, asr #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+63	mul w0, w1, w2	1024	1024	0	0	checked	
+64	udiv w0, w1, w2	1024	1024	0	0	checked	
+65	madd w0, w1, w2, w3	1024	1024	0	0	checked	
+66	msub w0, w1, w2, w3	1024	1024	0	0	checked	
+67	lsl w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+68	lsl w0, w1, #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+69	lsl w0, w1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+70	lsl w0, w1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+71	lsl w0, w1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+72	lsr w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+73	lsr w0, w1, #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+74	lsr w0, w1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+75	lsr w0, w1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+76	lsr w0, w1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+77	asr w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+78	asr w0, w1, #0	1024	1024	0	0	checked	
+79	asr w0, w1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+80	asr w0, w1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+81	asr w0, w1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+82	ror w0, w1, w2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+83	ror w0, w1, #0	1024	1024	0	0	checked	
+84	ror w0, w1, #1	1024	1024	0	0	checked	
+85	ror w0, w1, #7	1024	1024	0	0	checked	
+86	ror w0, w1, #31	1024	1024	0	0	checked	
+87	extr w0, w1, w2, #7	1024	1024	0	0	checked	
+88	ubfx w0, w1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+89	sbfx w0, w1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+90	ubfiz w0, w1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+91	bfxil w0, w1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+92	bfi w0, w1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+93	csel w0, w1, w2, eq	1024	1024	0	0	checked	
+94	csinc w0, w1, w2, eq	1024	1024	0	0	checked	
+95	csinv w0, w1, w2, eq	1024	1024	0	0	checked	
+96	csneg w0, w1, w2, eq	1024	1024	0	0	checked	
+97	cinc w0, w1, eq	1024	1024	0	0	checked	
+98	cinv w0, w1, eq	1024	1024	0	0	checked	
+99	cneg w0, w1, eq	1024	1024	0	0	checked	
+100	cset w0, eq	1024	1024	0	0	checked	
+101	csetm w0, eq	1024	1024	0	0	checked	
+102	ccmp w1, w2, #5, eq	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+103	ccmp w1, #7, #10, eq	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+104	csel w0, w1, w2, ne	1024	1024	0	0	checked	
+105	csinc w0, w1, w2, ne	1024	1024	0	0	checked	
+106	csinv w0, w1, w2, ne	1024	1024	0	0	checked	
+107	csneg w0, w1, w2, ne	1024	1024	0	0	checked	
+108	cinc w0, w1, ne	1024	1024	0	0	checked	
+109	cinv w0, w1, ne	1024	1024	0	0	checked	
+110	cneg w0, w1, ne	1024	1024	0	0	checked	
+111	cset w0, ne	1024	1024	0	0	checked	
+112	csetm w0, ne	1024	1024	0	0	checked	
+113	ccmp w1, w2, #5, ne	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+114	ccmp w1, #7, #10, ne	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+115	csel w0, w1, w2, cs	1024	1024	0	0	checked	
+116	csinc w0, w1, w2, cs	1024	1024	0	0	checked	
+117	csinv w0, w1, w2, cs	1024	1024	0	0	checked	
+118	csneg w0, w1, w2, cs	1024	1024	0	0	checked	
+119	cinc w0, w1, cs	1024	1024	0	0	checked	
+120	cinv w0, w1, cs	1024	1024	0	0	checked	
+121	cneg w0, w1, cs	1024	1024	0	0	checked	
+122	cset w0, cs	1024	1024	0	0	checked	
+123	csetm w0, cs	1024	1024	0	0	checked	
+124	ccmp w1, w2, #5, cs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+125	ccmp w1, #7, #10, cs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+126	csel w0, w1, w2, cc	1024	1024	0	0	checked	
+127	csinc w0, w1, w2, cc	1024	1024	0	0	checked	
+128	csinv w0, w1, w2, cc	1024	1024	0	0	checked	
+129	csneg w0, w1, w2, cc	1024	1024	0	0	checked	
+130	cinc w0, w1, cc	1024	1024	0	0	checked	
+131	cinv w0, w1, cc	1024	1024	0	0	checked	
+132	cneg w0, w1, cc	1024	1024	0	0	checked	
+133	cset w0, cc	1024	1024	0	0	checked	
+134	csetm w0, cc	1024	1024	0	0	checked	
+135	ccmp w1, w2, #5, cc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+136	ccmp w1, #7, #10, cc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+137	csel w0, w1, w2, mi	1024	1024	0	0	checked	
+138	csinc w0, w1, w2, mi	1024	1024	0	0	checked	
+139	csinv w0, w1, w2, mi	1024	1024	0	0	checked	
+140	csneg w0, w1, w2, mi	1024	1024	0	0	checked	
+141	cinc w0, w1, mi	1024	1024	0	0	checked	
+142	cinv w0, w1, mi	1024	1024	0	0	checked	
+143	cneg w0, w1, mi	1024	1024	0	0	checked	
+144	cset w0, mi	1024	1024	0	0	checked	
+145	csetm w0, mi	1024	1024	0	0	checked	
+146	ccmp w1, w2, #5, mi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+147	ccmp w1, #7, #10, mi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+148	csel w0, w1, w2, pl	1024	1024	0	0	checked	
+149	csinc w0, w1, w2, pl	1024	1024	0	0	checked	
+150	csinv w0, w1, w2, pl	1024	1024	0	0	checked	
+151	csneg w0, w1, w2, pl	1024	1024	0	0	checked	
+152	cinc w0, w1, pl	1024	1024	0	0	checked	
+153	cinv w0, w1, pl	1024	1024	0	0	checked	
+154	cneg w0, w1, pl	1024	1024	0	0	checked	
+155	cset w0, pl	1024	1024	0	0	checked	
+156	csetm w0, pl	1024	1024	0	0	checked	
+157	ccmp w1, w2, #5, pl	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+158	ccmp w1, #7, #10, pl	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+159	csel w0, w1, w2, vs	1024	1024	0	0	checked	
+160	csinc w0, w1, w2, vs	1024	1024	0	0	checked	
+161	csinv w0, w1, w2, vs	1024	1024	0	0	checked	
+162	csneg w0, w1, w2, vs	1024	1024	0	0	checked	
+163	cinc w0, w1, vs	1024	1024	0	0	checked	
+164	cinv w0, w1, vs	1024	1024	0	0	checked	
+165	cneg w0, w1, vs	1024	1024	0	0	checked	
+166	cset w0, vs	1024	1024	0	0	checked	
+167	csetm w0, vs	1024	1024	0	0	checked	
+168	ccmp w1, w2, #5, vs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+169	ccmp w1, #7, #10, vs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+170	csel w0, w1, w2, vc	1024	1024	0	0	checked	
+171	csinc w0, w1, w2, vc	1024	1024	0	0	checked	
+172	csinv w0, w1, w2, vc	1024	1024	0	0	checked	
+173	csneg w0, w1, w2, vc	1024	1024	0	0	checked	
+174	cinc w0, w1, vc	1024	1024	0	0	checked	
+175	cinv w0, w1, vc	1024	1024	0	0	checked	
+176	cneg w0, w1, vc	1024	1024	0	0	checked	
+177	cset w0, vc	1024	1024	0	0	checked	
+178	csetm w0, vc	1024	1024	0	0	checked	
+179	ccmp w1, w2, #5, vc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+180	ccmp w1, #7, #10, vc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+181	csel w0, w1, w2, hi	1024	1024	0	0	checked	
+182	csinc w0, w1, w2, hi	1024	1024	0	0	checked	
+183	csinv w0, w1, w2, hi	1024	1024	0	0	checked	
+184	csneg w0, w1, w2, hi	1024	1024	0	0	checked	
+185	cinc w0, w1, hi	1024	1024	0	0	checked	
+186	cinv w0, w1, hi	1024	1024	0	0	checked	
+187	cneg w0, w1, hi	1024	1024	0	0	checked	
+188	cset w0, hi	1024	1024	0	0	checked	
+189	csetm w0, hi	1024	1024	0	0	checked	
+190	ccmp w1, w2, #5, hi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+191	ccmp w1, #7, #10, hi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+192	csel w0, w1, w2, ls	1024	1024	0	0	checked	
+193	csinc w0, w1, w2, ls	1024	1024	0	0	checked	
+194	csinv w0, w1, w2, ls	1024	1024	0	0	checked	
+195	csneg w0, w1, w2, ls	1024	1024	0	0	checked	
+196	cinc w0, w1, ls	1024	1024	0	0	checked	
+197	cinv w0, w1, ls	1024	1024	0	0	checked	
+198	cneg w0, w1, ls	1024	1024	0	0	checked	
+199	cset w0, ls	1024	1024	0	0	checked	
+200	csetm w0, ls	1024	1024	0	0	checked	
+201	ccmp w1, w2, #5, ls	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+202	ccmp w1, #7, #10, ls	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+203	csel w0, w1, w2, ge	1024	1024	0	0	checked	
+204	csinc w0, w1, w2, ge	1024	1024	0	0	checked	
+205	csinv w0, w1, w2, ge	1024	1024	0	0	checked	
+206	csneg w0, w1, w2, ge	1024	1024	0	0	checked	
+207	cinc w0, w1, ge	1024	1024	0	0	checked	
+208	cinv w0, w1, ge	1024	1024	0	0	checked	
+209	cneg w0, w1, ge	1024	1024	0	0	checked	
+210	cset w0, ge	1024	1024	0	0	checked	
+211	csetm w0, ge	1024	1024	0	0	checked	
+212	ccmp w1, w2, #5, ge	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+213	ccmp w1, #7, #10, ge	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+214	csel w0, w1, w2, lt	1024	1024	0	0	checked	
+215	csinc w0, w1, w2, lt	1024	1024	0	0	checked	
+216	csinv w0, w1, w2, lt	1024	1024	0	0	checked	
+217	csneg w0, w1, w2, lt	1024	1024	0	0	checked	
+218	cinc w0, w1, lt	1024	1024	0	0	checked	
+219	cinv w0, w1, lt	1024	1024	0	0	checked	
+220	cneg w0, w1, lt	1024	1024	0	0	checked	
+221	cset w0, lt	1024	1024	0	0	checked	
+222	csetm w0, lt	1024	1024	0	0	checked	
+223	ccmp w1, w2, #5, lt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+224	ccmp w1, #7, #10, lt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+225	csel w0, w1, w2, gt	1024	1024	0	0	checked	
+226	csinc w0, w1, w2, gt	1024	1024	0	0	checked	
+227	csinv w0, w1, w2, gt	1024	1024	0	0	checked	
+228	csneg w0, w1, w2, gt	1024	1024	0	0	checked	
+229	cinc w0, w1, gt	1024	1024	0	0	checked	
+230	cinv w0, w1, gt	1024	1024	0	0	checked	
+231	cneg w0, w1, gt	1024	1024	0	0	checked	
+232	cset w0, gt	1024	1024	0	0	checked	
+233	csetm w0, gt	1024	1024	0	0	checked	
+234	ccmp w1, w2, #5, gt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+235	ccmp w1, #7, #10, gt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+236	csel w0, w1, w2, le	1024	1024	0	0	checked	
+237	csinc w0, w1, w2, le	1024	1024	0	0	checked	
+238	csinv w0, w1, w2, le	1024	1024	0	0	checked	
+239	csneg w0, w1, w2, le	1024	1024	0	0	checked	
+240	cinc w0, w1, le	1024	1024	0	0	checked	
+241	cinv w0, w1, le	1024	1024	0	0	checked	
+242	cneg w0, w1, le	1024	1024	0	0	checked	
+243	cset w0, le	1024	1024	0	0	checked	
+244	csetm w0, le	1024	1024	0	0	checked	
+245	ccmp w1, w2, #5, le	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+246	ccmp w1, #7, #10, le	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+247	csel w0, w1, w2, al	1024	1024	0	0	checked	
+248	csinc w0, w1, w2, al	1024	1024	0	0	checked	
+249	csinv w0, w1, w2, al	1024	1024	0	0	checked	
+250	csneg w0, w1, w2, al	1024	1024	0	0	checked	
+251	ccmp w1, w2, #5, al	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+252	ccmp w1, #7, #10, al	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+253	csel w0, w1, w2, nv	1024	1024	0	0	checked	
+254	csinc w0, w1, w2, nv	1024	1024	0	0	checked	
+255	csinv w0, w1, w2, nv	1024	1024	0	0	checked	
+256	csneg w0, w1, w2, nv	1024	1024	0	0	checked	
+257	ccmp w1, w2, #5, nv	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+258	ccmp w1, #7, #10, nv	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+259	ldr w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+260	str w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+261	ldur w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+262	stur w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+263	ldr w0, [x4, #8]!	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+264	ldr w0, [x4], #8	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+265	ldr w0, [x4, x5, lsl #2]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+266	str w0, [x4, #8]!	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+267	str w0, [x4], #8	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+268	str w0, [x4, x5, lsl #2]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+269	ldrb w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+270	ldrh w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+271	strb w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+272	strh w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+273	ldrsb w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+274	ldrsh w0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+275	add x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+276	add x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+277	add x0, x1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+278	sub x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+279	sub x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+280	sub x0, x1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+281	and x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+282	and x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+283	bic x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+284	bic x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+285	eor x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+286	eor x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+287	orr x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+288	orr x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+289	orn x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+290	orn x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+291	adds x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+292	adds x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+293	adds x0, x1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+294	subs x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+295	subs x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+296	subs x0, x1, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+297	ands x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+298	ands x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+299	bics x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+300	bics x0, x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+301	cmp x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+302	cmp x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+303	cmn x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+304	cmn x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+305	tst x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+306	tst x1, x2, lsl #3	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+307	mov x0, x1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+308	mov x0, #127	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+309	movk x0, #0xdead, lsl #16	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+310	mvn x0, x1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+311	neg x0, x1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+312	rev x0, x1	1024	1024	0	0	checked	
+313	rev16 x0, x1	1024	1024	0	0	checked	
+314	sxtb x0, w1	1024	1024	0	0	checked	
+315	sxth x0, w1	1024	1024	0	0	checked	
+316	mvn x0, x1, lsl #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+317	mvn x0, x1, lsl #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+318	mvn x0, x1, lsl #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+319	mvn x0, x1, lsr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+320	mvn x0, x1, lsr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+321	mvn x0, x1, lsr #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+322	mvn x0, x1, asr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+323	mvn x0, x1, asr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+324	mvn x0, x1, asr #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+325	mvn x0, x1, ror #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+326	mvn x0, x1, ror #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+327	mvn x0, x1, ror #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+328	neg x0, x1, lsl #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+329	neg x0, x1, lsl #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+330	neg x0, x1, lsl #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+331	neg x0, x1, lsr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+332	neg x0, x1, lsr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+333	neg x0, x1, lsr #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+334	neg x0, x1, asr #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+335	neg x0, x1, asr #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+336	neg x0, x1, asr #63	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+337	mul x0, x1, x2	1024	1024	0	0	checked	
+338	udiv x0, x1, x2	1024	1024	0	0	checked	
+339	madd x0, x1, x2, x3	1024	1024	0	0	checked	
+340	msub x0, x1, x2, x3	1024	1024	0	0	checked	
+341	lsl x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+342	lsl x0, x1, #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+343	lsl x0, x1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+344	lsl x0, x1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+345	lsl x0, x1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+346	lsr x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+347	lsr x0, x1, #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+348	lsr x0, x1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+349	lsr x0, x1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+350	lsr x0, x1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+351	asr x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+352	asr x0, x1, #0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+353	asr x0, x1, #1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+354	asr x0, x1, #7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+355	asr x0, x1, #31	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+356	ror x0, x1, x2	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+357	ror x0, x1, #0	1024	1024	0	0	checked	
+358	ror x0, x1, #1	1024	1024	0	0	checked	
+359	ror x0, x1, #7	1024	1024	0	0	checked	
+360	ror x0, x1, #31	1024	1024	0	0	checked	
+361	extr x0, x1, x2, #7	1024	1024	0	0	checked	
+362	ubfx x0, x1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+363	sbfx x0, x1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+364	ubfiz x0, x1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+365	bfxil x0, x1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+366	bfi x0, x1, #7, #13	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+367	csel x0, x1, x2, eq	1024	1024	0	0	checked	
+368	csinc x0, x1, x2, eq	1024	1024	0	0	checked	
+369	csinv x0, x1, x2, eq	1024	1024	0	0	checked	
+370	csneg x0, x1, x2, eq	1024	1024	0	0	checked	
+371	cinc x0, x1, eq	1024	1024	0	0	checked	
+372	cinv x0, x1, eq	1024	1024	0	0	checked	
+373	cneg x0, x1, eq	1024	1024	0	0	checked	
+374	cset x0, eq	1024	1024	0	0	checked	
+375	csetm x0, eq	1024	1024	0	0	checked	
+376	ccmp x1, x2, #5, eq	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+377	ccmp x1, #7, #10, eq	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+378	csel x0, x1, x2, ne	1024	1024	0	0	checked	
+379	csinc x0, x1, x2, ne	1024	1024	0	0	checked	
+380	csinv x0, x1, x2, ne	1024	1024	0	0	checked	
+381	csneg x0, x1, x2, ne	1024	1024	0	0	checked	
+382	cinc x0, x1, ne	1024	1024	0	0	checked	
+383	cinv x0, x1, ne	1024	1024	0	0	checked	
+384	cneg x0, x1, ne	1024	1024	0	0	checked	
+385	cset x0, ne	1024	1024	0	0	checked	
+386	csetm x0, ne	1024	1024	0	0	checked	
+387	ccmp x1, x2, #5, ne	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+388	ccmp x1, #7, #10, ne	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+389	csel x0, x1, x2, cs	1024	1024	0	0	checked	
+390	csinc x0, x1, x2, cs	1024	1024	0	0	checked	
+391	csinv x0, x1, x2, cs	1024	1024	0	0	checked	
+392	csneg x0, x1, x2, cs	1024	1024	0	0	checked	
+393	cinc x0, x1, cs	1024	1024	0	0	checked	
+394	cinv x0, x1, cs	1024	1024	0	0	checked	
+395	cneg x0, x1, cs	1024	1024	0	0	checked	
+396	cset x0, cs	1024	1024	0	0	checked	
+397	csetm x0, cs	1024	1024	0	0	checked	
+398	ccmp x1, x2, #5, cs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+399	ccmp x1, #7, #10, cs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+400	csel x0, x1, x2, cc	1024	1024	0	0	checked	
+401	csinc x0, x1, x2, cc	1024	1024	0	0	checked	
+402	csinv x0, x1, x2, cc	1024	1024	0	0	checked	
+403	csneg x0, x1, x2, cc	1024	1024	0	0	checked	
+404	cinc x0, x1, cc	1024	1024	0	0	checked	
+405	cinv x0, x1, cc	1024	1024	0	0	checked	
+406	cneg x0, x1, cc	1024	1024	0	0	checked	
+407	cset x0, cc	1024	1024	0	0	checked	
+408	csetm x0, cc	1024	1024	0	0	checked	
+409	ccmp x1, x2, #5, cc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+410	ccmp x1, #7, #10, cc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+411	csel x0, x1, x2, mi	1024	1024	0	0	checked	
+412	csinc x0, x1, x2, mi	1024	1024	0	0	checked	
+413	csinv x0, x1, x2, mi	1024	1024	0	0	checked	
+414	csneg x0, x1, x2, mi	1024	1024	0	0	checked	
+415	cinc x0, x1, mi	1024	1024	0	0	checked	
+416	cinv x0, x1, mi	1024	1024	0	0	checked	
+417	cneg x0, x1, mi	1024	1024	0	0	checked	
+418	cset x0, mi	1024	1024	0	0	checked	
+419	csetm x0, mi	1024	1024	0	0	checked	
+420	ccmp x1, x2, #5, mi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+421	ccmp x1, #7, #10, mi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+422	csel x0, x1, x2, pl	1024	1024	0	0	checked	
+423	csinc x0, x1, x2, pl	1024	1024	0	0	checked	
+424	csinv x0, x1, x2, pl	1024	1024	0	0	checked	
+425	csneg x0, x1, x2, pl	1024	1024	0	0	checked	
+426	cinc x0, x1, pl	1024	1024	0	0	checked	
+427	cinv x0, x1, pl	1024	1024	0	0	checked	
+428	cneg x0, x1, pl	1024	1024	0	0	checked	
+429	cset x0, pl	1024	1024	0	0	checked	
+430	csetm x0, pl	1024	1024	0	0	checked	
+431	ccmp x1, x2, #5, pl	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+432	ccmp x1, #7, #10, pl	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+433	csel x0, x1, x2, vs	1024	1024	0	0	checked	
+434	csinc x0, x1, x2, vs	1024	1024	0	0	checked	
+435	csinv x0, x1, x2, vs	1024	1024	0	0	checked	
+436	csneg x0, x1, x2, vs	1024	1024	0	0	checked	
+437	cinc x0, x1, vs	1024	1024	0	0	checked	
+438	cinv x0, x1, vs	1024	1024	0	0	checked	
+439	cneg x0, x1, vs	1024	1024	0	0	checked	
+440	cset x0, vs	1024	1024	0	0	checked	
+441	csetm x0, vs	1024	1024	0	0	checked	
+442	ccmp x1, x2, #5, vs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+443	ccmp x1, #7, #10, vs	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+444	csel x0, x1, x2, vc	1024	1024	0	0	checked	
+445	csinc x0, x1, x2, vc	1024	1024	0	0	checked	
+446	csinv x0, x1, x2, vc	1024	1024	0	0	checked	
+447	csneg x0, x1, x2, vc	1024	1024	0	0	checked	
+448	cinc x0, x1, vc	1024	1024	0	0	checked	
+449	cinv x0, x1, vc	1024	1024	0	0	checked	
+450	cneg x0, x1, vc	1024	1024	0	0	checked	
+451	cset x0, vc	1024	1024	0	0	checked	
+452	csetm x0, vc	1024	1024	0	0	checked	
+453	ccmp x1, x2, #5, vc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+454	ccmp x1, #7, #10, vc	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+455	csel x0, x1, x2, hi	1024	1024	0	0	checked	
+456	csinc x0, x1, x2, hi	1024	1024	0	0	checked	
+457	csinv x0, x1, x2, hi	1024	1024	0	0	checked	
+458	csneg x0, x1, x2, hi	1024	1024	0	0	checked	
+459	cinc x0, x1, hi	1024	1024	0	0	checked	
+460	cinv x0, x1, hi	1024	1024	0	0	checked	
+461	cneg x0, x1, hi	1024	1024	0	0	checked	
+462	cset x0, hi	1024	1024	0	0	checked	
+463	csetm x0, hi	1024	1024	0	0	checked	
+464	ccmp x1, x2, #5, hi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+465	ccmp x1, #7, #10, hi	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+466	csel x0, x1, x2, ls	1024	1024	0	0	checked	
+467	csinc x0, x1, x2, ls	1024	1024	0	0	checked	
+468	csinv x0, x1, x2, ls	1024	1024	0	0	checked	
+469	csneg x0, x1, x2, ls	1024	1024	0	0	checked	
+470	cinc x0, x1, ls	1024	1024	0	0	checked	
+471	cinv x0, x1, ls	1024	1024	0	0	checked	
+472	cneg x0, x1, ls	1024	1024	0	0	checked	
+473	cset x0, ls	1024	1024	0	0	checked	
+474	csetm x0, ls	1024	1024	0	0	checked	
+475	ccmp x1, x2, #5, ls	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+476	ccmp x1, #7, #10, ls	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+477	csel x0, x1, x2, ge	1024	1024	0	0	checked	
+478	csinc x0, x1, x2, ge	1024	1024	0	0	checked	
+479	csinv x0, x1, x2, ge	1024	1024	0	0	checked	
+480	csneg x0, x1, x2, ge	1024	1024	0	0	checked	
+481	cinc x0, x1, ge	1024	1024	0	0	checked	
+482	cinv x0, x1, ge	1024	1024	0	0	checked	
+483	cneg x0, x1, ge	1024	1024	0	0	checked	
+484	cset x0, ge	1024	1024	0	0	checked	
+485	csetm x0, ge	1024	1024	0	0	checked	
+486	ccmp x1, x2, #5, ge	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+487	ccmp x1, #7, #10, ge	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+488	csel x0, x1, x2, lt	1024	1024	0	0	checked	
+489	csinc x0, x1, x2, lt	1024	1024	0	0	checked	
+490	csinv x0, x1, x2, lt	1024	1024	0	0	checked	
+491	csneg x0, x1, x2, lt	1024	1024	0	0	checked	
+492	cinc x0, x1, lt	1024	1024	0	0	checked	
+493	cinv x0, x1, lt	1024	1024	0	0	checked	
+494	cneg x0, x1, lt	1024	1024	0	0	checked	
+495	cset x0, lt	1024	1024	0	0	checked	
+496	csetm x0, lt	1024	1024	0	0	checked	
+497	ccmp x1, x2, #5, lt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+498	ccmp x1, #7, #10, lt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+499	csel x0, x1, x2, gt	1024	1024	0	0	checked	
+500	csinc x0, x1, x2, gt	1024	1024	0	0	checked	
+501	csinv x0, x1, x2, gt	1024	1024	0	0	checked	
+502	csneg x0, x1, x2, gt	1024	1024	0	0	checked	
+503	cinc x0, x1, gt	1024	1024	0	0	checked	
+504	cinv x0, x1, gt	1024	1024	0	0	checked	
+505	cneg x0, x1, gt	1024	1024	0	0	checked	
+506	cset x0, gt	1024	1024	0	0	checked	
+507	csetm x0, gt	1024	1024	0	0	checked	
+508	ccmp x1, x2, #5, gt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+509	ccmp x1, #7, #10, gt	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+510	csel x0, x1, x2, le	1024	1024	0	0	checked	
+511	csinc x0, x1, x2, le	1024	1024	0	0	checked	
+512	csinv x0, x1, x2, le	1024	1024	0	0	checked	
+513	csneg x0, x1, x2, le	1024	1024	0	0	checked	
+514	cinc x0, x1, le	1024	1024	0	0	checked	
+515	cinv x0, x1, le	1024	1024	0	0	checked	
+516	cneg x0, x1, le	1024	1024	0	0	checked	
+517	cset x0, le	1024	1024	0	0	checked	
+518	csetm x0, le	1024	1024	0	0	checked	
+519	ccmp x1, x2, #5, le	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+520	ccmp x1, #7, #10, le	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+521	csel x0, x1, x2, al	1024	1024	0	0	checked	
+522	csinc x0, x1, x2, al	1024	1024	0	0	checked	
+523	csinv x0, x1, x2, al	1024	1024	0	0	checked	
+524	csneg x0, x1, x2, al	1024	1024	0	0	checked	
+525	ccmp x1, x2, #5, al	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+526	ccmp x1, #7, #10, al	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+527	csel x0, x1, x2, nv	1024	1024	0	0	checked	
+528	csinc x0, x1, x2, nv	1024	1024	0	0	checked	
+529	csinv x0, x1, x2, nv	1024	1024	0	0	checked	
+530	csneg x0, x1, x2, nv	1024	1024	0	0	checked	
+531	ccmp x1, x2, #5, nv	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+532	ccmp x1, #7, #10, nv	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+533	ldr x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+534	str x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+535	ldur x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+536	stur x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+537	ldr x0, [x4, #8]!	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+538	ldr x0, [x4], #8	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+539	ldr x0, [x4, x5, lsl #3]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+540	str x0, [x4, #8]!	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+541	str x0, [x4], #8	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+542	str x0, [x4, x5, lsl #3]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+543	ldrsb x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+544	ldrsh x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+545	sxtw x0, w1	1024	1024	0	0	checked	
+546	umulh x0, x1, x2	1024	1024	0	0	checked	
+547	umull x0, w1, w2	1024	1024	0	0	checked	
+548	umaddl x0, w1, w2, x3	1024	1024	0	0	checked	
+549	smaddl x0, w1, w2, x3	1024	1024	0	0	checked	
+550	ldrsw x0, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+551	ldp x0, x1, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+552	stp x0, x1, [x4, #8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+553	fmov d0, x0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+554	fmov x0, d0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+555	fmov s0, w0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+556	fmov w0, s0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+557	cnt v0.8b, v0.8b	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+558	cnt v0.16b, v0.16b	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+559	uaddlv h0, v0.8b	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+560	uaddlv h0, v0.16b	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+561	ldr q0, [x4, #16]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode
+562	str q0, [x4, #16]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized AArch64 native opcode

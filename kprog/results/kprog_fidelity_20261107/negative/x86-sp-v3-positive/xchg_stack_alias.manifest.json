@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-v3-positive/xchg_stack_alias.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-v3-positive/xchg_stack_alias.bpf.o",
+      "simulator_program": "xchg_stack_alias_x86_sim_xdp"
+    }
+  ]
+}

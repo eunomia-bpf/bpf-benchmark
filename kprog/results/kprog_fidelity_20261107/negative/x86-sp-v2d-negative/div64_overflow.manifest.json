@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/div64_overflow.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/div64_overflow.bpf.o",
+      "simulator_program": "div64_overflow_x86_sim_xdp"
+    }
+  ]
+}

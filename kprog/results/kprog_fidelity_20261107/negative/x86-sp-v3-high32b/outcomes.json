@@ -1,0 +1,36 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "high32_positive_byte",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov eax,1; shl rax,32; add rsp,rax; movzx eax, BYTE PTR [rsp]; ret",
+      "stage": "specialization_rejected",
+      "message": "native ABI return has an unbalanced stack pointer at 0x1c: ret"
+    },
+    {
+      "name": "high32_positive_qword",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov eax,1; shl rax,32; add rsp,rax; mov rax, QWORD PTR [rsp]; ret",
+      "stage": "specialization_rejected",
+      "message": "native ABI return has an unbalanced stack pointer at 0x1c: ret"
+    },
+    {
+      "name": "high32_negative_byte",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov eax,1; shl rax,32; neg rax; add rsp,rax; movzx eax, BYTE PTR [rsp]; ret",
+      "stage": "specialization_rejected",
+      "message": "native ABI return has an unbalanced stack pointer at 0x1f: ret"
+    },
+    {
+      "name": "high32_negative_qword",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov eax,1; shl rax,32; neg rax; add rsp,rax; mov rax, QWORD PTR [rsp]; ret",
+      "stage": "specialization_rejected",
+      "message": "native ABI return has an unbalanced stack pointer at 0x1f: ret"
+    }
+  ],
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#59 SMP PREEMPT_DYNAMIC Fri Nov  6 13:33:32 UTC 2026",
+    "x86_64"
+  ]
+}

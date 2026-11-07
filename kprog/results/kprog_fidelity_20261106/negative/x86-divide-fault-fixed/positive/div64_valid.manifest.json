@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/divide-positive/div64_valid.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/divide-positive/div64_valid.bpf.o",
+      "simulator_program": "div64_valid_x86_sim_xdp"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-v3-high32c/high32_positive_qword.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-v3-high32c/high32_positive_qword.bpf.o",
+      "simulator_program": "high32_positive_qword_x86_sim_xdp"
+    }
+  ]
+}

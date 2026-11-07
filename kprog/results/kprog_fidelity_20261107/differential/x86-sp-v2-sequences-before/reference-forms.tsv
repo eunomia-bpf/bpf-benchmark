@@ -1,0 +1,34 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	copy and restore SP: mov rax,rsp; mov rsp,rax	1024	1024	0	1024	checked	none
+1	LEA alias and restore SP: lea rax,[rsp-16]; mov rsp,rax; add rsp,16	1024	1024	0	1024	checked	none
+2	LEA alias to LEA SP: lea rax,[rsp-16]; lea rsp,[rax+16]	1024	1024	0	1024	checked	none
+3	copy alias and compare SP: mov rax,rsp; mov rcx,rax; cmp rcx,rsp	1024	1024	0	1024	checked	none
+4	alias load: lea rax,[rsp-16]; mov rdx,[rax]	1024	1024	0	1024	checked	none
+5	alias store: lea rax,[rsp-16]; mov DWORD PTR [rax],ecx	1024	1024	0	1024	checked	none
+6	alias LEA chain: lea rax,[rsp-16]; lea rdx,[rax+8]	1024	1024	0	1024	checked	none
+7	alias self copy: lea rax,[rsp-16]; mov rax,rax	1024	1024	0	1024	checked	none
+8	alias scalar add: mov rax,rsp; add rax,16	1024	1024	0	1024	checked	none
+9	alias scalar subtract: mov rax,rsp; sub rax,16	1024	1024	0	1024	checked	none
+10	full spill and restore SP: lea rax,[rsp-16]; mov [rsp-8],rax; mov rax,[rsp-8]; mov rsp,rax; add rsp,16	1024	1024	0	1024	checked	none
+11	alias PUSH POP: mov rax,rsp; push rax; pop rax	1024	1024	0	1024	checked	none
+12	alias PUSHW POPW: mov rax,rsp; push ax; pop dx	1024	1024	0	0	checked	none
+13	alias partial write al: mov rax,rsp; mov al,1	1024	1024	0	0	checked	none
+14	alias partial write ah: mov rax,rsp; mov ah,1	1024	1024	0	1024	checked	none
+15	alias partial write ax: mov rax,rsp; mov ax,1	1024	1024	0	0	checked	none
+16	alias partial write eax: mov rax,rsp; mov eax,1	1024	1024	0	0	checked	none
+17	alias partial add al: mov rax,rsp; add al,1	1024	1024	0	1024	checked	none
+18	alias partial add ah: mov rax,rsp; add ah,1	1024	1024	0	1024	checked	none
+19	alias partial add ax: mov rax,rsp; add ax,1	1024	1024	0	1024	checked	none
+20	alias partial add eax: mov rax,rsp; add eax,1	1024	1024	0	1024	checked	none
+21	alias spill BYTE: mov rax,rsp; mov BYTE PTR [rsp-16],al; movzx edx,BYTE PTR [rsp-16]	1024	1024	0	1024	checked	none
+22	alias spill WORD: mov rax,rsp; mov WORD PTR [rsp-16],ax; movzx edx,WORD PTR [rsp-16]	1024	1024	0	0	checked	none
+23	alias spill DWORD: mov rax,rsp; mov DWORD PTR [rsp-16],eax; mov edx,DWORD PTR [rsp-16]	1024	1024	0	0	checked	none
+24	alias spill QWORD: mov rax,rsp; mov QWORD PTR [rsp-16],rax; mov rdx,QWORD PTR [rsp-16]	1024	1024	0	1024	checked	none
+25	LEA AX from SP: lea ax,[rsp+16]	1024	1024	0	1024	checked	none
+26	LEA EAX from SP: lea eax,[rsp+16]	1024	1024	0	1024	checked	none
+27	LEA SP from SP: lea sp,[rsp+16]	1024	1024	0	1024	checked	none
+28	LEA ESP from SP: lea esp,[rsp+16]	1024	1024	0	1024	checked	none
+29	LEA CX from alias: lea rax,[rsp-16]; lea cx,[rax+8]	1024	1024	0	1024	checked	none
+30	LEA ECX from alias: lea rax,[rsp-16]; lea ecx,[rax+8]	1024	1024	0	1024	checked	none
+31	MOV SP self: mov rsp,rsp	1024	1024	0	1024	checked	none
+32	LEA SP self full: lea rsp,[rsp+16]	1024	1024	0	0	checked	none

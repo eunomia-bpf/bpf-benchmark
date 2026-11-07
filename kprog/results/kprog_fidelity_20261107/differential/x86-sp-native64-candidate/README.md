@@ -39,7 +39,11 @@ Supporting Lean contracts are not whole-program correctness claims.
 `v3` FULL fails at two dependent modules still using BV32 arena inputs.
 `v3b` fixes the input widths but exposes3natural-modulo proof goals.
 `v3c` proves the low-width restriction explicitly; its focused modules pass.
-Its complete immutable FULL check was still running at this publication boundary.
+Its complete immutable FULL check ended2 at the existing MULX route host oracle
+(1610 comparison failures): its raw tagged-cell expected values do not yet
+materialize native stack bits. The exact failure is retained; the runtime fix
+is still private. The later full1077-form CPU matrix finished1102848cases with
+zero differences (separate per-form data in ../x86-sp-v3-full/).
 Older v2/b/d/e FULL failures and the first focused filename error are retained.
 The first high32 controls stop at unbalanced-RET specialization and are labelled
 as such; the final controls restore SP and reach the actual verifier memory rejection.

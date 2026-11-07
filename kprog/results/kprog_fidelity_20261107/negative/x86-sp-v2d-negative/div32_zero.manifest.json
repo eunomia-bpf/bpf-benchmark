@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/div32_zero.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-v2d-negative/div32_zero.bpf.o",
+      "simulator_program": "div32_zero_x86_sim_xdp"
+    }
+  ]
+}

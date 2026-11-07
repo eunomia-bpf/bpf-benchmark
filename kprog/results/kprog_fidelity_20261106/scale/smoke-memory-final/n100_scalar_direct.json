@@ -1,0 +1,38 @@
+{
+  "name": "n100_scalar_direct",
+  "target_native_instructions": 100,
+  "expected_result": 17694198624199650402,
+  "stage": "passed",
+  "native_instructions": 115,
+  "returncode": 0,
+  "verifier_allocation_intervals": [
+    {
+      "slab_peak_bytes": 39632,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 42472,
+      "vmap_reserved_peak_bytes": 32768
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 47976,
+      "vmap_reserved_peak_bytes": 20480
+    }
+  ],
+  "verifier_slab_peak_bytes": 47976,
+  "verifier_vmap_reserved_peak_bytes": 20480,
+  "verification_time_us": 45,
+  "peak_states": 1
+}

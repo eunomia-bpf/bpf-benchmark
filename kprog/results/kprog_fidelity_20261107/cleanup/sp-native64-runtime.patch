@@ -1,0 +1,987 @@
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -431,4 +431,9 @@
+ 	X86_SIM_L_REG_VALUE(REG)
+ 
++/* Pointer addressing uses the private arena; scalar reads expose native bits. */
++#define X86_SIM_L_STACK_NUMERIC_BITS(VALUE)                                 \
++	((__u64)(long)(VALUE) - (__u64)(long)X86_SIM_L_STACK_PTR(0) +       \
++	 __x86_native_stack_base)
++
+ #define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SRC_SHIFT)               \
+ 	({                                                                 \
+@@ -438,7 +443,10 @@
+ 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width);             \
+ 		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
+-		__u64 __x86_rd_value =                                    \
+-			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg) + \
+-			(__x86_rd_reg == X86_RSP ? __x86_native_stack_base : 0);  \
++		void *__x86_rd_ptr = X86_SIM_L_READ_REG_PTR(__x86_rd_reg); \
++		__u64 __x86_rd_value = (__u64)(long)__x86_rd_ptr;           \
++		if (__x86_rd_reg == X86_RSP)                              \
++			__x86_rd_value += __x86_native_stack_base;          \
++		else if (X86_SIM_L_REG_TAG(__x86_rd_reg) == X86_SIM_TAG_STACK) \
++			__x86_rd_value = X86_SIM_L_STACK_NUMERIC_BITS(__x86_rd_ptr); \
+ 		KPROG_X86_READ_REG_AT(__x86_rd_value, __x86_rd_width,      \
+ 			__x86_rd_shift);                                    \
+@@ -474,4 +482,6 @@
+ 	case REG:                                                          \
+ 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
++		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
++			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
+ 		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
+ 			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
+@@ -482,4 +492,6 @@
+ 	case REG:                                                          \
+ 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
++		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
++			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
+ 		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
+ 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+@@ -580,5 +592,5 @@
+ #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
+ 	do {                                                               \
+-		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
++		__u64 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
+ 		if (KPROG_X86_STACK_ARM(                                  \
+ 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
+@@ -633,5 +645,5 @@
+ #define X86_SIM_L_STACK_READ(OFF, WIDTH)                                    \
+ 	({                                                                 \
+-		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
++		__u64 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
+ 		__u64 __x86_str_value;                                   \
+ 		if (KPROG_X86_STACK_ARM(                                  \
+@@ -1185,12 +1197,14 @@
+ 							__x86_l_src_ptr, __x86_l_off);\
+ 				}                                         \
+-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),        \
+-					__x86_l_result, __x86_l_dst_tag); \
++				if ((DST) == X86_RSP)                      \
++					X86_SIM_L_WRITE_REG_WIDTH((DST),  \
++						(KPROG_X86_REG_ABSENT(SRC) ? 0 : X86_SIM_L_READ_REG(SRC)) + __x86_l_off, __x86_l_width); \
++				else                                      \
++					X86_SIM_L_WRITE_REG_PTR_TAG((DST), \
++						__x86_l_result, __x86_l_dst_tag); \
+ 			} else {                                           \
+-				__x86_l_result = (__u8 *)__x86_l_src_ptr +  \
+-						  __x86_l_off;              \
+-				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
+-					(__u64)(long)__x86_l_result,     \
+-					__x86_l_width);                  \
++				__u64 __x86_l_numeric =                    \
++					(KPROG_X86_REG_ABSENT(SRC) ? 0 : X86_SIM_L_READ_REG(SRC)) + __x86_l_off; \
++				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_numeric, __x86_l_width); \
+ 			}                                                 \
+ 		}                                                         \
+@@ -1849,4 +1863,13 @@
+ 	X86_SIM_L_EXEC_MOV_IMM_AUX((DST), (FLAGS), 0U, (IMM))
+ 
++/* Full-width MOV keeps source selection separate from native destination writeback. */
++#define X86_SIM_L_WRITE_MOV_REG_PTR(DST, SRC, VALUE, TAG)                   \
++	do {                                                               \
++		if (KPROG_X86_MOV_REG_ARM(KPROG_X86_MOV_REG_FULL_WIDTH, (DST)) == KPROG_X86_MOV_REG_ARM_STACK_PTR) \
++			X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_READ_REG(SRC), KPROG_X86_MOV_REG_FULL_WIDTH); \
++		else                                                       \
++			X86_SIM_L_WRITE_REG_PTR_TAG((DST), (VALUE), (TAG)); \
++	} while (0)
++
+ #define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)                    \
+ 	do {                                                               \
+@@ -1854,5 +1877,5 @@
+ 		if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==         \
+ 		    KPROG_X86_MOV_REG_ARM_STACK_PTR) {                     \
+-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
++			X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),                \
+ 				X86_SIM_L_STACK_PTR(                       \
+ 					(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
+@@ -1860,5 +1883,5 @@
+ 		} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==  \
+ 			   KPROG_X86_MOV_REG_ARM_POINTER) {               \
+-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
++			X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),                \
+ 				X86_SIM_L_READ_REG_PTR(SRC),              \
+ 				X86_SIM_L_REG_TAG(SRC));                  \
+@@ -2196,5 +2219,5 @@
+ 			if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==\
+ 			    KPROG_X86_MOV_REG_ARM_STACK_PTR) {            \
+-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
++				X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),         \
+ 					X86_SIM_L_STACK_PTR(               \
+ 						(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
+@@ -2203,5 +2226,5 @@
+ 				   (SRC)) ==                              \
+ 				   KPROG_X86_MOV_REG_ARM_POINTER) {       \
+-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
++				X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),         \
+ 					X86_SIM_L_READ_REG_PTR(SRC),       \
+ 					X86_SIM_L_REG_TAG(SRC));           \
+@@ -2351,12 +2374,18 @@
+ 				if (KPROG_X86_XCHG_ARM(__x86_l_width) ==                \
+ 				    KPROG_X86_XCHG_ARM_POINTER_SWAP) {              \
+-					void *__x86_l_dst_ptr =                    \
+-					X86_SIM_L_READ_REG_PTR(DST);       \
+-				void *__x86_l_src_ptr =                    \
+-					X86_SIM_L_READ_REG_PTR(SRC);       \
+-				X86_SIM_L_WRITE_REG_PTR((DST),             \
+-							__x86_l_src_ptr);  \
+-				X86_SIM_L_WRITE_REG_PTR((SRC),             \
+-							__x86_l_dst_ptr);  \
++				void *__x86_l_dst_ptr = (DST) == X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(DST)) : X86_SIM_L_READ_REG_PTR(DST); \
++				void *__x86_l_src_ptr = (SRC) == X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)) : X86_SIM_L_READ_REG_PTR(SRC); \
++				__u8 __x86_l_dst_tag = (DST) == X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(DST); \
++				__u8 __x86_l_src_tag = (SRC) == X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(SRC); \
++				__u64 __x86_l_dst_bits = X86_SIM_L_READ_REG(DST); \
++				__u64 __x86_l_src_bits = X86_SIM_L_READ_REG(SRC); \
++				if ((DST) == X86_RSP) \
++				    X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_src_bits, X86_WIDTH_64); \
++				else \
++				    X86_SIM_L_WRITE_REG_PTR_TAG((DST), __x86_l_src_ptr, __x86_l_src_tag); \
++				if ((SRC) == X86_RSP) \
++				    X86_SIM_L_WRITE_REG_WIDTH((SRC), __x86_l_dst_bits, X86_WIDTH_64); \
++				else \
++				    X86_SIM_L_WRITE_REG_PTR_TAG((SRC), __x86_l_dst_ptr, __x86_l_dst_tag); \
+ 			} else {                                            \
+ 				__u64 __x86_l_dst_value =                  \
+--- a/kprog/formal/KProgFormal/X86StackIndex.lean
++++ b/kprog/formal/KProgFormal/X86StackIndex.lean
+@@ -1,49 +1,28 @@
+ import KProgFormal.Generated.GeneratedX86StackIndex
+-
+ namespace KProgFormal
+-
+ open GeneratedX86StackIndex (index)
+-
+-/-- Independent statement of the stack arena index: the low 32 bits of the
+-wrapping 64-bit frame-offset-plus-capacity sum, agreeing with the C macro
+-`((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))`. -/
+-def x86StackIndexSpec (capacity off : BitVec 64) : BitVec 32 :=
+-  BitVec.setWidth 32 (off + capacity)
+-
+-/-- The generated truncation equals the independent 32-bit-width statement for
+-every capacity and offset. -/
++/-- Native addresses wrap only at 64 bits, independently stated with commuted operands. -/
++def x86StackIndexSpec (capacity off : BitVec 64) : BitVec 64 := off + capacity
+ theorem x86_stack_index_refines (capacity off : BitVec 64) :
+     index capacity off = x86StackIndexSpec capacity off := by
+-  unfold index x86StackIndexSpec BitVec.truncate
++  unfold index x86StackIndexSpec
+   bv_decide
+-
+-/-- The frame base, offset `-capacity` (i.e. `0 - capacity`), lands at index 0:
+-the abstract frame base is the bottom of the arena. -/
+ theorem x86_stack_index_frame_base_is_zero (capacity : BitVec 64) :
+     index capacity (-capacity) = 0 := by
+   unfold index
+   bv_decide
+-
+-/-- An offset of zero (the arena top) lands at index `capacity` in the byte
+-arena. -/
+ theorem x86_stack_index_top_is_capacity (capacity : BitVec 64) :
+-    index capacity 0 = capacity.truncate 32 := by
++    index capacity 0 = capacity := by
+   unfold index
+   bv_decide
+-
+-/-- Two frame offsets that differ by a multiple of `2^32` alias to the same
+-arena index: only the low 32 bits of the sum reach the arena. -/
+-theorem x86_stack_index_mod_2_32 (capacity off off' : BitVec 64)
+-    (high : BitVec 64) (h : off' = off + BitVec.shiftLeft high 32) :
+-    index capacity off' = index capacity off := by
+-  subst h
++/-- Adding a nonzero high word cannot alias a distinct native address. -/
++theorem x86_stack_index_high_bits_distinct (capacity off delta : BitVec 64)
++    (h : delta ≠ 0) : index capacity (off + delta) ≠ index capacity off := by
+   unfold index
+   bv_decide
+-
+-/-- Concrete stack frame: capacity 64, an offset of `-56` (the first pushed
+-qword below the frame base) maps to byte index 8, and `-8` maps to 56. -/
++/-- The old high32 alias input remains, with its corrected native64 result. -/
+ theorem x86_stack_index_example :
+-    index 64 (-56) = 8 ∧ index 64 (-8) = 56 ∧ index 64 0 = 64 := by
+-  refine ⟨?_, ?_, ?_⟩ <;> native_decide
+-
++    index 64 (-56) = 8 ∧ index 64 (-8) = 56 ∧ index 64 0 = 64 ∧
++    index 64 ((-56) + 0x100000000) = 0x100000008 := by
++  decide
+ end KProgFormal
+--- a/kprog/formal/KProgFormal/X86XchgHandler.lean
++++ b/kprog/formal/KProgFormal/X86XchgHandler.lean
+@@ -111,8 +111,7 @@
+ 
+ /-- Independent statement of the pointer-swap arm's register effect: the two
+-cells exchange their whole 64-bit values and both tags become scalar. -/
++cells exchange their whole values and origin tags. -/
+ def x86XchgPointerSpec (dst src : X86RegValue) : X86RegValue × X86RegValue :=
+-  ({ bits := src.bits, tag := .scalar },
+-   { bits := dst.bits, tag := .scalar })
++  (src, dst)
+ 
+ /-- Independent statement of the subword-swap arm's register effect: each cell
+@@ -132,10 +131,9 @@
+   exact ⟨rfl, rfl⟩
+ 
+-/-- The pointer arm scalarizes both tags: the verifier provenance of neither
+-cell survives the swap. -/
+-theorem x86_xchg_pointer_scalarizes (dst src : X86RegValue) :
+-    (x86XchgPointerSpec dst src).1.tag = .scalar ∧
+-      (x86XchgPointerSpec dst src).2.tag = .scalar := by
+-  exact ⟨rfl, rfl⟩
++/-- A full-width copy permutes origin metadata along with each value. -/
++theorem x86_xchg_pointer_preserves_origins (dst src : X86RegValue) :
++    (x86XchgPointerSpec dst src).1.tag = src.tag ∧
++      (x86XchgPointerSpec dst src).2.tag = dst.tag := by
++  exact { left := rfl, right := rfl }
+ 
+ /-- The subword arm scalarizes both tags: the width-masked writeback of either
+--- a/kprog/formal/KProgFormal/X86StackArena.lean
++++ b/kprog/formal/KProgFormal/X86StackArena.lean
+@@ -10,14 +10,14 @@
+ `BitVec` division (not `Nat` division on `.toNat`), which `bv_decide` handles
+ natively. -/
+-def x86StackArenaWordIndexSpec (index : BitVec 32) : BitVec 32 := index / 8
++def x86StackArenaWordIndexSpec (index : BitVec 64) : BitVec 64 := index / 8
+ 
+ /-- Independent statement of the word-arena slot count: the capacity rounded
+ up to a multiple of 8. -/
+-def x86StackArenaWordsSpec (capacity : BitVec 32) : BitVec 32 :=
++def x86StackArenaWordsSpec (capacity : BitVec 64) : BitVec 64 :=
+   capacity >>> 3 + (if capacity &&& 7 == 0 then 0 else 1)
+ 
+ /-- Independent statement of the fast-path alignment guard: the index is a
+ whole number of 8-byte words, the C `(INDEX & 7U) == 0U`. -/
+-def x86StackArenaWordAlignedSpec (index : BitVec 32) : Prop := index % 8 = 0
++def x86StackArenaWordAlignedSpec (index : BitVec 64) : Prop := index % 8 = 0
+ 
+ /-- Independent statement of the byte-arena bytes a slot's word is split into:
+@@ -47,5 +47,5 @@
+ /-- The generated word-slot shift equals the independent quotient for every
+ byte index. -/
+-theorem x86_stack_arena_word_index_refines (index : BitVec 32) :
++theorem x86_stack_arena_word_index_refines (index : BitVec 64) :
+     wordIndex index = x86StackArenaWordIndexSpec index := by
+   unfold wordIndex x86StackArenaWordIndexSpec
+@@ -53,6 +53,6 @@
+ 
+ /-- The generated word count equals the independent round-up statement for
+-every capacity whose `+ 7` does not wrap (all capacities below `2^32 - 7`). -/
+-theorem x86_stack_arena_words_refines (capacity : BitVec 32)
++every capacity whose `+ 7` does not wrap (all capacities below `2^64 - 7`). -/
++theorem x86_stack_arena_words_refines (capacity : BitVec 64)
+     (h : BitVec.ule capacity (capacity + 7)) :
+     words capacity = x86StackArenaWordsSpec capacity := by
+@@ -63,5 +63,5 @@
+ statement: the low three bits are clear exactly when the index is a multiple
+ of 8. -/
+-theorem x86_stack_arena_word_aligned_refines (index : BitVec 32) :
++theorem x86_stack_arena_word_aligned_refines (index : BitVec 64) :
+     wordAligned index = true ↔ x86StackArenaWordAlignedSpec index := by
+   unfold wordAligned x86StackArenaWordAlignedSpec
+@@ -69,21 +69,21 @@
+ 
+ /-- The AArch64 and x86 statements of the same capacity restriction are
+-worded differently -- a numeric bound `capacity <= 2^32 - 8` there, the no-wrap
++worded differently -- a numeric bound `capacity <= 2^64 - 8` there, the no-wrap
+ predicate `capacity <= capacity + 7` here -- and they are the same restriction,
+ so a reader comparing the two files is not looking at a divergence. It is also
+-exactly tight: the equality holds at `2^32 - 8` and fails from `2^32 - 7`
++exactly tight: the equality holds at `2^64 - 8` and fails from `2^64 - 7`
+ upward, because the rounding wraps. -/
+ theorem x86_stack_arena_words_bound_is_tight :
+-    x86StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 8)) =
+-        words (BitVec.ofNat 32 (2 ^ 32 - 8)) ∧
+-      x86StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 7)) ≠
+-        words (BitVec.ofNat 32 (2 ^ 32 - 7)) ∧
+-      ¬ BitVec.ule (BitVec.ofNat 32 (2 ^ 32 - 7))
+-          (BitVec.ofNat 32 (2 ^ 32 - 7) + 7) := by
++    x86StackArenaWordsSpec (BitVec.ofNat 64 (2 ^ 64 - 8)) =
++        words (BitVec.ofNat 64 (2 ^ 64 - 8)) ∧
++      x86StackArenaWordsSpec (BitVec.ofNat 64 (2 ^ 64 - 7)) ≠
++        words (BitVec.ofNat 64 (2 ^ 64 - 7)) ∧
++      ¬ BitVec.ule (BitVec.ofNat 64 (2 ^ 64 - 7))
++          (BitVec.ofNat 64 (2 ^ 64 - 7) + 7) := by
+   refine ⟨?_, ?_, ?_⟩ <;> native_decide
+ 
+ /-- Word slots cover the whole byte arena: the capacity never exceeds the
+ byte count of the rounded-up word array. -/
+-theorem x86_stack_arena_words_cover_capacity (capacity : BitVec 32)
++theorem x86_stack_arena_words_cover_capacity (capacity : BitVec 64)
+     (h : BitVec.ule capacity (capacity + 7)) :
+     BitVec.ule capacity (words capacity * 8) := by
+@@ -93,5 +93,5 @@
+ /-- No whole word slot is wasted: for any non-empty arena the last slot always
+ holds at least one live byte, so the round-up never adds a full unused slot. -/
+-theorem x86_stack_arena_words_tight (capacity : BitVec 32)
++theorem x86_stack_arena_words_tight (capacity : BitVec 64)
+     (h1 : BitVec.ule 1 capacity) (h : BitVec.ule capacity (capacity + 7)) :
+     BitVec.ule ((words capacity - 1) * 8) (capacity - 1) := by
+@@ -102,5 +102,5 @@
+ shifted back, so the 64-bit fast path touches the byte-arena window
+ `[index, index + 8)` and skips nothing. -/
+-theorem x86_stack_arena_alignment_roundtrip (index : BitVec 32)
++theorem x86_stack_arena_alignment_roundtrip (index : BitVec 64)
+     (ha : wordAligned index = true) :
+     (wordIndex index) <<< 3 = index := by
+@@ -110,6 +110,6 @@
+ /-- Every 8-aligned byte index maps into the word arena: the slot is a valid
+ index below the array's slot count. -/
+-theorem x86_stack_arena_word_slot_in_range (capacity index : BitVec 32)
+-    (hc : index ≤ capacity) (hno : BitVec.ule capacity 4294967288) :
++theorem x86_stack_arena_word_slot_in_range (capacity index : BitVec 64)
++    (hc : index ≤ capacity) (hno : BitVec.ule capacity 18446744073709551608) :
+     wordIndex index ≤ words capacity := by
+   unfold wordIndex words
+@@ -149,6 +149,6 @@
+ `width`-byte access, stated as a subtraction from the 64-bit top rather than a
+ sum. -/
+-def x86StackArenaWindowEndSpec (index width : BitVec 32) : Nat :=
+-  2 ^ 32 - (2 ^ 32 - index.toNat - width.toNat)
++def x86StackArenaWindowEndSpec (index width : BitVec 64) : Nat :=
++  2 ^ 64 - (2 ^ 64 - index.toNat - width.toNat)
+ 
+ /-- Independent statement of the fit test: the window start is inside the arena
+@@ -156,11 +156,11 @@
+ because `Nat` subtraction truncates, so the remainder alone would accept an
+ index past the arena. -/
+-def x86StackArenaWindowFitsSpec (index width capacity : BitVec 32) : Bool :=
++def x86StackArenaWindowFitsSpec (index width capacity : BitVec 64) : Bool :=
+   decide (index.toNat ≤ capacity.toNat ∧ width.toNat ≤ capacity.toNat - index.toNat)
+ 
+ /-- The generated window end equals the independent restatement on every window
+ whose end stays inside the index space. -/
+-theorem x86_stack_arena_window_end_refines (index width : BitVec 32)
+-    (hnoWrap : index.toNat + width.toNat ≤ 2 ^ 32) :
++theorem x86_stack_arena_window_end_refines (index width : BitVec 64)
++    (hnoWrap : index.toNat + width.toNat ≤ 2 ^ 64) :
+     windowEnd index width = x86StackArenaWindowEndSpec index width := by
+   simp only [windowEnd, x86StackArenaWindowEndSpec]
+@@ -168,5 +168,5 @@
+ 
+ /-- The generated fit test agrees with the independent subtraction form. -/
+-theorem x86_stack_arena_window_fits_refines (index width capacity : BitVec 32) :
++theorem x86_stack_arena_window_fits_refines (index width capacity : BitVec 64) :
+     windowFits index width capacity =
+       x86StackArenaWindowFitsSpec index width capacity := by
+@@ -178,5 +178,5 @@
+ nonzero, the last byte the window touches, `index + width - 1`, is inside the
+ arena, `index + width - 1 < capacity`. -/
+-theorem x86_stack_arena_window_last_byte_inside (index width capacity : BitVec 32)
++theorem x86_stack_arena_window_last_byte_inside (index width capacity : BitVec 64)
+     (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+     index.toNat + width.toNat - 1 < capacity.toNat := by
+@@ -191,8 +191,8 @@
+ earlier `8 <= capacity` hypothesis excluded, a zero arena where `capacity - 1`
+ wraps, also fails. -/
+-theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32) :
++theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 64) :
+     windowFits (capacity - 1) 8 capacity = false := by
+   simp only [windowFits, windowEnd, decide_eq_false_iff_not]
+-  have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
++  have h8 : BitVec.toNat (8 : BitVec 64) = 8 := rfl
+   rw [h8]
+   by_cases hz : capacity = 0
+@@ -204,11 +204,11 @@
+       · exact hp
+     have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
+-      have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
++      have h1 : BitVec.toNat (1 : BitVec 64) = 1 := rfl
+       rw [BitVec.toNat_sub, h1]
+-      have hlt : capacity.toNat - 1 < 2 ^ 32 := by
+-        have : capacity.toNat < 2 ^ 32 := capacity.isLt
++      have hlt : capacity.toNat - 1 < 2 ^ 64 := by
++        have : capacity.toNat < 2 ^ 64 := capacity.isLt
+         omega
+       generalize hX : capacity.toNat - 1 = X at hlt
+-      have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
++      have hexp : 2 ^ 64 - 1 + capacity.toNat = X + 2 ^ 64 := by omega
+       rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
+     rw [hsub]
+@@ -217,9 +217,9 @@
+ /-- Independent statement of the pointer bound: `&b[index]` names an arena
+ address when the index is at most the capacity. -/
+-def x86StackArenaPointerFitsSpec (index capacity : BitVec 32) : Bool :=
++def x86StackArenaPointerFitsSpec (index capacity : BitVec 64) : Bool :=
+   decide (index.toNat ≤ capacity.toNat)
+ 
+ /-- The generated pointer bound agrees with the independent statement. -/
+-theorem x86_stack_arena_pointer_fits_refines (index capacity : BitVec 32) :
++theorem x86_stack_arena_pointer_fits_refines (index capacity : BitVec 64) :
+     pointerFits index capacity = x86StackArenaPointerFitsSpec index capacity :=
+   rfl
+@@ -228,6 +228,6 @@
+ addressable and the next one is not, for a capacity whose successor does not
+ wrap. -/
+-theorem x86_stack_arena_pointer_one_past_end (capacity : BitVec 32)
+-    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
++theorem x86_stack_arena_pointer_one_past_end (capacity : BitVec 64)
++    (hnoWrap : capacity.toNat + 1 < 2 ^ 64) :
+     pointerFits capacity capacity = true ∧
+       pointerFits (capacity + 1) capacity = false := by
+@@ -236,5 +236,5 @@
+     exact decide_eq_true (by simp)
+   · simp only [pointerFits]
+-    have h1 : (1 : BitVec 32).toNat = 1 := by decide
++    have h1 : (1 : BitVec 64).toNat = 1 := by decide
+     rw [BitVec.toNat_add, h1, Nat.mod_eq_of_lt hnoWrap]
+     simp only [decide_eq_false_iff_not]
+@@ -244,5 +244,5 @@
+ names a valid arena pointer, for any width -- no nonempty-width condition is
+ needed, since `index + width <= capacity` already gives `index <= capacity`. -/
+-theorem x86_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 32)
++theorem x86_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 64)
+     (hfit : windowFits index width capacity = true) :
+     pointerFits index capacity = true := by
+@@ -255,5 +255,5 @@
+ nonempty window, so a pointer that passes the pointer bound can still be
+ dereferenced out of the arena. -/
+-theorem x86_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 32) :
++theorem x86_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 64) :
+     pointerFits capacity capacity = true ∧
+       windowFits capacity 1 capacity = false := by
+--- a/kprog/formal/KProgFormal/CrossIsaStackArena.lean
++++ b/kprog/formal/KProgFormal/CrossIsaStackArena.lean
+@@ -23,21 +23,34 @@
+ open KProgFormal
+ 
++private theorem nativeWidth_restricts (v : BitVec 32) :
++    v.toNat % 18446744073709551616 = v.toNat := by
++  apply Nat.mod_eq_of_lt
++  have := v.isLt
++  omega
++
+ /-- The word-slot shift agrees: both index the word view by the byte index
+ shifted right three. -/
+ theorem wordIndex_agrees (index : BitVec 32) :
+     GeneratedArm64StackArena.wordIndex index =
+-      GeneratedX86StackArena.wordIndex index := rfl
++      (GeneratedX86StackArena.wordIndex (index.zeroExtend 64)).truncate 32 := by
++  unfold GeneratedArm64StackArena.wordIndex GeneratedX86StackArena.wordIndex
++  bv_decide
+ 
+ /-- The alignment guard agrees, so the 64-bit fast path is selected at the same
+-indices on both ISAs. -/
++indices on both ISAs for capacities whose low-width rounding does not wrap. -/
+ theorem wordAligned_agrees (index : BitVec 32) :
+     GeneratedArm64StackArena.wordAligned index =
+-      GeneratedX86StackArena.wordAligned index := rfl
++      GeneratedX86StackArena.wordAligned (index.zeroExtend 64) := by
++  unfold GeneratedArm64StackArena.wordAligned GeneratedX86StackArena.wordAligned
++  bv_decide
+ 
+ /-- The word-slot count agrees, so a capacity needs the same number of qwords
+ on both ISAs. -/
+-theorem words_agrees (capacity : BitVec 32) :
++theorem words_agrees (capacity : BitVec 32)
++    (h : capacity <= 4294967288) :
+     GeneratedArm64StackArena.words capacity =
+-      GeneratedX86StackArena.words capacity := rfl
++      (GeneratedX86StackArena.words (capacity.zeroExtend 64)).truncate 32 := by
++  unfold GeneratedArm64StackArena.words GeneratedX86StackArena.words
++  bv_decide
+ 
+ /-- The access-window end agrees: the first index past a `width`-byte access
+@@ -45,5 +58,6 @@
+ theorem windowEnd_agrees (index width : BitVec 32) :
+     GeneratedArm64StackArena.windowEnd index width =
+-      GeneratedX86StackArena.windowEnd index width := rfl
++      GeneratedX86StackArena.windowEnd (index.zeroExtend 64) (width.zeroExtend 64) := by
++  simp [nativeWidth_restricts, GeneratedArm64StackArena.windowEnd, GeneratedX86StackArena.windowEnd]
+ 
+ /-- The window bound agrees, so a fitting access is the same set of
+@@ -51,5 +65,7 @@
+ theorem windowFits_agrees (index width capacity : BitVec 32) :
+     GeneratedArm64StackArena.windowFits index width capacity =
+-      GeneratedX86StackArena.windowFits index width capacity := rfl
++      GeneratedX86StackArena.windowFits (index.zeroExtend 64) (width.zeroExtend 64) (capacity.zeroExtend 64) := by
++  simp [nativeWidth_restricts, GeneratedArm64StackArena.windowFits, GeneratedArm64StackArena.windowEnd,
++    GeneratedX86StackArena.windowFits, GeneratedX86StackArena.windowEnd]
+ 
+ /-- The pointer bound agrees, so the one-past-end rule is the same on
+@@ -57,5 +73,6 @@
+ theorem pointerFits_agrees (index capacity : BitVec 32) :
+     GeneratedArm64StackArena.pointerFits index capacity =
+-      GeneratedX86StackArena.pointerFits index capacity := rfl
++      GeneratedX86StackArena.pointerFits (index.zeroExtend 64) (capacity.zeroExtend 64) := by
++  simp [nativeWidth_restricts, GeneratedArm64StackArena.pointerFits, GeneratedX86StackArena.pointerFits]
+ 
+ /-- Concrete witness at each ISA's default frame: the two agree on which
+--- a/kprog/formal/KProgFormal/X86StackArmShape.lean
++++ b/kprog/formal/KProgFormal/X86StackArmShape.lean
+@@ -177,5 +177,5 @@
+ 8-byte words, which is the value `x86_stack_arena_word_aligned_refines` proves
+ the guard computes. -/
+-theorem x86_stack_arm_matches_arena (isW64 : Bool) (index : BitVec 32) :
++theorem x86_stack_arm_matches_arena (isW64 : Bool) (index : BitVec 64) :
+     armOf isW64 (wordAligned index) = .word ↔
+       isW64 = true ∧ x86StackArenaWordAlignedSpec index := by
+@@ -187,5 +187,5 @@
+ word window `[index, index + 8)` roundtrip `x86_stack_arena_alignment_roundtrip`
+ proves leaves no byte-arena element uncovered. -/
+-theorem x86_stack_arm_byte_covers (isW64 : Bool) (index : BitVec 32)
++theorem x86_stack_arm_byte_covers (isW64 : Bool) (index : BitVec 64)
+     (h : ¬(isW64 = true ∧ wordAligned index = true)) :
+     armOf isW64 (wordAligned index) = .byte :=
+--- a/kprog/formal/oracles/test_x86_stack_index_host.c
++++ b/kprog/formal/oracles/test_x86_stack_index_host.c
+@@ -11,6 +11,6 @@
+  * includes the frame base, the arena top, negative offsets below the base, and
+  * offsets whose high 32 bits are set, against an independent restatement that
+- * accumulates in unsigned 64-bit and keeps the low 32 bits. It also checks the
+- * affine law / frame-base-is-zero / high-32-bit-aliasing properties the
++ * accumulates in unsigned 64-bit and keeps all 64 bits. It also checks the
++ * affine law / frame-base-is-zero / high-32-bit-nonaliasing properties the
+  * refinement module proves. Exit 1 on mismatch.
+  *
+@@ -68,5 +68,5 @@
+ 
+ 		/* Cross-check the generated macro against the independent
+-		 * unsigned-64-bit low-32-bits restatement over a broad grid,
++		 * unsigned-64-bit full-width restatement over a broad grid,
+ 		 * including offsets below the base and offsets with the high
+ 		 * 32 bits set. */
+@@ -74,10 +74,9 @@
+ 			__s64 off = base + delta;
+ 			unsigned long want =
+-				(unsigned long)(((__u64)off + (__u64)cap) &
+-						0xffffffffULL);
++				(unsigned long)((__u64)off + (__u64)cap);
+ 
+ 			check_index("restate", cap, off, want);
+-			/* Aliasing: adding 2^32 to the offset keeps the index. */
+-			check_index("alias", cap, off + 0x100000000LL, want);
++			/* The same old high32 input now retains its distinct address. */
++			check_index("distinct_high32", cap, off + 0x100000000LL, want + 0x100000000UL);
+ 			cases += 2;
+ 		}
+--- a/kprog/formal/oracles/test_x86_mov_route_host.c
++++ b/kprog/formal/oracles/test_x86_mov_route_host.c
+@@ -145,4 +145,25 @@
+ }
+ 
++/* The independent model observes the architectural word represented by a
++ * private stack pointer. Test fixtures use a zero native origin; arena_top
++ * comes from the allocated fixture object, not the simulator projection. */
++static __u64 model_arena_top;
++
++static __u64 model_native_value(unsigned reg)
++{
++    if (reg == X86_RSP)
++        return mreg[reg];
++    if (mtag[reg] == X86_SIM_TAG_STACK)
++        return mreg[reg] - model_arena_top;
++    return mreg[reg];
++}
++
++static void model_native_write(unsigned dst, __u64 value, unsigned width,
++                               unsigned shift)
++{
++    mreg[dst] = model_partial_write(model_native_value(dst), value, width, shift);
++    mtag[dst] = X86_SIM_TAG_SCALAR;
++}
++
+ #define DECLARE_SIM_STATE()                                                \
+ 	X86_SIM_L_DECLARE_STATE();                                        \
+@@ -156,5 +177,6 @@
+ 	(void)__x86_xmm0_lo;                                              \
+ 	(void)__x86_xmm0_hi;                                              \
+-	(void)__x86_sim_ret_addr;
++	(void)__x86_sim_ret_addr;                                         \
++	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
+ 
+ /* Plant the register file: pattern values and pattern tags everywhere, with
+@@ -314,7 +336,5 @@
+ 	 * model reads its own planted file (MEM-free), so no snapshot dance
+ 	 * is needed before the run. */
+-	mreg[dst] = model_partial_write(mreg[dst], imm, w,
+-					aux_dst_shift(aux));
+-	mtag[dst] = X86_SIM_TAG_SCALAR;
++	model_native_write(dst, imm, w, aux_dst_shift(aux));
+ 
+ 	/* ---- the real routed arm ---- */
+@@ -346,5 +366,8 @@
+ 	w = resolve_width(flags);
+ 	if (w == X86_WIDTH_64) {
+-		if (src == X86_RSP) {
++        if (dst == X86_RSP) {
++            /* A native SP move stores an offset, not an arena pointer. */
++            model_native_write(dst, model_native_value(src), w, 0);
++        } else if (src == X86_RSP) {
+ 			/* The stack-base write: the arena address at the
+ 			 * window-wrapped source offset, tagged stack
+@@ -356,5 +379,5 @@
+ 			 * tag) moves. */
+ 			mreg[dst] = srcv;
+-			mtag[dst] = X86_SIM_L_REG_TAG(src);
++			mtag[dst] = mtag[src];
+ 		}
+ 	} else {
+@@ -363,9 +386,7 @@
+ 		 * the destination's prior value is whatever the source plant
+ 		 * left in the model. */
+-		__u64 value = model_read_reg_at(srcv, w, aux_src_shift(aux));
+-
+-		mreg[dst] = model_partial_write(mreg[dst], value, w,
+-						aux_dst_shift(aux));
+-		mtag[dst] = X86_SIM_TAG_SCALAR;
++		__u64 value = model_read_reg_at(model_native_value(src), w,
++                                            aux_src_shift(aux));
++        model_native_write(dst, value, w, aux_dst_shift(aux));
+ 	}
+ 
+--- a/kprog/formal/oracles/test_x86_xchg_route_host.c
++++ b/kprog/formal/oracles/test_x86_xchg_route_host.c
+@@ -81,19 +81,29 @@
+  * arm exchanges whole 64-bit cells; the subword arm exchanges the low-lane
+  * windows at the resolved width. Both scalarize both tags. */
++static __u64 model_arena_top;
++static __u64 model_native_value(unsigned reg)
++{
++    if (reg != X86_RSP && mtag[reg] == X86_SIM_TAG_STACK)
++        return mreg[reg] - model_arena_top;
++    return mreg[reg];
++}
+ static void model_xchg(unsigned dst, unsigned src, unsigned flags)
+ {
+-	unsigned w = resolve_width(flags);
+-	__u64 dv = mreg[dst];
+-	__u64 sv = mreg[src];
+-
+-	if (w == X86_WIDTH_64) {
+-		mreg[dst] = sv;
+-		mreg[src] = dv;
+-	} else {
+-		mreg[dst] = model_partial_write(dv, sv, w);
+-		mreg[src] = model_partial_write(sv, dv, w);
+-	}
+-	mtag[dst] = X86_SIM_TAG_SCALAR;
+-	mtag[src] = X86_SIM_TAG_SCALAR;
++    unsigned w = resolve_width(flags);
++    __u64 dv = model_native_value(dst), sv = model_native_value(src);
++    __u64 dr = dst == X86_RSP ? model_arena_top + mreg[dst] : mreg[dst];
++    __u64 sr = src == X86_RSP ? model_arena_top + mreg[src] : mreg[src];
++    __u8 dt = dst == X86_RSP ? X86_SIM_TAG_STACK : mtag[dst];
++    __u8 st = src == X86_RSP ? X86_SIM_TAG_STACK : mtag[src];
++    if (w == X86_WIDTH_64) {
++        mreg[dst] = dst == X86_RSP ? sv : sr;
++        mtag[dst] = dst == X86_RSP ? X86_SIM_TAG_SCALAR : st;
++        mreg[src] = src == X86_RSP ? dv : dr;
++        mtag[src] = src == X86_RSP ? X86_SIM_TAG_SCALAR : dt;
++    } else {
++        mreg[dst] = model_partial_write(dv, sv, w);
++        mreg[src] = model_partial_write(sv, dv, w);
++        mtag[dst] = mtag[src] = X86_SIM_TAG_SCALAR;
++    }
+ }
+ 
+@@ -179,4 +189,5 @@
+ 	(void)__x86_stack_mem;
+ 
++	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
+ 	PLANT_REGS();
+ 
+--- a/kprog/formal/oracles/test_x86_stack_arena_host.c
++++ b/kprog/formal/oracles/test_x86_stack_arena_host.c
+@@ -233,4 +233,10 @@
+ int main(void)
+ {
++    if (KPROG_X86_STACK_WORD_INDEX(0x100000000ULL) != 0x20000000ULL ||
++        KPROG_X86_STACK_WORD_INDEX(0x800000000ULL) != 0x100000000ULL ||
++        KPROG_X86_STACK_WINDOW_FITS(0x100000000ULL, 8, 128)) {
++        puts("MISMATCH full-width native arena address"); return 1;
++    }
++
+ 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 64U, 128U };
+ 	static const __u32 indices[] = {
+--- a/kprog/formal/tools/generate_x86_xchg_spec.py
++++ b/kprog/formal/tools/generate_x86_xchg_spec.py
+@@ -8,7 +8,7 @@
+   * at the full 64-bit width it swaps the two destination/source register
+     cells as *raw pointer cells*, reading each cell with the tag-preserving
+-    `X86_SIM_L_READ_REG_PTR` and writing each with the scalarizing
++    `X86_SIM_L_READ_REG_PTR` and writing each with the origin-preserving
+     `X86_SIM_L_WRITE_REG_PTR`; the swap moves the whole 64-bit cell and
+-    scalarizes both tags;
++    preserves both origin tags;
+   * at every narrower width it reads the two cells as 64-bit values
+     (`X86_SIM_L_READ_REG`) and writes each with `X86_SIM_L_WRITE_REG_WIDTH`, so
+@@ -211,5 +211,5 @@
+  * At the full {full} (64-bit) width code it swaps the two register cells as
+  * raw pointer cells (`X86_SIM_L_READ_REG_PTR` / `X86_SIM_L_WRITE_REG_PTR`),
+- * moving the whole 64-bit cell and scalarizing both tags; at every other code
++ * moving the whole 64-bit cell and origin-preserving both tags; at every other code
+  * it reads both cells as 64-bit values and writes each with
+  * `X86_SIM_L_WRITE_REG_WIDTH`, the partial-register writeback (8/16-bit
+@@ -219,5 +219,5 @@
+  * `KProgFormal/X86XchgHandler.lean` proves the generated `armOf` equals an
+  * independent construction, that the pointer arm swaps the whole cells while
+- * scalarizing, and that the subword arm's width-window writeback exchanges the
++ * origin-preserving, and that the subword arm's width-window writeback exchanges the
+  * two values at the access width.
+  * This header is included after the `X86_OP_XCHG` / `X86_WIDTH_*` decodes, so
+--- a/kprog/formal/tools/generate_x86_stack_index_spec.py
++++ b/kprog/formal/tools/generate_x86_stack_index_spec.py
+@@ -1,25 +1,4 @@
+ #!/usr/bin/env python3
+-"""Generate the shared x86-64 stack-index (frame-offset -> arena-index) contract.
+-
+-The generated Lean definition `GeneratedX86StackIndex.index` and the C macro
+-`KPROG_X86_STACK_INDEX` implement the byte index the x86 simulator's stack
+-helpers use to reach into its fixed `X86_SIM_STACK_BYTES` arena from an abstract
+-frame offset `OFF` (the value the simulator's abstract frame base resolves to):
+-
+-  - the offset is added to the arena capacity, so an offset of `-capacity`
+-    (the frame base) lands at index 0 and an offset of 0 lands at the top;
+-  - the sum is truncated to 32 bits (`__u32`), the index type the C helpers use
+-    for the `b[]` byte arena and the `q[]` word arena (`index >> 3`).
+-
+-The offset and capacity are 64-bit two's-complement quantities in the C code
+-(`(__s64)(OFF) + X86_SIM_STACK_BYTES`), so a negative offset below the capacity
+-wraps; the contract states the sum as wrapping 64-bit addition followed by a
+-32-bit truncation, which is exactly the C bit pattern. `KProgFormal/X86StackIndex.lean`
+-records that the map is the affine offset `capacity - base + delta`, that the
+-frame base lands at index 0, that the wrap is the low 32 bits of the offset,
+-and that two offsets differing by a multiple of `2^32` alias.
+-
+-The C macro evaluates neither flags nor memory: it is a pure index computation.
+-"""
++"""Generate native-width wrapping frame indexes; distinct high bits must survive."""
+ import argparse
+ import json
+@@ -37,5 +16,5 @@
+     "index_step": 1,
+     "accumulate": "wrapping64",
+-    "index_mask_bits": 32,
++    "index_mask_bits": 64,
+ }
+ 
+@@ -53,8 +32,8 @@
+ namespace KProgFormal.GeneratedX86StackIndex
+ /-- The arena byte index for an abstract frame offset `off` in an arena of
+-`capacity` bytes: `off + capacity`, truncated to the C helpers' 32-bit index
++`capacity` bytes: `off + capacity`, retained in the C helpers' 64-bit index
+ type. `capacity` is `X86_SIM_STACK_BYTES`. -/
+-def index (capacity off : BitVec 64) : BitVec 32 :=
+-  (capacity + off).truncate 32
++def index (capacity off : BitVec 64) : BitVec 64 :=
++  capacity + off
+ end KProgFormal.GeneratedX86StackIndex
+ '''
+@@ -66,5 +45,5 @@
+ #define KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
+ #define KPROG_X86_STACK_INDEX(OFF, CAPACITY)                               \\
+-\t((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))
++\t((__u64)(OFF) + (__u64)(CAPACITY))
+ #endif
+ '''
+--- a/kprog/formal/tools/generate_x86_stack_arena_spec.py
++++ b/kprog/formal/tools/generate_x86_stack_arena_spec.py
+@@ -13,5 +13,5 @@
+ arithmetic each uses so it can be machine-checked:
+ 
+-  - the byte arena `b[]` is indexed directly by the 32-bit stack index;
++  - the byte arena `b[]` is indexed directly by the 64-bit stack index;
+   - the word arena `q[]` is indexed by that index shifted right 3, and is only
+     ever used on the 64-bit path when the index is 8-aligned (the `& 7U`
+@@ -37,4 +37,5 @@
+     "schema_version": 1,
+     "operation": "x86StackArena",
++    "index_bits": 64,
+     "word_shift": 3,
+     "word_mask": "0x7",
+@@ -67,9 +68,9 @@
+ /-- Word-arena slot for a byte index: the index shifted right {shift}, the C
+ `INDEX >> {shift}`. Sound as a slot only when the index is {1 << shift}-aligned. -/
+-def wordIndex (index : BitVec 32) : BitVec 32 := index >>> {shift}
++def wordIndex (index : BitVec 64) : BitVec 64 := index >>> {shift}
+ 
+ /-- The 64-bit fast-path guard: the index is {1 << shift}-aligned (its low {shift}
+ bits clear), the C `(INDEX & {mask}U) == 0U`. -/
+-def wordAligned (index : BitVec 32) : Bool := (index &&& {mask}) == 0
++def wordAligned (index : BitVec 64) : Bool := (index &&& {mask}) == 0
+ 
+ /-- Byte `k` of a 64-bit word, little-endian, the C `(WORD >> (8U * K))`. -/
+@@ -84,17 +85,17 @@
+ /-- Number of word slots the byte arena requires: the capacity rounded up to a
+ multiple of {1 << shift}, the C `((CAPACITY + {mask}U) / {1 << shift}U)`. -/
+-def words (capacity : BitVec 32) : BitVec 32 :=
++def words (capacity : BitVec 64) : BitVec 64 :=
+   (capacity + {mask}) / {1 << shift}
+ 
+ /-- The first index past a `WIDTH`-byte access starting at `index`, the C
+ `(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
+-comparison is widened to 64 bits, so an access near the top of the 32-bit
++comparison is widened to 64 bits, so an access near the top of the 64-bit
+ index space is measured exactly rather than wrapping. -/
+-def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
++def windowEnd (index width : BitVec 64) : Nat := index.toNat + width.toNat
+ 
+ /-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
+ bytes: its end index is at most the capacity, the C
+ `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
+-def windowFits (index width capacity : BitVec 32) : Bool :=
++def windowFits (index width capacity : BitVec 64) : Bool :=
+   decide (windowEnd index width ≤ capacity.toNat)
+ 
+@@ -102,5 +103,5 @@
+ for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+ window of any width, which needs `index + width <= CAPACITY`. -/
+-def pointerFits (index capacity : BitVec 32) : Bool :=
++def pointerFits (index capacity : BitVec 64) : Bool :=
+   decide (index.toNat ≤ capacity.toNat)
+ end KProgFormal.GeneratedX86StackArena
+@@ -114,11 +115,11 @@
+ #ifndef KPROG_FORMAL_GENERATED_X86_STACK_ARENA_H
+ #define KPROG_FORMAL_GENERATED_X86_STACK_ARENA_H
+-#define KPROG_X86_STACK_WORD_INDEX(INDEX) ((__u32)(INDEX) >> {shift})
++#define KPROG_X86_STACK_WORD_INDEX(INDEX) ((__u64)(INDEX) >> {shift})
+ #define KPROG_X86_STACK_WORD_ALIGNED(INDEX) \\
+-\t((((__u32)(INDEX) & {mask}U) == 0U) ? 1 : 0)
++\t((((__u64)(INDEX) & {mask}U) == 0U) ? 1 : 0)
+ #define KPROG_X86_STACK_BYTE(WORD, K) \\
+ \t((__u8)(((__u64)(WORD)) >> (8U * (__u32)(K))))
+ #define KPROG_X86_STACK_WORDS(CAPACITY) \\
+-\t(((__u32)(CAPACITY) + {mask}U) / {1 << shift}U)
++\t(((__u64)(CAPACITY) + {mask}U) / {1 << shift}U)
+ #define KPROG_X86_STACK_ASSEMBLE(BYTE, K) \\
+ \t(((__u64)((__u8)(BYTE))) << (8U * (__u32)(K)))
+@@ -129,7 +130,7 @@
+  */
+ #define KPROG_X86_STACK_WINDOW_END(INDEX, BYTES) \\
+-\t(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
++\t(((__u64)(INDEX)) + ((__u64)(BYTES)))
+ #define KPROG_X86_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \\
+-\t((KPROG_X86_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
++\t((((__u64)(INDEX) <= (__u64)(CAPACITY)) && ((__u64)(BYTES) <= (__u64)(CAPACITY) - (__u64)(INDEX))) ? 1 : 0)
+ /*
+  * An arena pointer is well defined up to and including the one-past-end index,
+@@ -140,5 +141,5 @@
+  */
+ #define KPROG_X86_STACK_POINTER_FITS(INDEX, CAPACITY) \\
+-\t(((__u64)(__s64)(INDEX)) <= ((__u64)(__s64)(__u32)(CAPACITY)) ? 1 : 0)
++\t(((__u64)(__s64)(INDEX)) <= ((__u64)(CAPACITY)) ? 1 : 0)
+ #endif
+ '''
+--- a/kprog/formal/contracts/x86_stack_arena_spec.json
++++ b/kprog/formal/contracts/x86_stack_arena_spec.json
+@@ -1 +1 @@
+-{"schema_version":1,"operation":"x86StackArena","word_shift":3,"word_mask":"0x7","capacity_round":"ceil8","arena_alias":"b-q-union","assemble":"little_endian8","window_guard":"index_plus_bytes_le_capacity","pointer_guard":"index_le_capacity"}
++{"schema_version":1,"operation":"x86StackArena","word_shift":3,"word_mask":"0x7","capacity_round":"ceil8","arena_alias":"b-q-union","assemble":"little_endian8","window_guard":"index_plus_bytes_le_capacity","pointer_guard":"index_le_capacity","index_bits":64}
+--- a/kprog/formal/contracts/x86_stack_index_spec.json
++++ b/kprog/formal/contracts/x86_stack_index_spec.json
+@@ -1 +1 @@
+-{"schema_version":1,"operation":"x86StackIndex","index_base":"capacity","index_step":1,"accumulate":"wrapping64","index_mask_bits":32}
++{"schema_version":1,"operation":"x86StackIndex","index_base":"capacity","index_step":1,"accumulate":"wrapping64","index_mask_bits":64}
+--- a/kprog/formal/generated/x86_stack_index.h
++++ b/kprog/formal/generated/x86_stack_index.h
+@@ -3,4 +3,4 @@
+ #define KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
+ #define KPROG_X86_STACK_INDEX(OFF, CAPACITY)                               \
+-	((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))
++	((__u64)(OFF) + (__u64)(CAPACITY))
+ #endif
+--- a/kprog/formal/generated/x86_xchg.h
++++ b/kprog/formal/generated/x86_xchg.h
+@@ -7,5 +7,5 @@
+  * At the full 8 (64-bit) width code it swaps the two register cells as
+  * raw pointer cells (`X86_SIM_L_READ_REG_PTR` / `X86_SIM_L_WRITE_REG_PTR`),
+- * moving the whole 64-bit cell and scalarizing both tags; at every other code
++ * moving the whole 64-bit cell and origin-preserving both tags; at every other code
+  * it reads both cells as 64-bit values and writes each with
+  * `X86_SIM_L_WRITE_REG_WIDTH`, the partial-register writeback (8/16-bit
+@@ -15,5 +15,5 @@
+  * `KProgFormal/X86XchgHandler.lean` proves the generated `armOf` equals an
+  * independent construction, that the pointer arm swaps the whole cells while
+- * scalarizing, and that the subword arm's width-window writeback exchanges the
++ * origin-preserving, and that the subword arm's width-window writeback exchanges the
+  * two values at the access width.
+  * This header is included after the `X86_OP_XCHG` / `X86_WIDTH_*` decodes, so
+--- a/kprog/formal/generated/x86_stack_arena.h
++++ b/kprog/formal/generated/x86_stack_arena.h
+@@ -2,11 +2,11 @@
+ #ifndef KPROG_FORMAL_GENERATED_X86_STACK_ARENA_H
+ #define KPROG_FORMAL_GENERATED_X86_STACK_ARENA_H
+-#define KPROG_X86_STACK_WORD_INDEX(INDEX) ((__u32)(INDEX) >> 3)
++#define KPROG_X86_STACK_WORD_INDEX(INDEX) ((__u64)(INDEX) >> 3)
+ #define KPROG_X86_STACK_WORD_ALIGNED(INDEX) \
+-	((((__u32)(INDEX) & 7U) == 0U) ? 1 : 0)
++	((((__u64)(INDEX) & 7U) == 0U) ? 1 : 0)
+ #define KPROG_X86_STACK_BYTE(WORD, K) \
+ 	((__u8)(((__u64)(WORD)) >> (8U * (__u32)(K))))
+ #define KPROG_X86_STACK_WORDS(CAPACITY) \
+-	(((__u32)(CAPACITY) + 7U) / 8U)
++	(((__u64)(CAPACITY) + 7U) / 8U)
+ #define KPROG_X86_STACK_ASSEMBLE(BYTE, K) \
+ 	(((__u64)((__u8)(BYTE))) << (8U * (__u32)(K)))
+@@ -17,7 +17,7 @@
+  */
+ #define KPROG_X86_STACK_WINDOW_END(INDEX, BYTES) \
+-	(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
++	(((__u64)(INDEX)) + ((__u64)(BYTES)))
+ #define KPROG_X86_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \
+-	((KPROG_X86_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
++	((((__u64)(INDEX) <= (__u64)(CAPACITY)) && ((__u64)(BYTES) <= (__u64)(CAPACITY) - (__u64)(INDEX))) ? 1 : 0)
+ /*
+  * An arena pointer is well defined up to and including the one-past-end index,
+@@ -28,4 +28,4 @@
+  */
+ #define KPROG_X86_STACK_POINTER_FITS(INDEX, CAPACITY) \
+-	(((__u64)(__s64)(INDEX)) <= ((__u64)(__s64)(__u32)(CAPACITY)) ? 1 : 0)
++	(((__u64)(__s64)(INDEX)) <= ((__u64)(CAPACITY)) ? 1 : 0)
+ #endif
+--- a/kprog/formal/KProgFormal/Generated/GeneratedX86StackIndex.lean
++++ b/kprog/formal/KProgFormal/Generated/GeneratedX86StackIndex.lean
+@@ -3,7 +3,7 @@
+ namespace KProgFormal.GeneratedX86StackIndex
+ /-- The arena byte index for an abstract frame offset `off` in an arena of
+-`capacity` bytes: `off + capacity`, truncated to the C helpers' 32-bit index
++`capacity` bytes: `off + capacity`, retained in the C helpers' 64-bit index
+ type. `capacity` is `X86_SIM_STACK_BYTES`. -/
+-def index (capacity off : BitVec 64) : BitVec 32 :=
+-  (capacity + off).truncate 32
++def index (capacity off : BitVec 64) : BitVec 64 :=
++  capacity + off
+ end KProgFormal.GeneratedX86StackIndex
+--- a/kprog/formal/KProgFormal/Generated/GeneratedX86StackArena.lean
++++ b/kprog/formal/KProgFormal/Generated/GeneratedX86StackArena.lean
+@@ -4,9 +4,9 @@
+ /-- Word-arena slot for a byte index: the index shifted right 3, the C
+ `INDEX >> 3`. Sound as a slot only when the index is 8-aligned. -/
+-def wordIndex (index : BitVec 32) : BitVec 32 := index >>> 3
++def wordIndex (index : BitVec 64) : BitVec 64 := index >>> 3
+ 
+ /-- The 64-bit fast-path guard: the index is 8-aligned (its low 3
+ bits clear), the C `(INDEX & 7U) == 0U`. -/
+-def wordAligned (index : BitVec 32) : Bool := (index &&& 7) == 0
++def wordAligned (index : BitVec 64) : Bool := (index &&& 7) == 0
+ 
+ /-- Byte `k` of a 64-bit word, little-endian, the C `(WORD >> (8U * K))`. -/
+@@ -21,17 +21,17 @@
+ /-- Number of word slots the byte arena requires: the capacity rounded up to a
+ multiple of 8, the C `((CAPACITY + 7U) / 8U)`. -/
+-def words (capacity : BitVec 32) : BitVec 32 :=
++def words (capacity : BitVec 64) : BitVec 64 :=
+   (capacity + 7) / 8
+ 
+ /-- The first index past a `WIDTH`-byte access starting at `index`, the C
+ `(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
+-comparison is widened to 64 bits, so an access near the top of the 32-bit
++comparison is widened to 64 bits, so an access near the top of the 64-bit
+ index space is measured exactly rather than wrapping. -/
+-def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
++def windowEnd (index width : BitVec 64) : Nat := index.toNat + width.toNat
+ 
+ /-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
+ bytes: its end index is at most the capacity, the C
+ `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
+-def windowFits (index width capacity : BitVec 32) : Bool :=
++def windowFits (index width capacity : BitVec 64) : Bool :=
+   decide (windowEnd index width ≤ capacity.toNat)
+ 
+@@ -39,5 +39,5 @@
+ for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+ window of any width, which needs `index + width <= CAPACITY`. -/
+-def pointerFits (index capacity : BitVec 32) : Bool :=
++def pointerFits (index capacity : BitVec 64) : Bool :=
+   decide (index.toNat ≤ capacity.toNat)
+ end KProgFormal.GeneratedX86StackArena
