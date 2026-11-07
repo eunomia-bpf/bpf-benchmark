@@ -46,7 +46,7 @@ static unsigned long cases;
  * word, so a value whose bits 8..31 are nonzero matches no arm and yields the
  * C default `0`. */
 static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
-			      unsigned sf, unsigned of)
+			      unsigned sf, unsigned of, unsigned pf)
 {
 	switch (cc) {
 	case 0U: return of;
@@ -59,8 +59,8 @@ static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 	case 7U: return !cf && !zf;
 	case 8U: return sf;
 	case 9U: return !sf;
-	case 10U: return 0U; /* These retained route fixtures seed PF=0. */
-	case 11U: return 1U;
+	case 10U: return pf;
+	case 11U: return !pf;
 	case 12U: return sf != of;
 	case 13U: return sf == of;
 	case 14U: return zf || (sf != of);
@@ -83,14 +83,14 @@ static unsigned long branch_pc(int taken, unsigned long fallthrough,
  * which arm was reached and jumps to the shared epilogue.
  */
 static void check_jcc(unsigned cc, unsigned long current, unsigned long target,
-		      unsigned cf, unsigned zf, unsigned sf, unsigned of)
+		      unsigned cf, unsigned zf, unsigned sf, unsigned of, unsigned pf)
 {
 	X86_SIM_L_DECLARE_STATE();
 	struct x86_sim_xdp_abi __x86_sim_abi = {};
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
 	const unsigned long fallthrough = target + 1UL;
-	unsigned taken = model_cc_true(cc, cf, zf, sf, of);
+	unsigned taken = model_cc_true(cc, cf, zf, sf, of, pf);
 	unsigned long got;   /* the address the real macro jumped to */
 
 	(void)__x86_sim_abi;
@@ -101,6 +101,13 @@ static void check_jcc(unsigned cc, unsigned long current, unsigned long target,
 	__x86_zf = (__u8)zf;
 	__x86_sf = (__u8)sf;
 	__x86_of = (__u8)of;
+	__x86_pf = (__u8)pf;
+	__x86_af = 1;
+#define PLANT_BRANCH_REG(REG, NAME) \
+	__x86_##NAME.ptr = (void *)(unsigned long)(0x1234567800000000ULL + (REG) * 0x10001ULL); \
+	__x86_##NAME##_tag = (REG) % 9U;
+	X86_SIM_L_FOR_EACH_GPR(PLANT_BRANCH_REG)
+#undef PLANT_BRANCH_REG
 
 	got = fallthrough; /* default: fall-through */
 	goto probe_dispatch;
@@ -109,7 +116,14 @@ probe_dispatched:
 		unsigned long want = branch_pc((int)taken, fallthrough, target);
 
 		cases++;
-		if (got != want) {
+		unsigned changed = __x86_cf != cf || __x86_zf != zf ||
+			__x86_sf != sf || __x86_of != of || __x86_pf != pf || __x86_af != 1;
+#define CHECK_BRANCH_REG(REG, NAME) \
+		changed |= (__u64)(unsigned long)__x86_##NAME.ptr != \
+			(0x1234567800000000ULL + (REG) * 0x10001ULL) || __x86_##NAME##_tag != (REG) % 9U;
+		X86_SIM_L_FOR_EACH_GPR(CHECK_BRANCH_REG)
+#undef CHECK_BRANCH_REG
+		if (got != want || changed) {
 			printf("MISMATCH jcc cc=%u cur=%lu tgt=%lu fb=%u "
 			       "got=%lu want=%lu\n", cc, current, target,
 			       taken, got, want);
@@ -124,6 +138,22 @@ probe_dispatch:
 probe_target:
 	got = target;
 	goto probe_dispatched;
+}
+
+/* The unconditional wrapper reaches its mapped target for every direction. */
+static void check_jmp(unsigned long current, unsigned long target)
+{
+	unsigned long got = target + 1UL;
+	X86_SIM_X86_JMP(current, target, jump_target);
+	goto jump_done;
+jump_target:
+	got = target;
+jump_done:
+	cases++;
+	if (got != target) {
+		printf("MISMATCH jmp cur=%lu target=%lu got=%lu\n", current, target, got);
+		failures++;
+	}
 }
 
 /* The routed selector must agree with the ordering oracle at the boundary. */
@@ -189,11 +219,13 @@ int main(void)
 
 	for (c = 0; c < sizeof(cc_codes) / sizeof(cc_codes[0]); c++)
 		for (p = 0; p < sizeof(pairs) / sizeof(pairs[0]); p++)
-			for (fb = 0; fb < 16U; fb++)
+			for (fb = 0; fb < 32U; fb++)
 				check_jcc(cc_codes[c], pairs[p][0], pairs[p][1],
 					  fb & 1U, (fb >> 1) & 1U,
-					  (fb >> 2) & 1U, (fb >> 3) & 1U);
+					  (fb >> 2) & 1U, (fb >> 3) & 1U, (fb >> 4) & 1U);
 
+	for (p = 0; p < sizeof(pairs) / sizeof(pairs[0]); p++)
+		check_jmp(pairs[p][0], pairs[p][1]);
 	check_direction();
 
 	if (failures != 0) {

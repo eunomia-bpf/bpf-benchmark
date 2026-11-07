@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-32 x86 register tokens; full raw ISA and compiled-simulator closure continue.
+34 x86 register/control tokens; full raw ISA and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
 

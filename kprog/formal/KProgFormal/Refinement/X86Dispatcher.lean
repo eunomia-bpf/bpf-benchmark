@@ -1,3 +1,4 @@
+import KProgFormal.X86BranchEmit
 import KProgFormal.Generated.GeneratedX86MemAux
 import KProgFormal.Generated.GeneratedX86Specialization
 import KProgFormal.Generated.GeneratedX86DispatchFamily
@@ -1754,5 +1755,176 @@ theorem register_token_native_matches (env : EntryEnvironment.Environment) (fram
       Reference.X86.matchesTransition native nativeAfter actual := by
   rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
   exact register_dispatch_native_matches env frame arena _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
+
+/-- Raw PF-aware JCC condition and the actual forward/backward goto shape.
+Logical label addresses select the architectural PC through the existing
+branch-emission contract. Input registers, tags, memory and flags are retained. -/
+def branchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (aux : BitVec 32)
+    (target nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2) with
+  | none => none
+  | some taken =>
+      let selected := GeneratedX86BranchEmit.nextPc
+        (GeneratedX86BranchEmit.shape current target.toNat) taken nextPc.toNat target.toNat
+      some ⟨nativeRegisters env frame arena (registerPc state (BitVec.ofNat 64 selected)), [], none⟩
+
+theorem branch_register_frame_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (cc : Fin 16)
+    (target nextPc : Reference.Word) (state : RegisterState) :
+    branchRegisters env frame arena current (BitVec.ofNat 32 cc.val) target nextPc state =
+      some (Reference.X86.step (.branch (some cc) target nextPc) (nativeRegisters env frame arena state)) := by
+  have condition := X86Condition.condition_refines cc state.raw.rflags
+  unfold X86Condition.evaluate at condition
+  simp only [branchRegisters, condition, Option.bind_some]
+  rw [x86_branch_emit_refines]
+  cases taken : Reference.X86.condition state.raw.rflags cc <;>
+    simp [branchPc, taken, native_register_pc, Reference.X86.step, nativeRegisters, registerPc, registerValue]
+  all_goals funext reg; rfl
+
+/-- The unconditional JMP macro chooses its mapped target label directly. -/
+def jumpRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (target : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  some ⟨nativeRegisters env frame arena (registerPc state target), [], none⟩
+
+theorem jump_register_frame_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (target nextPc : Reference.Word) (state : RegisterState) :
+    jumpRegisters env frame arena target state =
+      some (Reference.X86.step (.branch none target nextPc) (nativeRegisters env frame arena state)) := rfl
+
+/-- Unified partial simulator step: register execution and the producer's
+separate JCC/JMP branch-handler class share one transition interface. Logical
+label/PC and compiled-code correspondence retain their layout/ABI obligations. -/
+def dispatchStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match dispatchRegisters env frame arena code flags aux dst src value nextPc state with
+  | some result => some result
+  | none =>
+      if code = GeneratedX86Opcode.code .jcc then branchRegisters env frame arena current aux value nextPc state
+      else if code = GeneratedX86Opcode.code .jmp then jumpRegisters env frame arena value state
+      else none
+
+inductive StepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
+    (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | registers (code : Nat) (native : Reference.X86.Instruction)
+      (fields : RegisterBinding flags aux dst src value nextPc nativeState code native) :
+      StepBinding flags aux dst src value nextPc nativeState code native
+  | conditional (cc : Fin 16) (conditionField : aux = BitVec.ofNat 32 cc.val) :
+      StepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .jcc)
+        (.branch (some cc) value nextPc)
+  | jump : StepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .jmp)
+      (.branch none value nextPc)
+
+theorem simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, dispatchStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | registers code native fields =>
+      obtain ⟨actual, dispatched, step⟩ :=
+        register_dispatch_step_refines env frame arena code flags aux dst src value nextPc state native fields
+      exact ⟨actual, by simp only [dispatchStep, dispatched], step⟩
+  | conditional cc conditionField =>
+      apply exact_dispatch_refines
+      subst aux
+      simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using
+        branch_register_frame_refines env frame arena current cc value nextPc state
+  | jump =>
+      apply exact_dispatch_refines
+      simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using
+        jump_register_frame_refines env frame arena value nextPc state
+
+/-- The branch renderer emits the same shared macro for every JCC/JMP token.
+Other covered tokens retain their existing direct/generic body interface. -/
+def specializedStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  if token = .jcc then branchRegisters env frame arena current aux value nextPc state
+  else if token = .jmp then jumpRegisters env frame arena value state
+  else specializedRegisters env frame arena token flags aux dst src value nextPc state
+
+def stepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
+  if token = .jcc then some .jcc else if token = .jmp then some .jmp else registerTokenOpcode token
+
+private theorem register_token_excludes_control (token : GeneratedX86Specialization.Op)
+    (opcode : GeneratedX86Opcode.Op) (selected : registerTokenOpcode token = some opcode) :
+    token ≠ .jcc ∧ token ≠ .jmp ∧ GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .jcc ∧
+      GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .jmp := by
+  cases token <;> simp only [registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+theorem step_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (selected : stepTokenOpcode token = some opcode) :
+    (GeneratedX86Specialization.dispatch token = .directMacro ∨
+      GeneratedX86Specialization.dispatch token = .genericRunOp ∨
+      GeneratedX86Specialization.dispatch token = .branchHandler) ∧
+      GeneratedX86Specialization.tokenName token = GeneratedX86Opcode.define opcode := by
+  cases token <;> simp only [stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+theorem step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (selected : stepTokenOpcode token = some opcode) :
+    specializedStep env frame arena current token flags aux dst src value nextPc state =
+      dispatchStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+  by_cases conditional : token = .jcc
+  · subst token
+    simp only [stepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
+    subst opcode
+    simp [specializedStep, dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove,
+      aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
+      GeneratedX86DispatchSingleton.code]
+  · by_cases jump : token = .jmp
+    · subst token
+      simp only [stepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
+      subst opcode
+      simp [specializedStep, dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove,
+        aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
+        GeneratedX86DispatchSingleton.code]
+    · have registerSelected : registerTokenOpcode token = some opcode := by
+        simpa only [stepTokenOpcode, conditional, jump, ↓reduceIte] using selected
+      obtain ⟨_, _, notConditional, notJump⟩ := register_token_excludes_control token opcode registerSelected
+      simp only [specializedStep, conditional, jump, ↓reduceIte]
+      rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state registerSelected]
+      unfold dispatchStep
+      cases dispatched : dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+        simp [dispatched, notConditional, notJump]
+
+theorem simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : stepTokenOpcode token = some opcode)
+    (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) :
+    ∃ actual, specializedStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  rw [step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
+  exact simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+
+theorem simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : stepTokenOpcode token = some opcode)
+    (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native)
+    (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, specializedStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refines⟩ :=
+    simulator_token_step_refines env frame arena current token opcode flags aux dst src value nextPc state native selected binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refines⟩
 
 end KProgFormal.Refinement.X86Dispatcher

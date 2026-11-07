@@ -10,19 +10,20 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
 | Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 31/75 | 0/71 |
-| Raw register dispatcher arm composition | 31/75 | 0/71 |
-| Additional partial-model handler families | 36/75 | 0 |
+| Raw register handler refinement | 32/75 | 0/71 |
+| Raw register dispatcher arm composition | 32/75 | 0/71 |
+| Additional partial-model handler families | 33/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
-| Additional wrapping-model dispatcher arm | 1/75 | 0/71 |
-| O2 C-model token-body equality | 32/75 | 0/71 |
+| Control handler model / composed step | 2/75 | 0/71 |
+| O2 C-model token-body equality | 34/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 32 x86 O2 equalities cover 23 direct bodies and nine unchanged generic calls.
-The remaining 36 x86 reference-family handlers have partial model proofs; eight
+The 34 x86 O2 equalities cover23 direct bodies, nine generic calls and two
+branch-handler bodies.
+The remaining33 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -53,14 +54,12 @@ totals with each proof/status-changing publication; T supplies token/link-law
 status and F supplies source-pinned replay inputs. Safety evidence follows the
 universal simulator, token and transformation laws. Historical individual-program
 proof artifacts remain frozen.
-LEA has universal optional-GPR/AUX field decoding, ordinary/readonly-literal/
-address32 dispatcher composition, corrected unit-RCX address binding and direct
-O2 body equality. The generated offset uses defined unsigned accumulation and
-total logical shifts, with62400 LEA-oracle and8401 offset-oracle UBSan cases.
-Production unit-RCX normalization is adopted. The remaining RSP-source signed
-sum has a tested [unsigned correction](lea-stack-wrapping.patch.gz):8192 full
-register/tag/flag/stack cases agree. C owns its coherent production adoption;
-raw-production totals retain31 while the C-model O2 total advances to32.
+LEA's complete raw register-field/frame/dispatcher/token chain now uses the
+published C sourceafba4a089, whose header6b3f31731d9d equals the exact prior
+8192-case RSP wrapping candidate. JCC/JMP have a unified logical-label control
+step, all16 PF-aware conditions and per-token body equality. Production
+label/native-PC, return-target fusion, ABI/definedness and compiled-code
+correspondence retain their universal completion interfaces.
 The added finite CL replay epochs contribute98304 observations and preserve
 the66/75 numeric replay total and each original source identity.
 <!-- COVERAGE END -->
@@ -3233,3 +3232,28 @@ source SHA256 matches that commit’s Git blob; its temporary export is retired.
 The full log, source manifest, CPU trace and exit receipt are archived under
 `full_make_check_af38184ef`. The later JCC/JMP proofs and adopted LEA header
 retain their separate source identities.
+
+### Unified register and branch-handler step
+
+`dispatchStep` and `StepBinding` compose the existing register step with JCC/JMP
+branch handlers. All16 PF-aware conditions use the actual AUX selector; the
+forward/backward emission contract chooses the same mapped target/fallthrough
+PC. Registers, tags, flags and memory retain their input values. The unified
+per-token equality and native-successor theorem cover34 tokens while all42
+existing dispatcher theorem signatures remain available. The logical-label
+model carries explicit native-PC/layout, return-target fusion, ABI/definedness,
+C correspondence and compiler/native-link completion interfaces.
+
+The137-target focused build, default Lean build and12 axiom audits pass with
+the recorded propext/Classical.choice/Quot.sound/Lean.ofReduceBool trust boundary.
+Expanded existing UBSan route checks pass3561cases, retaining every old PF=0
+vector and adding PF=1, full register/tag/flag preservation and JMP directions.
+The full-condition oracle passes1024cases, branch-shape oracle90cases and the
+canonical executable15371condition/width/lane/branch/memory/fault cases.
+
+Published C sourceafba4a089 adopts the exact earlier LEA unsigned-RSP correction:
+headerSHA6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11.
+Its prior8192case execution identity is retained as candidate evidence. LEA now
+contributes to32raw register operations; JCC/JMP add two control-model operations,
+and33 reference-family operations retain partial models. O2 covers34tokens
+(23direct/ninegeneric/twobranch). Coverage318rows/24columns retain every T O4 cell.
