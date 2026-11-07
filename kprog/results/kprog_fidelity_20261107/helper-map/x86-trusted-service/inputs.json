@@ -1,0 +1,136 @@
+{
+  "cases": [
+    {
+      "name": "helper_only_uid_gid",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/helper_only_uid_gid.bpf.o",
+      "source_sha256": "06304e415deb4747e9cfe2fc3e16ddd50b8d10e8b8d9da83263666110359e193",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/helper_only_uid_gid.native.o",
+      "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/helper_only_uid_gid.manifest.json",
+      "expected_result": 0,
+      "expected_retval": 2
+    },
+    {
+      "name": "helper_chain_simple",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/helper_chain_simple.bpf.o",
+      "source_sha256": "afca68a7d691105ec2e52fbe82efa9e23f24c2b84600508ddc0e4d5af49b70ba",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/helper_chain_simple.native.o",
+      "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/helper_chain_simple.manifest.json",
+      "expected_result": 0,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_array_lookup",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_array_lookup.bpf.o",
+      "source_sha256": "281734f6db825580969f3289e6742aa5e6eb4af768c144207e164e8bf735e5ef",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_array_lookup.native.o",
+      "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_array_lookup.manifest.json",
+      "expected_result": 16045690984503050241,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_array_index_packet",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_array_index_packet.bpf.o",
+      "source_sha256": "f563d7387150e2cfe21ba6a448278e940062a03236182f1c986d0042c1d22bc1",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_array_index_packet.native.o",
+      "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_array_index_packet.manifest.json",
+      "expected_result": 16045690984503098046,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_hash_lookup",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_hash_lookup.bpf.o",
+      "source_sha256": "0b0472df40acc11b5509525a4f4d79ccbc0970d7135dc83871db17c9eff4073b",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_hash_lookup.native.o",
+      "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_hash_lookup.manifest.json",
+      "expected_result": 1234605616436508552,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_hash_str_key",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_hash_str_key.bpf.o",
+      "source_sha256": "d32d35077458830db093c6e482f25db47442451eb15ad2e8ba58973a12288f1c",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_hash_str_key.native.o",
+      "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_hash_str_key.manifest.json",
+      "expected_result": 18369614221520256751,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_percpu_array",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_percpu_array.bpf.o",
+      "source_sha256": "65d0f362ba63daaa263122a34fbac376f9eb09accbd632303e050fc1b8bbe743",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_percpu_array.native.o",
+      "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_percpu_array.manifest.json",
+      "expected_result": 18369614221190019774,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_lru_hash_counter",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_lru_hash_counter.bpf.o",
+      "source_sha256": "28dcb0dcaf92ee350671dd4ca5195e7b72e242b6d300674634fda503ebac704d",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_lru_hash_counter.native.o",
+      "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_lru_hash_counter.manifest.json",
+      "expected_result": 1,
+      "expected_retval": 2
+    },
+    {
+      "name": "map_percpu_hash_counter",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/map_percpu_hash_counter.bpf.o",
+      "source_sha256": "317039fe48bd97cb5dd8c6d8bff6fa941b5ebbbeca71bc5d48ab848f26a9f6ca",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_percpu_hash_counter.native.o",
+      "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/map_percpu_hash_counter.manifest.json",
+      "expected_result": 1,
+      "expected_retval": 2
+    },
+    {
+      "name": "combined_helper_map",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/combined_helper_map.bpf.o",
+      "source_sha256": "4fb9427b4ca4d3d48de640b29502677c6a26e29472b174398a41d628b4da99fd",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/combined_helper_map.native.o",
+      "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/combined_helper_map.manifest.json",
+      "expected_result": 0,
+      "expected_retval": 2
+    },
+    {
+      "name": "multi_map_policy",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/multi_map_policy.bpf.o",
+      "source_sha256": "364d25ba9f511030a48a087ee55e11a3979dc0cb929171dfff9686b2dbf1e182",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/multi_map_policy.native.o",
+      "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/multi_map_policy.manifest.json",
+      "expected_result": 1311768465173141112,
+      "expected_retval": 2
+    },
+    {
+      "name": "packet_5tuple_classify",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/packet_5tuple_classify.bpf.o",
+      "source_sha256": "ca21540ff48397e6a049c0ac6a493f5bd3f4b65cb1910696da1ae38b4b95690a",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/packet_5tuple_classify.native.o",
+      "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/packet_5tuple_classify.manifest.json",
+      "expected_result": 3405691582,
+      "expected_retval": 2
+    },
+    {
+      "name": "stats_mixed_helpers",
+      "source_bpf": "/workspaces/repository/kprog/test/build-x86/stats_mixed_helpers.bpf.o",
+      "source_sha256": "51c3c1f478a684ee87725cf9a49f451abd2450d27bb7d6d1e639d07a21704883",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/stats_mixed_helpers.native.o",
+      "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664",
+      "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/x86-trusted-service/stats_mixed_helpers.manifest.json",
+      "expected_result": 1,
+      "expected_retval": 2
+    }
+  ],
+  "producer": "/workspaces/repository/kprog/formal/build/fidelity-trusted/bound-probe",
+  "producer_sha256": "8b6af5925b4d7ea387f1c37f796672ef807d59d32d7d045a813920ff35a349e5"
+}
