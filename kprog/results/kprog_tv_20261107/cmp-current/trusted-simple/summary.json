@@ -1,0 +1,125 @@
+{
+  "ok": true,
+  "program": "simple",
+  "architecture": "x86",
+  "route": "registered native-only common service",
+  "kernel_identity": {
+    "uname": [
+      "Linux",
+      "virtme-ng",
+      "7.0.0-rc2+",
+      "#62 SMP PREEMPT_DYNAMIC Sat Nov  7 11:00:04 UTC 2026",
+      "x86_64"
+    ],
+    "running_notes_sha256": "838ee36c3e4b70bbf07c3bde67b497fb80ec1dc26a67b72074e00707c2fffead",
+    "running_build_ids": [
+      "79824595980857fd636e49a7dc2faf131d2bf21d"
+    ],
+    "vmlinux_build_ids": [
+      "79824595980857fd636e49a7dc2faf131d2bf21d"
+    ],
+    "kernel_sha256": {
+      "kprog/tv/build-kernel-x86/vmlinux": "a20b4a208137335a37fe77aae9769cb4ece24e95eb897741648dd23b38d7e95c",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6"
+    },
+    "layout_profile_sha256": "a25ba781b1dd4896d3a9e2e3f6dd0b5a6bcd65e698a75b8bf279265ce5e4a0e6",
+    "interpretation": "structural XDP layout profile; not a post-conversion instruction capture",
+    "symbols": {
+      "running": {
+        "_text": 18446744072082161664,
+        "its_return_thunk": 18446744072099023008,
+        "__x86_return_thunk": 18446744072099023024
+      },
+      "vmlinux": {
+        "its_return_thunk": 18446744071595706528,
+        "_text": 18446744071578845184,
+        "__x86_return_thunk": 18446744071595706544
+      },
+      "relocation_by_symbol": {
+        "its_return_thunk": 503316480,
+        "__x86_return_thunk": 503316480,
+        "_text": 503316480
+      },
+      "all_three_share_slide": true,
+      "running_symbol_error": null,
+      "remaining": "symbol provenance only; runtime text alternatives and thunk execution remain trusted"
+    },
+    "return_text_before": {
+      "status": "captured",
+      "address": 18446744072099023008,
+      "bytes": 2,
+      "hex": "c3cc",
+      "sha256": "56de62c1837575efee31915828000fde2932e3c34c06b498f648ecaf6bae8d7c"
+    },
+    "running_matches_vmlinux": true,
+    "layout_profile_matches_kernel": true,
+    "loaded_module_build_ids": [
+      "1b173d5c136a766c9283d0bfdd9afd2f11906619"
+    ],
+    "module_file_build_ids": [
+      "1b173d5c136a766c9283d0bfdd9afd2f11906619"
+    ],
+    "loaded_module_matches_file": true,
+    "return_text_after": {
+      "status": "captured",
+      "address": 18446744072099023008,
+      "bytes": 2,
+      "hex": "c3cc",
+      "sha256": "56de62c1837575efee31915828000fde2932e3c34c06b498f648ecaf6bae8d7c"
+    },
+    "return_text_stable": true
+  },
+  "client": {
+    "ok": true,
+    "original_prog_id": 6,
+    "native_prog_id": 11,
+    "retval": 2,
+    "prebuilt_proof": false,
+    "packet_lengths": [
+      14,
+      71,
+      72,
+      128
+    ],
+    "exact_packet_checks": 8
+  },
+  "completion": {
+    "request_id": 1,
+    "source_prog_id": 6,
+    "native_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+    "started": "2026-11-07T18:33:58.275576+00:00",
+    "prog_id": 11,
+    "status": 0,
+    "artifact_archive": "/workspaces/repository/kprog/results/kprog_tv_20261107/cmp-current/trusted-simple/.live-zg1q_97v/requests/1.success.tar.gz",
+    "finished": "2026-11-07T18:34:01.401162+00:00"
+  },
+  "application_inputs": {
+    "kprog/tv/build/trusted-simple-client": "1c1528f39cf6293a953dd3e6f3994c09f265a3ce55b3353af978c3e4cedbf9b0",
+    "micro/programs/build-host-docker-x86/simple.bpf.o": "907540eb75863c27c21777be1584115c3810ed378bcdae102100ab37d7911b03",
+    "kprog/tv/build/simple.native.o": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd"
+  },
+  "capture_sha256": {
+    "checked.snapshot.bin": "49b69252513061ea63f6e03485dfb66cca63a9014601159be7884c8d1f00d0a7",
+    "emitted.bin": "5e72334a6fc9256978ba9bd41ebec274d0f0ddf2d8c7ea5b573f565c18eb8764",
+    "native.bin": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+    "native.relocs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "proof-input.bin": "c79c86913f3e0da8f65758c78aff2330b3319cb02a1b5c3c17398010d59a3de0",
+    "jit.bin": "bc6517907c5cbdcfdf7278706b418e716f57ad7aeebde67b9ecd4d530e89e121",
+    "jit-addresses.bin": "8f27e89bad5e44b3f54648e7d57f346a1d1b86be3d69c491cd33ba6e3892c79a",
+    "jit-lengths.bin": "cfc66af7710b364a82e05ad7018cbd4ae460e47b9cc7ffc047e56476a149bd50",
+    "stub.bin": "258a9cb4ddbc30d5e71cfad08fd08956540a9dd8bb20313e77c67b6afd479530",
+    "load.json": "b5f14245b6777f4b6072167076109e110da8f0537ba0bb877082aeb3393c7f63"
+  },
+  "sources": {
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/libnativeloader/src/native_tv_capture.hpp": "84b0597ac279a40f293451c05273dbd7b57c83289f9380b8fe92ac075d5fe2b6",
+    "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79"
+  },
+  "validated_by_loader": "actual checked binding/generation/context; emission entry inside actual JIT layout; exact native bytes when no relocation",
+  "remaining": "ISA/translation certificate and trust of kernel binding code are not discharged by capture",
+  "archive_sha256": "cf734cc29bfa67762abddb624075d282e1f297cfa9ad5c415bf51e46117abda7"
+}

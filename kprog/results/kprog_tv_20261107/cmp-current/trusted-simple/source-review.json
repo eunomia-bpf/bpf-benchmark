@@ -1,0 +1,32 @@
+{
+  "utc": "2026-11-07T18:36:11.509238+00:00",
+  "status": "current_published_CMP_header_produces_exact_certified_B29_in_fresh_native_only_kernel_capture",
+  "producer_header_commit": "b46de606ccde1165966e8d9fc0d19e881bcfe00e",
+  "source_pins_before": {
+    "kprog/x86/x86_sim_local_bpf.h": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+    "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+    "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+  },
+  "source_pins_after": {
+    "kprog/x86/x86_sim_local_bpf.h": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+    "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+    "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+  },
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "B29_literal_exact": true,
+  "actual_checks": {
+    "exact_packet_checks": 8,
+    "invocation_negative_controls": 14,
+    "materialization_negative_controls": 14
+  },
+  "certificate_scope": "Actual accepted bytes match the existing B29 native effect/prefix and architectural-state lemmas. Native/P/entry/ABI/materialization/kernel context checked by existing capture/checker; current producer source equivalence is not assumed.",
+  "remaining": [
+    "Full basic-block relation/ghost lineage TranslationValidation instance and physical JIT/caller transport; this fresh session has different JIT addresses and does not silently inherit another session JIT proof literals.",
+    "Other micro/application certificates and all29 runtime closure are separate."
+  ]
+}

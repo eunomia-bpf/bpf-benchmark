@@ -1,0 +1,95 @@
+{
+  "binding": {
+    "native_bytes": 60,
+    "verifier_insns": 29,
+    "source_prog_id": 6,
+    "native_prog_id": 11,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072640010398,
+        "jit_offset": 14,
+        "native_offset": 0,
+        "native_size": 60
+      }
+    ],
+    "materialization": {
+      "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+      "entry": "simple_xdp",
+      "entry_offset": 0,
+      "entry_bytes": 61,
+      "payload_bytes": 60,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    }
+  },
+  "invocation_layout": {
+    "jit_base": 18446744072640010384,
+    "native_entry": 18446744072640010398,
+    "native_end": 18446744072640010458,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744072099023008,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 503316480,
+    "runtime_return_text_verified": true,
+    "runtime_thunk_text": "captured stable C3/CC before and after execution"
+  },
+  "rejected_controls": [
+    "entry padding",
+    "restore opcode",
+    "return displacement",
+    "JIT base",
+    "live return symbol",
+    "live text symbol",
+    "compiled return symbol",
+    "symbol relocation receipt",
+    "kernel build ID",
+    "layout profile",
+    "return instruction",
+    "return text address",
+    "return text SHA",
+    "return text instability"
+  ],
+  "materialization_rejected_controls": [
+    "immutable input SHA",
+    "generated copy",
+    "entry offset",
+    "entry code",
+    "terminal RET",
+    "ELF machine",
+    "ELF type",
+    "ABI version",
+    "ABI mask",
+    "generated blob",
+    "data layout",
+    "map patches",
+    "native relocations",
+    "duplicate blob"
+  ],
+  "archive_sha256": "cf734cc29bfa67762abddb624075d282e1f297cfa9ad5c415bf51e46117abda7",
+  "translation_validation": "not established by this structural checker",
+  "remaining": [
+    "canonical LEAVE/whole epilogue transport",
+    "actual kernel caller/context/stack permissions",
+    "canonical return execution composition",
+    "full-state TV of the accepted B"
+  ],
+  "trusted": [
+    "kernel capture/provenance and live symbol reporting",
+    "structural ELF/archive parser",
+    "verifier soundness and canonical ISA semantics when composing the separate certificate"
+  ]
+}

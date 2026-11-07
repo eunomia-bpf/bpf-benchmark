@@ -2280,3 +2280,11 @@ All permission outcomes and exact partial states are covered. Guard views map
 BPC27/28/29 to native payload end, and JA/EXIT preserve every view. All14 state
 audits pass. The four native blocks now have correspondence lemmas; their
 relations/real-load snapshots still need composition into the full TV instance.
+
+`cmp-current/trusted-simple/` captures a fresh P-only load after the published
+CMP flag rewrite and service terminal-drain fix. The actual accepted bytes are
+EXACTLY the certified B29, with unchanged nativeP60;8 exact packet checks and
+14+14 invocation/materialization negatives pass. Five source pins are stable
+before/after and the header matches its published commit. Actual byte equality
+supplies this link; per-session JIT addresses and the remaining whole-TV/caller
+obligations are recorded separately.
