@@ -1,7 +1,7 @@
 {
   "utc": "2026-11-07T22:01:48.620244+00:00",
   "scope": "Private generic ARM readonly label extent and alias identity repair",
-  "production_state": "Candidate source and test binary remain private; full-system common-service control follows.",
+  "production_state": "Shared ARM readonly-label source adopted at 57db4da4387f19e86f79eae6dfa95bfaf024ee3d after the combined crate regression and common-service QEMU control.",
   "input_pins": {
     "utc": "2026-11-07T21:39:38.844940+00:00",
     "source_base": "kprog/x86/native_lab/native_link",
@@ -329,5 +329,14 @@
     }
   },
   "candidate_patch_gzip_sha256": "ef43e335f72ca86cb1085eab48f917ad731dbf18502d50b9eaf44b898057f603",
-  "inputs_archive_sha256": "315163e1e9b9dff2df0d70360f0a077f26bca5db5aa43c19b4a52597e890281e"
+  "inputs_archive_sha256": "315163e1e9b9dff2df0d70360f0a077f26bca5db5aa43c19b4a52597e890281e",
+  "source_integration": {
+    "commit": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+    "crate_tests_passed": 88,
+    "host_ok": true,
+    "guest_exit": 0,
+    "native_retval": 2,
+    "binary_sha256": "a437397a861322ae476be40a059268ed20006bf21cfb0b6403905f7c827a28f8",
+    "runtime_summary": "../arm-runtime-adoption/replay/trusted-arm64-service-result/summary.json"
+  }
 }

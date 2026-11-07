@@ -70,6 +70,15 @@ provides CODE-base input, and native-link remaps local ADR targets through its
 final code layout. Their address/layout preservation bridge remains part of the
 universal O1/O4 work alongside the dispatcher relation.
 
+The shared native-link readonly-data resolver gives proof payloads and native
+layout records the same checked ELF extent. Typed objects retain declared
+bounds; zero-sized labels retain the section suffix from their original symbol
+base. Aliases at the same section/base share an identity. The [coherent ARM
+service integration](../../corpus/results/kprog_arm64_app_coverage_20261107/arm-runtime-adoption/README.md)
+records the combined crate regression and QEMU generation-bound control, with
+native retval2 and matching kernel-owned request identities. Its exact loader,
+client, DSO and linker build inputs accompany the runtime archive.
+
 ## Smoke
 
 ```bash

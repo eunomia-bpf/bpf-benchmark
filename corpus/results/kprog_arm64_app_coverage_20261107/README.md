@@ -59,3 +59,8 @@ Katran's actual application restart exits 0 in the guest, QEMU and application. 
 ## Finite indirect dispatch in application runs
 
 The [whole-application source census](indirect-dispatch/README.md) reconciles the original common-service artifacts across all six closed first-pass cohorts. Katran's bound artifact contains 82 singleton indirect helper-call sites with actual register reads, CODE/helper partitioning and rejecting switch defaults; its finite local-return sets have sizes 0, 1 and 2. BCC direct helper calls, OTel's generated-source loader rejection, and the zero-request Cilium/Tetragon startup cohorts retain their separate counts. Tracee has closed its first-pass runtime; subsequent application replays consume the shared mechanism repairs. These source-site observations accompany the original workload counters and universal safety theorem work.
+
+
+## Coherent ARM service build
+
+[The shared readonly-label source integration](arm-runtime-adoption/README.md), published at 57db4da4387f19e86f79eae6dfa95bfaf024ee3d, records 88 crate regressions passing and a complete common-service QEMU control: guest0, hosttrue, native retval2, fresh generated/bound request and matching native identities. The captured ARM loader/client/DSO build incorporates kernel-owned PROG_ARRAY identity tracking; the linker combines the current shared x86 and ARM readonly-label sources. Active application epochs retain their original executable bytes, and subsequent startup wiring selects the captured new build. Six-application execution and universal safety theorem work continue.
