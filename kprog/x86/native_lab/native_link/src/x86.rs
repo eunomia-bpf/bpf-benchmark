@@ -1301,11 +1301,45 @@ pub(super) fn rewrite_x86(
         None
     };
 
+    let entry_bytes = read_symbol_bytes(elf, entry)?;
+    let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&entry_bytes, entry.address, 12)?
+        || helper_call_sites.iter().any(|(key, name)| {
+            key.0 == entry.section_index && key.1 == entry.address && name == "bpf_tail_call"
+        });
+    let proof_return_jmp_target = if !proof_mode && proof_input {
+        proof_entry_end_target
+    } else {
+        None
+    };
+    let mut planned_entry_abi = plan_x86_entry_abi_strip(
+        &entry_bytes, entry.address, entry_has_tail_call, proof_return_jmp_target,
+        (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
+    )?;
+    let mut required_mask = planned_entry_abi.callee_saved_mask;
+    for sym in included {
+        let bytes = read_symbol_bytes(elf, sym)?;
+        let is_entry = symbol_key(sym) == symbol_key(entry);
+        let mut instructions = Vec::new();
+        for mut insn in Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE) {
+            if insn.is_invalid() {
+                bail!("invalid x86 ABI instruction in {} at {:#x}", sym.name, insn.ip());
+            }
+            if is_entry && planned_entry_abi.drop_local_ips.contains(&(insn.ip()-sym.address)) {
+                continue;
+            }
+            if is_entry {
+                remap_x86_entry_registers(&mut insn, &planned_entry_abi.register_renames)?;
+            }
+            instructions.push(insn);
+        }
+        required_mask |= x86_observed_callee_saved_writes(&instructions)?;
+    }
+    let callee_saved_mask = x86_checked_callee_saved_mask(proof_callee_saved_mask, required_mask)?;
+
     let mut sym_global_offset: HashMap<SymbolKey, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
-    let mut callee_saved_mask: u8 = proof_callee_saved_mask.unwrap_or(0);
     // For each `bpf_map_lookup_elem` call site encountered in
     // reachable-symbol byte order, record (symbol_addr, local_call_offset)
     // -> selected spec. Filled during the decode loop; consumed by
@@ -1327,28 +1361,10 @@ pub(super) fn rewrite_x86(
         let is_entry = symbol_key(sym) == symbol_key(entry);
         let bytes = read_symbol_bytes(elf, sym)?;
         let entry_abi_strip = if is_entry {
-            let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&bytes, sym.address, 12)?
-                || helper_call_sites.iter().any(|(key, name)| {
-                    key.0 == sym.section_index && key.1 == sym.address && name == "bpf_tail_call"
-                });
-            let proof_return_jmp_target = if !proof_mode && proof_input {
-                proof_entry_end_target
-            } else {
-                None
-            };
-            plan_x86_entry_abi_strip(
-                &bytes,
-                sym.address,
-                entry_has_tail_call,
-                proof_return_jmp_target,
-                (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
-            )?
+            std::mem::take(&mut planned_entry_abi)
         } else {
             X86EntryAbiStrip::default()
         };
-        if is_entry && proof_callee_saved_mask.is_none() {
-            callee_saved_mask = entry_abi_strip.callee_saved_mask;
-        }
         // Decode at the symbol's original vaddr so insn.near_branch_target()
         // is meaningful in the ELF address space and we can identify
         // inter-symbol call targets. Below we re-anchor each instruction
@@ -1922,6 +1938,10 @@ pub(super) fn rewrite_x86(
         // rewrites change instruction sizes. If it hits an edge case at the
         // i8 distance boundary, fall back to a fixed near-branch layout with
         // manually remapped local targets.
+        // Include synthetic instructions too. A rewrite must never add a
+        // host nonvolatile clobber after tail-call cleanup has been planned.
+        x86_checked_callee_saved_mask(Some(callee_saved_mask),
+            x86_observed_callee_saved_writes(&local)?)?;
         let encoded = encode_x86_local_block(&sym.name, sym.size, &local, &insn_local_ip)?;
 
         let sym_base = blob.len();
@@ -3350,6 +3370,56 @@ fn x86_entry_return_terminator(
     }
     let target = insn.near_branch_target();
     target == symbol_end || Some(target) == proof_return_jmp_target
+}
+
+/// Actual writes, including subregisters, implicit and conditional writes,
+/// determine host preservation. A PUSH/POP plan alone misses bare functions.
+fn x86_observed_callee_saved_writes(instructions: &[Instruction]) -> Result<u8> {
+    fn observe(insn: &Instruction, factory: &mut InstructionInfoFactory, mask: &mut u8) {
+        for used in factory.info(insn).used_registers() {
+            if matches!(used.access(), OpAccess::Write | OpAccess::CondWrite |
+                OpAccess::ReadWrite | OpAccess::ReadCondWrite) {
+                if let Some(bit) = x86_gpr64_family(used.register())
+                    .and_then(x86_entry_callee_saved_mask_bit) {
+                    *mask |= bit;
+                }
+            }
+        }
+    }
+    fn observe_bytes(bytes: &[u8], factory: &mut InstructionInfoFactory, mask: &mut u8) -> Result<()> {
+        for insn in Decoder::new(64, bytes, DecoderOptions::NONE) {
+            if insn.is_invalid() {
+                bail!("invalid synthetic x86 ABI instruction");
+            }
+            observe(&insn, factory, mask);
+        }
+        Ok(())
+    }
+    let mut factory = InstructionInfoFactory::new();
+    let mut mask = 0;
+    let mut raw = Vec::new();
+    for insn in instructions {
+        if insn.code() == Code::DeclareByte {
+            for index in 0..insn.declare_data_len() {
+                raw.push(insn.get_declare_byte_value(index));
+            }
+        } else {
+            observe_bytes(&raw, &mut factory, &mut mask)?;
+            raw.clear();
+            observe(insn, &mut factory, &mut mask);
+        }
+    }
+    observe_bytes(&raw, &mut factory, &mut mask)?;
+    Ok(mask)
+}
+
+fn x86_checked_callee_saved_mask(declared: Option<u8>, required: u8) -> Result<u8> {
+    match declared {
+        Some(mask) if required & !mask != 0 =>
+            bail!("x86 .native_link_abi callee_saved_mask {mask:#x} omits native writes {required:#x}"),
+        Some(mask) => Ok(mask),
+        None => Ok(required),
+    }
 }
 
 fn read_x86_proof_callee_saved_mask(elf: &object::File) -> Result<u8> {
@@ -4857,6 +4927,36 @@ mod tests {
         );
         Ok(())
     }
+    #[test]
+    fn native_callee_saved_writes_include_aliases_implicit_and_synthetic_code() -> Result<()> {
+        let cases: &[(&str, &[u8], u8)] = &[
+            ("bare RBX", &[0x48,0xbb,0xf0,0xde,0xbc,0x9a,0x78,0x56,0x34,0x12], 1),
+            ("BL", &[0xb3,1], 1), ("BH", &[0xb7,1], 1),
+            ("BX", &[0x66,0xbb,1,0], 1), ("EBX", &[0xbb,1,0,0,0], 1),
+            ("R13D", &[0x41,0xbd,1,0,0,0], 2),
+            ("R14W", &[0x66,0x41,0xbe,1,0], 4),
+            ("R15B", &[0x41,0xb7,1], 8),
+            ("conditional RBX", &[0x48,0x0f,0x44,0xd8], 1),
+            ("read-write RBX", &[0x48,0x01,0xc3], 1),
+            ("implicit CPUID RBX", &[0x0f,0xa2], 1),
+            ("read-only RBX", &[0x48,0x89,0xd8], 0),
+            ("memory via RBX", &[0x48,0x89,0x03], 0),
+            ("caller-save EAX", &[0xb8,2,0,0,0], 0),
+        ];
+        for (name, bytes, expected) in cases {
+            let decoded = decode_x86(bytes)?;
+            assert_eq!(x86_observed_callee_saved_writes(&decoded)?, *expected, "{name}");
+            // Raw builder chunks may end in the middle of an instruction.
+            let chunks = bytes.chunks(2).map(declared_bytes).collect::<Result<Vec<_>>>()?;
+            assert_eq!(x86_observed_callee_saved_writes(&chunks)?, *expected, "raw {name}");
+        }
+        assert_eq!(x86_checked_callee_saved_mask(None, 15)?, 15);
+        assert_eq!(x86_checked_callee_saved_mask(Some(15), 1)?, 15);
+        assert!(x86_checked_callee_saved_mask(Some(0), 1).is_err());
+        assert!(x86_checked_callee_saved_mask(Some(1), 3).is_err());
+        Ok(())
+    }
+
 }
 
 fn disasm(bytes: &[u8]) {

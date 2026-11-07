@@ -1,0 +1,14 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
+output=$(mktemp -d build/x86-abi-kernel.XXXXXX) && \
+	python3 test_x86_abi_kernel.py run $output --probe build/x86-abi-bound-probe && \
+	printf '%s\n' "$output" > build/x86-abi-kernel.latest
+bare_rbx: actual bound ABI=0x1 JIT preservation rbx; native execution packet0/retval2 PASS
+bare_r13: actual bound ABI=0x2 JIT preservation r13; native execution packet0/retval2 PASS
+bare_r14: actual bound ABI=0x4 JIT preservation r14; native execution packet0/retval2 PASS
+bare_r15: actual bound ABI=0x8 JIT preservation r15; native execution packet0/retval2 PASS
+all_four: actual bound ABI=0xf JIT preservation rbx,r13,r14,r15; native execution packet0/retval2 PASS
+caller_saved: actual bound ABI=0x0 JIT preservation ; native execution packet0/retval2 PASS
+actual generation-bound native ABI:6 load/inspection/execution controls PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'

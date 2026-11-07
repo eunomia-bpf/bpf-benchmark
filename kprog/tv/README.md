@@ -767,3 +767,15 @@ other architectural fields, memory and ordered effects remain identical.
 `make simple-pc-relocation-check` checks these theorems with their dependencies;
 both use only propext/Quot.sound. Whole-execution transport to the captured RX
 entry and the actual initial-state/profile bridge remain to compose.
+
+Native-link's x86 inline ABI mask now comes from actual native writes over all
+reachable symbols, after entry stripping/renaming, before tail-call lowering.
+This fixes bare RBX/R13/R14/R15 writes that had no stripped save prologue.
+Subregisters, implicit/conditional writes and raw synthetic instruction chunks
+are included; a .proof.o declaring too few save bits is rejected before loading.
+The existing binding carries the resulting mask through verifier and JIT use.
+`x86-native-abi-check` exercises real ELF producer/kernel metadata; the private
+KVM regression inspects actual JIT save/restore before safe positive execution.
+79 Rust tests,15 ELF cases/12 metadata negatives and6 KVM controls pass; evidence
+is results/kprog_tv_20261107/x86-abi-*. This increment covers the existing four-bit
+preservation ABI; reserved RBP/R12/frame and whole-program TV remain separate.

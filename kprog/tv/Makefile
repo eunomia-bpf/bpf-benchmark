@@ -616,3 +616,33 @@ simple-emitted-negative-check:
 .PHONY: simple-pc-relocation-check
 simple-pc-relocation-check: checked-first-block-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimplePCRelocation.olean ../tv/SimplePCRelocation.lean
+
+X86_ABI_NATIVE_LINK ?= ../x86/native_lab/native_link/target/release/native-link
+.PHONY: x86-native-abi-check
+x86-native-abi-check:
+	python3 test_x86_native_abi.py $(X86_ABI_NATIVE_LINK) build/x86-native-abi
+
+.PHONY: x86-native-abi-proof-build x86-native-abi-kernel-check guest-x86-native-abi-check
+x86-native-abi-proof-build:
+	python3 test_x86_abi_kernel.py build build/x86-abi-proof
+
+build/x86-abi-bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/build-tv-binding/libnative_loader.a
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
+		-DNATIVE_LINK_PATH='"$(abspath build/native-link-abi)"' \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
+
+x86-native-abi-kernel-check: build/x86-abi-bound-probe
+	$(MAKE) module-check ARCH=x86 KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 16-19 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-x86-native-abi-check'
+
+guest-x86-native-abi-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
+	output=$$(mktemp -d build/x86-abi-kernel.XXXXXX) && \
+		python3 test_x86_abi_kernel.py run $$output --probe build/x86-abi-bound-probe && \
+		printf '%s\n' "$$output" > build/x86-abi-kernel.latest

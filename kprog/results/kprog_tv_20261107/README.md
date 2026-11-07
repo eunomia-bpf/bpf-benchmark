@@ -168,3 +168,52 @@ initial finite-index/memory-match/range proof-development errors are retained in
 pc-relocation-inputs.tar.gz. This is instruction/fetch transport. Lifting whole
 executions and the per-load prefix safety theorem to actual RX addresses, plus
 the actual initial-state/CPU-profile bridge, remains active.
+
+Priority2: native callee-save ABI derivation and bound execution
+--------------------------------------------------------------
+
+F's actual load-only finding was `mov rbx,0x123456789abcdef0; mov eax,2; ret`
+with zero ABI preservation metadata. Entry prologue stripping had been the only
+source of the mask, so a bare body escaped host preservation. Native-link now
+plans entry stripping once, collects actual writes over ALL reachable native
+symbols (after entry register renaming/drop decisions), and fixes the mask
+BEFORE tail-call cleanup is emitted. It accounts for subregister, implicit,
+read/write and conditional writes to the existing four BPF-backed nonvolatile
+registers RBX/R13/R14/R15. Rewritten instruction streams, including contiguous
+raw builder chunks, are checked against that same mask. Kernel-mode .proof.o
+metadata must cover the actual requirements; clearing its mask cannot override
+them. The existing verifier/JIT binding checks then carry the same exact mask.
+
+The final frozen HEAD+T-only source includes F's published LEA repair and excludes
+C's unrelated ROOT partial-write WIP. Its source blob was checked byte-for-byte
+against the private-index publication candidate. `x86-abi-unit.log`:79 Rust tests
+pass. `x86-abi-elf.log`:15 real ELF cases pass,12 cleared metadata variants reject,
+and declared supersets remain accepted. `x86-abi-kernel.log`: all6 actual KVM
+controls load through the production manifest/proof/binding path. The actual
+JIT is inspected for PUSH before and POP after the full native body, before
+running safe positive controls; all6 then return2/packet0.
+
+| native body | actual required mask | observed JIT preservation | result |
+| --- | --- | --- | --- |
+| bare RBX write | 0x1 | RBX | PASS |
+| bare R13 write | 0x2 | R13 | PASS |
+| bare R14 write | 0x4 | R14 | PASS |
+| bare R15 write | 0x8 | R15 | PASS |
+| all four | 0xf | RBX,R13,R14,R15 | PASS |
+| caller-save EAX control | 0 | no requested nonvolatile save | PASS |
+
+No unsafe old-mask native program was executed. The first KVM attempt lacked
+an explicit source_btf_symbol selector and stopped at manifest selection; the
+correct explicit selector was used for final tests. Initial private-source
+syntax/test placement errors and the earlier pre-LEA-source receipts are retained
+in x86-abi-inputs.tar.gz. Each final runtime record retains actual generations,
+checked snapshots/native/JIT bytes and disassembly. Source/binary pins are
+adjacent. The linker is a private debug build; this is correctness evidence,
+not performance data. Kernel/image defaults and native ISA semantics are unchanged.
+
+This closes the reported bare-write derivation hole for the existing four-bit
+preservation contract. RBP/R12 retain their existing reserved/native frame ABI;
+this increment does not prove that contract or replace translation validation.
+The accepted B/native correspondence, SP flags and actual entry/CPU-profile
+obligations remain separate. The producer/iced decoding and kernel binding are
+trusted until the native-only loader and canonical TV discharge those layers.

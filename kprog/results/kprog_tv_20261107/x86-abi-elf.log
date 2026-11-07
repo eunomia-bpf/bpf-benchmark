@@ -1,0 +1,19 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 test_x86_native_abi.py /workspaces/repository/kprog/tv/build/native-link-abi build/x86-native-abi
+bare_rbx: proof/kernel ABI=0x1; cleared metadata REJECTED
+bare_ebx: proof/kernel ABI=0x1; cleared metadata REJECTED
+bare_bl: proof/kernel ABI=0x1; cleared metadata REJECTED
+bare_bh: proof/kernel ABI=0x1; cleared metadata REJECTED
+bare_bx: proof/kernel ABI=0x1; cleared metadata REJECTED
+bare_r13: proof/kernel ABI=0x2; cleared metadata REJECTED
+bare_r14: proof/kernel ABI=0x4; cleared metadata REJECTED
+bare_r15: proof/kernel ABI=0x8; cleared metadata REJECTED
+all_four: proof/kernel ABI=0xf; cleared metadata REJECTED
+conditional_rbx: proof/kernel ABI=0x1; cleared metadata REJECTED
+implicit_cpuid: proof/kernel ABI=0x1; cleared metadata REJECTED
+read_rbx: proof/kernel ABI=0x0; read-only/control retains zero
+caller_saved: proof/kernel ABI=0x0; read-only/control retains zero
+stripped_save: proof/kernel ABI=0x1; cleared metadata REJECTED
+reachable callee: ABI=0x2 PASS
+actual ELF native ABI preservation:15 cases PASS;12 cleared metadata REJECTED
+make: Leaving directory '/workspaces/repository/kprog/tv'
