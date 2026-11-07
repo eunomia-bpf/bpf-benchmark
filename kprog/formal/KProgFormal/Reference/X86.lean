@@ -706,10 +706,37 @@ The low accumulator and all flags are preserved. -/
 def signHighValue (width : CmovWidth) (source : Word) : Word :=
   if (source.setWidth width.bits).msb then BitVec.ofNat 64 (2 ^ width.bits - 1) else 0
 
+/-- Legacy128-bit SSE moves in the enabled-SSE profile. MOVAPS checks its
+16-byte alignment before a mapped-memory access; MOVUPS has no such constraint.
+The guest event is the complete architectural access, not private scalar lanes. -/
+def xmm0Bytes (value : BitVec 128) : List Byte :=
+  (List.range 16).map (fun i => (value >>> (8 * i)).setWidth 8)
+
+def xmm0Store (m : Memory) (address : Word) (value : BitVec 128) : Memory :=
+  { m with
+    value := fun a => if (a - address).toNat < 16 then
+      (value >>> (8 * (a - address).toNat)).setWidth 8 else m.value a
+    initialized := fun a => if (a - address).toNat < 16 then true else m.initialized a }
+
+def xmm0Step (store aligned : Bool) (address nextPc : Word) (s : State) : Transition State :=
+  if aligned && address &&& 15 != 0 then
+    ⟨s, [.fault (.alignment address 16)], some (.alignment address 16)⟩
+  else if store then
+    if permitted s.memory.writable address 16 then
+      ⟨{ s with memory := xmm0Store s.memory address s.xmm0, pc := nextPc },
+        [.memory .write address (xmm0Bytes s.xmm0) true], none⟩
+    else ⟨s, [.fault (.write address 16)], some (.write address 16)⟩
+  else
+    if permitted s.memory.readable address 16 then
+      ⟨{ s with xmm0 := littleEndian 128 (bytesAt s.memory address 16), pc := nextPc },
+        [.memory .read address (bytesAt s.memory address 16) (initializedAt s.memory address 16)], none⟩
+    else ⟨s, [.fault (.read address 16)], some (.read address 16)⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | xmm0Move (store aligned : Bool) (address nextPc : Word)
   | doubleShift (width : CmovWidth) (left : Bool) (dst source : Register) (count nextPc : Word)
   | mulx (width : BzhiWidth) (high low : Register) (source : Source) (nextPc : Word)
   | multiply (width : CmovWidth) (dst : Register) (source : Source) (immediate : Option (BitVec 32)) (nextPc : Word)
@@ -750,7 +777,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -760,6 +787,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .xmm0Move store aligned address nextPc => xmm0Step store aligned address nextPc s
   | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
   | .mulx width high low source nextPc => mulxStep width high low source nextPc s
   | .multiply width dst source immediate nextPc => multiplyStep width dst source immediate nextPc s
@@ -857,6 +885,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .xmm0Move .. => 0xffffffffffffffff
   | .doubleShift width _ _ _ count _ =>
       let n := (doubleShiftCount count width.bits).toNat
       if n = 0 then 0xffffffffffffffff else if width.bits < n then 0xfffffffffffff72a
@@ -1292,6 +1321,15 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)
   if first ≠ 0x0f then throw "expected two-byte native opcode"
+  if opcode = 0x10 ∨ opcode = 0x11 ∨ opcode = 0x28 ∨ opcode = 0x29 then
+    if p.operand16 ∨ p.mandatoryPrefix ≠ 0 then throw "XMM0 reference requires legacy MOVUPS/MOVAPS"
+    let modrm ← byteAt bytes (count + 2)
+    if (modrm / 8) % 8 + 8 * ((p.rex / 4) % 2) ≠ 0 then throw "move requires XMM0"
+    let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+    let address ← match source with
+      | .memory a => pure a
+      | .register _ => throw "XMM0 move requires a memory operand"
+    return .xmm0Move (opcode == 0x11 || opcode == 0x29) (opcode == 0x28 || opcode == 0x29) address nextPc
   if opcode = 0xa4 ∨ opcode = 0xa5 ∨ opcode = 0xac ∨ opcode = 0xad then
     let modrm ← byteAt bytes (count + 2)
     if modrm / 64 ≠ 3 then throw "double-shift reference requires a register destination"

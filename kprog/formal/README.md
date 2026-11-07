@@ -32,9 +32,12 @@ accesses, routing tables, and selected whole-state handler refinements.
 slices to those same ISA steps, retaining registers, flags, vectors, memory,
 PC and ordered effects/faults. This includes scalar/logical/unary operations,
 width/sign extensions, signed and unsigned multiplication, conditional operations, shifts, bit operations,
-stack transfers, LEA, DIV, register XCHG, classic ROR, and the ARM arithmetic, vector,
-memory, exclusive and control families represented there. Individual module
-statements define their exact scope. Dispatcher coverage/exclusivity is
+stack transfers, LEA, DIV, register XCHG, classic ROR, XMM0 successful-access
+lane projections, and the ARM arithmetic, vector, memory, exclusive and control
+families represented there. XMM0 MOVUPS/MOVAPS references include 16-byte
+permission and alignment faults; the two-lane C projection currently requires
+successful, suitably aligned access. Individual module statements define their
+exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining
 handler lifts and their dispatcher composition is ongoing work.
 
