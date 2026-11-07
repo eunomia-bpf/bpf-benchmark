@@ -1255,3 +1255,12 @@ identical except the shared VectorMemory import. No placeholders, new tests,
 input filtering, ISA/runtime/generator/oracle/paper changes. Original compiler
 warnings remain visible. Exact45d's full pass predates CCMP/select and these
 memory-field bridges.
+
+Exact `45d56a97a2f3313a87d78cc82ca0e41cd7144962` completed the full
+`make -C kprog/formal check` with exit **0**. This includes the byte-field
+BITFIELD, arithmetic/logical flags and ORN dispatcher compositions plus all
+preceding Lean, contract, executable-reference/wire/compiler and C semantic
+checks. The immutable source/cache export was deleted automatically; compressed
+CALL CPU observations retain this440-case run. CCMP/select and memory-base/
+width bridges are later increments and are not included in this full pass.
+The complete77/72 theorem and O2/O4 transport remain open.
