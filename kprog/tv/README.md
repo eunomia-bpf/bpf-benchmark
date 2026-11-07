@@ -1250,6 +1250,38 @@ accesses retained. No PC, successor or trace element is forced or erased.
 The captured literal/binding checks and the complete supported Make target
 remain in place. This composition needs no runtime/wire/interface change.
 It closes the common-environment gap between the two proved subpaths; the
-complete private40-byte footprint projection and native register/flags/guard,
-whole-program, fault and ABI/materialization refinement are still separate
-obligations. Scope/compatibility/axiom audit: `trusted-simple-environment.json`.
+native register/flags/guard, whole-program, fault and ABI/materialization
+refinement remain separate obligations. Scope/compatibility/axiom audit:
+`trusted-simple-environment.json`. The precise initializer footprint and its
+projection are composed below.
+
+
+The actual x86 simple initializer's private footprint
+
+`initializationPrivateByte` covers exactly the 36 bytes from `r10-40` through
+`r10-5`, including architectural address wraparound. The last four bytes of
+the 40-byte stack layout remain outside this footprint;
+`initialization_untouched_top` proves this. `initialization_memory_agrees`
+derives unchanged guest values, initialization bits and permissions from all
+five actual stores. It makes no assumption about the resulting memory.
+
+`initializationProjectEvent` hides only complete accesses to the four actual
+8-byte slots and the actual 4-byte slot. `initialization_erased_private`
+proves that every byte of every hidden event is inside the footprint.
+Atomic, helper, fault and exclusive effects are always retained.
+`initialization_event_projection` proves that the nine actual ordered events
+reduce to exactly the two original guest reads; both read events are derived
+from the successful reference-memory reads and kept under explicit guest
+address disjointness premises. The execution itself retains all nine events.
+
+`initialized_prefix_correspondence` now composes the byte-decoded native
+bytes0..7 and accepted Bpc0..10 under one explicit environment, their complete
+resulting states, native RCX/BPF r2 and native RDX/BPF r3 correspondence,
+precise guest-memory agreement, and the ordered event projection. It uses
+the same canonical ISA/memory semantics and existing actual execution
+witnesses. This is still a successful two-native-load prefix: later native
+register/flags/CMP/Jcc, guards, stores, exits, faults, ABI/platform transport
+and immutable-P/materialized-artifact transport remain open. It is not a
+whole-basic-block or whole-program certificate. The supported Make target
+and bound-artifact mismatch checks remain unchanged; see
+`trusted-simple-privacy.json` for hashes, premises and the axiom audit.

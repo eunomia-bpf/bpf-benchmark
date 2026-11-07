@@ -1,0 +1,153 @@
+{
+  "status": "actual_initializer_prefix_refinement_and_precise_private_projection_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T10:39:55.265445+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.initialized_prefix_correspondence",
+  "covered_native_bytes": [
+    0,
+    7
+  ],
+  "covered_B_pcs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "native_successor_pc": 7,
+  "B_successor_pc": 11,
+  "private_footprint": {
+    "layout_bytes": 40,
+    "accessed_bytes": 36,
+    "from": "r10-40",
+    "through": "r10-5",
+    "untouched": "r10-4 through r10-1",
+    "wraparound": "included"
+  },
+  "ordered_trace": {
+    "actual_B_memory_events": 9,
+    "guest_reads_retained": 2,
+    "private_writes_projected": 5,
+    "private_reads_projected": 2,
+    "raw_execution": "all nine events retained",
+    "projection": "only exact actual slot addresses AND widths; every erased byte proved private",
+    "always_retained": [
+      "atomic",
+      "helper",
+      "fault",
+      "exclusive"
+    ]
+  },
+  "state_claims": [
+    "complete actual native and B successor states",
+    "native RCX corresponds to BPF r2; native RDX corresponds to BPF r3",
+    "all memory values and initialization bits outside precise footprint unchanged",
+    "readable and writable permissions unchanged globally"
+  ],
+  "premises": [
+    "entry PC0 and active proof",
+    "actual successful context reads",
+    "byte-disjoint second context read and actual private footprint",
+    "actual stack write/read permissions at captured widths",
+    "explicit env.nativeInput stackPointer witness",
+    "kernel XDP virtual/physical context conversion as explicit platform obligation"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical to HEAD baseline before increment",
+    "old_declarations_sha256": "fffdc0a76b4f54a6aadd16bd881e9554551b32850a899b27ad8df76845859b5b",
+    "runtime_wire_API_metadata_binding_rejection_contracts": "unchanged",
+    "new_ISA_semantics": false
+  },
+  "remaining": [
+    "native MOV RSI/XOR/CMP/Jcc and all successors",
+    "later guards/stores/exit/fault behavior",
+    "whole-basic-block/program architectural-state and effect refinement",
+    "ABI/nativeInput/kernel platform transport",
+    "immutable P to materialized emitted native artifact"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical reference ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms plus native proof reduction Lean.ofReduceBool in BV/private proofs"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "log_sha256": "b1addfb7646946e8e52397c1c7ea8b53609cbcda054b1c1a1dce54f397931e85",
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.initialization_slot_covers": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_slot_bytes": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_memory_agrees": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_erased_private": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_guest_event_retained": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_event_projection": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_spill_private": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_untouched_top": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_prefix_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "8446ec76ab836a481db02e8f54832f4bfce014320b678046c37488db01ccf5fb",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and removed after publication; shared incremental caches and STOP retained"
+}

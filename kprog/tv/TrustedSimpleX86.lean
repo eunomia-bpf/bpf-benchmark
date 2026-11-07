@@ -579,6 +579,208 @@ theorem initialized_complete_prefix (env : BPF.Environment) (p : BPF.State)
     (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using read32) pointerRead
   simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using entry.append body
 
+
+/-- Exactly the 36 initialized bytes of the captured 40-byte stack layout.
+The untouched four bytes immediately below r10 are not hidden. -/
+def initializationPrivateByte (frame address : Word) : Prop :=
+  (address - (frame-(40#64))).toNat < 36
+
+/-- Only the actual complete compiler slots, with their actual access sizes. -/
+def initializationSlot (frame address : Word) (count : Nat) : Prop :=
+  (address = frame-(40#64) ∧ count = 8) ∨
+  (address = frame-(32#64) ∧ count = 8) ∨
+  (address = frame-(24#64) ∧ count = 8) ∨
+  (address = frame-(16#64) ∧ count = 8) ∨
+  (address = frame-(8#64) ∧ count = 4)
+
+theorem initialization_slot_covers (frame base address : Word) (count : Nat)
+    (slot : initializationSlot frame base count)
+    (inside : (address-base).toNat < count) : initializationPrivateByte frame address := by
+  rcases slot with h | h | h | h | h
+  all_goals
+    rcases h with ⟨rfl,rfl⟩
+    first
+    | change address-(frame-_) < (8#64) at inside
+    | change address-(frame-_) < (4#64) at inside
+    change address-(frame-(40#64)) < (36#64)
+    unfold Word at *
+    bv_decide
+
+theorem initialization_slot_bytes (frame base : Word) (count : Nat)
+    (slot : initializationSlot frame base count) (i : Nat) (small : i < count) :
+    initializationPrivateByte frame (base+BitVec.ofNat 64 i) := by
+  apply initialization_slot_covers frame base _ count slot
+  have bounded : count ≤ 8 := by rcases slot with h | h | h | h | h <;> omega
+  have fits : i < 2^64 := by omega
+  simpa only [PrivateSpills.plus_index_sub, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits] using small
+
+def initializationAgreesOutside (frame : Word) (first second : Memory) : Prop :=
+  first.readable = second.readable ∧ first.writable = second.writable ∧
+    ∀ address, ¬ initializationPrivateByte frame address →
+      first.value address = second.value address ∧
+      first.initialized address = second.initialized address
+
+/-- Actual stores preserve permissions, values and initialization outside the
+precise footprint, even when the stack layout wraps around address zero. -/
+theorem initialization_memory_agrees (p : BPF.State) (pointer limit stack : Word) :
+    initializationAgreesOutside (p.regs 10) p.memory
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack).memory := by
+  refine ⟨rfl,rfl,?_⟩
+  intro address outside
+  have apart (base : Word) (count : Nat) (slot : initializationSlot (p.regs 10) base count) :
+      ¬ (address-base).toNat < count :=
+    fun inside => outside (initialization_slot_covers _ _ _ _ slot inside)
+  have a40 := apart (p.regs 10-(40#64)) 8 (Or.inl ⟨rfl,rfl⟩)
+  have a32 := apart (p.regs 10-(32#64)) 8 (Or.inr (Or.inl ⟨rfl,rfl⟩))
+  have a24 := apart (p.regs 10-(24#64)) 8 (Or.inr (Or.inr (Or.inl ⟨rfl,rfl⟩)))
+  have a16 := apart (p.regs 10-(16#64)) 8 (Or.inr (Or.inr (Or.inr (Or.inl ⟨rfl,rfl⟩))))
+  have a8 := apart (p.regs 10-(8#64)) 4 (Or.inr (Or.inr (Or.inr (Or.inr ⟨rfl,rfl⟩))))
+  simp +decide only [initializationFinal,initializedMemory,valueMemory,proofPrefixFinal,
+    afterSpill,BPF.setReg,ite_false]
+  simp only [storeMemory,a40,a32,a24,a16,a8,ite_false]
+  trivial
+
+instance (frame address : Word) (count : Nat) : Decidable (initializationSlot frame address count) :=
+  inferInstanceAs (Decidable ((_ ∧ _) ∨ (_ ∧ _) ∨ (_ ∧ _) ∨ (_ ∧ _) ∨ (_ ∧ _)))
+
+def initializationProjectEvent (frame : Word) : Event → Option Event
+  | event@(.memory .read address bytes _) =>
+      if initializationSlot frame address bytes.length then none else some event
+  | event@(.memory .write address bytes _) =>
+      if initializationSlot frame address bytes.length then none else some event
+  | event => some event
+
+theorem initialization_erased_private (frame : Word) (event : Event)
+    (gone : initializationProjectEvent frame event = none) :
+    ∃ kind address bytes initialized,
+      event = .memory kind address bytes initialized ∧
+      initializationSlot frame address bytes.length ∧
+      ∀ i < bytes.length, initializationPrivateByte frame (address+BitVec.ofNat 64 i) := by
+  cases event with
+  | memory kind address bytes initialized =>
+      cases kind with
+      | read =>
+          simp only [initializationProjectEvent] at gone
+          split at gone
+          · rename_i slot
+            exact ⟨.read,address,bytes,initialized,rfl,slot,
+              fun i small => initialization_slot_bytes frame address bytes.length slot i small⟩
+          · simp at gone
+      | write =>
+          simp only [initializationProjectEvent] at gone
+          split at gone
+          · rename_i slot
+            exact ⟨.write,address,bytes,initialized,rfl,slot,
+              fun i small => initialization_slot_bytes frame address bytes.length slot i small⟩
+          · simp at gone
+      | atomic => simp [initializationProjectEvent] at gone
+  | helper => simp [initializationProjectEvent] at gone
+  | fault => simp [initializationProjectEvent] at gone
+  | exclusive => simp [initializationProjectEvent] at gone
+
+theorem initialization_guest_event_retained (frame address : Word) (kind : AccessKind)
+    (bytes : List Byte) (initialized : Bool) (guest : ¬ initializationPrivateByte frame address) :
+    initializationProjectEvent frame (.memory kind address bytes initialized) =
+      some (.memory kind address bytes initialized) := by
+  have noSlot : ¬ initializationSlot frame address bytes.length := by
+    intro slot
+    have positive : 0 < bytes.length := by rcases slot with h | h | h | h | h <;> omega
+    exact guest (by simpa using initialization_slot_bytes frame address bytes.length slot 0 positive)
+  cases kind <;> simp [initializationProjectEvent,noSlot]
+
+theorem initialization_read_retained (m : Memory) (frame address value : Word) (count : Nat) (event : Event)
+    (read : readMemory m address count = .ok (value,event))
+    (guest : ¬ initializationPrivateByte frame address) :
+    initializationProjectEvent frame event = some event := by
+  by_cases permission : permitted m.readable address count = true
+  · simp only [readMemory,permission,ite_true,Except.ok.injEq,Prod.mk.injEq] at read
+    rw [← read.2]
+    exact initialization_guest_event_retained frame address .read _ _ guest
+  · simp [readMemory,permission] at read
+
+/-- Both actual guest reads survive; the seven real private accesses alone
+are erased. Atomic/helper/fault/exclusive effects cannot be erased. -/
+theorem initialization_event_projection (p : BPF.State) (pointer limit : Word) (first second : Event)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64))) :
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] := by
+  have firstKept := initialization_read_retained p.memory (p.regs 10) _ _ _ first read0 guest0
+  have secondKept := initialization_read_retained p.memory (p.regs 10) _ _ _ second read1 guest1
+  simp only [prefixEvents,initializationEvents,List.filterMap_append,List.filterMap_cons,List.filterMap_nil,
+    firstKept,secondKept]
+  simp [initializationProjectEvent,initializationSlot,valueBytes]
+
+
+theorem initialization_spill_private (frame address : Word)
+    (inside : PrivateSpills.privateByte (frame-(24#64)) address) :
+    initializationPrivateByte frame address := by
+  change address-((frame-(24#64))-(16#64)) < (16#64) at inside
+  change address-(frame-(40#64)) < (36#64)
+  unfold Word at *
+  bv_decide
+
+theorem initialization_untouched_top (frame offset : Word) (small : offset < (4#64)) :
+    ¬ initializationPrivateByte frame (frame-(4#64)+offset) := by
+  change ¬ (frame-(4#64)+offset)-(frame-(40#64)) < (36#64)
+  unfold Word at *
+  bv_decide
+
+/-- Actual native bytes0..7 and actual accepted Bpc0..10, with one explicit
+B environment. Every private event erased by the equality below is certified
+by initialization_erased_private; resulting guest memory is derived from all
+five actual stores. No later native branch, fault or whole-program TV claim. -/
+theorem initialized_prefix_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n [first,second] (nativePrefixFinal n pointer limit) ∧
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack) ∧
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] ∧
+    (nativePrefixFinal n pointer limit).gpr 1 =
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack).regs 2 ∧
+    (nativePrefixFinal n pointer limit).gpr 2 =
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack).regs 3 ∧
+    initializationAgreesOutside (p.regs 10) (nativePrefixFinal n pointer limit).memory
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack).memory := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8 = .ok (pointer,first) := by
+    simpa [memory,context] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8 = .ok (limit,second) := by
+    simpa [memory,context] using read1
+  have oldGuest : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i) := by
+    intro i small inside
+    exact guest1 i small (initialization_spill_private _ _ inside)
+  have guest1Base : ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)) := by
+    simpa using guest1 0 (by decide)
+  refine ⟨native_two_loads n pointer limit first second nativePC nativeRead0 nativeRead1,
+    initialized_complete_prefix env p pointer limit stack first second proofPC active nativeStack
+      read0 read1 write40 write32 write24 write16 write8 read40 read32 oldGuest,
+    initialization_event_projection p pointer limit first second read0 read1 guest0 guest1Base,?_,?_,?_⟩
+  · simp +decide [nativePrefixFinal,nativeAfterSecond,nativeAfter,initializationFinal,BPF.setReg]
+  · simp +decide [nativePrefixFinal,nativeAfterSecond,nativeAfter,initializationFinal,BPF.setReg]
+  · change initializationAgreesOutside (p.regs 10) n.memory _
+    rw [memory]
+    exact initialization_memory_agrees p pointer limit stack
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -612,3 +814,21 @@ end KProgTV.TrustedSimpleX86
 
 #print axioms KProgTV.TrustedSimpleX86.initialized_ordinary_step
 #print axioms KProgTV.TrustedSimpleX86.initialized_context_prefix
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_slot_covers
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_slot_bytes
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_memory_agrees
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_erased_private
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_guest_event_retained
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_event_projection
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_spill_private
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_untouched_top
+
+#print axioms KProgTV.TrustedSimpleX86.initialized_prefix_correspondence
