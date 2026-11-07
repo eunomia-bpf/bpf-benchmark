@@ -464,4 +464,118 @@ theorem dispatch_step_refines (code : Nat) (aux : BitVec 32) (width : Width) (ds
   | logicRegister => apply logic_register_refines
   | logicUnmodified => apply logic_unmodified_refines
 
+/-- The next production body uses its generated operand selector and actual
+byte-field reads before the generated shift and width write. -/
+def shiftBody (op : GeneratedArm64ImmOperand.ImmOp) (kind : Reference.AArch64.ShiftKind) (width : Width)
+    (dst src count : Byte) (immediate : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let amount := if GeneratedArm64ImmOperand.immediate op then immediate else Arm64Move.Fields.read s count
+  let value := GeneratedArm64Shift.value (Arm64Shift.shiftCode kind) (Arm64Move.Fields.read s src)
+    amount (Arm64Register.handlerWidth width)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem shift_body_typed (op : GeneratedArm64ImmOperand.ImmOp) (kind : Reference.AArch64.ShiftKind)
+    (width : Width) (dst src count : Register) (immediate : Word) (s : Reference.AArch64.State) :
+    shiftBody op kind width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (Arm64Register.registerCode count) immediate s = Arm64Shift.rawStep op kind width dst src count immediate s := by
+  simp only [shiftBody, Arm64Shift.rawStep, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+theorem shift_immediate_ignores_count (kind : Reference.AArch64.ShiftKind) (width : Width)
+    (dst src count other : Byte) (immediate : Word) (s : Reference.AArch64.State) :
+    shiftBody .shiftImm kind width dst src count immediate s =
+      shiftBody .shiftImm kind width dst src other immediate s := rfl
+
+def shiftOpcode (immediate : Bool) : Nat :=
+  GeneratedArm64DispatchFamily.code (if immediate then .shiftImm else .shiftReg)
+
+/-- The next actual gate is reached only after the earlier prefix/ALU.
+Its counts and operands are still bytes; other families pass onward. -/
+def dispatchThroughShift (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatch code aux width dst src src2 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Shift.decodeOpcode code).bind (fun op =>
+      (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => shiftBody op kind width dst src src2 value s))
+
+theorem before_shift (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatch (shiftOpcode immediate) aux width dst src src2 value sourceScalar sourceStack s = none := by
+  have first : dispatchPrefix (shiftOpcode immediate) aux width dst src value s = none := by
+    apply other <;> cases immediate <;> decide
+  have noAlu : Arm64Arithmetic.AluDispatch.decodeOpcode (shiftOpcode immediate) = none := by
+    cases immediate <;> rfl
+  simp only [dispatch, first, noAlu]
+  rfl
+
+theorem shift_reached (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughShift (shiftOpcode immediate) aux width dst src src2 value sourceScalar sourceStack s =
+      (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => shiftBody (if immediate then .shiftImm else .shiftReg) kind width dst src src2 value s) := by
+  have known : Arm64Shift.decodeOpcode (shiftOpcode immediate) =
+      some (if immediate then .shiftImm else .shiftReg) := by cases immediate <;> rfl
+  unfold dispatchThroughShift
+  rw [before_shift, known]
+  rfl
+
+theorem shift_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : DispatchBinding s.pc code aux width dst src src2 value native) :
+    dispatchThroughShift code aux width dst src src2 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughShift, dispatch_step_refines code aux width dst src src2 value sourceScalar sourceStack native s binding]
+
+theorem shift_immediate_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+    (dst src : Register) (count : Byte) (lane1 lane2 lane3 : Byte) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughShift (shiftOpcode true) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val)
+      sourceScalar sourceStack s = some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) s) := by
+  rw [shift_reached, Arm64Shift.packed_kind]
+  change some (shiftBody .shiftImm kind width (Arm64Register.registerCode dst)
+    (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val) s) = _
+  rw [shift_immediate_ignores_count kind width _ _ count (Arm64Register.registerCode 31), shift_body_typed]
+  change some (Arm64Shift.handlerStep (.immediate width kind amount dst src) s) = _
+  rw [Arm64Shift.step_refines]
+
+theorem shift_register_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
+    (dst src count : Register) (value : Word) (lane1 lane2 lane3 : Byte) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughShift (shiftOpcode false) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count) value
+      sourceScalar sourceStack s = some (Reference.AArch64.step (.shift (.register width kind dst src count)) s) := by
+  rw [shift_reached, Arm64Shift.packed_kind]
+  change some (shiftBody .shiftReg kind width (Arm64Register.registerCode dst)
+    (Arm64Register.registerCode src) (Arm64Register.registerCode count) value s) = _
+  rw [shift_body_typed]
+  change some (Arm64Shift.handlerStep (.register width kind dst src count) s) = _
+  rw [Arm64Shift.step_refines]
+
+/-- Field-only extension for the actual two SHIFT rows. -/
+inductive ShiftBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : DispatchBinding pc code aux width dst src src2 value native) :
+      ShiftBinding pc code aux width dst src src2 value native
+  | immediate (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+      (dst src : Register) (count : Byte) (lane1 lane2 lane3 : Byte) :
+      ShiftBinding pc (shiftOpcode true) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val)
+        (.shift (.immediate width kind amount dst src))
+  | register (width : Width) (kind : Reference.AArch64.ShiftKind) (dst src count : Register)
+      (value : Word) (lane1 lane2 lane3 : Byte) :
+      ShiftBinding pc (shiftOpcode false) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count) value
+        (.shift (.register width kind dst src count))
+
+theorem step_through_shift_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : ShiftBinding s.pc code aux width dst src src2 value native) :
+    dispatchThroughShift code aux width dst src src2 value sourceScalar sourceStack s = some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ earlier => exact shift_earlier_preserved _ _ _ _ _ _ _ _ _ _ s earlier
+  | immediate => apply shift_immediate_refines
+  | register => apply shift_register_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher

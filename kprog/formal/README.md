@@ -39,7 +39,9 @@ binds GPR/ZR/SP/NONE reads and writes; the leading NOP/address/MOV/MOVK gates
 compose through `Arm64Dispatcher.step_refines`, with field/relocation bindings
 and the MOV-bitmask SP alias kept explicit. The same byte-field dispatcher
 now composes both generic ALU rows and all six arithmetic/logical choices
-through `dispatch_step_refines`; the remaining families still need composition.
+through `dispatch_step_refines`. `step_through_shift_refines` extends that
+composition through both SHIFT rows and all four kinds, preserving count
+selection and width masking. The remaining families still need composition.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

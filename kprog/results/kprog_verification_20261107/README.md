@@ -930,3 +930,32 @@ contract, reference/wire/compiler and C semantic check. The immutable source/cac
 export was deleted automatically; compressed CALL CPU observations retain this
 440-case run. The later uniform-byte ALU composition is a separate increment
 and requires its own subsequent full check; no full77/72/O2/O4 claim follows.
+
+## Uniform byte SHIFT composed after the ALU
+
+`Arm64Dispatcher.dispatchThroughShift` extends the same concrete prefix and
+ALU with the next production SHIFT gate8/9. Its body selects count through
+the independent generated operand table, reads actual byte-coded registers,
+computes the generated shift and performs the real width write. All four
+kinds compose to the same canonical immediate/register shifts. Immediate
+forms ignore any count byte, including SP32 and NONE255; register forms keep
+the full incoming count word and the existing architectural width mask.
+All three unused AUX bytes remain arbitrary; no scalar/tag premise removes
+a branch, no raw SP byte is converted to ZR and no second PC advance occurs.
+
+Literal opcode disjointness proves both SHIFT rows bypass the earlier gates.
+Every prior DispatchBinding result transports unchanged through the extension.
+One step_through_shift_refines theorem covers the field-only ShiftBinding,
+including all earlier constructors and both new rows, without a component
+semantic/refinement premise. Native register/width/byte decoding and Entry/O4
+materialization/provenance/compiled-artifact obligations remain explicit;
+the remaining ISA families still need composition into the full72-op theorem.
+
+Validation: focused58-job and affected-family/reference Lean builds, seven
+existing contract freshness checks, direct-dispatch/model checks and nine
+existing semantic/route hosts passed20513,5120,3804,136,1115374,6401,6913,1280,
+337cases. Final proof SHA stayed unchanged through checks. All old declaration
+bytes remain unchanged; no placeholders, runtime/generator/oracle/ISA edits,
+new tests or filtered inputs. Original compiler warnings remain visible.
+A combined immutable full check follows publication, including this and the
+preceding uniform-byte ALU extension; exact96's archived full pass is earlier.
