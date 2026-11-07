@@ -44,6 +44,7 @@ run's metadata) removes the runtime-counter overhead from the workload.
 | --- | ---: | ---: | --- |
 | bcc/set | 1.002x | **1.000x** | 18 |
 | tracee/monitor | 1.539x | **1.640x** | 148 / 151 |
+| katran | 1.018x | **1.001x** | 1 / 1 |
 | tetragon/observer | 1.008x | 1.017x | 70 (partial, below) |
 
 Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
@@ -56,12 +57,15 @@ Two caveats, stated rather than smoothed over:
   those runs were launched with tracee's manifest in the environment and
   the shim read each app's own file — the replacements are real but
   fewer, so 1.017x is indicative, not comparable to the 1.008x.
-- **katran's stats-off arm is 0 replaced**, so it has no native number:
-  after the 10:50 kernel rebuild the stub rejects its 80-chunk blob at the
-  first instruction with `BPF_PROG_LOAD native_lab stub: Permission
-  denied` (`processed 1 insns`, `log_true_size=146`), where the earlier
-  stats-on run took the prebuilt-proof path and replaced. Reported to the
-  kernel owner.
+- **katran's stats-off arm replaced on the third attempt** (1 of 1,
+  `prebuilt_proof=1`, 802,911,496 against 803,348,250 packets, 1.001x).
+  Two earlier attempts after the 10:50 kernel rebuild failed with
+  `BPF_PROG_LOAD native_lab stub: Permission denied` (`processed 1
+  insns`, `log_true_size=146`) on the 80-chunk blob, so the failure was
+  transient rather than a code path difference — but with one sample the
+  1.001x should be read as "no native gain with counters off", and its
+  stats-on 1.018x accordingly as partly counter overhead rather than BPF
+  execution.
 
 ## The three arms
 
