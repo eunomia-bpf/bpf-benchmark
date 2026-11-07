@@ -1,0 +1,24 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+16	cmp rsp, 0	1024	1024	0	0	checked	none
+73	cmp al, bl	1024	1024	0	0	checked	none
+74	cmp al, 0x7f	1024	1024	0	0	checked	none
+75	cmp BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+76	cmp BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+77	cmp al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+191	cmp ax, bx	1024	1024	0	0	checked	none
+192	cmp ax, 0x7f	1024	1024	0	0	checked	none
+193	cmp WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+194	cmp WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+195	cmp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+329	cmp eax, ebx	1024	1024	0	0	checked	none
+330	cmp eax, 0x7f	1024	1024	0	0	checked	none
+331	cmp DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+332	cmp DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+333	cmp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+482	cmp rax, rbx	1024	1024	0	0	checked	none
+483	cmp rax, 0x7f	1024	1024	0	0	checked	none
+484	cmp QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+485	cmp QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+486	cmp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+621	cmp ah, bh	1024	1024	0	0	checked	none
+622	cmp ah, 0x7f	1024	1024	0	0	checked	none

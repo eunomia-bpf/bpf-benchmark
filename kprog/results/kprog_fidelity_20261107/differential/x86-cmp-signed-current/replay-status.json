@@ -1,0 +1,14 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "make",
+    "-f",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-popcnt-memory/Makefile",
+    "reference",
+    "OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current"
+  ],
+  "exit": 0,
+  "finished": "2026-11-07T19:09:39.877448+00:00"
+}

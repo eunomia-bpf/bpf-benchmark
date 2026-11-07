@@ -3,8 +3,7 @@
 This detached run consumes published b46de606ccde1165966e8d9fc0d19e881bcfe00e
 production CMP flag expression using the existing 1144-form matrix and frozen
 c110 canonical executable. The preceding d30 result remains separately published
-at ../x86-self-xor-current. Results remain pending until the terminal status and
-all per-form rows are reviewed. No production/reference/oracle change is made.
+at ../x86-self-xor-current. The terminal status and every per-form row have now been reviewed below. No production/reference/oracle change is made.
 
 ~~~sh
 taskset -c 16-19 make -C kprog/fidelity build ARCH=x86
@@ -34,7 +33,30 @@ physical source drift after capture is recorded without changing this snapshot.
 In particular, later C RORX edits are not relabeled as tested by this result.
 
 forms.tsv and the compressed empty mismatch stream retain the full CPU/C
-outcome. The canonical terminal status has not yet been independently reviewed
-in this CPU snapshot; no reference pass is inferred from active empty streams.
-The active trace and reference reader remain intact. This is enumerated-form
+outcome. At that CPU-phase review, the terminal canonical status had not yet been
+examined. The completed canonical review below supersedes that pending status.
+The original trace remains intact; its reference reader has now closed. This is enumerated-form
 sampling, not every encoding, whole ABI, invocation/transport or O1–O4 closure.
+
+## Completed full canonical result
+
+The reference Make job exits **0** at 2026-11-07T19:09:39.877448+00:00. All **1144
+forms x 1024 = 1,171,456 states** have **zero CPU/C, CPU/reference and
+C/reference differences**, with **zero unavailable forms**. The23 explicit
+CMP forms contribute23,552 states and zero differences in all comparisons.
+reference-forms.tsv and cmp-reference-forms.tsv retain every count; complete
+compressed mismatch and unavailable streams are empty.
+
+The frozen c110 canonical executable is independently verified against the
+[already published archive](../x86-current-matrix/canonical-reference.gz).
+The previously published static binary and all90 compiled input files remain unchanged.
+The original 2127364120-byte trace is retained in this Workspace, its full
+layout/length and SHA256 d8cde036e7544a4c1dcb96f7354d0712ebd32b24842d67fbf06de88083e77022 verified.
+summary.json retains the exact terminal times and all observed root-source drift.
+Those later root edits do not alter the frozen4fe/b46 production source used here.
+
+The later published RORX shared handler has its own
+[focused real-CPU/C/canonical result](../x86-rorx-current/README.md): four existing
+register/memory forms,4096 states, zero differences. It is not relabeled as
+being part of this1144-form4fe snapshot. No CPU rerun, flag/memory oracle change,
+new ISA model or source relaxation was needed to complete this full result.

@@ -1,0 +1,47 @@
+{
+  "recorded": "2026-11-07T19:12:20.940538+00:00",
+  "execution": "Real x86-64 host CPU, production C and frozen canonical reference",
+  "build_exit": 0,
+  "reference_exit": 0,
+  "finished": "2026-11-07T19:09:39.877448+00:00",
+  "forms": 1144,
+  "cases_per_form": 1024,
+  "cases": 1171456,
+  "cpu_c_mismatches": 0,
+  "cpu_reference_mismatches": 0,
+  "c_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "explicit_cmp_forms": 23,
+  "explicit_cmp_cases": 23552,
+  "explicit_cmp_all_comparisons_mismatches": 0,
+  "binary_sha256": "2057b385f3b982fc38adf9486f5025ab1b07b9cbd8deff038ad843fe9a4de924",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "compiled_header_sha256": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+  "production_header_commit": "b46de606ccde1165966e8d9fc0d19e881bcfe00e",
+  "trace_bytes": 2127364120,
+  "trace_sha256": "d8cde036e7544a4c1dcb96f7354d0712ebd32b24842d67fbf06de88083e77022",
+  "trace_retained_in_workspace": true,
+  "canonical_archive_reused": "kprog/results/kprog_fidelity_20261107/differential/x86-current-matrix/canonical-reference.gz",
+  "canonical_archive_publication": "eef2cbba699fabf59120a5e496448ed342f0187f",
+  "canonical_archive_sha256": "fb829f9f310c5c11993071c83ebd45040816fcaa0738ec5f40f12abad9aca5f9",
+  "already_published_cpu_inputs": "1bd037ccabc31b18fcf527d47054432be60c2637",
+  "source_drift_after": {
+    "kprog/fidelity/Makefile": {
+      "before": "1adcfbb7353513e7264e5103d5ff232d469a139d61b7a04428f1fe27e322817a",
+      "after": "2f97385b68e2b67f3a6335edf86719e6745587e4be4c6eb1402517b77c32edbc"
+    },
+    "kprog/x86/x86_sim_local_bpf.h": {
+      "before": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+      "after": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a"
+    },
+    "kprog/x86/micro-prog/generated_x86_specialization.py": {
+      "before": "3b68d720b251fa277114740d04020e017821022a8b410c9cc86d4b9280426a3b",
+      "after": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7"
+    },
+    "kprog/formal/generated/x86_specialization.h": {
+      "before": "ea6d98de6248aa7d75070cc3279b659bcff9bccf6fb3dc2773190dd7db0ad9bc",
+      "after": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690"
+    }
+  },
+  "scope": "Frozen 4fe CMP production snapshot; later 47fb RORX is separately tested by focused4-form55110c6f9, not attributed to this full run. Enumerated forms, not all encodings/whole ABI/ISA or O1-O4 closure."
+}

@@ -88,7 +88,7 @@ complete mismatch streams. Counts describe the enumerated forms in that report.
 
 | Snapshot | Forms / states | Reviewed comparison |
 | --- | ---: | --- |
-| [x86 CMP, header 4fe6817](results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/README.md) | 1144 / 1,171,456 | Real CPU/C: zero differences; canonical outcome is recorded in the linked report |
+| [x86 CMP, header 4fe6817](results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/README.md) | 1144 / 1,171,456 | Real CPU/C/canonical: zero differences, zero unavailable forms |
 | [x86 RORX, header 47fb5565](results/kprog_fidelity_20261107/differential/x86-rorx-current/README.md) | 4 / 4096 | Real CPU/C/canonical: zero differences, zero unavailable forms |
 | [ARM core, header c21833de](results/kprog_fidelity_20261107/differential/arm64-current-core/README.md) | 807 / 826,368 | QEMU/C/canonical: zero differences, zero unavailable forms; real ARM execution pending |
 
