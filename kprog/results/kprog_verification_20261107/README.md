@@ -3555,3 +3555,10 @@ control2 and replay totals retain their scopes. The audits report propext,
 Classical.choice, Quot.sound and Lean.ofReduceBool. Raw logs, initial proof
 diagnostics, source bytes and hashes are retained in the integration archive
 under `x86_store_memory_dispatch_tokens`.
+
+### Published source full check 23a3cfde9
+
+`make check` on immutable published23a3cfde9 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_23a3cfde9`. Every check retains its exact published source identity.

@@ -1846,6 +1846,26 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_23a3cfde9": {
+    "actual_exit": 0,
+    "archive_block_sha256": "cff557e96e9ed27e414472f4ad201cf31ffe487823c9114a0d6ca8f698bdc734",
+    "archive_marker": "=== FULL MAKE CHECK 23A3CFDE9 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.cpu.jsonl.gz": "ee4ceb942b7390fc6b21b77de55de0526e549177b7833e1f7cb809803cd55888",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.head": "ca1d9ab9d216377108c039b9c36ed28bba25cb9d018b8ae437dbfd0d020f429f",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.launch.log": "dfbe49c98a1cc4ffc46ed9546bc2cfac4ec1979ac13b561925109db25d9f1c69",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.log": "5f60ce8f1b9f8fda2b5f93f01a7404d12769550a941caa41c00d46667d0fb21c",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.py": "ad31d9cc7eb9d137fd3a36e27781afb7512ccfe69f3026560c6b177c778300b5",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.sources": "79b2a5f0f9d3d8b6d862931b8ebc658e9ef1e4a15d7b72df41c3bfc949087f53",
+      "/workspaces/.agent-state/kprog-lanes/V/store-memory-full.state": "745afc710ec10f0f2d393f6d8460f06f1caf3ea350bc55033554c26914481f09"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "23a3cfde98e01b18523234b5cc3a3532e0634b14",
+    "scope": "Complete formal make check of the exact published source tree 23a3cfde98e01b18523234b5cc3a3532e0634b14. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_2ccfa5a8d": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "854bb143cf69bd70365ad0bba9049e364902735cfc47d50c87e853f2410ed285",
