@@ -36,8 +36,10 @@ typedef signed long long __s64;
 #define __always_inline inline
 
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_no_helpers_host.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static int failures;
 static unsigned long cases;
@@ -258,6 +260,88 @@ static void check_load(const char *what, __u8 dst, __u8 src_reg, __u8 flags,
 	}
 }
 
+/* Numeric native observations are independent of the implementation readers. */
+static __u64 native_cell(const __u64 *r, const __u8 *tags, unsigned reg,
+                         __u64 arena, __u64 base)
+{
+	return reg == X86_RSP ? r[reg] + base :
+		tags[reg] == X86_SIM_TAG_STACK ? r[reg] - arena + base : r[reg];
+}
+
+static void check_frame(unsigned store, unsigned flags, unsigned data_reg,
+                        unsigned base_kind, unsigned index_kind, unsigned scale,
+                        __u64 native_base, unsigned via)
+{
+	__u8 h[192], eh[192], es[X86_SIM_STACK_BYTES], tags[16];
+	__u64 r[16], arena, base, index, target, disp, value = 0, old, mask;
+	unsigned width = flags ? flags : 8, i, bad;
+	unsigned br = base_kind == 0 ? X86_RSP : base_kind == 3 ? X86_REG_NONE : X86_RBP;
+	unsigned ir = index_kind == 0 ? X86_REG_NONE : index_kind == 1 ? X86_RCX :
+		index_kind == 2 ? X86_RSP : X86_RBP;
+	__u32 aux = ir | (scale << 8) | (0xd3U << 16) | (0x9aU << 24);
+	__u8 *memory;
+	X86_SIM_L_DECLARE_STATE();
+	struct x86_sim_xdp_abi __x86_sim_abi = {};
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
+	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+	X86_SIM_L_DECLARE_STACK();
+	(void)__x86_sim_abi; (void)__x86_sim_skb_ctx; (void)__x86_sim_abi_kind;
+	(void)__x86_sim_ret_addr; (void)__x86_sim_helper_abi_base;
+	arena = (__u64)(unsigned long)&__x86_stack_mem.b[X86_SIM_STACK_BYTES];
+	for (i = 0; i < X86_SIM_STACK_BYTES; i++) es[i] = __x86_stack_mem.b[i] = (__u8)(i * 37 + 11);
+	for (i = 0; i < sizeof(h); i++) eh[i] = h[i] = (__u8)(i * 19 + 0xa7);
+	for (i = 0; i < 16; i++) {
+		r[i] = 0x123456789abcdef0ULL + i * 0x10101; tags[i] = X86_SIM_TAG_SCALAR;
+		X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)r[i], tags[i]);
+	}
+	r[X86_RSP] = (__u64)-32; r[X86_RCX] = 3;
+	r[X86_RBP] = base_kind == 2 ? arena - 40 : (__u64)(unsigned long)&h[48];
+	tags[X86_RBP] = base_kind == 2 ? X86_SIM_TAG_STACK : X86_SIM_TAG_SCALAR;
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSP, (void *)(unsigned long)r[X86_RSP], tags[X86_RSP]);
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RCX, (void *)(unsigned long)r[X86_RCX], tags[X86_RCX]);
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RBP, (void *)(unsigned long)r[X86_RBP], tags[X86_RBP]);
+	__x86_native_stack_base = native_base;
+	__x86_cf = 1; __x86_zf = 0; __x86_sf = 1; __x86_of = 1; __x86_pf = 0; __x86_af = 1;
+	__x86_xmm0_lo = 0x12345678abcdef01ULL; __x86_xmm0_hi = 0xfedcba9876543210ULL;
+	base = br == X86_REG_NONE ? 0 : r[br];
+	index = ir == X86_REG_NONE ? 0 : native_cell(r, tags, ir, arena, native_base);
+	target = base_kind == 0 ? (__u64)-16 : base_kind == 2 ? arena - 16 : (__u64)(unsigned long)&h[96];
+	disp = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
+	memory = base_kind == 0 || base_kind == 2 ? &es[X86_SIM_STACK_BYTES - 16] : &eh[96];
+	if (store) {
+		value = native_cell(r, tags, data_reg, arena, native_base);
+		for (i = 0; i < width; i++) memory[i] = (__u8)(value >> (8 * (width - i - 1)));
+	} else {
+		for (i = 0; i < width; i++) value = (value << 8) | memory[i];
+		old = native_cell(r, tags, data_reg, arena, native_base);
+		mask = width == 8 ? ~0ULL : (1ULL << (8 * width)) - 1;
+		value = width == 4 ? value : (old & ~mask) | (value & mask);
+		r[data_reg] = data_reg == X86_RSP ? value - native_base : value;
+		tags[data_reg] = X86_SIM_TAG_SCALAR;
+	}
+	if (via)
+		X86_SIM_L_EXEC(store ? X86_OP_MOVBE_STORE : X86_OP_MOVBE_LOAD,
+			store ? br : data_reg, store ? data_reg : br, flags, aux, disp);
+	else if (store) X86_SIM_L_EXEC_MOVBE_STORE(br, data_reg, flags, aux, disp);
+	else X86_SIM_L_EXEC_MOVBE_LOAD(data_reg, br, flags, aux, disp);
+	bad = memcmp(h, eh, sizeof(h)) != 0;
+	for (i = 0; i < X86_SIM_STACK_BYTES; i++) bad |= es[i] != __x86_stack_mem.b[i];
+	cases++;
+	if (bad) { printf("MISMATCH MOVBE frame memory\n"); failures++; return; }
+	for (i = 0; i < 16; i++) {
+		cases += 2;
+		if ((__u64)(unsigned long)X86_SIM_L_REG_VALUE(i) != r[i] || X86_SIM_L_REG_TAG(i) != tags[i]) {
+			printf("MISMATCH MOVBE frame reg%u store=%u width=%u data=%u base=%u index=%u\n", i, store, width, data_reg, base_kind, index_kind);
+			failures++; return;
+		}
+	}
+	cases++;
+	if (__x86_cf != 1 || __x86_zf != 0 || __x86_sf != 1 || __x86_of != 1 || __x86_pf != 0 || __x86_af != 1 ||
+	    __x86_xmm0_lo != 0x12345678abcdef01ULL || __x86_xmm0_hi != 0xfedcba9876543210ULL) {
+		printf("MISMATCH MOVBE frame flags/vector\n"); failures++;
+	}
+}
+
 /* The routed arm selector must equal the contract's classification. */
 static void check_source_macro(void)
 {
@@ -358,6 +442,17 @@ int main(void)
 	/* load: stack arm, indexed addressing stays within the frame. */
 	check_load("load/stack/index", X86_RDX, X86_RSP, X86_WIDTH_8,
 		   X86_RDI, 1ULL, 0, -8, 0x2222222222222222ULL);
+
+	{
+		static const unsigned fw[] = {0, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64};
+		static const __u64 nb[] = {0, 0x7fffffffef91ULL, 0xfffffffffffffff9ULL};
+		unsigned st, via, wi, dr, bk, ik, sc, bi;
+		for (st = 0; st < 2; st++) for (via = 0; via < 2; via++)
+		for (wi = 0; wi < 4; wi++) for (dr = 0; dr < 16; dr++)
+		for (bk = 0; bk < 4; bk++) for (ik = 0; ik < 4; ik++)
+		for (sc = 0; sc < 4; sc++) for (bi = 0; bi < 3; bi++)
+			check_frame(st, fw[wi], dr, bk, ik, sc, nb[bi], via);
+	}
 
 	check_source_macro();
 	check_width_default();

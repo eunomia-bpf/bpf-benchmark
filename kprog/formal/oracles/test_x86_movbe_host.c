@@ -455,8 +455,10 @@ static struct movbe_load_effect contract_step_load(unsigned dst, unsigned base,
 
 	if (src_code == KPROG_X86_MEM_SRC_STACK)
 		raw = oracle_stack_load((__s64)base_ptr + off, width);
-	else if (src_code == KPROG_X86_MEM_SRC_ABI_PTR_LOAD)
-		raw = (__u64)(long)*(void **)&oracle_mem[oracle_slot(addr)];
+	else if (src_code == KPROG_X86_MEM_SRC_ABI_PTR_LOAD) {
+		/* The synthetic memory permits every byte alignment. */
+		memcpy(&raw, &oracle_mem[oracle_slot(addr)], sizeof(raw));
+	}
 	else
 		raw = KPROG_X86_MEM_LOAD(&oracle_mem[oracle_slot(addr)], width);
 
