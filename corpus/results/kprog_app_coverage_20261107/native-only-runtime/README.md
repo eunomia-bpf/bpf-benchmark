@@ -165,3 +165,26 @@ confirmed absent after this closed run; raw archives and logs are retained.
 make -C kprog/libnativeloader trusted-service-check
 make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus STATE=/workspaces/.agent-state/kprog-lanes/C/native-only-otel APPS=otelcol-ebpf-profiler/profiling
 ```
+
+
+### Tail-map repair confirmed; native unwinder reaches compiler OOM
+
+Actual same-image155931_215569 now fresh-binds read_task_struct AND
+perf_unwind_stop. Its real link plan carries kprobe_progs/perf_progs tail-map
+aliases, so the preceding transport failure is closed by live evidence.
+The third request, perf_unwind_native, generates911398bytes of C but Clang is
+killed before producing its BPF object. FULL guest dmesg explicitly reports
+clang invoked oom-killer/global_oom and Killed process1848(clang), with
+5999204KiB anonymous RSS. This failure is confirmed guest memory exhaustion,
+not a verifier rejection. Three generated/two compiled/two accepted-bound;
+remaining application loads are not reached and still require completion.
+No native workload measurement completes from this failed startup.
+
+otel-tail-map-rerun.json records cause counts, full OOM lines and exact aliases;
+its service archive contains ALL requests/kernel.log/meminfo, and the full raw
+corpus tree, driver log and launch inputs are retained alongside. Both guest
+disk and image tar are absent after closure. VM_MEM now forwards the existing
+runtime memory knob (default8G, unchanged for BCC timing). Next diagnostic uses
+12G, within lane C's12GiB cap, retaining the same image/kernel/workload/native
+code/generator/Clang flags. No compiler-optimization or verifier workaround was
+introduced. Reproduce with the preceding OTel command plus VM_MEM=12G.
