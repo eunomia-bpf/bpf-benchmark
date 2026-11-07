@@ -286,10 +286,60 @@ native code does, not in whether it ran. It is recorded as measured and
 left for a paired re-run against the 2026-05-29 tree rather than
 explained away.
 
-## cilium, tracee
+## cilium: builds after a two-line Makefile fix, then measures
 
-No usable manifest existed at the time of writing: cilium has 0 staged
-native objects, tracee 3. Both are lane C's to package.
+Cilium had no native artifacts at all, and it was a build gap rather than
+missing work: `vendor/bpf/Makefile` defined `native-cilium` but none of
+the three variables it uses, and `native-artifacts` both omitted the
+target and `rm -rf`-ed its stage dir. Defining
+`CILIUM_NATIVE_STAGE_OUT`, `CILIUM_NATIVE_OBJS` and
+`CILIUM_NATIVE_PROOF_MARKERS` from the existing `CILIUM_OBJS` (following
+the katran pattern) and adding the dependency gives 7 native objects and
+an 89-program manifest.
+
+A second defect then surfaced, in the runner:
+`runner/libs/bpf_evidence.py` compared the kernel's program name with
+`symbol[:15]`, but `BPF_OBJ_NAME_LEN` is 16 and the kernel keeps all 16
+bytes, so cilium's `tail_drop_notify` (exactly 16 characters) never
+matched. Comparing 16 bytes still matches shorter symbols. Both fixes are
+one commit.
+
+```
+corpus/results/x86_kvm_corpus_20261107_015227_847061   status ok
+177 programs replaced natively, 0 failed
+```
+
+| | cilium/agent |
+| --- | ---: |
+| received packets / s, baseline eBPF | 663,645 |
+| received packets / s, native | 728,762 |
+| **native/eBPF** | **1.098x** |
+| reference (2026-05-29) | **2.358x** |
+
+Both arms forwarded essentially everything and dropped in the same classes
+(baseline: 1 × `reason=139,direction=2` and 1 × `reason=3,direction=1`
+out of 159,385,781 verdicts; native: 2 and 2 out of 175,058,207), so the
+forwarding behaviour matches and the comparison is like-for-like. Both
+components ran ~60 s each arm, 120.1 s total, which is the normalizing
+denominator.
+
+**Does not reproduce**: 1.098x against 2.358x, a much larger gap than any
+other app here. The reference's Cilium advantage was its headline result,
+so this is the most important divergence in the table and is recorded as
+measured.
+
+## tracee: 151 programs fail on one readonly data symbol
+
+Tracee's build manifest has 114 objects, but every load fails with
+
+```
+native data symbol .L.str.14 exceeds BPF data map value_size for .rodata.str1.1
+```
+
+— one symbol, all 151 loads, so **0 programs replace** and tracee has no
+native number. This is a loader placement defect (a readonly data symbol
+stuffed into a map value too small for it), not an app property. Reported;
+recorded as blocked rather than as a boundary.
 
 # Blockers cleared to reach the native arm
 
