@@ -2,6 +2,7 @@ import KProgFormal.Refinement.EntryEnvironment
 import KProgFormal.X86RegWrite
 import KProgFormal.Refinement.X86Scalar
 import KProgFormal.Refinement.X86Cmov
+import KProgFormal.Refinement.X86Exchange
 import KProgFormal.Generated.GeneratedX86StackIndex
 import KProgFormal.Generated.GeneratedPtrAdd
 
@@ -283,5 +284,86 @@ theorem conditional_move_frame_refines (env : Environment) (frame : Frame) (aren
     Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes]
   all_goals simp only [NativeWord, Reference.Word] at *
   all_goals bv_decide
+
+
+/-- XCHG captures both operands before either assignment. The snapshot owns
+raw pointer/tag/numeric sources; the current state owns the destination and
+all other fields. RSP writeback consumes the captured native bits once. -/
+def writeCapturedPointer (env : Environment) (frame : Frame) (arena : NativeWord)
+    (snapshot current : RegisterState) (dst src : Reference.X86.Register) : RegisterState :=
+  if dst = 4 then writeRegister env frame arena current .w64 (.low dst)
+      (registerValue env frame arena snapshot src)
+  else
+    let pointer := if src = 4 then arena + snapshot.raw.gpr src else snapshot.raw.gpr src
+    let tag := if src = 4 then true else snapshot.stack src
+    ⟨{ current.raw with gpr := fun r => if r = dst then pointer else current.raw.gpr r },
+      fun r => if r = dst then tag else current.stack r⟩
+
+theorem native_captured_pointer_write (env : Environment) (frame : Frame) (arena : NativeWord)
+    (snapshot current : RegisterState) (dst src : Reference.X86.Register) :
+    nativeRegisters env frame arena (writeCapturedPointer env frame arena snapshot current dst src) =
+      { nativeRegisters env frame arena current with gpr := (fun r => if r = dst then
+          registerValue env frame arena snapshot src else registerValue env frame arena current r) } := by
+  unfold writeCapturedPointer
+  split
+  next dstRsp =>
+    rw [native_register_write]
+    simp only [register_write64, Reference.X86.RegisterSlice.reg]
+  next dstOther =>
+    simp only [nativeRegisters, registerValue]
+    congr 1
+    funext r
+    simp only [registerValue]
+    by_cases same : r = dst
+    · subst r
+      by_cases srcRsp : src = 4 <;> by_cases tagged : snapshot.stack src = true <;>
+        simp [dstOther, srcRsp, tagged, projectAddress, BitVec.add_comm, BitVec.add_sub_cancel] <;>
+        rw [BitVec.add_comm arena (snapshot.raw.gpr 4), BitVec.add_sub_cancel]
+    · simp only [same, ↓reduceIte]
+
+theorem exchange_numeric_write (width : Reference.X86.ScalarWidth) (reg : Reference.X86.Register)
+    (old value : NativeWord) :
+    Reference.X86.scalarWriteValue old value width (.low reg) = X86Exchange.write width old value := by
+  rw [← X86Scalar.register_write_refines]
+  cases width <;> rfl
+
+/-- The generated width selector chooses the actual pointer/tag snapshot
+body or the two numeric writes. Both source values stay tied to the incoming
+state; the second destination merge uses the state after the first write. -/
+def exchangeRegisters (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (left right : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let result := match GeneratedX86Xchg.armOf width.bytes with
+    | .pointerSwap =>
+        let first := writeCapturedPointer env frame arena state state left right
+        writeCapturedPointer env frame arena state first right left
+    | .subwordSwap =>
+        let first := writeRegister env frame arena state width (.low left) (registerValue env frame arena state right)
+        writeRegister env frame arena first width (.low right) (registerValue env frame arena state left)
+  registerPc result nextPc
+
+/-- Actual register XCHG refines the same canonical exchange step through the
+raw RSP/STACK frame for all widths, registers and aliases, including RSP/RSP.
+No captured-value equality or disjoint-register premise is supplied. -/
+theorem exchange_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (left right : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (exchangeRegisters env frame arena state width left right nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.exchange width (.low left) (.low right) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Exchange.step_refines]
+  have values (current : RegisterState) (reg : Reference.X86.Register) :
+      registerValue env frame arena current reg = (nativeRegisters env frame arena current).gpr reg := rfl
+  cases width <;>
+    dsimp only [exchangeRegisters, GeneratedX86Xchg.armOf, GeneratedX86Xchg.fullWidthCode,
+      Reference.X86.ScalarWidth.bytes]
+  all_goals try simp only [show (1 : Nat) ≠ 8 from by decide, show (2 : Nat) ≠ 8 from by decide,
+    show (4 : Nat) ≠ 8 from by decide, ↓reduceIte]
+  all_goals rw [native_register_pc]
+  all_goals simp only [native_captured_pointer_write, native_register_write, values,
+    Reference.X86.RegisterSlice.reg, exchange_numeric_write, X86Exchange.handlerStep]
+  all_goals try simp only [show ∀ old value, X86Exchange.write .w64 old value = value from fun _ _ => rfl]
+  all_goals rfl
 
 end KProgFormal.Refinement.X86NumericAddress

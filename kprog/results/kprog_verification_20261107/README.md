@@ -1866,3 +1866,31 @@ host cache binary was restored by compilation without reexecuting its known
 UBSan failure. No shared header/ISA/runtime/oracle/test edits or sanitizer
 skips. Full exact900 POPCNT compile EXIT2 remains a separate unresolved
 complete-check result. Proof SHA256 `80efca20fcb8480e935eb9d0503873001c02a4142929d0fa8bd0888a1fa0f747`.
+
+## x86 XCHG operand snapshots through the raw stack frame
+
+`writeCapturedPointer` separates the immutable input snapshot from the current
+destination state. Its complete native-view theorem derives RSP scalar
+normalization and other-cell pointer/STACK writes from the captured input,
+while retaining all current fields outside that destination. The generated
+XCHG selector then composes two such pointer writes at64 bits, or two numeric
+writes at8/16/32 bits. Both input values are captured before the first write;
+the second partial destination merge observes the state after it.
+
+`exchange_register_frame_refines` reuses the existing canonical X86Exchange
+step for low register slices at every width and every register alias,
+including source/destination RSP and RSP/RSP. It assumes no disjointness or
+caller-supplied captured-value equality. This is the low-slice register
+handler; high-byte producer routing, initial ABI/private-memory/other
+provenance, compiled B and full77/72/dispatcher/O2/O4 remain separate.
+
+Lean52-job graph and3 axiom audits PASS with only propext, Classical.choice,
+Lean.ofReduceBool and Quot.sound. Three existing generated contracts and both
+existing XCHG hosts pass under UBSan:260 handler and62725 route cases. All7
+proof and9 host input pins stayed unchanged. Older declarations are identical
+except the Exchange import; no placeholders/ISA/runtime/header/oracle/test
+edits. Complete failed normalization attempts and final commands/output/pins
+are appended to the existing integration JSON/gzip. The known full exact900
+POPCNT compile EXIT2 and separate canonical CMOV-route unaligned-pointer UB
+remain unresolved; no full pass or private-candidate promotion is claimed.
+Proof SHA256 `73b1487713565e8e1fe0c9b405edb5f28cf33f8329e7fb8804c118519c9684ca`.

@@ -2953,5 +2953,130 @@
     "proof_lines_added": 178,
     "scope": "actual raw RSP offset/STACK arena-pointer register frame; MOV immediate/register whole-state canonical steps; initial ABI, memory and compiled B remain open",
     "source_drift": []
+  },
+  "x86_xchg_register_frame": {
+    "archive_block_sha256": "5b5203edc9f6ab6530d29ebcfe67fd5074ce00bd074752ef38061b887c5683f3",
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.X86NumericAddress"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/x86-xchg-audit.lean"
+        ],
+        "exit": 0
+      }
+    ],
+    "exit": 0,
+    "host_validation": {
+      "commands": [
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_xchg_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_reg_write_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_stack_index_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_xchg_host.c",
+            "-o",
+            "build/test_x86_xchg_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_xchg_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_xchg_route_host.c",
+            "-o",
+            "build/test_x86_xchg_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_xchg_route_host"
+          ],
+          "exit": 0
+        }
+      ],
+      "exit": 0,
+      "pins": {
+        "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+        "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+        "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "kprog/formal/generated/x86_xchg.h": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+        "kprog/formal/oracles/test_x86_xchg_host.c": "4f4ecfb118e65bc0884fbcdc147372f3c35921002a05eefd3785ff3f7fe215d3",
+        "kprog/formal/oracles/test_x86_xchg_route_host.c": "c7f59cd4585c4f73d9a0e10bf0c536d258de4bb8efea48714d00adce93b0b6db",
+        "kprog/formal/oracles/x86_no_helpers_host.h": "c47df126fb5e8b86011e99c337273727987cf5fdfaf24a5f9559be77dc4d50ae",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+      },
+      "source_drift": []
+    },
+    "pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+      "kprog/formal/KProgFormal/Refinement/X86Exchange.lean": "60440353e710345b84cbef5a53899c2973540840e9062179fbf4f7193d196335",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "73b1487713565e8e1fe0c9b405edb5f28cf33f8329e7fb8804c118519c9684ca",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+      "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+    },
+    "prior_declarations_byte_identical_except_import": true,
+    "proof_lines_added": 82,
+    "scope": "low-slice register XCHG raw RSP/STACK frame, all widths and aliases; high-byte encoding/initial ABI/private memory/compiled B/full77 remain outside this theorem",
+    "source_drift": []
   }
 }
