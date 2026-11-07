@@ -1,0 +1,33 @@
+{
+  "status": "kernel_transport_integration_in_progress",
+  "vendor_commit": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "vendor_fork": "https://github.com/eunomia-bpf/linux/tree/kinsn-only",
+  "completed": [
+    "fixed native-only request/capability ioctl interface",
+    "kernel immutable native capsule queue and program lifetime ownership source",
+    "both module proof-writer/instantiate/JIT capsule checks source",
+    "x86 module compile exit0 before final submit-busy fastpath",
+    "transport controls compile with -Werror",
+    "combined kernel patch idempotence/conflict/source identity tests pass with committed vendor HEAD"
+  ],
+  "running": "isolated incremental x86 kernel build and real transport controls: lane T/trusted-kernel-v1.*",
+  "remaining": [
+    "real transport result",
+    "C shared service and x86 worker integration",
+    "A worker integration",
+    "application native-only submit routing",
+    "BCC x86 and Katran ARM REQUIRE_BOUND_PROOF=1 real runs",
+    "program binding/refinement certificate for this new path"
+  ],
+  "sources": {
+    "kinsn/module/include/native_lab_trusted_wire.h": "69403ed433207f99ce020657e6d8cb88f44e61151d99f5ea738c073c1a3ed8e3",
+    "kinsn/module/include/native_lab_trusted.h": "bbab76f3d11eedd21660817551895d96f386edc834df910d2e10113e0abf1e24",
+    "kinsn/module/include/native_lab_group.h": "e3d947117223ea29c4fb6713e17686b038726ee8e8679559240565ecf8155bb0",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "f085cf299a55a7ff3c3cc11ad42bf1a76fd45e64ce6fd779541b947b012cba26",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "b019578c79209c9c68a0faeda80642be76b6b2b7406a044c2b2250a25a386ca4",
+    "kprog/tv/native-proof-regions.patch": "82e9b4b39e15fd0da06a47954c1cd09bea9868c56c2e9e6bcf91a267a9366c12",
+    "kprog/tv/test_kernel_patch.py": "b7f91fedff5a22c6e1de95c099f6c5bcf07659329a879d26daf6d57c687b5b4d",
+    "kprog/tv/test_trusted_transport.c": "a72c8efee8619823b3dc06f5eef46e32a88bf0975631b124bfe731e1ccbf1c3b",
+    "kprog/tv/Makefile": "dab94f0e4da8cf18d38489eec3443e43814f635c3bae48c8af1d0e0ed1c1ccb8"
+  }
+}

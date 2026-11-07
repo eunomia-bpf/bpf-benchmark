@@ -706,3 +706,22 @@ simple-packet-emitted-certificate:
 
 simple-packet-emitted-negative-check:
 	python3 test_simple_emitted.py build/capture-loader-arm64-simple-packet --program simple_packet
+
+.PHONY: trusted-kernel-check guest-trusted-kernel-check
+build/test-trusted-transport: test_trusted_transport.c ../../kinsn/module/include/native_lab_trusted_wire.h
+	install -d build
+	$(CC) -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
+
+trusted-kernel-check: kernel-build-x86 build/test-trusted-transport
+	$(MAKE) module-check ARCH=x86 KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-trusted-kernel-check'
+
+guest-trusted-kernel-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko
+	./build/test-trusted-transport /sys/kernel/debug/bpf_x86_native_lab

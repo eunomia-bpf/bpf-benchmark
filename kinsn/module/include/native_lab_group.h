@@ -19,6 +19,8 @@ static void native_lab_put_maps(struct bpf_map **maps, u32 count)
 
 static void native_lab_release_binding_objects(struct native_blob *blob)
 {
+	native_lab_trusted_put(blob->trusted);
+	blob->trusted = NULL;
 	native_lab_put_maps(blob->bound_maps, blob->bound_map_count);
 	blob->bound_maps = NULL;
 	blob->bound_map_count = 0;
@@ -320,12 +322,14 @@ static int native_lab_group_use(u32 blob_id, u32 generation, u32 abi_mask)
 	if (err)
 		return err;
 	root = &blobs[b->chunk_count - 1];
-	if (!root->bound_generations ||
+	if (!root->trusted || !root->bound_generations ||
 	    root->binding.chunk_count != b->chunk_count)
 		return -ESTALE;
 	for (i = 0; i < b->chunk_count; i++) {
 		const struct native_blob *member = &blobs[i];
 
+		if (member->trusted != root->trusted)
+			return -EXDEV;
 		if (member->generation != root->bound_generations[i])
 			return -ESTALE;
 		err = native_lab_binding_use(&member->binding,

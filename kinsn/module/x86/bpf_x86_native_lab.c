@@ -52,6 +52,7 @@
 
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
+#include "native_lab_trusted.h"
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /*
@@ -106,6 +107,7 @@ struct native_blob {
 	u32 bound_map_count;
 	struct bpf_prog *bound_source;
 	struct bpf_prog *bound_target;
+	struct native_lab_trusted_capsule *trusted;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -203,6 +205,10 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 			mutex_unlock(&blobs_lock);
 			return -ESTALE;
 		}
+		if (!native_lab_trusted_authorized(blobs[blob_id].trusted)) {
+			mutex_unlock(&blobs_lock);
+			return -EPERM;
+		}
 		err = native_lab_group_use(blob_id, generation, abi_mask);
 		if (err) {
 			mutex_unlock(&blobs_lock);
@@ -269,6 +275,8 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		err = native_lab_group_use(blob_id, generation, abi_mask);
 		if (!err)
 			err = native_lab_group_program(prog, blob_id);
+		if (!err)
+			err = native_lab_trusted_bind_program(blobs[blob_id].trusted, prog);
 		if (err) {
 			mutex_unlock(&blobs_lock);
 			return err;
@@ -536,7 +544,7 @@ static ssize_t proof_write(struct file *file, const char __user *ubuf,
 	size_t count;
 	int err;
 
-	if (!capable(CAP_SYS_ADMIN))
+	if (!capable(CAP_SYS_ADMIN) || !native_lab_trusted_writer())
 		return -EPERM;
 	if (*ppos)
 		return -EINVAL;
@@ -578,9 +586,10 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	struct bpf_map **pinned_maps = NULL;
 	u32 pinned_map_count = 0;
 	struct bpf_prog *source = NULL, *target = NULL;
+	struct native_lab_trusted_capsule *trusted = NULL;
 	int err;
 
-	if (!capable(CAP_SYS_ADMIN))
+	if (!capable(CAP_SYS_ADMIN) || !native_lab_trusted_writer())
 		return -EPERM;
 	if (*ppos || len < sizeof(header))
 		return -EINVAL;
@@ -620,10 +629,15 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	err = native_lab_pin_context(&header, &source, &target);
 	if (err)
 		goto out;
+	err = native_lab_trusted_seal(&header, &trusted);
+	if (err)
+		goto out;
 	err = native_lab_advance_generation(blob);
 	if (err)
 		goto out;
 	blob->binding = header;
+	blob->trusted = trusted;
+	trusted = NULL;
 	blob->bound_source = source;
 	blob->bound_target = target;
 	source = NULL;
@@ -635,6 +649,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	pinned_map_count = 0;
 	group_generations = NULL;
 out:
+	native_lab_trusted_put(trusted);
 	if (source)
 		bpf_prog_put(source);
 	if (target)
@@ -886,6 +901,11 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
+
+	debugfs_create_file("native_submit", 0600, debugfs_root, NULL,
+			    &native_lab_trusted_fops);
+	debugfs_create_file("specializer", 0600, debugfs_root, (void *)1,
+			    &native_lab_trusted_fops);
 
 	checked = debugfs_create_file("checked_proof", 0400, debugfs_root, NULL,
 			      &native_lab_checked_fops);

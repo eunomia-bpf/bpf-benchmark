@@ -25,6 +25,14 @@ with tempfile.TemporaryDirectory() as directory:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(subprocess.run(["git", "show", "HEAD:" + name],
             cwd=here.parents[1] / "vendor/linux-framework", check=True, capture_output=True).stdout)
+    native_input = subprocess.run(["git", "show", "HEAD:include/linux/bpf_native_input.h"],
+        cwd=here.parents[1] / "vendor/linux-framework", capture_output=True)
+    if native_input.returncode == 0:
+        (kernel / "include/linux/bpf_native_input.h").write_bytes(native_input.stdout)
+    reverse = ["patch", "--batch", "--no-backup-if-mismatch", "-p1", "-d", str(kernel), "--reverse"]
+    if subprocess.run(reverse + ["--dry-run"], input=patch, capture_output=True).returncode == 0:
+        subprocess.run(reverse, input=patch, check=True, capture_output=True)
+    base = source.read_bytes()
     apply(kernel, patch)
     assert (kernel / "include/linux/bpf_native_input.h").read_bytes() == (
         here.parents[1] / "kinsn/module/include/native_lab_input.h").read_bytes()

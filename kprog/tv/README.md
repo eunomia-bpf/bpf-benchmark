@@ -1001,3 +1001,38 @@ correspondence, kernel immutable binding/JIT/entry agreement and the Lean
 kernel/printed axioms remain trusted. Runtime CPU-profile metadata enforcement,
 other programs and the native-only trusted loader remain active work. This
 adds no performance-admission condition and changes no native/simulator code.
+
+
+Registered native-only specializer transport (integration in progress)
+--------------------------------------------------------------------
+
+The kernel module exposes `native_submit` to the application and `specializer`
+to a trusted service registered once at bootstrap. The fixed ioctl ABI is
+`native_lab_trusted_wire.h`. SUBMIT accepts only native ELF, entry symbol and
+typed metadata with the source program ID; it copies and pins these before
+returning a kernel-issued request ID. The application has no proof field or
+proof authority. Replacing a submission on the same file is refused.
+
+The service uses NEXT to retrieve that immutable snapshot, ACTIVATE on its
+capability file to authorize a worker, and COMPLETE with a verified program ID
+or negative errno. The application uses WAIT on its original file. Closing the
+service fails queued/active requests; registration cannot be taken over before
+module reload. Privileged bootstrap/module administration is trusted. The
+service must keep its capability and generation environment isolated from the
+application, validate typed metadata against pinned kernel objects, and build
+fresh B from P. C owns this userspace service and x86 worker; A owns ARM worker.
+
+Both modules refuse application proof/binding writes and proof instantiation.
+Sealed chunks retain one capsule identity. The JIT attaches that capsule to the
+actual BPF program; COMPLETE accepts only a kernel-verified, JITted program with
+that same object identity. A core cleanup hook releases capsule/module ownership
+when the program is freed. P therefore remains kernel-owned after WAIT closes.
+The reference ISA/specializer faithfulness and kernel binding remain trusted
+where a per-program TV certificate is absent.
+
+`make -C kprog/tv trusted-kernel-check` builds the current incremental T kernel
+and runs transport controls without executing native code. Application submit
+plumbing, the shared service/worker integration and the required real BCC/x86
+and Katran/ARM runs remain active; this source increment alone does not claim
+that first working trusted path. Generation-zero experiments retain their
+explicit unbound interpretation.

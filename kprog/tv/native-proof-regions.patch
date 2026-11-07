@@ -173,10 +173,9 @@ index 41cddd5154b9..48c49d3cc874 100644
  				       dst_reg, imm32);
  			break;
 diff --git a/include/linux/bpf.h b/include/linux/bpf.h
-index 22ed55a5898c..dabaa0f11f5f 100644
 --- a/include/linux/bpf.h
 +++ b/include/linux/bpf.h
-@@ -967,8 +967,13 @@ struct bpf_func_proto {
+@@ -967,8 +967,13 @@
  
  struct bpf_kinsn {
  	struct module *owner; /* NULL for built-in/vmlinux descriptors */
@@ -191,10 +190,11 @@ index 22ed55a5898c..dabaa0f11f5f 100644
  
  	int (*instantiate_insn)(u64 payload, struct bpf_insn *insn_buf);
  
-@@ -980,6 +985,19 @@ struct bpf_kinsn {
+@@ -979,6 +984,19 @@
+ 			  u64 payload, const struct bpf_prog *prog,
  			  const u32 *final_ip);
  };
- 
++
 +/* Native artifacts query their generation-bound size with a NULL buffer.
 + * Instruction-slice descriptors retain their existing fixed upper bound.
 + */
@@ -207,16 +207,18 @@ index 22ed55a5898c..dabaa0f11f5f 100644
 +		return count < 0 ? count : -EINVAL;
 +	return count;
 +}
-+
+ 
  static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
  {
- 	if (!kinsn)
-@@ -1723,6 +1741,10 @@ struct bpf_prog_aux {
+@@ -1723,6 +1741,13 @@
  	struct bpf_trampoline *dst_trampoline;
  	enum bpf_prog_type saved_dst_prog_type;
  	enum bpf_attach_type saved_dst_attach_type;
 +	u32 native_load_flags; /* Exact original BPF_PROG_LOAD context. */
 +	u32 native_load_ifindex;
++	void *native_trusted_request; /* Immutable kernel-owned native capsule. */
++	void (*native_trusted_put)(void *);
++	struct module *native_trusted_owner;
 +	bool native_proof; /* Interpreter execution cannot replace native emission. */
 +	bool native_entry_inputs; /* Private proof inputs require a matching JIT. */
  	bool verifier_zext; /* Zero extensions has been inserted by verifier. */
@@ -251,7 +253,6 @@ index 64f592148971..7df21e0f4430 100644
  bool btf_is_kernel(const struct btf *btf)
  {
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 4476b5075fbe..7797f82cec23 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -24,6 +24,7 @@
@@ -262,7 +263,18 @@ index 4476b5075fbe..7797f82cec23 100644
  #include <linux/btf.h>
  #include <linux/hex.h>
  #include <linux/objtool.h>
-@@ -1320,6 +1321,9 @@ static int bpf_jit_blind_insn(const struct bpf_insn *from,
+@@ -291,6 +292,10 @@
+ 		mutex_destroy(&fp->aux->dst_mutex);
+ 		mutex_destroy(&fp->aux->st_ops_assoc_mutex);
+ 		kfree(fp->aux->poke_tab);
++		if (fp->aux->native_trusted_put) {
++			fp->aux->native_trusted_put(fp->aux->native_trusted_request);
++			module_put(fp->aux->native_trusted_owner);
++		}
+ 		kfree(fp->aux);
+ 	}
+ 	free_percpu(fp->stats);
+@@ -1320,6 +1325,9 @@
  	 * register for rewrites as long as they do not interfere with
  	 * the above cases!
  	 */
@@ -272,7 +284,7 @@ index 4476b5075fbe..7797f82cec23 100644
  	if (from->dst_reg == BPF_REG_AX || from->src_reg == BPF_REG_AX)
  		goto out;
  
-@@ -2527,7 +2531,8 @@ struct bpf_prog *bpf_prog_select_runtime(struct bpf_prog *fp, int *err)
+@@ -2527,7 +2535,8 @@
  		goto finalize;
  
  	if (IS_ENABLED(CONFIG_BPF_JIT_ALWAYS_ON) ||
@@ -595,7 +607,7 @@ diff --git a/include/linux/bpf_native_input.h b/include/linux/bpf_native_input.h
 new file mode 100644
 --- /dev/null
 +++ b/include/linux/bpf_native_input.h
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,63 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef NATIVE_LAB_INPUT_H
 +#define NATIVE_LAB_INPUT_H
@@ -646,6 +658,8 @@ new file mode 100644
 +/* Host simulators must supply an explicit outcome for each dynamic visit.
 + * There is deliberately no constant-success or random fallback.
 + */
++extern unsigned long native_lab_entry_input(unsigned int kind);
++#define NATIVE_LAB_ENTRY_INPUT(kind) native_lab_entry_input(kind)
 +extern unsigned long native_lab_exclusive_failure_choice(unsigned int site);
 +#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
 +	unsigned long __native_failure = native_lab_exclusive_failure_choice(site); \
