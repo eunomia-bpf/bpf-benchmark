@@ -1,0 +1,33 @@
+{
+  "utc": "2026-11-07T22:55:18.806363+00:00",
+  "host_ok": false,
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_request_attempts": 0,
+  "distinct_source_prog_ids": 0,
+  "proof_generated": 0,
+  "stages": {},
+  "failure_causes": {},
+  "requests": [],
+  "applications": [
+    {
+      "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000052_775888/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "status": "error",
+      "error": "cilium-agent exited before API became ready (rc=255): time=1970-01-01T00:01:31.658280352Z level=info msg=\" - !:batch\\\\.kubernetes\\\\.io/job-completion-index\"\ntime=1970-01-01T00:01:31.65836016Z level=info msg=\" - !:batch\\\\.kubernetes\\\\.io/controller-uid\"\ntime=1970-01-01T00:01:31.658441328Z level=info msg=\" - !:.*beta\\\\.kubernetes\\\\.io\"\ntime=1970-01-01T00:01:31.658520592Z level=info msg=\" - !:k8s\\\\.io\"\ntime=1970-01-01T00:01:31.658597552Z level=info msg=\" - !:pod-template-generation\"\ntime=1970-01-01T00:01:31.658674608Z level=info msg=\" - !:pod-template-hash\"\ntime=1970-01-01T00:01:31.658761552Z level=info msg=\" - !:controller-revision-hash\"\ntime=1970-01-01T00:01:31.658840992Z level=info msg=\" - !:controller-uid\"\ntime=1970-01-01T00:01:31.658923696Z level=info msg=\" - !:annotation.*\"\ntime=1970-01-01T00:01:31.658999888Z level=info msg=\" - !:etcd_node\"\ntime=1970-01-01T00:01:31.659076176Z level=info msg=\" - !:topology\\\\.kubernetes\\\\.io\"\ntime=1970-01-01T00:01:31.65917208Z level=info msg=\"Final node label prefixes to be used for identity evaluation:\"\ntime=1970-01-01T00:01:31.946486608Z level=info msg=\"Memory available for map entries (0.250% of 4094365696B): 10235914B\" module=agent.controlplane\ntime=1970-01-01T00:01:31.948588528Z level=info msg=\"Option set by dynamic sizing\" module=agent.controlplane option=bpf-sock-rev-map-max value=65536\ntime=1970-01-01T00:01:31.969749872Z level=info msg=Invoked duration=100.707216ms function=\"client.registerMappingsUpdater (.../k8s/client/rest_config_provider.go:409)\"\ntime=1970-01-01T00:01:32.01174936Z level=info msg=\"Underlay protocol ipv4 automatically selected\" module=agent.datapath.datapath-tunnel-config\ntime=1970-01-01T00:01:32.357930912Z level=info msg=Invoked duration=367.413184ms function=\"cmd.kvstoreLocksGC (cmd/cells.go:479)\"\ntime=1970-01-01T00:01:33.678871984Z level=info msg=\"L7 proxies are disabled\" module=agent.controlplane.l7-proxy\ntime=1970-01-01T00:01:35.319622848Z level=info msg=\"Probed kernel support for BIG TCP for UDP tunnels\" module=agent.datapath.bigtcp state=false\ntime=1970-01-01T00:01:35.375493104Z level=info msg=\"Datapath connector ready\" module=agent.datapath.connector datapathMode=veth\ntime=1970-01-01T00:01:35.384934368Z level=info msg=\"Datapath plugins are disabled.\" module=agent.datapath.datapath-plugins\ntime=1970-01-01T00:01:35.579085456Z level=info msg=\"Spire Delegate API Client is disabled as no socket path is configured\" module=agent.controlplane.auth.spire-delegate\ntime=1970-01-01T00:01:35.581009632Z level=info msg=\"Mutual authentication handler is disabled as no port is configured\" module=agent.controlplane.auth\ntime=1970-01-01T00:01:35.581864496Z level=info msg=\"Authentication processing is disabled\" module=agent.controlplane.auth\ntime=1970-01-01T00:01:35.76882144Z level=info msg=\"Certloader TLS watcher disabled\" module=agent.controlplane.hubble config=certloader-server-tls\ntime=1970-01-01T00:01:35.774629856Z level=info msg=\"The Hubble static exporter is disabled\" module=agent.controlplane.hubble.hubble-exporters\ntime=1970-01-01T00:01:35.775264112Z level=info msg=\"The Hubble dynamic exporter is disabled\" module=agent.controlplane.hubble.hubble-exporters\ntime=1970-01-01T00:01:35.778418512Z level=info msg=\"The Hubble packet drop events emitter is disabled\" module=agent.controlplane.hubble.hubble-dropeventemitter\ntime=1970-01-01T00:01:35.82048848Z level=info msg=\"Certloader TLS watcher disabled\" module=agent.controlplane.hubble.hubble-metrics config=certloader-server-tls\ntime=1970-01-01T00:01:35.83240936Z level=info msg=\"The Hubble metrics server is disabled\" module=agent.controlplane.hubble.hubble-metrics\ntime=1970-01-01T00:01:36.42238728Z level=info msg=Invoked duration=3.984836128s function=\"cmd.configureAPIServer (cmd/cells.go:385)\"\ntime=1970-01-01T00:01:36.561535984Z level=info msg=\"Init procedure to clean up stale CiliumEndpoint disabled\" module=agent.controlplane.stale-endpoint-cleanup\ntime=1970-01-01T00:01:37.307897568Z level=info msg=\"Determined final XDP mode\" module=agent.datapath.datapath-xdp-config accelarationMode=native mode=xdpdrv\ntime=1970-01-01T00:01:37.4348684Z level=info msg=\"Starting hive\"\ntime=1970-01-01T00:01:37.43854648Z level=info msg=\"Started gops server\" module=agent.infra.gops address=127.0.0.1:9890\ntime=1970-01-01T00:01:37.453340352Z level=error msg=\"Start hook failed\" function=\"gops.registerGopsHooks.func1 (pkg/gops/cell.go:47) (agent.infra.gops)\" error=\"mkdir /root/.config: read-only file system\"\ntime=1970-01-01T00:01:37.45585624Z level=error msg=\"Failed to start hive\" error=\"mkdir /root/.config: read-only file system\" duration=20.458912ms\ntime=1970-01-01T00:01:37.456877152Z level=info msg=\"Stopping hive\"\ntime=1970-01-01T00:01:37.457303008Z level=info msg=\"Stopped hive\" duration=219.136\u00b5s\ntime=1970-01-01T00:01:39.46364704Z level=fatal msg=\"unable to run agent: failed to start: mkdir /root/.config: read-only file system\" subsys=daemon",
+      "phases": {
+        "baseline": {
+          "programs": [],
+          "workload": null,
+          "raw_measurement": {}
+        },
+        "post_rejit": {
+          "programs": [],
+          "workload": null,
+          "raw_measurement": {}
+        }
+      }
+    }
+  ],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}

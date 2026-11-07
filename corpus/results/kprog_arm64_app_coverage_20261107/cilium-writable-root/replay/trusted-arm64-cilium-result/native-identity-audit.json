@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-07T22:55:18.791204+00:00",
+  "kind": "cilium",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261107T225318356745Z.tar.gz",
+  "archive_sha256": "541ed2fac4c66baf7e81fdbf7d4dc8cea7e9a4c5809f3ce4bf5be550904a8437",
+  "host_reported_ok": false,
+  "hashes_unchanged": true,
+  "completed_counts": {
+    "service_accepted": 0,
+    "service_refused": 0
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 0,
+  "not_completed": [],
+  "request_identities": [],
+  "identity_errors": [],
+  "all_recorded_identities_match": false,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}

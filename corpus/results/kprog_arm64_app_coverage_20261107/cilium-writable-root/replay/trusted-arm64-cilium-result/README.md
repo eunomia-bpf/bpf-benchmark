@@ -1,0 +1,1 @@
+Complete Cilium two-start functional replay with4GiB on16-19. Host status False; guest exit 1; Make exit 2; stages {}. Source/binary/resource settings and every application/request/work counter retain their actual archives. QEMU observations describe functional work. Whole-application and universal safety completion continues.
