@@ -1,0 +1,66 @@
+{
+  "utc": "2026-11-07T23:29:22.163462+00:00",
+  "guard_commit": "9357a045c9f6132df85c9d655f5e9db2d4450785",
+  "module_output": "kinsn/module/arm64/build-native-resource-guard",
+  "source_pins": {
+    "kinsn/module/arm64/bpf_arm64_ldp.c": "874e7fca2adffe840e436033a9377317f336c4c242e08f7464a7c73c7dd6e531",
+    "kinsn/module/arm64/bpf_arm64_mov.c": "42b1f90bb7ee328293f4dedc11c6bdfc5e5ef72c862ce103606ec9ae36d45ebf",
+    "kinsn/module/arm64/bpf_arm64_ccmp.c": "c301c7809f2e0a0f1f8b4be9f79daf6ef7faca7c54d3fd34b8d2db719d8f9b2a",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "0523c2d4d77f9685e37e1d006eb7d462a75b885e6cac50917926a3695792bff5",
+    "kinsn/module/arm64/bpf_arm64_prfm.c": "dce8ab291b7888fd047416a2dc415687a94bb4b3c676d44b507e118df66a720a",
+    "kinsn/module/arm64/bpf_arm64_str.c": "bec4dd963e9582d3c332870c046d5699e18036a0754592aecb44f68cc75013f9",
+    "kinsn/module/arm64/bpf_arm64_ldr.c": "777d3085588e4f93b102f9992e435138275f3d24f02464eb53cdd5b0a0d6d348",
+    "kinsn/module/arm64/bpf_arm64_rev.c": "30894ebd9587f3e50c9222d64292802bf4c097115ef7885fa7673ba1d1b7ddf3",
+    "kinsn/module/arm64/bpf_arm64_ubfm.c": "aba172a9011be02248a865b675e849b0ec8a1b66c5d5d3b716356644de55f001",
+    "kinsn/module/arm64/bpf_arm64_extr.c": "6e5282393515587861eb3ed0edd67a13da02c05d55b3d302312511ca121ec89c",
+    "kinsn/module/arm64/bpf_arm64_csel.c": "1583652ab5020bb1796b256b8ea39c87cb32b1e122b25f0a4a6d5438330ee7af",
+    "kinsn/module/include/native_lab_checked_wire.h": "5ca755370dc5872392137bae749bc069c96e23335a7565b7562b96dd6fbfdfc2",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+    "kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+    "kinsn/module/include/native_lab_group.h": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+    "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+    "kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+    "kinsn/module/include/native_lab_map_offset.h": "5a707883677eb5fbe27e534263d27ad87b771043c2523861c62587e56c6622c2",
+    "kinsn/module/include/native_lab_trusted.h": "ceb3ab5d3b7b0c5eb01a857963fee268ec824cfdb9ac1ee6097f842bfd2fbd8a",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "kinsn/module/arm64/Makefile": "681bda77eeb3b1eee2600c1f2bced7152fe2dc6d9fea55903567ec60c6bc482d"
+  },
+  "predecessor_pid": 3996338,
+  "predecessor_state": "scoped-app-successors/status.json",
+  "caller_build_commit": "bca4d587e9ca84a2d55043e2c30a95c02438e9cd",
+  "caller_and_linker_pins": {
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native-loader": "9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-service-client": "ac4e84709efbe5f93b868af4e7ec5696ee4f488d22fdd8248a81989e72f63d50",
+    "kprog/libnativeloader/build-arm64-entry-resources/libnative_loader.so": "b4dfe444fb6e28a7ce82bd65a9e315f537007cdf26de708a8a981f6ac0625082",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources": "e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9"
+  },
+  "retained_inputs": {
+    "kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko": "0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0",
+    "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "vendor/build/arm64/linux/Module.symvers": "9e2b618efe1172ad4a6134d0dd51bd40db3195b8a50c5201cb5c1fe860f80192"
+  },
+  "runtime_source_pins": {
+    "transport.py": "37e2555df3c5c88cf27fde45b8bc379c0f79ecaa7f3c4c6292ca72cf116533f1",
+    "runtime.sh": "dec7a7e7baeb1cc371e53174e782a4c2ae4c915d2001bf4aca73dbe38a887743",
+    "transport-replay.py": "c28abc87f27ef303273bdfe760a41ef69abb73ee1fa7bb37613010d34bf79e62",
+    "transport.sh": "ccfb139331c9f7ddcaeac9228a40a864bf97f5a547af91161fdbd493193a08f9"
+  },
+  "scope": "Incremental ARM module adoption of universal far-helper representability guard, followed by existing portable transport cohort and whole Katran two-start recipe after the current Tracee/Cilium sequence. Current application epochs retain their bytes.",
+  "module_binary_pins": {
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_ccmp.ko": "73c584277398cb7dcff5dd3da5d8f8438a993d573a90a21a98cdc14eee1f3432",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_csel.ko": "44df0c5490316c3ffee5992c1262a72ae90628ba4bd0a6bc10b40581aa43ae2f",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_extr.ko": "325d64fe65cdc2ae95e5cfbf9dbfb2da9216ae540e0be35d4f187ba211966302",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_ldp.ko": "70c66d3575d3745af6682b3751ca355442e88b096232ac0a580dc058ba16c0ad",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_ldr.ko": "81932134202fbd8ba424652971aca30ec9f51f0c663cf3bc93667c26117b813e",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_mov.ko": "1780a19c2a34f49b07aaf339bccea29c65cb396682a2d191685fd20ca373e0f8",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_native_lab.ko": "8a57874a0de59e1e1f79751d2dad64c54c6ece1567121b5be6d75862ed856122",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_prfm.ko": "4159f1cd590edc008b622cfc9746af2dcd73e5472e069cf14e2dc7516695fee2",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_rev.ko": "4f607fc8865764d87527e4abdbacb1d49138208f00fe4c4de1117b94fc64d225",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_str.ko": "c6c0f388925914601210b7e4771952d36f702e440768e9898f983b92aa31708d",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_ubfm.ko": "0c215fd61afb4d39535d12bc750ce228f467c7b353fabe9369351f2468e244bd"
+  }
+}
