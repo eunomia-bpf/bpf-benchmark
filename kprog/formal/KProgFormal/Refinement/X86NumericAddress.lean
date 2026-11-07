@@ -1,3 +1,4 @@
+import KProgFormal.X86Immediate
 import KProgFormal.Refinement.X86Logic
 import KProgFormal.Refinement.X86Endian
 import KProgFormal.Refinement.X86Popcount
@@ -574,6 +575,63 @@ theorem logic_register_frame_refines (env : Environment) (frame : Frame) (arena 
   · subst kind
     rfl
   · simp only [test, ↓reduceIte, native_register_write]
+    rfl
+
+
+/-- Native immediate identity at the operand width: narrow instructions
+ignore higher bits; qword arithmetic consumes a sign-extended low imm32. -/
+def ImmediateBinding (width : Reference.X86.ScalarWidth) (raw native : NativeWord) : Prop :=
+  native.setWidth width.bits =
+    (x86ImmediateValueSpec raw (X86Scalar.handlerWidth width)).setWidth width.bits
+
+theorem logic_value_operand_bits (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (left right native : NativeWord) (bits : right.setWidth width.bits = native.setWidth width.bits) :
+    X86Logic.value width kind left right = X86Logic.value width kind left native := by
+  simp only [X86Logic.value_refines, Reference.X86.logicalValue, bits]
+
+theorem logic_flags_operand_bits (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (left right native old : NativeWord) (bits : right.setWidth width.bits = native.setWidth width.bits) :
+    X86Logic.flags width kind left right old = X86Logic.flags width kind left native old := by
+  simp only [X86Logic.flags, logic_value_operand_bits width kind left right native bits]
+
+/-- The immediate logical body consumes the actual generated low-imm32/
+sign-extension primitive, then the same materialized lane read/flags/write.
+TEST has no data write and retains the incoming raw provenance. -/
+def logicImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (dst : Reference.X86.RegisterSlice) (raw nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)
+  let value := X86Logic.value width kind left right
+  let written := if kind = .test then state else writeRegister env frame arena state width dst value
+  registerPc (registerFlags written (X86Logic.flags width kind left right state.raw.rflags)) nextPc
+
+/-- The encoded immediate is related only by its operand bits. Its upper
+unused bits need not equal an implementation-chosen whole-word value.
+All native state and flag outputs are derived from this field identity. -/
+theorem logic_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (dst : Reference.X86.RegisterSlice) (raw native nextPc : NativeWord)
+    (field : ImmediateBinding width raw native) :
+    (⟨nativeRegisters env frame arena (logicImmediate env frame arena state width kind dst raw nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.logic width kind (.register dst) (.immediate native) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits : (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)).setWidth width.bits =
+      native.setWidth width.bits := by
+    rw [x86_immediate_value_refines]
+    exact field.symm
+  have values (left : NativeWord) := logic_value_operand_bits width kind left _ native bits
+  have flags (left old : NativeWord) := logic_flags_operand_bits width kind left _ native old bits
+  rw [← X86Logic.step_refines]
+  simp only [logicImmediate, native_register_pc, native_register_flags, native_register_read,
+    X86Logic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
+    Reference.X86.scalarRead, X86Scalar.write_refines, Reference.X86.scalarWrite,
+    List.nil_append, List.append_nil, values, flags]
+  by_cases test : kind = .test
+  · subst kind
+    rfl
+  · simp only [test, ↓reduceIte, native_register_write, values]
     rfl
 
 end KProgFormal.Refinement.X86NumericAddress

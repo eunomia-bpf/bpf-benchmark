@@ -2277,3 +2277,38 @@ header diff, original/final proofs and host commands/output/pins are in the
 existing integration JSON/gzip, without creating another runtime header.
 No ISA/header/generator/oracle/test/configuration/paper changes by V. Full
 77/72/whole-dispatch/O2/O4 and complete make-check completion remain open.
+
+## Logical immediates through generated value production and the raw frame
+
+logic_immediate_frame_refines composes the actual generated arithmetic-
+immediate helper, materialized destination-lane read, generated logical flags
+and raw width-aware writeback against the SAME canonical immediate-logic step.
+The helper consumes low imm32 and sign-extends it for64-bit operations. Its
+ImmediateBinding compares only native operand-width bits, so narrow native
+immediates may retain different unused high bits. This is an encoded operand
+identity, not an assumed result, chosen flags or numeric-state equality.
+
+The result and flag lemmas derive insensitivity to those unused operand bits.
+All four logical kinds and widths, legal high/low lanes, arbitrary flags and
+RSP/STACK aliases are covered. TEST preserves raw register/tag state; other
+kinds use the actual materialize/merge/zero-extend/scalarizing writer. Raw
+immediate opcode/AUX family composition is the next step; this component
+does not claim compiled B, initial ABI or full77/72/O2/O4 completion.
+
+Focused92-job Lean graph and three axiom audits PASS with only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. All372
+physical proof/configuration pins remain stable. The existing immediate
+contract check and existing CMP/TEST host pass under UBSan (2913 cases,
+including its immediate consumers); this reuses the retained oracle rather
+than adding a new one or new coverage. An initial auxiliary runner referenced
+a nonexistent standalone immediate-host filename; its setup failure executed
+no oracle and is retained separately. All11 actual host inputs remain stable.
+Older declarations are byte-identical except one import. Commands, logs,
+audits and source pins are appended to the existing integration JSON/gzip.
+No ISA/header/generator/oracle/test/configuration/paper changes accompany
+this proof. The POPCNT harness repair is separate uncommitted work here.
+
+The formal entry README is shortened to its requested role: what is proved,
+the single reference, layout, trusted assumptions and one make-check entry.
+Detailed chronological results stay in this dated log and the existing
+structured/compressed archive. No theorem or semantic oracle is removed.
