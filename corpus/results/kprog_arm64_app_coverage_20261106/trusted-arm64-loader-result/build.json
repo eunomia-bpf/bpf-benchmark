@@ -1,0 +1,42 @@
+{
+  "collected": "2026-11-07T09:16:48.090499+00:00",
+  "returncode": 0,
+  "target": "runtime-loader-build",
+  "cache": "kprog/libnativeloader/build-arm64-a-map-order-v3",
+  "artifacts": {
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.a": {
+      "sha256": "81533bf30bf1dd1d2eead021984a4602cbb00c0580accaa237ad1dac51cf4fc4",
+      "bytes": 4124886,
+      "mtime_ns": 1794042295356991956
+    },
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": {
+      "sha256": "003436c0ef0bb46ae8a709c752c3e7d3ed6a7fb601c81c3120d5400d4d8f6bc4",
+      "bytes": 2945008,
+      "mtime_ns": 1794042301532735061
+    },
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/CMakeFiles/native_loader.dir/src/native_loader.cpp.o": {
+      "sha256": "36ec89ad48fe6dcf9bd3390f34b81c43237b8a4b429803b62d6581ba80e1a2c0",
+      "bytes": 3704032,
+      "mtime_ns": 1794042295269256261
+    },
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o": {
+      "sha256": "f3103766b3e78be27522f55d26ed1615ffc46ec5f50e4193e1e892b435fa835a",
+      "bytes": 3704368,
+      "mtime_ns": 1794042301408732266
+    }
+  },
+  "source_at_collection": {
+    "kprog/libnativeloader/src/native_loader.cpp": {
+      "sha256": "3ae4d459643b071697e55c33445df23ff483810b0710e69edd58bdc9c4685997",
+      "bytes": 239776,
+      "mtime_ns": 1794042987941036189
+    },
+    "kprog/libnativeloader/include/native_loader.hpp": {
+      "sha256": "9bb3e6f903c4037618f69827dbe76463ad554fdc5b714b880933f3bf7a0c7f93",
+      "bytes": 6176,
+      "mtime_ns": 1794038709126727827
+    }
+  },
+  "source_boundary": "Source identities were collected after the build, not before; T may continue editing. Rebuild incrementally before service integration and pin that exact pair.",
+  "application_executed": false
+}

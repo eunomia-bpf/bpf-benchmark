@@ -1,0 +1,530 @@
+{
+  "collected": "2026-11-07T09:16:48.084060+00:00",
+  "native": {
+    "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+    "bytes": 2347424,
+    "mtime_ns": 1794034254949590366
+  },
+  "total": 14,
+  "generated": 14,
+  "compiled": 14,
+  "compile_failed": 0,
+  "link_exit": 0,
+  "install_exit": 0,
+  "runtime_pin_exit": 2,
+  "application_started": false,
+  "verifier_accepted": null,
+  "reason": "Runtime pin referenced deleted T/context-v2-exclusive-choice/arm64/Image; no application run generated.",
+  "compile_budget": {
+    "address_space_MiB": 32768,
+    "parallel": 1,
+    "per_command_timeout_seconds": 3600
+  },
+  "programs": [
+    {
+      "name": "otel_read_task_struct",
+      "original_name": "read_task_struct",
+      "program_type": 17,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_read_task_struct.bpf.c": {
+          "sha256": "871961a794ce5cf0d6200f4ff0a2ae92b5b3b09189791e91826ca315b92e92b7",
+          "bytes": 90676,
+          "mtime_ns": 1794034255250559994
+        },
+        "compile-sources/otel_read_task_struct.bpf.c": {
+          "sha256": "fdc9a803ae06a946a324f57b80ecf131bf623b80b8850a40672f2190db933a43",
+          "bytes": 90771,
+          "mtime_ns": 1794034276750387899
+        },
+        "native/otel_read_task_struct.proof.o": {
+          "sha256": "ccc4fd2ca63af6bc9d9e9d694c2462048f81e76d9b7239f301962793a8713e56",
+          "bytes": 14192,
+          "mtime_ns": 1794034255229596386
+        },
+        "objects/otel_read_task_struct.bpf.o": {
+          "sha256": "e152b4d5ae6b8d3562fabaa80219bcea2544c902bab9bc7170a655488fbbaffb",
+          "bytes": 46856,
+          "mtime_ns": 1794034278872104677
+        },
+        "objects/otel_read_task_struct.linked.bpf.o": {
+          "sha256": "de2f8fce2b504b71bebf1df8f16317fa232d9bf937ff3059c3831645c455844a",
+          "bytes": 57784
+        }
+      },
+      "installed_simulator_sha256": "de2f8fce2b504b71bebf1df8f16317fa232d9bf937ff3059c3831645c455844a"
+    },
+    {
+      "name": "otel_perf_unwind_stop",
+      "original_name": "perf_unwind_stop",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_stop.bpf.c": {
+          "sha256": "c934f03e2beeea2156f7948169aaf245a642307f27d674c3714df6d11a28b3fa",
+          "bytes": 2201434,
+          "mtime_ns": 1794034255990612747
+        },
+        "compile-sources/otel_perf_unwind_stop.bpf.c": {
+          "sha256": "16c8264e089b904e11874c0e4914690322c5b381bc1da88c1383af21632be34b",
+          "bytes": 2201529,
+          "mtime_ns": 1794034278882245037
+        },
+        "native/otel_perf_unwind_stop.proof.o": {
+          "sha256": "87c10f387b0f55208ef3d0334f1199c5f2d670a6f5bec37069c750520822347c",
+          "bytes": 331520,
+          "mtime_ns": 1794034255256596967
+        },
+        "objects/otel_perf_unwind_stop.bpf.o": {
+          "sha256": "20c76d1a01e3d344b44dcd19cd104237dc81650ad0fe5e795864bba7cea2678e",
+          "bytes": 786288,
+          "mtime_ns": 1794034367138002340
+        },
+        "objects/otel_perf_unwind_stop.linked.bpf.o": {
+          "sha256": "0afb0d437074303066623115044d6de9af8f2bfd9b8ec171c02ba46eff8d0ae6",
+          "bytes": 478728
+        }
+      },
+      "installed_simulator_sha256": "0afb0d437074303066623115044d6de9af8f2bfd9b8ec171c02ba46eff8d0ae6"
+    },
+    {
+      "name": "otel_perf_unwind_native",
+      "original_name": "perf_unwind_native",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_native.bpf.c": {
+          "sha256": "af68e611c7fcc9a2b02d0a20892b3895ea3b6206de1c3e1128b96c81719c0048",
+          "bytes": 3716823,
+          "mtime_ns": 1794034259239682599
+        },
+        "compile-sources/otel_perf_unwind_native.bpf.c": {
+          "sha256": "7b3d9f3b6459817b520e7790e4ebb5bd14abac92f7601aaf9b166bcaf8a69684",
+          "bytes": 3716918,
+          "mtime_ns": 1794034367201003695
+        },
+        "native/otel_perf_unwind_native.proof.o": {
+          "sha256": "5912bcfebc51d6020009b6590162ad8cb2233306cbdeb8ba168c763c1c25bf74",
+          "bytes": 458784,
+          "mtime_ns": 1794034256018613349
+        },
+        "objects/otel_perf_unwind_native.bpf.o": {
+          "sha256": "266bc4ac761128e0ab5a8f34fd6547a6e5a24c5f613721f517e8fe4caa94cd8d",
+          "bytes": 2487304,
+          "mtime_ns": 1794035434428193587
+        },
+        "objects/otel_perf_unwind_native.linked.bpf.o": {
+          "sha256": "8b04117f742b9ece638a1448aa6fe4111956b3c5475571ce46eeb5bec83f0b51",
+          "bytes": 979968
+        }
+      },
+      "installed_simulator_sha256": "8b04117f742b9ece638a1448aa6fe4111956b3c5475571ce46eeb5bec83f0b51"
+    },
+    {
+      "name": "otel_perf_unwind_hotspot",
+      "original_name": "perf_unwind_hotspot",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_hotspot.bpf.c": {
+          "sha256": "2676a940817c9ad5479f0a74baf2f923338940b5bd6a1441dcdc79f3c411291f",
+          "bytes": 3903844,
+          "mtime_ns": 1794034263307770058
+        },
+        "compile-sources/otel_perf_unwind_hotspot.bpf.c": {
+          "sha256": "793ae1ad10721e347a720bd33c716e7ec55d2db92630927f77f06e0eb226b916",
+          "bytes": 3903939,
+          "mtime_ns": 1794035434826236243
+        },
+        "native/otel_perf_unwind_hotspot.proof.o": {
+          "sha256": "6272082db3e0d1eb7046d888776b8495d2666ac74d0cfa7fc1023cc06c182c9c",
+          "bytes": 479520,
+          "mtime_ns": 1794034259288683652
+        },
+        "objects/otel_perf_unwind_hotspot.bpf.o": {
+          "sha256": "dd95c99d3e7ca9f678e6684eebe67014f6adbbf3d063f99562fdf7bbdefb3482",
+          "bytes": 2669192,
+          "mtime_ns": 1794036397701348699
+        },
+        "objects/otel_perf_unwind_hotspot.linked.bpf.o": {
+          "sha256": "f5ea1488fa6012e3212e2a892fbce249772a80087f93782b34f3e2ea680ca052",
+          "bytes": 1054648
+        }
+      },
+      "installed_simulator_sha256": "f5ea1488fa6012e3212e2a892fbce249772a80087f93782b34f3e2ea680ca052"
+    },
+    {
+      "name": "otel_perf_unwind_perl",
+      "original_name": "perf_unwind_perl",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_perl.bpf.c": {
+          "sha256": "5691cb49bbbcf3f9a5bb35405851924409c23a72a4803c2ef1a65f87afd75f45",
+          "bytes": 3771362,
+          "mtime_ns": 1794034266793845006
+        },
+        "compile-sources/otel_perf_unwind_perl.bpf.c": {
+          "sha256": "92cccea34a302391353e7305793bbf4b4bb3b77cabb920cf098f8af326694dd0",
+          "bytes": 3771457,
+          "mtime_ns": 1794036398105357493
+        },
+        "native/otel_perf_unwind_perl.proof.o": {
+          "sha256": "52df1db367406733be2a1722680934e74b31a67db4878182c388220126f77c4d",
+          "bytes": 426584,
+          "mtime_ns": 1794034263338770724
+        },
+        "objects/otel_perf_unwind_perl.bpf.o": {
+          "sha256": "5eb7745495c8711d730e62d004f0b966258cae1f4bceeb182139b92f42c8464f",
+          "bytes": 3142848,
+          "mtime_ns": 1794037735320942289
+        },
+        "objects/otel_perf_unwind_perl.linked.bpf.o": {
+          "sha256": "7892ac3296fc45252413a34ddc0e2092bf81401d27d088e064e9f33ec73284d7",
+          "bytes": 1135216
+        }
+      },
+      "installed_simulator_sha256": "7892ac3296fc45252413a34ddc0e2092bf81401d27d088e064e9f33ec73284d7"
+    },
+    {
+      "name": "otel_perf_unwind_php",
+      "original_name": "perf_unwind_php",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_php.bpf.c": {
+          "sha256": "0641271320a724744262468b2b2b6b0aeb0c5708a4f3b4290bc337ec89c0a314",
+          "bytes": 2858154,
+          "mtime_ns": 1794034268908890477
+        },
+        "compile-sources/otel_perf_unwind_php.bpf.c": {
+          "sha256": "f5ed045362ef16e839a1867dd7ee493bc9a87c51921e70f0709643245554e399",
+          "bytes": 2858249,
+          "mtime_ns": 1794037735862281991
+        },
+        "native/otel_perf_unwind_php.proof.o": {
+          "sha256": "76ed94bd6645d4e2bf0e702185fdd3a5a7f4150917be921bd1fda4fd5d02126d",
+          "bytes": 299424,
+          "mtime_ns": 1794034266824845672
+        },
+        "objects/otel_perf_unwind_php.bpf.o": {
+          "sha256": "966f64e136374a0f6d7c22dca36e3afd9cb96f96fdd100c1afcd878bf2762737",
+          "bytes": 2509320,
+          "mtime_ns": 1794039026321457793
+        },
+        "objects/otel_perf_unwind_php.linked.bpf.o": {
+          "sha256": "2f32633f109c9171f625950c9deffeae5c7966065474431ad6fa29249791c331",
+          "bytes": 816560
+        }
+      },
+      "installed_simulator_sha256": "2f32633f109c9171f625950c9deffeae5c7966065474431ad6fa29249791c331"
+    },
+    {
+      "name": "otel_perf_unwind_python",
+      "original_name": "perf_unwind_python",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_python.bpf.c": {
+          "sha256": "92cf823e129910b4d03fd2bd2dfea0cbcc99d4915d827cfa540306491580d8c4",
+          "bytes": 2307444,
+          "mtime_ns": 1794034270136246538
+        },
+        "compile-sources/otel_perf_unwind_python.bpf.c": {
+          "sha256": "ebbd2b045473f750ade6b79af55bebd81cbb32c1cd1334f0721fae42b8f05827",
+          "bytes": 2307539,
+          "mtime_ns": 1794039026832351689
+        },
+        "native/otel_perf_unwind_python.proof.o": {
+          "sha256": "27f05934307ac0d06ec8e9186b9f72963e322c96e282dc163114e4812c87a818",
+          "bytes": 279048,
+          "mtime_ns": 1794034268931890972
+        },
+        "objects/otel_perf_unwind_python.bpf.o": {
+          "sha256": "6f4d2ff411bbaaa21ab076da42c483bd03e6d2b83c9b362b2702065b951c34e0",
+          "bytes": 1966824,
+          "mtime_ns": 1794039432702171903
+        },
+        "objects/otel_perf_unwind_python.linked.bpf.o": {
+          "sha256": "54c71e71c37f3aced9d24297b47aae1328cacbf79d537f216f04af1df55ead9c",
+          "bytes": 739808
+        }
+      },
+      "installed_simulator_sha256": "54c71e71c37f3aced9d24297b47aae1328cacbf79d537f216f04af1df55ead9c"
+    },
+    {
+      "name": "otel_perf_unwind_ruby",
+      "original_name": "perf_unwind_ruby",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_ruby.bpf.c": {
+          "sha256": "12290c2bb63fb3a84e4fd40692b17dd1c624d1f42cc40d717ed44c5989bfb088",
+          "bytes": 2456490,
+          "mtime_ns": 1794034271388858982
+        },
+        "compile-sources/otel_perf_unwind_ruby.bpf.c": {
+          "sha256": "9986c2b8e74bd259b09554c512e4f4a653b7e22895286c94b03f25726b7da510",
+          "bytes": 2456585,
+          "mtime_ns": 1794039433011178532
+        },
+        "native/otel_perf_unwind_ruby.proof.o": {
+          "sha256": "8fa74d5c809e99178e2a1c61474d9a0f06b0a4b0825d6b6d541a9cdafe63ed25",
+          "bytes": 240672,
+          "mtime_ns": 1794034270162917437
+        },
+        "objects/otel_perf_unwind_ruby.bpf.o": {
+          "sha256": "eb9b4b5294f8984ba2c6a977cca431813aadcd93cf22c09b31404eff7cadbdac",
+          "bytes": 2521024,
+          "mtime_ns": 1794040548907125961
+        },
+        "objects/otel_perf_unwind_ruby.linked.bpf.o": {
+          "sha256": "9155a828604291e013be6a7b3154f312aa34d9151ef6a0f8840dddd0bbae1e4a",
+          "bytes": 823696
+        }
+      },
+      "installed_simulator_sha256": "9155a828604291e013be6a7b3154f312aa34d9151ef6a0f8840dddd0bbae1e4a"
+    },
+    {
+      "name": "otel_perf_unwind_v8",
+      "original_name": "perf_unwind_v8",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_unwind_v8.bpf.c": {
+          "sha256": "6d1864a63a1b7323f90d8bf23f2d514b839a30d9135cd0d5804df18cd77db7be",
+          "bytes": 3786965,
+          "mtime_ns": 1794034275625034868
+        },
+        "compile-sources/otel_perf_unwind_v8.bpf.c": {
+          "sha256": "af1a4f1b39983e821952f4e10c5ac4050f2d824e9d6f72a2c6f491dd2009b9b0",
+          "bytes": 3787060,
+          "mtime_ns": 1794040549327103346
+        },
+        "native/otel_perf_unwind_v8.proof.o": {
+          "sha256": "901c0e633d79464e411226d2507c8d7c201e6f6a96a46b432a37c3d116fe5a3d",
+          "bytes": 434856,
+          "mtime_ns": 1794034271416944398
+        },
+        "objects/otel_perf_unwind_v8.bpf.o": {
+          "sha256": "b25a68bcdec253d71bc726bb1fcbff01b67d524871baa71cbe72287f0262b13f",
+          "bytes": 2947744,
+          "mtime_ns": 1794041856406561621
+        },
+        "objects/otel_perf_unwind_v8.linked.bpf.o": {
+          "sha256": "c4737e9c10a8c0e217fe335fa8ba5de71cb6bf0ca43939d5d8033f8b57b3be1c",
+          "bytes": 1083176
+        }
+      },
+      "installed_simulator_sha256": "c4737e9c10a8c0e217fe335fa8ba5de71cb6bf0ca43939d5d8033f8b57b3be1c"
+    },
+    {
+      "name": "otel_perf_go_labels",
+      "original_name": "perf_go_labels",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_perf_go_labels.bpf.c": {
+          "sha256": "3a8d53fb52da919ae83a08f98381967c05e4eaaa584baa0f420d3c6437ffa3bf",
+          "bytes": 1197764,
+          "mtime_ns": 1794034275816827645
+        },
+        "compile-sources/otel_perf_go_labels.bpf.c": {
+          "sha256": "3fa8cfc17b7d1fc6843e4611f13bac06c7d12346d43df07ef99bdb609a2c164b",
+          "bytes": 1197859,
+          "mtime_ns": 1794041856946574192
+        },
+        "native/otel_perf_go_labels.proof.o": {
+          "sha256": "38a8e89ab802e1463c141e5cf0d584dde7e1d844e6b8e84f9221613a38cfb933",
+          "bytes": 184600,
+          "mtime_ns": 1794034275632035018
+        },
+        "objects/otel_perf_go_labels.bpf.o": {
+          "sha256": "b15cf0df9f7574fd5f16bab70fdcacff663438afb68115a918bbdd6254d8b062",
+          "bytes": 432280,
+          "mtime_ns": 1794041883047180939
+        },
+        "objects/otel_perf_go_labels.linked.bpf.o": {
+          "sha256": "b23fd3b1aa676298fb528025f946a60d70dd1656fd69047de0b213849c1af5b1",
+          "bytes": 291824
+        }
+      },
+      "installed_simulator_sha256": "b23fd3b1aa676298fb528025f946a60d70dd1656fd69047de0b213849c1af5b1"
+    },
+    {
+      "name": "otel_tracepoint__sched_process_free",
+      "original_name": "tracepoint__sched_process_free",
+      "program_type": 5,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_tracepoint__sched_process_free.bpf.c": {
+          "sha256": "c4a45002a95d32c95effee24645f3908e518012d5676dac8c6516479311293ca",
+          "bytes": 364372,
+          "mtime_ns": 1794034275884123198
+        },
+        "compile-sources/otel_tracepoint__sched_process_free.bpf.c": {
+          "sha256": "2adb677cdb5500fda080840a04cb59b4c24a5050baa0e4140921221c13917840",
+          "bytes": 364467,
+          "mtime_ns": 1794041883079501774
+        },
+        "native/otel_tracepoint__sched_process_free.proof.o": {
+          "sha256": "2bbb2486dc325a88483b944d9534c8084080f12770177a394ca0632d421cd635",
+          "bytes": 54592,
+          "mtime_ns": 1794034275820039060
+        },
+        "objects/otel_tracepoint__sched_process_free.bpf.o": {
+          "sha256": "df1c4e4d3cb7a3ce68eadde3e8dd13733b1a394501708c3680af53afaae447bd",
+          "bytes": 147752,
+          "mtime_ns": 1794041892193393169
+        },
+        "objects/otel_tracepoint__sched_process_free.linked.bpf.o": {
+          "sha256": "c1d5a3a1febdbdfb4a561d696e2c613a43386b8c86434e6ad7dd4cfce79f0a52",
+          "bytes": 113816
+        }
+      },
+      "installed_simulator_sha256": "c1d5a3a1febdbdfb4a561d696e2c613a43386b8c86434e6ad7dd4cfce79f0a52"
+    },
+    {
+      "name": "otel_tracepoint__sched_process_free_pre616",
+      "original_name": "tracepoint__sched_process_free_pre616",
+      "program_type": 5,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_tracepoint__sched_process_free_pre616.bpf.c": {
+          "sha256": "b1ebf67b8c0b7a07f6d135938d1c1d427160bbf5b2d2548365226533106bf80c",
+          "bytes": 364533,
+          "mtime_ns": 1794034275950041855
+        },
+        "compile-sources/otel_tracepoint__sched_process_free_pre616.bpf.c": {
+          "sha256": "7cca39361a685dded1c947d0792b13442b10422b7ba54bc05c2e7e829d265990",
+          "bytes": 364628,
+          "mtime_ns": 1794041892214854885
+        },
+        "native/otel_tracepoint__sched_process_free_pre616.proof.o": {
+          "sha256": "3ed471c1ab9ba540d60b7f401ac34147683905c1739fa9d4bb163ec1b02962f1",
+          "bytes": 54600,
+          "mtime_ns": 1794034275887040501
+        },
+        "objects/otel_tracepoint__sched_process_free_pre616.bpf.o": {
+          "sha256": "198db476f649444b6eef9d69c7cbb4d8846f7706ccccd4944425538a7771532e",
+          "bytes": 147824,
+          "mtime_ns": 1794041901373605993
+        },
+        "objects/otel_tracepoint__sched_process_free_pre616.linked.bpf.o": {
+          "sha256": "5966c8035a2c4fd0f202a139d24b5ee4323234d0fd9809b14612e60ba4399e26",
+          "bytes": 113848
+        }
+      },
+      "installed_simulator_sha256": "5966c8035a2c4fd0f202a139d24b5ee4323234d0fd9809b14612e60ba4399e26"
+    },
+    {
+      "name": "otel_native_tracer_entry",
+      "original_name": "native_tracer_entry",
+      "program_type": 7,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_native_tracer_entry.bpf.c": {
+          "sha256": "83fec9568ab92bca32842c06b404e93efd2b046a08bce2766bb030c0853ee012",
+          "bytes": 1790417,
+          "mtime_ns": 1794034276320858547
+        },
+        "compile-sources/otel_native_tracer_entry.bpf.c": {
+          "sha256": "340c5dfeba980d57fa62509d4e7f5d6027c2ecff3b9f6d5a65720006dc841781",
+          "bytes": 1790512,
+          "mtime_ns": 1794041901400376902
+        },
+        "native/otel_native_tracer_entry.proof.o": {
+          "sha256": "ce2ac73b724c9b1ceea940ad831639d1f45334ba5665e6db4993333d6c913ac5",
+          "bytes": 266816,
+          "mtime_ns": 1794034275958042027
+        },
+        "objects/otel_native_tracer_entry.bpf.o": {
+          "sha256": "b2b8ac5cfbdab5519253c8fae522848a6f565205cd94e5669cfb605da1494a63",
+          "bytes": 665648,
+          "mtime_ns": 1794041956496879969
+        },
+        "objects/otel_native_tracer_entry.linked.bpf.o": {
+          "sha256": "29af6631fe3e6c8826a259ee5a2158c0982462e07a68c48b8e0b5328f9120d11",
+          "bytes": 407320
+        }
+      },
+      "installed_simulator_sha256": "29af6631fe3e6c8826a259ee5a2158c0982462e07a68c48b8e0b5328f9120d11"
+    },
+    {
+      "name": "otel_custom__generic",
+      "original_name": "custom__generic",
+      "program_type": 2,
+      "generated": true,
+      "compiler_returncode": 0,
+      "pipeline": "preclean-o2",
+      "files": {
+        "sources/otel_custom__generic.bpf.c": {
+          "sha256": "89ac18b7e85acd362bffee9c439e772431911139724d2e1a22c28eed04949498",
+          "bytes": 1756691,
+          "mtime_ns": 1794034276680057550
+        },
+        "compile-sources/otel_custom__generic.bpf.c": {
+          "sha256": "8a3a9fb8619e66980d9cb2f656e8eef81c210afb2e35f6399fb9cc478dcfe9ed",
+          "bytes": 1756786,
+          "mtime_ns": 1794041956557109574
+        },
+        "native/otel_custom__generic.proof.o": {
+          "sha256": "c7679c7a18636e0ed55b1f9c3a91e8a3989230fbd57f39f1a17082912f04d2f9",
+          "bytes": 265632,
+          "mtime_ns": 1794034276328049982
+        },
+        "objects/otel_custom__generic.bpf.o": {
+          "sha256": "781814394634d832478c6cf01cfa885e2ed2371316616ae17dc4d4d6a16a71d9",
+          "bytes": 622200,
+          "mtime_ns": 1794042002446937134
+        },
+        "objects/otel_custom__generic.linked.bpf.o": {
+          "sha256": "624b59e699317d984e8c2e81f45a4b5d8df77e285a64680b39e94736c7c97590",
+          "bytes": 398768
+        }
+      },
+      "installed_simulator_sha256": "624b59e699317d984e8c2e81f45a4b5d8df77e285a64680b39e94736c7c97590"
+    }
+  ],
+  "frozen_simulator": {
+    "simulator/arm64_sim.h": {
+      "sha256": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+      "bytes": 5086
+    },
+    "simulator/arm64_sim_direct.h": {
+      "sha256": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "bytes": 28780
+    },
+    "simulator/arm64_sim_local_bpf.h": {
+      "sha256": "b715d009078df256645df9c632c2d746c681ff14e8e83bb659fb03f6a18a4aaf",
+      "bytes": 109959
+    }
+  },
+  "stage_payloads_byte_matched": true
+}
