@@ -727,3 +727,7 @@ $(ROOT)/kprog/arm64/build/trusted-transport/test-trusted-transport: $(ROOT)/kpro
 .PHONY: trusted-transport-arm64-run
 trusted-transport-arm64-run: trusted-transport-arm64-build
 	python3 $(HERE)/trusted-arm64-transport-result/replay.py --rootfs "$(TRANSPORT_ROOTFS)"
+
+.PHONY: manifest-dispatch-audit
+manifest-dispatch-audit:
+	taskset -c 8-11 python3 $(HERE)/manifest_dispatch_audit.py

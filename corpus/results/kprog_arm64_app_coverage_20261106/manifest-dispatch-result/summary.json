@@ -1,40 +1,54 @@
 {
-  "scope": "manifest selectors, not actual loaded-program/verifier/execution coverage",
+  "scope": "manifest selectors and all matching native ELF candidates; not loaded-program/verifier/execution coverage",
+  "started": "2026-11-07T09:21:52.216979+00:00",
   "apps": {
     "bcc": {
       "selectors": 32,
-      "finite_target_analysis_complete": 32,
-      "indirect_sites": 0
+      "candidates": 32,
+      "indirect_sites": 0,
+      "finite_candidates": 32,
+      "finite_selectors": 32
     },
     "cilium": {
       "selectors": 98,
-      "finite_target_analysis_complete": 88,
-      "indirect_sites": 2505,
-      "failed": 10
+      "candidates": 112,
+      "indirect_sites": 3885,
+      "finite_candidates": 112,
+      "finite_selectors": 98
     },
     "katran": {
       "selectors": 12,
-      "finite_target_analysis_complete": 12,
-      "indirect_sites": 91
+      "candidates": 12,
+      "indirect_sites": 91,
+      "finite_candidates": 12,
+      "finite_selectors": 12
     },
     "otelcol-ebpf-profiler": {
-      "selectors": 35,
-      "finite_target_analysis_complete": 33,
-      "indirect_sites": 3938,
-      "failed": 2
+      "selectors": 36,
+      "candidates": 38,
+      "indirect_sites": 4785,
+      "finite_candidates": 38,
+      "finite_selectors": 36
     },
     "tetragon": {
       "selectors": 245,
-      "finite_target_analysis_complete": 244,
-      "indirect_sites": 57512,
-      "failed": 1
+      "candidates": 248,
+      "indirect_sites": 57544,
+      "finite_candidates": 248,
+      "finite_selectors": 245
     },
     "tracee": {
       "selectors": 123,
-      "finite_target_analysis_complete": 106,
-      "indirect_sites": 15419,
-      "failed": 17
+      "candidates": 184,
+      "indirect_sites": 31825,
+      "finite_candidates": 184,
+      "finite_selectors": 123
     }
   },
-  "failure_class": "30 manifest selectors have no explicit symbol field; no indirect-target failure established"
+  "failure_classes": {},
+  "finished": "2026-11-07T09:22:26.817149+00:00",
+  "tools": {
+    "native_link_sha256": "736646a1b70254e5ae88dcf5d8e65d325d0a27bf89eb35e6b1b93336500d7722",
+    "generator_sha256": "2d7a9d33130d643362e277201312577a9c1791497d5d059be20288fc3b35ad48"
+  }
 }
