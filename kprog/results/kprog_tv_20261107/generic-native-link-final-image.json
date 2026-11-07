@@ -1,0 +1,265 @@
+{
+  "utc": "2026-11-07T22:00:12.192183+00:00",
+  "status": "universal_final_pc_staged_table_and_copied_instruction_preservation",
+  "scope": "Every finite mixed CALL/literal patch table, arbitrary64-bit temporary/final bases, exact finite copy pipeline and contained canonical fetch; all architectural states and canonical successors.",
+  "implementation_interfaces": {
+    "emitter": "emit_native_lab_x86 copies immutable blob into image+off; CALL writes use current emit_at and compute target displacement from final_ip+off+record.offset+5; literal targets retain their bound64-bit bits.",
+    "jit_copy_pipeline": "emit_kinsn_desc_call calls the emitter with local scratch/off0 and final_ip=image+addrs[i-1], checks ret==off and max_emit_bytes, then memcpy to temp. do_jit checks proglen+ilen against oldproglen/addrs[i] and copies temp into rw_image+proglen. bpf_jit_binary_pack_finalize copies the whole writable pack into final text through bpf_arch_text_copy/text_poke_copy.",
+    "staging_model": "staged shifts write locations only; displacement bits and target values retain final-PC calculation. view translates code storage only, and every instruction executes at its final canonical PC with original architectural data memory.",
+    "finalization": "copy_pipeline derives the complete native-range Transfer from the three copies and whole-pack cursor bounds. transfer_after_table derives later-stage stability from write separation.",
+    "transfer_contract": "Transfer states byte-value equality on the copied range. Actual C memcpy/text-copy extraction, lengths/cursors, final text allocation and stable execution lifetime supply production correspondence. Final readable/executable permissions follow the allocator interface; the view carries canonical storage permissions for memory-writer reasoning.",
+    "consumers": "finalized_call_decode and finalized_movabs_decode apply the existing complete consumer theorems at the actual final PC. finalized_instruction_preservation is a universal TV component for Composition."
+  },
+  "claims": [
+    "Canonical storeMemory commutes with temporary/final address translation for every scalar value, byte count and wrapping64-bit address.",
+    "Every finite mixed patch table retains identical final-PC displacement/target bits through temporary writes.",
+    "The actual three-stage copy shape and whole-pack subrange yield exact final fetches; later separated patch writes preserve that range.",
+    "Canonical decoder equality supplies forward TV and reverse step equivalence with full successor state, exact ordered guest effects and faults.",
+    "Existing range/opcode/separation/header premises yield bound CALL targets and fixed10B MOVABS values in actual copied final text."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-byte-layout-check native-link-final-image-check",
+    "reproduction": "make -C kprog/tv native-link-final-image-check",
+    "exit": 0,
+    "audits": 19,
+    "axiom_audit": {
+      "KProgTV.NativeLinkFinalImage.translated_difference": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.store_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.staged_address": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.staged_size": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkFinalImage.staged_value": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkFinalImage.patch_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.table_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.view_bytes": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.transfer_trans": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkFinalImage.transfer_slice": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_fetch": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_step_iff": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_instruction_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_call_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.finalized_movabs_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.transfer_subrange": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.copy_pipeline": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkFinalImage.transfer_after_table": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "earlier_elaborations": [
+      {
+        "exit": 2,
+        "detail": "Reserved Lean binder from replaced by sourceBase/destinationBase."
+      },
+      {
+        "exit": 0,
+        "audits": 16,
+        "detail": "Initial complete staging/fetch/consumer proof; three copy/fixup laws added for final nineteen-audit check."
+      }
+    ],
+    "dependency_cache": "All nine imported TV oleans match their published generic receipt hashes and source pins; complete twelve-file Lean source closure and twelve oleans retained by identity."
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkByteLayout.lean": "f52dac77ffda3c040d19b675dbdf5ccba0c250ac94bda09d7cffa1371c3ca2b7",
+    "kprog/tv/NativeLinkChunkLayout.lean": "30f470f181f8d8cdb7cd0779079514a531a550f83102c90c6cd5e0fe216f5076",
+    "kprog/tv/NativeLinkFinalImage.lean": "f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "0da5a9fda6d301494ffa5e59b4f009c66a9f4ecdb251fd2340ec37d0db28b2b5",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/Makefile": "84a20556d086d203b988259481404862f8060043c25850e782b0a0c218705002",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "ffa42fd42f06d048dc050ae83ca77bdd4454238331b4f76416e24a2f95f58888"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/Composition.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkByteLayout.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkChunkLayout.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkLiteral.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkMovabs.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkPatchTable.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkRelocation.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/tv/NativeLinkRelocationTable.lean": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/formal/lean-toolchain": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/formal/lakefile.toml": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kprog/formal/lake-manifest.json": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "be2bbfbb3798cadd2827c30c8fe016346ad903ae"
+  },
+  "implementation_source_observations": {
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": {
+      "sha256": "be52d8f6036898983f5f6ff87fabd6afc06ae6e261570ee02e2587ce56dfb73d",
+      "submodule_git_epoch": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+      "submodule_path": "arch/x86/net/bpf_jit_comp.c"
+    },
+    "vendor/linux-framework/kernel/bpf/core.c": {
+      "sha256": "3553ec2f33d57b27924f10801135e5b0734f6a1cca7833a4d7ae7c1e05342086",
+      "submodule_git_epoch": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+      "submodule_path": "kernel/bpf/core.c"
+    }
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkByteLayout.olean": "48a9413a7d27163c0ef5cba9da376979683c5a2e4c4330a9b5b2a35281bcc55e",
+    "kprog/tv/build/NativeLinkChunkLayout.olean": "54ac7d47dbd96067603dfaf6b906df564489d0f89804c3b35ecd6480f061d54a",
+    "kprog/tv/build/NativeLinkFinalImage.olean": "a2ba261de2219ca3c7393cb40be5f0ef484819d9824dd653fd9615c796f0ea62",
+    "kprog/tv/build/NativeLinkGuardedEmission.olean": "aab75037cb67d7e522558d29e1a76ab8779a6f8fa5cf4bca5d6b165410b09f5f",
+    "kprog/tv/build/NativeLinkLiteral.olean": "71f590b22e7f11cd6987df11a5b8866e422233dc219c89f3b4c0549eeb32288c",
+    "kprog/tv/build/NativeLinkMovabs.olean": "07fdf80aaaad660bf0ebbadd148ed5fe8a8ce44df295e8775afa2c0d2189fbf1",
+    "kprog/tv/build/NativeLinkPatchTable.olean": "c2a5820644ea097cd10e89ad7bcf17c7edfd98ec59ce39602a0c86e50eb540fb",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb"
+  },
+  "dependency_cache_receipts": {
+    "kprog/tv/build/Composition.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json"
+    ],
+    "kprog/tv/build/NativeLinkByteLayout.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-byte-layout.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-chunk-planner.json"
+    ],
+    "kprog/tv/build/NativeLinkChunkLayout.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-byte-layout.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-chunk-layout.json"
+    ],
+    "kprog/tv/build/NativeLinkGuardedEmission.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-guarded-emission.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-chunk-layout.json"
+    ],
+    "kprog/tv/build/NativeLinkLiteral.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json"
+    ],
+    "kprog/tv/build/NativeLinkMovabs.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-guarded-emission.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json"
+    ],
+    "kprog/tv/build/NativeLinkPatchTable.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-guarded-emission.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocation.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocationTable.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json"
+    ]
+  },
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-final-image.log.gz": {
+      "gzip_sha256": "dca1e0f68cec8341637adf7781b14ad9727bef47ecc21528a5135e12bc549945",
+      "raw_sha256": "912a6f62b8a0b22274f5155f29eb9d9c179164e52b7f9e39e2ce3ad8518b12a5",
+      "raw_bytes": 2377
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-final-image-attempts.log.gz": {
+      "gzip_sha256": "614436431aac32ac882f1a5a97058a02a91649171779108bf7719c14ffeed1fe",
+      "raw_sha256": "822914cc079470c7b28d418c01ed7b6f024028f80c30d9c150318e0ea9431aa0",
+      "raw_bytes": 9909
+    }
+  },
+  "completion_path": [
+    "Extract actual Rust/iced field/image/PC construction and exact kernel copy lengths/cursors into the universal interfaces.",
+    "Derive native-range separation from subsequent direct-tailcall/text fixups, final executable lifetime and complete logical-to-physical PC/entry/ABI correspondence.",
+    "Compose remaining helper/GOT consumers, ARM relocations, private frame/tag/definedness and actual compiler preservation through the unified O1/O2 and Composition interfaces."
+  ],
+  "trusted": [
+    "Accepted-B verifier soundness.",
+    "Canonical ISA/Memory semantics with F hardware/QEMU fidelity evidence.",
+    "Kernel binding, allocator/text-copy and C/ABI implementation correspondence.",
+    "Lean kernel and the recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ],
+  "evidence_class": "Universal Lean transformation component with explicit production-copy/final-lifetime correspondence; runtime measurements use their separately published receipts."
+}

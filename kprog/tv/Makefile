@@ -975,3 +975,8 @@ simulator-composition-check: bpf-check
 	cd ../formal && lake build KProgFormal.Refinement.X86Dispatcher
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/SimulatorComposition.olean ../tv/SimulatorComposition.lean
+
+.PHONY: native-link-final-image-check
+native-link-final-image-check: native-link-byte-layout-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkFinalImage.olean ../tv/NativeLinkFinalImage.lean

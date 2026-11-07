@@ -145,6 +145,21 @@ Later V PUSH/POP source/cache evolution is recorded separately. Production
 PC/field/definedness/ABI and actual compiled-B/link preservation retain their
 universal correspondence interfaces.
 
+`generic-native-link-final-image.json` adds 19 passing universal audits.
+The x86 emitter calculates relative targets at `final_ip` and writes temporary
+storage. Address translation commutes with the canonical scalar writer and
+arbitrary mixed patch tables, preserving the final-PC displacement bits and
+bound target values. Scratch-to-instruction, instruction-to-writable-pack and
+whole-pack-to-final-text copies compose into exact contained fetches. Canonical
+final-code decode and every relational step retain full state, ordered effects
+and faults; CALL and MOVABS target laws reach that final image directly. Later
+patch tables preserve a native range through write separation. Code-storage
+translation applies to fetch bytes; architectural data memory and helpers keep
+their original addresses. Actual kernel copy/size/cursor correspondence,
+post-finalization fixup separation and executable lifetime remain production
+interfaces, alongside complete PC/ABI/compiler and ARM transformation laws.
+Reproduce with `make -C kprog/tv native-link-final-image-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
