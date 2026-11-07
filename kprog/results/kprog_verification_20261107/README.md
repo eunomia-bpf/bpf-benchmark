@@ -96,8 +96,8 @@ continue to count their own `row_kind` values.
 | --- | ---: | --- |
 | `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
 | `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
-| `partial-universal-component` | 4 | Shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
-| `pending-universal-law` | 9 | ARM kinds2/4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `partial-universal-component` | 5 | ARM kind2 near/far body, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
+| `pending-universal-law` | 8 | ARM kinds4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
 All nine production relocation kinds have explicit rows. The seven proved
 components carry their production correspondence premises in `o4_completion`.
@@ -268,6 +268,25 @@ are retained in the raw log. C/A connect this kernel epoch to native-symbol
 metadata, coherent loader/service images and whole-application execution.
 The generic compiler/ISA/ABI and complete Artifact correspondence laws retain
 their separate proof stages.
+
+[`generic-native-link-arm-helper.json`](../kprog_tv_20261107/generic-native-link-arm-helper.json) records30 passing universal audits
+for the legacy ARM kind2 helper body. Actual MOVNlow/MOVK16/MOVK32/BLRx10
+words decode through the canonical AArch64 ISA. Four ordered u32 stores retain
+every complete instruction word. The existing load-time signed-range choice
+selects either the single BL plus its three preserved NOPs, or the four-word
+far body. Both bodies have full-state/exact-effect TV for every finite prefix
+and reverse reflection through `Composition.lean`'s token/block closure.
+
+Canonical materialization proves the exact low48 reconstruction and target
+equality precisely when the upper16 bits are all ones. The supported far-entry
+result sets X10 to the target, X30 to PC+16 and PC to the target. Near BL uses
+X30=PC+4; its original three NOPs advance the returned state to PC+16. These
+architectural differences remain explicit for the helper/caller ABI law.
+Kind2 has component status while actual field/table/final-image correspondence,
+the supported helper-pointer profile and complete callee/entry ABI compose the
+surrounding production stages. Current kernel target checks cover the negative
+pointer half; `Kernel48` identifies the exact far-encoding equality interface.
+Reproduce with `make -C kprog/tv native-link-arm-helper-check`.
 
 <!-- O4 COVERAGE END -->
 

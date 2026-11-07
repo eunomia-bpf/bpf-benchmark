@@ -1,0 +1,296 @@
+{
+  "utc": "2026-11-07T23:11:56.604800+00:00",
+  "status": "universal_arm_kind2_near_far_body_encoding_and_block_component",
+  "scope": "Every64-bit code base and target, all MOVN/MOVK16-bit fields and all canonical AArch64 states; exact ordered16B far body and first-word near patch with original NOP padding; every finite selected-site execution prefix.",
+  "implementation_interfaces": {
+    "source_words": "a64_movn_x(10,(u16)(~target&0xffff),0), a64_movk_x(10,(u16)((target>>16)&0xffff),16), a64_movk_x(10,(u16)((target>>32)&0xffff),32), BLRx10=0xd63f0140. kernel_far_words proves the existing unsigned source expressions against the decoded words.",
+    "source_selector": "Legacy kind2 checks aligned offset/full16B span/current BL0+NOP+NOP+NOP/negative kernel target/final_ip/aligned signed delta. Signed26-unit in-range uses the first BL word; range overflow selects the four-word materializer.",
+    "memory": "emit4 uses the same four ordered Reference.Memory u32 stores; emit4_fetch retains every instruction word at every64-bit base. nearCode writes only the first word; stored_word_later derives preservation of the actual original three NOPs.",
+    "decoder": "The single Reference.AArch64.decode consumes actual little-endian words. MOVNlow, MOVK16/32, BLR and NOP select the existing canonical instructions, including all original state and fault fields.",
+    "composition": "symbolicSite/decodedSite retain actual PC selection and full canonical Step. Existing tokenwise_validation/execution laws supply near/far/range-selected block TV; reverse execution reflection retains the same complete state and ordered effects.",
+    "address_profile": "reconstructed_exact proves target equality iff upper16bits=0xffff. Every raw target reconstructs as0xffff000000000000|low48(target). Current kernel negative-pointer check and the Kernel48 exact-encoding interface retain separate source/ABI roles.",
+    "entry_abi": "Near entry writes X30=PC+4 and reaches target; original three NOPs advance an arbitrary returned state by12. Supported far entry writes X10=target and X30=PC+16, then reaches target. helper_entry_result retains both exact architectures. Complete helper/caller behavior and callee effects enter through the remaining ABI relation.",
+    "production_correspondence": "Actual Rust/loader field/table/cursor positions, final executable bytes/lifetime, supported helper-pointer profile, original-to-linked PC and complete helper/caller/entry ABI supply the surrounding implementation laws."
+  },
+  "claims": [
+    "Every supported MOVNlow/MOVK16/MOVK32 field decodes to the exact canonical instruction; fixed BLR/NOP words decode directly.",
+    "The source C unsigned mask/shift/opcode formulas agree with those field-parametric words.",
+    "All four complete words survive the ordered scalar writes, including wrapping64-bit address addition.",
+    "Far materialization retains full state and reconstructs the exact low48 target plus upper ones; Kernel48 is precisely the target-equality condition.",
+    "The actual first-word near patch preserves all three original NOP words and canonical return-pad state.",
+    "Range-selected near/far bodies have full-state/exact-effect TV for arbitrary finite prefixes and reverse execution reflection through Composition.",
+    "Near and far entry results retain their actual X10/link differences and exact empty pre-callee trace."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-arm-bl26-check native-link-arm-helper-check",
+    "reproduction": "make -C kprog/tv native-link-arm-helper-check",
+    "exit": 0,
+    "audits": 30,
+    "axiom_audit": {
+      "KProgTV.NativeLinkArmHelper.word_bytes": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.decode_movn": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.decode_movk": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.decode_blr": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.decode_nop": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.relative_offsets": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.relative_start": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.relative_base": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmHelper.emit4_fetch": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.reconstructed_exact": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.reconstruction": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.materialized_state": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.far_reference": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.supported_far_reference": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.far_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.site_preservation": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.site_reflects": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.far_block_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.far_block_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_return_reference": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.stored_word_later": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_entry_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_pad_decode": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_block_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.near_block_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.kernel_far_words": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.helper_block_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.helper_block_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelper.helper_entry_result": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "warnings": 0,
+    "proof_budgets": "default recursion and heartbeat budgets",
+    "earlier_elaboration_exits": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "intermediate_audits": 20,
+    "development": "Nine completed elaboration diagnostics and the20-audit intermediate pass are archived with generator/extension controls. Final source retains the full near/far selected body, explicit dependent-field proofs and exact source PC arithmetic.",
+    "dependency_cache": "All four imported TV olean/source pairs match published generic receipts; complete8-file Lean closure,13source/build pins and8compiled-input identities are recorded."
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkArmBL26.lean": "b47b764c27d40d66e6fb69073724893a4129582ca742fd215c17cb287786eeff",
+    "kprog/tv/NativeLinkArmHelper.lean": "66a37c9f89145cc296e7247845cc750e1359008a04b7e651976d39008ef4a169",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/Makefile": "d7f9f0803aec4a191f07a98ed17354d7241d2ee7a0bb03b0dfd2bfb06636655a",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "a7d44bb00fa2fad8653e15c4d2d15dec1266ef80a7b434140c49fe94444ff343"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/tv/Composition.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/tv/NativeLinkArmBL26.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/tv/NativeLinkRelocation.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/tv/NativeLinkRelocationTable.lean": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/formal/lean-toolchain": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/formal/lakefile.toml": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kprog/formal/lake-manifest.json": "1dae0d37554445d7a5402046fdde47b151659f40",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "1dae0d37554445d7a5402046fdde47b151659f40"
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/AArch64.olean": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkArmBL26.olean": "924c5b38f7ee694a164126d33e131af7f9d95ed7783a7f0458e587f1ac9c8519",
+    "kprog/tv/build/NativeLinkArmHelper.olean": "4379d75ca3e078633d96bc9868d8a6177dc50789543add41c5860b9f0ccc3584",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb"
+  },
+  "dependency_cache_receipts": {
+    "kprog/tv/build/Composition.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ],
+    "kprog/tv/build/NativeLinkArmBL26.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocation.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocationTable.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ]
+  },
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper.log.gz": {
+      "gzip_sha256": "a54dc0cfcf4053ce15eae9016c04423bee001aafce50872de0c77b7bdfe7fd8f",
+      "raw_sha256": "c760f38e98c188a755d529c6a1fda242bd9b552c8de7addfd4c3e13fd18e4f7f",
+      "raw_bytes": 3696
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper-attempts.log.gz": {
+      "gzip_sha256": "d11d5bd60095308853b8884f524daf2206c19cf12b06a0252d643fbddeb67018",
+      "raw_sha256": "db2e19d3b812d252414e4f767d25d61daa84902da79fb5d513855101207beda6",
+      "raw_bytes": 422934
+    }
+  },
+  "completion_path": [
+    "Discharge the supported helper-pointer/Kernel48 domain through actual binding and ABI checks; retain exact near/far X10/link state.",
+    "Connect actual native-link/loader records, full16B intervals, cursor/PC mapping and final executable image/lifetime to the component.",
+    "Compose the complete helper/caller/entry ABI and callee effects, remaining ARM per-CPU/exclusive/tailcall laws, actual compiler/private-frame/definedness and universal O1/O2 through Composition."
+  ],
+  "trusted": [
+    "Canonical AArch64/Memory semantics with F hardware/QEMU fidelity evidence.",
+    "Accepted-B verifier soundness for checked-effects composition.",
+    "Kernel binding and supported C/address/ABI implementation correspondence.",
+    "Lean kernel and the recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ],
+  "evidence_class": "Universal Lean near/far body component; complete production address/layout/helper ABI and actual compiled-B correspondence compose through the explicit interfaces."
+}

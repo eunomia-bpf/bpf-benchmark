@@ -195,6 +195,25 @@ metadata, coherent loader/service images and whole-application execution.
 The generic compiler/ISA/ABI and complete Artifact correspondence laws retain
 their separate proof stages.
 
+`generic-native-link-arm-helper.json` records30 passing universal audits
+for the legacy ARM kind2 helper body. Actual MOVNlow/MOVK16/MOVK32/BLRx10
+words decode through the canonical AArch64 ISA. Four ordered u32 stores retain
+every complete instruction word. The existing load-time signed-range choice
+selects either the single BL plus its three preserved NOPs, or the four-word
+far body. Both bodies have full-state/exact-effect TV for every finite prefix
+and reverse reflection through `Composition.lean`'s token/block closure.
+
+Canonical materialization proves the exact low48 reconstruction and target
+equality precisely when the upper16 bits are all ones. The supported far-entry
+result sets X10 to the target, X30 to PC+16 and PC to the target. Near BL uses
+X30=PC+4; its original three NOPs advance the returned state to PC+16. These
+architectural differences remain explicit for the helper/caller ABI law.
+Kind2 has component status while actual field/table/final-image correspondence,
+the supported helper-pointer profile and complete callee/entry ABI compose the
+surrounding production stages. Current kernel target checks cover the negative
+pointer half; `Kernel48` identifies the exact far-encoding equality interface.
+Reproduce with `make -C kprog/tv native-link-arm-helper-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

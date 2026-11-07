@@ -986,3 +986,8 @@ native-link-arm-bl26-check: native-link-relocation-table-check
 	cd ../formal && lake build KProgFormal.Reference.AArch64
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmBL26.olean ../tv/NativeLinkArmBL26.lean
+
+.PHONY: native-link-arm-helper-check
+native-link-arm-helper-check: native-link-arm-bl26-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkArmHelper.olean ../tv/NativeLinkArmHelper.lean
