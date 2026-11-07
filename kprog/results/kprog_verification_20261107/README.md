@@ -1293,3 +1293,11 @@ identical except the shared WritebackMemory and two generated imports. No
 placeholders, new tests, input filters, ISA/runtime/generator/oracle/paper changes.
 Original compiler warnings remain visible. Active exact2c9 full check predates
 this body extension; full77/72/O2/O4 are not discharged.
+
+Exact `2c9bc4f3bb668ec41ad59d5900850425a3099df8` completed the full
+`make -C kprog/formal check` with exit **0**, including CCMP/select dispatch
+and memory-base byte/raw-width bridges plus every preceding Lean, contract,
+executable-reference/wire/compiler and C semantic check. The immutable source/
+cache export was deleted automatically. Compressed CALL CPU observations retain
+this440-case run. The actual byte-field memory body and subsequent LOAD dispatcher
+are separate increments not included in this full pass. Full77/72/O2/O4 remain open.
