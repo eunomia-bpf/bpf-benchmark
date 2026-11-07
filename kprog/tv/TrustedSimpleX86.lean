@@ -1951,6 +1951,114 @@ theorem packet_body_correspondence (env : BPF.Environment) (frame : Word) (n : X
   · rw [result]
     simp +decide [packetNativeFinal]
 
+
+def conditionalNativeFinal (n : X86.State) (pointer limit : Word) : X86.State :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit
+    then guardedNativeFinal n pointer limit else packetNativeFinal (guardedNativeFinal n pointer limit)
+
+def conditionalProofFinal (p : BPF.State) (pointer limit stack : Word) : BPF.State :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit
+    then proofExitFinal (guardedProofFinal p pointer limit stack)
+    else proofExitFinal (packetProofFinal (guardedProofFinal p pointer limit stack))
+
+def conditionalGuestSuffix (pointer limit : Word) : List Event :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit
+    then [] else packetWriteEvents pointer
+
+/-- Complete captured payload/proof executions for successful context and
+private-stack accesses, with writable premises only when the write path is
+taken. Private projection applies to the initializer prefix alone; every
+packet event is retained, including possible address aliases. -/
+theorem conditional_complete_payload_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i))
+    (writeBody : ¬ (pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit) →
+      permitted p.memory.writable pointer 2=true ∧
+      permitted p.memory.writable (pointer+(2#64)) 1=true ∧
+      permitted p.memory.writable (pointer+(3#64)) 4=true ∧
+      permitted p.memory.writable (pointer+(7#64)) 1=true) :
+    X86Path.Execution 0 native n ([first,second]++conditionalGuestSuffix pointer limit)
+      (conditionalNativeFinal n pointer limit) ∧
+    Execution (initializedInstructionStep env) p
+      ((prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit) ++
+        conditionalGuestSuffix pointer limit) (conditionalProofFinal p pointer limit stack) ∧
+    ((prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10))) ++ conditionalGuestSuffix pointer limit =
+      [first,second]++conditionalGuestSuffix pointer limit ∧
+    initializationAgreesOutside (p.regs 10) (conditionalNativeFinal n pointer limit).memory
+      (conditionalProofFinal p pointer limit stack).memory ∧
+    (conditionalNativeFinal n pointer limit).gpr 0=(conditionalProofFinal p pointer limit stack).regs 0 ∧
+    (conditionalNativeFinal n pointer limit).pc=60 ∧
+    (conditionalProofFinal p pointer limit stack).halted=true := by
+  obtain ⟨nrun,prun,trace,npc,ppc,memoryMatch,npointer,nzero,ppointer,pzero⟩ :=
+    entry_all_guards_correspondence env n p pointer limit stack first second nativePC proofPC active
+      context memory nativeStack read0 read1 write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  let n1 := guardedNativeFinal n pointer limit
+  let p1 := guardedProofFinal p pointer limit stack
+  change n1.gpr 0=(0#64) at nzero
+  change p1.regs 2=pointer at ppointer
+  change p1.regs 1=(0#64) at pzero
+  have writable : p1.memory.writable=p.memory.writable := by
+    dsimp only [p1,guardedProofFinal,remainingProofFinal]
+    split
+    · rfl
+    · split <;> rfl
+  have sameHalted : p1.halted=p.halted := by
+    dsimp only [p1,guardedProofFinal,remainingProofFinal]
+    split
+    · rfl
+    · split <;> rfl
+  have stillActive : p1.halted=false := sameHalted.trans active
+  have projection := congrArg (fun events => events++conditionalGuestSuffix pointer limit) trace
+  by_cases reject : pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit
+  · have at34 : p1.pc=34 := by simpa only [reject,ite_true] using ppc
+    have exitRun := proof_exit_execution env p1 at34 stillActive
+    refine ⟨?_,?_,projection,?_,?_,?_,?_⟩
+    · simpa only [conditionalNativeFinal,conditionalGuestSuffix,reject,ite_true,List.append_nil] using nrun
+    · simpa only [conditionalProofFinal,conditionalGuestSuffix,reject,ite_true,List.append_nil] using prun.append exitRun
+    · simpa only [conditionalNativeFinal,conditionalProofFinal,reject,ite_true,proofExitFinal,BPF.setReg] using memoryMatch
+    · simp only [conditionalNativeFinal,conditionalProofFinal,reject,ite_true]
+      change n1.gpr 0=(proofExitFinal p1).regs 0
+      simpa +decide [proofExitFinal,BPF.setReg,pzero] using nzero
+    · simpa only [conditionalNativeFinal,reject,ite_true] using npc
+    · simp only [conditionalProofFinal,reject,ite_true,proofExitFinal]
+  · have at35 : n1.pc=35 := by simpa only [reject,ite_false] using npc
+    have at18 : p1.pc=18 := by simpa only [reject,ite_false] using ppc
+    have storePointer : n1.gpr 1=p1.regs 2 := npointer.trans ppointer.symm
+    obtain ⟨w0,w2,w3,w7⟩ := writeBody reject
+    have pw0 : permitted p1.memory.writable (p1.regs 2) 2=true := by
+      simpa only [writable,ppointer] using w0
+    have pw2 : permitted p1.memory.writable (p1.regs 2+(2#64)) 1=true := by
+      simpa only [writable,ppointer] using w2
+    have pw3 : permitted p1.memory.writable (p1.regs 2+(3#64)) 4=true := by
+      simpa only [writable,ppointer] using w3
+    have pw7 : permitted p1.memory.writable (p1.regs 2+(7#64)) 1=true := by
+      simpa only [writable,ppointer] using w7
+    obtain ⟨nbody,pbody,finalMemory,returnMatch,donePC,doneHalted⟩ :=
+      packet_body_correspondence env (p.regs 10) n1 p1 at35 at18 stillActive storePointer memoryMatch pw0 pw2 pw3 pw7
+    refine ⟨?_,?_,projection,?_,?_,?_,?_⟩
+    · simpa only [conditionalNativeFinal,conditionalGuestSuffix,reject,ite_false,ppointer] using
+        native_execution_append nrun nbody
+    · simpa only [conditionalProofFinal,conditionalGuestSuffix,reject,ite_false,ppointer] using prun.append pbody
+    · simpa only [conditionalNativeFinal,conditionalProofFinal,reject,ite_false] using finalMemory
+    · simpa only [conditionalNativeFinal,conditionalProofFinal,reject,ite_false] using returnMatch
+    · simpa only [conditionalNativeFinal,reject,ite_false] using donePC
+    · simpa only [conditionalProofFinal,reject,ite_false] using doneHalted
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2145,3 +2253,5 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_memory_agrees
 
 #print axioms KProgTV.TrustedSimpleX86.packet_body_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.conditional_complete_payload_correspondence

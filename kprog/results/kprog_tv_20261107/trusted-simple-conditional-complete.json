@@ -1,0 +1,84 @@
+{
+  "status": "conditional_complete_captured_payload_proof_execution_correspondence_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T11:59:27.968705+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.conditional_complete_payload_correspondence",
+  "artifact_scope": {
+    "native_materialized_payload_bytes": 60,
+    "accepted_B_instructions": 37,
+    "entry_PCs": 0,
+    "native_terminal_PC": 60,
+    "B_terminal": "actual EXIT/halted at PC37"
+  },
+  "outcomes": {
+    "guard_reject": "two guest reads, no guest writes, return0",
+    "guards_pass": "two guest reads, four ordered guest writes, return2",
+    "all_guard_outcomes_derived_from_loaded_values": true,
+    "arithmetic": "canonical modular64 including wraparound"
+  },
+  "claims": [
+    "complete actual native and accepted B executions with complete resulting states",
+    "native and B return values agree",
+    "private-footprint memory agreement including initialization and global permissions retained",
+    "B prefix retains all9memoryevents; native prefix has exact same two original reads",
+    "private projection applied only to initializer prefix; every guest-write suffix event kept even under address aliasing"
+  ],
+  "premises": [
+    "both entry PCs0 and active B",
+    "same entry context pointer and memory",
+    "actual successful context reads",
+    "actual successful private-stack read/write permissions",
+    "explicit env.nativeInput stackPointer witness",
+    "context/private-footprint disjointness as in entry theorem",
+    "four successful store permissions only if the guards select the write path",
+    "explicit kernel virtual/physical context transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical before namespace end",
+    "old_declarations_sha256": "59090461c1878eb7588e0595efbc70258e4bcce7ed7b9d88d41bef415421290b",
+    "ISA_runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "not_yet_claimed": [
+    "unconditional whole-program TranslationValidation",
+    "all failed context/store accesses",
+    "program-wide architectural/canonical relational simulation",
+    "ABI/return-boundary/kernel platform transport",
+    "original immutable ELF to materialized native payload transport"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and Lean.ofReduceBool native proof reduction"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "fc7be668b90417f072f45f7d9741aa1ff44723c335e2471e35ae94194ef0e4e0",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.conditional_complete_payload_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "b015ad958ab7e217c9e18e27a08a9da4d55cc6aee4e96a0087943cedde960b56",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and retired after publication; STOP/shared caches retained"
+}

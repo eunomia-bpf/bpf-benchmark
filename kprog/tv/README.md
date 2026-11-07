@@ -1505,3 +1505,33 @@ relational simulation, ABI/return-boundary/platform behavior and immutable-P/
 materialized-artifact transport remain open. This is a successful body
 certificate, not whole-program TV. Evidence:
 `trusted-simple-native-B-packet.json`.
+
+
+Conditional complete captured payload and proof executions
+
+`conditional_complete_payload_correspondence` composes entry, private
+initialization, all three guards, the selected packet-write body and the
+actual accepted EXIT. It proves complete native execution to payload PC60
+and complete B execution to a halted EXIT state, with equal return values
+and related memories. Guard rejection takes the zero-return path; the
+other path performs the four actual writes and returns2. Writable-memory
+premises are required only when the guards select that write path.
+
+The native guest trace has the two original reads and zero or four actual
+writes. B retains its complete nine-event initializer/entry prefix and that
+same guest-write suffix. Private projection applies to the initializer
+prefix alone; the suffix is retained unconditionally, so an address alias
+cannot cause a packet event to be erased. Memory agreement includes outside
+values/initialization and globally equal permissions. All branch outcomes
+come from the actual loaded values with 64-bit wraparound retained.
+
+This is conditional complete execution correspondence for the captured
+60-byte materialized native payload and 37-instruction accepted B, under
+the existing successful context/private-access and platform premises.
+It is not an unconditional whole-program translation-validation result:
+failed context/store accesses, program-wide architectural/relational
+simulation, ABI/return-boundary/platform transport and binding the original
+immutable ELF to the materialized payload remain open. Verifier soundness,
+the canonical reference ISA/platform, kernel binding/capture, and the
+registered specialization/link service until complete TV remain trusted.
+Evidence and axiom audit: `trusted-simple-conditional-complete.json`.
