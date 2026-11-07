@@ -78,7 +78,7 @@ def bcc(live):
         BPFREJIT_NATIVE_LOADER_SO=str(LOADER / "libnative_loader.so"),
         BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF="1",
         BPFREJIT_SHIM_NATIVE_MANIFEST=str(live / "native-only-manifest.json"),
-        BPFREJIT_KEEP_ALL_WORKDIRS="1")
+        BPFREJIT_KEEP_ALL_WORKDIRS="1", BPFREJIT_CORPUS_REJIT_TIMEOUT="0")
     os.environ.pop("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", None)
     command = ["sh", "/qemu-run.sh"]
     work = dict(command=command)
@@ -99,6 +99,9 @@ def bcc(live):
         requests = live / "requests/requests.jsonl"
         work["completed_requests"] = [json.loads(line) for line in requests.read_text().splitlines()] if requests.exists() else []
         (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
+    errors = [row for row in work["corpus_metadata"] if row["status"] == "error"]
+    if errors:
+        raise RuntimeError("BCC corpus recorded application errors: " + json.dumps(errors))
     return dict(app="bcc/set", **work)
 
 
