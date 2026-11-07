@@ -1,0 +1,57 @@
+{
+  "utc": "2026-11-07T23:08:06.520576+00:00",
+  "kind": "otelcol-ebpf-profiler",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261107T215656632646Z.tar.gz",
+  "archive_sha256": "1a83fddcc27c55f8200787b2947e570462fe5f02cd11fa6cca795432675d9021",
+  "host_reported_ok": false,
+  "hashes_unchanged": false,
+  "completed_counts": {
+    "service_accepted": 1,
+    "service_refused": 1
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 2,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "read_task_struct",
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "4dbad6353b07ddbec38f3d00aab0f5939305225f20bac0c25e40a920d8e4b796",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "0fb3b4788c70988529e2c7e1d0ddda819a6cd1cbc5b18e8c80e53321aafc0299",
+        "request/generated/trusted_arm64.bpf.o": "e598f5ee39ef341024f92401867cfa197b34898d96fe39763ba469c84b352d9f",
+        "request/generated/trusted_arm64.bpf.c": "acf140e6897f293418e07ea0d175f3001b98a30e0334b15e0bcaeadad1f3942d",
+        "request/generation.metadata.json": "d947e1db891f29f05c1e9cbe02928a60c453d1e4dd2f47be0578ab2dcb362e4f",
+        "request/kernel.facts.json": "3a74e89ce48eb96fb2cbdddaee636f1a3e41ec7cded64ba88c80ef31ae995f83",
+        "request/source-identities.json": "29ce32f2cc493857d3d7074071323cc4a34eedc9986bcb18a56f3a2ecc9569da"
+      }
+    },
+    {
+      "request_id": 2,
+      "status": -5,
+      "entry": "perf_unwind_stop",
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "6cd269ca635e6314b44cad09b71e9a0fdc16858da9514c2b1d76b33cfb5dc55e",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "752a6b661410f3efd05c2d89dd3f6860f416b6e56b8c56f6c0f7583cef62a190",
+        "request/generated/trusted_arm64.bpf.o": "656f27689aea4391bd7d59a33c618f503729431838a6360b787d740f0fbd7799",
+        "request/generated/trusted_arm64.bpf.c": "40f0e1ca1f53cdd3c62f19397b68a3eed7538941d068fbddb1ba995e9931b7a5",
+        "request/generation.metadata.json": "fe1b9a4327f004af4bc278af832e7c9fe381e1dba98b4fc9bec3f1b91ce9b913",
+        "request/kernel.facts.json": "172be2696a310704c2328de2e28e112e05dca5202de64219a7ac93cbeceae7ff",
+        "request/source-identities.json": "29ce32f2cc493857d3d7074071323cc4a34eedc9986bcb18a56f3a2ecc9569da"
+      }
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}
