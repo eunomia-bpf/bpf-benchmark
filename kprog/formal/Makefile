@@ -178,6 +178,7 @@ check:
 	python3 tools/check_reference_x86_condition.py
 	python3 tools/check_reference_x86_path.py
 	python3 tools/check_x86_memory_widths.py
+	python3 tools/check_arm64_pointer_access.py
 	python3 tools/check_reference_arm64.py
 	python3 tools/check_reference_arm64_addressed_memory.py
 	python3 tools/check_reference_exclusive.py

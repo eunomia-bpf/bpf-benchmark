@@ -723,7 +723,29 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_LOAD_ADDR(ADDR, WIDTH)                                  \
 	KPROG_ARM64_LOAD_BYTES((ADDR), (WIDTH))
 
-#define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
+/* Preserve one native-width pointer read and literal context offsets in BPF.
+ * Host reads also permit unaligned words without alignment/effective-type UB. */
+#ifdef __BPF__
+#define ARM64_SIM_L_LOAD_PTR_AT(BASE, OFFSET)                               \
+	({ void *__a64_ptr_result;                                      \
+	   if (__builtin_constant_p(OFFSET) && (OFFSET) >= -32768 &&      \
+	       (OFFSET) <= 32767)                                       \
+		if ((OFFSET) < 0)                                       \
+			__asm__ volatile("%0 = *(u64 *)(%1 %2)"            \
+				: "=r"(__a64_ptr_result) : "r"(BASE), "i"(OFFSET) : "memory"); \
+		else                                                    \
+			__asm__ volatile("%0 = *(u64 *)(%1 + %2)"          \
+				: "=r"(__a64_ptr_result) : "r"(BASE), "i"(OFFSET) : "memory"); \
+	   else                                                        \
+		__asm__ volatile("%0 = *(u64 *)(%1 + 0)"                  \
+			: "=r"(__a64_ptr_result) : "r"((__u8 *)(BASE) + (OFFSET)) : "memory"); \
+	   __a64_ptr_result; })
+#else
+typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
+#define ARM64_SIM_L_LOAD_PTR_AT(BASE, OFFSET) \
+	(*(arm64_sim_unaligned_ptr volatile *)((__u8 *)(BASE) + (OFFSET)))
+#endif
+#define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) ARM64_SIM_L_LOAD_PTR_AT((ADDR), 0)
 
 /*
  * Little-endian byte-ladder store. The byte lanes and the width-driven ladder
@@ -806,9 +828,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			break;                                             \
 		}                                                        \
 		case KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD: {                 \
-			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
 			__a64_mrd_value =                                \
-				(__u64)(long)ARM64_SIM_L_LOAD_PTR_ADDR(__a64_mrd_addr);\
+				(__u64)(long)ARM64_SIM_L_LOAD_PTR_AT(ARM64_SIM_L_READ_REG_PTR(BASE), __a64_mrd_off);\
 			break;                                             \
 		}                                                        \
 		case KPROG_ARM64_MEM_SRC_RELOC_PTR:                      \
