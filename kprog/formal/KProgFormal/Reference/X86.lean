@@ -1558,4 +1558,15 @@ theorem decode_simple_packet_tail (s : State) :
       List.range'_succ,
       Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
 
+
+/-- Proof-only symbolic reduction through the single canonical decoder.
+The quotation retains access to its private implementation names, allowing
+external byte/extent certificates to compute without copying ISA semantics. -/
+macro "canonical_x86_decode" : tactic =>
+  `(tactic| simp +decide [decode,prefixes,byteAt,operand,addressParts,
+    signedDisplacement,registerCode,scalarWidth,scalarSlice,scalarSource,
+    scalarDestination,ScalarWidth.bytes,ScalarWidth.bits,fallthrough,integerBinary,
+    Instruction.fallthrough,List.range'_succ,Except.bind,Except.map,Except.pure,
+    Bind.bind,Pure.pure,Except.instMonad])
+
 end KProgFormal.Reference.X86

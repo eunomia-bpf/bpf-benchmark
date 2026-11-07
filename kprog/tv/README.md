@@ -1768,3 +1768,21 @@ provenance remain trusted or explicit premises; the dated fidelity TCB inventory
 records source scope separately. Arbitrary CFG/extent and finite-prefix coverage,
 strict basic-block mapping and semantic entry/ABI/RET/platform transport remain
 open. This conditional selected-path theorem is not unconditional artifact TV.
+
+### Finite-prefix safety up to a proved state relation
+
+`TrustedSimpleSafety.execution_checked_of_related_complete` generalizes complete-run
+safety to every finite execution from a related entry. Its explicit premises
+require equal step events, related successor states, checked complete-run events
+and a closed checked terminal region. It assumes neither full-state determinism
+nor fuel/termination for the arbitrary run. This permits the concrete proof to
+retain ISA-undefined AF choices until the real CMP overwrites them. The two new
+generic lemmas use only `propext`; concrete x86 relation/CFG/terminal instantiation
+is still required. Run the existing `trusted-simple-safety-certificate` target.
+
+The reference module also exports the proof-only `canonical_x86_decode` tactic.
+Its hygienic quotation reduces the original private decoder helpers, enabling
+external extent proofs without another ISA implementation or global simp changes.
+All earlier reference definitions and theorems remain byte-identical. The17-entry
+extent/CFG job remains separate and pending. Evidence for the checked generic
+composition and compiled interface is in related-prefix-composition JSON/log.

@@ -100,6 +100,58 @@ theorem bound_captured_selected_path_effects_checked (env : BPF.Environment) (n 
   · exact checkedSetup event setup
   · exact checkedGuest event guest
 
+
+/-- A checked terminal region may vary only within a proved state relation;
+all steps remain in that region and emit only already checked events. -/
+theorem execution_checked_related_terminal {State : Type} {step : BlockStep State}
+    (related : State → State → Prop) (checked : Event → Prop) (terminal : State)
+    (quiet : ∀ {s events next}, related terminal s → step s events next →
+      related terminal next ∧ ∀ event ∈ events, checked event)
+    {s last : State} {trace : List Event} (run : Execution step s trace last)
+    (initial : related terminal s) : ∀ event ∈ trace, checked event := by
+  induction run with
+  | refl => intro event inside; simp at inside
+  | next head tail ih =>
+    obtain ⟨nextRelation,allowed⟩ := quiet initial head
+    have checkedTail := ih nextRelation
+    intro event inside
+    rcases List.mem_append.mp inside with first | second
+    · exact allowed event first
+    · exact checkedTail event second
+
+/-- One checked complete execution covers every finite execution from a
+related entry when each actual step has the same events and a related next
+state. The relation may retain precisely the ISA's undefined-output freedom;
+full-state determinism is not assumed. No fuel or termination assumption is
+placed on the arbitrary execution. -/
+theorem execution_checked_of_related_complete {State : Type} {step : BlockStep State}
+    (related : State → State → Prop)
+    (matched : ∀ {first second firstEvents firstNext secondEvents secondNext},
+      related first second → step first firstEvents firstNext →
+      step second secondEvents secondNext → firstEvents=secondEvents ∧ related firstNext secondNext)
+    (checked : Event → Prop) {s terminal : State} {expected : List Event}
+    (complete : Execution step s expected terminal)
+    (allowed : ∀ event ∈ expected, checked event)
+    (quiet : ∀ {state events next}, related terminal state → step state events next →
+      related terminal next ∧ ∀ event ∈ events, checked event)
+    {actualStart last : State} {trace : List Event}
+    (initial : related s actualStart) (run : Execution step actualStart trace last) :
+    ∀ event ∈ trace, checked event := by
+  induction complete generalizing actualStart trace last with
+  | refl => exact execution_checked_related_terminal related checked _ quiet run initial
+  | next head suffix ih =>
+    cases run with
+    | refl => intro event inside; simp at inside
+    | next actualHead actualTail =>
+      obtain ⟨sameEvents,nextRelation⟩ := matched initial head actualHead
+      cases sameEvents
+      have checkedTail := ih (fun event inside => allowed event (List.mem_append_right _ inside))
+        quiet nextRelation actualTail
+      intro event inside
+      rcases List.mem_append.mp inside with first | second
+      · exact allowed event (List.mem_append_left _ first)
+      · exact checkedTail event second
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -107,3 +159,7 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projected_events_checked
 
 #print axioms KProgTV.TrustedSimpleSafety.bound_captured_selected_path_effects_checked
+
+#print axioms KProgTV.TrustedSimpleSafety.execution_checked_related_terminal
+
+#print axioms KProgTV.TrustedSimpleSafety.execution_checked_of_related_complete
