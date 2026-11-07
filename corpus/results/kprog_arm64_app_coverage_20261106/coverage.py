@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -75,16 +76,20 @@ def freeze_simulator(directory):
         shutil.copytree(ROOT / 'kprog/formal/generated', directory / 'formal/generated')
 
 
-def compile_one(row, directory, timeout, memory_mb):
+def compile_one(row, directory, timeout, memory_mb, preclean=False):
     with (directory / 'compile-locks' / (row['name'] + '.lock')).open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        return compile_locked(row, directory, timeout, memory_mb)
+        return compile_locked(row, directory, timeout, memory_mb, preclean)
 
 
-def compile_locked(row, directory, timeout, memory_mb):
+def compile_locked(row, directory, timeout, memory_mb, preclean=False):
     log = directory / 'compile' / (row['name'] + '.json')
+    pipeline = 'preclean-o2' if preclean else 'clang-o2'
     if log.exists():
-        return json.loads(log.read_text())
+        prior = json.loads(log.read_text())
+        if prior.get('compiler_pipeline', 'clang-o2') != pipeline:
+            raise ValueError('compiler pipeline changed; use a new frozen phase')
+        return prior
     source = directory / 'compile-sources' / (row['name'] + '.bpf.c')
     source.write_text(Path(row['source']).read_text().replace(
         '#include "../arm64_sim_local_bpf.h"',
@@ -96,19 +101,45 @@ def compile_locked(row, directory, timeout, memory_mb):
                '-I', '/usr/include/x86_64-linux-gnu',
                '-I', str(ROOT / 'kprog/arm64/micro-prog'), '-c', str(source),
                '-o', str(directory / 'objects' / (row['name'] + '.bpf.o'))]
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, timeout=timeout)
-        code, stdout, stderr = result.returncode, result.stdout, result.stderr
-    except subprocess.TimeoutExpired as error:
-        code = 124
-        stdout = (error.stdout or b'').decode(errors='replace')
-        stderr = (error.stderr or b'').decode(errors='replace') + f'\ncompile timeout after {timeout}s\n'
-    record = dict(row, command=command, returncode=code, stdout=stdout, stderr=stderr)
+    commands = [command]
+    if preclean:
+        ir = directory / 'compiler-ir'
+        ir.mkdir(exist_ok=True)
+        stem = ir / row['name']
+        commands = [command[:-4] + ['-Xclang', '-disable-llvm-passes', '-emit-llvm',
+            '-c', str(source), '-o', str(stem)+'.front.bc']]
+        for index, passes in enumerate(['instcombine<max-iterations=16>,simplifycfg',
+                'sroa,instcombine<max-iterations=16>,simplifycfg', 'default<O2>']):
+            input_ir = str(stem)+('.front.bc' if index == 0 else f'.{index-1}.bc')
+            commands.append(['prlimit', f'--as={memory_mb * 1024 * 1024}', '--core=0',
+                '--', 'opt-18', '-passes='+passes, input_ir, '-o', str(stem)+f'.{index}.bc'])
+        commands.append(['prlimit', f'--as={memory_mb * 1024 * 1024}', '--core=0',
+            '--', 'llc-18', '-mcpu=v4', '-bpf-stack-size=4096', '-filetype=obj',
+            str(stem)+'.2.bc', '-o', str(directory/'objects'/(row['name']+'.bpf.o'))])
+    deadline = time.monotonic() + timeout
+    attempts = []
+    stdout = stderr = ''
+    for step in commands:
+        try:
+            result = subprocess.run(step, text=True, capture_output=True,
+                timeout=max(0.001, deadline-time.monotonic()))
+            code, step_stdout, step_stderr = result.returncode, result.stdout, result.stderr
+        except subprocess.TimeoutExpired as error:
+            code = 124
+            step_stdout = (error.stdout or b'').decode(errors='replace')
+            step_stderr = (error.stderr or b'').decode(errors='replace') + f'\ncompile timeout after {timeout}s\n'
+        stdout += step_stdout
+        stderr += step_stderr
+        attempts.append(dict(command=step, returncode=code, stdout=step_stdout, stderr=step_stderr))
+        if code:
+            break
+    record = dict(row, command=commands[0], commands=attempts, compiler_pipeline=pipeline,
+        returncode=code, stdout=stdout, stderr=stderr)
     log.write_text(json.dumps(record) + '\n')
     return record
 
 
-def compile_all(directory, offset=0, stop=None, timeout=120, jobs=1, memory_mb=8192):
+def compile_all(directory, offset=0, stop=None, timeout=120, jobs=1, memory_mb=8192, *, preclean=False):
     if jobs < 1 or memory_mb < 1:
         raise ValueError("compiler jobs and memory_mb must be positive")
     for name in ['compile', 'objects', 'compile-sources', 'compile-locks']:
@@ -118,7 +149,7 @@ def compile_all(directory, offset=0, stop=None, timeout=120, jobs=1, memory_mb=8
     freeze_simulator(directory)
     failures = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
-        futures = [pool.submit(compile_one, row, directory, timeout, memory_mb) for row in rows]
+        futures = [pool.submit(compile_one, row, directory, timeout, memory_mb, preclean) for row in rows]
         for count, future in enumerate(concurrent.futures.as_completed(futures), 1):
             row = future.result()
             failures += row['returncode'] != 0
@@ -287,8 +318,8 @@ def package(directory, build, base):
 if __name__ == '__main__':
     action, path, *rest = sys.argv[1:]
     directory = Path(path).resolve()
-    if action == 'compile':
-        code = compile_all(directory, *map(int, rest))
+    if action in {'compile', 'compile-preclean'}:
+        code = compile_all(directory, *map(int, rest), preclean=action == 'compile-preclean')
     elif action == 'summarize':
         code = summarize(directory)
     elif action == 'census':

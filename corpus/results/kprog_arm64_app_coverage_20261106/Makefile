@@ -650,3 +650,7 @@ load-offset-check:
 	python3 $(HERE)/load_offset_check.py $(HERE)/$(PHASE)
 	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal $(ROOT)/kprog/formal/oracles/test_arm64_load_bytes_host.c -o $(ROOT)/kprog/arm64/build/load-bytes-host
 	$(ROOT)/kprog/arm64/build/load-bytes-host
+
+.PHONY: compile-preclean
+compile-preclean:
+	taskset -c 16-23 python3 $(HERE)/coverage.py compile-preclean $(HERE)/$(PHASE) $(COMPILE_ARGS)

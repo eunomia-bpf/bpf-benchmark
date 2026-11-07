@@ -1,0 +1,26 @@
+{
+  "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v8/compile-sources/otel_perf_unwind_native.bpf.c": {
+    "bytes": 3716912,
+    "sha256": "c56f8bc292bfff6e3677bf88198fb423f86034dcbebcec9bcf1fab607f4ebffe"
+  },
+  "kprog/arm64/build/a-ir-diagnostic/otel_perf_unwind_native.bpf.o": {
+    "bytes": 4967000,
+    "sha256": "aff389404582671d4665ec48d317ab0d4a5970113d1f7023b101609a9b165d59"
+  },
+  "kprog/arm64/build/a-ir-diagnostic/frontend.bc": {
+    "bytes": 196865604,
+    "sha256": "c2a4365873ed207ca20982db052dc07ad2fa7205864e27bc3349fb8d080d2537"
+  },
+  "kprog/arm64/build/a-ir-diagnostic/preclean.bc": {
+    "bytes": 148763576,
+    "sha256": "8fae50159826754515fa9934d4363af7d41b8636b8c9e4bc8adfcf2f1ca7347b"
+  },
+  "kprog/arm64/build/a-ir-diagnostic/cleanpromoted.bc": {
+    "bytes": 57345860,
+    "sha256": "da2b7e31a4cde27369bdd7bd1bbee2acde75b9921958e816fdc105bac9952155"
+  },
+  "kprog/arm64/build/a-ir-diagnostic/optimized.bc": {
+    "bytes": 21494180,
+    "sha256": "711b681381cbc6bfed1451ae8840310ed647c000486fdc1120bbceb4ebadbd40"
+  }
+}

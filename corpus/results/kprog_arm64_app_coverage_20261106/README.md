@@ -971,3 +971,11 @@ are retained. Katran completes both workload phases with1baseline/1native
 resident counter row. BCC, OTel, Cilium, Tetragon and Tracee record application
 errors and no native workload phase. These failures remain open; BCC's newer
 v14 evidence is listed above. Driver exit0 is not application success.
+
+## OTel native unwind compiler-order fix
+
+[Same-source compilation now succeeds](otel-native-preclean-result/README.md)
+after constant cleanup precedes SROA, followed by standard LLVM O2/backend.
+The exact source/object, all IR hashes and original O2/O1 OOM traces are
+retained. Fresh14-entry compilation and map/global linking continue separately;
+this result establishes compilation only, with no verifier/app success claim.
