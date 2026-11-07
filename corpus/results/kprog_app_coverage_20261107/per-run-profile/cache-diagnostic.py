@@ -2,6 +2,15 @@
 import json,os,traceback
 from pathlib import Path
 import guest as g
+(g.OUT/'script.snapshot.py').write_bytes(Path(__file__).read_bytes())
+(g.OUT/'guest.snapshot.py').write_bytes(Path(g.__file__).read_bytes())
+def probe_commands(trace,*lines):
+ # FileIO append seeks to END; tracefs seq_lseek rejects END with EINVAL.
+ fd=os.open(trace/'kprobe_events',os.O_WRONLY|os.O_APPEND)
+ try:
+  data=(chr(10).join(lines)+chr(10)).encode()
+  if os.write(fd,data)!=len(data):raise RuntimeError('short tracefs command write')
+ finally:os.close(fd)
 for p,v in [('/proc/sys/kernel/bpf_stats_enabled','1'),('/proc/sys/net/core/bpf_jit_kallsyms','1')]:Path(p).write_text(v+chr(10))
 try:
  for arm,disabled in [('jit',0),('native',0),('native',1)]:
@@ -18,9 +27,8 @@ try:
    g.command([g.HELPER,'dump',ident,0,g.OUT/(label+'.jit.bin')],g.OUT/(label+'-jit-info.json'))
    g.map_stats(g.OUT/(label+'-before.json'))
    trace=Path('/sys/kernel/tracing')
-   with (trace/'kprobe_events').open('a') as f:
-    f.write('p:kprog_cache/lookup __htab_map_lookup_elem map=%di:x64 key=%si:x64 k0=+0(%si):x64 k1=+8(%si):x64 k2=+16(%si):x64 k3=+24(%si):x64 k4=+32(%si):x64'+chr(10))
-    f.write('r:kprog_cache/lookup_ret __htab_map_lookup_elem ret=$retval:x64 pos=+88($retval):x32'+chr(10))
+   if not (trace/'kprobe_events').exists():g.command(['mount','-t','tracefs','tracefs',trace],g.OUT/(label+'-tracefs-mount.json'))
+   probe_commands(trace,'p:kprog_cache/lookup __htab_map_lookup_elem map=%di:x64 key=%si:x64 k0=+0(%si):x64 k1=+8(%si):x64 k2=+16(%si):x64 k3=+24(%si):x64 k4=+32(%si):x64','r:kprog_cache/lookup_ret __htab_map_lookup_elem ret=$retval:x64 pos=+88($retval):x32')
    (trace/'trace').write_text('')
    (trace/'events/kprog_cache/enable').write_text('1')
    (trace/'tracing_on').write_text('1')
@@ -28,7 +36,7 @@ try:
    (trace/'tracing_on').write_text('0')
    (trace/'events/kprog_cache/enable').write_text('0')
    (g.OUT/(label+'-lookup-trace.txt')).write_text((trace/'trace').read_text())
-   with (trace/'kprobe_events').open('a') as f:f.write('-:kprog_cache/lookup'+chr(10)+'-:kprog_cache/lookup_ret'+chr(10))
+   probe_commands(trace,'-:kprog_cache/lookup','-:kprog_cache/lookup_ret')
    g.map_stats(g.OUT/(label+'-after.json'))
   finally:runner.stop()
  g.publish(g.OUT/'complete.json',dict(ok=True,kind='functional cache diagnostic; no comparative timing'))

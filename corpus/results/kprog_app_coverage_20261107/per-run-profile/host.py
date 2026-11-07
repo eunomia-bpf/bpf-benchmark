@@ -6,9 +6,14 @@ ROOT=Path('/workspaces/repository');sys.path.insert(0,str(ROOT))
 from corpus.profiling.perf_control import PerfCollector
 HERE=Path(__file__).resolve().parent;STATE=Path('/workspaces/.agent-state/kprog-lanes/C')
 PERF=STATE/'perf-build/perf';variant=sys.argv[1] if len(sys.argv)>1 else 'baseline'
-if variant not in ('baseline','tables','no-lowering'):raise ValueError(variant)
-image='bpf-benchmark/kprog-map-capture:c-20261107' if variant!='tables' else 'bpf-benchmark/kprog-perf-tables:c-20261107'
-image_tar=str(STATE/('map-capture-runtime.image.tar' if variant!='tables' else 'perf-tables-runtime.image.tar'))
+variants={
+ 'baseline':('bpf-benchmark/kprog-map-capture:c-20261107','map-capture-runtime.image.tar'),
+ 'tables':('bpf-benchmark/kprog-perf-tables:c-20261107','perf-tables-runtime.image.tar'),
+ 'no-lowering':('bpf-benchmark/kprog-map-capture:c-20261107','map-capture-runtime.image.tar'),
+ 'map-identity':('bpf-benchmark/kprog-map-identity:c-20261107','map-identity.image.tar.gz'),
+}
+if variant not in variants:raise ValueError(variant)
+image,filename=variants[variant];image_tar=str(STATE/filename)
 OUT=HERE/('run-'+variant+'-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ'));OUT.mkdir()
 QMP=STATE/'perf-qmp.sock'
 def occupants(exclude=None):

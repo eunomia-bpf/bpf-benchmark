@@ -97,4 +97,23 @@ perf-no-lowering-profile:
 
 perf-cache-diagnostic:
 	install -d /workspaces/.agent-state/kprog-lanes/C/cache-diag-var-tmp /workspaces/.agent-state/kprog-lanes/C/cache-diag-tmp /workspaces/.agent-state/kprog-lanes/C/cache-diag-modules
-	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/cache-diag-modules --disable-monitor --cpus 1 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/per-run-profile/guest.sh $(HERE)/per-run-profile/cache-trace-diagnostic bpf-benchmark/kprog-map-capture:c-20261107 /workspaces/.agent-state/kprog-lanes/C/map-capture-runtime.image.tar 0 cache-diagnostic.py'
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/cache-diag-modules --disable-monitor --cpus 1 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/per-run-profile/guest.sh $(HERE)/per-run-profile/cache-trace-diagnostic-replay bpf-benchmark/kprog-map-capture:c-20261107 /workspaces/.agent-state/kprog-lanes/C/map-capture-runtime.image.tar 0 cache-diagnostic.py'
+
+map-identity-tests:
+	taskset -c 20-23 env CARGO_TARGET_DIR=/workspaces/.agent-state/kprog-lanes/C/map-identity-target-current CARGO_BUILD_JOBS=2 cargo test --offline --manifest-path /workspaces/.agent-state/kprog-lanes/C/map-identity-source/current/kprog/x86/native_lab/native_link/Cargo.toml
+	taskset -c 20-23 env CARGO_TARGET_DIR=/workspaces/.agent-state/kprog-lanes/C/map-identity-target-runtime CARGO_BUILD_JOBS=2 cargo test --offline --manifest-path /workspaces/.agent-state/kprog-lanes/C/map-identity-source/runtime/Cargo.toml
+
+map-identity-linker:
+	taskset -c 20-23 env CARGO_TARGET_DIR=/workspaces/.agent-state/kprog-lanes/C/map-identity-target-runtime CARGO_BUILD_JOBS=2 cargo build --offline --release --manifest-path /workspaces/.agent-state/kprog-lanes/C/map-identity-source/runtime/Cargo.toml
+
+map-identity-image:
+	install -m0755 /workspaces/.agent-state/kprog-lanes/C/map-identity-target-runtime/release/native-link $(HERE)/map-identity-v1/runtime/native-link
+	docker build -f $(HERE)/map-identity-v1/Dockerfile -t bpf-benchmark/kprog-map-identity:c-20261107 $(HERE)/map-identity-v1/runtime
+	bash -o pipefail -c 'docker save bpf-benchmark/kprog-map-identity:c-20261107 | gzip -1 > /workspaces/.agent-state/kprog-lanes/C/map-identity.image.tar.gz'
+
+map-identity-functional:
+	install -d /workspaces/.agent-state/kprog-lanes/C/map-id-var-tmp /workspaces/.agent-state/kprog-lanes/C/map-id-tmp /workspaces/.agent-state/kprog-lanes/C/map-id-modules
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/map-id-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/map-id-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/map-id-modules --disable-monitor --cpus 1 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/map-identity-v1/guest.sh'
+
+perf-map-identity-profile:
+	python3 -u $(HERE)/per-run-profile/host.py map-identity

@@ -1,0 +1,49 @@
+[
+  {
+    "phase": "before",
+    "jit": {
+      "id": 16,
+      "name": "balancer_ingres",
+      "type": 6,
+      "btf_id": 43,
+      "func_type_id": 116,
+      "run_cnt": 4,
+      "run_time_ns": 4168,
+      "jited_len": 10261,
+      "jited_addr": "0xffffffffc0605d5c",
+      "first_jited_func_len": 10261
+    },
+    "jit_sha256": "0668af1b5656cb2f69e821d7990825e477bddd4cb4ebce27774c272980465423",
+    "vip_gate_offsets": [
+      4362,
+      7087
+    ],
+    "ipv4_lookup_operation_offset": 7109,
+    "operation_bytes": "8b063d000400007316488d84c730010000488b00654803042528102b9eeb0231c04885c0",
+    "first_key_word": 33554442,
+    "wrong_array_max_entries": 1024
+  },
+  {
+    "phase": "fixed",
+    "jit": {
+      "id": 39,
+      "name": "balancer_ingres",
+      "type": 6,
+      "btf_id": 76,
+      "func_type_id": 116,
+      "run_cnt": 4,
+      "run_time_ns": 3805,
+      "jited_len": 10151,
+      "jited_addr": "0xffffffffc0605d54",
+      "first_jited_func_len": 10151
+    },
+    "jit_sha256": "02942413ca794b33c3ef7f28bb133191710084e095915c0bcfdafbc2e2f5098e",
+    "vip_gate_offsets": [
+      4362,
+      7030
+    ],
+    "ipv4_lookup_operation_offset": 7052,
+    "operation_bytes": "e84b1eebda4885c0742a4989c5807c2464117535b805000000e86222ebda4889c1492b4d",
+    "direct_call_target": "0xffffffff9b4b9730"
+  }
+]
