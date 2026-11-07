@@ -1,33 +1,7 @@
-/*
- * Host cross-check for the x86 simulator's routing of the four block-copy /
- * block-fill bodies `X86_SIM_L_EXEC_CALL_MEMCPY`, `..._MEMCPY_REG`,
- * `..._MEMSET`, and `..._MEMSET_REG` through the machine-checked
- * `KPROG_X86_CALLMEM_*` contract.
- *
- * The four bodies now share one `X86_SIM_L_EXEC_CALL_MEM_STEP` composition
- * that selects the array shape through `KPROG_X86_CALLMEM_KIND`, the
- * copied/filled length's source through `KPROG_X86_CALLMEM_COUNT_SOURCE`, and
- * the array bound through `KPROG_X86_CALLMEM_BOUND_FORM` /
- * `KPROG_X86_CALLMEM_FIXED_BOUND`. This oracle includes the *simulator* header
- * so it drives those real bodies rather than a restatement, and compares the
- * whole modeled heap and the result-register write against an independent
- * byte model.
- *
- * Unlike the pre-existing `test_x86_callmem_host.c` (which checks the contract
- * plus a model but never includes the simulator header), this oracle covers
- * the routing the four bodies now perform. It plants, per opcode, a case where
- * each of the three routed facts is *numerically distinguishable* from the
- * wrong selection: an immediate-count case whose artifact exceeds the literal
- * `1024` bound (so a bound-form swap to the artifact writes a longer region),
- * and a register-count case whose `RDX` exceeds the artifact (so a bound-form
- * swap to the literal, or a count-source swap to the artifact, writes a
- * different region).
- *
- * Build/run:
- *   cd kprog/formal
- *   gcc -Wall -Wextra -O2 -I. -I../x86 -I../../kprog \
- *       -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *       test_x86_callmem_route_host.c -o /tmp/t_cmr && /tmp/t_cmr
+/* Actual simulator copy/fill routing against full-count byte effects.
+ * Fixed counts above 1024 and register counts above IMM must not truncate.
+ * Copy fixtures use disjoint valid buffers; this is not a kernel memcpy
+ * overlap contract. Every destination byte and the returned pointer/tag match.
  */
 typedef unsigned char __u8;
 typedef unsigned short __u16;
@@ -81,7 +55,7 @@ static void snapshot_expect(void)
 static void check_op(const char *what, int op_is_copy, int op_is_reg,
 		     __u64 imm, __u64 rdx, __u64 fill_value, __u8 rdi_tag)
 {
-	__u64 bound = op_is_reg ? imm : (__u64)KPROG_X86_CALLMEM_FIXED_BOUND;
+
 	__u64 count = op_is_reg ? rdx : imm;
 	void *dst_ptr = (void *)(heap + DST_OFF);
 	void *src_ptr = (void *)(heap + SRC_OFF);
@@ -111,7 +85,7 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, rdx, X86_WIDTH_64);
 
 	/* ---- independent byte model of the bounded region ---- */
-	for (i = 0; i < bound && (__u64)i < count; i++) {
+	for (i = 0; (__u64)i < count; i++) {
 		if (op_is_copy)
 			exp_heap[DST_OFF + i] = heap[SRC_OFF + i];
 		else
@@ -175,17 +149,7 @@ static void check_selectors(void)
 		printf("MISMATCH count source\n");
 		failures++;
 	}
-	cases++;
-	if (KPROG_X86_CALLMEM_BOUND_FORM(1) != KPROG_X86_CALLMEM_BOUND_IMM ||
-	    KPROG_X86_CALLMEM_BOUND_FORM(0) != KPROG_X86_CALLMEM_BOUND_FIXED) {
-		printf("MISMATCH bound form\n");
-		failures++;
-	}
-	cases++;
-	if (KPROG_X86_CALLMEM_FIXED_BOUND != 1024U) {
-		printf("MISMATCH fixed bound=%u\n", KPROG_X86_CALLMEM_FIXED_BOUND);
-		failures++;
-	}
+
 }
 
 int main(void)
@@ -193,21 +157,16 @@ int main(void)
 	__u8 tags[] = { X86_SIM_TAG_SCALAR, X86_SIM_TAG_MAP_VALUE };
 	unsigned t;
 
-	/* ---- copy opcodes: source bytes move byte by byte ---- */
-	/* MEMCPY: immediate count, flat. */
+	/* Full-count cases, including sizes beyond the removed simulator cap. */
 	check_op("memcpy/imm", 1, 0, 16, 0, 0, X86_SIM_TAG_SCALAR);
-	/* MEMCPY: immediate count *larger* than the literal bound, so a
-	 * bound-form swap to the artifact would write past 1024 bytes. */
+	/* Full requested length; IMM is ignored by register-count forms. */
 	check_op("memcpy/imm/over", 1, 0, 2000, 0, 0, X86_SIM_TAG_SCALAR);
-	/* MEMCPY: immediate count smaller than the bound. */
+	/* Full requested length; IMM is ignored by register-count forms. */
 	check_op("memcpy/imm/small", 1, 0, 4, 0, 0, X86_SIM_TAG_SCALAR);
-	/* MEMCPY_REG: register count; artifact is the bound. */
+	/* Full requested length; IMM is ignored by register-count forms. */
 	check_op("memcpy/reg", 1, 1, 32, 16, 0, X86_SIM_TAG_SCALAR);
 	check_op("memcpy/reg/zero", 1, 1, 32, 0, 0, X86_SIM_TAG_SCALAR);
-	/* MEMCPY_REG with RDX *larger* than the artifact, so both a
-	 * bound-form swap (to the literal 1024) and a count-source swap (to
-	 * the artifact) write a different region than the artifact-bounded
-	 * min(imm, rdx). */
+	/* Full requested length; IMM is ignored by register-count forms. */
 	check_op("memcpy/reg/over", 1, 1, 8, 2000, 0, X86_SIM_TAG_SCALAR);
 
 	/* ---- fill opcodes: one masked byte to every element ---- */

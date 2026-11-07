@@ -1,36 +1,6 @@
-/*
- * Host cross-check for the x86-64 `CALL_MEMCPY` / `CALL_MEMSET` handler
- * composition (`X86_OP_CALL_MEMCPY`, `0x3f`, `X86_OP_CALL_MEMCPY_REG`,
- * `0x46`, `X86_OP_CALL_MEMSET`, `0x3c`, and `X86_OP_CALL_MEMSET_REG`, `0x45`),
- * the bodies `X86_SIM_L_EXEC_CALL_MEMCPY`, `X86_SIM_L_EXEC_CALL_MEMCPY_REG`,
- * `X86_SIM_L_EXEC_CALL_MEMSET`, and `X86_SIM_L_EXEC_CALL_MEMSET_REG`.
- *
- * Part 1 verifies the generated opcode/kind/count-source/bound-form tables
- * against independent restatements: the two `MEMCPY` opcodes copy and the two
- * `MEMSET` opcodes fill; the two `*_REG` opcodes take their length from `RDX`
- * and the two immediate forms from the artifact; and — the asymmetry the
- * contract is about — the two immediate-count bodies iterate to the hardcoded
- * literal `1024` while the two register-count bodies are bounded by the
- * artifact, the *opposite* of their length source.
- *
- * Part 2 drives the whole block-copy/fill composition over a deterministic
- * register and memory model: it classifies the body through the generated kind
- * table, selects the length source through the generated count-source table and
- * the array bound through the generated bound-form table, and moves bytes one
- * at a time through the shared little-endian load/store at width 8. The whole
- * destination buffer, the whole register file, and the result-register write
- * must match a hand-written model of the four C bodies.
- *
- * Part 3 pins the facts the composition is about: the immediate-count bodies
- * iterate to the literal `1024` even when the artifact is smaller or larger;
- * a copy writes the source bytes whereas a fill writes one constant; bytes at
- * or beyond the bound (and at or beyond the count) keep their old values; and
- * the bodies write `RAX` as the destination pointer carrying the destination
- * register's tag while leaving every other GPR and flag unchanged.
- *
- * Build/run:
- *   cd kprog/formal
- *   cc -Wall -Wextra -O2 -I. test_x86_callmem_host.c -o /tmp/t_cm && /tmp/t_cm
+/* Exact-count callmem selector/composition checks over finite host fixtures.
+ * All four opcodes process their full selected length, including >1024.
+ * The separate actual-route oracle exercises the production C body.
  */
 typedef unsigned char __u8;
 typedef unsigned short __u16;
@@ -191,78 +161,15 @@ static __u8 oracle_low_byte(__u64 value)
 
 static unsigned part1(void)
 {
-	static const unsigned opcodes[4] = {
-		X86_OP_CALL_MEMCPY, X86_OP_CALL_MEMCPY_REG,
-		X86_OP_CALL_MEMSET, X86_OP_CALL_MEMSET_REG,
-	};
-	unsigned cases = 0;
-	unsigned oi;
-
-	for (oi = 0; oi < 4U; oi++) {
-		unsigned op = opcodes[oi];
-		unsigned want_copy = op == X86_OP_CALL_MEMCPY ||
-				     op == X86_OP_CALL_MEMCPY_REG;
-		unsigned want_reg = op == X86_OP_CALL_MEMCPY_REG ||
-				    op == X86_OP_CALL_MEMSET_REG;
-		unsigned want_kind = want_copy ? KPROG_X86_CALLMEM_COPY
-					       : KPROG_X86_CALLMEM_FILL;
-		unsigned want_count = want_reg ? KPROG_X86_CALLMEM_COUNT_REG
-					       : KPROG_X86_CALLMEM_COUNT_IMM;
-		/* The bound form is the opposite selection: the immediate-count
-		 * bodies take the literal bound, the register-count bodies the
-		 * artifact. Reading the count source as the bound form would
-		 * collapse the two facts. */
-		unsigned want_bound = want_reg ? KPROG_X86_CALLMEM_BOUND_IMM
-					       : KPROG_X86_CALLMEM_BOUND_FIXED;
-		unsigned got_kind = KPROG_X86_CALLMEM_KIND(want_copy);
-		unsigned got_count = KPROG_X86_CALLMEM_COUNT_SOURCE(want_reg);
-		unsigned got_bound = KPROG_X86_CALLMEM_BOUND_FORM(want_reg);
-
-		if (got_kind != want_kind) {
-			fprintf(stderr, "kind mismatch op=%#x got=%u want=%u\n",
-				op, got_kind, want_kind);
-			return 0;
-		}
-		if (got_count != want_count) {
-			fprintf(stderr, "count source mismatch op=%#x got=%u want=%u\n",
-				op, got_count, want_count);
-			return 0;
-		}
-		if (got_bound != want_bound) {
-			fprintf(stderr, "bound form mismatch op=%#x got=%u want=%u\n",
-				op, got_bound, want_bound);
-			return 0;
-		}
-		/* The bound form and the count source are independent facts: the
-		 * count source is the artifact exactly when the bound is the
-		 * literal, and the register exactly when the bound is the
-		 * artifact. In codes the two selections coincide, so only this
-		 * reading separates them — a collapsed table loses it. */
-		if ((got_count == KPROG_X86_CALLMEM_COUNT_IMM) !=
-		    (got_bound == KPROG_X86_CALLMEM_BOUND_FIXED)) {
-			fprintf(stderr,
-				"bound form and count source collapsed op=%#x\n",
-				op);
-			return 0;
-		}
-		/* The two kinds are distinct, and the two bound forms are. */
-		if (KPROG_X86_CALLMEM_KIND(1U) == KPROG_X86_CALLMEM_KIND(0U))
-			return 0;
-		if (KPROG_X86_CALLMEM_BOUND_FORM(1U) ==
-		    KPROG_X86_CALLMEM_BOUND_FORM(0U))
-			return 0;
-		cases++;
-	}
-
-	/* The hardcoded bound is the literal 1024 and each width-8 element is
-	 * one byte. */
-	if (KPROG_X86_CALLMEM_FIXED_BOUND != 1024U)
-		return 0;
-	if (KPROG_X86_WIDTH_BITS(X86_WIDTH_8) / 8U != 1U)
-		return 0;
-	cases++;
-
-	return cases;
+ unsigned op, cases = 0;
+ for (op = 0; op < 4; op++) {
+  unsigned copy = op < 2, reg = op == 1 || op == 3;
+  if (KPROG_X86_CALLMEM_KIND(copy) != (copy ? 0U : 1U)) return 0;
+  if (KPROG_X86_CALLMEM_COUNT_SOURCE(reg) != (reg ? 1U : 0U)) return 0;
+  cases++;
+ }
+ if (KPROG_X86_WIDTH_BITS(X86_WIDTH_8) != 8U) return 0;
+ return cases + 1;
 }
 
 /* ------------------------------------------------------------------ */
@@ -288,13 +195,10 @@ static struct callmem_effect contract_step(unsigned op_is_copy,
 {
 	__u8 kind = KPROG_X86_CALLMEM_KIND(op_is_copy);
 	__u8 count_source = KPROG_X86_CALLMEM_COUNT_SOURCE(op_is_reg);
-	__u8 bound_form = KPROG_X86_CALLMEM_BOUND_FORM(op_is_reg);
-	unsigned bound = bound_form == KPROG_X86_CALLMEM_BOUND_FIXED
-		? KPROG_X86_CALLMEM_FIXED_BOUND
-		: (unsigned)imm;
 	unsigned count = count_source == KPROG_X86_CALLMEM_COUNT_REG
 		? (unsigned)oracle_reg_value(X86_RDX)
 		: (unsigned)imm;
+	unsigned bound = count;
 	__u64 dst = oracle_reg_value(dst_reg);
 	__u64 src = oracle_reg_value(src_reg);
 	__u64 value = oracle_reg_value(src_reg);
@@ -323,9 +227,10 @@ static struct callmem_effect model_step(unsigned op_is_copy,
 					unsigned op_is_reg, __u64 imm,
 					unsigned dst_reg, unsigned src_reg)
 {
-	unsigned bound = op_is_reg ? (unsigned)imm : 1024U;
+
 	unsigned count = op_is_reg ? (unsigned)oracle_reg_value(X86_RDX)
 				   : (unsigned)imm;
+	unsigned bound = count;
 	__u64 dst = oracle_reg_value(dst_reg);
 	__u64 src = oracle_reg_value(src_reg);
 	__u64 value = oracle_reg_value(src_reg);
@@ -354,9 +259,7 @@ static struct callmem_effect model_step(unsigned op_is_copy,
 
 static unsigned part2(void)
 {
-	/* The immediate is the artifact; for the two register-count opcodes it
-	 * is the array bound while the length comes from `RDX`. Values both
-	 * below and above the literal bound exercise the clamp. */
+	/* Full selected count; no independent array bound. */
 	static const __u64 imms[6] = {
 		0ULL, 1ULL, 8ULL, 32ULL, 1024ULL, 2048ULL,
 	};
@@ -454,36 +357,31 @@ static unsigned part3(void)
 {
 	unsigned cases = 0;
 
-	/* Pin 1: the immediate-count bodies iterate to the literal 1024, not
-	 * to the artifact. With an artifact of 2048 the settled length is
-	 * 2048 but the array bound is 1024, so exactly 1024 bytes are
-	 * written; with an artifact of 8 the array bound is still 1024. */
+	/* Full selected count; no independent array bound. */
 	{
 		struct callmem_effect big;
 		struct callmem_effect small;
 
 		oracle_restore_pristine();
 		big = contract_step(0U, 0U, 2048ULL, X86_RDI, X86_RSI);
-		if (big.bound != 1024U)
+		if (big.bound != 2048U)
 			return 0;
 		if (big.count != 2048U)
 			return 0;
 		small = contract_step(0U, 0U, 8ULL, X86_RDI, X86_RSI);
-		if (small.bound != 1024U || small.count != 8U)
+		if (small.bound != 8U || small.count != 8U)
 			return 0;
 		cases++;
 	}
 
-	/* Pin 2: the register-count bodies are bounded by the artifact. With
-	 * an artifact of 32 and an `RDX` length of 100, exactly 32 bytes are
-	 * written — the opposite selection from pin 1. */
+	/* Full selected count; no independent array bound. */
 	{
 		struct callmem_effect e;
 
 		oracle_restore_pristine();
 		oracle_regs[X86_RDX].u.v = 100ULL;
 		e = contract_step(0U, 1U, 32ULL, X86_RDI, X86_RSI);
-		if (e.bound != 32U || e.count != 100U)
+		if (e.bound != 100U || e.count != 100U)
 			return 0;
 		cases++;
 	}
@@ -517,10 +415,7 @@ static unsigned part3(void)
 		cases++;
 	}
 
-	/* Pin 4: bytes at or beyond the array bound and at or beyond the
-	 * copied length keep their old values — a canary above the region
-	 * survives. The destination holds distinct old bytes and the source
-	 * holds a different pattern, so a stray write is visible. */
+	/* Full selected count; no independent array bound. */
 	{
 		unsigned i;
 		__u64 dst = oracle_reg_value(X86_RDI);
@@ -528,7 +423,7 @@ static unsigned part3(void)
 		oracle_restore_pristine();
 		for (i = 0; i < 2048U; i++)
 			oracle_mem[oracle_slot(dst + i)] = 0x5aU;
-		/* A register-count copy bounded by 32, length 16. */
+		/* Full selected count; no independent array bound. */
 		oracle_regs[X86_RDX].u.v = 16ULL;
 		(void)contract_step(1U, 1U, 32ULL, X86_RDI, X86_RSI);
 		for (i = 16U; i < 2048U; i++) {

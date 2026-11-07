@@ -35,7 +35,6 @@ OUT_DIR = Path(__file__).resolve().parent
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 MAX_REP_MOVS_COUNT = 64
-MAX_MEMSET_COUNT = 1024
 
 PTR_WIDTH = {
     "BYTE": 8,
@@ -560,15 +559,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             return enc("X86_OP_CALL_HELPER", imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
         if insn.reloc_symbol == "memcpy":
             if insn.sim_imm is None:
-                return enc("X86_OP_CALL_MEMCPY_REG", imm=c_u64(MAX_MEMSET_COUNT))
-            if insn.sim_imm < 0 or insn.sim_imm > MAX_MEMSET_COUNT:
-                raise ValueError(f"memcpy length {insn.sim_imm} exceeds simulator bound in {insn.raw}")
+                return enc("X86_OP_CALL_MEMCPY_REG", imm=c_u64(0))
             return enc("X86_OP_CALL_MEMCPY", imm=c_u64(insn.sim_imm))
         if insn.reloc_symbol == "memset":
             if insn.sim_imm is None:
-                return enc("X86_OP_CALL_MEMSET_REG", imm=c_u64(MAX_MEMSET_COUNT))
-            if insn.sim_imm < 0 or insn.sim_imm > MAX_MEMSET_COUNT:
-                raise ValueError(f"memset length {insn.sim_imm} exceeds simulator bound in {insn.raw}")
+                return enc("X86_OP_CALL_MEMSET_REG", imm=c_u64(0))
             return enc("X86_OP_CALL_MEMSET", imm=c_u64(insn.sim_imm))
         if ops:
             call_reg = reg_info(ops[0])
