@@ -54,6 +54,9 @@
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
 #include "native_lab_trusted.h"
 
+/* Name the exported entry, without compiler builtin/fortify substitution. */
+extern void *native_lab_x86_memset(void *, int, size_t) __asm__("memset");
+
 #define NATIVE_LAB_MAX_BLOBS	512
 /*
  * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kinsn

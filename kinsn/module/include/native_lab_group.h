@@ -565,6 +565,18 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 				}
 			} else if ((reloc->kind >= 1 && reloc->kind <= 3) ||
 				   reloc->kind == NATIVE_LAB_RELOC_HELPER_POINTER) {
+#ifdef CONFIG_X86_64
+				/* The trusted x86 worker expands exact-count memset into
+				 * stores, not a BPF helper. SKB's private context shadow
+				 * is not yet a faithful write representation. */
+				if (reloc->kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 &&
+				    reloc->target == (unsigned long)native_lab_x86_memset &&
+				    env->prog->type != BPF_PROG_TYPE_SCHED_CLS &&
+				    env->prog->type != BPF_PROG_TYPE_CGROUP_SKB &&
+				    native_lab_trusted_authorized(blob->trusted)) {
+					found = true;
+				} else
+#endif
 				for (i = 0; i < env->prog->len; i++) {
 					const struct bpf_insn *insn = &env->prog->insnsi[i];
 					const struct bpf_func_proto *proto;
