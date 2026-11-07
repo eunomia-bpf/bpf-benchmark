@@ -1,0 +1,14 @@
+{
+  "recorded": "2026-11-07T16:23:59.157948+00:00",
+  "reference_build_exit": 0,
+  "replay_make_exit": 2,
+  "compared_cases": 8192,
+  "exact_matches": 7168,
+  "fault_kind_mismatches": 1024,
+  "register_flag_pc_memory_mismatches": 0,
+  "actual_native_fault": "trap12/#SS/SIGBUS7",
+  "expected_canonical_fault": "non_canonical",
+  "observed_canonical_fault": "read(address=incoming_RBP,bytes=8)",
+  "source_status": "V-owned uncommitted candidate at capture; not canonical publication",
+  "x86_source_sha256": "9fca3291b55b8ef0bfdfa8fab8afe8935210e5fd30f6c0314f7db53661b7afa8"
+}
