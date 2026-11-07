@@ -369,3 +369,32 @@ reference/wire/compiler checks and C semantic hosts. The immutable source/cache
 export was deleted automatically; compressed CALL CPU observations now retain
 this full run. Subsequent SHIFT field/operand composition is a separate increment
 requiring its own full validation.
+
+## SHIFT immediate/register fields and dispatcher
+
+`Arm64Shift.decodeOpcode` binds the real numeric SHIFT_IMM/SHIFT_REG case labels
+to the generated operand-source table. `decoded_operand` proves both the same
+numeric code and the same immediate/register decision across the two generated
+tables. The low AUX byte independently selects LSL/LSR/ASR/ROR; all three unused
+bytes leave that selection unchanged. `rawStep` then selects the count, reads
+the incoming source, invokes the generated width-aware shift and writes the
+result before advancing PC once.
+
+`dispatch_immediate_refines` and `dispatch_register_refines` compose those fields
+with the existing canonical full-state step for both W/X widths, all four
+shift kinds and legal aliases. Immediate forms ignore the count-register value;
+register forms ignore the immediate and retain architectural count masking.
+Typed native immediate bounds are explicit. Invalid kind bytes and unrelated
+opcodes return no result for this slice, including other families with their
+own immediate-selection rule. All previous unary and shift theorems remain
+unchanged; this increment covers SHIFT_IMM/REG, not an invented all-opcode theorem.
+Native byte/operand/width and Entry/O4 transport remain separate obligations.
+
+Validation: 37 Lean/reference dependency jobs passed, including the existing
+AArch64 reference regressions with 3860 control/PC-address states. Five related
+contract freshness checks passed. Existing independent shift, operand-selection
+and family hosts checked 20,513, 5,120 and 2,072 cases; actual operand, family and
+AUX route hosts checked 3,804, 136 and 1,115,374 cases. There were no proof/test
+failures or input filtering. Runtime, oracle, test and ISA source are unchanged;
+T's appended public x86 decode lemma was preserved. A new immutable full check
+follows publication; exactdb3066318's successful full result precedes this work.
