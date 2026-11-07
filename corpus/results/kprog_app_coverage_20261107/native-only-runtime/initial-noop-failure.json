@@ -1,0 +1,31 @@
+{
+  "started": "2026-11-07T14:32:10.853929+00:00",
+  "apps": "bcc/set",
+  "samples": 1,
+  "duration": 2,
+  "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-k68v1b8f/requests",
+  "service_state_mode": "0o700",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository",
+    "__runtime-vm-corpus",
+    "PLATFORM=kvm",
+    "ARCH=x86",
+    "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-native-only:x86-current",
+    "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/runtime.image.tar",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=2"
+  ],
+  "returncode": 0,
+  "finished": "2026-11-07T14:35:48.148287+00:00",
+  "corpus_metadata": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_143508_623079/metadata.json",
+      "status": "error",
+      "error_message": "corpus suite reported errors"
+    }
+  ],
+  "archive": "corpus-20261107T143602938239Z.tar.gz",
+  "archive_sha256": "a384617c054f091f2e3a62a6c9964a507bceff7ae6b49de3ca1ba4d040c58393"
+}

@@ -58,3 +58,17 @@ bridge's file placement; it does not claim isolation from a privileged operator.
 The application image is unchanged; the corrected bootstrap reuses it.
 
 The first relocated-state attempt exited before registering the service because that path was read-only in the guest. The VNG recipe now mounts the lane state directory writable in the guest, outside the application container mounts. The exact setup error is retained; no native requests or application result are counted from it.
+
+## Native-arm plan correction
+
+The first completed standard run143508_623079 failed before any native request.
+Its registered service stayed idle. The recipe had explicitly forced
+BPFREJIT_BENCH_PASSES=noop, which makes the corpus apply a bytecode optimizer
+plan even in native-loader mode. It failed preparing kinsn target.json during
+the first unnamed two-instruction libbpf probes. This was NOT a verifier failure
+of a generated simulator. The full result and service/driver archive are
+retained (initial-noop-result.tar.gz, initial-noop-failure.json and the referenced
+corpus archive). The guest no longer forces that bytecode pass. The standard
+native-driver path uses its existing empty enabled-pass list; feature probes
+load unchanged. REQUIRE_BOUND_PROOF=1 and the workload stay the same. Replay
+uses the existing pinned image and matching cached kernel/modules; no rebuild.
