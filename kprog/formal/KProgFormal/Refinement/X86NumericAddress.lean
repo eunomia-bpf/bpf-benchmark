@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86LegacyShift
 import KProgFormal.Refinement.X86Multiply
 import KProgFormal.Refinement.X86Unary
 import KProgFormal.Refinement.X86Arithmetic
@@ -952,5 +953,68 @@ theorem multiply_alu_immediate_frame_refines (env : Environment) (frame : Frame)
     rfl
   · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
     rfl
+
+
+/-- Architectural shifts consume only their width-selected5/6 count bits. -/
+def ShiftCountBinding (width : Reference.X86.ScalarWidth) (raw native : NativeWord) : Prop :=
+  Reference.X86.legacyCount width raw = Reference.X86.legacyCount width native
+
+theorem shift_value_count (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (source raw native : NativeWord) (field : ShiftCountBinding width raw native) :
+    X86LegacyShift.value width kind source raw = X86LegacyShift.value width kind source native := by
+  unfold ShiftCountBinding at field
+  simp only [X86LegacyShift.value_refines, Reference.X86.legacyShiftValue, field]
+
+theorem shift_flags_count (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (source raw native old : NativeWord) (field : ShiftCountBinding width raw native) :
+    X86LegacyShift.flags width kind source raw old = X86LegacyShift.flags width kind source native old := by
+  unfold ShiftCountBinding at field
+  simp only [X86LegacyShift.flags_refine, Reference.X86.legacyShiftFlags,
+    Reference.X86.legacyShiftValue, field]
+
+/-- The real width-aware lane read precedes count/result/flags and the same
+numeric writer. All aliases and count-zero partial writes remain observable. -/
+def shiftRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (dst : Reference.X86.RegisterSlice) (rawCount nextPc : NativeWord) : RegisterState :=
+  let source := readRegister env frame arena state width dst
+  let written := writeRegister env frame arena state width dst (X86LegacyShift.value width kind source rawCount)
+  registerPc (registerFlags written (X86LegacyShift.flags width kind source rawCount state.raw.rflags)) nextPc
+
+theorem shift_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (dst : Reference.X86.RegisterSlice) (rawCount nativeCount nextPc : NativeWord)
+    (field : ShiftCountBinding width rawCount nativeCount) :
+    (⟨nativeRegisters env frame arena (shiftRegister env frame arena state width kind dst rawCount nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.legacyShift width kind (.register dst) nativeCount nextPc)
+        (nativeRegisters env frame arena state) := by
+  have values (source : NativeWord) := shift_value_count width kind source rawCount nativeCount field
+  have flags (source old : NativeWord) := shift_flags_count width kind source rawCount nativeCount old field
+  rw [← X86LegacyShift.step_refines]
+  simp only [shiftRegister, native_register_pc, native_register_flags, native_register_write,
+    native_register_read, X86LegacyShift.handlerStep, X86Scalar.read_refines,
+    Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
+    Reference.X86.scalarWrite, List.nil_append, List.append_nil, values, flags]
+  rfl
+
+theorem shift_immediate_count (width : Reference.X86.ScalarWidth) (raw : NativeWord) :
+    ShiftCountBinding width (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width))
+      ((raw.setWidth 8).setWidth 64) := by
+  rw [x86_immediate_value_refines]
+  cases width <;> simp only [ShiftCountBinding, Reference.X86.legacyCount,
+    X86Scalar.handlerWidth, x86ImmediateValueSpec, reduceCtorEq, ↓reduceIte] <;> bv_decide
+
+/-- CL's native count is derived from the SAME pre-state, including when RCX
+carries a private STACK alias. No count value or alignment is assumed. -/
+theorem shift_register_count (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (reg : Reference.X86.Register) :
+    ShiftCountBinding width (readRegister env frame arena state width (.low reg))
+      (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low reg)) := by
+  rw [native_register_read]
+  cases width <;> simp only [ShiftCountBinding, Reference.X86.legacyCount,
+    Reference.X86.scalarRegisterValue, Reference.X86.RegisterSlice.shift,
+    Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes, Nat.reduceMul,
+    reduceCtorEq, ↓reduceIte] <;> bv_decide
 
 end KProgFormal.Refinement.X86NumericAddress

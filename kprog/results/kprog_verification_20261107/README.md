@@ -2587,3 +2587,50 @@ its exact earlier snapshot; this increment has the separate complete Lean
 and focused/oracle validations above. A new immutable full will be recorded
 separately. Raw shift payloads and other operation families, whole-ISA dispatch
 and compiled-B/O2/O4 remain active work.
+
+## SHL/SHR/SAR/ROL raw frames and same-input CL resolution
+
+The same raw dispatcher-step theorem now composes all four legacy shift/
+rotate-left payloads through the register and immediate ALU families. The
+actual width/lane read precedes the generated result/flag helpers and numeric
+writer. Every legal width and destination slice, arbitrary incoming flags,
+masked count, zero-count writeback and RSP/STACK representation is covered.
+The existing undefined-output masks remain unchanged.
+
+Immediate count resolution derives the native imm8 from the generated low-
+imm32 helper. For variable forms, CL is derived from the SAME incoming native
+state, not assumed: the width-read count and the native RCX low byte have the
+same architectural5/6 count bits. Destination RCX/CH aliases still sample the
+original state before writeback. No product/result/flag/count-value or native-
+state equality is a premise. RegisterBinding now takes the input native state
+explicitly to resolve this operand; all previous constructors remain available
+for arbitrary input states and all old theorem cases still compile. The
+canonical ISA already uses resolved counts/addresses, so no second ISA or
+canonical-definition change is introduced.
+
+Selector and generic-result lemmas establish the actual ALU path and exclusion
+of earlier logical/carry/unary/IMUL/self-XOR branches. A universal enum theorem
+shows that all16 declared ALU tokens select a proved payload family under the
+legal native width/operand bindings. This does not claim malformed fields,
+arbitrary raw payload bytes or the remaining77/72 opcode coverage.
+
+Focused98-job Lean build, six audits and the complete default Lean library+
+executable-reference build PASS with stable input pins and only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. Seven
+existing generated checks and unchanged UBSan shift-flags/flag-route/ALU-route
+hosts pass:90112/6504961/760337 cases. One initial proof needed its masked-count
+binding unfolded; that failed elaboration and exact source are retained.
+The tested header is C's published4fe6817/b46de606c CMP update, independently
+matched against its Git blob; V changes no header, encoder, oracle or ISA.
+Detailed commands, source pins, proofs, diffs, warnings and logs are appended
+to the existing integration JSON/gzip.
+
+The separate complete make-check on published231cbde41 also finished with
+actual exit0 and queue0. All1140 source hashes were independently verified
+against the exact published Git blobs. Its full output, CPU trace, source
+manifest and runner/queue controls are retained here; the private source/cache
+export was removed and FULL slot released. Warm caches and shared vendor
+symlinks were reused. That full snapshot includes IMULbc3b, and predates this
+shift increment and C's new CMP header; later input differences are explicitly
+recorded. It is not relabeled as a current-HEAD PASS. Whole-ISA dispatch and
+compiled-B/O2/O4 remain active work.
