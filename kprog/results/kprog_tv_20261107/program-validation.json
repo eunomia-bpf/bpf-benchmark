@@ -69,10 +69,10 @@
     {
       "program": "simple_packet",
       "arch": "aarch64",
-      "status": "entry_guard_return_store_components",
-      "theorem": "PacketStoreTransport.store_execution_witnesses",
-      "validation_log": "packet-store-final.log",
-      "validation_log_sha256": "bc157ab76a060261ea22f45155a20d1213e5d47f9faa9435d70cf13a98f4cfe1",
+      "status": "all_invocation_paths_at_relative_PC_under_entry_contract",
+      "theorem": "PacketInvocation.bound_native_prefix_checked",
+      "validation_log": "packet-invocation-final.log",
+      "validation_log_sha256": "21a947711bb9972dcef5703c4da5b52a6422f870b370f2df6a241d8948576d8d",
       "captures": [
         {
           "record": "6-7",
@@ -114,9 +114,8 @@
         }
       ],
       "remaining": [
-        "entry_to_positive_store_composition",
         "actual_RX_every_prefix_and_ABI",
-        "accepted_invocation_composition"
+        "actual_capture_bound_theorem_instances"
       ]
     }
   ]

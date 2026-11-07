@@ -372,3 +372,22 @@ normalization/source-rewrite development failures are retained in
 packet-store-inputs.tar.gz with source/module pins adjacent. This proves the
 whole store block; original-entry/positive-store composition and the complete
 RX/ABI/accepted invocation still remain to compose.
+
+
+`simple_packet`: complete invocation/prefix composition at relative PC
+--------------------------------------------------------------------
+
+`packet-invocation-final.log` proves the positive entry/guard-to-store edge
+with both real memories, every store/fault outcome, successful real returns
+and every rejected return path. Complete matched invocation/trace projection
+and native terminal closure cover all branches. Every arbitrary native prefix
+therefore has only events checked for the same expanded B under explicit
+verifier/platform soundness. The full Artifact binding/acceptance/admitted-entry
+composition is also proved at relative native PC0. All printed axioms are the
+existing propext/choice/ofReduceBool/Quot.sound, with no sorryAx.
+
+Inputs, full source and the two earlier PC-normalization development errors
+are retained in packet-invocation-inputs.tar.gz, with pins adjacent. These
+results close original-entry/positive-store composition. Actual RX/host ABI
+transport and per-capture accepted-entry instantiation remain active; the
+complete updated dependency refresh follows separately.

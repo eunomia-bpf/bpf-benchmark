@@ -1,0 +1,16 @@
+'KProgTV.PacketInvocation.passed_guards_store' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketInvocation.matched_invocation' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketInvocation.every_native_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketInvocation.bound_native_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]

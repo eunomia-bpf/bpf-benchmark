@@ -941,3 +941,26 @@ BPF store width and BPF address changes. Both BPF arrays change together, and
 all affected modules are rebuilt against each changed definition. The full
 original-entry/positive-store/return composition, RX/ABI transport and accepted
 artifact theorem remain active for this program.
+
+
+All packet invocation paths at the relative entry
+------------------------------------------------
+
+`make -C kprog/tv simple-packet-invocation-check` composes original entry,
+private spills, both guard outcomes, all store/fault paths and actual returns.
+`PacketInvocation.matched_invocation` gives complete native and checked-B
+executions with the private-memory relation, exact ordered guest projection
+and a closed native return/fault end. The real compiled frame crosses every
+block edge; it is never replaced by native memory.
+`every_native_prefix_checked` then checks EVERY native execution prefix under
+explicit verifier/platform soundness for this same B. The certificate itself,
+rather than an assumed translation-validation premise, supplies the complete
+matching executions and closure.
+
+`bound_native_prefix_checked` composes that result with explicit acceptance,
+admitted proof entry and exact full Artifact equality, including code, B,
+entry, supported ABI and specialization metadata. This theorem uses relative
+native PC0. Transport to the two captured actual RX addresses, host ABI
+preservation and per-load accepted-entry instantiation are the next steps.
+The existing explicit kernel entry and ISA/hardware/profile trusted contracts
+remain required; no runtime CPU-profile enforcement is inferred.
