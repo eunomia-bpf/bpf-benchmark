@@ -1066,4 +1066,54 @@ theorem rotate_right_cl_operand (env : Environment) (frame : Frame) (arena : Nat
       Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1) :=
   native_register_read env frame arena state .w8 (.low 1)
 
+/-- Full-register reads used by BMI2 preserve neither private arena origins
+nor the RSP offset representation: both are materialized before arithmetic. -/
+def bmiRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst src : Reference.X86.Register) (count nextPc : NativeWord) : RegisterState :=
+  let source := registerValue env frame arena state src
+  let scalar := match width with | .w32 => Reference.X86.ScalarWidth.w32 | .w64 => .w64
+  registerPc (writeRegister env frame arena state scalar (.low dst)
+    (X86BmiShift.value width kind source count)) nextPc
+
+theorem bmi_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst src : Reference.X86.Register) (count : Reference.X86.ShiftCount) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (bmiRegister env frame arena state width kind dst src
+        (Reference.X86.countValue (nativeRegisters env frame arena state) count) nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.bmiShift width kind dst (.register src) count nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86BmiShift.step_refines width kind dst (.register src) count nextPc
+    (nativeRegisters env frame arena state) .scalar]
+  unfold bmiRegister
+  rw [native_register_pc, native_register_write]
+  simp only [X86BmiShift.handlerStep, X86Bt.readOperand, nativeRegisters]
+  congr 1
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+    rw [← X86Scalar.register_write_refines]
+    cases width <;> rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+/-- The production SHIFTX gate samples source and count in the same input
+state; all destination/source/count aliases are retained. No flags change. -/
+def bmiShiftRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst src count : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  bmiRegister env frame arena state width kind dst src
+    (registerValue env frame arena state count) nextPc
+
+theorem bmi_shift_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst src count : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (bmiShiftRegister env frame arena state width kind dst src count nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.bmiShift width kind dst (.register src) (.register count) nextPc)
+        (nativeRegisters env frame arena state) :=
+  bmi_register_frame_refines env frame arena state width kind dst src (.register count) nextPc
+
 end KProgFormal.Refinement.X86NumericAddress

@@ -2696,3 +2696,25 @@ physical RORX body after these stable checks; the tested4fe header is archived
 and its classic ROR body remains byte-identical. No reference ISA, C handler,
 encoder or oracle was changed by V. Memory ROR, remaining operations and the
 compiled O2/O4 link remain open.
+
+
+### BMI2 raw register dispatcher
+
+SHLX, SHRX and SARX now use the raw SHIFTX gate's AUX count register and
+IMM32 ALU selector. RORX uses its separate imm8 gate and the same value/write
+proof. The handlers sample full materialized source/count registers in the
+same incoming state, including every source/destination/count alias, RSP and
+private STACK pointers. Both architectural widths are covered. The theorem
+retains the entire modeled state and leaves all flags and memory unchanged.
+The existing dispatcher-step theorem composes these gates with earlier ones.
+
+The focused 113-module and complete default Lean builds passed. Five axiom
+audits contain no proof placeholders. Five generator checks and the existing
+195,841-case routed host oracle passed under UBSan with stable source hashes.
+The production header is exactly C's published `2b1ab2c29` RORX extraction
+(SHA256 `47fb5565`); its generated value is the same primitive used by this
+proof. V changed no production handler, contract, oracle or canonical ISA.
+The archived first count-decoder elaboration failure was corrected without
+changing a theorem premise. Memory-source BMI forms, remaining operations,
+whole-ISA coverage and compiled O2/O4 remain open. The next full check will
+use a new published snapshot; the prior a076 full pass remains separate.

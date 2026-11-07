@@ -322,6 +322,32 @@ theorem shift_alu_value (width : ScalarWidth) (kind : Reference.X86.LegacyShift)
       X86LegacyShift.value width kind source count := by
   cases kind <;> rfl
 
+/-- SHIFTX's IMM is a32-bit ALU token, separate from the count GPR in AUX.
+Its three legal BMI shifts preserve flags; RORX has its own opcode. -/
+def bmiShiftKindOf (payload : BitVec 32) : Option Reference.X86.BmiShift :=
+  if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .shl) then some .left
+  else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .shr) then some .right
+  else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .sar) then some .arithmetic
+  else none
+
+def bmiShiftAlu : Reference.X86.BmiShift → GeneratedX86AluDecode.Alu
+  | .left => .shl | .right => .shr | .arithmetic => .sar | .rotate => .rol
+
+theorem bmi_shift_kind_decodes (kind : Reference.X86.BmiShift) (payload : BitVec 32)
+    (ordinary : kind ≠ .rotate)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (bmiShiftAlu kind))) :
+    bmiShiftKindOf payload = some kind := by
+  subst payload
+  cases kind <;> first | rfl | contradiction
+
+/-- The actual x86_alu_result shift arms are the same generated primitives
+as the BMI value model. The rotate arm is excluded from SHIFTX. -/
+theorem bmi_shift_alu_value (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (source count : Reference.Word) (ordinary : kind ≠ .rotate) :
+    GeneratedX86AluResult.result (bmiShiftAlu kind) source count (X86Bzhi.handlerWidth width) =
+      X86BmiShift.value width kind source count := by
+  cases kind <;> first | rfl | contradiction
+
 /-- Every declared ALU token selects a proved payload family. This does not
 claim arbitrary raw payload bytes or malformed native operand fields. -/
 theorem alu_payload_cases (alu : GeneratedX86AluDecode.Alu) :
@@ -463,6 +489,20 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
         pure ⟨nativeRegisters env frame arena
           (logicRegister env frame arena state width .test destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .shiftx then do
+        let width ← bswapWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        let count ← registerOf (aux.setWidth 8)
+        let kind ← bmiShiftKindOf (value.setWidth 32)
+        pure ⟨nativeRegisters env frame arena
+          (bmiShiftRegister env frame arena state width kind destination source count nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .rorx then do
+        let width ← bswapWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (bmiRegister env frame arena state width .rotate destination source value nextPc), [], none⟩
       else if code = GeneratedX86Opcode.code .ror then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -513,6 +553,21 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | bmiShift (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+      (destination source count : Register)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (countField : aux = BitVec.ofNat 32 count.val)
+      (ordinary : kind ≠ .rotate)
+      (operationField : value.setWidth 32 = BitVec.ofNat 32 (GeneratedX86AluDecode.code (bmiShiftAlu kind))) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .shiftx)
+        (.bmiShift width kind destination (.register source) (.register count) nextPc)
+  | rorx (width : Reference.X86.BzhiWidth) (destination source : Register) (encoded : Byte)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (countField : value = encoded.setWidth 64) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .rorx)
+        (.bmiShift width .rotate destination (.register source) (.immediate encoded) nextPc)
   | rotateImmediate (width : ScalarWidth) (destination : RegisterSlice) (encoded : Byte)
       (widthField : WidthBinding flags width)
       (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
@@ -690,7 +745,7 @@ theorem rotate_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnv
   .rotateCl width destination widthField dstField (rotate_right_cl_operand env frame arena state)
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL) plus logical/arithmetic/unary/multiply/shift ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX plus logical/arithmetic/unary/multiply/shift ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
@@ -703,6 +758,23 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | bmiShift width kind destination source count widthField dstField srcField countField ordinary operationField =>
+      subst dst; subst src; subst aux
+      have widthDecoded := bswap_width_binding_decodes flags width widthField
+      have kindDecoded := bmi_shift_kind_decodes kind _ ordinary operationField
+      have countDecoded : registerOf (BitVec.ofNat 8 count.val) = some count :=
+        register_of_byte count
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte, countDecoded, kindDecoded] using
+        congrArg some (bmi_shift_register_frame_refines env frame arena state width kind destination source count nextPc)
+  | rorx width destination source encoded widthField dstField srcField countField =>
+      subst dst; subst src
+      have widthDecoded := bswap_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte, countField, Reference.X86.countValue] using
+        congrArg some (bmi_register_frame_refines env frame arena state width .rotate destination source (.immediate encoded) nextPc)
   | rotateImmediate width destination encoded widthField dstField countField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
