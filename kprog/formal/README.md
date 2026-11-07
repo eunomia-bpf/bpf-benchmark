@@ -38,7 +38,10 @@ families represented there. Exclusive load/store core lifts additionally compose
 the generated native-width memory primitives and W-status writeback, retaining
 both outcomes. Monitor state and ordering events are ghost annotations whose
 platform witnesses remain explicit; this does not certify ordinary stores as
-atomic exclusive operations. XMM0 MOVUPS/MOVAPS references include 16-byte
+atomic exclusive operations. D0 load/store lifts compose generated eight-byte
+memory operations, upper-half clearing, indexed addressing and the two singleton
+dispatch arms, retaining full state, ordered effects and faults under the explicit
+SP-alignment witness. XMM0 MOVUPS/MOVAPS references include 16-byte
 permission and alignment faults; the two-lane C projection currently requires
 successful, suitably aligned access. REP MOVS includes direction, address32,
 segments and restart faults; its C core lift requires a matching bounded count,
