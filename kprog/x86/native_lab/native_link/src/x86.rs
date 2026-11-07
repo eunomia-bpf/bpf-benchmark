@@ -303,6 +303,18 @@ fn select_update_site(
                 return Ok(None);
             }
         }
+        if update_sites.iter().any(|site| site.map_addr != 0) {
+            // The producer binds these aliases by source pointer before
+            // neutralizing map addresses for the cached native template.
+            if let Some((idx, _)) = update_sites.iter().enumerate().find(|(idx, site)|
+                !used[*idx] && site.map_names.iter().any(|name| name == map_name)).or_else(||
+                    update_sites.iter().enumerate().find(|(_, site)|
+                        site.map_names.iter().any(|name| name == map_name))) {
+                used[idx] = true;
+                return Ok(Some((idx.to_string(), idx)));
+            }
+            return Ok(None);
+        }
         if let Some((idx, _)) = update_sites.iter().enumerate().find(|(idx, spec)| {
             !used[*idx] && update_site_exactly_matches_native_map(spec, map_name)
         }) {
@@ -4605,6 +4617,7 @@ mod tests {
             percpu_base_addr: 0,
             map_name: Some(map_name.to_string()),
             map_addr: 0,
+            map_names: vec![],
         }
     }
 
@@ -4656,6 +4669,28 @@ mod tests {
         assert_eq!(used, vec![false]);
         assert_eq!(select_update_site(&sites, &maps, &mut used, 0, None)?, None);
         assert_eq!(used, vec![false]);
+        Ok(())
+    }
+
+    #[test]
+    fn update_selection_retains_full_identity_when_template_addresses_are_zero() -> Result<()> {
+        let name = "cilium_ipv4_frag_datagrams";
+        let short = truncate_bpf_obj_name(name);
+        let mut wrong = test_update_site(&short, 0x1000);
+        wrong.map_addr = 0x1110;
+        wrong.map_names = vec!["cilium_other_map".to_string()];
+        let mut right = test_update_site(&short, 0x2000);
+        right.map_addr = 0x2220;
+        right.map_names = vec![name.to_string()];
+        let sites = vec![wrong, right.clone(), right];
+        let maps = HashMap::from([(name.to_string(), 0)]);
+        let mut used = vec![false; 3];
+        for (call, index) in [(0, 1), (1, 2), (2, 1)] {
+            assert_eq!(select_update_site(&sites, &maps, &mut used, call, Some(name))?,
+                Some((index.to_string(), index)));
+        }
+        assert_eq!(used, vec![false, true, true]);
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 3, Some("unbound_name"))?, None);
         Ok(())
     }
 

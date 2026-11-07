@@ -2929,6 +2929,7 @@ struct NativeLinkArgs {
         uint64_t percpu_base_addr = 0;
         std::string map_name;
         uint64_t map_addr = 0;
+        std::vector<std::string> map_names;
     };
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
@@ -4146,6 +4147,7 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.percpu_base_addr);
         hash.add_string(arg.map_name);
         hash.add_u64(arg.map_addr);
+        for (const auto &name : arg.map_names) hash.add_string(name);
     }
     return hash.hex();
 }

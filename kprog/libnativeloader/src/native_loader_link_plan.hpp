@@ -104,6 +104,12 @@ inline void write_json_update_site(std::ostream &out,
         << ",\"value_offset\":" << site.value_offset
         << ",\"percpu_base_addr\":" << site.percpu_base_addr
         << ",\"map_addr\":" << site.map_addr;
+    out << ",\"map_names\":[";
+    for (size_t i = 0; i < site.map_names.size(); i++) {
+        if (i) out << ",";
+        write_json_string(out, site.map_names[i]);
+    }
+    out << "]";
     if (!site.map_name.empty()) {
         out << ",\"map_name\":";
         write_json_string(out, site.map_name);

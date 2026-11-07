@@ -76,6 +76,7 @@ NativeLinkArgs::UpdateSite make_link_update_site(
         site.percpu_base_addr,
         site.map_name,
         site.map_addr,
+        {},
     };
 }
 
@@ -208,6 +209,13 @@ NativeLinkArgs build_native_link_args(
     }
     for (size_t i = 0; i < companion.update_sites.size(); i++) {
         auto site = make_link_update_site(companion.update_sites[i]);
+        // Native templates carry zero map pointers. Bind full aliases while
+        // the source FD identity and real native map addresses are available.
+        for (const auto &map : maps) {
+            if (site.map_addr && map.second == site.map_addr &&
+                companion.native_map_symbols.count(map.first))
+                site.map_names.push_back(map.first);
+        }
         // LLVM can merge proof calls from different maps. The verifier then
         // poisons map_ptr_state, so bind the public helper identity rather than
         // a map-specific ops function on the required-bound path.

@@ -44,3 +44,20 @@ linker is also retained privately for same-input offline comparison.
 
 Runtime replay is pending. Unit/build success alone does not establish that
 the33 failures are closed or that the application forwards matching packets.
+
+## Initial live neutral-template failure and correction
+
+The first updated replay150159_654306 retains33 truncation errors and144 native
+timing receipts; the app reports ENODATA and no native workload completes.
+Its complete raw result and captured cache are in initial-neutral-failure.tar.gz.
+The actual link plan shows full native map values deliberately set to0 for
+later patching, while repeated source sites retain the same nonzero identity.
+Thus direct address matching alone cannot resolve the neutral template.
+
+The producer now binds all full native map aliases to each source map pointer
+BEFORE neutralization. These exact names are serialized as update-site
+map_names and enter the cache key. The x86 consumer matches those complete
+aliases and reuses the known map identity for repeated/extra calls. Output map
+pointers remain neutral; generic helpers remain for genuinely unresolved
+identities. A new regression uses zero template addresses to cover the actual
+live failure that the initial unit cases missed. A second live replay follows.
