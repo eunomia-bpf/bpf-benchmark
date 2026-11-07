@@ -1177,3 +1177,25 @@ to immutable P by per-program TV. Accepted-byte provenance and the kernel
 capture/binding implementation remain explicit trust assumptions. Extending
 RX checks to x86 retains the existing ARM simple/simple_packet regression:
 four actual captures pass and all72 corruptions remain rejected.
+
+First actual x86 simple entry-load refinement
+--------------------------------------------
+
+`trusted-simple-entry-certificate` checks the retained native/B literals and
+compiles `TrustedSimpleX86.lean` against V's canonical X86/X86Path and the
+existing BPFPlatform semantics. The public canonical decoder lemma
+`decode_mov_rcx_rdi` unfolds the same private decoder helpers; it changes no
+ISA semantics. `entry_load_correspondence` connects actual native bytes0..3
+to virtual B pc0 under the explicit XDP32-to-64 context expansion. It proves
+both complete successor states, the same single8-byte event, corresponding
+loaded values and equal memory. Native flags/other registers/vector/profile
+and all untouched BPF fields remain in those state equalities.
+
+The theorem requires initial entry PCs, an active proof, related context and
+memory, and an actual successful context-read witness. It does not yet prove
+the rest of BB0 or the whole program: the spill, second read, guards, stores,
+exit, fault cases and ABI composition remain. Context conversion still needs
+its bound kernel/platform transport. The axiom audit has only standard Lean
+logical axioms, with no sorryAx. Exact scope and hashes are recorded in
+`trusted-simple-entry.json`; this is a concrete partial refinement, not a
+whole-program certificate.

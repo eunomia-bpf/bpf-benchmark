@@ -1,0 +1,115 @@
+import KProgFormal.Reference.X86Path
+import BPFPlatform
+
+set_option maxRecDepth 4096
+set_option maxHeartbeats 2000000
+namespace KProgTV.TrustedSimpleX86
+open KProgFormal.Reference
+-- Exact native and accepted virtual B bytes from the b61f291a8 service capture.
+def native : Array Byte := #[0x48,0x8b,0xf,0x48,0x8b,0x57,0x8,0x48,0x89,0xce,0x31,0xc0,0x48,0x39,0xd6,0x77,0x2b,0x48,0x8d,0x7e,0x8,0x48,0x39,0xd7,0x77,0x22,0x48,0x83,0xc6,0x48,0x48,0x39,0xd6,0x77,0x19,0x66,0xc7,0x1,0x4e,0x61,0xc6,0x41,0x2,0xbc,0xc7,0x41,0x3,0x0,0x0,0x0,0x0,0xc6,0x41,0x7,0x0,0xb8,0x2,0x0,0x0,0x0]
+def proof : Array Byte := #[0x61,0x12,0x0,0x0,0x0,0x0,0x0,0x0,0x7b,0x2a,0xd8,0xff,0x0,0x0,0x0,0x0,0x61,0x11,0x4,0x0,0x0,0x0,0x0,0x0,0x7b,0x1a,0xe0,0xff,0x0,0x0,0x0,0x0,0xb4,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x7a,0xa,0xe8,0xff,0x0,0x0,0x0,0x0,0x7a,0xa,0xf0,0xff,0x0,0x0,0x0,0x0,0x62,0xa,0xf8,0xff,0x0,0x0,0x0,0x0,0xb7,0x90,0x1,0x0,0x2,0x0,0x0,0x0,0x79,0xa2,0xd8,0xff,0x0,0x0,0x0,0x0,0x79,0xa3,0xe0,0xff,0x0,0x0,0x0,0x0,0x2d,0x32,0x16,0x0,0x0,0x0,0x0,0x0,0xb7,0x4,0x0,0x0,0x8,0x0,0x0,0x0,0xbf,0x25,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x5,0x0,0x0,0x48,0x0,0x0,0x0,0x2d,0x35,0x12,0x0,0x0,0x0,0x0,0x0,0xf,0x24,0x0,0x0,0x0,0x0,0x0,0x0,0x2d,0x34,0x10,0x0,0x0,0x0,0x0,0x0,0xb7,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x3,0x0,0x0,0x0,0x0,0x0,0x0,0xf,0x23,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x4,0x0,0x0,0x4e,0x61,0x0,0x0,0x6b,0x43,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x3,0x0,0x0,0x2,0x0,0x0,0x0,0xf,0x23,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x4,0x0,0x0,0xbc,0x0,0x0,0x0,0x73,0x43,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x3,0x0,0x0,0x3,0x0,0x0,0x0,0xf,0x23,0x0,0x0,0x0,0x0,0x0,0x0,0x63,0x13,0x0,0x0,0x0,0x0,0x0,0x0,0xb7,0x3,0x0,0x0,0x7,0x0,0x0,0x0,0xf,0x23,0x0,0x0,0x0,0x0,0x0,0x0,0x73,0x13,0x0,0x0,0x0,0x0,0x0,0x0,0xb4,0x1,0x0,0x0,0x2,0x0,0x0,0x0,0xbc,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x5,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x95,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
+
+theorem native_size : native.size = 60 := rfl
+theorem proof_size : proof.size = 296 := rfl
+
+theorem native_decode0 (s : X86.State) :
+    X86.decode (native.extract 0 3) s = .ok
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc + 3)) := by
+  have bytes : native.extract 0 3 = #[0x48,0x8b,0x0f] := by decide
+  rw [bytes]
+  exact X86.decode_mov_rcx_rdi s
+
+theorem virtual_decode0 : BPF.decode proof 0 = .ok ⟨0x61,2,1,0,0⟩ := rfl
+
+-- Kernel XDP conversion is explicit platform metadata, not an ISA rewrite.
+-- Its actual runtime correspondence remains a kernel/platform trust obligation.
+def physical0 : Array Byte := #[0x79,0x12,0,0,0,0,0,0]
+def externals : BPF.Environment where
+  immediate := fun _ _ _ => .error "no immediate in entry load"
+  helperCall := fun _ _ => .error "no helper in entry load"
+  helper := fun _ _ _ => .error "no helper in entry load"
+
+def nativeAfter (s : X86.State) (value : Word) : X86.State :=
+  { s with gpr := fun r => if r = 1 then value else s.gpr r, pc := s.pc + 3 }
+
+theorem native_load (s : X86.State) (value : Word) (event : Event)
+    (read : readMemory s.memory (s.gpr 7) 8 = .ok (value,event)) :
+    X86.step (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+3)) s =
+      ⟨nativeAfter s value, [event], none⟩ := by
+  simp +decide [X86.step, X86.moveStep, X86.scalarRead, X86.readSource, read,
+    X86.scalarWrite, X86.scalarWriteValue, X86.RegisterSlice.reg,
+    X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes, nativeAfter]
+
+theorem proof_load (s : BPF.State) (value : Word) (event : Event)
+    (active : s.halted = false) (position : s.pc = 0)
+    (read : readMemory s.memory (s.regs 1) 8 = .ok (value,event)) :
+    BPF.step externals physical0 s =
+      .ok ⟨{ BPF.setReg s 2 value with pc := 1 }, [event], none⟩ := by
+  simp +decide [BPF.step, active, position, physical0, BPF.decode,
+    BPF.execute, BPF.load, read, BPF.setReg, littleEndian,
+    Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+
+def expansion0 : BPFPlatform.Expansion where
+  original := ⟨0x61,2,1,0,0⟩
+  bytes := physical0
+  positions := fun _ => [0]
+
+def platform : BPFPlatform.Environment where
+  bpf := externals
+  access := fun pc _ => .ok (if pc = 0 then some expansion0 else none)
+
+theorem platform_load (s : BPF.State) (value : Word) (event : Event)
+    (active : s.halted = false) (position : s.pc = 0)
+    (read : readMemory s.memory (s.regs 1) 8 = .ok (value,event)) :
+    BPFPlatform.step platform proof s =
+      .ok ⟨{ BPF.setReg s 2 value with pc := 1 }, [event], none⟩ := by
+  simp +decide [BPFPlatform.step, platform, active, position, virtual_decode0,
+    BPFPlatform.expand, expansion0, BPFPath.evaluate, physical0, BPF.decode, proof,
+    BPF.execute, BPF.load, BPF.setReg, read, littleEndian,
+    Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+
+/-- Real byte-decoded native execution, not an assumed instruction slice. -/
+theorem native_entry_execution (s : X86.State) (value : Word) (event : Event)
+    (position : s.pc = 0)
+    (read : readMemory s.memory (s.gpr 7) 8 = .ok (value,event)) :
+    X86Path.Execution 0 native s [event] (nativeAfter s value) := by
+  have decoded : X86Path.decodeAt 0 native ⟨0,3⟩ s = .ok
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+3)) := by
+    simp +decide [X86Path.decodeAt, position, native_size, native_decode0,
+      X86Path.fallthrough, X86.Instruction.fallthrough,
+      Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+  have actual := X86Path.Execution.next ⟨0,3⟩ _ decoded
+    (X86Path.Execution.refl (X86.step
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+3)) s).state)
+  rw [native_load s value event read] at actual
+  simpa using actual
+
+/-- First captured instruction: both complete successor states and exactly
+one identical memory event. Context conversion is an explicit platform input;
+this theorem does not erase a spill or assume a later branch/return. -/
+theorem entry_load_correspondence (n : X86.State) (p : BPF.State)
+    (value : Word) (event : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (read : readMemory p.memory (p.regs 1) 8 = .ok (value,event)) :
+    X86Path.Execution 0 native n [event] (nativeAfter n value) ∧
+    BPFPlatform.step platform proof p =
+      .ok ⟨{ BPF.setReg p 2 value with pc := 1 }, [event], none⟩ ∧
+    (nativeAfter n value).gpr 1 = ({ BPF.setReg p 2 value with pc := 1 } : BPF.State).regs 2 ∧
+    (nativeAfter n value).memory = ({ BPF.setReg p 2 value with pc := 1 } : BPF.State).memory := by
+  have nativeRead : readMemory n.memory (n.gpr 7) 8 = .ok (value,event) := by
+    simpa [memory, context] using read
+  exact ⟨native_entry_execution n value event nativePC nativeRead,
+    platform_load p value event active proofPC read,
+    by simp [nativeAfter, BPF.setReg], by simpa [nativeAfter, BPF.setReg] using memory⟩
+
+end KProgTV.TrustedSimpleX86
+#print axioms KProgTV.TrustedSimpleX86.native_decode0
+#print axioms KProgTV.TrustedSimpleX86.native_load
+#print axioms KProgTV.TrustedSimpleX86.proof_load
+
+#print axioms KProgTV.TrustedSimpleX86.platform_load
+
+#print axioms KProgTV.TrustedSimpleX86.entry_load_correspondence

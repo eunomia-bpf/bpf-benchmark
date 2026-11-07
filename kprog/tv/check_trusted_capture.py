@@ -6,6 +6,7 @@ Expected entry/ABI/architecture and saved hashes are external certificate inputs
 import hashlib
 import io
 import json
+import re
 from pathlib import Path
 import struct
 import tarfile
@@ -67,6 +68,13 @@ def check(directory, expected):
         with tarfile.open(fileobj=io.BytesIO(archive.extractfile(success[0]).read())) as inner:
             request = {Path(m.name).name:inner.extractfile(m).read() for m in inner.getmembers()
                 if m.isfile() and m.name.startswith('request/kernel.')}
+    if expected['entry'] == 'simple_xdp':
+        lean = Path(__file__).with_name('TrustedSimpleX86.lean').read_text()
+        captured, _ = decode(files['checked.snapshot.bin'])
+        for name, actual in [('native', files['native.bin']), ('proof', captured)]:
+            literal = re.search(r'def '+name+r' : Array Byte := #\[([^\]]+)\]', lean)
+            if literal is None or bytes(int(x, 0) for x in literal[1].split(',')) != actual:
+                raise ValueError('Lean literals differ from accepted artifact: '+name)
     pins = saved['capture_sha256']
     positive = validate(files, request, expected, pins)
     controls = []

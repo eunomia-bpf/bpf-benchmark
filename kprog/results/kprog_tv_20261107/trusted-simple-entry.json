@@ -1,0 +1,54 @@
+{
+  "status": "first_successful_entry_load_refinement_checked",
+  "program": "actual trusted-service x86 simple from b61f291a8",
+  "native_bytes": 60,
+  "accepted_B_insns": 37,
+  "covered_native_byte_range": [
+    0,
+    3
+  ],
+  "covered_virtual_B_pc": 0,
+  "canonical_ISA": "KProgFormal.Reference.X86 / X86Path",
+  "theorem": "KProgTV.TrustedSimpleX86.entry_load_correspondence",
+  "claims": [
+    "actual captured native bytes decode to canonical MOV64 RCX,[RDI] with real successor",
+    "complete native successor preserves all other GPRs, flags, XMM0, memory, bases/profile",
+    "complete BPF successor preserves all other registers/memory/ghost state",
+    "one identical ordered 8-byte read event; equal loaded value and memory",
+    "Lean native/proof literals checked against actual accepted service archive by existing binding checker"
+  ],
+  "premises": [
+    "native/proof initial PCs0; proof active",
+    "nativeRDI=BPFcontext r1 and equal initial memory",
+    "actual successful eight-byte context read witness",
+    "explicit XDP virtual32-to-physical64 context conversion contract; kernel/platform transport trusted"
+  ],
+  "not_discharged": [
+    "whole basic block/program TV",
+    "private-spill erasure and second context load",
+    "branches/stores/exit/ABI composition",
+    "fault/invalid-context cases",
+    "end-to-end immutable P to emitted artifact refinement"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "reference ISA semantics and explicit kernel platform contract",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV is complete"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "379675eea7041118f36846d2770c1d9d639a98e22a9d50226bf265fe360b5c82",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f3e81ad17fa923ce2a6676692490b43dc8608d0ca83a49236a73d330e9aecdeb"
+  },
+  "lean_exit": 0,
+  "axiom_audit": [
+    "'KProgTV.TrustedSimpleX86.native_decode0' depends on axioms: [propext, Classical.choice, Quot.sound]",
+    "'KProgTV.TrustedSimpleX86.native_load' depends on axioms: [propext, Quot.sound]",
+    "'KProgTV.TrustedSimpleX86.proof_load' depends on axioms: [propext, Quot.sound]",
+    "'KProgTV.TrustedSimpleX86.platform_load' depends on axioms: [propext, Quot.sound]",
+    "'KProgTV.TrustedSimpleX86.entry_load_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]"
+  ],
+  "log_sha256": "f0a14a876ce847529a598ddd19fac0bf9f44b8d02b7767e4410b7cdeeaa982b7",
+  "raw_output": "summarized and removed; canonical incremental cache retained"
+}

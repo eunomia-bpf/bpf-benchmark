@@ -793,3 +793,9 @@ build/simple.native.o: ../../micro/programs/simple.bpf.c ../../micro/programs/co
 .PHONY: trusted-binding-check
 trusted-binding-check:
 	PYTHONDONTWRITEBYTECODE=1 python3 check_trusted_capture.py
+
+.PHONY: trusted-simple-entry-certificate
+trusted-simple-entry-certificate: trusted-binding-check
+	cd ../formal && lake build KProgFormal.Reference.X86Path
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimpleX86.olean ../tv/TrustedSimpleX86.lean

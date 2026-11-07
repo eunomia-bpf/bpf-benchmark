@@ -1493,4 +1493,14 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     pure (.bt width source (.immediate (BitVec.ofNat 8 immediate)) nextPc)
   else throw "unrecognized native opcode"
 
+/-- Public symbolic byte-decoding interface for the captured simple entry.
+No operand or successor is supplied by the consumer of this lemma. -/
+theorem decode_mov_rcx_rdi (s : State) :
+    decode #[0x48,0x8b,0x0f] s = .ok
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc + 3)) := by
+  simp +decide [decode, prefixes, byteAt, operand, addressParts,
+    signedDisplacement, registerCode, scalarWidth, scalarSlice,
+    scalarSource, scalarDestination, Except.bind, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad]
+
 end KProgFormal.Reference.X86
