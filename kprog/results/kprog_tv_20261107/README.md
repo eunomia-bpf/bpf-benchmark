@@ -276,3 +276,10 @@ proof-entry admissibility, verifier/platform soundness, canonical ISA/hardware
 connection and immutable kernel binding remain explicit trusted obligations.
 The tested target is the existing Cortex-A72/no-LSE2 QEMU recipe; runtime CPU
 profile metadata enforcement is not claimed by this increment.
+
+`invocation-abi-full.log` records EXIT0 for the complete `simple-emitted-check`
+dependency chain after adding the actual-entry/ABI module: canonical models,
+clang arrays, context/private entry, every guard/store/return path, actual RX
+transport, ABI/entry identity and both accepted-entry instances. This supersedes
+the earlier leaf-only validation for the new module. It does not supply a
+runtime CPU-profile metadata check or certify another program.

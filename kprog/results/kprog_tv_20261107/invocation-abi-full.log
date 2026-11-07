@@ -1,0 +1,262 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+'KProgTV.execution_checked_of_complete' depends on axioms: [propext]
+cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
+'KProgTV.BPFPath.evaluate_sound' depends on axioms: [propext, Quot.sound]
+'KProgTV.BPFPath.evaluate_program_congr' depends on axioms: [propext, Quot.sound]
+'KProgTV.BPFPath.evaluate_program_congr_if_wide' depends on axioms: [propext, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPlatform.olean ../tv/BPFPlatform.lean
+'KProgTV.BPFPlatform.expand_sound' depends on axioms: [propext, Quot.sound]
+python3 extract_checked.py build-arm64/checked-kernel.log build/simple-checked
+actual expanded proof: 29 instructions, 1 bound region(s)
+make checked-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-checked \
+	-o ../tv/build/simple-checked/SimpleChecked.olean ../tv/build/simple-checked/SimpleChecked.lean
+'KProgTV.SimpleChecked.original_prefix' depends on axioms: [propext, Lean.ofReduceBool, Quot.sound]
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleCheckedPlatform.olean ../tv/SimpleCheckedPlatform.lean
+'KProgTV.SimpleCheckedPlatform.first_step' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleCheckedPlatform.second_step' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleCheckedPlatform.step_equal' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleCheckedPlatform.execution_transport' depends on axioms: [propext, Quot.sound]
+cd ../formal && lake build KProgFormal.Reference.AArch64
+Build completed successfully.
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/ARM64Path.olean ../tv/ARM64Path.lean
+'KProgTV.ARM64Path.evaluate_sound' depends on axioms: [propext, Quot.sound]
+python3 extract_simple_arm64.py
+exact ELF entry bytes: native=84 BPF=224
+python3 extract_simple_context.py
+complete actual clang 224 B / kernel 224 B; type6/attach37/flags0
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimplePlatform.olean ../tv/build/simple-arm64/SimplePlatform.lean
+../arm64/build/app-native-link/release/native-link --input build/simple-arm64/native-link/simple.proof.o \
+	--symbol simple_xdp --mode kernel --output build/simple-arm64/simple.kernel.bin \
+	--output-relocs build/simple-arm64/simple.kernel.relocs \
+	--output-abi build/simple-arm64/simple.kernel.abi \
+	--output-environment-layout build/simple-arm64/simple.kernel.environment.json
+native-link: arm64 entry=simple_xdp (76 bytes), 1 reachable symbol(s) total
+  - simple_xdp (vaddr 0x0, 76 bytes) [entry]
+native-link: wrote 84 bytes -> build/simple-arm64/simple.kernel.bin (0 relocs)
+native-link: wrote 0 relocs -> build/simple-arm64/simple.kernel.relocs
+native-link: wrote ABI metadata -> build/simple-arm64/simple.kernel.abi
+test ! -s build/simple-arm64/simple.kernel.relocs
+python3 extract_simple_arm64.py --native-blob build/simple-arm64/simple.kernel.bin
+actual complete kernel native blob equals the extracted native proof entry
+exact ELF entry bytes: native=84 BPF=224
+make simple-entry-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && lake env lean -R ../tv -o ../tv/build/PrivateSpills.olean ../tv/PrivateSpills.lean
+'KProgTV.PrivateSpills.two_spills_preserve_guest' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PrivateSpills.guest_bytes_preserved' depends on axioms: [propext, Quot.sound]
+'KProgTV.PrivateSpills.guest_reads_preserved' depends on axioms: [propext, Quot.sound]
+'KProgTV.PrivateSpills.spill_word' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PrivateSpills.upper_spill_reload' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PrivateSpills.erased_event_private' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PrivateSpills.store_agrees' depends on axioms: [propext]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimplePlatform.olean ../tv/build/simple-arm64/SimplePlatform.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleEntryCertificate.lean
+'KProgTV.SimpleEntryCertificate.native_full_state' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_first_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_second_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_prefix_full_state' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEntryCertificate.entry_guest_trace' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.entry_translation' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+make simple-blocks-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv \
+	-o ../tv/build/SimpleEntryCertificate.olean ../tv/SimpleEntryCertificate.lean
+'KProgTV.SimpleEntryCertificate.native_full_state' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_first_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_second_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_prefix_full_state' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEntryCertificate.entry_guest_trace' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.entry_translation' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv \
+	-o ../tv/build/SimpleGuardCertificate.olean ../tv/SimpleGuardCertificate.lean
+'KProgTV.SimpleGuardCertificate.native_first_block' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleGuardCertificate.proof_first_block' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleGuardCertificate.native_second_block' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleGuardCertificate.proof_second_block' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleGuardCertificate.actual_block_executions' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleBlocks.olean ../tv/SimpleBlocks.lean
+'KProgTV.SimpleBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleStoreCertificate.olean ../tv/SimpleStoreCertificate.lean
+'KProgTV.SimpleStoreCertificate.native_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.proof_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.matching_executions' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.including_faults' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.store_transition_relation' depends on axioms: [propext, Classical.choice, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleCheckedBlocks.olean ../tv/SimpleCheckedBlocks.lean
+'KProgTV.SimpleCheckedBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.second_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.return_executions' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.store_including_faults' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.first_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.second_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.store_with_spills' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.passed_guards_store' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.passed_guards_complete' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.matched_invocation' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.every_native_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleCheckedBlocks.bound_native_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimplePCRelocation.olean ../tv/SimplePCRelocation.lean
+'KProgTV.SimplePCRelocation.all_instructions' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimplePCRelocation.step_at' depends on axioms: [propext, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleExecutionRelocation.olean ../tv/SimpleExecutionRelocation.lean
+'KProgTV.SimpleExecutionRelocation.all_successors' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleExecutionRelocation.execution_rebase' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleExecutionRelocation.every_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleInvocationABI.olean ../tv/SimpleInvocationABI.lean
+'KProgTV.SimpleInvocationABI.all_instructions_preserve' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.every_RX_prefix_preserves' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.entry_is_model' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+python3 extract_checked.py build-arm64/checked-kernel.log build/simple-checked --exports build/capture-loader-arm64-emitted
+actual expanded proof: 29 instructions, 1 bound region(s)
+completed per-program exports: 2; translation validation remains separate
+python3 test_emitted_sites.py build/capture-loader-arm64-emitted
+6-7: actual callback RX entry 0xffff80008355d8b8, JIT offset 40, exact84B/GEN4: PASS
+6-7/truncated header: REJECTED
+6-7/truncated site: REJECTED
+6-7/extra site: REJECTED
+6-7/wrong version: REJECTED
+6-7/wrong site count: REJECTED
+6-7/wrong source ID: REJECTED
+6-7/nonzero reserved: REJECTED
+6-7/wrong blob ID: REJECTED
+6-7/stale generation: REJECTED
+6-7/wrong native extent: REJECTED
+6-7/wrong ABI: REJECTED
+6-7/absent RX entry: REJECTED
+6-7/RX outside function: REJECTED
+6-7/shifted RX entry: REJECTED
+6-7/changed emitted store: REJECTED
+6-7/changed entry with intact decoy: REJECTED
+6-7/truncated actual JIT layout: REJECTED
+6-7/wrong native program: REJECTED
+6-8: actual callback RX entry 0xffff80008355d970, JIT offset 40, exact84B/GEN8: PASS
+6-8/truncated header: REJECTED
+6-8/truncated site: REJECTED
+6-8/extra site: REJECTED
+6-8/wrong version: REJECTED
+6-8/wrong site count: REJECTED
+6-8/wrong source ID: REJECTED
+6-8/nonzero reserved: REJECTED
+6-8/wrong blob ID: REJECTED
+6-8/stale generation: REJECTED
+6-8/wrong native extent: REJECTED
+6-8/wrong ABI: REJECTED
+6-8/absent RX entry: REJECTED
+6-8/RX outside function: REJECTED
+6-8/shifted RX entry: REJECTED
+6-8/changed emitted store: REJECTED
+6-8/changed entry with intact decoy: REJECTED
+6-8/truncated actual JIT layout: REJECTED
+6-8/wrong native program: REJECTED
+actual entry binding: 2 captures PASS; 36 corruptions REJECTED
+python3 extract_simple_emitted.py build/capture-loader-arm64-emitted build/simple-emitted
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+6-8: emitted native/program/entry/ABI/metadata certificate input generated
+make simple-emitted-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+'KProgTV.SimpleEmitted_6_7.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_7.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_7.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_7.accepted_actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_8.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.accepted_actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'
