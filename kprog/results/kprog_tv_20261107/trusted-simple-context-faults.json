@@ -1,0 +1,103 @@
+{
+  "status": "both_captured_context_load_faults_checked",
+  "utc": "2026-11-07T12:34:45.992347+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleX86.first_context_fault_correspondence",
+    "KProgTV.TrustedSimpleX86.second_context_fault_correspondence"
+  ],
+  "fault_positions": [
+    {
+      "native_PC": 0,
+      "B_virtual_PC": 0,
+      "address": "context",
+      "width": 8,
+      "earlier_guest_events": 0,
+      "earlier_private_writes": 0
+    },
+    {
+      "native_PC": 3,
+      "B_virtual_PC": 2,
+      "address": "context+8",
+      "width": 8,
+      "earlier_guest_events": 1,
+      "earlier_private_writes": 1
+    }
+  ],
+  "claims": [
+    "failed canonical source read changes neither destination nor native PC",
+    "actual captured kernel context expansion propagates exact8B/address fault at original B PC",
+    "second fault retains first actual read and exact first private spill",
+    "only certified first private spill erased; read and fault retained",
+    "complete resulting states and memory equality/precise36byte outside-private values/init/global-permissions relation",
+    "arbitrary B environment cannot invent a context-load value",
+    "model-only proof; no unsafe native execution"
+  ],
+  "premises": [
+    "entry nativePC0/BPC0 and active B",
+    "nativeRDI/B r1 context equality and same initial canonical memory",
+    "corresponding failed read permission",
+    "second-fault case requires actual first successful read, first private spill permission and first-read base outside private36",
+    "explicit captured kernel context conversion platform"
+  ],
+  "not_yet_claimed": [
+    "one theorem deriving all read/write outcomes without successful-context-read premises",
+    "unconditional whole-program TranslationValidation",
+    "universal canonical relational/architectural simulation",
+    "private frame/kernel platform/supported ABI discharge",
+    "original immutable ELF/entry/return-boundary to materialized native60 transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "7c18894e14b427e0cb00e452e23c2966e6eec6ae0c4678c7761901968e49368c",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "f6e7bcd51edffcb43997c2f1c120b6e6633973deffa676fec0f4e7ac4a461c5a",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.native_memory_source_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_context_load_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.native_first_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.native_second_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.first_context_fault_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.second_context_fault_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical reference ISA/memory and explicit B platform semantics",
+    "verifier soundness for eventual safety composition",
+    "kernel binding/capture/provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel and reported axioms, including native reduction inherited from private-footprint lemma"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "8a5d0bfada20c7304643dff8cc4244bf62de05a99e43f823be98d1dac2cc0549"
+  }
+}

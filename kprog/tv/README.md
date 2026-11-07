@@ -1598,3 +1598,15 @@ every guest suffix event remains, including fault and alias cases. This extends
 the earlier conditional-complete certificate; context faults, universal relational
 simulation and ABI/original-ELF materialization still prevent an unconditional TV
 claim. The entry-any-permissions JSON/log gives the exact checked checkpoint.
+
+### Both context-load faults
+
+`first_context_fault_correspondence` and `second_context_fault_correspondence`
+cover failed8-byte context reads at nativePC0/3 and actual B virtualPC0/2,
+including their captured physical context expansion. Neither failed read commits
+its destination or advances its PC. The second fault retains the first read
+and B's first private spill; only that proved-private spill is projected away.
+Full states and outside-private36 memory values/init/permissions are retained.
+These are model-only proofs, with no unsafe native execution. The dated
+context-faults JSON/log records all six axiom audits. All-outcome composition,
+universal relational simulation and ABI/platform/materialization remain open.

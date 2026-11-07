@@ -2530,6 +2530,132 @@ theorem complete_all_store_outcomes_correspondence (env : BPF.Environment) (n : 
       simpa only [completeNativeFinal,completeProofFinal,reject,ite_false,nativeIndex] using
         And.intro donePC (And.intro doneHalted returnMatch)
 
+
+/-- A failed canonical source read commits no destination or PC change. -/
+theorem native_memory_source_fault (s : X86.State) (destination : X86.ScalarDestination)
+    (address nextPC : Word) (bad : permitted s.memory.readable address 8=false) :
+    X86.step (.move .w64 destination (.memory address) nextPC) s =
+      ⟨s,[.fault (.read address 8)],some (.read address 8)⟩ := by
+  simp only [X86.step,X86.moveStep,X86.scalarRead,X86.readSource,X86.ScalarWidth.bytes,
+    readMemory,bad,Bool.false_eq_true,ite_false]
+
+/-- Actual captured context conversions preserve a first or second read fault
+at the virtual PC. Arbitrary B environments cannot supply an invented value. -/
+theorem initialized_context_load_fault (env : BPF.Environment) (p : BPF.State) (address : Word)
+    (position : (p.pc=0 ∧ address=p.regs 1) ∨ (p.pc=2 ∧ address=p.regs 1+(8#64)))
+    (active : p.halted=false) (bad : permitted p.memory.readable address 8=false) :
+    BPFPlatform.step (initializedPlatform env) proof p =
+      .ok ⟨p,[.fault (.read address 8)],some (.read address 8)⟩ := by
+  have entry : p.pc=0 ∨ p.pc=1 ∨ p.pc=2 := by rcases position with h | h; exact Or.inl h.1; exact Or.inr (Or.inr h.1)
+  rw [entry_environment_independent env p entry]
+  rcases position with ⟨position,rfl⟩ | ⟨position,rfl⟩
+  all_goals simp +decide [BPFPlatform.step,platform,active,position,virtual_decode0,
+    BPFPlatform.expand,expansion0,expansion2,BPFPath.evaluate,physical0,physical2,
+    BPF.decode,proof,BPF.execute,BPF.load,BPF.setReg,readMemory,bad,littleEndian,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  all_goals cases p <;> simp_all
+
+theorem native_first_context_fault (s : X86.State) (position : s.pc=0)
+    (bad : permitted s.memory.readable (s.gpr 7) 8=false) :
+    X86Path.Execution 0 native s [.fault (.read (s.gpr 7) 8)] s := by
+  have decoded : X86Path.decodeAt 0 native ⟨0,3⟩ s = .ok
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+(3#64))) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode0,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have step := native_memory_source_fault s (.register (.low 1)) (s.gpr 7) (s.pc+(3#64)) bad
+  have run := X86Path.Execution.next ⟨0,3⟩ _ decoded
+    (X86Path.Execution.refl (X86.step
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+(3#64))) s).state)
+  rw [step] at run
+  simpa only [List.append_nil] using run
+
+theorem native_second_context_fault (s : X86.State) (position : s.pc=3)
+    (bad : permitted s.memory.readable (s.gpr 7+(8#64)) 8=false) :
+    X86Path.Execution 0 native s [.fault (.read (s.gpr 7+(8#64)) 8)] s := by
+  have decoded : X86Path.decodeAt 0 native ⟨3,4⟩ s = .ok
+      (.move .w64 (.register (.low 2)) (.memory (s.gpr 7+(8#64))) (s.pc+(4#64))) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode3,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have step := native_memory_source_fault s (.register (.low 2)) (s.gpr 7+(8#64)) (s.pc+(4#64)) bad
+  have run := X86Path.Execution.next ⟨3,4⟩ _ decoded
+    (X86Path.Execution.refl (X86.step
+      (.move .w64 (.register (.low 2)) (.memory (s.gpr 7+(8#64))) (s.pc+(4#64))) s).state)
+  rw [step] at run
+  simpa only [List.append_nil] using run
+
+/-- First entry read fails in both actual artifacts before any spill. -/
+theorem first_context_fault_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (bad : permitted p.memory.readable (p.regs 1) 8=false) :
+    X86Path.Execution 0 native n [.fault (.read (p.regs 1) 8)] n ∧
+    Execution (initializedInstructionStep env) p [.fault (.read (p.regs 1) 8)] p ∧
+    n.memory=p.memory := by
+  have nbad : permitted n.memory.readable (n.gpr 7) 8=false := by simpa only [memory,context] using bad
+  have step : initializedInstructionStep env p [.fault (.read (p.regs 1) 8)] p :=
+    ⟨⟨p,[.fault (.read (p.regs 1) 8)],some (.read (p.regs 1) 8)⟩,
+      initialized_context_load_fault env p (p.regs 1) (Or.inl ⟨proofPC,rfl⟩) active bad,rfl,rfl⟩
+  refine ⟨?_,?_,memory⟩
+  · simpa only [context] using native_first_context_fault n nativePC nbad
+  · simpa only [List.append_nil] using Execution.next step (Execution.refl p)
+
+/-- Second read failure retains the first actual read and B's first spill;
+only that certified private spill is erased, never the read or fault. -/
+theorem second_context_fault_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer : Word) (first : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (bad : permitted p.memory.readable (p.regs 1+(8#64)) 8=false) :
+    X86Path.Execution 0 native n [first,.fault (.read (p.regs 1+(8#64)) 8)] (nativeAfter n pointer) ∧
+    Execution (initializedInstructionStep env) p
+      [first,.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true,
+        .fault (.read (p.regs 1+(8#64)) 8)] (afterSpill p pointer) ∧
+    ([first,.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true,
+        .fault (.read (p.regs 1+(8#64)) 8)].filterMap (initializationProjectEvent (p.regs 10))) =
+      [first,.fault (.read (p.regs 1+(8#64)) 8)] ∧
+    initializationAgreesOutside (p.regs 10) (nativeAfter n pointer).memory (afterSpill p pointer).memory := by
+  have nativeRead : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first) := by simpa only [memory,context] using read0
+  have nread := native_entry_execution n pointer first nativePC nativeRead
+  have at3 : (nativeAfter n pointer).pc=3 := by simp only [nativeAfter,nativePC]; rfl
+  have nativeBad : permitted (nativeAfter n pointer).memory.readable ((nativeAfter n pointer).gpr 7+(8#64)) 8=false := by
+    simpa +decide [nativeAfter,memory,context] using bad
+  have nfault := native_second_context_fault (nativeAfter n pointer) at3 nativeBad
+  have step0 : initializedInstructionStep env p [first] {BPF.setReg p 2 pointer with pc := 1} := by
+    refine ⟨⟨{BPF.setReg p 2 pointer with pc := 1},[first],none⟩,?_,rfl,rfl⟩
+    rw [entry_environment_independent env p (Or.inl proofPC)]
+    exact platform_load p pointer first active proofPC read0
+  have step1 : initializedInstructionStep env {BPF.setReg p 2 pointer with pc := 1}
+      [.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true] (afterSpill p pointer) := by
+    refine ⟨⟨afterSpill p pointer,[.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true],none⟩,?_,rfl,rfl⟩
+    rw [entry_environment_independent env _ (Or.inr (Or.inl rfl))]
+    exact platform_spill p pointer active proofPC write40
+  have qBad : permitted (afterSpill p pointer).memory.readable ((afterSpill p pointer).regs 1+(8#64)) 8=false := by
+    simpa +decide [afterSpill,BPF.setReg,storeMemory] using bad
+  have qActive : (afterSpill p pointer).halted=false := active
+  have step2 : initializedInstructionStep env (afterSpill p pointer)
+      [.fault (.read (p.regs 1+(8#64)) 8)] (afterSpill p pointer) := by
+    refine ⟨⟨afterSpill p pointer,[.fault (.read (p.regs 1+(8#64)) 8)],some (.read (p.regs 1+(8#64)) 8)⟩,?_,rfl,rfl⟩
+    simpa +decide [afterSpill,BPF.setReg] using initialized_context_load_fault env (afterSpill p pointer)
+      ((afterSpill p pointer).regs 1+(8#64)) (Or.inr ⟨rfl,rfl⟩) qActive qBad
+  refine ⟨?_,?_,?_,?_⟩
+  · simpa +decide [nativeAfter,context] using native_execution_append nread nfault
+  · simpa only [List.append_nil,List.cons_append,List.nil_append] using
+      Execution.next step0 (Execution.next step1 (Execution.next step2 (Execution.refl _)))
+  · have kept := initialization_read_retained p.memory (p.regs 10) _ _ _ first read0 guest0
+    simp only [List.filterMap_cons,List.filterMap_nil,kept]
+    simp [initializationProjectEvent,initializationSlot,valueBytes]
+  · change initializationAgreesOutside (p.regs 10) n.memory (afterSpill p pointer).memory
+    rw [memory]
+    refine ⟨rfl,rfl,?_⟩
+    intro address outside
+    exact (spill_preserves_guest p pointer).2.2 address
+      (fun inside => outside (initialization_spill_private _ _ inside))
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2752,3 +2878,15 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_body_any_permissions
 
 #print axioms KProgTV.TrustedSimpleX86.complete_all_store_outcomes_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.native_memory_source_fault
+
+#print axioms KProgTV.TrustedSimpleX86.initialized_context_load_fault
+
+#print axioms KProgTV.TrustedSimpleX86.native_first_context_fault
+
+#print axioms KProgTV.TrustedSimpleX86.native_second_context_fault
+
+#print axioms KProgTV.TrustedSimpleX86.first_context_fault_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.second_context_fault_correspondence
