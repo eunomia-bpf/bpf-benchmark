@@ -1,9 +1,9 @@
 {
-  "utc": "2026-11-07T20:27:42.064321+00:00",
+  "utc": "2026-11-07T20:37:10.532561+00:00",
   "scope": "Private source-of-truth integration of generic ARM immediate alias mechanism",
   "production_state": "Active application source epochs retained; integration awaits their closure and owner synchronization",
-  "source_files_changed": 16,
-  "source_pins_verified": 256,
+  "source_files_changed": 17,
+  "source_pins_verified": 258,
   "c_checks": {
     "cases": [
       2072,
@@ -80,16 +80,31 @@
       {
         "module": "KProgFormal.Refinement.Arm64Dispatcher",
         "returncode": 0,
-        "source_sha256": "2e0635e8a93756cf9f01157f29d9d33a98ea5c80a304dcff927bf09c98f40cc8",
-        "olean_sha256": "bd44eaa8a583151ae7be475d1ab463775afeeea0a6026d71d60d19040c2f5519"
+        "source_sha256": "26db65b9802e616400ed0311c5bb0fb76abda4559d0c5ba4e1d8cd277d82bf10",
+        "olean_sha256": "691be70ad3a70ce3bd1451cd5fa8a4efd0fd8fdbe83442178ac59863f5a77fa2"
+      },
+      {
+        "module": "KProgFormal.Arm64DispatchSingleton",
+        "returncode": 0,
+        "source_sha256": "9d9986e4d069142ce2ae096cd28413e0cc87f7de627b4214f792ad203e74f16b",
+        "olean_sha256": "84dfcdd6b59e6fa4c59513a4d57586685692c36020de94edd8460ecad98357dc"
+      },
+      {
+        "module": "KProgFormal.Arm64DispatchTotality",
+        "returncode": 0,
+        "source_sha256": "f48e41461c9ac2d9d106751843e479c3c82e0c9db72d82e262f8d51d60e46434",
+        "olean_sha256": "310a125f0806ac895b8886e840afbbe4db8d7bf7c9e7f587f827a35f713d2371"
       }
     ],
     "exit": 0,
-    "audits": 4,
+    "audits": 6,
     "axioms": [
       "propext",
-      "Quot.sound"
-    ]
+      "Quot.sound",
+      "Classical.choice",
+      "Lean.ofReduceBool"
+    ],
+    "axiom_scope": "Canonical alias refinement inherits the existing arithmetic refinement dependencies; raw alias equation uses propext/Quot.sound; reserved-set membership is axiom-free."
   },
   "direct_dispatch": {
     "tokens": 71,
@@ -103,7 +118,12 @@
   "semantics": "Labels3/4 share generic immediate label6 for every AUX value, width, register assignment, operand and incoming state; AUX retains ALU operation selection.",
   "universal_theorem": "KProgFormal.Refinement.Arm64Dispatcher.immediate_alias_dispatch",
   "related_generic_replay": "acd62b43cc9173cc16426bf160e3e09778b02d9f",
-  "diffstat": " .../kprog/arm64/arm64_sim_direct.h                 |   4 +-\n .../formal/KProgFormal/Arm64AluOperandSelect.lean  |  16 +--\n .../formal/KProgFormal/Arm64DispatchFamily.lean    |  10 +-\n .../Generated/GeneratedArm64AluOperandSelect.lean  |  14 +--\n .../Generated/GeneratedArm64DispatchFamily.lean    |  10 +-\n .../KProgFormal/Refinement/Arm64Arithmetic.lean    |   6 +-\n .../KProgFormal/Refinement/Arm64Dispatcher.lean    |  10 ++\n .../contracts/arm64_alu_operand_select_spec.json   |   2 +-\n .../contracts/arm64_dispatch_family_spec.json      |   2 +-\n .../formal/generated/arm64_alu_operand_select.h    |  18 ++--\n .../kprog/formal/generated/arm64_dispatch_family.h |  10 +-\n .../oracles/test_arm64_alu_operand_select_host.c   |   4 +\n .../test_arm64_alu_operand_select_route_host.c     |  10 +-\n .../oracles/test_arm64_dispatch_family_host.c      |   5 +-\n .../generate_arm64_alu_operand_select_spec.py      | 115 ++++++---------------\n .../tools/generate_arm64_dispatch_family_spec.py   |  41 ++------\n 16 files changed, 116 insertions(+), 161 deletions(-)\n",
-  "patch_sha256": "22826e256616b865ad6a87b5ebb911f62fde496252aeafa237052441aced2ae1",
-  "inputs_sha256": "1f26e955931593fbad76e7b1a8ca3da5be0d5251f615e95b165655d240fb73e1"
+  "diffstat": " .../kprog/arm64/arm64_sim_direct.h                 |   4 +-\n .../formal/KProgFormal/Arm64AluOperandSelect.lean  |  16 +--\n .../formal/KProgFormal/Arm64DispatchFamily.lean    |  10 +-\n .../formal/KProgFormal/Arm64DispatchTotality.lean  |  37 +++----\n .../Generated/GeneratedArm64AluOperandSelect.lean  |  14 +--\n .../Generated/GeneratedArm64DispatchFamily.lean    |  10 +-\n .../KProgFormal/Refinement/Arm64Arithmetic.lean    |   6 +-\n .../KProgFormal/Refinement/Arm64Dispatcher.lean    |  24 +++++\n .../contracts/arm64_alu_operand_select_spec.json   |   2 +-\n .../contracts/arm64_dispatch_family_spec.json      |   2 +-\n .../formal/generated/arm64_alu_operand_select.h    |  18 ++--\n .../kprog/formal/generated/arm64_dispatch_family.h |  10 +-\n .../oracles/test_arm64_alu_operand_select_host.c   |   4 +\n .../test_arm64_alu_operand_select_route_host.c     |  10 +-\n .../oracles/test_arm64_dispatch_family_host.c      |   5 +-\n .../generate_arm64_alu_operand_select_spec.py      | 115 ++++++---------------\n .../tools/generate_arm64_dispatch_family_spec.py   |  41 ++------\n 17 files changed, 142 insertions(+), 186 deletions(-)\n",
+  "patch_sha256": "8fd67606d5bb02e21ee32481acc554e506559e459b68c3e180b5f0873a024754",
+  "inputs_sha256": "cc6aca738ec2b8ccc07559b97a6287fe53c35854323f41d764e79c62cb0952a5",
+  "canonical_alias_theorem": "KProgFormal.Refinement.Arm64Dispatcher.arithmetic_immediate_alias_refines",
+  "totality_scope": "The modeled generated-table subset has an empty reserved set after numeric3/4 join the ALU family.",
+  "source_checks": 7,
+  "patch_application_preflight": 0,
+  "prior_carrier_preflight": 128
 }
