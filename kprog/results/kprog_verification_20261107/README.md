@@ -456,3 +456,11 @@ passed 1024, 5120, 3804, 257 and 6401 cases respectively. No proof/test failures
 Existing C warnings about inline redefinition, unused host state and potentially
 uninitialized non-selected macro arms remain visible. Exact1c4a46960 full check
 is running separately; this newer increment awaits its own full validation.
+
+Exact `1c4a46960955370dde5f4d56201f3274a6dbc951` completed the full
+`make -C kprog/formal check` with exit **0**, including SHIFT opcode/operand/AUX
+composition, all earlier Lean modules, contracts, reference/wire/compiler checks
+and semantic hosts. The immutable source/cache export was deleted automatically;
+compressed CALL CPU observations retain this successful 440-case full run.
+Subsequent MVN/NEG, MOV and multiply-family increments need their own full check.
+This result is distinct from the mutable shared-tree CMOV failure owned by F.
