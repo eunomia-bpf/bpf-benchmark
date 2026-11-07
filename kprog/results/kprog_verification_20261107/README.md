@@ -330,3 +330,11 @@ singleton route hosts checked 1,115,374 and 11,083 cases. Initial proof attempts
 failed on argument parentheses and a free-variable decide goal; explicit field
 proofs fixed these without changing any premise or filtering inputs. Current
 combined full validation is recorded separately from the earlier tail source.
+
+Exact `6ded5f0d5a497b7fe511cd8fe7139103d663f854` completed
+`make -C kprog/formal check` with exit **0**, including FMOV/CNT/UADDLV raw
+fields and the concrete dispatcher tail, plus all prior Lean modules, generated
+contracts, reference/wire/compiler checks and C semantic hosts. The immutable
+source/cache export was deleted automatically; compressed CALL CPU observations
+now retain this successful full run. Subsequent packed BITFIELD/MOVK work needs
+its own full validation.
