@@ -1,0 +1,65 @@
+{
+  "utc": "2026-11-07T19:49:51.411280+00:00",
+  "status": "universal_private_spill_trace_projection_and_actual_accepted_proof_soundness_transfer_proved",
+  "scope": "Every artifact, state type, finite execution, canonical event trace and compiler-private byte predicate; ownership may close over the supported invocation/frame environment.",
+  "claims": [
+    "Erased events are positive-size ordinary reads or writes whose every addressed byte belongs to the supplied private region.",
+    "Retained events equal their raw originals, including address, size, access kind, bytes and initialization flag. Helpers, atomic effects, exclusive/order effects, faults and empty accesses remain observable.",
+    "Each projected block contains a physical raw-proof execution with identical physical endpoints and its exact ordered projected trace.",
+    "Any finite sequence of projected blocks lifts to a physical proof execution; projection preserves the order of every retained event.",
+    "Verifier-checked raw effects imply checked projected effects through retained-event identity. The physical verifier soundness assumption supplies this property directly.",
+    "generic_artifact_effects_checked composes a universal native-to-projected-proof law, actual raw-proof verifier soundness/admitted entry, and full executed/validated Artifact binding to cover every native effect."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o bpf-check private-spill-projection-check",
+    "reproduction": "make -C kprog/tv private-spill-projection-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.PrivateSpillProjection.kept_event_original": [
+        "propext"
+      ],
+      "KProgTV.PrivateSpillProjection.erased_access_owned": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.PrivateSpillProjection.projected_trace_checked": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.PrivateSpillProjection.projected_execution_lifts": [
+        "propext"
+      ],
+      "KProgTV.PrivateSpillProjection.projected_execution_checked": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.PrivateSpillProjection.generic_artifact_effects_checked": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "7296c8dfea4cf3f0e597a80c3a46371ee9cf50ac36b76f03f816982b8cea25ef",
+    "dependency_scope": "Generic Composition and canonical Memory/Event types supply the complete import scope."
+  },
+  "source_sha256": {
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/PrivateSpillProjection.lean": "c7754031523b9ac4adceb1a9939cc67513d77ad5e1c909e5159bfde34f12797c",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/Makefile": "a70f36d5e2e2c958c5e1ebb7b0734c20f8442b36083f5a9cd0764c04dd0ce1d5"
+  },
+  "premises": [
+    "The generic compiler/layout invariant supplies byte ownership and public/private separation for the actual invocation/frame environment. Artifact metadata fixes the layout and the bound entry relation fixes its invocation parameters.",
+    "The native-to-projected-proof validation law is quantified over all artifacts and carries architectural state, control and ordered effects.",
+    "Verifier soundness is assumed for actual accepted raw-proof executions and their admitted entry. Complete Artifact equality binds both code images, entry, ABI and specialization/layout metadata."
+  ],
+  "completion_path": [
+    "Prove spill insertion/reload/control preservation and private-frame ownership for the actual generic compiler/layout transformation, then use the projection theorem as its verifier-soundness adapter.",
+    "Combine V token/definedness laws, actual compiler-output preservation, relocation layout and remaining map/helper/tail-call transformations through Composition.lean."
+  ],
+  "trusted": [
+    "Actual accepted-proof verifier soundness and supported physical entry/kernel binding provenance.",
+    "Canonical ISA/Memory semantics and separate hardware-fidelity validation.",
+    "Lean kernel and reported propext/Quot.sound."
+  ]
+}

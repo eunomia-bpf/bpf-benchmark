@@ -29,6 +29,16 @@ additional audits pass (sixteen cumulative). `record_table_preservation`
 supplies the resulting table TV instance. Actual native-link interval
 construction, chunk layout and global code binding form the next bridge.
 
+`generic-private-spill-projection.json` connects compiler-private event
+projection to actual accepted-B verifier soundness for every artifact and
+invocation. Erased ordinary reads/writes have positive size and every byte is
+owned privately. Retained events keep their exact raw values and order;
+helper, atomic, exclusive, fault and empty-access effects remain visible.
+Projected executions lift to physical executions with the same endpoints.
+Six audits pass; full Artifact binding composes the checked-effects theorem.
+Private-frame ownership and spill insertion/reload/control preservation form
+the concrete compiler/layout obligations for this adapter.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
