@@ -130,6 +130,18 @@ correspondence and mixed-field separation retain their completion steps;
 other GOT/memory-table consumers and helper/entry ABI follow. Original nonzero
 byte protection and final literal-field identity have their separate invariants.
 
+[`generic-native-link-chunk-layout.json`](../kprog_tv_20261107/generic-native-link-chunk-layout.json)
+adds 22 passing universal audits.
+Existing binding bounds and the group u32 cursor imply an exact logical byte
+partition, natural-number size sum and unique chunk ownership. Serializer
+subtraction and checked rebase preserve every selected5B/8B record's complete
+target, selector and materialized patch at each64-bit final base. Local field
+separation supplies whole-table separation through the derived cross-chunk
+law; the global table instantiates canonical CALL TV with full state/effects.
+Actual Rust instruction offsets/templates, within-chunk separation, complete PC
+partition and physical executable chunk-base/byte identity form the next layout
+bridge. Other consumer, ABI, ARM and compiler stages retain their own laws.
+
 <!-- O4 COVERAGE END -->
 
 

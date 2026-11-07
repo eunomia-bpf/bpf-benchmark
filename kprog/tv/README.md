@@ -85,6 +85,17 @@ law. Producer template/field/PC/chunk correspondence and mixed-field separation
 provide their remaining layout inputs. Literal-field identity and other
 GOT/helper/entry ABI stages retain their own generic preservation laws.
 
+`generic-native-link-chunk-layout.json` adds 22 passing universal audits.
+Existing binding bounds and the group u32 cursor imply an exact logical byte
+partition, natural-number size sum and unique chunk ownership. Serializer
+subtraction and checked rebase preserve every selected5B/8B record's complete
+target, selector and materialized patch at each64-bit final base. Local field
+separation supplies whole-table separation through the derived cross-chunk
+law; the global table instantiates canonical CALL TV with full state/effects.
+Actual Rust instruction offsets/templates, within-chunk separation, complete PC
+partition and physical executable chunk-base/byte identity form the next layout
+bridge. Other consumer, ABI, ARM and compiler stages retain their own laws.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

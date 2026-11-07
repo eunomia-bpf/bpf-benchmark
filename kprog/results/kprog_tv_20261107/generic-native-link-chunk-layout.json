@@ -1,0 +1,191 @@
+{
+  "utc": "2026-11-07T20:58:30.489859+00:00",
+  "status": "universal_checked_chunk_partition_and_serialized_relocation_materialization",
+  "scope": "Every finite accepted u32 chunk group; every mixed x86 kind1/shared kind5/6/7 local record table and every64-bit executable base.",
+  "implementation_correspondence": {
+    "bounds": "native_lab_binding_validate: chunk_offset<=total_native_size, positive native_size, native_size<=total_native_size-chunk_offset.",
+    "cursor": "native_lab_group_metadata compares each chunk_offset to group_prepare cursor; group_prepare adds native_size in u32 and compares its final cursor to total_native_size.",
+    "serialization": "native_loader.cpp:chunk_reloc_bytes selects complete global relocation spans and emits u32(start-chunk.offset), original kind and original target. x86 kind1 consumes5B; shared literal kinds5/6/7 consume8B.",
+    "emission": "The final-base materialization theorem equates the global record with the chunk-local record at base+chunk_offset. Canonical Memory and X86 supply the existing writer and instruction relation."
+  },
+  "claims": [
+    "Accepted bounds prove every u32 cursor addition equals its natural-number sum and stays within the common total.",
+    "An accepted group has an ordered half-open partition, an exact size sum and one unique chunk owner for every logical native byte.",
+    "A local record that fits its chunk rebases exactly into u32 global offsets; full consumed spans stay inside their owning chunk.",
+    "Local and global materialization yield exactly the same Patch, including the final CALL displacement and full literal target, at every wrapping64-bit base.",
+    "Local field separation plus accepted chunk bounds derives all cross-chunk separation, whole global record-table separation and canonical physical patch separation.",
+    "The resulting chunk table instantiates the existing full-state/exact-effect CALL translation-validation theorem.",
+    "The actual serializer subtraction reconstructs the original selected global record, preserves target/selector, fits locally and has unique selected ownership."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-guarded-emission-check native-link-chunk-layout-check",
+    "reproduction": "make -C kprog/tv native-link-chunk-layout-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkChunkLayout.valid_end": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_lower": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_ordered": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_size_sum": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_coverage": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.ordered_unique": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_span": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_offset": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_bounds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_materialize": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_separated": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.cross_chunk_separated": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_valid": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkChunkLayout.checked_partition": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.global_records_separated": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.physical_table_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.chunk_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.global_materialize": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.selected_local_fits": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.rebase_localize": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkChunkLayout.serialized_materialize": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkChunkLayout.selected_unique": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "c0b140678ff937075085a0adabc957f0739369c0137bce534a278b0b182aa5b6",
+    "attempts_archive": "kprog/results/kprog_tv_20261107/generic-native-link-chunk-layout-attempts.log.gz",
+    "attempts_raw_sha256": "f7d12051c9b27ef331a5920ac746b18b08812587f707412dab04750853293adc",
+    "proof_elaboration_attempt_exits": [
+      2,
+      2
+    ],
+    "intermediate_pass_audits": [
+      12,
+      18
+    ]
+  },
+  "source_sha256": {
+    "kprog/tv/NativeLinkChunkLayout.lean": "30f470f181f8d8cdb7cd0779079514a531a550f83102c90c6cd5e0fe216f5076",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "0da5a9fda6d301494ffa5e59b4f009c66a9f4ecdb251fd2340ec37d0db28b2b5",
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/Makefile": "dff7141e44455b270ecbd29249634bea0fd4e6e5d025dd36e974c37e1be6bacc",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_group.h": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5"
+  },
+  "implementation_source_observations": [
+    {
+      "path": "kinsn/module/include/native_lab_group.h",
+      "observed_sha256": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "published_sha256": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5",
+      "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 7992c4106..0ded174ff 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n"
+    }
+  ],
+  "compiled_olean_sha256": {
+    "kprog/tv/build/NativeLinkGuardedEmission.olean": "aab75037cb67d7e522558d29e1a76ab8779a6f8fa5cf4bca5d6b165410b09f5f",
+    "kprog/tv/build/NativeLinkChunkLayout.olean": "54ac7d47dbd96067603dfaf6b906df564489d0f89804c3b35ecd6480f061d54a"
+  },
+  "premises": [
+    "Trusted kernel C/ABI correspondence maps actual accepted header fields and group cursor checks to ValidChunk/CheckedGroup. The mathematical guard extraction is source-pinned; the Lean proof covers the extracted guard arithmetic and generic canonical writer relation.",
+    "Local records fit their chunk and the producer supplies within-chunk consumed-field separation, original CALL opcodes and accepted signed32 targets. Checked metadata derives cross-chunk separation and exact offset transport.",
+    "Serialized fields represent the actual supported x86 CALL/shared literal kinds; target identity and exact Artifact bytes, entry, ABI and metadata remain bound through the trusted kernel.",
+    "The logical byte partition and final-base equations compose with the actual JIT image through a physical chunk-base/code-byte correspondence law."
+  ],
+  "completion_path": [
+    "Connect actual Rust instruction offsets/templates and within-chunk consumed-field separation to the typed records; establish complete PC partition and actual final executable chunk bases/bytes.",
+    "Compose complete MOVABS/GOT/memory-table consumers, supported invocation/helper ABI, ARM instruction relocation and tail-call stages.",
+    "Supply universal O1/O2/definedness and actual compiler/private-frame preservation, then instantiate Composition.lean for every artifact."
+  ],
+  "trusted": [
+    "Kernel binding code and C/ABI correspondence for accepted metadata, immutable snapshots, serialization and final executable image.",
+    "Canonical ISA/Memory semantics and F hardware/QEMU fidelity evidence.",
+    "Accepted-B verifier soundness for checked-effects composition.",
+    "Lean kernel and the explicitly audited propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ]
+}
