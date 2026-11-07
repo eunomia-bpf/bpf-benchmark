@@ -1,0 +1,1780 @@
+{
+  "objects": 93,
+  "functions": 436,
+  "changed": 70,
+  "focus": [
+    {
+      "object": "bpf_execve_event_v61.o",
+      "symbol": "execve_send",
+      "prior_bytes": 10368,
+      "linked_bytes": 11296,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        14,
+        25,
+        35,
+        113,
+        130,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        25,
+        35,
+        113,
+        130,
+        181
+      ]
+    }
+  ],
+  "changed_rows": [
+    {
+      "object": "bpf_execve_event_v61.o",
+      "symbol": "execve_send",
+      "prior_bytes": 10368,
+      "linked_bytes": 11296,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        14,
+        25,
+        35,
+        113,
+        130,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        25,
+        35,
+        113,
+        130,
+        181
+      ]
+    },
+    {
+      "object": "bpf_execve_event_v61.o",
+      "symbol": "event_execve",
+      "prior_bytes": 16272,
+      "linked_bytes": 22448,
+      "prior_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        80,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        80,
+        113,
+        125,
+        130,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_fentry_v61.o",
+      "symbol": "generic_fentry_process_event",
+      "prior_bytes": 27328,
+      "linked_bytes": 31312,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_fentry_v61.o",
+      "symbol": "generic_fentry_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_fentry_v61.o",
+      "symbol": "generic_fentry_filter_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_fentry_v61.o",
+      "symbol": "generic_fentry_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_fexit_v61.o",
+      "symbol": "generic_fexit_filter_arg",
+      "prior_bytes": 2720,
+      "linked_bytes": 27768,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_fexit_v61.o",
+      "symbol": "generic_fexit_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_fexit_v61.o",
+      "symbol": "generic_fexit_event",
+      "prior_bytes": 25936,
+      "linked_bytes": 26864,
+      "prior_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181,
+        184
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181,
+        184
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v511.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 32272,
+      "linked_bytes": 32672,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v53.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 28296,
+      "linked_bytes": 28696,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v61.o",
+      "symbol": "generic_kprobe_process_event",
+      "prior_bytes": 27536,
+      "linked_bytes": 32408,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v61.o",
+      "symbol": "generic_kprobe_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v61.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 3496,
+      "linked_bytes": 28944,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_kprobe_v61.o",
+      "symbol": "generic_kprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 9328,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61.o",
+      "symbol": "generic_lsm_process_event",
+      "prior_bytes": 27328,
+      "linked_bytes": 31312,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61.o",
+      "symbol": "generic_lsm_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61.o",
+      "symbol": "generic_lsm_filter_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61.o",
+      "symbol": "generic_lsm_actions",
+      "prior_bytes": 1704,
+      "linked_bytes": 8416,
+      "prior_helpers": [
+        1,
+        2,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_rawtp_v61.o",
+      "symbol": "generic_rawtp_process_event",
+      "prior_bytes": 27328,
+      "linked_bytes": 31312,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_rawtp_v61.o",
+      "symbol": "generic_rawtp_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_rawtp_v61.o",
+      "symbol": "generic_rawtp_filter_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_rawtp_v61.o",
+      "symbol": "generic_rawtp_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_filter_arg",
+      "prior_bytes": 2720,
+      "linked_bytes": 27768,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_event",
+      "prior_bytes": 25920,
+      "linked_bytes": 26848,
+      "prior_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_filter_arg",
+      "prior_bytes": 2720,
+      "linked_bytes": 27768,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_event",
+      "prior_bytes": 25424,
+      "linked_bytes": 26352,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61.o",
+      "symbol": "generic_tracepoint_process_event",
+      "prior_bytes": 26568,
+      "linked_bytes": 27928,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61.o",
+      "symbol": "generic_tracepoint_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61.o",
+      "symbol": "generic_tracepoint_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61.o",
+      "symbol": "generic_tracepoint_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 8864,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v511.o",
+      "symbol": "generic_uprobe_filter_arg",
+      "prior_bytes": 32272,
+      "linked_bytes": 32672,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v53.o",
+      "symbol": "generic_uprobe_filter_arg",
+      "prior_bytes": 28296,
+      "linked_bytes": 28696,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_uprobe_process_event",
+      "prior_bytes": 27144,
+      "linked_bytes": 29392,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_uprobe_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_uprobe_filter_arg",
+      "prior_bytes": 3496,
+      "linked_bytes": 28944,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_uprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7560,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_sleepable_preload",
+      "prior_bytes": 376,
+      "linked_bytes": 4760,
+      "prior_helpers": [
+        1,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "symbol": "generic_sleepable_offload",
+      "prior_bytes": 784,
+      "linked_bytes": 3632,
+      "prior_helpers": [
+        1,
+        3,
+        14,
+        112
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        14,
+        112
+      ]
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "symbol": "generic_usdt_process_event",
+      "prior_bytes": 27448,
+      "linked_bytes": 31432,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "symbol": "generic_usdt_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "symbol": "generic_usdt_filter_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "symbol": "generic_usdt_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 8904,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "symbol": "generic_sleepable_preload",
+      "prior_bytes": 376,
+      "linked_bytes": 6040,
+      "prior_helpers": [
+        1,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        113,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v511.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 32272,
+      "linked_bytes": 32672,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v53.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 28296,
+      "linked_bytes": 28696,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v61.o",
+      "symbol": "generic_kprobe_process_event",
+      "prior_bytes": 27536,
+      "linked_bytes": 32408,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v61.o",
+      "symbol": "generic_kprobe_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v61.o",
+      "symbol": "generic_kprobe_filter_arg",
+      "prior_bytes": 3496,
+      "linked_bytes": 28944,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_kprobe_v61.o",
+      "symbol": "generic_kprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 9328,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_multi_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_filter_arg",
+      "prior_bytes": 2720,
+      "linked_bytes": 27768,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_multi_retkprobe_v61.o",
+      "symbol": "generic_retkprobe_event",
+      "prior_bytes": 25936,
+      "linked_bytes": 26864,
+      "prior_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        174,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        174,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_filter_arg",
+      "prior_bytes": 2720,
+      "linked_bytes": 27768,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7040,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_multi_retuprobe_v61.o",
+      "symbol": "generic_retuprobe_event",
+      "prior_bytes": 25440,
+      "linked_bytes": 26368,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        174,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        5,
+        12,
+        14,
+        35,
+        45,
+        113,
+        125,
+        174,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v511.o",
+      "symbol": "generic_uprobe_filter_arg",
+      "prior_bytes": 32272,
+      "linked_bytes": 32672,
+      "prior_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_uprobe_process_event",
+      "prior_bytes": 27144,
+      "linked_bytes": 29392,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_uprobe_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_uprobe_filter_arg",
+      "prior_bytes": 3496,
+      "linked_bytes": 28944,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_uprobe_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 7560,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_sleepable_preload",
+      "prior_bytes": 376,
+      "linked_bytes": 4760,
+      "prior_helpers": [
+        1,
+        174,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        148,
+        174,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "symbol": "generic_sleepable_offload",
+      "prior_bytes": 784,
+      "linked_bytes": 3632,
+      "prior_helpers": [
+        1,
+        3,
+        14,
+        112
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        14,
+        112
+      ]
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "symbol": "generic_usdt_process_event",
+      "prior_bytes": 27448,
+      "linked_bytes": 31432,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        12,
+        14,
+        35,
+        45,
+        113,
+        148,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        25,
+        35,
+        45,
+        113,
+        125,
+        130,
+        148,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "symbol": "generic_usdt_process_filter",
+      "prior_bytes": 22424,
+      "linked_bytes": 23352,
+      "prior_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        5,
+        12,
+        14,
+        35,
+        113,
+        125,
+        181
+      ]
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "symbol": "generic_usdt_filter_arg",
+      "prior_bytes": 2920,
+      "linked_bytes": 27968,
+      "prior_helpers": [
+        1,
+        3,
+        12,
+        14
+      ],
+      "linked_helpers": [
+        1,
+        3,
+        4,
+        12,
+        14
+      ]
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "symbol": "generic_usdt_actions",
+      "prior_bytes": 800,
+      "linked_bytes": 8904,
+      "prior_helpers": [
+        1,
+        12
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12,
+        14,
+        27,
+        109,
+        125
+      ]
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "symbol": "generic_sleepable_preload",
+      "prior_bytes": 376,
+      "linked_bytes": 6040,
+      "prior_helpers": [
+        1,
+        174,
+        181
+      ],
+      "linked_helpers": [
+        1,
+        2,
+        4,
+        14,
+        113,
+        148,
+        174,
+        181
+      ]
+    }
+  ],
+  "manifest_sha256": "67344103cf8ba074567ba1e4581376b6dee0434406ae5f411b80beb182136d57",
+  "source_sha256": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+  "raw_sha256": "086128574985ad478868a1f0516f0756bdb9c8e7d1d49ccc0d4d2bf3ad8a9dd7",
+  "generic_fixture_tests": 3,
+  "manifest_check_exit": 0
+}

@@ -237,41 +237,88 @@ def scan_bpf_source_programs(
     except ImportError as exc:
         raise SystemExit("pyelftools is required for --source-object-root") from exc
 
+    from elftools.elf.relocation import RelocationSection
+
     by_symbol: dict[str, SourceProgramMeta] = {}
     with source_obj.open("rb") as f:
         elf = ELFFile(f)
         symtab = elf.get_section_by_name(".symtab")
         if symtab is None:
             raise SystemExit(f"source BPF object has no .symtab: {source_obj}")
+        functions = {}
+        entries = []
         for sym in symtab.iter_symbols():
             info = sym["st_info"]
-            if info["type"] != "STT_FUNC" or not source_symbol_binding_allowed(
-                info["bind"], include_local=include_local
-            ):
+            if info["type"] != "STT_FUNC" or not isinstance(sym["st_shndx"], int):
                 continue
-            if not isinstance(sym["st_shndx"], int):
-                continue
-            section = elf.get_section(sym["st_shndx"])
+            section_index = int(sym["st_shndx"])
+            section = elf.get_section(section_index)
             if section is None or not (section["sh_flags"] & 0x4):
                 continue
-            data = section.data()
-            start = int(sym["st_value"])
-            size = int(sym["st_size"])
+            start, size = int(sym["st_value"]), int(sym["st_size"])
             if size <= 0:
                 continue
-            end = start + size
-            if start < 0 or end > len(data) or size % 8 != 0:
+            if start < 0 or start + size > section["sh_size"] or start % 8 or size % 8:
                 raise SystemExit(f"invalid BPF function bounds for {sym.name} in {source_obj}")
-            helpers: set[int] = set()
-            body = data[start:end]
-            for off in range(0, len(body), 8):
-                insn = body[off:off + 8]
-                if insn[0] == BPF_CALL and insn[1] == 0:
-                    helpers.add(int.from_bytes(insn[4:8], "little", signed=True))
-                elif insn[0] == BPF_LD_IMM64:
-                    # Skip the second half of an ldimm64 pair.
+            key = (section_index, start)
+            if key in functions and functions[key][1] != size:
+                raise SystemExit(f"conflicting BPF function extents at {key} in {source_obj}")
+            functions[key] = (section, size, sym.name)
+            if source_symbol_binding_allowed(info["bind"], include_local=include_local):
+                entries.append((sym.name, key))
+
+        relocations = {}
+        for section in elf.iter_sections():
+            if isinstance(section, RelocationSection):
+                symbols = elf.get_section(section["sh_link"])
+                for reloc in section.iter_relocations():
+                    relocations[(int(section["sh_info"]), int(reloc["r_offset"]))] = (
+                        int(reloc["r_info_type"]), symbols.get_symbol(reloc["r_info_sym"]))
+
+        edges, helpers = {}, {}
+        for key, (section, size, name) in functions.items():
+            section_index, start = key
+            body = section.data()[start:start + size]
+            edges[key], helpers[key] = set(), set()
+            offset = 0
+            while offset < size:
+                insn = body[offset:offset + 8]
+                opcode, source = insn[0], insn[1] >> 4
+                immediate = int.from_bytes(insn[4:8], "little", signed=True)
+                if opcode == BPF_CALL and source == 0:
+                    helpers[key].add(immediate)
+                reloc = relocations.get((section_index, start + offset))
+                target = None
+                if reloc is not None:
+                    kind, symbol = reloc
+                    target_section = symbol["st_shndx"]
+                    if (isinstance(target_section, int)
+                            and elf.get_section(target_section).name == ".text"):
+                        # Match libbpf bpf_object__reloc_code: direct calls use
+                        # S/8+imm+1; function-address ldimm64 uses (S+imm)/8.
+                        if opcode == BPF_CALL and source == 1 and kind == 10:
+                            target = (target_section, int(symbol["st_value"]) + (immediate + 1) * 8)
+                        elif opcode == BPF_LD_IMM64 and kind == 1:
+                            target = (target_section, int(symbol["st_value"]) + immediate)
+                elif opcode == BPF_CALL and source == 1:
+                    target = (section_index, start + offset + (immediate + 1) * 8)
+                if target is not None:
+                    if target not in functions:
+                        raise SystemExit(f"BPF subprogram target {target} from {name} lacks a function extent in {source_obj}")
+                    edges[key].add(target)
+                offset += 16 if opcode == BPF_LD_IMM64 else 8
+
+        for name, root in entries:
+            reachable, pending = set(), [root]
+            while pending:
+                key = pending.pop()
+                if key in reachable:
                     continue
-            by_symbol[sym.name] = SourceProgramMeta(bytecode_len=size, helpers=helpers)
+                reachable.add(key)
+                pending.extend(edges[key] - reachable)
+            by_symbol[name] = SourceProgramMeta(
+                bytecode_len=sum(functions[key][1] for key in reachable),
+                helpers=set().union(*(helpers[key] for key in reachable)))
     return by_symbol
 
 

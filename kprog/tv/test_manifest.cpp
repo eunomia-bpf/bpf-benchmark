@@ -32,9 +32,9 @@ int main()
     }
     assert(!resolve_native_manifest(path, info, insns, load_map, "tracepoint__sys"));
     assert(!resolve_native_manifest(path, info, insns, load_map, "tracepoint__sys_enter_other"));
-    const auto rejects = [&](const std::string &expected) {
+    const auto rejects = [&](const std::string &expected, const std::string &source = "") {
         try {
-            resolve_native_manifest(path, info, insns, load_map);
+            resolve_native_manifest(path, info, insns, load_map, source);
         } catch (const std::runtime_error &error) {
             assert(std::string(error.what()).find(expected) != std::string::npos);
             return;
@@ -45,6 +45,10 @@ int main()
     manifest(",\"source_btf_symbol\":\"\"", "");
     rejects("empty source_btf_symbol");
     manifest("", "");
-    rejects("ambiguous entries");
+    assert(!resolve_native_manifest(path, info, insns, load_map));
+    assert(!resolve_native_manifest(path, info, insns, load_map, "other"));
+    manifest(",\"source_btf_symbol\":\"tracepoint__sys_enter_openat\"",
+             ",\"source_btf_symbol\":\"tracepoint__sys_enter_openat\"");
+    rejects("ambiguous entries", "tracepoint__sys_enter_openat");
     std::cout << "full BTF selector collision/missing/truncated/unknown/empty/ambiguous regressions: PASS\n";
 }

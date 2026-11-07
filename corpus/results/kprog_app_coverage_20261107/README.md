@@ -210,3 +210,11 @@ generated/compiled requests bind4/4, allnative hashes and shim boundIDs agree.
 The next upstream execve_send load stops at its manifest length selector before
 generation; libbpf appends a928-byte callback to its10368-byte entry. The common
 manifest scanner is being repaired to describe the complete11296-byte source.
+
+
+The [generic source-closure scanner](manifest-source-closure/README.md) now
+counts reachable direct-call/function-address callbacks and their helpers,
+matching libbpf assembly. Three compiled BPF regressions and existing C++
+manifest checks pass. Tetragon execve_send selector becomes11296bytes; the
+next whole-app replay consumes the regenerated manifest with fixed native
+objects, workload and common kernel-owned generation/binding service.
