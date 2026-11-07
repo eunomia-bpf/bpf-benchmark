@@ -93,8 +93,8 @@ MOV selects raw width, GPR bytes and AUX lanes, then uses the proved raw
 stack-frame body. None means unproved/out-of-binding, never runtime success
 or a claim that C added a guard for malformed fields or other opcodes. -/
 def dispatchThroughMove (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
-    (value nextPc : Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   if code = GeneratedX86DispatchSingleton.code .nop then
     some ⟨nativeRegisters env frame arena (registerPc state nextPc), [], none⟩
   else if beforeMove code then none
@@ -111,7 +111,7 @@ def dispatchThroughMove (env : EntryEnvironment.Environment) (frame : EntryEnvir
 
 /-- Field identities only: nextPc/value remain the same supplied native
 fields. Artifact decoding/layout/initial ABI still must establish them. -/
-inductive MoveBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+inductive MoveBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
     Nat → Reference.X86.Instruction → Prop where
   | nop : MoveBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .nop) (.nop nextPc)
   | immediate (width : ScalarWidth) (destination : RegisterSlice)
@@ -130,8 +130,8 @@ inductive MoveBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value n
 Neither a handler equation nor a state/value equality is a premise. This is
 NOP and MOV, not all77 operations or compiled/native invocation transport. -/
 theorem step_through_move_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
-    (value nextPc : Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : MoveBinding flags aux dst src value nextPc code native) :
     dispatchThroughMove env frame arena code flags aux dst src value nextPc state =
       some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
@@ -274,18 +274,28 @@ theorem unary_payload_separate (payload : BitVec 32) (kind : Reference.X86.Unary
 
 /-- This is the actual generated result contract, not an assumed operand
 value: all four unary formulas discard arbitrary RHS bits. -/
-theorem unary_result_ignores_rhs (kind : Reference.X86.UnaryKind) (left right : Word)
+theorem unary_result_ignores_rhs (kind : Reference.X86.UnaryKind) (left right : Reference.Word)
     (width : GeneratedX86Width.Width) :
     GeneratedX86AluResult.result (X86Unary.alu kind) left right width =
       GeneratedX86AluResult.result (X86Unary.alu kind) left 0 width := by
   cases kind <;> rfl
 
+/-- The IMUL token cannot take any previously lifted ALU payload branch
+or the zero-operand XOR gate; its carry route is the generic handler. -/
+theorem multiply_payload_separate (payload : BitVec 32)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul)) :
+    logicKindOf payload = none ∧ arithmeticKindOf payload = none ∧ unaryKindOf payload = none ∧
+      GeneratedX86AluDecode.handlerForCode payload = .generic ∧
+      payload ≠ BitVec.ofNat 32 (GeneratedX86AluDecode.code .xor) := by
+  subst payload
+  decide
+
 /-- C's current same-register/same-lane XOR zero-operand selection, tested
 on raw fields before either read. Partial writes still use the original cell. -/
 def logicRegisterBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (state : RegisterState) (width : ScalarWidth) (kind : Reference.X86.LogicKind)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (kind : Reference.X86.LogicKind)
     (dstCode srcCode : Byte) (aux : BitVec 32) (destination source : RegisterSlice)
-    (nextPc : Word) : RegisterState :=
+    (nextPc : Reference.Word) : RegisterState :=
   if GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code .xor) ∧
       dstCode = srcCode ∧ GeneratedX86RegLaneAux.dstShift aux = GeneratedX86RegLaneAux.srcShift aux
   then selfXorRegister env frame arena state width destination nextPc
@@ -294,8 +304,8 @@ def logicRegisterBody (env : EntryEnvironment.Environment) (frame : EntryEnviron
 /-- Field identities derive both the selected native XOR kind and identical
 native slices. No same-value or chosen branch-result premise is assumed. -/
 theorem logic_register_body_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (state : RegisterState) (width : ScalarWidth) (kind : Reference.X86.LogicKind)
-    (dstCode srcCode : Byte) (aux : BitVec 32) (destination source : RegisterSlice) (nextPc : Word)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (kind : Reference.X86.LogicKind)
+    (dstCode srcCode : Byte) (aux : BitVec 32) (destination source : RegisterSlice) (nextPc : Reference.Word)
     (kindField : GeneratedX86RegLaneAux.payload aux =
       BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Logic.alu kind)))
     (dstField : SliceBinding width dstCode (GeneratedX86RegLaneAux.dstShift aux) destination)
@@ -332,8 +342,8 @@ selection. Other unproved forms remain
 None. Distinct generated opcode identities prevent an intervening handler
 from taking these gates; None never means production success/rejection. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
-    (value nextPc : Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   match dispatchThroughMove env frame arena code flags aux dst src value nextPc state with
   | some result => some result
   | none =>
@@ -347,10 +357,16 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
             match arithmeticKindOf (GeneratedX86RegLaneAux.payload aux) with
             | some kind => pure ⟨nativeRegisters env frame arena
                 (arithmeticImmediate env frame arena state width kind destination value nextPc), [], none⟩
-            | none => do
-                let kind ← unaryKindOf (GeneratedX86RegLaneAux.payload aux)
-                pure ⟨nativeRegisters env frame arena
-                  (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
+            | none =>
+                match unaryKindOf (GeneratedX86RegLaneAux.payload aux) with
+                | some kind => pure ⟨nativeRegisters env frame arena
+                    (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
+                | none =>
+                    if GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul) then do
+                      let wide ← cmovWidthOf flags
+                      pure ⟨nativeRegisters env frame arena
+                        (multiplyAluImmediate env frame arena state wide destination.reg value nextPc), [], none⟩
+                    else none
       else if code = GeneratedX86DispatchFamily.code .cmpImm then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -375,10 +391,17 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
                 let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
                 pure ⟨nativeRegisters env frame arena
                   (arithmeticRegister env frame arena state width kind destination source nextPc), [], none⟩
-            | none => do
-                let kind ← unaryKindOf (GeneratedX86RegLaneAux.payload aux)
-                pure ⟨nativeRegisters env frame arena
-                  (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
+            | none =>
+                match unaryKindOf (GeneratedX86RegLaneAux.payload aux) with
+                | some kind => pure ⟨nativeRegisters env frame arena
+                    (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
+                | none =>
+                    if GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul) then do
+                      let wide ← cmovWidthOf flags
+                      let source ← registerOf src
+                      pure ⟨nativeRegisters env frame arena
+                        (multiplyRegister env frame arena state wide destination.reg source nextPc), [], none⟩
+                    else none
       else if code = GeneratedX86DispatchFamily.code .cmpReg then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -391,6 +414,12 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
         pure ⟨nativeRegisters env frame arena
           (logicRegister env frame arena state width .test destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .imulImm then do
+        let width ← cmovWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (multiplyImmediate env frame arena state width destination source value nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .cmov then do
         let width ← cmovWidthOf flags
         let destination ← registerOf dst
@@ -421,11 +450,33 @@ XCHG ignores AUX and immediate, matching the production low-slice encoder.
 Immediate forms consume only the destination lane and low-imm32/width
 operand binding; SRC, source-shift and unused AUX bytes are unconstrained.
 The native instruction is the single canonical ISA's existing constructor. -/
-inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
     Nat → Reference.X86.Instruction → Prop where
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc code native
+  | multiplyRegister (op : GeneratedX86DispatchFamily.DispatchOp) (width : Reference.X86.CmovWidth)
+      (destination source : Register)
+      (familyField : GeneratedX86DispatchFamily.aluRegHandled op = true)
+      (operationField : GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul))
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.multiply width destination (.register source) none nextPc)
+  | multiplyAluImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : Reference.X86.CmovWidth)
+      (destination : Register)
+      (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
+      (operationField : GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul))
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.multiply width destination (.register destination) (some (value.setWidth 32)) nextPc)
+  | multiplyImmediate (width : Reference.X86.CmovWidth) (destination source : Register) (encoded : BitVec 32)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (immediateField : MultiplyImmediateBinding width value encoded) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .imulImm)
+        (.multiply width destination (.register source) (some encoded) nextPc)
   | unaryImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
       (kind : Reference.X86.UnaryKind) (destination : RegisterSlice)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
@@ -445,7 +496,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
         (.unary width kind (.register destination) nextPc)
   | arithmeticImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
-      (kind : Reference.X86.ArithmeticKind) (destination : RegisterSlice) (nativeValue : Word)
+      (kind : Reference.X86.ArithmeticKind) (destination : RegisterSlice) (nativeValue : Reference.Word)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
       (writing : kind ≠ .compare)
       (operationField : GeneratedX86RegLaneAux.payload aux =
@@ -467,7 +518,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
         (.arithmetic width kind (.register destination) (.register source) nextPc)
   | logicImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
-      (kind : Reference.X86.LogicKind) (destination : RegisterSlice) (nativeValue : Word)
+      (kind : Reference.X86.LogicKind) (destination : RegisterSlice) (nativeValue : Reference.Word)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
       (writing : kind ≠ .test)
       (operationField : GeneratedX86RegLaneAux.payload aux =
@@ -477,13 +528,13 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (immediateField : ImmediateBinding width value nativeValue) :
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
         (.logic width kind (.register destination) (.immediate nativeValue) nextPc)
-  | compareImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Word)
+  | compareImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Reference.Word)
       (widthField : WidthBinding flags width)
       (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
       (immediateField : ImmediateBinding width value nativeValue) :
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code .cmpImm)
         (.arithmetic width .compare (.register destination) (.immediate nativeValue) nextPc)
-  | testImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Word)
+  | testImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Reference.Word)
       (widthField : WidthBinding flags width)
       (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
       (immediateField : ImmediateBinding width value nativeValue) :
@@ -535,19 +586,54 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
         (.exchange width (.low destination) (.low source) nextPc)
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic/unary ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic/unary/multiply ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
-    (value nextPc : Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : RegisterBinding flags aux dst src value nextPc code native) :
     dispatchRegisters env frame arena code flags aux dst src value nextPc state =
       some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | multiplyRegister op width destination source familyField operationField widthField dstField srcField =>
+      subst dst; subst src
+      have widthDecoded := width_binding_decodes flags (cmovScalarWidth width) widthField
+      have wideDecoded := cmov_width_binding_decodes flags width widthField
+      have separate := multiply_payload_separate (BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul)) rfl
+      have dstDecoded : sliceOf (cmovScalarWidth width) (registerByte destination)
+          (GeneratedX86RegLaneAux.dstShift aux) = some (.low destination) := by
+        cases width <;> simp [sliceOf, cmovScalarWidth, register_of_byte]
+      cases op <;> simp [GeneratedX86DispatchFamily.aluRegHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, wideDecoded, separate.1, separate.2.1, separate.2.2.1, operationField, dstDecoded,
+        register_of_byte, Reference.X86.RegisterSlice.reg] using
+        congrArg some (multiply_register_frame_refines env frame arena state width destination source nextPc)
+  | multiplyAluImmediate op width destination familyField operationField widthField dstField =>
+      subst dst
+      have widthDecoded := width_binding_decodes flags (cmovScalarWidth width) widthField
+      have wideDecoded := cmov_width_binding_decodes flags width widthField
+      have separate := multiply_payload_separate (BitVec.ofNat 32 (GeneratedX86AluDecode.code .imul)) rfl
+      have dstDecoded : sliceOf (cmovScalarWidth width) (registerByte destination)
+          (GeneratedX86RegLaneAux.dstShift aux) = some (.low destination) := by
+        cases width <;> simp [sliceOf, cmovScalarWidth, register_of_byte]
+      cases op <;> simp [GeneratedX86DispatchFamily.aluImmHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, wideDecoded, separate.1, separate.2.1, separate.2.2.1, operationField, dstDecoded,
+        Reference.X86.RegisterSlice.reg] using
+        congrArg some (multiply_alu_immediate_frame_refines env frame arena state width destination value nextPc)
+  | multiplyImmediate width destination source encoded widthField dstField srcField immediateField =>
+      subst dst; subst src
+      have decoded := cmov_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        decoded, register_of_byte] using
+        congrArg some (multiply_immediate_frame_refines env frame arena state width destination source value encoded nextPc immediateField)
   | unaryImmediate op width kind destination familyField operationField widthField dstField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := unary_kind_binding_decodes _ kind operationField

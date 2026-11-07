@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Multiply
 import KProgFormal.Refinement.X86Unary
 import KProgFormal.Refinement.X86Arithmetic
 import KProgFormal.X86Immediate
@@ -794,5 +795,162 @@ theorem unary_register_frame_refines (env : Environment) (frame : Frame) (arena 
     Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
     Reference.X86.scalarWrite, List.nil_append, List.append_nil]
   rfl
+
+
+/-- The scalar read/write width for the legal two-operand IMUL forms. -/
+def multiplyScalarWidth : Reference.X86.CmovWidth → Reference.X86.ScalarWidth
+  | .w16 => .w16 | .w32 => .w32 | .w64 => .w64
+
+/-- Early production lane narrowing retains every bit observed by IMUL. -/
+theorem multiply_read_bits (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (reg : Reference.X86.Register) :
+    (readRegister env frame arena state (multiplyScalarWidth width) (.low reg)).setWidth width.bits =
+      (registerValue env frame arena state reg).setWidth width.bits := by
+  cases width <;> simp only [readRegister, multiplyScalarWidth, X86Scalar.handlerWidth, X86Scalar.lane,
+    GeneratedX86RegRead.readAt, Reference.X86.RegisterSlice.reg,
+    Reference.X86.CmovWidth.bits, Reference.X86.CmovWidth.bytes, Nat.reduceMul] <;> bv_decide
+
+theorem multiply_value_operand_bits (width : Reference.X86.CmovWidth)
+    (left right nativeLeft nativeRight : NativeWord)
+    (leftBits : left.setWidth width.bits = nativeLeft.setWidth width.bits)
+    (rightBits : right.setWidth width.bits = nativeRight.setWidth width.bits) :
+    X86Multiply.value width left right = Reference.X86.multiplyValue width nativeLeft nativeRight := by
+  simp only [X86Multiply.value_refines, Reference.X86.multiplyValue, leftBits, rightBits]
+
+theorem multiply_flags_operand_bits (width : Reference.X86.CmovWidth)
+    (left right nativeLeft nativeRight old : NativeWord)
+    (leftBits : left.setWidth width.bits = nativeLeft.setWidth width.bits)
+    (rightBits : right.setWidth width.bits = nativeRight.setWidth width.bits) :
+    X86Multiply.flags width left right old = Reference.X86.multiplyFlags width nativeLeft nativeRight old := by
+  have mixed : Reference.X86.multiplyMixedSign width left right =
+      Reference.X86.multiplyMixedSign width nativeLeft nativeRight := by
+    cases width <;> simp_all only [Reference.X86.multiplyMixedSign,
+      Reference.X86.CmovWidth.bits, Reference.X86.CmovWidth.bytes, Nat.reduceMul] <;> bv_decide
+  simp only [X86Multiply.flags_refine, Reference.X86.multiplyFlags, Reference.X86.multiplyOverflow,
+    Reference.X86.multiplyMagnitude, mixed, leftBits, rightBits]
+
+theorem multiply_scalar_write (width : Reference.X86.CmovWidth) (reg : Reference.X86.Register)
+    (old value : NativeWord) :
+    Reference.X86.scalarWriteValue old value (multiplyScalarWidth width) (.low reg) =
+      Reference.X86.writeValue width old value := by
+  cases width <;> simp only [multiplyScalarWidth, Reference.X86.scalarWriteValue,
+    Reference.X86.RegisterSlice.shift, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    Reference.X86.writeValue, Nat.reduceMul] <;> bv_decide
+
+/-- Two materialized width reads precede product/CF/OF and the scalarizing
+write. Source aliases, native RSP and private STACK aliases remain explicit. -/
+def multiplyRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+  let right := readRegister env frame arena state (multiplyScalarWidth width) (.low src)
+  let written := writeRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+    (X86Multiply.value width left right)
+  registerPc (registerFlags written (X86Multiply.flags width left right state.raw.rflags)) nextPc
+
+theorem multiply_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (multiplyRegister env frame arena state width dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.multiply width dst (.register src) none nextPc)
+        (nativeRegisters env frame arena state) := by
+  have leftBits := multiply_read_bits env frame arena state width dst
+  have rightBits := multiply_read_bits env frame arena state width src
+  have value := multiply_value_operand_bits width _ _ _ _ leftBits rightBits
+  have flags := multiply_flags_operand_bits width _ _ _ _ state.raw.rflags leftBits rightBits
+  simp only [multiplyRegister, native_register_pc, native_register_flags, native_register_write,
+    value, flags, multiply_scalar_write, Reference.X86.step, Reference.X86.multiplyStep,
+    Reference.X86.readSource]
+  congr 1
+  congr 1
+  funext reg
+  by_cases same : reg = dst
+  · subst reg
+    rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+    rfl
+
+
+/-- IMUL_IMM carries a sign-decoded simulator field. Only operand-width bits
+must match the immediate encoded by the native instruction. -/
+def MultiplyImmediateBinding (width : Reference.X86.CmovWidth) (raw : NativeWord)
+    (encoded : BitVec 32) : Prop :=
+  (GeneratedX86Signed.signExtend raw (X86Cmov.handlerWidth width)).setWidth width.bits =
+    (Reference.X86.multiplyImmediate width encoded).setWidth width.bits
+
+/-- Dedicated three-operand IMUL reads SRC, not the previous destination. -/
+def multiplyImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (raw nextPc : NativeWord) : RegisterState :=
+  let left := registerValue env frame arena state src
+  let right := GeneratedX86Signed.signExtend raw (X86Cmov.handlerWidth width)
+  let written := writeRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+    (X86Multiply.value width left right)
+  registerPc (registerFlags written (X86Multiply.flags width left right state.raw.rflags)) nextPc
+
+theorem multiply_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (raw : NativeWord) (encoded : BitVec 32) (nextPc : NativeWord)
+    (field : MultiplyImmediateBinding width raw encoded) :
+    (⟨nativeRegisters env frame arena (multiplyImmediate env frame arena state width dst src raw nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.multiply width dst (.register src) (some encoded) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have value := multiply_value_operand_bits width (registerValue env frame arena state src) _ _ _ rfl field
+  have flags := multiply_flags_operand_bits width (registerValue env frame arena state src) _ _ _ state.raw.rflags rfl field
+  simp only [multiplyImmediate, native_register_pc, native_register_flags, native_register_write,
+    value, flags, multiply_scalar_write, Reference.X86.step, Reference.X86.multiplyStep,
+    Reference.X86.readSource]
+  congr 1
+  congr 1
+  funext reg
+  by_cases same : reg = dst
+  · subst reg
+    rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+    rfl
+
+/-- The ALU-immediate route's generated helper has exactly the native IMUL
+immediate bits, including16-bit narrowing and64-bit imm32 sign extension. -/
+theorem multiply_alu_immediate_bits (width : Reference.X86.CmovWidth) (raw : NativeWord) :
+    (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth (multiplyScalarWidth width))).setWidth width.bits =
+      (Reference.X86.multiplyImmediate width (raw.setWidth 32)).setWidth width.bits := by
+  rw [x86_immediate_value_refines]
+  cases width <;> simp only [multiplyScalarWidth, X86Scalar.handlerWidth, x86ImmediateValueSpec,
+    Reference.X86.multiplyImmediate, Reference.X86.CmovWidth.bits, Reference.X86.CmovWidth.bytes,
+    Nat.reduceMul, reduceCtorEq, ↓reduceIte] <;> bv_decide
+
+def multiplyAluImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst : Reference.X86.Register) (raw nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+  let right := GeneratedX86Immediate.value raw (X86Scalar.handlerWidth (multiplyScalarWidth width))
+  let written := writeRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+    (X86Multiply.value width left right)
+  registerPc (registerFlags written (X86Multiply.flags width left right state.raw.rflags)) nextPc
+
+theorem multiply_alu_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst : Reference.X86.Register) (raw nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (multiplyAluImmediate env frame arena state width dst raw nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.multiply width dst (.register dst) (some (raw.setWidth 32)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have leftBits := multiply_read_bits env frame arena state width dst
+  have rightBits := multiply_alu_immediate_bits width raw
+  have value := multiply_value_operand_bits width _ _ _ _ leftBits rightBits
+  have flags := multiply_flags_operand_bits width _ _ _ _ state.raw.rflags leftBits rightBits
+  simp only [multiplyAluImmediate, native_register_pc, native_register_flags, native_register_write,
+    value, flags, multiply_scalar_write, Reference.X86.step, Reference.X86.multiplyStep,
+    Reference.X86.readSource]
+  congr 1
+  congr 1
+  funext reg
+  by_cases same : reg = dst
+  · subst reg
+    rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+    rfl
 
 end KProgFormal.Refinement.X86NumericAddress

@@ -2548,3 +2548,42 @@ This is a full PASS for that exact snapshot. New IMUL raw-frame/dispatcher
 work is outside it and will carry separate validation; full77/72 operation,
 whole-ISA dispatch and compiled-B/O2/O4 remain active work. Earlier failed
 full runs and their original inputs/output remain separately retained.
+
+## IMUL raw-frame and dispatcher refinement
+
+Three actual IMUL bodies now compose into the same raw dispatcher theorem:
+the register ALU payload, the ALU-immediate payload and dedicated IMUL_IMM56.
+The first two perform their actual width reads; dedicated IMUL_IMM reads SRC
+rather than the old destination and sign-extends its simulator immediate at
+the destination width. The proofs cover all16 GPRs, legal16/32/64-bit widths,
+identical/different source and destination, RSP normalization and private-STACK
+aliases. Both operands are captured before writeback. Product truncation,
+CF/OF overflow, merge/zero-extension/scalarization and every unchanged frame
+field are derived against the SAME canonical multiply step. The C-selected
+preserved values of ISA-undefined flags remain within the existing mask.
+
+Operand-bit lemmas connect early narrowing to signed magnitude, mixed sign
+and overflow without assuming a product or overflow decision. ALU-immediate
+lowimm32/sign extension is derived; dedicated immediate bindings compare only
+encoded operand-width bits. AUX selector lemmas exclude logical/arithmetic/
+unary/self-XOR branches and establish generic routing. Unused wide operand
+lane bytes and dedicated-immediate AUX remain unconstrained. Opcode names do
+not override AUX. All previous dispatcher cases compile.
+
+Importing the multiply helpers exposes a legacy global Word alias; architectural
+field types are now explicitly Reference.Word so that alias cannot silently
+change their types. Initial GPR-extensionality/name-resolution proof failures
+and exact saved inputs are retained; final proofs contain no placeholder.
+Focused94-job Lean build, five audits and the complete default Lean library+
+executable-reference build PASS with stable input pins and only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. Eight
+existing generated checks and unchanged IMUL-route, register-source-immediate
+and wide-flag hosts pass under UBSan:261121/41296/2048 cases. No new test,
+oracle, production header, encoder or canonical ISA change is introduced.
+
+Original/final proofs, full diff, failed and successful commands/output/pins
+are appended to the existing integration JSON/gzip. Full5a446 PASS remains
+its exact earlier snapshot; this increment has the separate complete Lean
+and focused/oracle validations above. A new immutable full will be recorded
+separately. Raw shift payloads and other operation families, whole-ISA dispatch
+and compiled-B/O2/O4 remain active work.
