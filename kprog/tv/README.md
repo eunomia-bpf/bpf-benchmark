@@ -1955,3 +1955,13 @@ full-state translated successor. Accepted extents, decoded operands, masks
 and transition identities derive from captured bytes. Arbitrary AF, memory
 permissions and branch outcomes remain covered, and logical CFG closure is
 preserved. Whole finite-execution and bound-B composition follow next.
+
+`trusted-simple-bound-based-prefixes.json` applies the exact accepted-B/full-
+artifact safety composition to **every finite native payload execution at its
+actual codebase**. Complete state/trace transport covers arbitrary accepted
+extents, AF choices, guest permissions and branches without fuel, determinism
+or termination assumptions. Actual entry PC equals codebase; initial registers
+and memory remain exact. Physical typed-context/private-frame/invocation facts,
+strict per-native-block full-state correspondence and the original terminal
+RET boundary remain explicit obligations. This is a model proof for the pinned
+accepted capture, not a new runtime or hardware-fidelity result.

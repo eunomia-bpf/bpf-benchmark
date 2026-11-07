@@ -1984,6 +1984,78 @@ theorem simple_native_based_step_reflects (base : Word) (s : X86.State)
     simpa only [shiftNativeTransition,stateEq] using states
   · exact simple_native_relational_step_closed s entry instruction _ valid logicalDecoded logicalStep
 
+
+/-- Every finite actual real-base execution reflects to a logicalPC0-origin
+execution with the exact same event trace and a full-state translated endpoint.
+No fuel, determinism or termination premise occurs. -/
+theorem simple_native_based_execution_reflects (base : Word)
+    {first last : X86.State} {trace : List Event}
+    (run : Execution (relationalNativeInstructionStep base native) first trace last)
+    (s : X86.State) (valid : simpleClosedPC s.pc) (starts : shiftNativeState base s=first) :
+    ∃ logicalLast, Execution (relationalNativeInstructionStep 0 native) s trace logicalLast ∧
+      shiftNativeState base logicalLast=last := by
+  induction run generalizing s with
+  | refl physical => exact ⟨s,Execution.refl s,starts⟩
+  | @next physical middle last head tail headStep tailRun ih =>
+    have normalized : relationalNativeInstructionStep base native (shiftNativeState base s) head middle := by
+      rw [starts]
+      exact headStep
+    obtain ⟨logicalMiddle,logicalHead,middleEq,middleValid⟩ :=
+      simple_native_based_step_reflects base s valid normalized
+    obtain ⟨logicalLast,logicalTail,lastEq⟩ := ih logicalMiddle middleValid middleEq
+    exact ⟨logicalLast,Execution.next logicalHead logicalTail,lastEq⟩
+
+/-- Exact accepted B plus full artifact binding covers actual native starts
+at their real emitted code base, with no logicalPC0 assumption on the actual
+machine state. Invocation registers/memory remain unchanged by transport. -/
+theorem bound_captured_based_native_prefix_effects_checked (env : BPF.Environment) (n : X86.State) (p : BPF.State) (codeBase : Word)
+    (validated executed : Artifact) (binding : executed=validated)
+    (nativeImage : validated.nativeBytes=native.toList)
+    (proofImage : validated.proofBytes=proof.toList) (entryImage : validated.entry=0)
+    (accepted : Artifact → Prop) (proofEntry : Artifact → BPF.State → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ artifact, accepted artifact → proofEntry artifact p →
+      ∀ trace last, Execution (boundCapturedProofStep env artifact) p trace last →
+        ∀ event ∈ trace, checked artifact event)
+    (acceptance : accepted validated) (admitted : proofEntry validated p)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (relationalNativeInstructionStep (codeBase+BitVec.ofNat 64 executed.entry)
+      executed.nativeBytes.toArray) n trace last)
+    (stack : Word) (nativePC : n.pc=codeBase) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    ∀ event ∈ trace, checked validated event := by
+  subst executed
+  have canonicalRun : Execution (relationalNativeInstructionStep codeBase native) n trace last := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList,BitVec.add_zero] using run
+  let logical := shiftNativeState (-codeBase) n
+  have logicalPC : logical.pc=0 := by
+    dsimp only [logical,shiftNativeState]
+    rw [nativePC]
+    unfold Word at *
+    bv_decide
+  have starts : shiftNativeState codeBase logical=n := by
+    simpa only [logical,BitVec.neg_neg] using shift_native_state_inverse (-codeBase) n
+  have valid : simpleClosedPC logical.pc := by simp [simpleClosedPC,simpleNativeOffsets,logicalPC]
+  obtain ⟨logicalLast,logicalRun,_⟩ := simple_native_based_execution_reflects codeBase
+    canonicalRun logical valid starts
+  have boundLogical : Execution (relationalNativeInstructionStep (BitVec.ofNat 64 validated.entry)
+      validated.nativeBytes.toArray) logical trace logicalLast := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList] using logicalRun
+  exact bound_captured_native_prefix_effects_checked env logical p validated validated rfl
+    nativeImage proofImage entryImage accepted proofEntry checked verifierSound acceptance admitted
+    boundLogical stack logicalPC proofPC active context memory nativeStack
+    write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -2117,3 +2189,7 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_code_shift_decode_pair
 
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_based_step_reflects
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_based_execution_reflects
+
+#print axioms KProgTV.TrustedSimpleSafety.bound_captured_based_native_prefix_effects_checked
