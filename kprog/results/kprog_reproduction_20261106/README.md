@@ -187,38 +187,26 @@ across runtimes, not by trusting the timings.
 
 **Provenance.** Both micro arms below were measured before the native
 submission path was reworked (`fd1b65560`), and on current code
-`make micro` no longer completes on it. The failure is in the kernel
-specializer, not in wiring: the trusted service **is** started and does
-register (`Makefile:362` launches
-`kprog/trusted_service.py --endpoint .../specializer` whenever `RUNTIMES`
-names a native runtime, and the run archives its state), and the
-specializer then returns EINVAL for the micro blobs —
-`trusted specializer refused native program: Invalid argument` — for all
-29 pure-suite programs; the stage2 arm additionally trips the
-application/trusted split at `native_loader.cpp:5547`
-(`applications submit native programs and cannot supply a proof`). The
-lane's own record calls it
-`..._build_pass_runtime_pending`. The figures are kept because they
-were measured with recipe parity verified from the result files, but they
-are **not** re-verified on today's tree, and the corpus matrix above
-(which was re-checked after both gates and still measures) is the part of
-this report that reflects current code.
+`make micro` does not complete on it. The failure turned out to have two
+causes, and the reported symptom named neither:
 
-| Run | Suite | Programs | Geomean |
-| --- | --- | ---: | ---: |
-| Reference 2026-05-29 | `micro_staged_codegen` | 29 | **1.478x** |
-| Current | `micro_staged_codegen` | 29 | **1.446x** |
+1. The trusted specializer invoked a bare `"clang"`, which is not on
+   `PATH` in the service's environment, so its first subprocess failed
+   with `[Errno 2] No such file or directory: 'clang'` — surfacing to the
+   caller as `trusted specializer refused native program: Invalid
+   argument`. The specializer was never reached. It now honours `CLANG`
+   with `clang` as fallback (`e549bcaea`), and the first native request
+   then verifies end to end (`status: 0`).
+2. The service container is terminated after the first request
+   (`service_returncode: -15`, SIGTERM, 17 s in) while 28 more programs
+   are still loading, so those surface as
+   `trusted specializer refused native program: Input/output error`. Its
+   serve loop is `while True`, so something tears the container down early.
 
-Recipe parity, read back from both `details/result.json`: runtimes
-`kernel native_kernel llvmbpf native`, `inner_repeat` 100000, 3 samples
-per run — identical in both.
-
-```sh
-taskset -c 0-7 make micro PLATFORM=kvm ARCH=x86 \
-  SUITE=micro/config/micro_pure_jit.yaml \
-  RUNTIMES='kernel native_kernel llvmbpf native' \
-  SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000
-```
+How to read the two figures below: they were measured with recipe parity
+verified from the result files, but they are **not** re-verified on today's
+tree, and the corpus matrix (re-checked after both native gates and still
+measuring) is the part of this report that reflects current code.
 
 Artifact: `micro/results/x86_kvm_micro_20261106_090507_158145`.
 
