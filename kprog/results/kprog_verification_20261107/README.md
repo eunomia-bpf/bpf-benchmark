@@ -1137,3 +1137,28 @@ existing semantic/route hosts passed 40080 cases,60144 cases,5120 cases,64 cases
 no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper
 changes. Original C warnings remain visible. Active exact261 full check predates
 BITFIELD and both flag-family compositions.
+
+## Uniform byte ORN composed after logical flags
+
+`Arm64Dispatcher.dispatchThroughOrn` appends the actual ORN numeric gate.
+Its byte-coded body consumes the full modifier switch, AUX byte1/byte2,
+generated complemented-OR value and width write with one PC advance and no
+NZCV change. All four native shifts retain native amount bounds. An independent
+width-level equality proves NONE agrees with LSL0 after generated ORN narrowing;
+NONE ignores any amount byte, without adding a shift guard. SRC3/IMM/AUX0/AUX3
+remain arbitrary. Aliased operands and ZR/discarded destinations retain the
+existing complete canonical logical step. No pointer path or source-tag premise
+is invented for this scalar operation.
+
+Literal disjointness derives reachability through all previous gates; every
+earlier result transports unchanged. The single step_through_orn_refines covers
+the field/modifier/amount-only binding, with no assumed component step equality.
+Remaining families, native byte/raw-width and O2/O4 transport are still open.
+
+Validation: focused77-job dispatcher/reference Lean build (first compile passed),
+nine existing contract freshness checks, direct-dispatch/model checks and12
+existing semantic/route hosts passed 40080 cases,2072 cases,136 cases,225292 cases,701 cases,40401 cases,512 cases,6913 cases,257 cases,6401 cases,586829 cases,1115374 cases. Exact proof SHA256
+`1c6145fe2cd4a660d527ee8b639a5f273a92bdec6224d29304fc8be42e7fc27c` remained unchanged. Every old declaration is byte-identical;
+no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper
+changes. Original C warnings remain visible. Exact261's just-finished full pass
+predates BITFIELD, arithmetic/logical flags and this ORN composition.

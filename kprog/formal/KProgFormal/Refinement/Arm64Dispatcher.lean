@@ -1410,4 +1410,111 @@ theorem step_through_flag_logic_refines (code : Nat) (aux : BitVec 32) (width : 
   | register => apply flag_logic_register_refines
   | unmodified => apply flag_logic_unmodified_refines
 
+
+/-- ORN uses the full production modifier switch before its generated
+complemented OR and byte-coded width write. It never changes NZCV. -/
+def ornBody (aux : BitVec 32) (width : Width) (dst src src2 : Byte) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let rhs := GeneratedArm64Mod.value (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (Arm64Move.Fields.read s src2) ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let value := GeneratedArm64Orn.value .orn_reg (Arm64Move.Fields.read s src) rhs (Arm64Register.handlerWidth width)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+def dispatchThroughOrn (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughFlagLogic code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => if code = GeneratedArm64Orn.code .orn_reg then some (ornBody aux width dst src src2 s) else none
+
+theorem orn_reached (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughOrn (GeneratedArm64Orn.code .orn_reg) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (ornBody aux width dst src src2 s) := by
+  have before : dispatchThroughFlagLogic (GeneratedArm64Orn.code .orn_reg) aux width dst src src2 src3 value
+      sourceScalar sourceStack s = none := rfl
+  unfold dispatchThroughOrn
+  rw [before]
+  rfl
+
+theorem orn_body_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+    (dst src rhs : Register) (lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    ornBody (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) s =
+      Reference.AArch64.step (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩) s := by
+  simp only [ornBody, Arm64Arithmetic.FlagArithmetic.packed_modifier, Arm64Arithmetic.FlagArithmetic.packed_amount,
+    Arm64Shift.Unary.native_amount, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+  change Arm64Logic.handlerStep ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩ s = _
+  rw [Arm64Logic.step_refines]
+
+theorem orn_unmodified_value (width : Width) (lhs rhs amount : Word) :
+    GeneratedArm64Orn.value .orn_reg lhs (GeneratedArm64Mod.value .none rhs amount (Arm64Register.handlerWidth width))
+      (Arm64Register.handlerWidth width) =
+    GeneratedArm64Orn.value .orn_reg lhs (GeneratedArm64Mod.value .lsl rhs 0 (Arm64Register.handlerWidth width))
+      (Arm64Register.handlerWidth width) := by
+  cases width <;> simp only [GeneratedArm64Orn.value, GeneratedArm64Mod.value,
+    Arm64Register.handlerWidth, GeneratedArm64Width.narrow, GeneratedArm64Width.mask] <;> bv_decide
+
+theorem orn_body_unmodified (width : Width) (dst src src2 : Byte) (amount lane0 lane3 : Byte)
+    (s : Reference.AArch64.State) :
+    ornBody (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3) width dst src src2 s =
+      ornBody (Arm64Arithmetic.FlagArithmetic.packedAux .lsl 0 lane0 lane3) width dst src src2 s := by
+  simp only [ornBody, Arm64Arithmetic.FlagArithmetic.packed_modifier,
+    Arm64Arithmetic.FlagArithmetic.packed_amount, orn_unmodified_value]
+  rfl
+
+theorem orn_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+    (dst src rhs : Register) (src3 lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughOrn (GeneratedArm64Orn.code .orn_reg)
+      (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs)
+      src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩) s) := by
+  rw [orn_reached, orn_body_refines]
+
+theorem orn_unmodified_refines (width : Width) (dst src rhs : Register) (src3 amount lane0 lane3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughOrn (GeneratedArm64Orn.code .orn_reg)
+      (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.logic ⟨width, .disjunction true, .lsl,
+        ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩) s) := by
+  rw [orn_reached, orn_body_unmodified]
+  exact congrArg some (orn_body_refines width .lsl ⟨0, by cases width <;> decide⟩ dst src rhs lane0 lane3 s)
+
+theorem orn_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : FlagLogicBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughOrn code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughOrn,
+    step_through_flag_logic_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive OrnBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : FlagLogicBinding pc code aux width dst src src2 src3 value native) :
+      OrnBinding pc code aux width dst src src2 src3 value native
+  | shifted (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+      (dst src rhs : Register) (src3 lane0 lane3 : Byte) (value : Word) :
+      OrnBinding pc (GeneratedArm64Orn.code .orn_reg)
+        (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+        width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value
+        (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩)
+  | unmodified (width : Width) (dst src rhs : Register) (src3 amount lane0 lane3 : Byte) (value : Word) :
+      OrnBinding pc (GeneratedArm64Orn.code .orn_reg) (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)
+        width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value
+        (.logic ⟨width, .disjunction true, .lsl, ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩)
+
+theorem step_through_orn_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : OrnBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughOrn code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact orn_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | shifted => apply orn_refines
+  | unmodified => apply orn_unmodified_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher
