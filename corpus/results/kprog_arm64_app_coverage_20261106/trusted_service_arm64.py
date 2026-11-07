@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import queue
 import signal
+import shlex
 import subprocess
 import sys
 import tarfile
@@ -19,68 +20,34 @@ LOADER = ROOT / 'kprog/libnativeloader/build-arm64-a-map-order-v3'
 NATIVE_LINK = ROOT / 'kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'
 
 
-def katran(live):
-    """Run the unchanged corpus Katran topology, application and packet recipe."""
-    from dataclasses import asdict
-    import shutil
-    sys.path.insert(0, str(ROOT))
-    os.environ.update(RUN_TARGET_ARCH="arm64", BPFREJIT_REMOTE_PYTHON_BIN="python3",
-        BPFREJIT_REPO_ARTIFACT_ROOT="/artifacts/user/repo-artifacts/arm64",
-        BPFREJIT_KERNEL_MODULES_ROOT=str(ROOT / "vendor/build/arm64/linux/modules-install"),
-        BPFREJIT_SHIM_NATIVE_LOADER="1", BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF="1",
-        BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF="1",
-        BPFREJIT_NATIVE_LOADER_SO=str(LOADER / "libnative_loader.so"),
-        BPFREJIT_SHIM_NATIVE_MANIFEST=str(ROOT / "kprog/arm64/build/app-verified-stage/katran/manifest.json"),
-        BPFREJIT_SHIM_LOG=str(live / "shim.log"),
-        BPFREJIT_SHIM_DIR=str(live / "shim-dumps"))
-    bpftool = shutil.which("bpftool")
-    if not bpftool:
-        raise RuntimeError("retained runtime has no bpftool")
-    os.environ["BPFTOOL"] = bpftool
-    Path("/proc/sys/kernel/bpf_stats_enabled").write_text("1\n")
-    from runner.libs.app_runners.katran import KatranRunner
-    from runner.libs.app_outcomes import katran_outcome_snapshot
-    runner = KatranRunner(workload_spec={"kind": "xdp_pktgen"})
-    work = {}
-    def programs():
-        return json.loads(subprocess.check_output([bpftool, "-j", "prog", "show"], text=True))
-    try:
-        runner.start()
-        work.update(application_artifacts=runner.artifacts, programs_before=programs(),
-                    outcomes_before=katran_outcome_snapshot())
-        (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
-        work["workload"] = asdict(runner.run_workload(2))
-        work.update(programs_after=programs(), outcomes_after=katran_outcome_snapshot())
-        requests = live / "requests/requests.jsonl"
-        receipts = [json.loads(line) for line in requests.read_text().splitlines()] if requests.exists() else []
-        if not receipts or any(r["status"] for r in receipts):
-            raise RuntimeError("Katran has no complete successful trusted-service receipts")
-        before = {r["id"]:r for r in work["programs_before"]}
-        after = {r["id"]:r for r in work["programs_after"]}
-        deltas = [{"prog_id":r["prog_id"], "run_cnt_delta":int(after.get(r["prog_id"],{}).get("run_cnt",0))-int(before.get(r["prog_id"],{}).get("run_cnt",0))} for r in receipts]
-        work["native_run_counts"] = deltas
-        if not any(r["run_cnt_delta"] > 0 for r in deltas):
-            raise RuntimeError("no bound native application program executed during workload")
-        return dict(app="katran/xdp_pktgen", completed_requests=receipts, native_run_counts=deltas)
-    finally:
-        try:
-            runner.stop()
-        finally:
-            work["application_output"] = runner.process_output
-            (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
+CORPUS_APPS = {
+    "bcc": "bcc/set", "otelcol-ebpf-profiler": "otelcol-ebpf-profiler/profiling",
+    "cilium": "cilium/agent", "tetragon": "tetragon/observer",
+    "katran": "katran", "tracee": "tracee/monitor",
+}
 
 
-def bcc(live):
-    """Reuse the retained standard two-start corpus.driver recipe unchanged."""
+def corpus_application(live, case):
+    """Run the retained two-start recipe with the requested corpus app selector."""
     import shutil
-    os.environ.update(BPFREJIT_REPO_ARTIFACT_ROOT="/artifacts/user/repo-artifacts/arm64",
+    artifact_root = "/artifacts" if case in {"tracee", "tetragon"} else "/artifacts/user/repo-artifacts/arm64"
+    os.environ.update(BPFREJIT_REPO_ARTIFACT_ROOT=artifact_root, BPFREJIT_REMOTE_PYTHON_BIN="python3",
         BPFREJIT_KERNEL_MODULES_ROOT=str(ROOT / "vendor/build/arm64/linux/modules-install"),
         BPFREJIT_NATIVE_LOADER_SO=str(LOADER / "libnative_loader.so"),
         BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF="1",
         BPFREJIT_SHIM_NATIVE_MANIFEST=str(live / "native-only-manifest.json"),
         BPFREJIT_KEEP_ALL_WORKDIRS="1", BPFREJIT_CORPUS_REJIT_TIMEOUT="0")
     os.environ.pop("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", None)
-    command = ["sh", "/qemu-run.sh"]
+    launcher = Path("/qemu-run.sh").read_text()
+    entry = "exec python3 -m corpus.driver"
+    if launcher.count(entry) != 1:
+        raise RuntimeError("retained corpus launcher has no unique driver entry")
+    # APP is an existing corpus knob; retain every other saved launcher setting.
+    launcher = launcher.replace(entry, "export BPFREJIT_CORPUS_APPS=" +
+        shlex.quote(CORPUS_APPS[case]) + "\n" + entry)
+    launch_path = live / "corpus-launch.sh"
+    launch_path.write_text(launcher)
+    command = ["sh", str(launch_path)]
     work = dict(command=command)
     try:
         with (live / "corpus.log").open("w") as output:
@@ -99,10 +66,12 @@ def bcc(live):
         requests = live / "requests/requests.jsonl"
         work["completed_requests"] = [json.loads(line) for line in requests.read_text().splitlines()] if requests.exists() else []
         (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
+    if not work["corpus_metadata"]:
+        raise RuntimeError(case + " corpus produced no application metadata")
     errors = [row for row in work["corpus_metadata"] if row["status"] == "error"]
     if errors:
-        raise RuntimeError("BCC corpus recorded application errors: " + json.dumps(errors))
-    return dict(app="bcc/set", **work)
+        raise RuntimeError(case + " corpus recorded application errors: " + json.dumps(errors))
+    return dict(app=CORPUS_APPS[case], **work)
 
 
 def guest(live, case="control"):
@@ -133,8 +102,8 @@ def guest(live, case="control"):
         ready = event()
         if not ready.get('ready') or ready['arch'] != 2:
             raise RuntimeError('ARM common service did not register')
-        if case in {"katran", "bcc"}:
-            summary.update((katran if case == "katran" else bcc)(live), ok=True)
+        if case in CORPUS_APPS:
+            summary.update(corpus_application(live, case), ok=True)
         else:
             result = subprocess.run([LOADER / 'trusted-service-client', LOADER / 'trusted-native.o'],
                 text=True, capture_output=True)
@@ -167,12 +136,12 @@ def guest(live, case="control"):
         (live / 'guest.json').write_text(json.dumps(summary, indent=2) + chr(10))
 
 
-def host(case="control"):
+def host(case="control", results=None):
     """Mount the retained runtime read-only; use the new canonical Image/module."""
     build = ROOT / 'kprog/arm64/build/trusted-transport'
     build.mkdir(exist_ok=True)
-    out = HERE / ('trusted-arm64-' + case + '-result' if case in {'katran', 'bcc'} else 'trusted-arm64-service-result')
-    out.mkdir(exist_ok=True)
+    out = (Path(results).resolve() if results else HERE) / ('trusted-arm64-' + case + '-result' if case in CORPUS_APPS else 'trusted-arm64-service-result')
+    out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     archive = out / ('run-' + stamp + '.tar.gz')
     summary = dict(ok=False, case=case, started=datetime.now(timezone.utc).isoformat(), archive=archive.name)
@@ -182,7 +151,7 @@ def host(case="control"):
         module = ROOT / 'kinsn/module/arm64/build/bpf_arm64_native_lab.ko'
         root = ROOT / 'kprog/arm64/build/app-runtime-v35/root'
         argv = ['taskset', '-c', '8-11', 'qemu-system-aarch64', '-M', 'virt',
-            '-cpu', 'max', '-smp', '8' if case in {'katran', 'bcc'} else '2', '-m', '8192' if case in {'katran', 'bcc'} else '2048', '-nographic', '-no-reboot',
+            '-cpu', 'max', '-smp', '8' if case in CORPUS_APPS else '2', '-m', '8192' if case in CORPUS_APPS else '2048', '-nographic', '-no-reboot',
             '-kernel', str(image), '-fsdev',
             'local,id=rootfs,path=' + str(root) + ',security_model=none,readonly=on',
             '-device', 'virtio-9p-device,fsdev=rootfs,mount_tag=rootfs',
@@ -197,19 +166,11 @@ def host(case="control"):
             ROOT / 'kprog/arm64/micro-prog/generate_micro_sim_proofs.py',
             ROOT / 'kprog/arm64/micro-prog/arm64_abi.py', ROOT / 'kprog/arm64/arm64_sim_direct.h',
             ROOT / 'kinsn/module/include/native_lab_trusted_wire.h', Path(__file__)]
-        if case == 'katran':
-            inputs.extend([ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
-                ROOT / 'kprog/arm64/build/app-verified-stage/katran/manifest.json',
-                ROOT / 'kprog/arm64/build/app-verified-stage/katran/balancer.native.o',
-                root / 'artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc',
-                ROOT / 'runner/libs/app_runners/katran.py',
-                ROOT / 'vendor/build/arm64/linux/Module.symvers',
-                ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules' / (ROOT / 'vendor/build/arm64/linux/include/config/kernel.release').read_text().strip() / 'modules.dep'])
-        if case == 'bcc':
-            manifest = ROOT / 'kprog/arm64/build/app-verified-stage/bcc/manifest.json'
+        if case in CORPUS_APPS:
+            manifest = ROOT / 'kprog/arm64/build/app-verified-stage' / case / 'manifest.json'
             data = json.loads(manifest.read_text())
             inputs.append(manifest)
-            for row in data['objects']:
+            for row in data['objects'] + data.get('data_objects', []):
                 for key in ['simulator_object', 'simulator_program']:
                     row.pop(key, None)
                 native = (manifest.parent / row['native_object']).resolve()
@@ -218,10 +179,17 @@ def host(case="control"):
             (live / 'native-only-manifest.json').write_text(json.dumps(data, indent=2) + chr(10))
             inputs.extend([root / 'qemu-run.sh', root / 'qemu-init',
                 ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
-                ROOT / 'corpus/driver.py', ROOT / 'runner/libs/app_runners/bcc_set.py',
-                ROOT / 'runner/libs/app_runners/bcc.py'])
-            inputs.extend(root / 'usr/local/bin' / name for name in
-                ['capable', 'biosnoop', 'vfsstat', 'opensnoop', 'syscount', 'tcpconnect', 'tcplife', 'runqlat'])
+                ROOT / 'corpus/driver.py', ROOT / 'runner/libs/app_runners' / ({'bcc':'bcc_set', 'otelcol-ebpf-profiler':'otel_profiler'}.get(case, case) + '.py')])
+            if case == 'bcc':
+                inputs.append(ROOT / 'runner/libs/app_runners/bcc.py')
+                inputs.extend(root / 'usr/local/bin' / name for name in
+                    ['capable', 'biosnoop', 'vfsstat', 'opensnoop', 'syscount', 'tcpconnect', 'tcplife', 'runqlat'])
+            if case == 'katran':
+                inputs.append(root / 'artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc')
+            elif case in {'tracee', 'tetragon'}:
+                inputs.extend(p for p in (root / 'artifacts' / case).rglob('*') if p.is_file())
+            elif case in {'cilium', 'otelcol-ebpf-profiler'}:
+                inputs.append(root / 'usr/local/bin' / ('cilium-agent' if case == 'cilium' else case))
             inputs.extend([ROOT / 'runner/libs/app_runners/native_loader_env.py',
                 ROOT / 'corpus/config/macro_apps.yaml', ROOT / 'corpus/config/benchmark_config.yaml'])
             inputs.extend(sorted((ROOT / 'kinsn/module/arm64/build').glob('*.ko')))
@@ -252,9 +220,9 @@ def host(case="control"):
                             'insmod ' + str(module),
                             'cd ' + str(ROOT),
                         ]
-                        if case in {'katran', 'bcc'}:
+                        if case in CORPUS_APPS:
                             commands.append('mount --bind ' + str(ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so') + ' /usr/local/lib/bpfrejit/libbpfrejit_shim.so')
-                        if case == 'bcc':
+                        if case in CORPUS_APPS:
                             commands.extend(['mount --bind ' + str(ROOT / 'kinsn/module/arm64/build') + ' /artifacts/kinsn',
                                 'mount --bind ' + str(ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules') + ' /artifacts/lib/modules',
                                 'mount -t bpf bpffs /sys/fs/bpf',
@@ -284,12 +252,12 @@ def host(case="control"):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) in (2, 3) and sys.argv[1] == 'host':
-        case = sys.argv[2] if len(sys.argv) == 3 else 'control'
-        if case not in {'control', 'katran', 'bcc'}:
+    if len(sys.argv) in (2, 3, 4) and sys.argv[1] == 'host':
+        case = sys.argv[2] if len(sys.argv) >= 3 else 'control'
+        if case not in {'control', *CORPUS_APPS}:
             raise SystemExit('unknown case')
-        host(case)
+        host(case, sys.argv[3] if len(sys.argv) == 4 else None)
     elif len(sys.argv) in (3, 4) and sys.argv[1] == 'guest':
         guest(sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else 'control')
     else:
-        raise SystemExit('usage: trusted_service_arm64.py host [katran|bcc] | guest LIVE [katran|bcc]')
+        raise SystemExit('usage: trusted_service_arm64.py host [control|APP] [RESULTS] | guest LIVE [control|APP]')

@@ -1,0 +1,2316 @@
+{
+  "utc": "2026-11-07T18:17:31.122764+00:00",
+  "source_sha256": "154edb67bdf49755b5c627e3aaba87beed83ac660b30d334747122940e5a7a71",
+  "apps": {
+    "bcc": {
+      "selector": "bcc/set",
+      "native_manifest_entries": 32,
+      "data_manifest_entries": 0,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+          "sha256": "5cad86c7834ddd83f3f64d7e16a2fc561d4f228501f2347a99bb26ecdb319fd0"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+          "sha256": "5cad86c7834ddd83f3f64d7e16a2fc561d4f228501f2347a99bb26ecdb319fd0"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+          "sha256": "f56bcfb6ee2f0442d1c70e58456e0090920fe9bc801998629b69c9b2041e4c7d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+          "sha256": "f56bcfb6ee2f0442d1c70e58456e0090920fe9bc801998629b69c9b2041e4c7d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o",
+          "sha256": "e5e635f1eab0e15aa3d773d0d5a4a568b0b111267d6a803431a69245c963250e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "85e78e8e8980b07c883ace55807aa1250d2f339c2719e6953491e6ced4d5a5eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "85e78e8e8980b07c883ace55807aa1250d2f339c2719e6953491e6ced4d5a5eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "85e78e8e8980b07c883ace55807aa1250d2f339c2719e6953491e6ced4d5a5eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "85e78e8e8980b07c883ace55807aa1250d2f339c2719e6953491e6ced4d5a5eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "d4f583b51206c2f87ceae8c68d9a3b89c69c396dcadc3516e4612b4f204575f5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "d4f583b51206c2f87ceae8c68d9a3b89c69c396dcadc3516e4612b4f204575f5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "d4f583b51206c2f87ceae8c68d9a3b89c69c396dcadc3516e4612b4f204575f5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "d4f583b51206c2f87ceae8c68d9a3b89c69c396dcadc3516e4612b4f204575f5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+          "sha256": "fa652433960b83d59fb02dfa010f67fe42e6872105cfde816a08c33a6aada437"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+          "sha256": "fa652433960b83d59fb02dfa010f67fe42e6872105cfde816a08c33a6aada437"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "4e9cfa0026a5c97d8a5173f707965bdb71c339e3fcda6f7b0ec7c7a4580b4f6f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "4e9cfa0026a5c97d8a5173f707965bdb71c339e3fcda6f7b0ec7c7a4580b4f6f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "4e9cfa0026a5c97d8a5173f707965bdb71c339e3fcda6f7b0ec7c7a4580b4f6f"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "bcc/set",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host bcc corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/bcc_set.py"
+    },
+    "otelcol-ebpf-profiler": {
+      "selector": "otelcol-ebpf-profiler/profiling",
+      "native_manifest_entries": 36,
+      "data_manifest_entries": 15,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/system_config.native.o",
+          "sha256": "e55f8d779b0149c1df126a39b4da61f41411a6c9e22a0c3c6e7f68fc8a50aac6"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+          "sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/custom_trace.native.o",
+          "sha256": "92c109154a4fa9879553b234eb7022b81bbef4be9025c15871016d0b4852c640"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/dotnet_tracer.native.o",
+          "sha256": "32d5f8634910a3172fcf100bcea3b744dbf2847626561e2fc262086421d8ed1f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/go_labels.native.o",
+          "sha256": "72428309891b11297f1973924a605a2534e32084e6558852ae61096e68d19f8a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/hotspot_tracer.native.o",
+          "sha256": "3670c69e7c0e55cf39233ee2af8a018388c717766dcfb339ebb6dbbba0e4c869"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/interpreter_dispatcher.native.o",
+          "sha256": "a0c6f2df3d13effea67305ea0810c0613aff02f4d036ebf4cb99e0e0075690c1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/native_stack_trace.native.o",
+          "sha256": "8ded5b71d07fb75c0df6040082bff89e144c89906815efe0a1534e793eec84cd"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/off_cpu.native.o",
+          "sha256": "9c7e88e1cd52865d5f29466ab0bdb6bbcfef0015d49c7f2627c7f295eda717c0"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/perl_tracer.native.o",
+          "sha256": "fdb3cfd4e5c070722b6b144c8b5ac49b863317af833224c0490f58f928fffc8d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/php_tracer.native.o",
+          "sha256": "ef0aed477b6d45b5814f6a21f71e18560771489fb9f9c6fa6186a9747966f253"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/python_tracer.native.o",
+          "sha256": "eab2eb14be64fadadafa6f72a62715a4f8c5bcae87025ef5b172d17eb97ca1a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/ruby_tracer.native.o",
+          "sha256": "9379d767a54bd08acadb373d626cf9cfc1fbc194d646709da2c29aa3f6b90ff4"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/sched_monitor.native.o",
+          "sha256": "9d781b259280a3b6b85042e146d484d817e9d05adcb958b7fd7a0b10534ad36c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/system_config.native.o",
+          "sha256": "e55f8d779b0149c1df126a39b4da61f41411a6c9e22a0c3c6e7f68fc8a50aac6"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/uprobe.native.o",
+          "sha256": "896e969013c1d042967fceeb7c15875f12a9c384f88fb07d13f1ce0db5d3550b"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/v8_tracer.native.o",
+          "sha256": "18f1bac844fd0e4bcc111eb4628debaf0957cf8a96c399ee8627ba474a04c498"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "otelcol-ebpf-profiler/profiling",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host otelcol-ebpf-profiler corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/otel_profiler.py"
+    },
+    "cilium": {
+      "selector": "cilium/agent",
+      "native_manifest_entries": 98,
+      "data_manifest_entries": 0,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_sock.native.o",
+          "sha256": "8b0f331823bfbc5e9499e1dd70e4916e7614d83a06d588246496c3f3f768a792"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_host.native.o",
+          "sha256": "5c9acfe786e46cd16f4ad171317433e942e8ca10c978cacce90dc605f17aa3b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_overlay.native.o",
+          "sha256": "bbdf146dee90cf808537d4848d4389ac0a985b7b0ac559198d346b700e3bbd5e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_wireguard.native.o",
+          "sha256": "e5e2ff32558d9c61f1c3a0076a77152b825c101a55a9b24ebb9615c7c2741a78"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_xdp.native.o",
+          "sha256": "a4e8f66bc3ac2f7c9e717f92574e6ad8c76df12edfe7fe99affa6461a01eab0d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/bpf_lxc.native.o",
+          "sha256": "7f384aa29c83a140e9275f5198e75e27d40ed820358cdb30962712b544fd4693"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/cilium/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "cilium/agent",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host cilium corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/cilium.py"
+    },
+    "tetragon": {
+      "selector": "tetragon/observer",
+      "native_manifest_entries": 245,
+      "data_manifest_entries": 0,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v310.native.o",
+          "sha256": "e9b2537b8f4b5bf5ba9c82b2cea5db936b677a8e8e4e8716f135cd52e62fe868"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v511.native.o",
+          "sha256": "02731137f2beface72a22f675b347b684464246ee9ec7f0d51e9414be2291219"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v53.native.o",
+          "sha256": "3835f7983e72cf9dbd75a1f6d26d760fcb6b0465c7d313807633790243e7b9f9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v310.native.o",
+          "sha256": "fbe4e0750f61db9fd77c04a1083000b36670a7e926b61676bc7115b74716786e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v511.native.o",
+          "sha256": "7620cc8d34b1d50c5d504a233b6db0ca1383b78e6c49d462e3ae64e19976b937"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v310.native.o",
+          "sha256": "fbe4e0750f61db9fd77c04a1083000b36670a7e926b61676bc7115b74716786e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v511.native.o",
+          "sha256": "7620cc8d34b1d50c5d504a233b6db0ca1383b78e6c49d462e3ae64e19976b937"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_fork_v310.native.o",
+          "sha256": "596b161a033bf7c9ea304e04296681638927fed0e6100e805b21c0f0c5b9052b"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_fork_v511.native.o",
+          "sha256": "10370b76066dec79aa2da7465d42053582f8198ca6cfa2f43351d24693338da1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v511.native.o",
+          "sha256": "a02ad55661b9043277cad90624ca163e743bc5e8ef7c37c261e39c0abe831198"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v53.native.o",
+          "sha256": "770e8a29fc8f0e8cd1ef92af9cc18677de3145cdddeb2cea8fcc5685b657db65"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v61.native.o",
+          "sha256": "707121ef64b9746ef1b863b60441b5e3df8d88ee29ce1c6c0c462ca69f82ee16"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v53.native.o",
+          "sha256": "3835f7983e72cf9dbd75a1f6d26d760fcb6b0465c7d313807633790243e7b9f9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v310.native.o",
+          "sha256": "e9b2537b8f4b5bf5ba9c82b2cea5db936b677a8e8e4e8716f135cd52e62fe868"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v511.native.o",
+          "sha256": "02731137f2beface72a22f675b347b684464246ee9ec7f0d51e9414be2291219"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v53.native.o",
+          "sha256": "3835f7983e72cf9dbd75a1f6d26d760fcb6b0465c7d313807633790243e7b9f9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+          "sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v511.native.o",
+          "sha256": "04ba868275e07289bf449c3c50a9643d5f21dfaf72923927265ef571dd547120"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v511.native.o",
+          "sha256": "04ba868275e07289bf449c3c50a9643d5f21dfaf72923927265ef571dd547120"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v511.native.o",
+          "sha256": "04ba868275e07289bf449c3c50a9643d5f21dfaf72923927265ef571dd547120"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v511.native.o",
+          "sha256": "04ba868275e07289bf449c3c50a9643d5f21dfaf72923927265ef571dd547120"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+          "sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+          "sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v511.native.o",
+          "sha256": "456718dfc8a31c18e6f887ccc6b6692f485d136e3848296495a55b9e047669b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v53.native.o",
+          "sha256": "92fcd7480b6159584986f58d2ed4ae051efa4859b8a72fcc2dbc71f578092a7c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v61.native.o",
+          "sha256": "503b6fae42b2129582dd9e59c9e47abdde3917e37b823388dba3e61b1fa6861a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v511.native.o",
+          "sha256": "456718dfc8a31c18e6f887ccc6b6692f485d136e3848296495a55b9e047669b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v53.native.o",
+          "sha256": "92fcd7480b6159584986f58d2ed4ae051efa4859b8a72fcc2dbc71f578092a7c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v61.native.o",
+          "sha256": "503b6fae42b2129582dd9e59c9e47abdde3917e37b823388dba3e61b1fa6861a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v511.native.o",
+          "sha256": "456718dfc8a31c18e6f887ccc6b6692f485d136e3848296495a55b9e047669b2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v53.native.o",
+          "sha256": "92fcd7480b6159584986f58d2ed4ae051efa4859b8a72fcc2dbc71f578092a7c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v61.native.o",
+          "sha256": "503b6fae42b2129582dd9e59c9e47abdde3917e37b823388dba3e61b1fa6861a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v53.native.o",
+          "sha256": "92fcd7480b6159584986f58d2ed4ae051efa4859b8a72fcc2dbc71f578092a7c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v61.native.o",
+          "sha256": "503b6fae42b2129582dd9e59c9e47abdde3917e37b823388dba3e61b1fa6861a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_kprobe_v53.native.o",
+          "sha256": "97200b177558bc8ca69ba2b5721b1cadf8d9878cdb8c7583f9c51f629a927086"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_kprobe_v61.native.o",
+          "sha256": "e7559dfbc14ef6a8391ab4a5a44a356f0a2f4c95940962fa141b10c7fe87c080"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v511.native.o",
+          "sha256": "d7bbe8e86a4045c8ad9d50bb685bf1d50ac84412707a11214ca69ce0e5ad8997"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v511.native.o",
+          "sha256": "d7bbe8e86a4045c8ad9d50bb685bf1d50ac84412707a11214ca69ce0e5ad8997"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v511.native.o",
+          "sha256": "d7bbe8e86a4045c8ad9d50bb685bf1d50ac84412707a11214ca69ce0e5ad8997"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v511.native.o",
+          "sha256": "d7bbe8e86a4045c8ad9d50bb685bf1d50ac84412707a11214ca69ce0e5ad8997"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+          "sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+          "sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_output_v61.native.o",
+          "sha256": "569a1cbf316b1acb590c279b6f9d6d689a8c93950d3f812a74e677e31f13a50f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+          "sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+          "sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v511.native.o",
+          "sha256": "b1bb6fb1ddaf10ea4215a9d72f865a519c58f098d7bbc3ed5520eb2494759a6d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v511.native.o",
+          "sha256": "b1bb6fb1ddaf10ea4215a9d72f865a519c58f098d7bbc3ed5520eb2494759a6d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v511.native.o",
+          "sha256": "b1bb6fb1ddaf10ea4215a9d72f865a519c58f098d7bbc3ed5520eb2494759a6d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v511.native.o",
+          "sha256": "b1bb6fb1ddaf10ea4215a9d72f865a519c58f098d7bbc3ed5520eb2494759a6d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+          "sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+          "sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v511.native.o",
+          "sha256": "609c30d297b5622e71d382bcc54de37583ce33abbd455eb93e696cebc909c2d0"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v53.native.o",
+          "sha256": "56b94370549e4dd66a5aa78a20ec671032eca61cfec6c2c6d590f000a2ebbf19"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v61.native.o",
+          "sha256": "efd9883080dfad86c840fc2748e9d2843fdbf0a1a5bfc7ea026285e32d904e0f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v511.native.o",
+          "sha256": "f29688152a4cdad91367ec189b7ebb9bf06ada49feacdff5165a20138e296c6c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v511.native.o",
+          "sha256": "f29688152a4cdad91367ec189b7ebb9bf06ada49feacdff5165a20138e296c6c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v511.native.o",
+          "sha256": "f29688152a4cdad91367ec189b7ebb9bf06ada49feacdff5165a20138e296c6c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+          "sha256": "04648cf1a670431a5299da356b97112f4211a4bdc040a23173c6ecb3ec234d8f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+          "sha256": "04648cf1a670431a5299da356b97112f4211a4bdc040a23173c6ecb3ec234d8f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+          "sha256": "04648cf1a670431a5299da356b97112f4211a4bdc040a23173c6ecb3ec234d8f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+          "sha256": "04648cf1a670431a5299da356b97112f4211a4bdc040a23173c6ecb3ec234d8f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+          "sha256": "33af2b09b1b76a90ffd9b3f1a26a6e61311bdadebe41bb9422f40ae92006c39d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+          "sha256": "33af2b09b1b76a90ffd9b3f1a26a6e61311bdadebe41bb9422f40ae92006c39d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+          "sha256": "33af2b09b1b76a90ffd9b3f1a26a6e61311bdadebe41bb9422f40ae92006c39d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+          "sha256": "33af2b09b1b76a90ffd9b3f1a26a6e61311bdadebe41bb9422f40ae92006c39d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v511.native.o",
+          "sha256": "744faa3926d758bacca675e82fc2675cb577875645440d4917e6900b6c67db1a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+          "sha256": "4c0491c4c86ac67d1c179adb26fad90452a23f3023ae9a25601880c8f1137df3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+          "sha256": "4c0491c4c86ac67d1c179adb26fad90452a23f3023ae9a25601880c8f1137df3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+          "sha256": "4c0491c4c86ac67d1c179adb26fad90452a23f3023ae9a25601880c8f1137df3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+          "sha256": "4c0491c4c86ac67d1c179adb26fad90452a23f3023ae9a25601880c8f1137df3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v61.native.o",
+          "sha256": "7ea3f661c06b549660c2fc66b686bbfdb3f58e925828c063eee6a2a0bfeab5a5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v511.native.o",
+          "sha256": "545fcfca2b8ade6deb9da4ad498713c64a096861422431fdf0071cbf1a87d923"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v511.native.o",
+          "sha256": "545fcfca2b8ade6deb9da4ad498713c64a096861422431fdf0071cbf1a87d923"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v511.native.o",
+          "sha256": "545fcfca2b8ade6deb9da4ad498713c64a096861422431fdf0071cbf1a87d923"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+          "sha256": "8326602cf1af1928065af6f98fbbe171484f8a4c40bbe7538646757633cfd3eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+          "sha256": "8326602cf1af1928065af6f98fbbe171484f8a4c40bbe7538646757633cfd3eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+          "sha256": "8326602cf1af1928065af6f98fbbe171484f8a4c40bbe7538646757633cfd3eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+          "sha256": "8326602cf1af1928065af6f98fbbe171484f8a4c40bbe7538646757633cfd3eb"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v511.native.o",
+          "sha256": "c446feb305257c5e0d697164938153afea13ec34f119530c20e92918551bba5a"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v511.native.o",
+          "sha256": "b7da37a286441e90fbdded99bb95dc0b9f7bbfee6040b5053f23d4eb83bcf2ce"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v61.native.o",
+          "sha256": "9266402750ec495393e7624acaa17f22239c6d1da2950ccc43ca5a847433964d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+          "sha256": "ff3b24eb91ff95e9cd7bc7233bdd76daf476a4904b039de4cb40a372bc0d6509"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+          "sha256": "ff3b24eb91ff95e9cd7bc7233bdd76daf476a4904b039de4cb40a372bc0d6509"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+          "sha256": "ff3b24eb91ff95e9cd7bc7233bdd76daf476a4904b039de4cb40a372bc0d6509"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+          "sha256": "ff3b24eb91ff95e9cd7bc7233bdd76daf476a4904b039de4cb40a372bc0d6509"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+          "sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+          "sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+          "sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+          "sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+          "sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+          "sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+          "sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v61.native.o",
+          "sha256": "ca46ff6916ac0847b8e7269518c0b7380fe4c3607dbb6a82f54a45fa51f32a18"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+          "sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v61.native.o",
+          "sha256": "9266402750ec495393e7624acaa17f22239c6d1da2950ccc43ca5a847433964d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+          "sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+          "sha256": "075549b0765b2d660ef490fdfba7751b8a15eac800bd11aa0e881104d312b230"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+          "sha256": "a9180fa2d6a2e59fb657cae1185879d9e78acb2fa1d73ba9e4b6165ddfc7b022"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_loader_v511.native.o",
+          "sha256": "d5cf1f9290269dad0be0782651282036551c522b8505bba51a98847452563ea1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+          "sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_mkdir_v511.native.o",
+          "sha256": "c5038b20feb99d5df8480b94b3e3046525a540dd97653adb4e3a479ed0d8fcb7"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_release_v511.native.o",
+          "sha256": "bd73a15da730cfcde7c525ba32ff5a4dc0874a5e2636009e0aa2b0c39ebc0031"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_rmdir_v511.native.o",
+          "sha256": "2f01ae5ebc40d28942036afe0c8b9aa49eb518d564d8a6cdaf2391b91fea1616"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+          "sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+          "sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tetragon/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "tetragon/observer",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host tetragon corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/tetragon.py"
+    },
+    "katran": {
+      "selector": "katran",
+      "native_manifest_entries": 12,
+      "data_manifest_entries": 0,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/balancer.native.o",
+          "sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/healthchecking_ipip.native.o",
+          "sha256": "ab0b571c0c62c58ffd1695b478e2fee7a29028015c9c01d117c8b1764afb1dc6"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/xdp_root.native.o",
+          "sha256": "2edeaa3477e5f9d9579a480379458b1cdfd85daf32f1b0a8ecbf950380816341"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/katran/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "katran",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host katran corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/katran.py"
+    },
+    "tracee": {
+      "selector": "tracee/monitor",
+      "native_manifest_entries": 123,
+      "data_manifest_entries": 0,
+      "native_inputs": [
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/lsm_check.native.o",
+          "sha256": "e2727545d62e52166d8bb317ecd5c16348c2c8f2dd0961401fffe247c58e6bb0"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/kprobe_check.native.o",
+          "sha256": "1392b405574a754a0e82594ba6e4de1277e5b599b451ac773dea8f4deaa7e1d8"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "55a59e08aed8462a97099ae0ac8e0a27a03b312fc0f65b58bf686a490a4b50a1"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/source_map.native.o",
+          "sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_0.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_1.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_2.native.o",
+          "sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_3.native.o",
+          "sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_4.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_5.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_6.native.o",
+          "sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3"
+        },
+        {
+          "path": "kprog/arm64/build/app-verified-stage/tracee/startup/startup_7.native.o",
+          "sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+        }
+      ],
+      "shell_syntax": true,
+      "saved_env_actual_selector": "tracee/monitor",
+      "make_dry_run": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host tracee corpus/results/kprog_arm64_app_coverage_20261107",
+      "runner": "runner/libs/app_runners/tracee.py"
+    }
+  }
+}
