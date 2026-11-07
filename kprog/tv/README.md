@@ -1456,3 +1456,26 @@ entry faults, the program-wide architectural/relational simulation or
 ABI/platform and immutable-P/materialized-artifact transport. It is not a
 whole-program TV certificate. Scope and audit:
 `trusted-simple-entry-all-guards.json`.
+
+
+Actual accepted B packet writes and exit
+
+`packet_proof_block` checks actual Bpc18..33 and its complete resulting state.
+Its four guest writes remain ordered as 2 bytes at pointer, 1 byte at +2,
+4 bytes at +3 and 1 byte at +7, with the exact values from the artifact.
+`packet_proof_execution` transports this witness to the same explicit
+`initializedInstructionStep env` relation. The only success premises beyond
+PC18/active are the four actual writable-memory permissions; no packet event
+is projected away.
+
+`proof_exit_block` and `proof_exit_execution` check the accepted artifact's
+actual MOV32 at pc34, rewritten JA at pc35 and appended EXIT at pc36. The
+complete final state has PC37, halted=true, and the actual zero-extended
+32-bit return value. `packet_proof_return` composes writes through this real
+EXIT and derives returned value2 with all four write events retained.
+
+This is a successful B-subpath/exit certificate. Native byte decoding,
+write-memory/event correspondence, failed-store paths, complete entry/program
+composition, canonical relational simulation and ABI/immutable-artifact
+transport remain open. Scope, source hashes and audit:
+`trusted-simple-B-packet-return.json`.

@@ -1614,6 +1614,117 @@ theorem entry_all_guards_correspondence (env : BPF.Environment) (n : X86.State) 
       change (remainingProofFinal p1).regs 1=(0#64)
       exact (remaining_proof_frame p1 1 (by decide) (by decide)).trans p0
 
+
+theorem virtual_decode18 : BPF.decode proof 18 = .ok ⟨0xb7,1,0,0,0⟩ := rfl
+theorem virtual_decode19 : BPF.decode proof 19 = .ok ⟨0xb7,3,0,0,0⟩ := rfl
+theorem virtual_decode20 : BPF.decode proof 20 = .ok ⟨0x0f,3,2,0,0⟩ := rfl
+theorem virtual_decode21 : BPF.decode proof 21 = .ok ⟨0xb7,4,0,0,24910⟩ := rfl
+theorem virtual_decode22 : BPF.decode proof 22 = .ok ⟨0x6b,3,4,0,0⟩ := rfl
+theorem virtual_decode23 : BPF.decode proof 23 = .ok ⟨0xb7,3,0,0,2⟩ := rfl
+theorem virtual_decode24 : BPF.decode proof 24 = .ok ⟨0x0f,3,2,0,0⟩ := rfl
+theorem virtual_decode25 : BPF.decode proof 25 = .ok ⟨0xb7,4,0,0,188⟩ := rfl
+theorem virtual_decode26 : BPF.decode proof 26 = .ok ⟨0x73,3,4,0,0⟩ := rfl
+theorem virtual_decode27 : BPF.decode proof 27 = .ok ⟨0xb7,3,0,0,3⟩ := rfl
+theorem virtual_decode28 : BPF.decode proof 28 = .ok ⟨0x0f,3,2,0,0⟩ := rfl
+theorem virtual_decode29 : BPF.decode proof 29 = .ok ⟨0x63,3,1,0,0⟩ := rfl
+theorem virtual_decode30 : BPF.decode proof 30 = .ok ⟨0xb7,3,0,0,7⟩ := rfl
+theorem virtual_decode31 : BPF.decode proof 31 = .ok ⟨0x0f,3,2,0,0⟩ := rfl
+theorem virtual_decode32 : BPF.decode proof 32 = .ok ⟨0x73,3,1,0,0⟩ := rfl
+theorem virtual_decode33 : BPF.decode proof 33 = .ok ⟨0xb4,1,0,0,2⟩ := rfl
+
+def packetWriteMemory (memory : Memory) (pointer : Word) : Memory :=
+  storeMemory (storeMemory (storeMemory (storeMemory memory pointer (24910#64) 2)
+    (pointer+(2#64)) (188#64) 1) (pointer+(3#64)) (0#64) 4) (pointer+(7#64)) (0#64) 1
+
+def packetWriteEvents (pointer : Word) : List Event :=
+  [.memory .write pointer (valueBytes (24910#64) 2) true,
+   .memory .write (pointer+(2#64)) (valueBytes (188#64) 1) true,
+   .memory .write (pointer+(3#64)) (valueBytes (0#64) 4) true,
+   .memory .write (pointer+(7#64)) (valueBytes (0#64) 1) true]
+
+def packetProofFinal (p : BPF.State) : BPF.State :=
+  { BPF.setReg (BPF.setReg (BPF.setReg p 1 (2#64)) 3 (p.regs 2+(7#64))) 4 (188#64) with
+    memory := packetWriteMemory p.memory (p.regs 2)
+    pc := 34 }
+
+/-- Actual four guest writes, in their actual order and widths. Permission
+premises describe successful stores; the trace is neither hidden nor replaced. -/
+theorem packet_proof_block (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=18) (active : p.halted=false)
+    (write0 : permitted p.memory.writable (p.regs 2) 2 = true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1 = true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4 = true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1 = true) :
+    BPFPath.evaluate env proof [18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33] p =
+      .ok ⟨packetProofFinal p,packetWriteEvents (p.regs 2),none⟩ := by
+  have plus2 : (2#64)+p.regs 2 = p.regs 2+(2#64) := BitVec.add_comm _ _
+  have plus3 : (3#64)+p.regs 2 = p.regs 2+(3#64) := BitVec.add_comm _ _
+  have plus7 : (7#64)+p.regs 2 = p.regs 2+(7#64) := BitVec.add_comm _ _
+  simp +decide [BPFPath.evaluate,virtual_decode18,virtual_decode19,virtual_decode20,virtual_decode21,
+    virtual_decode22,virtual_decode23,virtual_decode24,virtual_decode25,virtual_decode26,virtual_decode27,
+    virtual_decode28,virtual_decode29,virtual_decode30,virtual_decode31,virtual_decode32,virtual_decode33,
+    BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+    packetProofFinal,packetWriteMemory,packetWriteEvents,storeMemory,
+    plus2,plus3,plus7,write0,write2,write3,write7,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  funext index
+  by_cases one : index=1 <;> by_cases three : index=3 <;> by_cases four : index=4 <;>
+    simp [one,three,four]
+
+
+theorem packet_proof_execution (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=18) (active : p.halted=false)
+    (write0 : permitted p.memory.writable (p.regs 2) 2 = true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1 = true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4 = true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1 = true) :
+    Execution (initializedInstructionStep env) p (packetWriteEvents (p.regs 2)) (packetProofFinal p) := by
+  exact ordinary_path_execution env [18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33] p
+    ⟨packetProofFinal p,packetWriteEvents (p.regs 2),none⟩
+    (by intro pc inside; simp at inside; omega)
+    (packet_proof_block env p position active write0 write2 write3 write7)
+
+theorem virtual_decode34 : BPF.decode proof 34 = .ok ⟨0xbc,0,1,0,0⟩ := rfl
+theorem virtual_decode35 : BPF.decode proof 35 = .ok ⟨0x05,0,0,0,0⟩ := rfl
+theorem virtual_decode36 : BPF.decode proof 36 = .ok ⟨0x95,0,0,0,0⟩ := rfl
+
+def proofExitFinal (p : BPF.State) : BPF.State :=
+  { BPF.setReg p 0 ((p.regs 1).setWidth 32 |>.setWidth 64) with pc := 37, halted := true }
+
+/-- The accepted artifact's actual MOV32/JA/EXIT tail, including the appended
+EXIT stub. The complete final state records the architectural return width. -/
+theorem proof_exit_block (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=34) (active : p.halted=false) :
+    BPFPath.evaluate env proof [34,35,36] p = .ok ⟨proofExitFinal p,[],none⟩ := by
+  simp +decide [BPFPath.evaluate,virtual_decode34,virtual_decode35,virtual_decode36,
+    BPF.execute,BPF.source,BPF.alu,BPF.setReg,position,active,proofExitFinal,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+theorem proof_exit_execution (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=34) (active : p.halted=false) :
+    Execution (initializedInstructionStep env) p [] (proofExitFinal p) := by
+  exact ordinary_path_execution env [34,35,36] p ⟨proofExitFinal p,[],none⟩
+    (by intro pc inside; simp at inside; omega) (proof_exit_block env p position active)
+
+/-- Successful actual guest stores through the real accepted EXIT, retaining
+all four memory events in order and deriving the returned value two. -/
+theorem packet_proof_return (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=18) (active : p.halted=false)
+    (write0 : permitted p.memory.writable (p.regs 2) 2 = true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1 = true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4 = true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1 = true) :
+    Execution (initializedInstructionStep env) p (packetWriteEvents (p.regs 2))
+      (proofExitFinal (packetProofFinal p)) ∧
+    (proofExitFinal (packetProofFinal p)).halted = true ∧
+    (proofExitFinal (packetProofFinal p)).regs 0 = (2#64) := by
+  have body := packet_proof_execution env p position active write0 write2 write3 write7
+  have tailRun := proof_exit_execution env (packetProofFinal p) rfl
+    (by simpa [packetProofFinal,BPF.setReg] using active)
+  refine ⟨?_,rfl,?_⟩
+  · simpa only [List.append_nil] using body.append tailRun
+  · simp +decide [proofExitFinal,packetProofFinal,BPF.setReg]
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1764,3 +1875,13 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.remaining_proof_frame
 
 #print axioms KProgTV.TrustedSimpleX86.entry_all_guards_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.packet_proof_block
+
+#print axioms KProgTV.TrustedSimpleX86.packet_proof_execution
+
+#print axioms KProgTV.TrustedSimpleX86.proof_exit_block
+
+#print axioms KProgTV.TrustedSimpleX86.proof_exit_execution
+
+#print axioms KProgTV.TrustedSimpleX86.packet_proof_return
