@@ -1,6 +1,6 @@
 import TrustedSimpleSafety
 
-/-! The actual82-byte fresh jit-invocation capture. This certificate covers its
+/-! The actual82-byte fresh jit-return-text capture. This certificate covers its
 entry wrapper independently of the unvalidated current B30. Stack writes are
 retained host-ABI effects, not erased guest operations. -/
 set_option maxRecDepth 4096
@@ -9,7 +9,7 @@ namespace KProgTV.TrustedSimpleJIT
 open KProgFormal.Reference
 open TrustedSimpleX86 TrustedSimpleSafety
 
-def image : Array Byte := #[0xf,0x1f,0x44,0x0,0x0,0xf,0x1f,0x0,0x55,0x48,0x89,0xe5,0x41,0x57,0x48,0x8b,0xf,0x48,0x8b,0x57,0x8,0x48,0x89,0xce,0x31,0xc0,0x48,0x39,0xd6,0x77,0x2b,0x48,0x8d,0x7e,0x8,0x48,0x39,0xd7,0x77,0x22,0x48,0x83,0xc6,0x48,0x48,0x39,0xd6,0x77,0x19,0x66,0xc7,0x1,0x4e,0x61,0xc6,0x41,0x2,0xbc,0xc7,0x41,0x3,0x0,0x0,0x0,0x0,0xc6,0x41,0x7,0x0,0xb8,0x2,0x0,0x0,0x0,0x41,0x5f,0xc9,0xe9,0xba,0x2f,0xc1,0xcb]
+def image : Array Byte := #[0xf,0x1f,0x44,0x0,0x0,0xf,0x1f,0x0,0x55,0x48,0x89,0xe5,0x41,0x57,0x48,0x8b,0xf,0x48,0x8b,0x57,0x8,0x48,0x89,0xce,0x31,0xc0,0x48,0x39,0xd6,0x77,0x2b,0x48,0x8d,0x7e,0x8,0x48,0x39,0xd7,0x77,0x22,0x48,0x83,0xc6,0x48,0x48,0x39,0xd6,0x77,0x19,0x66,0xc7,0x1,0x4e,0x61,0xc6,0x41,0x2,0xbc,0xc7,0x41,0x3,0x0,0x0,0x0,0x0,0xc6,0x41,0x7,0x0,0xb8,0x2,0x0,0x0,0x0,0x41,0x5f,0xc9,0xe9,0xae,0x2f,0xa1,0xd6]
 theorem image_size : image.size = 82 := rfl
 theorem emitted_payload : image.extract 14 74 = native := by decide
 
@@ -182,12 +182,12 @@ theorem actual_saved_bp (base : Word) (n : X86.State)
 
 
 -- Relocation identity from the new capture's live kernel symbol receipt.
-def returnDisplacement : Word := (0xcbc12fba#32).signExtend 64
+def returnDisplacement : Word := (0xd6a12fae#32).signExtend 64
 def returnTarget (base : Word) : Word := base + (82#64) + returnDisplacement
 
 theorem decode77 (s : X86.State) : X86.decode (image.extract 77 82) s = .ok
     (.branch none (s.pc+(5#64)+returnDisplacement) (s.pc+(5#64))) := by
-  have bytes : image.extract 77 82 = #[0xe9,0xba,0x2f,0xc1,0xcb] := by decide
+  have bytes : image.extract 77 82 = #[0xe9,0xae,0x2f,0xa1,0xd6] := by decide
   rw [bytes]
   unfold returnDisplacement
   canonical_x86_decode
@@ -205,7 +205,7 @@ theorem actual_return_edge (base : Word) (s : X86.State) (position : s.pc=base+(
       Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
   · rfl
 
-theorem captured_return_symbol : returnTarget (18446744072640010388#64) = (18446744071763478688#64) := by decide
+theorem captured_return_symbol : returnTarget (18446744072642107552#64) = (18446744071948028064#64) := by decide
 
 
 /-- Generalize the existing return-slot lemma to either save slot or the
@@ -322,6 +322,7 @@ def afterLeave (base : Word) (s : X86.State) (value : Word) : X86.State :=
 
 theorem actual_leave_step (base : Word) (s : X86.State) (value : Word) (event : Event)
     (position : s.pc=base+(76#64))
+    (canonicalFrame : X86.leave64FrameCanonical s=true)
     (read : readMemory s.memory (s.gpr 5) 8 = .ok (value,event)) :
     X86Path.decodeAt base image ⟨76,1⟩ s = .ok (.leave64 (base+(77#64))) ∧
     X86.step (.leave64 (base+(77#64))) s = ⟨afterLeave base s value,[event],none⟩ := by
@@ -329,14 +330,15 @@ theorem actual_leave_step (base : Word) (s : X86.State) (value : Word) (event : 
   · simp +decide [X86Path.decodeAt,image_size,decode76,position,
       X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
       Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
-  · exact X86.leave64_read_success _ value event s read
+  · exact X86.leave64_read_success _ value event s canonicalFrame read
 
 /-- The two real failure boundaries retain the complete incoming state.
 In particular a failed LEAVE never commits an intermediate RSP=RBP. -/
 theorem actual_leave_fault (base : Word) (s : X86.State) (fault : Fault)
+    (canonicalFrame : X86.leave64FrameCanonical s=true)
     (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
     X86.step (.leave64 (base+(77#64))) s = ⟨s,[.fault fault],some fault⟩ :=
-  X86.leave64_read_fault _ fault s read
+  X86.leave64_read_fault _ fault s canonicalFrame read
 
 theorem actual_pop_fault (base : Word) (s : X86.State) (fault : Fault)
     (read : readMemory s.memory (s.gpr 4) 8 = .error fault) :
@@ -348,6 +350,7 @@ reads remain ordered; no return-slot access or host effect is erased. -/
 theorem actual_epilogue_path (base : Word) (s : X86.State)
     (saved15 savedBP : Word) (event15 eventBP : Event)
     (position : s.pc=base+(74#64))
+    (canonicalFrame : X86.leave64FrameCanonical s=true)
     (read15 : readMemory s.memory (s.gpr 4) 8 = .ok (saved15,event15))
     (readBP : readMemory s.memory (s.gpr 5) 8 = .ok (savedBP,eventBP)) :
     X86Path.Execution base image s [event15,eventBP]
@@ -356,7 +359,9 @@ theorem actual_epilogue_path (base : Word) (s : X86.State)
   have frameRead : readMemory (afterPop base s saved15).memory
       ((afterPop base s saved15).gpr 5) 8 = .ok (savedBP,eventBP) := by
     simpa +decide [afterPop] using readBP
-  have leave := actual_leave_step base (afterPop base s saved15) savedBP eventBP rfl frameRead
+  have frameOK : X86.leave64FrameCanonical (afterPop base s saved15)=true := by
+    simpa +decide [X86.leave64FrameCanonical,afterPop] using canonicalFrame
+  have leave := actual_leave_step base (afterPop base s saved15) savedBP eventBP rfl frameOK frameRead
   have jump := actual_return_edge base (afterLeave base (afterPop base s saved15) savedBP) rfl
   have tail := X86Path.Execution.next ⟨77,5⟩ _ jump.1
     (X86Path.Execution.refl (X86.step (.branch none (returnTarget base) (base+(82#64)))
@@ -408,6 +413,7 @@ theorem actual_epilogue_pop_fault_path (base : Word) (s : X86.State) (fault : Fa
 theorem actual_epilogue_leave_fault_path (base : Word) (s : X86.State)
     (value : Word) (event : Event) (fault : Fault)
     (position : s.pc=base+(74#64))
+    (canonicalFrame : X86.leave64FrameCanonical s=true)
     (read15 : readMemory s.memory (s.gpr 4) 8 = .ok (value,event))
     (readBP : readMemory s.memory (s.gpr 5) 8 = .error fault) :
     X86Path.Execution base image s [event,.fault fault] (afterPop base s value) := by
@@ -420,7 +426,9 @@ theorem actual_epilogue_leave_fault_path (base : Word) (s : X86.State)
     simp +decide [X86Path.decodeAt,image_size,decode76,afterPop,
       X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
       Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
-  have failed := actual_leave_fault base (afterPop base s value) fault frameRead
+  have frameOK : X86.leave64FrameCanonical (afterPop base s value)=true := by
+    simpa +decide [X86.leave64FrameCanonical,afterPop] using canonicalFrame
+  have failed := actual_leave_fault base (afterPop base s value) fault frameOK frameRead
   have tail := X86Path.Execution.next ⟨76,1⟩ _ decoded
     (X86Path.Execution.refl (X86.step (.leave64 (base+(77#64))) (afterPop base s value)).state)
   rw [failed] at tail
@@ -436,6 +444,131 @@ theorem epilogue_preserves_result (base : Word) (s : X86.State) (saved15 savedBP
       last.xmm0=s.xmm0 ∧ last.fsBase=s.fsBase ∧ last.gsBase=s.gsBase ∧
       last.addressWidth=s.addressWidth := by
   simp +decide [afterLeave,afterPop]
+
+
+/-- Exact live bytes sampled before and after this capture's native runs.
+INT3 is not executed by a successful RET; its presence is retained in the image. -/
+def returnThunk : Array Byte := #[0xc3,0xcc]
+
+theorem return_thunk_decode (s : X86.State) :
+    X86.decode (returnThunk.extract 0 1) s = .ok (.returnNear (0#16) (s.pc+(1#64))) := by
+  change X86.decode #[0xc3] s = _
+  canonical_x86_decode
+
+def afterOuterReturn (s : X86.State) (target : Word) : X86.State :=
+  {s with
+    gpr := fun r => if r=4 then s.gpr 4+(8#64) else s.gpr r
+    pc := target}
+
+/-- A canonical RET reads the original caller slot and commits SP/PC only
+for a canonical saved continuation. This read is never erased or called a
+verifier-checked guest load by this ABI component. -/
+theorem actual_return_thunk_success (base : Word) (s : X86.State) (target : Word) (event : Event)
+    (position : s.pc=returnTarget base)
+    (read : readMemory s.memory (s.gpr 4) 8 = .ok (target,event))
+    (canonical : X86.canonicalTarget s.addressWidth target=true) :
+    X86Path.decodeAt (returnTarget base) returnThunk ⟨0,1⟩ s =
+      .ok (.returnNear (0#16) (returnTarget base+(1#64))) ∧
+    X86.step (.returnNear (0#16) (returnTarget base+(1#64))) s =
+      ⟨afterOuterReturn s target,[event],none⟩ := by
+  constructor
+  · simp +decide [X86Path.decodeAt,returnThunk,position,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    canonical_x86_decode
+    all_goals simp +decide [position,X86Path.fallthrough,X86.Instruction.fallthrough]
+  · simp +decide [X86.step,X86.returnStep,read,canonical,afterOuterReturn]
+
+theorem actual_return_thunk_read_fault (base : Word) (s : X86.State) (fault : Fault)
+    (read : readMemory s.memory (s.gpr 4) 8 = .error fault) :
+    X86.step (.returnNear (0#16) (returnTarget base+(1#64))) s =
+      ⟨s,[.fault fault],some fault⟩ := by
+  simp only [X86.step,X86.returnStep,read]
+
+theorem actual_return_thunk_target_fault (base : Word) (s : X86.State) (target : Word) (event : Event)
+    (read : readMemory s.memory (s.gpr 4) 8 = .ok (target,event))
+    (noncanonical : X86.canonicalTarget s.addressWidth target=false) :
+    X86.step (.returnNear (0#16) (returnTarget base+(1#64))) s =
+      ⟨s,[event,.fault (.nonCanonical target)],some (.nonCanonical target)⟩ := by
+  simp only [X86.step,X86.returnStep,read,noncanonical,Bool.false_eq_true,ite_false]
+
+/-- Two connected actual code regions: the captured JIT epilogue reaches its
+live kernel thunk, whose RET reaches the original caller continuation. The
+complete final state is explicit, including every non-restored body register. -/
+theorem actual_epilogue_and_return (base : Word) (caller s : X86.State)
+    (target : Word) (event15 eventBP outerEvent : Event)
+    (position : s.pc=base+(74#64))
+    (canonicalFrame : X86.leave64FrameCanonical s=true)
+    (stack : s.gpr 4=caller.gpr 4-(16#64))
+    (frame : s.gpr 5=caller.gpr 4-(8#64))
+    (read15 : readMemory s.memory (caller.gpr 4-(16#64)) 8 = .ok
+      (caller.gpr 15,event15))
+    (readBP : readMemory s.memory (caller.gpr 4-(8#64)) 8 = .ok
+      (caller.gpr 5,eventBP))
+    (outerRead : readMemory s.memory (caller.gpr 4) 8 = .ok (target,outerEvent))
+    (canonical : X86.canonicalTarget s.addressWidth target=true) :
+    ∃ middle,
+      X86Path.Execution base image s [event15,eventBP] middle ∧
+      X86Path.Execution (returnTarget base) returnThunk middle [outerEvent]
+        (afterOuterReturn
+          {s with
+            gpr := fun r => if r=4 then caller.gpr 4 else if r=5 then caller.gpr 5
+              else if r=15 then caller.gpr 15 else s.gpr r
+            pc := returnTarget base} target) := by
+  have lower : readMemory s.memory (s.gpr 4) 8 = .ok (caller.gpr 15,event15) := by
+    rw [stack]; exact read15
+  have upper : readMemory s.memory (s.gpr 5) 8 = .ok (caller.gpr 5,eventBP) := by
+    rw [frame]; exact readBP
+  let middle := {afterLeave base (afterPop base s (caller.gpr 15)) (caller.gpr 5)
+    with pc := returnTarget base}
+  have epilogue : X86Path.Execution base image s [event15,eventBP] middle :=
+    actual_epilogue_path base s _ _ _ _ position canonicalFrame lower upper
+  have restored := epilogue_restores_caller_frame base caller s frame
+  have middleSP : middle.gpr 4=caller.gpr 4 := by
+    simp +decide [middle,afterLeave,afterPop,frame,BitVec.sub_add_cancel]
+  have read : readMemory middle.memory (middle.gpr 4) 8 = .ok (target,outerEvent) := by
+    rw [middleSP]
+    exact outerRead
+  have good : X86.canonicalTarget middle.addressWidth target=true := canonical
+  have returned := actual_return_thunk_success base middle target outerEvent rfl read good
+  have path := X86Path.Execution.next ⟨0,1⟩ _ returned.1
+    (X86Path.Execution.refl (X86.step (.returnNear (0#16) (returnTarget base+(1#64))) middle).state)
+  rw [returned.2] at path
+  refine ⟨middle,epilogue,?_⟩
+  have endpoint := congrArg (fun state => afterOuterReturn state target) restored
+  change afterOuterReturn middle target = _ at endpoint
+  rw [endpoint] at path
+  simpa only [List.append_nil] using path
+
+
+/-- Address faults precede the implicit read, according to the published
+whole-eight-byte canonical-span rule. This is not a simulator-added check. -/
+theorem actual_leave_address_fault (base : Word) (s : X86.State)
+    (badFrame : X86.leave64FrameCanonical s=false) :
+    X86.step (.leave64 (base+(77#64))) s =
+      ⟨s,[.fault (.nonCanonical (s.gpr 5))],some (.nonCanonical (s.gpr 5))⟩ :=
+  X86.leave64_noncanonical _ s badFrame
+
+theorem actual_epilogue_address_fault_path (base : Word) (s : X86.State) (value : Word) (event : Event)
+    (position : s.pc=base+(74#64))
+    (read15 : readMemory s.memory (s.gpr 4) 8 = .ok (value,event))
+    (badFrame : X86.leave64FrameCanonical s=false) :
+    X86Path.Execution base image s [event,.fault (.nonCanonical (s.gpr 5))] (afterPop base s value) := by
+  have pop := actual_pop_step base s value event position read15
+  have bad : X86.leave64FrameCanonical (afterPop base s value)=false := by
+    simpa +decide [X86.leave64FrameCanonical,afterPop] using badFrame
+  have address : (afterPop base s value).gpr 5=s.gpr 5 := by simp +decide [afterPop]
+  have decoded : X86Path.decodeAt base image ⟨76,1⟩ (afterPop base s value) =
+      .ok (.leave64 (base+(77#64))) := by
+    simp +decide [X86Path.decodeAt,image_size,decode76,afterPop,
+      X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have failed := actual_leave_address_fault base (afterPop base s value) bad
+  have tail := X86Path.Execution.next ⟨76,1⟩ _ decoded
+    (X86Path.Execution.refl (X86.step (.leave64 (base+(77#64))) (afterPop base s value)).state)
+  rw [failed] at tail
+  have path := X86Path.Execution.next ⟨74,2⟩ _ pop.1 (by rw [pop.2]; exact tail)
+  rw [pop.2] at path
+  simpa only [address,List.cons_append,List.nil_append,List.append_nil] using path
 
 end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.emitted_payload
@@ -461,3 +594,9 @@ end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_pop_fault_path
 #print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_leave_fault_path
 #print axioms KProgTV.TrustedSimpleJIT.epilogue_preserves_result
+#print axioms KProgTV.TrustedSimpleJIT.actual_return_thunk_success
+#print axioms KProgTV.TrustedSimpleJIT.actual_return_thunk_read_fault
+#print axioms KProgTV.TrustedSimpleJIT.actual_return_thunk_target_fault
+#print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_and_return
+#print axioms KProgTV.TrustedSimpleJIT.actual_leave_address_fault
+#print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_address_fault_path

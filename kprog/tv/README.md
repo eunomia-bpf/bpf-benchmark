@@ -2119,3 +2119,16 @@ application submits only P. The kernel accepted and bound the fresh B29
 packet checks pass. Structural invocation/materialization controls also pass.
 The canonical header is unchanged. This supplies the actual accepted B for TV;
 it is neither a full-state certificate nor production/app promotion.
+
+`trusted-simple-live-return.json` instantiates the JIT and thunk literals from
+the same return-text capture. Its28 audits check the connected actual
+POP/LEAVE/JMP and RET executions, with exact restored caller frame and original
+return-slot read retained. The new LEAVE canonical-span premise and address-
+fault path use the published flat NO-LASS reference;64-bit wrap is retained.
+Read faults and noncanonical continuations preserve their actual state/effects.
+
+All affected prerequisite stages were rechecked; the final changed-source
+check passes after a JIT-only decode-normalization correction. Actual kernel
+caller/profile/stack premises, the full native-body embedding and exact B29
+TV remain explicit. The caller return read is not silently classified as a
+verifier-checked guest access.

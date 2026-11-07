@@ -1,0 +1,192 @@
+{
+  "status": "same_capture_actual_JIT_epilogue_and_live_RET_compose_to_exact_caller_continuation_under_explicit_stack_contract",
+  "utc": "2026-11-07T17:01:10.246546+00:00",
+  "reference_commit": "213d8d5aa2a7f6440e965d8282e625faaddfeafb",
+  "reference_profile": "flat NO-LASS; whole8-byte LEAVE canonical-span/address-fault rule,64-bit wrap retained",
+  "capture_commit": "92e43d48a31f1f202c5771210e5d4cf437618a54",
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleJIT.lean": "1c77a04357bd701d62d27490a4295221abff3d37f970cc4daf611175d8cefad3",
+    "kprog/tv/Makefile": "03850e6ce1ef85d97a0ea484818c1012834e759bdc0268a0cfbf603f10dc41a0"
+  },
+  "claims": [
+    "Actual new82Bimage and2BreturnThunk literals match the SAME archivedruntime capture. OnlycapturedJITrelocation/address constants changed from previous session.",
+    "Canonical POP/LEAVE/JMP connects to the observed C3 RET; the full final state restores original caller saved registers and advances callerSP by8 on return.",
+    "RAX/result and all non-restored body state remain exact; both save-slot reads and original caller return-slot read are retained in their ordered code-region executions.",
+    "Address fault precedes LEAVE memory read; successful/read-fault paths now explicitly require the published whole8-byte frame canonicality.64-bit wrapping is not forbidden.",
+    "RET read faults and noncanonical saved continuation faults preserve full state and retain the actual read/fault effects."
+  ],
+  "validation": {
+    "dependency_command": "make -C kprog/tv trusted-simple-jit-certificate",
+    "dependency_attempt_exit": 2,
+    "dependency_failure_scope": "only new JIT RET decode normalization; all prerequisite stages completed without errors/sorryAx",
+    "final_command": "make -C kprog/tv -o trusted-simple-safety-certificate trusted-simple-jit-certificate",
+    "final_exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-jit-certificate",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleJIT.emitted_payload": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_registers": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_memory": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_outer_return_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_r15": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_bp": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_edge": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.captured_return_symbol": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleJIT.complete_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.total_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_pop_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_body_saved_words": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_leave_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_leave_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_pop_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.epilogue_restores_caller_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_pop_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_leave_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.epilogue_preserves_result": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_thunk_success": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_thunk_read_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_thunk_target_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_and_return": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_leave_address_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_address_fault_path": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx_in_completed_stages": true,
+    "final_log_sha256": "b5fa47a196d2f8b74dfabfb5a75f4f9db725b949128a70e67e3883d80f3de621",
+    "combined_log_sha256": "f002ca73006eae7f648dfec447ede46c9e81aced5515339fa84bed3b925649a9"
+  },
+  "premises": [
+    "actual epilogueentryPC/base + savedframe/SP relations derivedbythewrapper/bodycomponents",
+    "whole8-byte LEAVEframecanonicality in the bound architectural profile",
+    "savedR15/BP and original outerreturn-slot reads; body-save-slot theorem derivespreservation from original caller slots underexplicitpacket/kernelstackseparation",
+    "canonical original saved caller continuation; actual kernel caller/context/stackpermissions and profile remain to be established"
+  ],
+  "remaining": [
+    "Composition from actual kernel caller through every native body step; no claim the RET host-ABI read is a verifier-checked guest load.",
+    "Per-basic-block/full-state TV of actual accepted candidateB29 or canonicalB30; candidate not promoted.",
+    "Explicit full hardware profile including hostLASS/CPL is V/F work; no user-mode profile restriction is copiedinto kernelISA.",
+    "Other micro/application certificates and complete safety obligations."
+  ],
+  "trusted": [
+    "single canonicalV X86/referenceMemory semantics and explicit platform/caller contract",
+    "Lean kernel and reported inherited Lean.ofReduceBool axioms",
+    "actual kernel/native/JIT/ELF/proc-kcore capture and binding code/provenance",
+    "assumed verifier soundness remains separate until exact acceptedB TV is supplied"
+  ]
+}
