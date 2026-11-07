@@ -1,0 +1,12 @@
+--- a/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py
++++ b/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py
+@@ -240,6 +240,9 @@
+                                 'mount -t bpf bpffs /sys/fs/bpf',
+                                 'mount -t tmpfs -o mode=1777 tmpfs /var/tmp',
+                                 'install -d -m1777 /dev/shm', 'mount -t tmpfs -o mode=1777 tmpfs /dev/shm', 'ulimit -l unlimited'])
++                        if case == 'cilium':
++                            commands.extend(['cp -a /var/lib/cilium /run/cilium-lib',
++                                'mount --bind /run/cilium-lib /var/lib/cilium'])
+                         commands.extend([
+                             'PATH=' + str(ROOT / 'runner/build-arm64-llvmbpf') + ':/usr/lib/llvm-18/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 python3 ' + str(Path(__file__)) + ' guest ' + str(live) + ' ' + case])
+                         qemu.stdin.write((' && '.join(commands) + '; rc=$?; echo $rc > ' + str(live / 'guest.exit') + '; echo o > /proc/sysrq-trigger' + chr(10)).encode())
