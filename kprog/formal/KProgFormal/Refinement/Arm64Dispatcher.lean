@@ -3020,4 +3020,186 @@ theorem step_through_d_observed_refines (code : Nat) (flags : Byte) (aux : BitVe
           Reference.AArch64.VectorMemoryWidth.scale, Arm64VectorMemory.d_offset_refines]
       exact congrArg some (result.trans same)
 
+
+/-- Q0 uses the actual two-lane raw transfer between byte-field pre/post
+base updates. The architectural event observation stays outside this body. -/
+def qByteBody (load : Bool) (aux : BitVec 32) (base index : Byte) (immediate : Word)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let before := bumpMemoryBase base (GeneratedArm64MemPrepost.preDelta aux immediate) s
+  let address := Arm64Move.Fields.read before base + memoryOffsetBody aux index immediate before
+  let transferred := Arm64VectorMemory.qSuccess load address before
+  { transferred with state := bumpMemoryBase base (GeneratedArm64MemPrepost.postDelta aux immediate) transferred.state }
+
+theorem q_byte_body_immediate (load : Bool) (mode : Reference.AArch64.Writeback) (aux : BitVec 32)
+    (base : Register) (immediate : Word) (s : Reference.AArch64.State)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    qByteBody load aux (memoryBaseCode base) GeneratedArm64MemIndex.indexSentinel immediate s =
+      Arm64VectorMemory.qWritebackCore load mode base immediate s := by
+  obtain ⟨pre, post, suppressed⟩ := memory_flag_fields aux mode immediate flags
+  simp only [qByteBody, Arm64VectorMemory.qWritebackCore, pre, post, suppressed,
+    memory_offset_absent, memory_base_bump_typed, memory_base_read, Arm64Memory.base_refines]
+
+/-- Q index scaling is four, not the scalar-double scale three. The original
+native index-value proof already includes all four extension kinds at scale4. -/
+theorem q_memory_offset_indexed (aux : BitVec 32) (index : Register)
+    (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then 4 else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then 4 else 0)) :
+    memoryOffsetBody aux (Arm64Register.registerCode index) 0 s =
+      Reference.AArch64.memoryOffset s 4 (.register index kind scaled) := by
+  have suppressed : GeneratedArm64MemPrepost.suppressOffset aux = false :=
+    (memory_flag_fields aux .none 0 memoryFlags).2.2
+  have modifier : ∀ value : Word,
+      GeneratedArm64Mod.value (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+        value (BitVec.ofNat 64 (if scaled then 4 else 0)) .w64 =
+      GeneratedArm64Mod.value (Arm64AddressedMemory.modifier kind) value (BitVec.ofNat 64 (if scaled then 4 else 0)) .w64 := by
+    intro value
+    rcases mod with standard | ⟨omitted, kinds, zero⟩
+    · rw [standard]
+    · rw [omitted, zero]
+      exact memory_index_modifier .double kind false .none value (Or.inr ⟨rfl, kinds, rfl⟩)
+  unfold memoryOffsetBody
+  rw [memory_index_present]
+  simp only [GeneratedArm64MemIndexValue.sourceOf, ↓reduceIte, Arm64Move.Fields.register_read,
+    Arm64Register.read_refines, suppressed, amount, modifier]
+  simp only [GeneratedArm64MemOffset.value, Bool.not_true, Bool.false_eq_true, ↓reduceIte, BitVec.add_zero]
+  simpa [Reference.Word, Reference.AArch64.memoryOffset, Arm64AddressedMemory.indexValue] using
+    Arm64AddressedMemory.index_refines kind (Reference.AArch64.readReg s index)
+      ⟨if scaled then 4 else 0, by split <;> decide⟩
+
+theorem q_byte_body_indexed (load : Bool) (aux : BitVec 32) (base index : Register)
+    (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then 4 else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then 4 else 0)) :
+    qByteBody load aux (memoryBaseCode base) (Arm64Register.registerCode index) 0 s =
+      Arm64VectorMemory.qWritebackCore load .none base (Reference.AArch64.memoryOffset s 4 (.register index kind scaled)) s := by
+  have pre : GeneratedArm64MemPrepost.preDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.preDelta; split <;> rfl
+  have post : GeneratedArm64MemPrepost.postDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.postDelta; split <;> rfl
+  simp only [qByteBody, pre, post, bumpMemoryBase, ↓reduceIte,
+    q_memory_offset_indexed aux index kind scaled s memoryFlags mod amount, memory_base_read]
+  simp only [Arm64VectorMemory.qWritebackCore, Arm64Memory.base_refines]
+  rfl
+
+def qCode (load : Bool) : Nat := GeneratedArm64DispatchSingleton.code (if load then .loadQ0 else .storeQ0)
+
+def dispatchThroughQ (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughD code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+  | some result => some result
+  | none => if code = qCode true then some (qByteBody true aux src src2 value s)
+    else if code = qCode false then some (qByteBody false aux dst src2 value s) else none
+
+def observeQDispatch (code : Nat) (result : Option (Transition Reference.AArch64.State)) :
+    Option (Transition Reference.AArch64.State) :=
+  if code = qCode true ∨ code = qCode false then result.map Arm64VectorMemory.observeQ else result
+
+theorem q_before_none (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughD (qCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s = none := by
+  unfold dispatchThroughD dispatchThroughPair dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix
+  cases decoded : decodeDataWidth flags with
+  | none => cases load <;> rfl
+  | some width => cases load <;> rfl
+
+theorem q_reached (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughQ (qCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (qByteBody load aux (if load then src else dst) src2 value s) := by
+  unfold dispatchThroughQ
+  rw [q_before_none]
+  cases load <;> rfl
+
+inductive QBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : DBinding pc code flags aux dst src src2 src3 value release native) :
+      QBinding pc code flags aux dst src src2 src3 value release native
+  | immediate (load : Bool) (mode : Reference.AArch64.Writeback) (base : Register) (immediate : Word)
+      (flags : Byte) (aux : BitVec 32) (unused src3 : Byte) (release : Bool)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+      QBinding pc (qCode load) flags aux (if load then unused else memoryBaseCode base)
+        (if load then memoryBaseCode base else unused) GeneratedArm64MemIndex.indexSentinel src3 immediate release
+        (.vectorMemory ⟨.quad, load, 0, base, .immediate immediate, mode⟩)
+  | indexed (load : Bool) (base index : Register) (kind : Reference.AArch64.MemoryExtend) (scaled : Bool)
+      (flags : Byte) (aux : BitVec 32) (unused src3 : Byte) (release : Bool)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+      (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+          (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then 4 else 0) = 0))
+      (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then 4 else 0)) :
+      QBinding pc (qCode load) flags aux (if load then unused else memoryBaseCode base)
+        (if load then memoryBaseCode base else unused) (Arm64Register.registerCode index) src3 0 release
+        (.vectorMemory ⟨.quad, load, 0, base, .register index kind scaled, .none⟩)
+
+/-- One observed step through both Q0 gates. The two concrete observations
+are explicit: Q's byte-preserving lane grouping and the earlier exclusive
+monitor/order ghost. Neither is hidden in a caller's semantic premise. -/
+theorem step_through_q_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : QBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (observeQDispatch code (dispatchThroughQ code flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s)) = some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value release native earlier =>
+      have result := step_through_d_observed_refines code flags aux dst src src2 src3 value sourceScalar
+        sourceStack firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
+      have numeric : ∃ prior, dispatchThroughD code flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar secondScalar failure s = some prior := by
+        cases raw : dispatchThroughD code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+        | none => simp [raw, observeExclusiveDispatch] at result; split at result <;> simp_all
+        | some prior => exact ⟨prior, rfl⟩
+      obtain ⟨prior, reached⟩ := numeric
+      have separate (load : Bool) : code ≠ qCode load := by
+        intro equal; rw [equal, q_before_none] at reached; contradiction
+      simpa only [dispatchThroughQ, reached, observeQDispatch, separate true, separate false,
+        or_self, ↓reduceIte] using result
+  | immediate load mode base immediate flags aux unused src3 release memoryFlags =>
+      have separate : qCode load ≠ GeneratedArm64Stlxr.code .stlxr := by cases load <;> decide
+      have isQ : qCode load = qCode true ∨ qCode load = qCode false := by cases load <;> simp
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte, observeQDispatch, isQ]
+      rw [q_reached]
+      have route : (if load then (if load then memoryBaseCode base else unused) else
+          (if load then unused else memoryBaseCode base)) = memoryBaseCode base := by cases load <;> rfl
+      change some (Arm64VectorMemory.observeQ (qByteBody load aux _ GeneratedArm64MemIndex.indexSentinel value s)) = _
+      rw [route, q_byte_body_immediate load mode aux base value s memoryFlags]
+      rcases vectorAccess with ⟨alignment, accessible⟩
+      exact congrArg some (Arm64VectorMemory.q_writeback_observed_refines load mode base value s alignment accessible)
+  | indexed load base index kind scaled flags aux unused src3 release memoryFlags mod amount =>
+      have separate : qCode load ≠ GeneratedArm64Stlxr.code .stlxr := by cases load <;> decide
+      have isQ : qCode load = qCode true ∨ qCode load = qCode false := by cases load <;> simp
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte, observeQDispatch, isQ]
+      rw [q_reached]
+      have route : (if load then (if load then memoryBaseCode base else unused) else
+          (if load then unused else memoryBaseCode base)) = memoryBaseCode base := by cases load <;> rfl
+      change some (Arm64VectorMemory.observeQ (qByteBody load aux _ (Arm64Register.registerCode index) 0 s)) = _
+      rw [route, q_byte_body_indexed load aux base index kind scaled s memoryFlags mod amount]
+      rcases vectorAccess with ⟨alignment, accessible⟩
+      have allowed : permitted (if load then s.memory.readable else s.memory.writable)
+          (Reference.AArch64.memoryBase s base + Reference.AArch64.memoryOffset s 4 (.register index kind scaled)) 16 = true := by
+        simpa only [Reference.AArch64.VectorMemoryWidth.bytes, Reference.AArch64.VectorMemoryWidth.scale,
+          reduceCtorEq, ↓reduceIte] using accessible
+      have result := Arm64VectorMemory.q_writeback_observed_refines load .none base
+        (Reference.AArch64.memoryOffset s 4 (.register index kind scaled)) s alignment allowed
+      have same : Reference.AArch64.step (.vectorMemory ⟨.quad, load, 0, base,
+          .immediate (Reference.AArch64.memoryOffset s 4 (.register index kind scaled)), .none⟩) s =
+          Reference.AArch64.step (.vectorMemory ⟨.quad, load, 0, base, .register index kind scaled, .none⟩) s := by
+        rfl
+      exact congrArg some (result.trans same)
+
 end KProgFormal.Refinement.Arm64Dispatcher

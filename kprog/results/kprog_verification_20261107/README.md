@@ -1547,8 +1547,8 @@ reachability; those remain separate. No ISA/runtime/oracle changes.
 
 Validation: Lean27-job vector target and93-job dependent dispatcher target
 pass;8 proof-axiom audits report only propext/Classical.choice/Quot.sound plus
-the existing Lean.ofReduceBool dependency. Nine existing contracts/model
-checks and6 of10 existing semantic hosts pass (9504DQ,21extra,9504vector,
+the existing Lean.ofReduceBool dependency. Nine existing contracts and dispatch-model
+checks plus6 of10 existing semantic hosts pass (9504DQ,21extra,9504vector,
 7field,20168offset,4608pre/post cases). Four unchanged dynamic route hosts
 (dq_mem,dq_mem_extra,vreg,vreg_field) fail compilation at the production
 unmapped-XDP branch; failed stale binaries were never run. All8 pinned
@@ -1558,3 +1558,40 @@ Full original focused log and command/source pins are appended to the
 existing integration archive/JSON. The prior immutable967 full remains
 EXIT2, no repeated full or full-pass claim. A owns that forward integration
 repair; full77/72/O2/O4 completion remains open.
+
+## Actual Q0 gates and combined observed dispatcher step
+
+`dispatchThroughQ` now adds the actual LOAD_Q0/STORE_Q0 gates after D0.
+Raw FLAGS remains unused; bank0 and16 transferred bytes are fixed. LOAD
+uses physical SRC base, STORE uses DST, both use SRC2 index, and unused
+integer fields/SRC3 remain arbitrary bytes. The numeric body retains both
+8-byte accesses; `observeQDispatch` applies the previously proved checked
+event grouping only to those two Q codes. Earlier rows preserve their raw
+transitions and exclusive ghost observation unchanged.
+
+`QBinding` contains only native/encoded field identities. Derived core
+equalities cover immediate offset/pre/post plus indexed UXTW/SXTW/LSL/
+SXTX, native Q scale4, ZR, NONE255 and omitted unscaled X modifiers. No
+scalar-width surrogate is used for Q indexing. The single
+`step_through_q_observed_refines` theorem composes all preceding gates and
+these forms with separate original-native vector access/SP permissions.
+Successful sequential byte/event/state/writeback composition is proved;
+hardware atomicity/concurrency, faulting writeback, producer/artifact/O2/O4
+transport, remaining vector/control families and full77/72 remain open.
+
+Validation: Lean93-job dispatcher,5 axiom audits,10 existing contracts,
+dispatch-model check and ALL14 existing semantic hosts pass:
+9504DQ,62418DQroute,21extra,62424extra-route,9504vector,62445vector-route,
+7field,62427field-route,20168offset,4608pre/post,512index,22115index-route,
+17index-value,3015index-value-route. All8 source pins stayed unchanged.
+Prior declaration bytes remain identical; no placeholders, new tests,
+ISA/runtime/oracle edits. Exact dispatcher SHA256 `1a2a8534e6fe9ac4e69e83089709f5d8d33b6a91aff60698acafcef9667e2479`.
+
+This focused run uses A's entry-selector header repair WIP, SHA256
+`d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126`,
+not the previous published failing header. Owner publication and the new
+immutable complete check are still pending at this checkpoint. The earlier
+full EXIT2 and all failed logs remain intact; they are not relabeled as a
+pass. Complete new command exits/source pins and original PASS log are
+appended to the existing integration JSON/compressed archive. V does not
+commit A's header or change a host model/guard to obtain this result.
