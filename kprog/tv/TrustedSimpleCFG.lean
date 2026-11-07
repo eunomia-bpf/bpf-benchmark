@@ -324,6 +324,229 @@ theorem simple_native_extent_unique (s : X86.State) (offset : Nat) (entry : X86P
     change entry.length % 18446744073709551616=(simpleNativeLength offset) % 18446744073709551616 at lengthNats
     exact ⟨start,by omega⟩
 
+
+/-- Canonical relational observation masks never alter PC, memory, events
+or faults. Only the ISA's explicitly undefined flags/register bits vary. -/
+theorem canonical_relational_observed_fields (instruction : X86.Instruction)
+    (s : X86.State) (actual : Transition X86.State) (run : X86.Step instruction s actual) :
+    actual.state.pc=(X86.step instruction s).state.pc ∧
+    actual.state.memory=(X86.step instruction s).state.memory ∧
+    actual.events=(X86.step instruction s).events ∧ actual.fault=(X86.step instruction s).fault := by
+  obtain ⟨events,fault,states⟩ := run
+  exact ⟨(congrArg X86.State.pc states).symm,(congrArg X86.State.memory states).symm,
+    events.symm,fault.symm⟩
+
+def simpleClosedPC (pc : Word) : Prop := pc.toNat ∈ simpleNativeOffsets++[60]
+
+theorem simple_native_canonical_successor (s : X86.State) (offset : Nat)
+    (member : offset ∈ simpleNativeOffsets) (position : s.pc=BitVec.ofNat 64 offset) :
+    match X86.decode (native.extract offset (offset+simpleNativeLength offset)) s with
+    | .error _ => False
+    | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc := by
+  have choices : offset=0 ∨ offset=3 ∨ offset=7 ∨ offset=10 ∨ offset=12 ∨ offset=15 ∨ offset=17 ∨ offset=21 ∨ offset=24 ∨ offset=26 ∨ offset=30 ∨ offset=33 ∨ offset=35 ∨ offset=40 ∨ offset=44 ∨ offset=51 ∨ offset=55 := by
+    simpa [simpleNativeOffsets] using member
+  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · change (match X86.decode (native.extract 0 3) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode0]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 3 7) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode3]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 7 10) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode7]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 10 12) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode10]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 12 15) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode12]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 15 17) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode15]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 17 21) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode17]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 21 24) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode21]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 24 26) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode24]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 26 30) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode26]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 30 33) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode30]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 33 35) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode33]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 35 40) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode35]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 40 44) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode40]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 44 51) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode44]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 51 55) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode51]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+  · change (match X86.decode (native.extract 55 60) s with
+      | .error _ => False
+      | .ok instruction => simpleClosedPC (X86.step instruction s).state.pc)
+    rw [native_decode55]
+    simp +decide [simpleClosedPC,simpleNativeOffsets,position,X86.step,X86.moveStep,
+      X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,X86.readSource,
+      X86.ScalarDestination.source,X86.ScalarWidth.bytes,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all [simpleClosedPC,simpleNativeOffsets])
+
+
+/-- There is no decoded instruction after the actual60-byte payload end. -/
+theorem simple_native_end_no_decode (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (position : s.pc=60)
+    (accepted : X86Path.decodeAt 0 native entry s=.ok instruction) : False := by
+  obtain ⟨pc,positive,_,inside,_⟩ := decode_extent_constraints 0 native entry s instruction accepted
+  have zeroPlus (v : Word) : (0 : Word)+v=v := by unfold Word at *; bv_decide
+  have words : BitVec.ofNat 64 entry.offset=(60#64) := by
+    simpa only [zeroPlus] using pc.symm.trans position
+  have nats := congrArg BitVec.toNat words
+  change entry.offset % 18446744073709551616=60 at nats
+  have codeBound : entry.offset+entry.length≤60 := inside
+  omega
+
+/-- Arbitrary decoded extents and arbitrary canonical relational outputs
+stay in the actual captured CFG; supplied successor annotations are unused. -/
+theorem simple_native_relational_step_closed (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (actual : Transition X86.State)
+    (valid : simpleClosedPC s.pc)
+    (accepted : X86Path.decodeAt 0 native entry s=.ok instruction)
+    (run : X86.Step instruction s actual) : simpleClosedPC actual.state.pc := by
+  rcases List.mem_append.mp valid with start | finish
+  · have position : s.pc=BitVec.ofNat 64 s.pc.toNat := by simp
+    obtain ⟨offset,length⟩ := simple_native_extent_unique s s.pc.toNat entry instruction start position accepted
+    have raw := decode_extent_reflects_raw 0 native entry s instruction accepted
+    rw [offset,length] at raw
+    have canonical := simple_native_canonical_successor s s.pc.toNat start position
+    rw [raw] at canonical
+    rw [(canonical_relational_observed_fields instruction s actual run).1]
+    exact canonical
+  · have endPC : s.pc=60 := by
+      have asNat : s.pc.toNat=60 := by simpa only [List.mem_singleton] using finish
+      apply BitVec.eq_of_toNat_eq
+      simpa using asNat
+    exact False.elim (simple_native_end_no_decode s entry instruction endPC accepted)
+
+theorem simple_native_relational_path_closed {entries : List X86Path.Entry}
+    {s : X86.State} {actual : Transition X86.State}
+    (run : CanonicalRelationalPath 0 native entries s actual)
+    (valid : simpleClosedPC s.pc) : simpleClosedPC actual.state.pc := by
+  induction run with
+  | nil state => exact valid
+  | fault entry instruction decoded step failed =>
+    exact simple_native_relational_step_closed _ entry instruction _ valid decoded step
+  | next entry instruction decoded step continued suffix ih =>
+    exact ih (simple_native_relational_step_closed _ entry instruction _ valid decoded step)
+
 end KProgTV.TrustedSimpleX86
 
 #print axioms KProgTV.TrustedSimpleX86.simple_native_metadata_bounds
@@ -367,3 +590,14 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.decode_extent_constraints
 
 #print axioms KProgTV.TrustedSimpleX86.simple_native_extent_unique
+
+
+#print axioms KProgTV.TrustedSimpleX86.canonical_relational_observed_fields
+
+#print axioms KProgTV.TrustedSimpleX86.simple_native_canonical_successor
+
+#print axioms KProgTV.TrustedSimpleX86.simple_native_end_no_decode
+
+#print axioms KProgTV.TrustedSimpleX86.simple_native_relational_step_closed
+
+#print axioms KProgTV.TrustedSimpleX86.simple_native_relational_path_closed

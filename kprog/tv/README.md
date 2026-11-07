@@ -1789,7 +1789,7 @@ composition and compiled interface is in related-prefix-composition JSON/log.
 
 ### Canonical uniqueness of arbitrary native extents
 
-`TrustedSimpleCFG.simple_native_extent_unique` (in the shared
+`simple_native_extent_unique` in `TrustedSimpleCFG.lean` (in the shared
 `KProgTV.TrustedSimpleX86` namespace) proves that any successful `decodeAt` at
 one of the17 actual captured native PCs has exactly the correct byte offset
 and instruction length. All272 entry/length candidates0..15 reduce through
@@ -1802,3 +1802,19 @@ use only the listed logical axioms; earlier reference/entry/safety sources are
 unchanged. Evidence is in native-extent-unique JSON/log. Reachable CFG closure,
 arbitrary finite-prefix safety, strict block mapping and ABI/platform/RET
 transport remain separate obligations.
+
+### Closure of arbitrary canonical relational native paths
+
+`simple_native_relational_path_closed` now accepts an arbitrary list of decoded
+extents and proves that every final PC remains in the actual17-entry CFG or
+the60-byte payload end. Each accepted instruction range is forced to the unique
+canonical extent, every actual canonical/relational successor is checked, and
+no instruction can decode at the payload end. PC, memory, events and faults
+remain exact under the canonical undefined-output masks. No access permission
+outcome, branch result or AF value is assumed. Actual entry0 satisfies the
+initial closed-PC predicate.
+
+The CFG target and all5 new theorem audits pass; earlier CFG declarations are
+unchanged. See cfg-closed JSON/log. Relating every arbitrary prefix's events to
+B still requires the concrete state/step relation and terminal argument. Strict
+block mapping, entry/ABI/platform/RET transport and other programs remain open.
