@@ -64,3 +64,18 @@ regressions passed; existing exclusive wire checks passed 82 complete-state,
 effect and fault cases and 10 encoding/input rejections. One early proof attempt
 failed on redundant record updates in the failure arm; restructuring that arm
 removed the redundant update without weakening any theorem or filtering inputs.
+
+## Published whole-check result
+
+Exact `6e64f4a3e91b407c4ee5ce46c581080b9e667c27` completed
+`make -C kprog/formal check` with exit **0**. The immutable export included the
+CALL/RET, named-map fixture, import-composition fix and exclusive-core proofs;
+all Lean modules, reference regressions, generated contracts, compiler/wire
+checks and existing C semantic/route hosts passed. The final existing ARM stack
+arena route host checked 2,814,832 cases and the decode host 1,410 cases.
+The temporary source/cache export was deleted immediately. Its obsolete raw
+outputs are removed after this summary is committed; shared incremental caches
+are retained. The compressed CALL CPU observations now come from this successful
+whole-check run rather than the earlier focused v8 run. Later source changes
+require their own validation; this result does not include the subsequent D0
+full-state proof work or other lanes' uncommitted runtime changes.
