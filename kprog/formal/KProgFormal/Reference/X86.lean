@@ -496,6 +496,35 @@ def extendValue (sourceWidth : ScalarWidth) (signed : Bool) (source : Word) : Wo
   if signed then (source.setWidth sourceWidth.bits).signExtend 64
   else (source.setWidth sourceWidth.bits).setWidth 64
 
+/-- DIV's dividend is AX at byte width and the complete DX:AX/EDX:EAX/
+RDX:RAX pair otherwise. Natural numbers avoid truncating the 128-bit case. -/
+def divideDividend (width : ScalarWidth) (s : State) : Nat :=
+  if width = .w8 then (s.gpr 0).toNat % 65536
+  else (s.gpr 2).toNat % (2 ^ width.bits) * (2 ^ width.bits) +
+    (s.gpr 0).toNat % (2 ^ width.bits)
+
+/-- Both zero divisor and an unrepresentable quotient raise #DE before any
+register/flag/PC write. A completed memory operand read remains observable. -/
+def divideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
+    (s : State) : Transition State :=
+  match scalarRead s width source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (operand, reads) =>
+      let divisor := operand.toNat % (2 ^ width.bits)
+      let dividend := divideDividend width s
+      let quotient := dividend / divisor
+      if divisor = 0 ∨ 2 ^ width.bits ≤ quotient then
+        ⟨s, reads ++ [.fault .divide], some .divide⟩
+      else
+        let remainder := dividend % divisor
+        if width = .w8 then
+          let result := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 (256 * remainder + quotient)) .w16 (.low 0)
+          ⟨{ s with gpr := (fun r => if r = 0 then result else s.gpr r), pc := nextPc }, reads, none⟩
+        else
+          let low := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 quotient) width (.low 0)
+          let high := scalarWriteValue (s.gpr 2) (BitVec.ofNat 64 remainder) width (.low 2)
+          ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
+
 /-- CWD/CDQ/CQO take the upper half of a signed double-width accumulator.
 The low accumulator and all flags are preserved. -/
 def signHighValue (width : CmovWidth) (source : Word) : Word :=
@@ -505,6 +534,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | divide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | signHigh (width : CmovWidth) (nextPc : Word)
   | extend (sourceWidth targetWidth : ScalarWidth) (signed : Bool) (dst : Register) (source : ScalarSource) (nextPc : Word)
   | popcount (width : CmovWidth) (dst : Register) (source : Source) (nextPc : Word)
@@ -537,7 +567,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -547,6 +577,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .divide width source nextPc => divideStep width source nextPc s
   | .signHigh width nextPc =>
       let result := writeValue width (s.gpr 2) (signHighValue width (s.gpr 0))
       ⟨{ s with gpr := (fun r => if r = 2 then result else s.gpr r), pc := nextPc }, [], none⟩
@@ -634,6 +665,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .divide .. => 0xfffffffffffff72a
   | .signHigh .. => 0xffffffffffffffff
   | .extend .. => 0xffffffffffffffff
   | .popcount .. => 0xffffffffffffffff
@@ -857,6 +889,10 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   if first = 0xf6 ∨ first = 0xf7 then
     let modrm ← byteAt bytes (count + 1)
     let group := (modrm / 8) % 8
+    if group = 6 then
+      let width := scalarWidth p (first == 0xf6)
+      let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      return .divide width (scalarSource p width source) nextPc
     if group = 2 ∨ group = 3 then
       let width := scalarWidth p (first == 0xf6)
       let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
