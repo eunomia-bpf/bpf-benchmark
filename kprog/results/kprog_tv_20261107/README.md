@@ -246,3 +246,11 @@ invocation/initial-state and selected CPU-profile bridge remains explicit;
 other micros/apps, relocated final-patch TV and the priority5 native-only loader
 remain active. The complete dependency refresh against current canonical
 sources follows separately; no full real-world invocation discharge is claimed.
+
+`actual-rx-prefix-full.log` closes the pending complete dependency refresh:
+`make simple-emitted-check` exits0 after rebuilding the canonical AArch64/BPF
+models, exact arrays/platform/private entry/guard/store proofs, PC/execution
+transport and BOTH actual RX-address theorem instances. The36 site corruptions
+also reject in this run; all positive theorem axioms remain as stated without
+sorryAx. This refresh includes current canonical sources, not only old cached
+checker modules. Invocation/initial-state/profile work continues separately.
