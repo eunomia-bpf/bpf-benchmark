@@ -989,3 +989,12 @@ All prior declarations are byte-identical except the shared Mul import.
 No proof placeholders, new tests, input filtering, runtime/generator/oracle/
 ISA or paper changes. Original C warnings remain visible. Exact95bad0374's
 ongoing immutable full check predates this extension.
+
+Exact `95bad0374160198157abed4f80b8abb88f37448e` completed the full
+`make -C kprog/formal check` with exit **0**. This includes the uniform byte
+ALU and SHIFT dispatcher compositions and every preceding Lean, contract,
+reference/wire/compiler and C semantic check. The immutable source/cache
+export was deleted automatically. Compressed CALL CPU observations retain
+this440-case run. The later multiply/divide and unary compositions are
+separate increments and are not included in this full pass. The complete
+77/72 dispatcher and O2/O4 bindings remain open.
