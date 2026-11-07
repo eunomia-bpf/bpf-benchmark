@@ -40,12 +40,14 @@ bash kprog/results/kprog_fidelity_20261107/differential/x86-sp-current-integrati
 python3 kprog/results/kprog_fidelity_20261107/differential/x86-sp-current-integration/check_full.py
 ```
 
-A replacement51-route check and whole formal check are detached, reusing the
-shared incremental build and Lake caches, and waiting for an existing FULL
-check to finish. `full.exit` and source-pins are their completion receipts; a
-whole-check pass is not claimed here. The native-only trusted-service negative
-suite is separate under `negative/x86-trusted-sp`; it has not yet established
-zero accepted on the new service path. Earlier private-path negative results
-remain historical evidence. BIOSNOOP's scalar/private-stack pointer projection
+The replacement51-route check and complete `make -C kprog/formal check`
+both PASS. The whole check returned0; every pinned runtime/routing input is
+byte-identical before and after. `formal-check.json`, `full.exit`,
+`source-pins-before.json`, `source-pins-after.json` and `full.log.gz` retain
+that completion. It reused shared incremental build/Lake caches after the
+prior full-check slot was released. The separate native-only trusted-service
+negative suite under `negative/x86-trusted-sp` subsequently rejected29/29
+unsafe entries and executed9/9 valid controls on x86KVM (7b3dca3d5).
+Earlier private-path results remain historical evidence. BIOSNOOP's scalar/private-stack pointer projection
 verifier rejection reported by C remains an integration issue, not hidden by
 these CPU successes. No whole-program fidelity or safety closure is claimed.

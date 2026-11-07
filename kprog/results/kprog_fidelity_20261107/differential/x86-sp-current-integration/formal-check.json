@@ -1,0 +1,17 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/formal",
+    "check"
+  ],
+  "returncode": 0,
+  "source_drift": [],
+  "runtime_sha256": "b3c5eaf24ca2b67f68b241d9c88ca41d419e7cc4e5795739536adcacd700847c",
+  "runtime_commit": "088f426a98d3548b7657cfe8765ee7d60ab41052",
+  "full_log": "full.log.gz",
+  "recorded": "2026-11-07T10:51:09.094653+00:00"
+}

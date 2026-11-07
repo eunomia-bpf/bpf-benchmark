@@ -31,5 +31,5 @@
   "cmov_step_route": "OK (9585138 cases)",
   "first_full_returncode": 2,
   "first_full_failure": "cmov_step_route_host: FAIL (30192); stale raw-cell expected values corrected without changing case grids",
-  "current_full": "detached focused51 then shared incremental FULL, waits for existing full checks; not yet passed"
+  "current_full": "PASS: make -C kprog/formal check returned0, all pinned inputs byte-identical before/after"
 }
