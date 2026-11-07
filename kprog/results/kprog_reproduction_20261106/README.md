@@ -293,16 +293,26 @@ native data symbol .L.str.14 exceeds BPF data map value_size for .rodata.str1.1
 — one symbol, all 151 loads, so **0 programs replace** and tracee has no
 native number.
 
-The check is `native_loader.cpp:3893`, `if (*off + sym.st_size >
-map->value_size)`, and the process created a **`value_size=0`** map for
-this section. A zero-sized map can never hold a symbol, so every data
-symbol overflows; either the map is declared with zero entries and libbpf
-sizes it from a section the native object's placement does not match, or
-`source_data_symbol_offset` returns an offset past the map. It is a
-loader placement/sizing defect, not an app property, and it matters
-because tracee is the one app whose reference ratio (0.958x) is below 1.
-Reported, recorded as blocked with these specifics rather than as a
-boundary.
+The numbers rule out the obvious explanations. The app creates a real
+map for the section — `BPF_MAP_CREATE type=2 key_size=4 value_size=246
+max_entries=1 name=.rodata.str1.1` (and `value_size=72` for `.rodata`) —
+and the check is `native_loader.cpp:3893`, `if (*off + sym.st_size >
+map->value_size)`. So the map is 246 bytes and the loader computes an
+offset for `.L.str.14` whose end passes 246.
+
+That reads as a **placement mismatch between the proof object's own
+`.rodata.str1.1` layout and the app's map**: the native object puts that
+string later in its section than the app's 246-byte map provides for.
+Either the proof object should be linked with the app's section base and
+size, or `source_data_symbol_offset` should map by symbol identity rather
+than by offset-into-section. It is a loader/link placement defect, not an
+app property, and it matters because tracee is the one app whose
+reference ratio (0.958x) is below 1. Reported with these numbers and
+recorded as blocked, not as a boundary.
+
+bcc shows a related but distinct gap on 7 of 25 programs: `proof readonly
+map lacks explicit symbol metadata: .rodata.native...`, which reads like
+the same readonly-map metadata family.
 
 # Blockers cleared to reach the native arm
 
