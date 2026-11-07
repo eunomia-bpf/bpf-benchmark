@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Logic
 import KProgFormal.Refinement.X86Endian
 import KProgFormal.Refinement.X86Popcount
 import KProgFormal.Refinement.X86Condition
@@ -498,5 +499,47 @@ theorem population_count_register_frame_refines (env : Environment) (frame : Fra
       Reference.X86.RegisterSlice.shift, Reference.X86.ScalarWidth.bits,
       Reference.X86.ScalarWidth.bytes] <;> bv_decide
   · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+
+/-- The generated XOR result on identical source lanes is the same result
+as its zero-operand specialization, independently of the pointer encoding. -/
+theorem self_xor_value (width : Reference.X86.ScalarWidth) (value : NativeWord) :
+    X86Logic.value width .xor value value = X86Logic.value width .xor 0 0 := by
+  simp [X86Logic.value_refines, Reference.X86.logicalValue]
+
+/-- Logic flags depend on that result and the same incoming flags; no old
+pointer bits or selected condition outcome is an assumption. -/
+theorem self_xor_flags (width : Reference.X86.ScalarWidth) (value old : NativeWord) :
+    X86Logic.flags width .xor value value old = X86Logic.flags width .xor 0 0 old := by
+  simp only [X86Logic.flags, self_xor_value]
+
+/-- C's same-register/same-lane XOR specialization uses its existing generated
+ALU, flag and write primitives with literal zero operands. The destination
+write still preserves untouched byte/word lanes and normalizes RSP once. -/
+def selfXorRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
+  let value := X86Logic.value width .xor 0 0
+  let written := writeRegister env frame arena state width dst value
+  registerPc (registerFlags written (X86Logic.flags width .xor 0 0 state.raw.rflags)) nextPc
+
+/-- Whole raw-frame refinement of the actual zero-operand body for a single
+native register slice used as both operands. Cross-lane AH/AL forms are not
+same-slice inputs. This does not prove a compiler or raw producer gate. -/
+theorem self_xor_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (selfXorRegister env frame arena state width dst nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.logic width .xor (.register dst) (.register dst) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Logic.step_refines]
+  unfold selfXorRegister
+  rw [native_register_pc, native_register_flags, native_register_write]
+  simp only [X86Logic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
+    Reference.X86.scalarRead, Except.bind, Bind.bind, Except.pure, Pure.pure,
+    self_xor_value, self_xor_flags, reduceCtorEq, ↓reduceIte,
+    X86Scalar.write_refines, Reference.X86.scalarWrite, List.nil_append, List.append_nil]
+  rfl
 
 end KProgFormal.Refinement.X86NumericAddress

@@ -2148,3 +2148,31 @@ five UBSan hosts for underlying count/reversal/flags were already checked
 for c9e345fd3; they are not rerun or counted twice here. No ISA/header/producer/
 oracle/test/configuration/paper edits. Full-check POPCNT compile and CMOV
 route alignment failures remain open; no whole-check pass is claimed.
+
+## Same-register XOR specialization through the raw frame
+
+C's actual OTel failure involves self-XOR on a verifier pointer value. The
+new self_xor_value and self_xor_flags lemmas derive that identical native
+operand lanes give the same generated result and flag outputs as literal
+zero operands. self_xor_register_frame_refines composes those existing
+ALU/flag/write primitives through the raw RSP/STACK frame against the SAME
+canonical register-XOR step. All four widths, high/low byte slices, arbitrary
+incoming flags and STACK/raw pointer encodings are covered. Byte/word writes
+still preserve untouched lanes; RSP normalization still happens once.
+No old-pointer-value, result, state-equality or condition premise is supplied.
+
+The two native operands are the SAME RegisterSlice. AL/AH cross-lane XOR is
+not a same-slice case and cannot use the identity. C owns the raw producer
+same-GPR/same-shift predicate and its concrete candidate compiler/CPU work;
+this theorem does not certify that predicate, promote a header, prove a C
+compiler or close compiled-B/O2/ABI transport. V introduces no producer or
+runtime rejection and claims no new C-host cases for this proof-only change.
+
+Focused91-job Lean graph, including the seven-opcode dispatcher consumer,
+and three axiom audits PASS with only the existing propext/Classical.choice/
+Lean.ofReduceBool/Quot.sound dependencies. All372 physical source/configuration
+pins remain stable, including published494c canonical LEAVE. Older proof
+declarations are identical except one import. Complete commands/logs/audits/
+pins are appended to the existing integration archive. No ISA/header/
+generator/oracle/test/configuration/paper changes. Full77/72/whole-dispatch/
+compiled-B/O2/O4 and the separate known complete-check failures remain open.

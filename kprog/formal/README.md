@@ -217,3 +217,8 @@ population count with materialized native reads and scalarizing writeback,
 including RSP and STACK aliases. POPCNT derives all flag outputs from the
 captured input, while BSWAP preserves flags. Memory forms and compiled-body/
 ABI transport remain separate.
+
+The same-slice XOR specialization is also proved through the raw frame:
+generated ALU/flag primitives on literal zero operands plus the actual lane
+writer refine XOR of the same native register slice. Other byte lanes remain
+unchanged. The raw producer predicate and compiled C/BPF body are separate.
