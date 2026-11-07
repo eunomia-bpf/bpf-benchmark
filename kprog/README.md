@@ -114,5 +114,5 @@ QEMU agreement is kept separate from real hardware evidence. These sampled
 observations support O1. Safety must follow for every program from generic
 per-operation refinement, per-token specialization and binding theorems, and
 preservation of each native-link transformation, composed through
-Composition.lean. Program-specific proofs, certificates and validation files
-are frozen and excluded from safety evidence.
+Composition.lean. The formal lanes develop these universal theorems;
+historical program-specific proof files remain frozen in the archive.

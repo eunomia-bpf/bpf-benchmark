@@ -40,5 +40,5 @@
   "current_header_sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
   "inputs_archive_sha256": "4b3c1e736def3c083d46f7401ebff85cbdf4492a058542c60b6779cbb0a30749",
   "attempt_archive_sha256": "56bd44bd81f62d3b87afc342188b2e29fc066a01a960808884b12ec7e73d5568",
-  "scope": "Generic load mechanism, not a per-program certificate or safety theorem; llvmbpf JIT execution, not kernel verifier acceptance."
+  "scope": "Generic shared-load mechanism: llvmbpf JIT, host CPU and byte-oracle observations. Universal safety theorems and kernel-verifier acceptance have their own evidence paths."
 }
