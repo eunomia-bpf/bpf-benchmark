@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include "../../kinsn/module/include/native_lab_binding.h"
@@ -23,6 +24,21 @@ static void rejected(int result, int expected, const char *message)
 {
 	require(result == -1 && errno == expected, message);
 	printf("%s: REJECTED (%d)\n", message, expected);
+}
+static void rejected_libbpf(int result, int expected, const char *message)
+{
+	printf("%s: libbpf_result=%d errno=%d\n", message, result, errno);
+	require(result == -expected && errno == expected, message);
+	printf("%s: REJECTED (%d)\n", message, expected);
+}
+_Static_assert(sizeof(struct native_lab_trusted_request) == 64, "stable request ABI");
+_Static_assert(sizeof(struct native_lab_trusted_submission) == 80, "resource submission ABI");
+static uint32_t map_identity(int fd)
+{
+	struct bpf_map_info info = {};
+	uint32_t size = sizeof(info);
+	require(!bpf_obj_get_info_by_fd(fd, &info, &size), "resource map identity");
+	return info.id;
 }
 static uint64_t pointer(const void *p) { return (uintptr_t)p; }
 static void signal_peer(int fd) { require(write(fd, "x", 1) == 1, "signal peer"); }
@@ -79,6 +95,11 @@ int main(int argc, char **argv)
 		.arch = arch, .source_prog_id = info.id, .native_size = sizeof(native),
 		.entry_size = sizeof(entry)-1, .metadata_size = sizeof(metadata)-1,
 		.native_user = pointer(&native), .entry_user = pointer(entry), .metadata_user = pointer(metadata) };
+	int native_resource = bpf_map_create(BPF_MAP_TYPE_PERCPU_ARRAY, "native_resource", 4, 8, 3, NULL);
+	int omitted_resource = bpf_map_create(BPF_MAP_TYPE_PERCPU_ARRAY, "omitted_resource", 4, 8, 3, NULL);
+	require(native_resource >= 0 && omitted_resource >= 0, "create native-only and omitted application maps");
+	uint32_t native_resource_id = map_identity(native_resource);
+	uint32_t omitted_resource_id = map_identity(omitted_resource);
 	int service = open(service_path, O_RDWR | O_CLOEXEC);
 	require(service >= 0, "register trusted service");
 	rejected(open(service_path, O_RDWR | O_CLOEXEC), EBUSY, "application cannot obtain registered service authority");
@@ -92,6 +113,43 @@ int main(int argc, char **argv)
 	request.reserved = 0;
 	struct native_lab_trusted_result result = {};
 	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_COMPLETE, &result), EPERM, "application cannot complete proof request");
+	int rollback = bpf_map_create(BPF_MAP_TYPE_ARRAY, "rollback_pin", 4, 8, 1, NULL);
+	require(rollback >= 0, "create rollback resource");
+	uint32_t rollback_id = map_identity(rollback);
+	int32_t resource_fds[] = { rollback, -1 };
+	struct native_lab_trusted_submission resources = { .request = request,
+		.map_count = 1, .map_fds_user = pointer(resource_fds) };
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EPERM, "service endpoint resource submission refused");
+	resources.reserved = 1;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EINVAL, "resource reserved field refused");
+	resources.reserved = 0; resources.map_count = 65;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), E2BIG, "resource count beyond verifier limit refused");
+	resources.map_count = 0;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EINVAL, "empty resource pointer ambiguity refused");
+	resources.map_count = 1; resources.map_fds_user = 1;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EFAULT, "resource vector inaccessible memory refused");
+	resources.map_fds_user = pointer(resource_fds); resources.map_count = 2;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EBADF, "partial resource vector invalid FD refused");
+	resource_fds[1] = rollback;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EEXIST, "duplicate resource identity refused");
+	int ordinary_file = open("/dev/null", O_RDONLY | O_CLOEXEC);
+	require(ordinary_file >= 0, "open ordinary descriptor control");
+	resource_fds[0] = ordinary_file; resources.map_count = 1;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), EINVAL, "ordinary file resource refused");
+	require(!close(ordinary_file), "close ordinary descriptor control");
+	resource_fds[0] = rollback;
+	native.e_machine = EM_BPF;
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &resources), ENOEXEC, "resource submission proof ELF refused");
+	native.e_machine = arch == NATIVE_LAB_ARCH_X86 ? EM_X86_64 : EM_AARCH64;
+	long page_size = sysconf(_SC_PAGESIZE);
+	require(page_size > 0, "request page size");
+	void *response = mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	require(response != MAP_FAILED, "allocate copyback control");
+	memcpy(response, &resources, sizeof(resources));
+	require(!mprotect(response, page_size, PROT_READ), "protect request copyback control");
+	rejected(ioctl(invalid, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, response), EFAULT, "resource request copyback failure refused");
+	require(!munmap(response, page_size) && !close(rollback), "close rollback resource controls");
+	rejected_libbpf(bpf_map_get_fd_by_id(rollback_id), ENOENT, "failed submissions release partial resource references");
 	require(!close(invalid), "close invalid request controls");
 	int ready[2], proceed[2];
 	require(!pipe(ready) && !pipe(proceed), "transport synchronization");
@@ -100,7 +158,16 @@ int main(int argc, char **argv)
 		require(!close(service), "producer drops service capability");
 		int submit = open(submit_path, O_RDWR | O_CLOEXEC);
 		require(submit >= 0, "open producer submission");
-		require(!ioctl(submit, NATIVE_LAB_TRUSTED_SUBMIT, &request) && request.request_id, "submit native snapshot");
+		int32_t native_fds[] = { native_resource };
+		struct native_lab_trusted_submission native_submission = { .request = request,
+			.map_count = 1, .map_fds_user = pointer(native_fds) };
+		require(!ioctl(submit, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &native_submission) &&
+			native_submission.request.request_id, "submit native snapshot and map capability");
+		request = native_submission.request;
+		native_fds[0] = omitted_resource;
+		require(!close(native_resource), "producer closes snapshotted resource FD");
+		rejected(ioctl(submit, NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &native_submission), EBUSY,
+			"submitted resource vector replacement refused");
 		memset(&native, 0xcc, sizeof(native)); memset(entry, 0xcc, sizeof(entry)); memset(metadata, 0xcc, sizeof(metadata));
 		rejected(ioctl(submit, NATIVE_LAB_TRUSTED_SUBMIT, &request), EBUSY, "replace submitted native bytes refused");
 		rejected(ioctl(submit, NATIVE_LAB_TRUSTED_NEXT, &request), EPERM, "application cannot read service requests");
@@ -116,6 +183,7 @@ int main(int argc, char **argv)
 			result.status == -EINVAL && !result.prog_id, "specializer failure reaches submitting application");
 		require(!close(submit), "close producer submission"); _exit(0);
 	}
+	require(!close(native_resource), "parent closes native resource FD");
 	await_peer(ready[0]);
 	struct native_lab_trusted_request next = { .version = NATIVE_LAB_TRUSTED_VERSION };
 	rejected(ioctl(service, NATIVE_LAB_TRUSTED_NEXT, &next), EMSGSIZE, "capacity probe retains queued request");
@@ -143,6 +211,17 @@ int main(int argc, char **argv)
 		shape.map_type == BPF_MAP_TYPE_ARRAY && shape.key_size == 4 &&
 		shape.value_size == 8 && shape.max_entries == 1 && !shape.map_flags && !shape.has_inner,
 		"actual source inner template shape");
+	struct native_lab_trusted_map native_shape = { .request_id = next.request_id, .map_id = native_resource_id };
+	require(!ioctl(service, NATIVE_LAB_TRUSTED_MAP, &native_shape) &&
+		native_shape.map_type == BPF_MAP_TYPE_PERCPU_ARRAY && native_shape.key_size == 4 &&
+		native_shape.value_size == 8 && native_shape.max_entries == 3 && !native_shape.map_flags &&
+		!native_shape.has_inner, "actual pinned native-only map shape after descriptor close");
+	int retained = bpf_map_get_fd_by_id(native_resource_id);
+	require(retained >= 0 && map_identity(retained) == native_resource_id && !close(retained),
+		"capsule retains actual map beyond application FD lifetime");
+	native_shape.map_id = omitted_resource_id;
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_MAP, &native_shape), ENOENT, "valid omitted application resource refused");
+	puts("native-only map capability survives descriptor mutation and close: PASS");
 	puts("kernel source/load attributes and actual outer/inner map shapes: PASS");
 	shape.depth = 2;
 	rejected(ioctl(service, NATIVE_LAB_TRUSTED_MAP, &shape), ENOENT, "invented inner template refused");
@@ -162,6 +241,7 @@ int main(int argc, char **argv)
 	result.status = -EINVAL; result.prog_id = 0;
 	require(!ioctl(service, NATIVE_LAB_TRUSTED_COMPLETE, &result), "complete controlled specializer error");
 	child_ok(child);
+	rejected_libbpf(bpf_map_get_fd_by_id(native_resource_id), ENOENT, "completed request releases native resource references");
 	child = fork(); require(child >= 0, "fork queued producer");
 	if (!child) {
 		require(!close(service), "queued producer drops service capability");
@@ -174,7 +254,7 @@ int main(int argc, char **argv)
 	}
 	await_peer(ready[0]); require(!close(service), "disconnect service"); child_ok(child);
 	rejected(open(service_path, O_RDWR | O_CLOEXEC), EBUSY, "application cannot replace disconnected trusted registration");
-	require(!close(source) && !close(outer) && !close(inner), "close source program/maps");
+	require(!close(source) && !close(outer) && !close(inner) && !close(omitted_resource), "close source program/maps");
 	puts("registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS");
 	return 0;
 }

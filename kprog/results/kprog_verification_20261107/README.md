@@ -233,6 +233,28 @@ production inputs. Complete field/table layout, final text placement, supported
 ABI and implementation correspondence supply the surrounding link stages.
 Reproduce with `make -C kprog/tv native-link-arm-bl26-check`.
 
+[`trusted-native-resources.json`](../kprog_tv_20261107/trusted-native-resources.json) records the kernel-owned resource capability
+extension for native-referenced application maps. `SUBMIT_RESOURCES` adds an
+80-byte envelope around the existing64-byte request and copies a signed32 FD
+vector during submission. Kernel `bpf_map_get` resolves and retains actual
+objects; the registered service queries their real identities, shapes and
+inner templates through the existing MAP interface. Source maps and explicitly
+submitted native maps form the authorized set. The capsule shares its resource
+lifetime with sealed chunks and bound programs. Existing submission, source
+context, verifier and proof provenance checks remain active.
+
+The cached x86 KVM regression passes30 expected refusals,3 positive case
+outcomes and1 suite summary. Native-only maps survive application FD closure
+and vector mutation, while valid maps outside the submitted set are refused.
+Partial-copy/FD/duplicate/copyback failures and request completion release map
+references. Both native submission routes retain proof-ELF refusal, and the
+application proof-upload/service-registration controls pass. The actual
+libbpf lookup API returns `-ENOENT` for released objects; its return and errno
+are retained in the raw log. C/A connect this kernel epoch to native-symbol
+metadata, coherent loader/service images and whole-application execution.
+The generic compiler/ISA/ABI and complete Artifact correspondence laws retain
+their separate proof stages.
+
 <!-- O4 COVERAGE END -->
 
 

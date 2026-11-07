@@ -1,0 +1,239 @@
+{
+  "utc": "2026-11-07T22:34:36.159610+00:00",
+  "status": "kernel_native_resource_capabilities_snapshot_query_and_lifetime_pass",
+  "scope": "Generic actual x86 KVM/module transport controls for kernel-owned native submissions, source context, authorized map references, registered-service capabilities and proof provenance.",
+  "design": {
+    "submission": "NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES ioctl0x77 uses struct native_lab_trusted_submission: existing64-byte request, u32 map_count, zero u32 reserved, u64 map_fds_user; complete extent80bytes.",
+    "compatibility": "Original64-byte SUBMIT, NEXT, CONTEXT, MAP and result layouts retain their ABI. The final queued disconnect case exercises successful legacy SUBMIT after the resource submission.",
+    "authorization": "Kernel copies the signed32 FD vector, resolves each FD with bpf_map_get in the submitting task, rejects duplicate actual objects and bounds the vector by existing verifier MAX_USED_MAPS64.",
+    "snapshot": "Resolved actual object references become immutable capsule fields before queue publication. Source used_maps and these native resource references supply the registered-service MAP query; actual inner-template traversal and kernel shape fields are retained.",
+    "lifetime": "The capsule owns references through request, sealed-chunk and bound-program krefs. Partial FD/copyback failures and request completion release them through the common capsule destructor.",
+    "verification": "The registered service generates B from kernel-owned P. Existing actual verifier checks and native relocation/source/context/generation/ABI binding remain in their paths; the service queries declared resource IDs through the capsule.",
+    "application_integration": "C owns native-symbol metadata/live deduplicated FD submission and worker query integration; C/A adopt a coherent kernel/loader/service image before whole-application replay."
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o kernel-build-x86 trusted-kernel-check",
+    "reproduction": "make -C kprog/tv trusted-kernel-check",
+    "exit": 0,
+    "platform": "cached x86 kernel; vng KVM2vCPU/2GiB on8-11; incremental module/test build",
+    "outcome_lines": 34,
+    "named_case_outcomes": 33,
+    "expected_refusals": 30,
+    "positive_case_outcomes": 3,
+    "suite_summary_lines": 1,
+    "previous_outcomes_retained": "16 expected refusals,2 positive case outcomes and1 suite summary;15 additional named cases cover14 refusals and1 positive resource case.",
+    "refusal_records": [
+      {
+        "case": "application cannot obtain registered service authority",
+        "errno": 16
+      },
+      {
+        "case": "application proof ELF refused",
+        "errno": 8
+      },
+      {
+        "case": "unrecognized submission metadata refused",
+        "errno": 22
+      },
+      {
+        "case": "application cannot complete proof request",
+        "errno": 1
+      },
+      {
+        "case": "service endpoint resource submission refused",
+        "errno": 1
+      },
+      {
+        "case": "resource reserved field refused",
+        "errno": 22
+      },
+      {
+        "case": "resource count beyond verifier limit refused",
+        "errno": 7
+      },
+      {
+        "case": "empty resource pointer ambiguity refused",
+        "errno": 22
+      },
+      {
+        "case": "resource vector inaccessible memory refused",
+        "errno": 14
+      },
+      {
+        "case": "partial resource vector invalid FD refused",
+        "errno": 9
+      },
+      {
+        "case": "duplicate resource identity refused",
+        "errno": 17
+      },
+      {
+        "case": "ordinary file resource refused",
+        "errno": 22
+      },
+      {
+        "case": "resource submission proof ELF refused",
+        "errno": 8
+      },
+      {
+        "case": "resource request copyback failure refused",
+        "errno": 14
+      },
+      {
+        "case": "failed submissions release partial resource references",
+        "errno": 2
+      },
+      {
+        "case": "submitted resource vector replacement refused",
+        "errno": 16
+      },
+      {
+        "case": "replace submitted native bytes refused",
+        "errno": 16
+      },
+      {
+        "case": "application cannot read service requests",
+        "errno": 1
+      },
+      {
+        "case": "capacity probe retains queued request",
+        "errno": 90
+      },
+      {
+        "case": "valid omitted application resource refused",
+        "errno": 2
+      },
+      {
+        "case": "invented inner template refused",
+        "errno": 2
+      },
+      {
+        "case": "map outside pinned source refused",
+        "errno": 2
+      },
+      {
+        "case": "stale source context request refused",
+        "errno": 116
+      },
+      {
+        "case": "application proof upload refused with active trusted worker",
+        "errno": 1
+      },
+      {
+        "case": "application cannot use trusted source query",
+        "errno": 1
+      },
+      {
+        "case": "wrong native request identity refused",
+        "errno": 116
+      },
+      {
+        "case": "invalid final errno refused",
+        "errno": 22
+      },
+      {
+        "case": "unrelated verified BPF program cannot authorize native request",
+        "errno": 18
+      },
+      {
+        "case": "completed request releases native resource references",
+        "errno": 2
+      },
+      {
+        "case": "application cannot replace disconnected trusted registration",
+        "errno": 16
+      }
+    ],
+    "positive_records": [
+      "immutable native ELF/entry/metadata survive producer mutation",
+      "native-only map capability survives descriptor mutation and close",
+      "kernel source/load attributes and actual outer/inner map shapes",
+      "registered trusted transport, immutable P, application proof refusal and fail-closed disconnect"
+    ],
+    "lifetime_api_results": [
+      {
+        "lookup": "after partial FD/duplicate/copyback failure rollback",
+        "libbpf_result": -2,
+        "errno": 2
+      },
+      {
+        "lookup": "after completed request and submitting-file close",
+        "libbpf_result": -2,
+        "errno": 2
+      }
+    ],
+    "initial_diagnostic": "The initial test expected syscall-style -1 from libbpf map-ID lookup. The actual lookup API returns negative errno; the final helper checks exact -ENOENT plus errno and records both. Kernel resource implementation stayed unchanged across these test-source epochs.",
+    "arm_interfaces": "Common header is included after bpf_verifier.h by both ISA modules; the cached ARM kernel exports bpf_map_get/bpf_map_put. Actual runtime collection here is x86; A supplies coherent ARM module/loader adoption."
+  },
+  "source_sha256": {
+    "kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+    "kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+    "kinsn/module/include/native_lab_checked_wire.h": "5ca755370dc5872392137bae749bc069c96e23335a7565b7562b96dd6fbfdfc2",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/native_lab_group.h": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+    "kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+    "kinsn/module/include/native_lab_map_offset.h": "5a707883677eb5fbe27e534263d27ad87b771043c2523861c62587e56c6622c2",
+    "kinsn/module/include/native_lab_trusted.h": "ceb3ab5d3b7b0c5eb01a857963fee268ec824cfdb9ac1ee6097f842bfd2fbd8a",
+    "kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "ffa42fd42f06d048dc050ae83ca77bdd4454238331b4f76416e24a2f95f58888",
+    "kprog/tv/test_trusted_transport.c": "f4fcb4c6cc5654509350588c57c4f024a8054896ba1105a23b48864e69de1e3b",
+    "kprog/tv/Makefile": "79d7686e5e76cb674bc53f66dfd8343b4b46d643a47b605bff089748e67b5e3c",
+    "kprog/tv/module.mk": "ff4d110f1a8732952edad9f96442e29528095a8f88d4fe85403213ef2a5704b3"
+  },
+  "source_git_epoch": {
+    "kinsn/module/include/kinsn_common.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/kinsn_x86_emit.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_binding.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_checked.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_checked_wire.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_exclusive.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_group.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_input.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/include/native_lab_map_offset.h": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kprog/tv/Makefile": "f0e1faffad3ad619cfe3de5d0713462458426159",
+    "kprog/tv/module.mk": "f0e1faffad3ad619cfe3de5d0713462458426159"
+  },
+  "implementation_source_observations": {
+    "kinsn/module/include/native_lab_group.h": {
+      "observed_sha256": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+      "published_sha256": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+      "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 3af810d76..b44ef33a6 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n",
+      "implementation_body_identity": "identical; two retained blank lines"
+    }
+  },
+  "runtime_artifact_sha256": {
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "57e6f868da0768526965fdd0a789c4d7080358efe4439edb1f0e32c5136ceb9f",
+    "kprog/tv/build/test-trusted-transport": "27c1c0f97f1b4918322b92b637cc01d182941e4e9c786237e930505f20d73dfd",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+    "kprog/tv/build-kernel-x86/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+    "kprog/tv/build-kernel-x86/Module.symvers": "59e1113d4d6a08410452bfec5bc047fb9a21ad1e15d7ca044b10eb12a5e64447",
+    "runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a": "79fe9c97c5b4d9853c8d592b280473f70f8399dd0c729178fd58fcf1b57ae6dc",
+    "kprog/tv/build-x86/.bpf_x86_native_lab.o.cmd": "b941864e215b29ecc77d09469481aecb032cd55fce0621382a503e1a88c020a5"
+  },
+  "archives": {
+    "kprog/results/kprog_tv_20261107/trusted-native-resources.log.gz": {
+      "gzip_sha256": "9394c81d657ad2c8e339df2b3cd2755bb08d2f9c545f674a9ba258c441b40c1b",
+      "raw_sha256": "c97494aed6976c24a79e240683b4e2412316b79a8dedc0d84cf82772e20135c0",
+      "raw_bytes": 2471
+    },
+    "kprog/results/kprog_tv_20261107/trusted-native-resources.raw.tar.gz": {
+      "gzip_sha256": "21e2987465213ed3f70da37f6311cc03d053b80d33c214b9003d67d4e8b356cf",
+      "raw_sha256": "fc5f622d570416be5e0c4382adbc5e36fb74474dec36fdfcb7a1b906bf0cff22",
+      "raw_bytes": 1822720
+    }
+  },
+  "completion_path": [
+    "C integrates live unique native-resource FDs and complete alias metadata; service validates every declared ID through kernel MAP facts.",
+    "C/A rebuild their next coherent cached module/loader/service image and collect actual application generation/verification/binding/execution.",
+    "T/V compose universal producer/C/resource metadata, complete ABI/compiler/native-link and full Artifact correspondence laws."
+  ],
+  "trusted": [
+    "Kernel FD-to-map resolution and map reference lifetime.",
+    "Kernel trusted-service registration, immutable snapshot, proof verifier and native binding implementation.",
+    "Canonical ISA and universal simulator/compiler/link correspondence for the end-to-end theorem."
+  ],
+  "evidence_class": "Runtime mechanism regression and kernel binding implementation; universal formal laws and whole-application outcomes retain their separately identified evidence."
+}

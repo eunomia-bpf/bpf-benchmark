@@ -30,6 +30,20 @@ struct native_lab_trusted_request {
 	__u64 metadata_user;
 };
 
+/* Native-referenced map capabilities accompany the immutable P snapshot.
+ * Each signed32 descriptor is resolved in the submitting task and retained
+ * by the capsule with the same map-reference lifetime as an ordinary program.
+ * The service obtains actual identities/shapes through TRUSTED_MAP. The
+ * descriptor array is copied during SUBMIT_RESOURCES; reserved stays zero.
+ * The existing request and NEXT layouts keep their original ABI.
+ */
+struct native_lab_trusted_submission {
+	struct native_lab_trusted_request request;
+	__u32 map_count;
+	__u32 reserved;
+	__u64 map_fds_user;
+};
+
 /* Only the registered service file description can activate a worker.
  * A child receiving that capability FD may ACTIVATE before the trusted
  * loader uploads its freshly generated proof. An application submit FD
@@ -70,7 +84,7 @@ struct native_lab_trusted_context {
 struct native_lab_trusted_map {
 	__u64 request_id;
 	__u32 map_id;
-	__u32 depth; /* 0=used source map, 1=its actual inner template, ... */
+	__u32 depth; /* 0=pinned source/native map, 1=actual inner template, ... */
 	__u32 map_type;
 	__u32 key_size;
 	__u32 value_size;
@@ -90,4 +104,5 @@ struct native_lab_trusted_map {
 #define NATIVE_LAB_TRUSTED_WAIT _IOR('N', 0x74, struct native_lab_trusted_result)
 #define NATIVE_LAB_TRUSTED_CONTEXT _IOWR('N', 0x75, struct native_lab_trusted_context)
 #define NATIVE_LAB_TRUSTED_MAP _IOWR('N', 0x76, struct native_lab_trusted_map)
+#define NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES _IOWR('N', 0x77, struct native_lab_trusted_submission)
 #endif

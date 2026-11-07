@@ -15,6 +15,8 @@ struct native_lab_trusted_capsule {
 	struct kref refs;
 	u64 id;
 	struct bpf_prog *source;
+	struct bpf_map **resource_maps;
+	u32 resource_count;
 	void *native, *metadata;
 	char *entry;
 	u32 native_size, metadata_size, entry_size;
@@ -46,6 +48,10 @@ static void native_lab_capsule_release(struct kref *ref)
 {
 	struct native_lab_trusted_capsule *capsule = container_of(ref,
 		struct native_lab_trusted_capsule, refs);
+	u32 i;
+	for (i = 0; i < capsule->resource_count; i++)
+		bpf_map_put(capsule->resource_maps[i]);
+	kfree(capsule->resource_maps);
 	if (capsule->source)
 		bpf_prog_put(capsule->source);
 	kvfree(capsule->native);
@@ -138,10 +144,50 @@ static int native_lab_trusted_bind_program(struct native_lab_trusted_capsule *ca
 	return 0;
 }
 
+/* Each successful FD resolution pins the actual kernel object. Capsule
+ * release handles every partial-copy, queue and completion failure path. */
+static int native_lab_snapshot_resources(struct native_lab_trusted_capsule *capsule,
+		const struct native_lab_trusted_submission *submission)
+{
+	s32 *fds;
+	u32 i, j;
+	int err = 0;
+	if (!submission->map_count)
+		return 0;
+	fds = memdup_user(u64_to_user_ptr(submission->map_fds_user),
+		array_size(submission->map_count, sizeof(*fds)));
+	if (IS_ERR(fds))
+		return PTR_ERR(fds);
+	capsule->resource_maps = kcalloc(submission->map_count,
+		sizeof(*capsule->resource_maps), GFP_KERNEL);
+	if (!capsule->resource_maps) {
+		err = -ENOMEM;
+		goto out;
+	}
+	for (i = 0; i < submission->map_count; i++) {
+		struct bpf_map *map = bpf_map_get(fds[i]);
+		if (IS_ERR(map)) {
+			err = PTR_ERR(map);
+			goto out;
+		}
+		for (j = 0; j < capsule->resource_count; j++)
+			if (capsule->resource_maps[j] == map) {
+				bpf_map_put(map);
+				err = -EEXIST;
+				goto out;
+			}
+		capsule->resource_maps[capsule->resource_count++] = map;
+	}
+out:
+	kfree(fds);
+	return err;
+}
+
 static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
-		void __user *argument)
+		void __user *argument, bool resources)
 {
 	struct native_lab_trusted_request request;
+	struct native_lab_trusted_submission submission = {};
 	struct native_lab_trusted_capsule *capsule;
 	struct native_lab_trusted_job *job;
 	const struct elf64_hdr *elf;
@@ -151,8 +197,17 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 	mutex_unlock(&native_lab_service_lock);
 	if (err)
 		return err;
-	if (copy_from_user(&request, argument, sizeof(request)))
+	if (resources) {
+		if (copy_from_user(&submission, argument, sizeof(submission)))
+			return -EFAULT;
+		if (submission.reserved || (!submission.map_count && submission.map_fds_user))
+			return -EINVAL;
+		if (submission.map_count > MAX_USED_MAPS)
+			return -E2BIG;
+		request = submission.request;
+	} else if (copy_from_user(&request, argument, sizeof(request))) {
 		return -EFAULT;
+	}
 	if (request.version != NATIVE_LAB_TRUSTED_VERSION ||
 	    request.arch != NATIVE_LAB_BINDING_ARCH || request.flags ||
 	    request.reserved || request.request_id || !request.source_prog_id ||
@@ -202,6 +257,9 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 			goto fail;
 		}
 	}
+	err = native_lab_snapshot_resources(capsule, &submission);
+	if (err)
+		goto fail;
 	capsule->native_size = request.native_size;
 	capsule->entry_size = request.entry_size;
 	capsule->metadata_size = request.metadata_size;
@@ -442,6 +500,12 @@ static int native_lab_trusted_map(void __user *argument)
 			break;
 		}
 	}
+	if (!map)
+		for (i = 0; i < capsule->resource_count; i++)
+			if (capsule->resource_maps[i]->id == shape.map_id) {
+				map = capsule->resource_maps[i];
+				break;
+			}
 	if (!map) {
 		err = -ENOENT;
 		goto out;
@@ -486,7 +550,9 @@ static long native_lab_trusted_ioctl(struct file *file, unsigned int command, un
 		}
 	}
 	if (command == NATIVE_LAB_TRUSTED_SUBMIT)
-		return native_lab_trusted_submit(owner, pointer);
+		return native_lab_trusted_submit(owner, pointer, false);
+	if (command == NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES)
+		return native_lab_trusted_submit(owner, pointer, true);
 	if (command == NATIVE_LAB_TRUSTED_WAIT) {
 		struct native_lab_trusted_result result = {};
 		struct native_lab_trusted_job *job;
