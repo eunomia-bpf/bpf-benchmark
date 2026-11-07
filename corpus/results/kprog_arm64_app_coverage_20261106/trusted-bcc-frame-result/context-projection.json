@@ -1,0 +1,118 @@
+{
+  "utc": "2026-11-07T12:26:34.283236+00:00",
+  "scope": "static source correspondence audit only; no new program generated, loaded or executed",
+  "head": "bec323efb7266742011755bf0cdc5eccd7e25bce",
+  "canonical_header_sha256": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
+  "candidate_header_sha256": "204e2d7bf69f1bf9f76b5aac1bcba55bb1ffe37f755a9464141cbf39a43fb85b",
+  "finding": "XDP/SKB ordinary stores and generic buffer arguments can address the private expanded context representation; only SKB cb[0:2] is projected on return. Equivalent native external write permissions and visible effects are not established by this representation.",
+  "raw_context_distinction": "ENTRY_RAW starts from actual verifier ctx rather than the expanded XDP/SKB private object; this specific shadow-object finding is not inferred for RAW entry.",
+  "evidence": [
+    {
+      "macro": "ARM64_SIM_ENTRY_XDP",
+      "canonical": {
+        "first_line": 247,
+        "last_line": 260,
+        "text": "#define ARM64_SIM_ENTRY_XDP(CTX)                                            \\\n\tstruct arm64_sim_xdp_abi __a64_sim_abi = {                         \\\n\t\t.data = (void *)(long)(CTX)->data,                         \\\n\t\t.data_end = (void *)(long)(CTX)->data_end,                 \\\n\t};                                                               \\\n\tstruct __sk_buff *__a64_sim_skb_ctx = (struct __sk_buff *)0;      \\\n\t__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \\\n\tARM64_SIM_L_DECLARE_STATE();                                      \\\n\tARM64_SIM_L_DECLARE_STACK();                                      \\\n\t__a64_sim_helper_ctx = (void *)(CTX);                             \\\n\t__a64_sim_helper_abi_base = &__a64_sim_abi;                       \\\n\t__a64_x0.ptr = &__a64_sim_abi;                                    \\\n\t__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \\\n\t__a64_x0_tag = ARM64_SIM_TAG_ABI\n"
+      },
+      "candidate_first_line": 254,
+      "candidate_last_line": 267,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_ENTRY_SKB",
+      "canonical": {
+        "first_line": 262,
+        "last_line": 275,
+        "text": "#define ARM64_SIM_ENTRY_SKB(CTX)                                            \\\n\tstruct arm64_sim_skb_abi __a64_sim_abi = {                         \\\n\t\t.data_end = (void *)(long)(CTX)->data_end,                 \\\n\t\t.data = (void *)(long)(CTX)->data,                         \\\n\t};                                                               \\\n\tstruct __sk_buff *__a64_sim_skb_ctx = (CTX);                      \\\n\t__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \\\n\tARM64_SIM_L_DECLARE_STATE();                                      \\\n\tARM64_SIM_L_DECLARE_STACK();                                      \\\n\t__a64_sim_helper_ctx = (void *)(CTX);                             \\\n\t__a64_sim_helper_abi_base = &__a64_sim_abi;                       \\\n\t__a64_x0.ptr = &__a64_sim_abi;                                    \\\n\t__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \\\n\t__a64_x0_tag = ARM64_SIM_TAG_ABI\n"
+      },
+      "candidate_first_line": 269,
+      "candidate_last_line": 282,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_ENTRY_RAW",
+      "canonical": {
+        "first_line": 281,
+        "last_line": 289,
+        "text": "#define ARM64_SIM_ENTRY_RAW(CTX)                                            \\\n\tstruct arm64_sim_skb_abi __a64_sim_abi = {};                       \\\n\tstruct __sk_buff *__a64_sim_skb_ctx = (struct __sk_buff *)0;       \\\n\t__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;                                      \\\n\tARM64_SIM_L_DECLARE_STATE();                                      \\\n\tARM64_SIM_L_DECLARE_STACK();                                      \\\n\t__a64_x0.ptr = (void *)(CTX);                                      \\\n\t__a64_x30_tag = ARM64_SIM_TAG_RETURN; \\\n\t__a64_x0_tag = ARM64_SIM_TAG_ABI\n"
+      },
+      "candidate_first_line": 288,
+      "candidate_last_line": 296,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_L_MEM_WRITE",
+      "canonical": {
+        "first_line": 902,
+        "last_line": 921,
+        "text": "#define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\\\n\tdo {                                                               \\\n\t\t__s64 __a64_mwr_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\\\n\t\t__u8 __a64_mwr_tag = ARM64_SIM_L_REG_TAG(BASE);          \\\n\t\t__u8 __a64_mwr_arm = KPROG_ARM64_MEM_WRITE_ARM(          \\\n\t\t\t((BASE) == ARM64_SP), __a64_mwr_tag);            \\\n\t\tif (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \\\n\t\t__u8 __a64_mwr_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \\\n\t\t\t(BASE) == ARM64_SP);                             \\\n\t\t__s64 __a64_mwr_base =                               \\\n\t\t\t(__a64_mwr_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\\\n\t\t\t\t? __a64_sp                              \\\n\t\t\t\t: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\\\n\t\t\tARM64_SIM_L_STACK_WRITE_TAG(__a64_mwr_base + __a64_mwr_off,\\\n\t\t\t\t\t\t    (WIDTH), (VALUE), (TAG));\\\n\t\t} else {                                                   \\\n\t\t\tvoid *__a64_mwr_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mwr_off;\\\n\t\t\tARM64_SIM_L_STORE_ADDR(__a64_mwr_addr, (WIDTH), (VALUE));\\\n\t\t}                                                         \\\n\t} while (0)\n"
+      },
+      "candidate_first_line": 909,
+      "candidate_last_line": 928,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_L_HELPER_ARG_PTR",
+      "canonical": {
+        "first_line": 681,
+        "last_line": 688,
+        "text": "#define ARM64_SIM_L_HELPER_ARG_PTR(REG) \\\n    ({ void *__a64_hap_ptr; \\\n       if (KPROG_ARM64_HELPER_ARG_PTR_BODY(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK) == KPROG_ARM64_HELPER_ARG_PTR_BODY_STACK_ARENA_PTR) { \\\n           __s64 __a64_hap_off = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG); \\\n           asm volatile(\"\" : \"+r\"(__a64_hap_off)); \\\n           __a64_hap_ptr = ARM64_SIM_L_STACK_PTR(__a64_hap_off); \\\n       } else { __a64_hap_ptr = ARM64_SIM_L_READ_REG_PTR(REG); } \\\n       __a64_hap_ptr; })\n"
+      },
+      "candidate_first_line": 688,
+      "candidate_last_line": 695,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_L_HELPER_CTX_PTR",
+      "canonical": {
+        "first_line": 692,
+        "last_line": 696,
+        "text": "#define ARM64_SIM_L_HELPER_CTX_PTR(REG)                                  \\\n\t(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_ABI ?                  \\\n\t KPROG_ABI_HELPER_CONTEXT(ARM64_SIM_L_READ_REG_PTR(REG),          \\\n\t\t__a64_sim_helper_abi_base, __a64_sim_helper_ctx) :         \\\n\t ARM64_SIM_L_HELPER_ARG_PTR(REG))\n"
+      },
+      "candidate_first_line": 699,
+      "candidate_last_line": 703,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_LIBC_MEMSET",
+      "canonical": {
+        "first_line": 1464,
+        "last_line": 1472,
+        "text": "#define ARM64_SIM_LIBC_MEMSET()                                            \\\n\tdo {                                                               \\\n\t\t__u8 *__a64_lib_dst = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0);  \\\n\t\t__u8 __a64_lib_byte = (__u8)ARM64_SIM_L_READ_REG(ARM64_X1);  \\\n\t\t__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \\\n\t\tfor (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \\\n\t\t\t__a64_lib_dst[__a64_lib_i] = __a64_lib_byte;               \\\n\t\tARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0), ARM64_SIM_L_REG_TAG(ARM64_X0), 0, ARM64_SIM_TAG_SCALAR, __a64_lib_len, 0); \\\n\t} while (0)\n"
+      },
+      "candidate_first_line": 1471,
+      "candidate_last_line": 1479,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_LIBC_MEMCPY",
+      "canonical": {
+        "first_line": 1474,
+        "last_line": 1482,
+        "text": "#define ARM64_SIM_LIBC_MEMCPY()                                            \\\n\tdo {                                                               \\\n\t\t__u8 *__a64_lib_dst = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0);  \\\n\t\tconst __u8 *__a64_lib_src = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1); \\\n\t\t__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \\\n\t\tfor (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \\\n\t\t\t__a64_lib_dst[__a64_lib_i] = __a64_lib_src[__a64_lib_i]; \\\n\t\tARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0), ARM64_SIM_L_REG_TAG(ARM64_X0), (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1), ARM64_SIM_L_REG_TAG(ARM64_X1), __a64_lib_len, 1); \\\n\t} while (0)\n"
+      },
+      "candidate_first_line": 1481,
+      "candidate_last_line": 1489,
+      "byte_identical": true
+    },
+    {
+      "macro": "ARM64_SIM_RET",
+      "canonical": {
+        "first_line": 1736,
+        "last_line": 1743,
+        "text": "#define ARM64_SIM_RET()                                                     \\\n\tdo {                                                               \\\n\t\tif (__a64_sim_skb_ctx) {                                   \\\n\t\t\t__a64_sim_skb_ctx->cb[0] = __a64_sim_abi.cb[0];    \\\n\t\t\t__a64_sim_skb_ctx->cb[1] = __a64_sim_abi.cb[1];    \\\n\t\t}                                                          \\\n\t\treturn (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \\\n\t} while (0)\n"
+      },
+      "candidate_first_line": 1743,
+      "candidate_last_line": 1750,
+      "byte_identical": true
+    }
+  ],
+  "not_claimed": [
+    "new verifier acceptance",
+    "new unsafe execution",
+    "runtime counterexample",
+    "proof of all context/helper effects",
+    "application acceptance"
+  ],
+  "next_work": "A owns ARM context-effect repair after preserving active frozen runs; C owns corresponding x86 repair, T canonical memory/entry correspondence, F negative replay. No production fix included in this audit."
+}
