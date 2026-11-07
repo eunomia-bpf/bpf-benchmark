@@ -323,6 +323,13 @@ def _list_app_shim_program_ids(app_pid: int) -> tuple[int, ...]:
     resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "list_progs"})
     if not bool(resp.get("ok")):
         raise RuntimeError(str(resp.get("error") or "list_progs failed"))
+    if os.environ.get("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "").strip().lower() in {"1", "true", "yes", "on"}:
+        pending = resp.get("native_loads_inflight")
+        completed = resp.get("native_bound_completed")
+        if type(pending) is not int or type(completed) is not int or pending < 0 or completed < 0:
+            raise ValueError("verified native startup requires shim load-progress fields; update the shim")
+        if pending or not completed:
+            return ()
     programs = resp.get("progs")
     if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
         raise RuntimeError("list_progs returned invalid progs payload")

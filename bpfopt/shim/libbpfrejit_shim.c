@@ -889,6 +889,14 @@ long syscall(long number, ...) {
         }
     }
 
+    struct shim_native_load_scope native_scope
+        __attribute__((cleanup(shim_native_load_scope_end))) = {0};
+    if (cmd == BPF_PROG_LOAD && attr && !in_shim &&
+        shim_native_loader_enabled() && shim_native_loader_requires_bound_proof()) {
+        native_scope.active = 1;
+        __atomic_add_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
+    }
+
     /* Pre-call captures: one pending pointer per kind. Each capture_*
      * allocates a heap entry we insert into the corresponding table iff
      * the syscall succeeds. */
@@ -1681,7 +1689,10 @@ static void emit_list_progs(int cli) {
         return;
     }
     size_t len = 0;
-    len += snprintf(buf + len, cap - len, "{\"ok\":true,\"progs\":[");
+    len += snprintf(buf + len, cap - len,
+                    "{\"ok\":true,\"native_loads_inflight\":%u,\"native_bound_completed\":%u,\"progs\":[",
+                    __atomic_load_n(&shim_native_loads_inflight, __ATOMIC_SEQ_CST),
+                    __atomic_load_n(&shim_native_bound_completed, __ATOMIC_SEQ_CST));
     int first = 1;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {

@@ -48,3 +48,14 @@ trusted-bcc-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
 	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 ../test/run_trusted_service_guest.py bcc
+
+.PHONY: trusted-bcc-set-kvm trusted-bcc-set-guest
+trusted-bcc-set-kvm: trusted-service-check
+	$(MAKE) -C "$(REPO_ROOT)/bpfopt/shim" SHIM_SO=build-x86/libbpfrejit_shim.so build-x86/libbpfrejit_shim.so
+	taskset -c 16-19 vng --run "$(REPO_ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage" --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --overlay-rwdir /tmp --overlay-rwdir /usr/local --overlay-rwdir /run --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader trusted-bcc-set-guest'
+
+trusted-bcc-set-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod ../tv/build-x86/bpf_x86_native_lab.ko
+	install -D -m0755 ../../bpfopt/shim/build-x86/libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 ../test/run_trusted_service_guest.py bcc-set

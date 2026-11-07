@@ -418,6 +418,16 @@ static void shim_native_loader_log_jit_dump(const char *label, int fd) {
     free(insns);
 }
 
+/* Verified startup must not confuse a synchronous proof wait with an idle
+ * program set. The outer syscall scope includes capture and state insertion. */
+static unsigned shim_native_loads_inflight;
+static unsigned shim_native_bound_completed;
+struct shim_native_load_scope { int active; };
+static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
+    if (scope->active)
+        __atomic_sub_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
+}
+
 static long shim_maybe_replace_with_native_fd(long original_fd,
                                               struct prog_entry *prog) {
     const char *prog_name = prog ? prog->name : "";
@@ -628,6 +638,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              manifest, prog->bytecode_path);
     kmsg_line("native replaced name=%s original_fd=%ld native_fd=%d",
               prog_name ? prog_name : "", original_fd, result.prog_fd);
+    if (shim_native_loader_requires_bound_proof())
+        __atomic_add_fetch(&shim_native_bound_completed, 1, __ATOMIC_SEQ_CST);
     return result.prog_fd;
 }
 

@@ -16,12 +16,38 @@ import traceback
 
 ROOT=Path(__file__).resolve().parents[2]
 CASE=sys.argv[1] if len(sys.argv)==2 else 'control'
-if CASE not in {'control','bcc'}:raise ValueError('unknown trusted service case')
-OUT=ROOT/'corpus/results/kprog_app_coverage_20261107'/('trusted-service-bcc' if CASE=='bcc' else 'trusted-service')
+if CASE not in {'control','bcc','bcc-set'}:raise ValueError('unknown trusted service case')
+OUT=ROOT/'corpus/results/kprog_app_coverage_20261107'/{'control':'trusted-service','bcc':'trusted-service-bcc','bcc-set':'trusted-service-bcc-set'}[CASE]
 OUT.mkdir(exist_ok=True)
 STAMP=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
 archive=OUT/('run-'+STAMP+'.tar.gz')
 summary=dict(ok=False,case=CASE,started=datetime.now(timezone.utc).isoformat(),request_archive=archive.name)
+
+def run_bcc_set(live,environment):
+    # Reuse the unchanged corpus tool list, arguments and startup/stop paths.
+    os.environ.update(environment)
+    os.environ['BPFTOOL_BIN']=str(ROOT/'vendor/build/x86/bpftool/bin/bpftool')
+    sys.path.insert(0,str(ROOT))
+    from runner.libs.app_runners.bcc_set import BccSetRunner,BCC_SET_TOOL_SPECS
+    from runner.libs.agent import bpftool_prog_show_records
+    runner=BccSetRunner(tool_binaries={s.name:ROOT/'vendor/build/x86/bcc/bin'/s.name for s in BCC_SET_TOOL_SPECS},
+                        workload_spec={'kind':'stress_ng_bcc_hook_hot'})
+    Path('/proc/sys/kernel/bpf_stats_enabled').write_text('1'+chr(10))
+    try:
+        runner.start()
+        (live/'programs-before-work.json').write_text(json.dumps(bpftool_prog_show_records(),indent=2))
+        completed=0
+        for _ in range(10000):
+            with open('/dev/null','wb') as output:output.write(b'x')
+            completed+=1
+        (live/'functional-work.json').write_text(json.dumps(dict(opens_completed=completed,writes_completed=completed,closes_completed=completed)))
+        (live/'programs-after-work.json').write_text(json.dumps(bpftool_prog_show_records(),indent=2))
+    finally:
+        try:runner.stop()
+        finally:
+            (live/'runner.json').write_text(json.dumps(dict(output=runner.process_output,
+                tools={name:dict(command=child.command_used,output=child.process_output) for name,child in runner._children.items()}),indent=2))
+
 with tempfile.TemporaryDirectory(prefix='.live-',dir=OUT) as temporary:
     live=Path(temporary)
     state=live/'requests'
@@ -54,7 +80,7 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=OUT) as temporary:
         ready=event()
         if not ready.get('ready'):raise RuntimeError('trusted service did not register')
         environment=dict(os.environ)
-        if CASE=='bcc':
+        if CASE in {'bcc','bcc-set'}:
             environment.update(LD_PRELOAD=str(ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so'),
                 BPFREJIT_SHIM_NATIVE_LOADER='1',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
                 BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF='1',
@@ -67,24 +93,32 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=OUT) as temporary:
                   ROOT/'kprog/libnativeloader/build/trusted-native.o']
         inputs=[ROOT/'kprog/tv/build-kernel-x86/arch/x86/boot/bzImage',
                 ROOT/'kprog/tv/build-x86/bpf_x86_native_lab.ko',Path(argv[0])]
-        if CASE=='bcc':
+        if CASE in {'bcc','bcc-set'}:
             inputs.extend([ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so',
                 ROOT/'kprog/libnativeloader/build/libnative_loader.so',
                 ROOT/'vendor/build/native-bpf/x86/stage/bcc/manifest.json',
                 ROOT/'vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o'])
         else:inputs.append(ROOT/'kprog/libnativeloader/build/trusted-native.o')
+        if CASE=='bcc-set':
+            tools=['capable','biosnoop','vfsstat','opensnoop','syscount','tcpconnect','tcplife','runqlat']
+            inputs.extend(ROOT/'vendor/build/x86/bcc/bin'/name for name in tools)
+            inputs.extend(ROOT/'vendor/build/native-bpf/x86/stage/bcc'/(name+'.native.o') for name in tools)
         summary['artifact_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
-        result=subprocess.run(argv,env=environment,text=True,capture_output=True)
-        (live/'client.stdout').write_text(result.stdout)
-        (live/'client.stderr').write_text(result.stderr)
-        summary['returncode']=result.returncode
-        result.check_returncode()
-        if CASE=='bcc':
+        if CASE=='bcc-set':
+            run_bcc_set(live,environment)
+            summary['returncode']=0
+        else:
+            result=subprocess.run(argv,env=environment,text=True,capture_output=True)
+            (live/'client.stdout').write_text(result.stdout)
+            (live/'client.stderr').write_text(result.stderr)
+            summary['returncode']=result.returncode
+            result.check_returncode()
+        if CASE in {'bcc','bcc-set'}:
             count=len(re.findall(r'native-loader timings prog=',(live/'shim.log').read_text()))
             if not count:raise RuntimeError('BCC produced no required native replacement receipts')
             records=[event() for _ in range(count)]
             if any(record['status'] for record in records):raise RuntimeError('BCC service request failed')
-            summary.update(app='bcc/vfsstat',completed_requests=records)
+            summary.update(app='bcc/set' if CASE=='bcc-set' else 'bcc/vfsstat',completed_requests=records)
         else:
             client=json.loads(result.stdout)
             if not client['ok'] or client['retval']!=2:raise RuntimeError('native control result mismatch')

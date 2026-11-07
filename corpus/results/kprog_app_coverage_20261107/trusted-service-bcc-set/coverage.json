@@ -1,0 +1,73 @@
+{
+  "runs": [
+    {
+      "archive": "run-20261107T093056559759Z.tar.gz",
+      "sha256": "67fbebdea54238a0bdf58aad1865daf37aa8df5c24596717fdf6d73352f1d259",
+      "outer_ok": false,
+      "observed_requests": 5,
+      "proof_generated": 1,
+      "proof_compiled": 1,
+      "accepted": 1,
+      "causes": {
+        "accepted": 1,
+        "interrupted-archive": 1,
+        "map-metadata-kernel-query": 3
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T094936220605Z.tar.gz",
+      "sha256": "8bf49a73612703af1df2eef94d9b1c5b43603111257464ba08286de0f43268b7",
+      "outer_ok": true,
+      "observed_requests": 3,
+      "proof_generated": 3,
+      "proof_compiled": 3,
+      "accepted": 3,
+      "causes": {
+        "accepted": 3
+      },
+      "functional_work": {
+        "opens_completed": 10000,
+        "writes_completed": 10000,
+        "closes_completed": 10000
+      },
+      "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T095602396820Z.tar.gz",
+      "sha256": "a948860469aa0a5f961e99c4bdb924ac3ebc41432c1ffde40b7d41fa7c416745",
+      "outer_ok": false,
+      "observed_requests": 12,
+      "proof_generated": 11,
+      "proof_compiled": 11,
+      "accepted": 10,
+      "causes": {
+        "accepted": 10,
+        "specialization-or-loader-error": 1,
+        "verifier-misaligned-stack-access": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T100525410513Z.tar.gz",
+      "sha256": "de040d15a4a294ce9f84d27d1b105516fc960a42092b785d119bc8afef443c3a",
+      "outer_ok": false,
+      "observed_requests": 21,
+      "proof_generated": 21,
+      "proof_compiled": 21,
+      "accepted": 17,
+      "causes": {
+        "accepted": 17,
+        "request-activation-refused-during-teardown": 1,
+        "verifier-EINVAL-no-failure-line-retained": 1,
+        "verifier-scalar-stack-pointer-arithmetic": 1,
+        "verifier-stack-limit": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    }
+  ],
+  "scope": "Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded."
+}

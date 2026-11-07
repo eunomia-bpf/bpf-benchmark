@@ -1,0 +1,33 @@
+{
+  "ok": false,
+  "case": "bcc-set",
+  "started": "2026-11-07T10:05:25.412635+00:00",
+  "request_archive": "run-20261107T100525410513Z.tar.gz",
+  "artifact_sha256": {
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "6f03b95301fdb094647d3e85e5f06570eb4e5f77df5070e65d8bb6c9ff0d8f2a",
+    "vendor/build/x86/bcc/bin/vfsstat": "7620da18ec87eb09d12309cf965f35f25df6c3934492cf8f4edf831e1a676a83",
+    "bpfopt/shim/build-x86/libbpfrejit_shim.so": "93b7f74137a3998f7893b88bdb932311c4a4577a31231229ed517733c2764062",
+    "kprog/libnativeloader/build/libnative_loader.so": "f90e4a79aa55ecad0e9c956e4123631dd95edb986538d4b2c900398e6cdc17c6",
+    "vendor/build/native-bpf/x86/stage/bcc/manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+    "vendor/build/x86/bcc/bin/capable": "d628f54fbf9cd38ee1b191e09339173e02966cecf4e57f2b2e04df97a8bbcf70",
+    "vendor/build/x86/bcc/bin/biosnoop": "b60783623a73b810971326599233190a00ec699b52f2fba47ff4a5a616772195",
+    "vendor/build/x86/bcc/bin/opensnoop": "9c1aee16ff4f2d55481d9dc09fa68adf23e91981415448c94ca3336337afa0c4",
+    "vendor/build/x86/bcc/bin/syscount": "9e8753fb6dd014c9a5d6b5db8988f7616c59808e3374228efb5239ad88b4f2f9",
+    "vendor/build/x86/bcc/bin/tcpconnect": "fe7080c629fda0557298c661e69cac8903837a070dfe9e14ca943ef6ec0b72f4",
+    "vendor/build/x86/bcc/bin/tcplife": "4cc49d395678151bac3b6fa277ea07027528fb6358e82768af1a8c2be02e664a",
+    "vendor/build/x86/bcc/bin/runqlat": "5c1e33359c5a84ce666526d124f4c8026a1d8b8d8200cca086f344d34439817e",
+    "vendor/build/native-bpf/x86/stage/bcc/capable.native.o": "e9b8e901b1bb9b3a3ba99eeac2cc105c195a69c3946d554cde5036029031a427",
+    "vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+    "vendor/build/native-bpf/x86/stage/bcc/opensnoop.native.o": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+    "vendor/build/native-bpf/x86/stage/bcc/syscount.native.o": "226056848c49ce5655582a802d26e0de7a51b7ac90ee81c30b8071bd1b0d5933",
+    "vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+    "vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o": "823d84c9fb802e6abe9c709f18ff7bf6fdd5059590cc9f5cae0a9fa3a4358b88",
+    "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63"
+  },
+  "error": "BCC tool biosnoop exited before BPF programs were tracked by shim",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 108, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 37, in run_bcc_set\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/bcc_set.py\", line 88, in start\n    wait_for_app_shim_programs(\n  File \"/workspaces/repository/runner/libs/rejit.py\", line 382, in wait_for_app_shim_programs\n    raise RuntimeError(f\"{process_name} exited before BPF programs were tracked by shim{detail}\")\nRuntimeError: BCC tool biosnoop exited before BPF programs were tracked by shim\n",
+  "finished": "2026-11-07T10:08:43.757777+00:00",
+  "archive_sha256": "de040d15a4a294ce9f84d27d1b105516fc960a42092b785d119bc8afef443c3a"
+}
