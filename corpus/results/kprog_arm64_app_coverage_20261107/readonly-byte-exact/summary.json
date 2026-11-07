@@ -1,6 +1,6 @@
 {
   "utc": "2026-11-07T18:53:46.511930+00:00",
-  "scope": "Private byte-exact readonly candidate; current serial guests remain on unchanged canonical input",
+  "scope": "Tested readonly byte reader applied after previous serial queue closed; runtime replay pending",
   "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T182921697243Z.tar.gz",
   "raw_archive_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
   "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
@@ -216,7 +216,7 @@
     },
     "patch_sha256": "5b514905f08733d3132c5cdaa1c4fc13f7d40127e89b011a9610a3dc78c56f3c"
   },
-  "canonical_source_applied": false,
+  "canonical_source_applied": true,
   "old_hex_ascii_regression_exit": 2,
   "fixed_regression_exit": 0,
   "actual_worker_compile_exit": 0,

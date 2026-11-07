@@ -88,47 +88,33 @@ class Encoded:
 
 
 def rodata_bytes(obj: Path) -> bytes:
-    result = subprocess.run(
-        ["aarch64-linux-gnu-objdump", "-s", "-j", ".native_link_rodata", str(obj)],
-        cwd=REPO_ROOT, check=False, text=True, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    if result.returncode != 0:
-        return b""
-    out = bytearray()
-    for line in result.stdout.splitlines():
-        fields = line.split()
-        if len(fields) < 2 or not re.fullmatch(r"[0-9a-fA-F]+", fields[0]):
-            continue
-        for field in fields[1:]:
-            if not re.fullmatch(r"[0-9a-fA-F]+", field) or len(field) % 2:
-                break
-            out.extend(int(field[i:i + 2], 16) for i in range(0, len(field), 2))
-    return bytes(out)
+    # Read binary bytes; objdump's ASCII column can itself look hexadecimal.
+    from elftools.elf.elffile import ELFFile
+    with obj.open("rb") as stream:
+        section = ELFFile(stream).get_section_by_name(".native_link_rodata")
+        return section.data() if section is not None else b""
 
 
 def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
+    from elftools.elf.elffile import ELFFile
     data = rodata_bytes(obj)
     if not data:
         return {}
-    result = subprocess.run(["aarch64-linux-gnu-objdump", "-t", str(obj)],
-                            cwd=REPO_ROOT, check=True, text=True,
-                            stdout=subprocess.PIPE)
-    out: dict[str, bytes] = {}
-    for line in result.stdout.splitlines():
-        fields = line.split()
-        if ".native_link_rodata" not in fields:
-            continue
-        idx = fields.index(".native_link_rodata")
-        if idx + 2 >= len(fields):
-            continue
-        offset = int(fields[0], 16)
-        size = int(fields[idx + 1], 16)
-        name = fields[-1]
-        if size <= 0 or offset + size > len(data):
-            raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
-        out[name] = data[offset:offset+size]
-    return out
+    with obj.open("rb") as stream:
+        elf = ELFFile(stream)
+        symbols = elf.get_section_by_name(".symtab")
+        if symbols is None:
+            raise ValueError("native readonly section lacks its symbol table")
+        index = elf.get_section_index(".native_link_rodata")
+        out: dict[str, bytes] = {}
+        for symbol in symbols.iter_symbols():
+            if symbol["st_shndx"] != index or symbol["st_info"]["type"] != "STT_OBJECT":
+                continue
+            offset, size, name = symbol["st_value"], symbol["st_size"], symbol.name
+            if size <= 0 or offset + size > len(data):
+                raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
+            out[name] = data[offset:offset + size]
+        return out
 
 
 def split_operands(text: str) -> tuple[str, ...]:

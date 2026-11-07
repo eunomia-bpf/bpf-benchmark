@@ -17,6 +17,24 @@ assembly.write_text('.text\n.global entry\n.type entry,%function\nentry:\nmov w0
 subprocess.run(['aarch64-linux-gnu-gcc','-c',assembly,'-o',phase/'identical.o'],check=True)
 dump=subprocess.check_output(['aarch64-linux-gnu-objdump','-dr',phase/'identical.o'],text=True)
 functions=OrderedDict(entry=gen.parse_flat_instructions(dump))
+# A hex-looking ASCII display column must never become readonly payload bytes.
+hex_payloads = {"hex_ascii": b"deadbeef00000000" * 2, "short_ascii": b"abcdef"}
+hex_assembly = phase / 'hex-ascii.S'
+rows = ['.section .native_link_rodata,"a"']
+for name, value in hex_payloads.items():
+    rows.extend(['.balign 16', '.global ' + name, '.type ' + name + ',%object',
+                 name + ':', '.byte ' + ','.join(str(byte) for byte in value),
+                 '.size ' + name + ',.-' + name])
+hex_assembly.write_text(chr(10).join(rows) + chr(10))
+hex_object = phase / 'hex-ascii.o'
+subprocess.run(['aarch64-linux-gnu-gcc', '-c', hex_assembly, '-o', hex_object], check=True)
+with hex_object.open('rb') as stream:
+    expected = ELFFile(stream).get_section_by_name('.native_link_rodata').data()
+if gen.rodata_bytes(hex_object) != expected or gen.load_rodata_blobs(hex_object) != hex_payloads:
+    raise RuntimeError('hexadecimal ASCII display text corrupted native readonly bytes')
+if gen.load_rodata_blobs(phase / 'identical.o'):
+    raise RuntimeError('object without readonly data gained a private extent')
+
 objects={'first':bytes(120),'section:SectionIndex(5):.rodata':bytes(120)}
 source=phase/'identical.bpf.c'
 rendered=gen.render_program('identical','entry',functions,'xdp',rodata16=objects).replace(
