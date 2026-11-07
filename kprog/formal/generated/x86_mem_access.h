@@ -18,21 +18,21 @@ kprog_x86_mem_load(const void *address, __u8 width)
     case X86_WIDTH_8:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u8 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
-        return value;
+        return (__u8)value;
 #else
         return *(volatile const kprog_x86_unaligned8 *)address;
 #endif
     case X86_WIDTH_16:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u16 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
-        return value;
+        return (__u16)value;
 #else
         return *(volatile const kprog_x86_unaligned16 *)address;
 #endif
     case X86_WIDTH_32:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u32 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
-        return value;
+        return (__u32)value;
 #else
         return *(volatile const kprog_x86_unaligned32 *)address;
 #endif
@@ -65,19 +65,19 @@ kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
             asm volatile("%0 = *(u8 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
         else
             asm volatile("%0 = *(u8 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return value;
+        return (__u8)value;
     case X86_WIDTH_16:
         if (displacement < 0)
             asm volatile("%0 = *(u16 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
         else
             asm volatile("%0 = *(u16 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return value;
+        return (__u16)value;
     case X86_WIDTH_32:
         if (displacement < 0)
             asm volatile("%0 = *(u32 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
         else
             asm volatile("%0 = *(u32 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return value;
+        return (__u32)value;
     case X86_WIDTH_64:
         if (displacement < 0)
             asm volatile("%0 = *(u64 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");

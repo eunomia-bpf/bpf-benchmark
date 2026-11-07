@@ -125,6 +125,11 @@ at native function entry; the C simulator may initialize local variables to keep
 the eBPF program well-formed, but accepted direct-native artifacts must not have
 guest-visible behavior that depends on those initializer values.
 
+Scalar 8/16/32-bit memory loads return the zero-extended value at their
+actual access width. The BPF inline-assembly result is narrowed explicitly,
+so Clang retains that architectural fact across subsequent register reads;
+the access still executes once at its original width.
+
 The active code does not add runtime data-end checks. Packet/ctx accesses are
 raw modeled memory operations. If the verifier cannot prove them safe from the
 exact native control/data flow, the program fails to load.

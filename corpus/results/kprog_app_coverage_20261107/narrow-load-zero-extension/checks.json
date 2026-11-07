@@ -1,0 +1,173 @@
+{
+  "original_native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f",
+  "native_result": {
+    "compile_ns": 7769876489,
+    "exec_ns": 674,
+    "timing_source": "ktime",
+    "timing_source_wall": "wall_steady",
+    "wall_exec_ns": 2835,
+    "result": 2868565165525030065,
+    "retval": 2,
+    "code_size": {
+      "bpf_bytecode_bytes": 1992,
+      "native_code_bytes": 0
+    },
+    "phases_ns": {
+      "memory_prepare_ns": 12197718,
+      "packet_prepare_ns": 74630,
+      "native_load_ns": 7769876489,
+      "companion_load_ns": 8714431,
+      "companion_open_ns": 1262676,
+      "companion_object_load_ns": 7377671,
+      "companion_map_ptr_extract_ns": 0,
+      "companion_lookup_spec_ns": 0,
+      "native_link_cache_lookup_ns": 0,
+      "native_link_exec_ns": 0,
+      "native_link_read_ns": 0,
+      "native_link_map_patch_ns": 0,
+      "blob_upload_ns": 0,
+      "prog_load_ns": 0,
+      "prog_run_wall_ns": 2835
+    },
+    "perf_counters": {},
+    "perf_counters_meta": {
+      "requested": false,
+      "collected": false,
+      "include_kernel": true,
+      "scope": "full_repeat_raw",
+      "error": ""
+    }
+  },
+  "terminal_request": {
+    "request_id": 1,
+    "source_prog_id": 6,
+    "native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f",
+    "started": "2026-11-07T19:11:57.194017+00:00",
+    "prog_id": 11,
+    "status": 0,
+    "artifact_archive": "/run/c-load-width-candidate/session-7wyva_44/requests/1.success.tar.gz",
+    "finished": "2026-11-07T19:12:05.004052+00:00"
+  },
+  "terminal_archive_readable": true,
+  "native_submission_only": true,
+  "host_byte_oracle_cases": 40260,
+  "host_ubsan_exit": 0,
+  "division_fault_load_only": [
+    {
+      "name": "div8_zero",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div8_zero.bpf.o",
+        "--program",
+        "div8_zero_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div8_overflow",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div8_overflow.bpf.o",
+        "--program",
+        "div8_overflow_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div16_zero",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div16_zero.bpf.o",
+        "--program",
+        "div16_zero_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div16_overflow",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div16_overflow.bpf.o",
+        "--program",
+        "div16_overflow_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div32_zero",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div32_zero.bpf.o",
+        "--program",
+        "div32_zero_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div32_overflow",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div32_overflow.bpf.o",
+        "--program",
+        "div32_overflow_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div64_zero",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div64_zero.bpf.o",
+        "--program",
+        "div64_zero_x86_sim_xdp",
+        "--load-only"
+      ]
+    },
+    {
+      "name": "div64_overflow",
+      "stage": "verifier_rejected",
+      "returncode": 1,
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/.agent-state/kprog-lanes/C/load-width-candidate/negative-build/div64_overflow.bpf.o",
+        "--program",
+        "div64_overflow_x86_sim_xdp",
+        "--load-only"
+      ]
+    }
+  ],
+  "negative_accepted": 0,
+  "private_run_outside_sources_unchanged": true,
+  "only_after_capture_change": "candidate header subsequently promoted byte for byte",
+  "canonical_lean_and_contract_unchanged": true,
+  "sources_after_sha256": {
+    "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+    "kprog/formal/tools/generate_x86_mem_access_spec.py": "9d9ab4d23938bee79e30c92211e9891fadaca73e4711b31e7d3a3cf04db42f34",
+    "kprog/x86/README.md": "75dedb8a5c8fd77d9d4c4fb0adff7171459ac8e4c5efdb7f29f12f1c50fa282d"
+  },
+  "same_clang_flags": true,
+  "full_29_runtime_pending": "../micro-load-width",
+  "raw_sha256": "64a51fc29f98f462a92ba4182cfa0d8f449a24822671df9c2cd2b98ff963e025"
+}
