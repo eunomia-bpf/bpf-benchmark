@@ -2250,3 +2250,10 @@ all RFLAGS. Equality covers all16GPRs, flags, XMM0, memory, PC, segments and
 address width, with actual ordered effects and every permitted XOR AF choice.
 All4 state audits pass. Later guard/store boundary reconstruction and complete
 full-state TV remain open; the physical context-conversion premise persists.
+
+`trusted-simple-b29-second-block-state.json` extends the reconstruction through
++8 LEA/CMP/JA. The first-block relation is preserved into a full second-block
+view using actual B registers, canonical CMP and the immutable invocation
+frame. Every byte-decoded canonical native execution has that complete state,
+empty effects/fault and the actual successor, including64-bit wrap. All6 state
+audits pass. +72/store reconstruction and full-state TV remain open.

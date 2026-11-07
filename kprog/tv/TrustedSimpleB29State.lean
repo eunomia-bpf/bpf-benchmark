@@ -131,9 +131,57 @@ theorem second_read_fault_architecture (env : BPF.Environment) (n : X86.State) (
   · simpa only [exactEndpoint] using proofRun
   · simp only [exactEndpoint]
 
+
+/-- +8 JA boundary: native RDI is now the actual B temporary r3. The earlier
+CMP flags are rematerialized from the still represented data/end values. -/
+def secondGuardView (entry : X86.State) (p : BPF.State) : X86.State :=
+  {entry with
+    gpr := fun r => if r=0 then p.regs 0 else if r=1 then p.regs 2
+      else if r=2 then p.regs 1 else if r=6 then p.regs 2 else if r=7 then p.regs 3 else entry.gpr r
+    rflags := X86.arithmeticFlags .w64 true false (p.regs 3) (p.regs 1)
+      (X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 1) entry.rflags)
+    memory := p.memory
+    pc := if p.pc=27 then 60 else 26}
+
+theorem second_guard_architecture (entry : X86.State) (p : BPF.State) :
+    remainingNative8 (firstGuardView entry p)=secondGuardView entry (guard8After p) := by
+  by_cases reject : p.regs 2+(8#64)>p.regs 1
+  all_goals simp +decide [secondGuardView,firstGuardView,remainingNative8,remainingNativeCmp8,remainingNativeLea,
+    guard8After,guard8Add,guard8Move,BPF.setReg,reject]
+  all_goals funext r
+  all_goals by_cases zero : r=0
+  all_goals by_cases one : r=1
+  all_goals by_cases two : r=2
+  all_goals by_cases six : r=6
+  all_goals by_cases seven : r=7
+  all_goals simp_all +decide
+
+/-- Arbitrary decoded native execution of the second block, given the
+architectural relation established by the first block, has the reconstructed
+whole B end state and identical empty effects. No successor is assumed. -/
+theorem second_block_relational_architecture (env : BPF.Environment) (entry n : X86.State)
+    (p : BPF.State) (actual : Transition X86.State)
+    (related : n=firstGuardView entry p) (position : p.pc=5) (active : p.halted=false)
+    (run : CanonicalRelationalPath 0 native [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩] n actual) :
+    actual.state=secondGuardView entry (guard8After p) ∧ actual.events=[] ∧ actual.fault=none ∧
+    Execution (TrustedSimpleB29.instructionStep env) p actual.events (guard8After p) := by
+  subst n
+  have nativePC : (firstGuardView entry p).pc=17 := by simp [firstGuardView,position]
+  have members : ∀ extent ∈ [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩], extent ∈ simpleDefinedExtents := by simp [simpleDefinedExtents]
+  obtain ⟨endpoint,_⟩ := defined_relational_result_unique run members
+    (remaining_native8_evaluation (firstGuardView entry p) nativePC)
+  refine ⟨?_,?_,?_,?_⟩
+  · simpa only [endpoint] using second_guard_architecture entry p
+  · simp only [endpoint]
+  · simp only [endpoint]
+  · simpa only [endpoint] using guard8_execution env p position active
+
 end KProgTV.TrustedSimpleB29State
 #print axioms KProgTV.TrustedSimpleB29State.first_guard_architecture
 #print axioms KProgTV.TrustedSimpleB29State.first_block_relational_architecture
 
 #print axioms KProgTV.TrustedSimpleB29State.first_read_fault_architecture
 #print axioms KProgTV.TrustedSimpleB29State.second_read_fault_architecture
+
+#print axioms KProgTV.TrustedSimpleB29State.second_guard_architecture
+#print axioms KProgTV.TrustedSimpleB29State.second_block_relational_architecture
