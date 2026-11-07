@@ -206,6 +206,27 @@ inductive ShiftCount
 def countValue (s : State) : ShiftCount → Word
   | .register r => s.gpr r | .immediate value => value.setWidth 64
 
+/-- MULX returns the exact unsigned product as two operand-sized halves.
+The 32-bit form fits in 64 bits; the 64-bit form uses 128 bits. No flags change. -/
+def mulxParts (width : BzhiWidth) (left right : Word) : Word × Word :=
+  match width with
+  | .w32 =>
+      let product := (left.setWidth 32).setWidth 64 * (right.setWidth 32).setWidth 64
+      ((product.setWidth 32).setWidth 64, ((product >>> 32).setWidth 32).setWidth 64)
+  | .w64 =>
+      let product := left.setWidth 128 * right.setWidth 128
+      (product.setWidth 64, (product >>> 64).setWidth 64)
+
+/-- Read the explicit operand and the incoming implicit RDX before either
+write. When the two destinations alias, the high half is the final value. -/
+def mulxStep (width : BzhiWidth) (high low : Register) (source : Source)
+    (nextPc : Word) (s : State) : Transition State :=
+  match readSource s source width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (right, reads) =>
+      let parts := mulxParts width (s.gpr 2) right
+      ⟨{ s with gpr := fun r => if r = high then parts.2 else if r = low then parts.1 else s.gpr r, pc := nextPc }, reads, none⟩
+
 /-- BMI2 shifts read width-sized operands, mask counts to five/six bits,
 and leave every flag unchanged. Rotate selects a window in a doubled source. -/
 def bmiShiftValue (width : BzhiWidth) (kind : BmiShift) (value amount : Word) : Word :=
@@ -670,6 +691,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | mulx (width : BzhiWidth) (high low : Register) (source : Source) (nextPc : Word)
   | multiply (width : CmovWidth) (dst : Register) (source : Source) (immediate : Option (BitVec 32)) (nextPc : Word)
   | rotateRight (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
   | exchange (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
@@ -708,7 +730,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -718,6 +740,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .mulx width high low source nextPc => mulxStep width high low source nextPc s
   | .multiply width dst source immediate nextPc => multiplyStep width dst source immediate nextPc s
   | .rotateRight width dst count nextPc => rotateRightStep width dst count nextPc s
   | .exchange width left right nextPc => exchangeStep width left right nextPc s
@@ -813,6 +836,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .mulx .. => 0xffffffffffffffff
   | .multiply .. => 0xffffffffffffff2b
   | .rotateRight width _ count _ => legacyDefinedFlags width .rotateLeft count
   | .exchange .. => 0xffffffffffffffff
@@ -1205,8 +1229,9 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let vexPrefix := vex2 % 8
     let isBit := map == 2 && vexPrefix == 0 && (opcode == 0xf5 || opcode == 0xf2)
     let isShift := map == 2 && opcode == 0xf7 && (vexPrefix == 1 || vexPrefix == 2 || vexPrefix == 3)
+    let isMulx := map == 2 && opcode == 0xf6 && vexPrefix == 3
     let isRotate := map == 3 && opcode == 0xf0 && vexPrefix == 3 && (vex2 / 8) % 16 == 15
-    if p.vexInvalid || !(isBit || isShift || isRotate) then
+    if p.vexInvalid || !(isBit || isShift || isRotate || isMulx) then
       throw "invalid BMI VEX encoding"
     let rex := (if vex1 / 128 = 0 then 4 else 0) +
       (if (vex1 / 64) % 2 = 0 then 2 else 0) +
@@ -1217,6 +1242,7 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let index := registerCode (15 - (vex2 / 8) % 16)
     let width := if vex2 / 128 = 0 then BzhiWidth.w32 else .w64
     let (source, nextPc, cursor) ← operand bytes s p modrm (count + 5) (if isRotate then 1 else 0)
+    if isMulx then return .mulx width dst index source nextPc
     if isRotate then
       let immediate ← byteAt bytes cursor
       return .bmiShift width .rotate dst source (.immediate (BitVec.ofNat 8 immediate)) nextPc
