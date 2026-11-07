@@ -49,5 +49,23 @@ check('probe_preserves_opaque_copy_suffix', 'push rbx; mov DWORD PTR [rsp], 7; p
 body = 'push rbx; mov rdi, rsp; mov esi, 8; mov edx, 0; call r12; mov eax, DWORD PTR [rsp]; add rsp, 8; ret'
 check('all_targets_must_write',body,False,{4:(('scalar',113),('scalar',7))})
 check('both_probe_targets_write',body,True,{4:(('scalar',113),('scalar',112))})
+# A join may point to native private stack or external memory. Keep every
+# possible stack origin: neither a load nor a weak store may erase ABI taint.
+check('joined_external_defined_stack',
+      'push rbx; mov QWORD PTR [rsp], 7; mov rcx, rdi; test edi, edi; je 6; mov rcx, rsp; mov rax, QWORD PTR [rcx]; add rsp, 8; ret',True)
+check('joined_external_opaque_stack',
+      'push rbx; mov rcx, rdi; test edi, edi; je 5; mov rcx, rsp; mov rax, QWORD PTR [rcx]; add rsp, 8; ret',False)
+check('joined_store_cannot_initialize_other_path',
+      'push rbx; mov rcx, rdi; test edi, edi; je 5; mov rcx, rsp; mov QWORD PTR [rcx], 7; mov rax, QWORD PTR [rsp]; add rsp, 8; ret',False)
+check('joined_store_cannot_escape_opaque_bits',
+      'push rbx; mov rcx, rdi; test edi, edi; je 5; mov rcx, rsp; mov QWORD PTR [rcx], rbx; mov eax, 2; add rsp, 8; ret',False)
+check('joined_two_stack_origins_keep_opaque_alternative',
+      'push rbx; push rbx; mov QWORD PTR [rsp], 7; mov rcx, rsp; lea rdx, [rsp+8]; test edi, edi; cmove rcx, rdx; mov rax, QWORD PTR [rcx]; add rsp, 16; ret',False)
+check('joined_two_defined_stack_origins',
+      'push rbx; push rbx; mov QWORD PTR [rsp], 7; mov QWORD PTR [rsp+8], 9; mov rcx, rsp; lea rdx, [rsp+8]; test edi, edi; cmove rcx, rdx; mov rax, QWORD PTR [rcx]; add rsp, 16; ret',True)
+check('joined_copy_source_keeps_opaque_stack_bits',
+      'mov rdx, rdi; push rbx; test edi, edi; je 5; mov rdx, rsp; push rax; mov rdi, rsp; mov esi, 8; call bpf_probe_read_kernel; mov rax, QWORD PTR [rsp]; add rsp, 16; ret',False)
+check('joined_copy_source_defined_on_every_path',
+      'mov rdx, rdi; push rbx; mov QWORD PTR [rsp], 7; test edi, edi; je 6; mov rdx, rsp; push rax; mov rdi, rsp; mov esi, 8; call bpf_probe_read_kernel; mov rax, QWORD PTR [rsp]; add rsp, 16; ret',True)
 (HERE/'helper-effects-regression.json').write_text(json.dumps(rows,indent=2)+'\n')
 print('helper memory effect regressions:',len(rows),'passed')

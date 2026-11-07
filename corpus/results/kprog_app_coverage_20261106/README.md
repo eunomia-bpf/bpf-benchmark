@@ -1098,3 +1098,24 @@ Clang's source-location exhaustion; six proofs compile and eight retain a
 backend short-branch-range failure. Those eight remain active. The next phase
 uses installed clang18's BPFv4 long-jump target for every program. No OTel
 application bound execution or timing is claimed here.
+
+
+## Preserve private-stack origins across pointer joins
+
+The entry-definedness constructor now retains finite sets of private-stack
+origins when control flow joins stack pointers with other stack/external
+pointers. Reads intersect defined bits across every possible origin; weak
+stores retain old taint at alternatives they might not overwrite. Helper copies
+also preserve opaque source bytes and withhold pointer provenance when the
+source origin is ambiguous. Stack offset0 stays distinct from an external
+pointer. No runtime instruction or guard is added.
+
+All42 existing micro/stage2 constructors and31 helper-memory/alias regressions
+pass, including eight new stack/external, weak-store and helper-copy controls.
+The three previously accepted undefined-entry/flags/helper-clobber cases still
+reject at specialization. A second private full `make -C kprog/formal check`
+passes on the capacity snapshot plus this exact constructor overlay.
+[Source, cases and raw checks](alias-join-artifacts.tar.gz) preserve the evidence;
+reproduce constructor controls with `make -f corpus/results/kprog_app_coverage_20261106/Makefile abi-regression helper-effects-regression arithmetic-regression`.
+V/F own the separate division-fault repair and its bound regressions recorded
+in coordination. This change preserves their division implementation.
