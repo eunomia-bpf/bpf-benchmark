@@ -1978,3 +1978,12 @@ full-state equality between each declared context conversion and an ordinary
 BPF step on the whole derived physical37instruction image. Both read faults
 and successes are covered without access-outcome premises. The other35 bytes
 retain their exact positions; all-PC/whole-execution equivalence follows next.
+
+`trusted-simple-physical-whole.json` proves pointwise step equality for every
+complete BPF state and bidirectional correspondence of **all finite executions**
+between the declared platform interpretation and ordinary BPF semantics on
+the whole derived37instruction image. All35 unchanged positions are decoded
+from exact bytes; invalid PC, halt, environment and all fault outcomes remain
+covered. Full endpoints and ordered traces are exact, with no fuel/path/access
+premise. This remains a declared interpretation, not a newly captured kernel
+post-conversion program or proof of historical kernel binary identity.

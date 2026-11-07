@@ -76,6 +76,173 @@ theorem physical_context_step_2 (env : BPF.Environment) (s : BPF.State) (positio
         BPF.step,BPF.decode,BPF.execute,BPF.load,BPF.setReg,read,active,position,littleEndian,
         Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
 
+
+/-- Ordinary unchanged instructions use exactly the same physical BPF
+transition, including environment choices and every error/fault result. -/
+theorem ordinary_physical_step (env : BPF.Environment) (s : BPF.State) (instruction : BPF.Instruction)
+    (not0 : s.pc≠0) (not2 : s.pc≠2)
+    (virtual : BPF.decode proof s.pc.toNat=.ok instruction)
+    (physical : BPF.decode physicalProof s.pc.toNat=.ok instruction) (notWide : instruction.code≠0x18) :
+    BPFPlatform.step (initializedPlatform env) proof s=BPF.step env physicalProof s := by
+  have execute := BPF.execute_program_congr_if_wide env proof physicalProof s instruction
+    (fun impossible => False.elim (notWide impossible))
+  cases active : s.halted <;> by_cases negative : s.pc<0 <;>
+    simp [BPFPlatform.step,initializedPlatform,platform,BPF.step,active,negative,not0,not2,
+      virtual,physical,execute,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- These are wire-decoding certificates for the actual unchanged35BPF
+positions, not a new instruction interpreter. -/
+theorem unchanged_physical_decodes (pc : Nat) (inside : pc<37) (not0 : pc≠0) (not2 : pc≠2) :
+    ∃ instruction, BPF.decode proof pc=.ok instruction ∧
+      BPF.decode physicalProof pc=.ok instruction ∧ instruction.code≠0x18 := by
+  have choices : pc=1 ∨ pc=3 ∨ pc=4 ∨ pc=5 ∨ pc=6 ∨ pc=7 ∨ pc=8 ∨ pc=9 ∨ pc=10 ∨ pc=11 ∨ pc=12 ∨ pc=13 ∨ pc=14 ∨ pc=15 ∨ pc=16 ∨ pc=17 ∨ pc=18 ∨ pc=19 ∨ pc=20 ∨ pc=21 ∨ pc=22 ∨ pc=23 ∨ pc=24 ∨ pc=25 ∨ pc=26 ∨ pc=27 ∨ pc=28 ∨ pc=29 ∨ pc=30 ∨ pc=31 ∨ pc=32 ∨ pc=33 ∨ pc=34 ∨ pc=35 ∨ pc=36 := by omega
+  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · refine ⟨⟨0x7b,10,2,0xffd8,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x7b,10,1,0xffe0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb4,1,0,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x7a,10,0,0xffe8,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x7a,10,0,0xfff0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x62,10,0,0xfff8,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,0,9,0x1,0x2⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x79,2,10,0xffd8,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x79,3,10,0xffe0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x2d,2,3,0x16,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,4,0,0x0,0x8⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xbf,5,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x7,5,0,0x0,0x48⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x2d,5,3,0x12,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xf,4,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x2d,4,3,0x10,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,1,0,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,3,0,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xf,3,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,4,0,0x0,0x614e⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x6b,3,4,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,3,0,0x0,0x2⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xf,3,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,4,0,0x0,0xbc⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x73,3,4,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,3,0,0x0,0x3⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xf,3,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x63,3,1,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb7,3,0,0x0,0x7⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xf,3,2,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x73,3,1,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xb4,1,0,0x0,0x2⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0xbc,0,1,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x5,0,0,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+  · refine ⟨⟨0x95,0,0,0x0,0x0⟩,rfl,?_,by decide⟩
+    rw [physical_proof_literal]
+    rfl
+
+/-- Pointwise equality for EVERY full proof state, including halted,
+negative/out-of-range PC and every guest read/write fault. -/
+theorem physical_step_eq (env : BPF.Environment) (s : BPF.State) :
+    BPFPlatform.step (initializedPlatform env) proof s=BPF.step env physicalProof s := by
+  cases active : s.halted with
+  | true =>
+    simp [BPFPlatform.step,BPF.step,active,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  | false =>
+    by_cases negative : s.pc<0
+    · simp [BPFPlatform.step,BPF.step,active,negative,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    · by_cases zero : s.pc=0
+      · exact physical_context_step_0 env s zero
+      · by_cases two : s.pc=2
+        · exact physical_context_step_2 env s two
+        · by_cases inside : s.pc.toNat<37
+          · have not0 : s.pc.toNat≠0 := by omega
+            have not2 : s.pc.toNat≠2 := by omega
+            obtain ⟨instruction,virtual,physical,notWide⟩ := unchanged_physical_decodes s.pc.toNat inside not0 not2
+            exact ordinary_physical_step env s instruction zero two virtual physical notWide
+          · have outside : 296<8*s.pc.toNat+8 := by omega
+            have virtual : BPF.decode proof s.pc.toNat=.error "BPF instruction outside artifact" := by
+              simp [BPF.decode,proof_size,outside,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+            have physical : BPF.decode physicalProof s.pc.toNat=.error "BPF instruction outside artifact" := by
+              simp [BPF.decode,physical_proof_size,outside,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+            simp [BPFPlatform.step,BPF.step,active,negative,virtual,physical,
+              Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Whole-program relation equality preserves complete states and ordered
+traces at every finite prefix; no selected path or evaluator bound is used. -/
+theorem physical_instruction_relation_eq (env : BPF.Environment) :
+    initializedInstructionStep env=BPFPath.instructionStep env physicalProof := by
+  funext before events after
+  unfold initializedInstructionStep BPFPath.instructionStep
+  rw [physical_step_eq]
+
+theorem physical_execution_iff (env : BPF.Environment) (first last : BPF.State) (trace : List Event) :
+    Execution (initializedInstructionStep env) first trace last ↔
+      Execution (BPFPath.instructionStep env physicalProof) first trace last := by
+  rw [physical_instruction_relation_eq]
+
 end KProgTV.TrustedSimplePlatform
 
 #print axioms KProgTV.TrustedSimplePlatform.physical_proof_size
@@ -91,3 +258,13 @@ end KProgTV.TrustedSimplePlatform
 #print axioms KProgTV.TrustedSimplePlatform.physical_context_step_0
 
 #print axioms KProgTV.TrustedSimplePlatform.physical_context_step_2
+
+#print axioms KProgTV.TrustedSimplePlatform.ordinary_physical_step
+
+#print axioms KProgTV.TrustedSimplePlatform.unchanged_physical_decodes
+
+#print axioms KProgTV.TrustedSimplePlatform.physical_step_eq
+
+#print axioms KProgTV.TrustedSimplePlatform.physical_instruction_relation_eq
+
+#print axioms KProgTV.TrustedSimplePlatform.physical_execution_iff
