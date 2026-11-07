@@ -1,0 +1,94 @@
+{
+  "input_header_sha256": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
+  "cases": [
+    {
+      "app": "tcplife",
+      "max_fp_minus": 584,
+      "command": [
+        "clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/kprog/arm64",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/A/ghost-candidate-jw905ike/tcplife.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/ghost-candidate-jw905ike/tcplife.o"
+      ]
+    },
+    {
+      "app": "katran",
+      "max_fp_minus": 672,
+      "command": [
+        "clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/kprog/arm64",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/A/ghost-candidate-jw905ike/katran.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/ghost-candidate-jw905ike/katran.o"
+      ]
+    }
+  ],
+  "header_unchanged": true,
+  "host_cross_checks": [
+    {
+      "case": "stack_arena",
+      "compile": 0,
+      "run": 0,
+      "stdout": "arm64 stack arena route host cross-check: OK (2814832 cases)\n"
+    },
+    {
+      "case": "stack_arm",
+      "compile": 0,
+      "run": 0,
+      "stdout": "arm64 stack arm route host cross-check: OK (167480 cases)\n"
+    },
+    {
+      "case": "stack_read_tag_source",
+      "compile": 0,
+      "run": 0,
+      "stdout": "arm64 stack read tag source route host cross-check: OK (60144 cases)\n"
+    },
+    {
+      "case": "stack_write_lanes",
+      "compile": 0,
+      "run": 0,
+      "stdout": "arm64 stack write lanes route host cross-check: OK (3843515 cases)\n"
+    },
+    {
+      "case": "stack_write_tag_action",
+      "compile": 0,
+      "run": 0,
+      "stdout": "arm64 stack write tag action route host cross-check: OK (9285536 cases)\n"
+    }
+  ],
+  "promoted": false,
+  "reason": "conditional ghost writes leave both compiler frame offsets unchanged"
+}
