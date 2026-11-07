@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Mulx
 import KProgFormal.Refinement.X86Movx
 import KProgFormal.Refinement.X86RotateRight
 import KProgFormal.Refinement.X86LegacyShift
@@ -1300,5 +1301,84 @@ theorem extend_register_frame_refines (env : Environment) (frame : Frame) (arena
   congr 2
   funext r
   by_cases same : r = dst <;> simp [same]
+
+def mulxScalarWidth : Reference.X86.BzhiWidth → Reference.X86.ScalarWidth
+  | .w32 => .w32 | .w64 => .w64
+
+theorem mulx_scalar_write (width : Reference.X86.BzhiWidth) (dst : Reference.X86.Register)
+    (old value : NativeWord) :
+    Reference.X86.scalarWriteValue old value (mulxScalarWidth width) (.low dst) =
+      X86Mulx.write width old value := by
+  rw [← X86Scalar.register_write_refines]
+  cases width <;> rfl
+
+/-- Each product half already occupies its full architectural output width.
+The raw writer scalarizes its destination and projects RSP back to its offset. -/
+theorem native_mulx_half_write (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst : Reference.X86.Register) (left right : NativeWord) (upper : Bool) :
+    nativeRegisters env frame arena (writeRegister env frame arena state (mulxScalarWidth width)
+      (.low dst) (if upper then (Reference.X86.mulxParts width left right).2
+        else (Reference.X86.mulxParts width left right).1)) =
+      { nativeRegisters env frame arena state with gpr := fun r => if r = dst then
+          (if upper then (Reference.X86.mulxParts width left right).2
+            else (Reference.X86.mulxParts width left right).1)
+          else (nativeRegisters env frame arena state).gpr r } := by
+  rw [native_register_write]
+  simp only [Reference.X86.RegisterSlice.reg, nativeRegisters]
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte, mulx_scalar_write]
+    cases upper
+    · exact (X86Mulx.writes_parts width _ left right).1
+    · exact (X86Mulx.writes_parts width _ left right).2
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+theorem native_mulx_low_write (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst : Reference.X86.Register) (left right : NativeWord) :
+    nativeRegisters env frame arena (writeRegister env frame arena state (mulxScalarWidth width)
+      (.low dst) (Reference.X86.mulxParts width left right).1) =
+      { nativeRegisters env frame arena state with gpr := fun r => if r = dst then
+          (Reference.X86.mulxParts width left right).1
+          else (nativeRegisters env frame arena state).gpr r } := by
+  simpa only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] using
+    native_mulx_half_write env frame arena state width dst left right false
+
+theorem native_mulx_high_write (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst : Reference.X86.Register) (left right : NativeWord) :
+    nativeRegisters env frame arena (writeRegister env frame arena state (mulxScalarWidth width)
+      (.low dst) (Reference.X86.mulxParts width left right).2) =
+      { nativeRegisters env frame arena state with gpr := fun r => if r = dst then
+          (Reference.X86.mulxParts width left right).2
+          else (nativeRegisters env frame arena state).gpr r } := by
+  simpa only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] using
+    native_mulx_half_write env frame arena state width dst left right true
+
+/-- The C limb/product arms capture both operands before the low assignment.
+The high assignment uses the updated destination state; high=low retains high. -/
+def mulxRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (high low source : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let product := X86Mulx.parts width (registerValue env frame arena state 2)
+    (registerValue env frame arena state source)
+  let first := writeRegister env frame arena state (mulxScalarWidth width) (.low low) product.1
+  let second := writeRegister env frame arena first (mulxScalarWidth width) (.low high) product.2
+  registerPc second nextPc
+
+theorem mulx_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (high low source : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (mulxRegister env frame arena state width high low source nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.mulx width high low (.register source) nextPc)
+        (nativeRegisters env frame arena state) := by
+  unfold mulxRegister
+  rw [X86Mulx.parts_refine, native_register_pc]
+  rw [native_mulx_high_write, native_mulx_low_write]
+  rfl
 
 end KProgFormal.Refinement.X86NumericAddress

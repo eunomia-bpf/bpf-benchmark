@@ -648,6 +648,13 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← registerOf src
         pure ⟨nativeRegisters env frame arena
           (populationCountRegister env frame arena state width destination source nextPc), [], none⟩
+      else if code = GeneratedX86Opcode.code .mulx then do
+        let width ← bswapWidthOf flags
+        let low ← registerOf dst
+        let source ← registerOf src
+        let high ← registerOf (aux.setWidth 8)
+        pure ⟨nativeRegisters env frame arena
+          (mulxRegister env frame arena state width high low source nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .xchg then do
         let width ← widthOf flags
         let destination ← registerOf dst
@@ -670,6 +677,12 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | mulx (width : Reference.X86.BzhiWidth) (high low source : Register)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (lowField : dst = registerByte low) (srcField : src = registerByte source)
+      (highField : aux = BitVec.ofNat 32 high.val) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .mulx)
+        (.mulx width high low (.register source) nextPc)
   | extend (signed : Bool) (sourceWidth targetWidth : ScalarWidth)
       (destination : Register) (source : RegisterSlice)
       (targetWidthField : WidthBinding flags targetWidth)
@@ -923,6 +936,15 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | mulx width high low source widthField lowField srcField highField =>
+      apply exact_dispatch_refines
+      subst dst; subst src; subst aux
+      have widthDecoded := bswap_width_binding_decodes flags width widthField
+      have highDecoded : registerOf (BitVec.ofNat 8 high.val) = some high := register_of_byte high
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte, highDecoded] using
+        congrArg some (mulx_register_frame_refines env frame arena state width high low source nextPc)
   | extend signed sourceWidth targetWidth destination source targetWidthField sourceWidthField dstField srcField =>
       apply exact_dispatch_refines
       subst dst
@@ -1248,6 +1270,7 @@ def directRegisterOpcode : GeneratedX86Specialization.Op → Option GeneratedX86
   | .setcc => some .setcc | .ror => some .ror | .rorx => some .rorx
   | .andn => some .andn | .bt => some .bt | .btImm => some .btImm
   | .imulImm => some .imulImm
+  | .mulx => some .mulx
   | .movzxReg => some .movzxReg | .movsxReg => some .movsxReg
   | .addImm => some .addImm | .aluImm => some .aluImm
   | .addReg => some .addReg | .xorReg => some .xorReg | .aluReg => some .aluReg
@@ -1284,6 +1307,12 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
       pure ⟨nativeRegisters env frame arena (moveRegister env frame arena state width destination source nextPc), [], none⟩
   | .movzxReg => movxRegisters env frame arena false flags aux dst src nextPc state
   | .movsxReg => movxRegisters env frame arena true flags aux dst src nextPc state
+  | .mulx => do
+      let width ← bswapWidthOf flags
+      let low ← registerOf dst
+      let source ← registerOf src
+      let high ← registerOf (aux.setWidth 8)
+      pure ⟨nativeRegisters env frame arena (mulxRegister env frame arena state width high low source nextPc), [], none⟩
   | .cmov => do
       let width ← cmovWidthOf flags
       let destination ← registerOf dst

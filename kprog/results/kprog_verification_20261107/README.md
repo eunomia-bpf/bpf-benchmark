@@ -10,20 +10,23 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
 | Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 27/75 | 0/71 |
-| Raw register dispatcher arm composition | 27/75 | 0/71 |
-| Additional partial-model handler families | 40/75 | 0 |
-| Conditional modeled handler / observed dispatcher | 0 | 71/71 |
-| O2 C-model token-body equality | 27/75 | 0/71 |
+| Raw register handler refinement | 28/75 | 0/71 |
+| Raw register dispatcher arm composition | 28/75 | 0/71 |
+| Additional partial-model handler families | 39/75 | 0 |
+| Conditional modeled handler / observed dispatcher | 0 | 69/71 |
+| Declared opcode dispatcher gaps | 0 | 2/71 |
+| O2 C-model token-body equality | 28/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 27 x86 O2 equalities cover 21 direct bodies and six unchanged generic calls.
-The remaining 40 x86 reference-family handlers have partial model proofs; eight
+The 28 x86 O2 equalities cover 22 direct bodies and six unchanged generic calls.
+The remaining 39 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
-premises. Whole-simulator raw handler/dispatcher closure, compiled-B,
+premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
+immediate-operand gate coverage; the current modeled/C gate selects6/7.
+Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
 Inventory is pinned to the production headers in each row's `catalog_source`
@@ -2979,3 +2982,28 @@ F's published `a13de4544` ledger supplies four additional numeric replay entries
 CPU/C/reference comparisons with all differences zero. Their source, header,
 executable and reference hashes remain in the table. Selected x86 replay totals
 advance to **66/75**, with nine numeric operations awaiting selected replay.
+
+The MULX raw-frame increment captures implicit RDX and the explicit source
+before either destination assignment. The low write precedes the high write;
+every destination/source alias, high=low, RSP offset and STACK-projected value
+is quantified. Separate product-half write lemmas preserve the complete native
+projection across each actual numeric writer. The ordered dispatcher consumes
+actual width/GPR/AUX fields; the direct token body has equality through the
+same shared macro semantics. Coverage advances to **28** raw x86 handler and
+dispatcher operations and **28** C-model O2 tokens (22 direct and six generic).
+
+Focused123 and all378 default Lean targets passed, with thirteen axiom audits.
+The existing MULX reference suite checked2,904 actual CPU products/aliases/flags,
+8,192 GNU encodings and9,228 complete native/fault states. Existing UBSan MULX
+route and generic specialization hosts retain their original cases and stable
+recorded inputs; exact command/results are archived. All earlier dispatcher
+theorem signatures are retained verbatim. The canonical ISA, contracts,
+production C and oracle sources retain their published definitions.
+
+The ARM table now records two declared numeric dispatch gaps explicitly:
+ADD_IMM(3) and SUB_IMM(4). The actual generated ALU gate accepts ALU_IMM(6)
+and ALU_REG(7), matching the existing universal model's `aluCode` selector.
+Canonical arithmetic families remain defined, and conditional modeled entries
+now total **69/71**. F's private gate/operand-selector candidate and A's source
+adoption carry separate replay/publication identities. Universal O1/O2 work
+continues against the actual published production definitions.
