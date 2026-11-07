@@ -113,9 +113,9 @@ matching-work measurement continue from the reported failure classes.
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
-| Tetragon | 289 | 2 | 2 | 2 | 1: helper stack relation | 0 | [201956 batch](native-coherent-tetragon__observer/README.md) |
+| Tetragon | 289 | 2 | 2 | 2 | 1: helper stack relation | 0 | [201956 batch](native-affine-tetragon__observer/README.md) |
 | Katran | 1 | 1 | 1 | 0 | 0 | 1: partial pointer-register write | [201524 batch](native-coherent-katran/README.md) |
-| Tracee | 151 | 2 | 2 | 2 | 1: helper stack relation | 0 | [203243 helper-preserving batch](tracee-core-helper/README.md) |
+| Tracee | 151 | 2 | 2 | 2 | 1: helper stack relation | 0 | [203243 helper-preserving batch](tracee-affine-helper/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -145,3 +145,9 @@ shared [affine stack-origin repair](helper-stack-affine/README.md) preserves
 finite private-stack/external alternatives through displacement, known index
 and constant ADD/SUB while retaining opaque-byte checks. The generic checker
 passes141 cases; whole Tetragon/Tracee replay follows the new source epoch.
+
+The affine/readonly/LEA producer replay records two bound requests for each of
+Tetragon and Tracee, followed by helper-source stack relation errors. Their new
+linked archives keep the exact source epoch. The shared slot-join repair aligns
+external-value defaults across reads and merges, passes143generic ABI controls,
+and proceeds to a fresh whole-application batch.

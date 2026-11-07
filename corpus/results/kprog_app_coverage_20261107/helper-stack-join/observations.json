@@ -1,0 +1,19 @@
+{
+  "encoder_abi_cases": 143,
+  "cl_host_cases": 3072,
+  "rendered_movx_cases": 19,
+  "run_exit": 0,
+  "prior_control": {
+    "detected": true,
+    "error": "([('sub', ('rsp', '64')), ('mov', ('QWORD PTR [rsp+8]', '42')), ('test', ('rdi', 'rdi')), ('je', ('7',)), ('lea', ('rdx', '[rsp+8]')), ('mov', ('QWORD PTR [rsp+16]', 'rdx')), ('jmp', ('c',)), ('mov', ('rdx', 'rdi')), ('lea', ('rdi', '[rsp+16]')), ('mov', ('esi', '8')), ('mov', ('eax', '113')), ('call', ('rax',)), ('mov', ('rdx', 'QWORD PTR [rsp+16]')), ('lea', ('rdi', '[rsp+32]')), ('mov', ('esi', '8')), ('mov', ('eax', '113')), ('call', ('rax',)), ('mov', ('eax', 'DWORD PTR [rsp+32]')), ('add', ('rsp', '64')), ('ret', ())], 'native helper source stack relation unresolved at 0x10: call rax', None)"
+  },
+  "source_sha256": {
+    "kprog/x86/micro-prog/x86_abi.py": "82ca3cdf81391ef732ca9e4a24a5666caa9deeddfe85ec0421163caaf993b346",
+    "kprog/formal/tools/check_x86_flag_definedness.py": "bc7da2e7829bb274d2be9b8ee69225299b48d7df554d71924df7e08a1c21e356"
+  },
+  "whole_application_prior_epochs": {
+    "tetragon/observer": "x86_kvm_corpus_20261107_205501_597797",
+    "tracee/monitor": "x86_kvm_corpus_20261107_205819_761660"
+  },
+  "raw_sha256": "d2eafb8adb0fec32b3bdf10f5070ae1f49da3c932e79653c3c7c787815609374"
+}

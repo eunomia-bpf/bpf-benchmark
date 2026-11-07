@@ -133,6 +133,22 @@ def main():
                   ("mov", ("eax", "113")), ("call", ("rax",)),
                   ("add", ("rsp", "64"))] + finish
     check(unresolved, "native helper source stack relation unresolved")
+    # A helper's fully written external bytes use the same absent-slot
+    # representation as read_alias; joins retain the other stack alternative.
+    for opaque_source in (False, True):
+        body = [("sub", ("rsp", "64")),
+                ("mov", ("QWORD PTR [rsp+8]", "rbx" if opaque_source else "42")),
+                ("test", ("rdi", "rdi")), ("je", ("7",)),
+                ("lea", ("rdx", "[rsp+8]")),
+                ("mov", ("QWORD PTR [rsp+16]", "rdx")), ("jmp", ("c",)),
+                ("mov", ("rdx", "rdi")), ("lea", ("rdi", "[rsp+16]")),
+                ("mov", ("esi", "8")), ("mov", ("eax", "113")), ("call", ("rax",)),
+                ("mov", ("rdx", "QWORD PTR [rsp+16]")),
+                ("lea", ("rdi", "[rsp+32]")), ("mov", ("esi", "8")),
+                ("mov", ("eax", "113")), ("call", ("rax",)),
+                ("mov", ("eax", "DWORD PTR [rsp+32]")),
+                ("add", ("rsp", "64")), ("ret", ())]
+        check(body, "undefined native ABI register eax" if opaque_source else None)
     print(f"x86 flag definedness: {cases} encoder/ABI condition and undefined-result cases OK")
     check_compiled_counts()
     check_compiled_movx()

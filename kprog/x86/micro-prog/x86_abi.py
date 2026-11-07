@@ -97,7 +97,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
         opaque = {p: a.opaque.get(p, 255) & b.opaque.get(p, 255)
                   for p in a.opaque.keys() | b.opaque.keys()}
         opaque = {p: v for p, v in opaque.items() if v != 255}
-        pointers = {p: joined_pointer(a.pointers.get(p), b.pointers.get(p))
+        pointers = {p: joined_pointer(a.pointers.get(p, False), b.pointers.get(p, False))
                     for p in a.pointers.keys() | b.pointers.keys()}
         return State(tuple(x & y for x, y in zip(a.defined, b.defined)),
                      tuple(joined_pointer(x,y) for x,y in zip(a.aliases,b.aliases)),

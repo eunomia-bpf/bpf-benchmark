@@ -387,3 +387,10 @@ ELF section and extracts STT_OBJECT extents from its symbol table. Exact section
 bytes and distinct symbol identities retain their native layout. The generic
 frontend result records88 data fixtures and the production adoption hash;
 application batches capture the reader source at service startup.
+
+
+Helper-copy stack slot joins use the same external-value default as slot reads.
+A predecessor with helper-written ordinary bytes joins with a saved private-stack
+pointer as finite stack/external alternatives. Explicit unknown origins keep their
+rejection path; copied opaque ABI bytes retain their taint through every origin.
+The common encoder/ABI checker carries paired defined/opaque branch controls.
