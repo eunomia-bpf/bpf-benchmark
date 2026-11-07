@@ -1339,6 +1339,37 @@ theorem original_native_complete_path_exists (n : X86.State) (position : n.pc=0)
     simpa only [originalNativePath,originalNativeResult,outcome,Option.isSome,ite_false,
       instruction,effect] using combined
 
+
+/-- A valid invocation's original return target and exact read survive the
+body. The extra RET read is retained, not reclassified as an erased B spill.
+Body faults still terminate before RET. -/
+theorem original_native_invocation_return (n : X86.State) (position : n.pc=0)
+    (target : Word) (event : Event)
+    (entryRead : readMemory n.memory (n.gpr 4) 8=.ok (target,event))
+    (canonical : X86.canonicalTarget n.addressWidth target=true)
+    (apart : ∀ pointer read, readMemory n.memory (n.gpr 7) 8=.ok (pointer,read) →
+      packetReturnSlotApart pointer (n.gpr 4)) :
+    originalNativeResult n =
+      if (allReadNativeResult n).fault.isSome then allReadNativeResult n
+      else ⟨{ (allReadNativeResult n).state with
+        gpr := fun r => if r=4 then n.gpr 4+(8#64) else (allReadNativeResult n).state.gpr r,
+        pc := target },(allReadNativeResult n).events++[event],none⟩ := by
+  have body := all_read_native_path_exists n position
+  have valid : simpleClosedPC n.pc := by simp [simpleClosedPC,simpleNativeOffsets,position]
+  have frame := captured_native_prefix_abi_frame (canonical_relational_path_execution body) valid
+  have stack := congrArg (fun saved => saved.2.1) frame
+  change (allReadNativeResult n).state.gpr 4=n.gpr 4 at stack
+  have width := congrArg (fun saved => saved.2.2.2.2.2.2.2.2.2.2) frame
+  change (allReadNativeResult n).state.addressWidth=n.addressWidth at width
+  have unchanged := captured_native_return_slot_read n (allReadNativeResult n) position body apart
+  have retained : readMemory (allReadNativeResult n).state.memory
+      ((allReadNativeResult n).state.gpr 4) 8=.ok (target,event) := unchanged.trans entryRead
+  have retainedEntry : readMemory (allReadNativeResult n).state.memory
+      (n.gpr 4) 8=.ok (target,event) := by simpa only [stack] using retained
+  by_cases failed : (allReadNativeResult n).fault.isSome=true
+  · simp only [originalNativeResult,failed,ite_true]
+  · simp [originalNativeResult,failed,X86.step,X86.returnStep,stack,width,retainedEntry,canonical]
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1448,3 +1479,5 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.original_native_ret_at
 
 #print axioms KProgTV.TrustedSimpleSafety.original_native_complete_path_exists
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_invocation_return

@@ -1919,3 +1919,12 @@ No valid-stack or successful-return premise is needed. The archived entry
 bytes are independently rechecked against the Lean payload plus `c3`. This
 does not classify RET's extra read as a verifier-checked guest event or close
 the physical entry/return ABI transport.
+
+`trusted-simple-original-invocation-return.json` derives the original RET's
+exact full-state outcome from the invocation's initial return-slot read and
+packet/slot separation. Normal body completion returns to the saved canonical
+word, advances native RSP by8 and appends exactly the entry return-read event;
+body faults stop before RET. No final return-read/success premise is supplied.
+The actual kernel invocation must still establish these initial ABI facts and
+continuation identity. The retained RET read is not asserted to be a guest
+access checked by B. Actual codebase and strict B-block transport remain open.
