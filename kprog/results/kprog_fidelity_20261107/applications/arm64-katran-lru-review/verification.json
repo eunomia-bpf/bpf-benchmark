@@ -1,0 +1,149 @@
+{
+  "recorded": "2026-11-07T18:40:16.977417+00:00",
+  "source_archive": "corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/context-native/trusted-arm64-katran-result/run-20261107T145906541111Z.tar.gz",
+  "source_commit": "4b3d09c5543400e5b70aed41a671a1547dda2640",
+  "archive_sha256": "ac6aa71a8c8f52c48a4510a72e950a2043e04663fa3be86c9e89d965e8fc381f",
+  "work_member_sha256": "f0da6606a36f80e0167ea099308681c5843b50eaa675c6fb38fd380ec7d854e3",
+  "guest_exit": 0,
+  "guest_ok": true,
+  "kernel_generated_native_equal": true,
+  "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+  "source_prog_id": 14,
+  "attached_bound_prog_id": 15,
+  "request_archive_sha256": "eec37450269318f232c171c9ee951f108cfed3985a554d7b121e5447a2cebb4e",
+  "pktgen_packets": 19391,
+  "pktgen_errors": 0,
+  "receiver_counter_delta": {
+    "rx_packets": 19391,
+    "rx_bytes": 1628844,
+    "rx_errors": 0,
+    "rx_dropped": 0,
+    "tx_packets": 0,
+    "tx_bytes": 0,
+    "tx_errors": 0,
+    "tx_dropped": 0
+  },
+  "captured_native_run_counts": [
+    {
+      "prog_id": 15,
+      "run_cnt_delta": 19391
+    }
+  ],
+  "native_count_evidence": "Raw work.json and guest.json report the same bound-ID run delta; raw per-program before/after native kernel-counter snapshots are not separately present, so this review does not independently recompute that delta.",
+  "stats_counter_deltas": {
+    "vip_0": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 969550
+    },
+    "lru": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1
+    },
+    "lru_miss": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "new_conn_rate": {
+      "packets_or_v1": 964,
+      "bytes_or_v2": 4440443232832
+    },
+    "fallback_lru": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 0
+    },
+    "icmp_too_big": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "lpm_src": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "remote_encap": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "encap_fail": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "global_lru": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "consistent_hash_drop": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "decap": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "quic_icmp": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "icmp_ptb_v6": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "icmp_ptb_v4": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "xpop_decap_success": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "udp_flow_migration": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "total": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1241024
+    },
+    "tx": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1241024
+    },
+    "drop": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "pass": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    }
+  },
+  "source_mapping_pins": {
+    "runner/libs/app_outcomes.py": "a138c8bbd85a14fae340c071cd6a688e6776f115051e6d1c0077c3e049eb8b4e",
+    "vendor/bpf/katran/katran/lib/bpf/balancer.c": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+    "vendor/bpf/katran/katran/lib/bpf/balancer_consts.h": "7455fc95819d1b2c2bc66e1d852bd224321c1b5b1dd43851655be524066fce5f"
+  },
+  "source_mapping_locations": {
+    "runner/libs/app_outcomes.py": [
+      149,
+      154
+    ],
+    "vendor/bpf/katran/katran/lib/bpf/balancer_consts.h": [
+      258,
+      266
+    ],
+    "vendor/bpf/katran/katran/lib/bpf/balancer.c": [
+      822,
+      850,
+      999,
+      1029
+    ]
+  },
+  "mapping": {
+    "stats[512].v1": "total VIP packets; not LRU lookups denominator",
+    "stats[512].v2": "generic LRU misses",
+    "stats[513]": "TCP SYN/non-SYN miss breakdown; this workload is UDP",
+    "stats[515].v1": "fallback cache selected; not a cache miss"
+  },
+  "workload_name": "katran_kernel_pktgen_l2_udp",
+  "ip_protocol": 17,
+  "scope": "Historical 14:59 one-arm QEMU functional run; no new guest, baseline comparison, current two-start acceptance or hardware performance claim."
+}
