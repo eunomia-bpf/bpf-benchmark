@@ -499,3 +499,134 @@ are propext/Quot.sound; the composed spill results additionally use
 Classical.choice/Lean.ofReduceBool. No passing result contains sorryAx.
 This entry-prefix certificate is now available for composition with the
 existing guard/store certificates and the real return path.
+
+`simple-blocks-check` now proves the complete first native basic block
+(LDP/MOV/CMP/BHI) against all eight actual physical proof instructions.
+`SimpleBlocks.first_block` composes actual executions, complete resulting
+states, guest-memory agreement, ordered projected reads, both real branch
+successors and a proof that every erased effect touches only private bytes.
+The body transport lemma checks decoded instructions against both complete
+captured streams; it does not introduce another instruction semantics.
+The real kernel-mode linker output is exactly the complete84-byte native
+stream in the certificate, with ABI mask0 and no relocation/environment sites.
+All eight entry mutations still reject. The composed theorem uses propext,
+Classical.choice, Lean.ofReduceBool and Quot.sound, without sorryAx.
+
+This result covers BB0 of the physical-context capture. Whole-program
+validation is continuing with the actual generation-bound expanded proof:
+the loader redirects clang EXITs, the module appends ABI clobbers, and the
+verifier interprets virtual context accesses before physical conversion.
+Those exact expanded bytes and platform rules must be included in the final
+certificate; the standalone physical capture is not that expanded artifact.
+
+Both native modules now offer opt-in `capture_checked=1`. After each
+successful bound load, `checked_proof` under that module's debugfs directory
+contains the exact expanded virtual program at `validate_native_proof`, before
+restoration/context conversion. Read it before the next upload: every blob,
+proof, relocation or binding mutation invalidates new opens. Each already-open
+FD retains its own immutable copy. Capture is disabled by default; enabled
+capture failures propagate. This read-only interface requires CAP_SYS_ADMIN.
+
+`native_lab_checked_wire.h` defines version1:120-byte header (six32-bit
+fields followed by binding96), program instructions,16-byte region records,
+40-byte map records and16-byte helper records. It preserves region payloads,
+source/context identity, actual map IDs/layouts/resolved pointers, and helper
+IDs/functions. A callback snapshot alone does not establish load acceptance.
+The per-program record must also retain the successful load result and exact
+native output/metadata. There is one latest snapshot, rather than a queue.
+
+`simple-checked-kernel-check-arm64` exercises the production loader against
+the actual clang/native objects and captures its complete29-instruction
+expanded proof. Both original and native programs return2, perform the exact
+eight-byte packet update and preserve120 other bytes. The capture includes
+the actual EXIT-to-JA rewrite and final stub EXIT; virtual context offsets
+remain0/4. `simple-checked-artifact-check` preserves every snapshot byte and
+checks its27-instruction clang prefix, redirected exit and stub exit in Lean.
+`checked-artifact-negative-check` rejects14 corrupted records and four actual
+instruction mutations. The prefix equality uses Lean.ofReduceBool explicitly.
+Whole-program context/state/effect simulation remains active; these byte
+identity checks do not replace that theorem. Both complete x86/Arm binding
+regressions also verify resolved map/helper facts, invalidation and stable FDs.
+The inputs archive includes the exact small guest runtime used by this test.
+
+`BPFREJIT_NATIVE_LOADER_TV_DIR=<directory>` optionally exports each successful
+bound load while the existing upload lock still protects its snapshot. Enable
+`capture_checked=1` on the paired native-lab module. Each source-ID/native-ID
+subdirectory contains the exact expanded verifier snapshot, linked native bytes
+and relocations, linked proof input, actual JIT bytes/addresses/function lengths,
+and restored stub. `load.json` is written last; a failed export propagates and
+closes the candidate program. An incomplete directory carries no success claim.
+The loader checks generation, entry/ABI/chunk layout and the complete serialized
+load context before exporting. It never substitutes a later program's snapshot.
+
+`capture-loader-build` builds both libraries; `checked-kernel-check-x86`
+exercises the export on the existing real loader/map/helper/multichunk regression.
+`simple-checked-kernel-check-arm64` exercises two distinct successful records,
+stable history after another upload, and a real output-path IO failure. Its log
+retains all exported bytes as `TV_EXPORT` records. Reconstruct them with
+`python3 kprog/tv/extract_checked.py <guest-log> <simple-output> --exports <directory>`.
+The resulting inventory explicitly marks translation validation `not_validated`;
+these are complete inputs to TV, rather than TV certificates.
+
+`checked-platform-check` proves that all29 actual expanded instruction positions
+agree with the captured physical context conversion for arbitrary complete BPF
+states and memory, including read/write faults. It includes the loader's real
+JA-to-final-EXIT rewrite. `accepted_step` derives the PC extent from successful
+byte decoding; `execution_transport` lifts every actual physical execution to
+that exact virtual verifier program with identical complete states and ordered
+events. There is no caller-supplied safety premise or forced successor in this
+transport. Its axioms are propext/Quot.sound; byte-prefix identity separately
+uses Lean.ofReduceBool. Native-to-proof block composition, invocation ABI
+premises and CPU-profile binding remain separate obligations.
+
+Map lookup inlining and the proof boundary (2026-11-07)
+-----------------------------------------------------
+
+The checked virtual B may retain `BPF_FUNC_map_lookup_elem`. When final native P
+inlines that operation, its TV comparison must model the actual lowered memory
+accesses, branches and remaining calls. Retaining an opaque helper event in the
+comparison would change the ordered trace: `BPF.execute` currently appends
+`Event.helper` after the platform helper effects, while an inline array lookup
+contains no helper call. Only proved-private simulator effects may be erased;
+map implementation memory and LRU state are shared objects.
+
+A compatible bridge keeps the verifier's checked call and proves its platform
+expansion against the exact bound kernel's `map->ops->map_gen_lookup` output,
+then compares that expanded behavior with final native bytes using V's canonical
+ISA. Explicit matching operations in B are another representation if the
+verifier accepts them. Neither representation may assume the desired result or
+hide an extra native access. The existing `BPFPlatform` expansion theorem covers
+context-memory conversion; its step currently rejects expansion of a call, so
+it does not already supply this helper-lowering bridge.
+
+The concrete distinctions matter: array lookup reads the key and performs the
+bounds/null choice; per-CPU array adds the slot-pointer and CPU-base operations;
+hash lookup retains `__htab_map_lookup_elem` followed by null/offset handling;
+LRU hash additionally reads and conditionally writes its reference byte. Check
+the actual memory order, addresses, sizes, faults, remaining helper identities,
+arguments/effects/clobbers, control successors and complete native state. Bind
+the exact map identity, generated expansion and every layout/specialization or
+per-CPU/platform input it consumes to the accepted and emitted artifact. A
+shared semantic map result alone does not establish those facts.
+
+This affects existing code: `configure_lookup_site_for_shape` in
+[the loader](../libnativeloader/src/native_loader.cpp) and
+`build_x86_array_lookup` / `build_x86_lookup_call_postprocess` in
+[the linker](../x86/native_lab/native_link/src/x86.rs) already lower several map
+kinds. The kernel's [`do_misc_fixups`](../../vendor/linux-framework/kernel/bpf/verifier.c)
+uses the real map generator after checking the virtual helper operation;
+[`array_map_gen_lookup`](../../vendor/linux-framework/kernel/bpf/arraymap.c) and
+[`htab_map_gen_lookup`](../../vendor/linux-framework/kernel/bpf/hashtab.c) define
+the corresponding concrete expansions. Their correct realization of the
+verifier's map contract belongs to the assumed kernel/verifier platform
+soundness until separately proved; native lowering remains a TV obligation.
+
+`native_lab_map_helper_target` in
+[the binding code](../../kinsn/module/include/native_lab_group.h) checks a
+resolved target against the map operations/generator, not equivalence of the
+whole inline sequence. Current capture records the pre-fixup checked program,
+map facts and original helper prototype target, without the generated sequence
+or all its layout/CPU inputs. These records alone do not discharge this bridge.
+A direct `rel32` call to the same resolved helper still represents an actual
+helper call and is a separate transformation. This analysis changes no runtime
+default or measurement admission rule; unbound performance work continues.
