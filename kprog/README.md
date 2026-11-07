@@ -105,5 +105,8 @@ sh kprog/fidelity/run-arm64.sh
 ~~~
 
 QEMU agreement is kept separate from real hardware evidence. These sampled
-observations support O1; the per-operation, specialization, binding and
-whole-program proof work remains in the formal and translation-validation lanes.
+observations support O1. Safety must follow for every program from generic
+per-operation refinement, per-token specialization and binding theorems, and
+preservation of each native-link transformation, composed through
+Composition.lean. Program-specific proofs, certificates and validation files
+are frozen and excluded from safety evidence.
