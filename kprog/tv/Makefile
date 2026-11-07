@@ -816,3 +816,23 @@ guest-unbound-kernel-check:
 	insmod build-x86/bpf_x86_native_lab.ko
 	./build/test-binding-kernel --unbound-only
 	./build/test-loader --unbound-only
+
+# Actual Katran loads its own programs through the unchanged upstream server.
+UNBOUND_KATRAN_INPUTS ?= $(CURDIR)/build/unbound-katran
+.PHONY: unbound-katran-inputs unbound-katran-check guest-unbound-katran-check unbound-loader-regression
+unbound-katran-inputs:
+	python3 test_unbound_katran.py --prepare $(UNBOUND_KATRAN_INPUTS)
+
+unbound-katran-check:
+	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-unbound-katran-check UNBOUND_KATRAN_INPUTS=$(UNBOUND_KATRAN_INPUTS)'
+
+guest-unbound-katran-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko
+	python3 test_unbound_katran.py $(UNBOUND_KATRAN_INPUTS)
+
+unbound-loader-regression: unbound-kernel-check unbound-katran-check

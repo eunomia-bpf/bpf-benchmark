@@ -1545,3 +1545,11 @@ shared-loader native ELF case requiring mask15 and multiple chunks. Both execute
 and return2. Unbound instantiation now initializes r0 before ABI marker reads on
 both ISAs; nonzero-generation proof ordering is unchanged. Raw evidence is in
 `../results/kprog_tv_20261107/unbound-abi-regression/`.
+
+The actual upstream Katran balancer is also in the regression run:
+`make -C kprog/tv unbound-katran-inputs` extracts its existing runtime dependencies,
+then `make -C kprog/tv unbound-loader-regression` runs both the synthetic loader
+cases and unchanged KatranServerSession. The captured GET_INFO stub must contain
+multiple sequential generation-zero chunks with mask15. The current real
+balancer passes with80 chunks and driver-mode attachment. The AArch64 module
+also passes all16 masks/three chunks under QEMU; see the same dated evidence.

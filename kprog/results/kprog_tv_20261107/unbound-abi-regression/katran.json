@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "scope": "Actual upstream Katran server startup/unbound loader load+attach; no timing or workload claim.",
+  "metadata": {
+    "server_binary": "/workspaces/repository/kprog/tv/build/unbound-katran/katran_server_grpc",
+    "balancer_prog_path": "/workspaces/repository/vendor/build/x86/katran/bpf/balancer.bpf.o",
+    "healthchecking_prog_path": "/workspaces/repository/vendor/build/x86/katran/bpf/healthchecking_ipip.bpf.o",
+    "maps": {
+      "vip_map": {
+        "id": 4,
+        "type": "hash",
+        "name": "vip_map",
+        "flags": 0,
+        "bytes_key": 20,
+        "bytes_value": 8,
+        "max_entries": 512,
+        "bytes_memlock": 50224,
+        "frozen": 0,
+        "btf_id": 14
+      },
+      "reals": {
+        "id": 8,
+        "type": "array",
+        "name": "reals",
+        "flags": 0,
+        "bytes_key": 4,
+        "bytes_value": 20,
+        "max_entries": 4096,
+        "bytes_memlock": 98608,
+        "frozen": 0,
+        "btf_id": 14
+      },
+      "ch_rings": {
+        "id": 7,
+        "type": "array",
+        "name": "ch_rings",
+        "flags": 0,
+        "bytes_key": 4,
+        "bytes_value": 4,
+        "max_entries": 33554944,
+        "bytes_memlock": 268439856,
+        "frozen": 0,
+        "btf_id": 14
+      },
+      "ctl_array": {
+        "id": 3,
+        "type": "array",
+        "name": "ctl_array",
+        "flags": 0,
+        "bytes_key": 4,
+        "bytes_value": 8,
+        "max_entries": 16,
+        "bytes_memlock": 432,
+        "frozen": 0,
+        "btf_id": 14
+      }
+    },
+    "iface": "tvkatran0",
+    "ifindex": 3,
+    "attached": true,
+    "attach_info": {
+      "xdp": [
+        {
+          "devname": "tvkatran0",
+          "ifindex": 3,
+          "mode": "driver",
+          "id": 7
+        }
+      ],
+      "tc": [],
+      "flow_dissector": [],
+      "netfilter": []
+    },
+    "attach_mode": "driver",
+    "attach_mode_before_rebind": null,
+    "attach_info_before_rebind": {},
+    "pid": 1106,
+    "command_used": [
+      "/workspaces/repository/kprog/tv/build/unbound-katran/katran_server_grpc",
+      "-balancer_prog=/workspaces/repository/vendor/build/x86/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/workspaces/repository/vendor/build/x86/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:01",
+      "-intf=tvkatran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ]
+  },
+  "server_output": {
+    "stdout_tail": [],
+    "stderr_tail": [
+      "I20261107 12:15:24.607931  1106 KatranGrpcService.cpp:69] Starting Katran",
+      "E20261107 12:15:24.617146  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame",
+      "E20261107 12:15:24.617542  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "E20261107 12:15:24.625453  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame",
+      "E20261107 12:15:24.626142  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "E20261107 12:15:24.634498  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame",
+      "E20261107 12:15:24.634846  1106 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame"
+    ]
+  },
+  "balancer_receipt": "[5.011877 pid=1106 tid=1106] native-loader replaced prog=balancer_ingres original_fd=19 native_fd=49 original_id=6 native_id=7 symbol=balancer_ingress native_object=/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/manifest.json source=/tmp/bpfrejit_1106_0325eddd38cf33c9.bpf",
+  "timings_receipt": "[5.011596 pid=1106 tid=1106] native-loader timings prog=balancer_ingres cache_hit=0 prebuilt_proof=1 bound_required=0 original_id=6 native_id=7 symbol=balancer_ingress native_object=/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o bpf_bytes=20336 native_bytes=10129 total_ns=236681455 manifest_resolve_ns=11034103 native_data_symbols_ns=3030481 companion_map_ptr_ns=3952272 companion_lookup_spec_ns=95693169 cache_lookup_ns=9035708 native_link_exec_ns=59697222 native_link_read_ns=1254636 map_patch_ns=64952 upload_ns=1407323 prog_load_ns=45889070",
+  "proof_bound": false,
+  "chunks": 80,
+  "abi_mask": 15,
+  "generation": 0,
+  "xlated_size": 1288,
+  "xlated_sha256": "f8b68ac2dc5491f96374fc66ebdc6a5a1d66d84fbdd269b06137567f8dbf665f",
+  "source_sha256": {
+    "vendor/build/x86/katran/bpf/balancer.bpf.o": "2178f495720f0a81e44a8bc439978e259459fa0a6486f2c9c4a693f993cb2498",
+    "vendor/build/native-bpf/x86/stage/katran/balancer.native.o": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "5c5b3ee437d74c0173e86dbff3da4ffc1f7315837ac20856a662de5928e3fc09",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6"
+  },
+  "server_sha256": "78876034e1d2f83ee53d40ebcb41e2c260b421cbc7876cad83f7b68198eccd1d",
+  "runtime_image_id": "sha256:227b5a2e5c03193e6b700fbd00766dd6b064cae388f842346fdefbd0309df424",
+  "test_sha256": "3e82a63e5b57b51be65f7e96ab026584965a9a8462a792a3adec53d44743fe31",
+  "validation_command": "make -C kprog/tv unbound-katran-check"
+}

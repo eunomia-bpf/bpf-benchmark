@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "scope": "Actual AArch64 QEMU verifier/JIT/TEST_RUN, generation-zero three-chunk stubs all16ABI masks",
+  "retval": 2,
+  "masks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "chunks": 3,
+  "sha256": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kprog/tv/build-arm64/bpf_arm64_native_lab.ko": "a4139373100f4f06b04f66f3a9fbd088683b50786e3c107296d60b2cf94fcfd9",
+    "kprog/tv/build-arm64/test-binding-kernel": "d63896e741496bd2f16edab4d787f1f8323de6808528e6283a6a22962f607ac3"
+  }
+}
