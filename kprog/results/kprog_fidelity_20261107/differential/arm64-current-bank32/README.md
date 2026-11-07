@@ -6,7 +6,7 @@ build cache from its committed harness archive, preserving historical data;
 then use existing incremental bank32.mk targets on CPUs16-19. No shared
 kernel/module/image or production source is rebuilt or changed.
 
-All CPU/QEMU and reference results are pending. Canonical ordinary-family
+Completed results and the retained exclusive API refusal are recorded below. Canonical ordinary-family
 replay uses the same source ISA as x86-control's f1c5 executable (ARM source
 verified identical to current HEAD). Exclusive rows retain the explicit CLREX
 fixture. Their physical-monitor/environment API obligations stay explicit:
@@ -20,5 +20,16 @@ Actual ARM hardware replay remains with the coordinator.
 FMOV128:131072 states; bitfield70:71680 states. Both current production
 snapshots have zero QEMU/C/canonical differences and no unavailable form.
 Their per-form tables, archived inputs and static hardware handoffs are
-retained in the corresponding directories. Memory and exclusive results
-remain pending; no complete four-family or actual-hardware claim is made.
+retained in the corresponding directories. The later memory/exclusive outcomes are recorded below; complete four-family
+canonical agreement and actual hardware evidence are not claimed.
+
+## Final current-snapshot results
+
+FMOV128 +bitfield70 +memory255:453 forms/463872 QEMU/C/canonical
+states, all three comparisons zero and no unavailable ordinary form.
+Exclusive8:8192 QEMU/C observations agree, but canonical0cases/8unavailable
+(`exclusive instruction requires explicit monitor state`); Make exits2.
+Thus461 forms/472064 QEMU/C states agree, while CPU/canonical is complete
+for453 forms. All four static hardware handoffs and exact source snapshots
+are retained per family; real ARM hardware remains pending. No production
+ISA/runtime/header change or whole O1–O4 claim is made.

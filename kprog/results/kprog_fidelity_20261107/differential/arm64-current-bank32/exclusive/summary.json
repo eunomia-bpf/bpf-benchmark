@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-11-07T15:51:40.075818+00:00",
+  "cpu_observation_complete": true,
+  "canonical_complete": false,
+  "execution": "QEMU user mode; ARM hardware pending",
+  "forms": 8,
+  "cases_per_form": 1024,
+  "total_cases": 8192,
+  "qemu_c_mismatches": 0,
+  "reference_cases": 0,
+  "reference_unavailable_forms": 8,
+  "qemu_exit": 0,
+  "reference_make_exit": 2,
+  "diagnostic": "reference: exclusive instruction requires explicit monitor state",
+  "monitor_fixture": "CLREX before native_pc; simulator failure1 only at four explicit store sites",
+  "trace_bytes": 27066392,
+  "trace_sha256": "0c4b25c0f44b75167bbc659ee4cb67af97de192bbde36f33a33eee71775b497b",
+  "compiled_input_files": 92,
+  "binary_sha256": "8391b40fc6c9755c5cc08e3a5e52e1273f0a159528be81e923c18721ba1753d7",
+  "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+}
