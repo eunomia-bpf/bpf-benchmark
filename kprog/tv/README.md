@@ -2084,3 +2084,15 @@ JGT, retaining exactly3 conditional guards. Its full source/header/object and
 patch are archived. This is compile-shape evidence, without a new semantic or
 kernel-acceptance claim; C owns integration after its active inputs close.
 The earlier2-line artifact and local Lean proofs remain separately retained.
+
+`trusted-simple-jit-epilogue.json` records a full dependent replay against V's
+published LEAVE reference and22 JIT axiom audits. Canonical POP/LEAVE/JMP
+success paths retain both reads and restore the caller frame without changing
+the native result, memory or flags. Read faults stop at the actual failing
+instruction; a LEAVE read fault preserves its full incoming state.
+
+This uses the reference's shared read-fault abstraction. F's real hardware
+comparison reports1024 noncanonical-frame #SS fault-kind differences, tracked
+by V/F; full architectural fault classification is not claimed here. Actual
+caller premises, current B30 refinement and the live RET boundary remain
+separate obligations.

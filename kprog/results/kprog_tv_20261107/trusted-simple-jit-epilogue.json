@@ -1,0 +1,155 @@
+{
+  "status": "complete_dependent_JIT_certificate_rechecked_with_published_LEAVE_and_canonical_epilogue_components_proved",
+  "utc": "2026-11-07T16:30:47.688592+00:00",
+  "reference_commit": "02e4592300a3567f91e9a82fc0f02d5c57b0f8a4",
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "9fca3291b55b8ef0bfdfa8fab8afe8935210e5fd30f6c0314f7db53661b7afa8",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleJIT.lean": "f21c6071c989d83c0cf17797488f999cef550527335fb01ae6e0278db3dfa273",
+    "kprog/tv/Makefile": "03850e6ce1ef85d97a0ea484818c1012834e759bdc0268a0cfbf603f10dc41a0"
+  },
+  "claims": [
+    "Complete existing dependency chain rechecked against Vpublished9fca reference, including all prior simple payload and JIT proofs.",
+    "Actual C9 decoded by the one canonical ISA; POP/LEAVE/JMP path retains both ordered stack reads and exact full endpoint.",
+    "Successful endpoint restores caller RSP/RBP/R15 while preserving native RAX/result, memory, flags, SIMD and remaining state.",
+    "Read-fault path stops at POP or LEAVE with exact state; LEAVE read fault does not commit intermediate SP=BP."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-jit-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleJIT.emitted_payload": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_registers": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_memory": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_outer_return_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_r15": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_bp": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_edge": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.captured_return_symbol": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleJIT.complete_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.total_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_body_preserves_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_pop_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_body_saved_words": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_leave_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_leave_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_pop_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.epilogue_restores_caller_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_pop_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_epilogue_leave_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.epilogue_preserves_result": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "all_dependency_axiom_audits": 296,
+    "log_sha256": "086c6fe18b2f65de1dbfe84c5bf3455b833ff774b005bfd56f01a392cf04b9e2"
+  },
+  "native_capture_commit": "0f44ffdcb2322116e7d6ddd4fc5164db081af375",
+  "fault_classification_boundary": "Reference9fca uses shared read-fault abstraction. F347c4c1e9 reports1024 real noncanonical-frame #SS classified as read rather than nonCanonical; no full hardware fault-kind fidelity claim.",
+  "remaining": [
+    "Same-capture live RET text/outer-return execution composition (new raw capture now available separately).",
+    "Actual kernel caller stack/context/packet-save-slot separation and permissions.",
+    "CurrentB30/newproducer whole-program TV; Ccontextcandidate notpromoted.",
+    "Architectural fault-kind discrepancy tracked byV/F, allothermicro/application certificates."
+  ],
+  "trusted": [
+    "single VcanonicalX86 and shared reference memory semantics",
+    "Lean kernel and reported axioms; inherited native reduction explicitlyreported",
+    "kernel/native/JIT artifact provenance and invocation facts",
+    "verifier soundness for the actual accepted B remains a separate composition premise"
+  ]
+}

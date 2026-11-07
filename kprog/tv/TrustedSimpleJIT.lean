@@ -307,6 +307,136 @@ theorem actual_body_saved_words (base : Word) (caller n : X86.State)
   · rw [outer,entry]
     exact actual_outer_return_slot base caller
 
+
+/-- The actual C9 byte, interpreted only by V's canonical LEAVE rule. -/
+theorem decode76 (s : X86.State) : X86.decode (image.extract 76 77) s = .ok
+    (.leave64 (s.pc+(1#64))) := by
+  have bytes : image.extract 76 77 = #[0xc9] := by decide
+  rw [bytes]
+  exact X86.leave64_decode s
+
+def afterLeave (base : Word) (s : X86.State) (value : Word) : X86.State :=
+  {s with
+    gpr := fun r => if r=4 then s.gpr 5+(8#64) else if r=5 then value else s.gpr r
+    pc := base+(77#64)}
+
+theorem actual_leave_step (base : Word) (s : X86.State) (value : Word) (event : Event)
+    (position : s.pc=base+(76#64))
+    (read : readMemory s.memory (s.gpr 5) 8 = .ok (value,event)) :
+    X86Path.decodeAt base image ⟨76,1⟩ s = .ok (.leave64 (base+(77#64))) ∧
+    X86.step (.leave64 (base+(77#64))) s = ⟨afterLeave base s value,[event],none⟩ := by
+  constructor
+  · simp +decide [X86Path.decodeAt,image_size,decode76,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  · exact X86.leave64_read_success _ value event s read
+
+/-- The two real failure boundaries retain the complete incoming state.
+In particular a failed LEAVE never commits an intermediate RSP=RBP. -/
+theorem actual_leave_fault (base : Word) (s : X86.State) (fault : Fault)
+    (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
+    X86.step (.leave64 (base+(77#64))) s = ⟨s,[.fault fault],some fault⟩ :=
+  X86.leave64_read_fault _ fault s read
+
+theorem actual_pop_fault (base : Word) (s : X86.State) (fault : Fault)
+    (read : readMemory s.memory (s.gpr 4) 8 = .error fault) :
+    X86.step (.pop .w64 15 (base+(76#64))) s = ⟨s,[.fault fault],some fault⟩ := by
+  simp only [X86.step,X86.readSource,X86.StackWidth.bytes,read]
+
+/-- A real complete POP/LEAVE/JMP path through the captured image. Both
+reads remain ordered; no return-slot access or host effect is erased. -/
+theorem actual_epilogue_path (base : Word) (s : X86.State)
+    (saved15 savedBP : Word) (event15 eventBP : Event)
+    (position : s.pc=base+(74#64))
+    (read15 : readMemory s.memory (s.gpr 4) 8 = .ok (saved15,event15))
+    (readBP : readMemory s.memory (s.gpr 5) 8 = .ok (savedBP,eventBP)) :
+    X86Path.Execution base image s [event15,eventBP]
+      {afterLeave base (afterPop base s saved15) savedBP with pc := returnTarget base} := by
+  have pop := actual_pop_step base s saved15 event15 position read15
+  have frameRead : readMemory (afterPop base s saved15).memory
+      ((afterPop base s saved15).gpr 5) 8 = .ok (savedBP,eventBP) := by
+    simpa +decide [afterPop] using readBP
+  have leave := actual_leave_step base (afterPop base s saved15) savedBP eventBP rfl frameRead
+  have jump := actual_return_edge base (afterLeave base (afterPop base s saved15) savedBP) rfl
+  have tail := X86Path.Execution.next ⟨77,5⟩ _ jump.1
+    (X86Path.Execution.refl (X86.step (.branch none (returnTarget base) (base+(82#64)))
+      (afterLeave base (afterPop base s saved15) savedBP)).state)
+  rw [jump.2] at tail
+  have middle := X86Path.Execution.next ⟨76,1⟩ _ leave.1
+    (by rw [leave.2]; exact tail)
+  rw [leave.2] at middle
+  have full := X86Path.Execution.next ⟨74,2⟩ _ pop.1
+    (by rw [pop.2]; exact middle)
+  rw [pop.2] at full
+  simpa using full
+
+/-- Exact full-state endpoint: only the three saved registers and PC change
+from the body exit. RAX/result, flags, SIMD, memory and all other GPRs remain. -/
+theorem epilogue_restores_caller_frame (base : Word) (caller s : X86.State)
+    (frame : s.gpr 5=caller.gpr 4-(8#64)) :
+    {afterLeave base (afterPop base s (caller.gpr 15)) (caller.gpr 5) with pc := returnTarget base} =
+    {s with
+      gpr := fun r => if r=4 then caller.gpr 4 else if r=5 then caller.gpr 5
+        else if r=15 then caller.gpr 15 else s.gpr r
+      pc := returnTarget base} := by
+  have cancel : caller.gpr 4-(8#64)+(8#64)=caller.gpr 4 := BitVec.sub_add_cancel _ _
+  simp only [afterLeave,afterPop]
+  congr 1
+  funext r
+  by_cases sp : r=4
+  · subst r; simp +decide [frame,cancel]
+  · by_cases bp : r=5
+    · subst r; simp +decide
+    · by_cases saved : r=15
+      · subst r; simp +decide
+      · simp only [sp,bp,saved,ite_false]
+
+
+theorem actual_epilogue_pop_fault_path (base : Word) (s : X86.State) (fault : Fault)
+    (position : s.pc=base+(74#64))
+    (read : readMemory s.memory (s.gpr 4) 8 = .error fault) :
+    X86Path.Execution base image s [.fault fault] s := by
+  have decoded : X86Path.decodeAt base image ⟨74,2⟩ s = .ok (.pop .w64 15 (base+(76#64))) := by
+    simp +decide [X86Path.decodeAt,image_size,decode74,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have path := X86Path.Execution.next ⟨74,2⟩ _ decoded
+    (X86Path.Execution.refl (X86.step (.pop .w64 15 (base+(76#64))) s).state)
+  rw [actual_pop_fault base s fault read] at path
+  simpa using path
+
+theorem actual_epilogue_leave_fault_path (base : Word) (s : X86.State)
+    (value : Word) (event : Event) (fault : Fault)
+    (position : s.pc=base+(74#64))
+    (read15 : readMemory s.memory (s.gpr 4) 8 = .ok (value,event))
+    (readBP : readMemory s.memory (s.gpr 5) 8 = .error fault) :
+    X86Path.Execution base image s [event,.fault fault] (afterPop base s value) := by
+  have pop := actual_pop_step base s value event position read15
+  have frameRead : readMemory (afterPop base s value).memory
+      ((afterPop base s value).gpr 5) 8 = .error fault := by
+    simpa +decide [afterPop] using readBP
+  have decoded : X86Path.decodeAt base image ⟨76,1⟩ (afterPop base s value) =
+      .ok (.leave64 (base+(77#64))) := by
+    simp +decide [X86Path.decodeAt,image_size,decode76,afterPop,
+      X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have failed := actual_leave_fault base (afterPop base s value) fault frameRead
+  have tail := X86Path.Execution.next ⟨76,1⟩ _ decoded
+    (X86Path.Execution.refl (X86.step (.leave64 (base+(77#64))) (afterPop base s value)).state)
+  rw [failed] at tail
+  have path := X86Path.Execution.next ⟨74,2⟩ _ pop.1 (by rw [pop.2]; exact tail)
+  rw [pop.2] at path
+  simpa using path
+
+/-- The successful wrapper never changes the native result or any memory,
+flags, SIMD, segment base or address-width state. -/
+theorem epilogue_preserves_result (base : Word) (s : X86.State) (saved15 savedBP : Word) :
+    let last := {afterLeave base (afterPop base s saved15) savedBP with pc := returnTarget base}
+    last.gpr 0=s.gpr 0 ∧ last.memory=s.memory ∧ last.rflags=s.rflags ∧
+      last.xmm0=s.xmm0 ∧ last.fsBase=s.fsBase ∧ last.gsBase=s.gsBase ∧
+      last.addressWidth=s.addressWidth := by
+  simp +decide [afterLeave,afterPop]
+
 end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.emitted_payload
 #print axioms KProgTV.TrustedSimpleJIT.actual_entry_path
@@ -323,3 +453,11 @@ end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.actual_pop_step
 
 #print axioms KProgTV.TrustedSimpleJIT.actual_body_saved_words
+#print axioms KProgTV.TrustedSimpleJIT.actual_leave_step
+#print axioms KProgTV.TrustedSimpleJIT.actual_leave_fault
+#print axioms KProgTV.TrustedSimpleJIT.actual_pop_fault
+#print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_path
+#print axioms KProgTV.TrustedSimpleJIT.epilogue_restores_caller_frame
+#print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_pop_fault_path
+#print axioms KProgTV.TrustedSimpleJIT.actual_epilogue_leave_fault_path
+#print axioms KProgTV.TrustedSimpleJIT.epilogue_preserves_result
