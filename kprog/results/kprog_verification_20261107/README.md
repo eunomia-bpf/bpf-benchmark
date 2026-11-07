@@ -67,8 +67,8 @@ continue to count their own `row_kind` values.
 | --- | ---: | --- |
 | `proved-conditional` | 6 | x86 kind1 slot/table/record layout, private-spill projection, generic block relation, checked-effects composition |
 | `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
-| `partial-universal-component` | 3 | Shared kinds5/6/7 stable-map resolution and checked8B literal writer; physical consumer/layout/ABI composition follows |
-| `pending-universal-law` | 11 | ARM kinds2/3/4/9, readonly kind8, chunk/code layout, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `partial-universal-component` | 4 | Shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
+| `pending-universal-law` | 10 | ARM kinds2/3/4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
 All nine production relocation kinds have explicit rows. The six proved
 components carry their production correspondence premises in `o4_completion`.
@@ -93,6 +93,17 @@ value-offset bounds/callback addition, checked exact8B bytes/readback, byte
 initialization and the canonical read event have proved components. The three
 rows retain actual producer/C correspondence, mixed-table layout, physical
 consumer and helper/entry ABI completion obligations.
+
+[`generic-native-link-patch-table.json`](../kprog_tv_20261107/generic-native-link-patch-table.json)
+adds 18 passing universal audits. Ordered mixed CALL/literal tables retain each
+complete consumed span and bound literal value; actual final-code CALL decode
+has full-state/effect TV and reverse reflection. Protected original instructions
+also keep their exact canonical decode and behavior. Typed u32 intervals derive
+physical separation for every5B/8B pairing and64-bit base. The actual Rust
+instruction/chunk construction and complete consumer/control/ABI correspondence
+supply the production bridge recorded in the two updated O4 rows. The8B literal span
+covers its field/data; complete consumer instruction/prefix coverage belongs
+to that physical-consumer bridge.
 
 <!-- O4 COVERAGE END -->
 

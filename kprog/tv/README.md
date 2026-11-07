@@ -51,6 +51,19 @@ mismatch laws reject universally. Source/C object correspondence, mixed-table
 layout, physical instruction consumption and helper/entry ABI form the next
 composition bridge; the central O4 rows label these as proved components.
 
+`generic-native-link-patch-table.json` composes kind1 CALL immediates and
+kinds5/6/7 literals in one arbitrary ordered table. Every final5B/8B consumed
+span has exact bytes and each literal its complete target. Final-code CALL
+canonical decode/full-state/events/faults have forward TV and reverse
+reflection. Protected original instruction fetches retain their canonical
+decode and behavior as well. Typed u32 interval separation derives physical
+protection for all CALL/literal pairings, either interval order and every64-bit
+final base. Eighteen audits pass. The actual Rust instruction/chunk construction,
+complete PC partition, resolved targets and physical literal/helper/entry ABI
+provide the remaining production correspondence for this universal component.
+The8B literal span describes its field/data; whole consumer instruction/prefix
+coverage is part of the physical-consumer bridge.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
