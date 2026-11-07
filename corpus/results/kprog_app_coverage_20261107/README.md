@@ -1,6 +1,6 @@
 # x86 application follow-up, 2026-11-07 UTC
 
-This directory records unbound-native loader/runtime repairs and the coordinator's linked-image/map-lowering/compiler experiments. It does not establish generation-bound verification of these applications.
+This directory records x86 application repairs and native-only runtime results. The standard BCC corpus now completes25/25 fresh generation-bound loads; the other five applications remain to be completed on that path. Historical unbound experiments below retain their original evidence boundaries.
 
 ## Tracee functional repair
 
@@ -82,3 +82,19 @@ SIGKILL compilation failures (inet_sock_set_state, sched_switch); zero recorded
 verifier rejections. The native workload is not reached. Full raw results and
 requests are retained. One identical8GiB replay is active, with full kernel logs
 saved; no program was dropped or simulator rule changed to obtain acceptance.
+
+
+### Standard BCC native-only runtime completed
+
+[Standard BCC receipt](native-only-runtime/standard-bcc-8g.json) records actual
+153239_875135 appok/metadata completed/verified_native_loader: all25 source
+programs generate fresh proofs, are verifier-accepted/bound, and replace their
+originals; zero specialization failures or verifier rejects. Every service native
+ID matches the25-program post snapshot; prebuilt_proof=0 on all25 receipts.
+Both unchanged four-stressor workload arms complete; syscall bogo counts are514
+in both, other duration-driven operation counts differ and raw per-program
+counters are retained. This is functional runtime evidence, not equal-work or
+performance acceptance. The preceding two Clang SIGKILLs resolve at8GiB with
+byte-identical generated C/native proofs;4GiB OOM remains unconfirmed. All failed
+and successful raw data are retained; the closed guest disk/tar are removed.
+R timing commands and exact reproduction inputs are in the linked README.

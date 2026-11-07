@@ -1,9 +1,9 @@
 {
-  "started": "2026-11-07T15:21:41.867736+00:00",
+  "started": "2026-11-07T15:30:05.935020+00:00",
   "apps": "bcc/set",
   "samples": 1,
   "duration": 2,
-  "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-xkiiz_7k/requests",
+  "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-chbxujgy/requests",
   "service_state_mode": "0o700",
   "command": [
     "make",
@@ -18,14 +18,14 @@
     "WORKLOAD_DURATION=2"
   ],
   "returncode": 0,
-  "finished": "2026-11-07T15:28:16.324117+00:00",
+  "finished": "2026-11-07T15:36:29.025645+00:00",
   "corpus_metadata": [
     {
-      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_152434_982905/metadata.json",
-      "status": "error",
-      "error_message": "corpus suite reported errors"
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_153239_875135/metadata.json",
+      "status": "completed",
+      "error_message": null
     }
   ],
-  "archive": "corpus-20261107T152826302130Z.tar.gz",
-  "archive_sha256": "6da6eeb9e312b6facd399660eb0a1ae13931ca0ae6f0d584ccb6d810033c9cc9"
+  "archive": "corpus-20261107T153640028572Z.tar.gz",
+  "archive_sha256": "b8e5e4b824b7b06f60c7f5eff7f9b11b1b9615f95438ddff8dab7c8558fefad3"
 }

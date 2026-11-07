@@ -1,99 +1,118 @@
-# Native-only trusted service with the standard corpus framework
+# Native-only BCC through the standard corpus framework
 
-The guest registers the trusted specializer outside the application container.
-Applications in the container submit only native programs through the kernel;
-the service reads the retained kernel input and produces fresh bound proofs.
-The normal corpus driver owns the JIT baseline, stop/restart, native arm,
-unchanged workload and counters. No upstream runner/workload/framework source
-was changed for this bridge.
+Actual run `x86_kvm_corpus_20261107_153239_875135` completes with application
+status **ok**, metadata **completed**, and mode **verified_native_loader**.
+All25 application programs across the eight corpus BCC tools are generated
+fresh by the registered service, verifier-accepted, bound and replaced. No
+native load fails. The25 service-completed native IDs exactly equal the25
+program IDs in the native measurement snapshot. All25 shim timing receipts
+report bound_required=1 and prebuilt_proof=0. Feature probes pass unchanged
+(52 observed skip receipts), as required by the operator.
 
-The image overlays the existing application image with current loader/shim,
-native linker, six-app native artifacts and current clean corpus/runner sources.
-All15 kinsn modules match the existing TV kernel. Network/system modules are
-exported from that kernel's current cached build using modules_install; no
-kernel recompile or guessing among historical installation directories.
-The Docker disk lives in the lane-owned host-backed var-tmp directory.
+| Tool | Programs total | Proof generated | Verifier accepted/bound | Specialization failed | Verifier rejected |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| capable |2|2|2|0|0|
+| biosnoop |4|4|4|0|0|
+| vfsstat |5|5|5|0|0|
+| opensnoop |4|4|4|0|0|
+| syscount |2|2|2|0|0|
+| tcpconnect |4|4|4|0|0|
+| tcplife |1|1|1|0|0|
+| runqlat |3|3|3|0|0|
+| Total |25|25|25|0|0|
 
-## Completed package validation
+The application container supplies only native ELF/entry/typed metadata to
+the kernel. A service registered OUTSIDE that container receives the retained
+kernel input, generates and compiles fresh simulator BPF, and loads it through
+the authenticated kernel/service route. Its0700 work directory is outside
+the application result mount. The existing corpus driver owns the JIT baseline,
+stop/restart, native arm and unchanged workload/counter collection. No upstream
+runner, app workload, native program or simulator semantics changed here.
+This is actual native-only runtime acceptance, not an all-ISA/O1-O4 theorem.
 
-Incremental15-module build, cached-module export, package and Docker build/save
-all completed. `package-inputs.json` pins1546 source/artifact inputs and the base
-image. `image.json` records the image/tar hashes and verifies its layer ancestry.
-Five critical files extracted from the actual image match the built loader,
-shim, linker, native module and corpus driver byte for byte. The first package
-attempt's ambiguous historical-module-cache error is retained; the corrected
-export uses current kbuild outputs directly.
+## Work and counters
+
+Both arms run the standard stress_ng_bcc_hook_hot command with syscall-fast75,
+cap, set and sockfd stressors, the same2second requested duration and one sample.
+All four stressors pass in both arms. Both retain25 per-program run/time deltas.
+The counts are duration-driven and include background activity; they are not
+an equality assertion or a performance conclusion from this functional sample.
+
+| Arm | syscall bogo ops | cap | set | sockfd | Aggregate BPF invocations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| JIT |514|208541|25344|156214|12167274|
+| Verified native |514|262177|20642|75230|10359382|
+
+Observed wall times2.083/4.082seconds can exceed the requested2second duration.
+The syscall count514 occurs in BOTH arms here and in earlier no-BPF controls;
+it is not alone evidence that native instrumentation changed the work. Full
+stdout/stderr and counters are available for R's same-work analysis and longer
+measurements. No event-count equivalence is inferred from aggregate BPF runs.
+
+## Failures retained and changes
+
+| Standard run | Accepted/bound | Failure class | App/native measurement |
+| --- | ---: | --- | --- |
+|143508_623079|0|forced noop bytecode plan fails target.json during startup probes|error/not reached|
+|152434_982905 (4GiB)|23/25|2 Clang SIGKILLs: inet_sock_set_state, sched_switch|error/not reached|
+|153239_875135 (8GiB)|25/25|none|ok/completed|
+
+The bridge accidentally forced BPFREJIT_BENCH_PASSES=noop, which caused the
+standard driver to run a bytecode plan before native replacement. Removing
+that forced setting uses the existing empty native-arm pass list and leaves
+feature probes unchanged. The first corrected4GiB run generated25 requests,
+with two compiler kills; these are compilation failures, not verifier rejects.
+compile-input-comparison.json proves those two generated C files AND native
+proof ELFs are byte-identical to the previously accepted direct-service inputs;
+the generator, simulator header and trusted worker identities also match.
+Increasing only guest memory4->8GiB resolves both in the standard run. SIGKILL
+alone does not prove the4GiB failure was OOM. The8GiB full dmesg contains no
+OOM/killed-process/page-allocation-failure message; dmesg and meminfo are saved.
+
+The two earlier setup errors are retained as well: first the service directory
+was inside the writable result mount (stopped before any native request), then
+the relocated service state was read-only in the guest (failed registration).
+Its final private path/mode and all request archives are recorded. No setup
+failure is counted as a generated proof, verifier rejection or app acceptance.
+
+## Reproduction and raw evidence
 
 ```
-make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile image
 make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus
 ```
 
-`SAMPLES`, `WORKLOAD_DURATION` and `APPS` select the ordinary corpus inputs;
-defaults are one2second BCC functional sample. This is not a timing recipe yet.
-The mutable build context and large image tar remain in lane C state, while
-source recipes, exact hashes and completed build logs are committed here.
-Package reruns refuse to overwrite existing compiled module inputs silently.
+This uses the cached image a20b2981171de35a85d1827760701e157efa17347c8705374f146a5d7dbe1a90,
+matching incremental TV kernel and15 matching kinsn modules. It does not rebuild
+an image/kernel. package-inputs.json pins1546 initial source/artifact inputs;
+image.json records layer ancestry, binary equality and image/tar hashes. Each
+service request separately pins its actual generator/header/service/linker/
+trusted-loader inputs. The per-request records are authoritative for that run.
 
-## Runtime status
+standard-bcc-8g.json contains the per-tool table, every native/source identity,
+actual native counter and both workload counters. standard-bcc-8g-result.tar.gz
+is the complete raw corpus tree. corpus-20261107T153640028572Z.tar.gz retains
+the complete service/driver logs, all25 request archives, full kernel log and
+meminfo. Their hashes are in the receipt. standard-bcc.json and its full result
+archive retain the23/25 run; initial-noop-failure.json and its full result retain
+the preceding failure. All earlier setup archives/logs remain available.
 
-The first standard-corpus BCC guest is running. Completed startup evidence is
-separately [25/25 native-only BCC](../trusted-service-bcc-set/native-only-complete.json).
-No standard corpus success, JIT/native work equivalence or timing is claimed
-from the image build. The guest archives service requests and corpus output;
-its summary records raw make return code and actual corpus metadata statuses
-separately, since process exit0 does not establish application success.
-Do not stage active .live directories or incomplete runtime logs.
+CPUS selects host affinity (default16-19), SAMPLES and WORKLOAD_DURATION retain
+standard corpus meanings, and existing BPFREJIT_CORPUS_BPF_STATS selects stats
+(default1). Timing commands on R's CPUs, when free:
 
-## Private service workspace correction
+```
+make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus CPUS=0-7 SAMPLES=3 WORKLOAD_DURATION=30 BPFREJIT_CORPUS_BPF_STATS=0
+make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus CPUS=0-7 SAMPLES=3 WORKLOAD_DURATION=30 BPFREJIT_CORPUS_BPF_STATS=1
+```
 
-The first preparation guest was stopped before its first native submission:
-its proof work directory would have been inside the writable corpus-results
-mount. Its logs are retained in aborted-private-state.tar.gz and are not counted
-as an application or verifier result. The service now works under a0700 temporary
-directory in lane C state, outside the application result mount. Only after the
-service stops are complete request artifacts copied into the result archive.
-The guest summary records the actual private path and mode. This corrects the
-bridge's file placement; it does not claim isolation from a privileged operator.
-The application image is unchanged; the corrected bootstrap reuses it.
+The new affinity/stats forwarding passes make dry-run, shell syntax and Python
+syntax checks; actual successful evidence above is statsON/C16-19/one2second
+sample. R owns counterbalancing and same-work interpretation. These commands
+are preparation for that measurement, not a claim it has already run.
 
-The first relocated-state attempt exited before registering the service because that path was read-only in the guest. The VNG recipe now mounts the lane state directory writable in the guest, outside the application container mounts. The exact setup error is retained; no native requests or application result are counted from it.
-
-## Native-arm plan correction
-
-The first completed standard run143508_623079 failed before any native request.
-Its registered service stayed idle. The recipe had explicitly forced
-BPFREJIT_BENCH_PASSES=noop, which makes the corpus apply a bytecode optimizer
-plan even in native-loader mode. It failed preparing kinsn target.json during
-the first unnamed two-instruction libbpf probes. This was NOT a verifier failure
-of a generated simulator. The full result and service/driver archive are
-retained (initial-noop-result.tar.gz, initial-noop-failure.json and the referenced
-corpus archive). The guest no longer forces that bytecode pass. The standard
-native-driver path uses its existing empty enabled-pass list; feature probes
-load unchanged. REQUIRE_BOUND_PROOF=1 and the workload stay the same. Replay
-uses the existing pinned image and matching cached kernel/modules; no rebuild.
-
-
-## First corrected-plan run:23/25 bound, two compiler SIGKILLs
-
-Actual standard run152434_982905 enters verified_native_loader with no bytecode
-pass and passes50 libbpf feature probes unchanged. All25 native requests reach
-the registered service;23 freshly generated simulator objects are accepted and
-bound. Clang is killed with SIGKILL for inet_sock_set_state and sched_switch;
-these are compilation failures, not verifier rejections. No native workload
-measurement completes because tcplife exits97. Full service/request archives,
-raw app/shim/work counters and receipts are retained in standard-bcc.json,
-standard-bcc-result.tar.gz, standard-bcc-driver.log.gz and its service_archive.
-The JIT2second workload reports514/248219/24008/135585 syscall/cap/set/sockfd
-bogo operations; no JIT/native equality or timing follows from this failure.
-
-The next replay keeps the SAME image/kernel/modules/workload and raises the
-guest memory4G->8G, within C's12GiB limit. SIGKILL alone has not established OOM;
-the driver now saves full dmesg and meminfo before archiving. No code/simulator
-change, fallback, program omission or kernel rebuild is used for this retry.
-
-
-The corpus recipe removes its guest var-tmp Docker disk and exported image tar
-on exit, after checking for open users. A later run re-exports the cached Docker
-image when its tar is absent; it does not rebuild the image or kernel. Raw results,
-request archives, logs, compiled caches and provenance records are retained.
+The corpus EXIT trap removes its own guest var-tmp Docker disk and exported
+image tar after checking open users. Later runs re-export the cached image.
+The successful8GiB run's cleanup receipt confirms both removed after the guest
+and collector closed (about15GiB allocated space). Raw results/requests/logs,
+compiled caches and provenance remain. The initial package preparation commands
+and completed build logs remain alongside for rebuilding only when inputs change.

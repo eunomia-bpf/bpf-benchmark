@@ -20,7 +20,7 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
     for line in service.stdout:log.write(line);log.flush()
    except Exception as error:reader_errors.append(str(error))
   reader=threading.Thread(target=drain);reader.start()
-  env=dict(os.environ,BPFREJIT_CORPUS_APPS=a.apps,BPFREJIT_SHIM_NATIVE_LOADER='post',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',KEEP_WORKDIRS='all',BPFREJIT_KEEP_ALL_WORKDIRS='1',BPFREJIT_CORPUS_BPF_STATS='1')
+  env=dict(os.environ,BPFREJIT_CORPUS_APPS=a.apps,BPFREJIT_SHIM_NATIVE_LOADER='post',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',KEEP_WORKDIRS='all',BPFREJIT_KEEP_ALL_WORKDIRS='1',BPFREJIT_CORPUS_BPF_STATS=os.environ.get('BPFREJIT_CORPUS_BPF_STATS','1'))
   command=['make','-C',str(R),'__runtime-vm-corpus','PLATFORM=kvm','ARCH=x86','RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-native-only:x86-current','RUNTIME_IMAGE_TAR='+str(S/'runtime.image.tar'),'SAMPLES='+str(a.samples),'WORKLOAD_DURATION='+str(a.duration)]
   summary['command']=command
   with (live/'corpus.log').open('w') as output:done=subprocess.run(command,env=env,stdout=output,stderr=subprocess.STDOUT)
