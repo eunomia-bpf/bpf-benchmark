@@ -732,10 +732,59 @@ def xmm0Step (store aligned : Bool) (address nextPc : Word) (s : State) : Transi
         [.memory .read address (bytesAt s.memory address 16) (initializedAt s.memory address 16)], none⟩
     else ⟨s, [.fault (.read address 16)], some (.read address 16)⟩
 
+/-- REP uses the address size for all three implicit registers. In address32
+mode even zero-count execution clears their high halves before checking memory. -/
+def stringAddress (address32 : Bool) (value : Word) : Word :=
+  if address32 then (value.setWidth 32).setWidth 64 else value
+
+def stringStart (address32 : Bool) (s : State) : State :=
+  { s with gpr := fun r => if r = 1 ∨ r = 6 ∨ r = 7 then stringAddress address32 (s.gpr r) else s.gpr r }
+
+/-- One completed MOVS element changes the three implicit registers. Source
+segment overrides affect only the read, never ES:RDI. DF selects the stride. -/
+def stringAdvance (width : ScalarWidth) (address32 : Bool) (s : State) : State :=
+  let stride := BitVec.ofNat 64 width.bytes
+  let delta := if s.rflags.getLsbD 10 then -stride else stride
+  { s with gpr := fun r =>
+      if r = 1 then stringAddress address32 (s.gpr r - 1)
+      else if r = 6 ∨ r = 7 then stringAddress address32 (s.gpr r + delta)
+      else s.gpr r }
+
+/-- Faults stop before completing this element. Earlier completed iterations
+remain committed; a source read before a destination fault remains observable. -/
+def repMovsElement (width : ScalarWidth) (address32 : Bool) (sourceBase : Word)
+    (s : State) : Transition State :=
+  let source := sourceBase + stringAddress address32 (s.gpr 6)
+  let destination := stringAddress address32 (s.gpr 7)
+  match readMemory s.memory source width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, read) =>
+      match writeMemory s.memory destination value width.bytes with
+      | .error fault => ⟨s, [read, .fault fault], some fault⟩
+      | .ok (memory, write) =>
+          ⟨{ stringAdvance width address32 s with memory := memory }, [read, write], none⟩
+
+/-- The repetition count comes from RCX/ECX, with no simulator bound. The PC
+advances only at completion; a fault retains the instruction PC for restart. -/
+def repMovsLoop (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word) :
+    Nat → State → Transition State
+  | 0, s => ⟨{ s with pc := nextPc }, [], none⟩
+  | n + 1, s =>
+      let first := repMovsElement width address32 sourceBase s
+      if first.fault.isSome then first else
+        let rest := repMovsLoop width address32 sourceBase nextPc n first.state
+        ⟨rest.state, first.events ++ rest.events, rest.fault⟩
+
+def repMovsStep (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word)
+    (s : State) : Transition State :=
+  let start := stringStart address32 s
+  repMovsLoop width address32 sourceBase nextPc (start.gpr 1).toNat start
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | repMovs (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word)
   | xmm0Move (store aligned : Bool) (address nextPc : Word)
   | doubleShift (width : CmovWidth) (left : Bool) (dst source : Register) (count nextPc : Word)
   | mulx (width : BzhiWidth) (high low : Register) (source : Source) (nextPc : Word)
@@ -777,7 +826,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -787,6 +836,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
   | .xmm0Move store aligned address nextPc => xmm0Step store aligned address nextPc s
   | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
   | .mulx width high low source nextPc => mulxStep width high low source nextPc s
@@ -885,6 +935,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .repMovs .. => 0xffffffffffffffff
   | .xmm0Move .. => 0xffffffffffffffff
   | .doubleShift width _ _ _ count _ =>
       let n := (doubleShiftCount count width.bits).toNat
@@ -1074,6 +1125,10 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if first = 0xa4 ∨ first = 0xa5 then
+    if p.mandatoryPrefix ≠ 0xf3 then throw "MOVS reference requires the architectural REP prefix"
+    let sourceBase := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
+    return .repMovs (scalarWidth p (first == 0xa4)) p.address32 sourceBase (← fallthrough s (count + 1))
   if first = 0x90 ∧ p.rex % 2 = 0 then
     return .nop (← fallthrough s (count + 1))
   if 0x90 ≤ first ∧ first ≤ 0x97 then
