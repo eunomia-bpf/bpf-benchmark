@@ -1,0 +1,7 @@
+# Live native TC context projection
+
+The generic TC entry obtains the same native context bits through the existing kernel bpf_cast_to_kern_ctx identity. This kernel returns its argument and verifier fixup emits MOV64. BTF-backed native fields therefore keep their actual kernel object and pointer identity. Packet fields and BPF cb slots use their corresponding typed context fields; data_len follows the actual len/linear-end ABI relation. Helpers retain the original context identity, and CB writes immediately update that same context. Static ABI aliases keep their exact wrapping offsets through LEA.
+
+The actual captured Cilium TC source compiles successfully. Its largest BPF stack offset becomes400, compared with the preceding padded mirror's recorded maximum in observations.json. Host/UBSan controls pass65536context frames, covering native field offsets, packet tags, helper identity, aliases,64-bit CB writes and the complete context memory frame. The initial field-projection diagnostic and final BTF-backed source remain in the raw archive. Whole-application verifier and work receipts follow the queued runtime adoption.
+
+Commands: C/skb-live-context/run.sh and host.sh, using Clang18/O3/mcpuv4 and UBSan. C denotes /workspaces/.agent-state/kprog-lanes/C. raw.tar.gz retains exact private sources, actual generated C/object/disassembly, diagnostics and controls; observations.json pins the local kernel cast implementation and executable field checks. Universal ABI correspondence remains the shared V/T interface.

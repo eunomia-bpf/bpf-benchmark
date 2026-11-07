@@ -1,0 +1,18 @@
+{
+  "host_context_frames": 65536,
+  "host_exit": 0,
+  "actual_bpf_compile_exit": 0,
+  "old_max_stack_offset": 616,
+  "new_max_stack_offset": 400,
+  "old_bpf_insns": 3841,
+  "new_bpf_insns": 3784,
+  "kernel_cast": "bpf_cast_to_kern_ctx returns obj and verifier fixup emits MOV64",
+  "input_sha256": "42a052d9780e3438717b33ac4ec6b20445e90d37a7f973bbcf0933bedc3511fa",
+  "candidate_sha256": "766aa811da4d878878b3a7379ccc418d0cfe04ef71e84637546b13e1a64d0b10",
+  "abi_sha256": "9ea9835cd6520d924234fb296e0677ce9567e091b0aec7f4a84921610d87f96d",
+  "kernel_sources": {
+    "kernel/bpf/helpers.c": "90d8518feeceea841636f98719889d8afe55fe595009bb873d8b832b39200c0d",
+    "kernel/bpf/verifier.c": "6bccb2ae3244f1d85ffc4b3e7b0c64acafa9aa78d2955944ae1f1bdc870375a1"
+  },
+  "runtime": "Whole Cilium live-TC successor follows component publication and the current serial queue."
+}
