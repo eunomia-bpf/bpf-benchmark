@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -50,7 +51,11 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                         '#include ' + json.dumps(str(ROOT / "kprog/x86/x86_sim_local_bpf.h")))
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
-    run(["clang", "-g", "-O3", "-mcpu=v4", "-target", "bpf",
+    # `clang` is not always on PATH in the service's environment (the
+    # container image ships it under /usr/lib/llvm-*/bin), so the compiler
+    # is overridable exactly as the rest of the build does it.
+    clang = os.environ.get("CLANG") or "clang"
+    run([clang, "-g", "-O3", "-mcpu=v4", "-target", "bpf",
          "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
          "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
          "-I", "/usr/include/x86_64-linux-gnu", "-c", source, "-o", obj])
