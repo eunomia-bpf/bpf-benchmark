@@ -1301,3 +1301,40 @@ executable-reference/wire/compiler and C semantic check. The immutable source/
 cache export was deleted automatically. Compressed CALL CPU observations retain
 this440-case run. The actual byte-field memory body and subsequent LOAD dispatcher
 are separate increments not included in this full pass. Full77/72/O2/O4 remain open.
+
+## Raw-FLAGS prefix and actual LOAD dispatcher composition
+
+`Arm64Dispatcher.dispatchThroughLoad` consumes actual FLAGS bytes instead of
+coercing byte/halfword memory widths to integer W/X. The certified scalar prefix
+normalizes only W/X native fields (including zero→X), then the LOAD gate decodes
+all four memory widths from the same generated effective code. Other widths pass
+to their own families at this normalization boundary; no C rejection policy is
+added. Literal opcode disjointness proves LOAD bypasses every preceding gate,
+and all prior SelectBinding results transport unchanged with raw width identity.
+
+The actual byte body composes offset/pre/post immediate loads and native
+register-index addressing, including UXTW/SXTW/LSL/SXTX, optional width scaling,
+ZR indexes and omitted unscaled X modifiers. Only the physical NONE255 byte
+suppresses the index; AUX0 remains arbitrary. Omitted NONE agrees with native
+LSL0/SXTX0 by a derived value equality, not a value premise. Native register-offset
+forms bind IMM0 and no writeback. Both scalar/tag-preserving LOAD branches remain
+quantified, as do unused fields and all source/destination/index aliases permitted
+by the native form. Exact memory bytes/events/full state and one PC advance follow
+the same canonical ISA.
+
+One step_through_load_refines theorem covers all earlier gates plus both LOAD
+addressing classes. LoadBinding contains field/code/width/modifier/amount identities
+only; scalarMemoryAccess separately states the original native SP-alignment and
+per-byte access premises. It does not infer native permissions from writable
+shadow memory, add runtime guards, erase faults or assume component step equality.
+Entry/O2/O4 must establish these access/materialization/provenance premises from
+an admitted artifact. Faulting writeback, remaining families and full77/72/O2/O4
+completion remain open.
+
+Validation: focused94-job dispatcher/reference Lean build,13 existing contract
+freshness checks, direct-dispatch/model checks and17 existing semantic/route
+hosts passed 40080 cases,225292 cases,2048 cases,20168 cases,512 cases,22115 cases,512 cases,6913 cases,257 cases,6401 cases,20024 cases,20024 cases,16486328 cases,17 cases,3015 cases,4608 cases,135170 cases. Exact proof SHA256
+`b0b79dd12d3b052a2e51a6c103a35b89181febaff37ab2684d43e55082b4788a` stayed unchanged through validation. Every previously
+published declaration remains byte-identical. No placeholders, new tests, input
+filtering, ISA/runtime/generator/oracle/paper edits. Original warnings remain
+visible. Exact2c9's archived full pass predates this and the actual memory body.

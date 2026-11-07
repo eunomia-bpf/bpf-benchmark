@@ -1938,4 +1938,261 @@ theorem scalar_memory_immediate_refines (load : Bool) (i : Reference.AArch64.Add
   rw [transfer] at result
   exact result
 
+
+
+/-- A native register index is present even when field31 reads ZR; only the
+actual NONE255 byte suppresses the index. -/
+theorem memory_index_present (index : Register) :
+    GeneratedArm64MemIndex.present (Arm64Register.registerCode index) = true := by
+  have different : Arm64Register.registerCode index ≠ GeneratedArm64MemIndex.indexSentinel := by
+    intro equal
+    have numbers := congrArg BitVec.toNat equal
+    change index.val % 256 = 255 at numbers
+    rw [Nat.mod_eq_of_lt (show index.val < 256 by omega)] at numbers
+    have := index.isLt
+    omega
+  simp only [GeneratedArm64MemIndex.present, GeneratedArm64MemIndex.arm, different, ↓reduceIte]
+
+/-- An omitted unscaled X modifier is the same native index as LSL0/SXTX0.
+Only enum/amount identities are assumed, never an evaluated index equality. -/
+theorem memory_index_modifier (width : Reference.AArch64.MemoryWidth) (kind : Reference.AArch64.MemoryExtend)
+    (scaled : Bool) (mod : GeneratedArm64ModDecode.Mod) (value : Word)
+    (encoded : mod = Arm64AddressedMemory.modifier kind ∨
+      (mod = .none ∧ (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then width.scale else 0) = 0)) :
+    GeneratedArm64Mod.value mod value (BitVec.ofNat 64 (if scaled then width.scale else 0)) .w64 =
+      GeneratedArm64Mod.value (Arm64AddressedMemory.modifier kind) value
+        (BitVec.ofNat 64 (if scaled then width.scale else 0)) .w64 := by
+  rcases encoded with standard | ⟨omitted, kinds, zero⟩
+  · rw [standard]
+  · rw [omitted, zero]
+    rcases kinds with rfl | rfl <;>
+      simp [Arm64AddressedMemory.modifier, GeneratedArm64Mod.value, GeneratedArm64Width.mask, Reference.Word] <;> bv_decide
+
+theorem memory_offset_indexed (width : Reference.AArch64.MemoryWidth) (aux : BitVec 32) (index : Register)
+    (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then width.scale else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then width.scale else 0)) :
+    memoryOffsetBody aux (Arm64Register.registerCode index) 0 s =
+      Arm64WritebackMemory.offsetValue width s (.register index kind scaled) := by
+  have suppressed : GeneratedArm64MemPrepost.suppressOffset aux = false :=
+    (memory_flag_fields aux .none 0 memoryFlags).2.2
+  unfold memoryOffsetBody
+  rw [memory_index_present]
+  simp only [GeneratedArm64MemIndexValue.sourceOf, ↓reduceIte, Arm64Move.Fields.register_read, suppressed]
+  rw [amount, memory_index_modifier width kind scaled _ _ mod]
+  simp [GeneratedArm64MemOffset.value, Arm64WritebackMemory.offsetValue, Reference.Word]
+
+theorem scalar_memory_body_indexed (load : Bool) (width : Reference.AArch64.MemoryWidth) (aux : BitVec 32)
+    (data base index : Register) (kind : Reference.AArch64.MemoryExtend) (scaled tagIsScalar : Bool)
+    (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then width.scale else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then width.scale else 0)) :
+    scalarMemoryBody load width aux (Arm64Register.registerCode data) (memoryBaseCode base)
+      (Arm64Register.registerCode index) 0 tagIsScalar s =
+      Arm64WritebackMemory.core width (if load then .load data none else .store data) .none base
+        (Arm64WritebackMemory.offsetValue width s (.register index kind scaled)) s := by
+  have pre : GeneratedArm64MemPrepost.preDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.preDelta
+    split <;> rfl
+  have post : GeneratedArm64MemPrepost.postDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.postDelta
+    split <;> rfl
+  simp only [scalarMemoryBody, pre, post, bumpMemoryBase, ↓reduceIte,
+    memory_offset_indexed width aux index kind scaled s memoryFlags mod amount,
+    memory_base_read, scalar_memory_success_typed]
+  simp only [Arm64WritebackMemory.core, Arm64Memory.base_refines]
+  rfl
+
+/-- Raw FLAGS normalization for the certified W/X prefix. Other widths pass
+onward to memory/vector families; None is this normalization boundary, not a
+new C runtime rejection policy. Zero uses the same generated X default. -/
+def decodeDataWidth (flags : Byte) : Option Width :=
+  let effective := GeneratedArm64Width.effective flags.toNat
+  if effective = GeneratedArm64Width.code .w32 then some .w32
+  else if effective = GeneratedArm64Width.code .w64 then some .w64 else none
+
+def decodeMemoryWidth (flags : Byte) : Option Reference.AArch64.MemoryWidth :=
+  let effective := GeneratedArm64Width.effective flags.toNat
+  if effective = 1 then some .byte else if effective = 2 then some .half
+  else if effective = 4 then some .word else if effective = 8 then some .double else none
+
+theorem decode_data_width (flags : Byte) (width : Width)
+    (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth width)) :
+    decodeDataWidth flags = some width := by
+  simp only [decodeDataWidth, encoded]
+  cases width <;> rfl
+
+theorem decode_memory_width (flags : Byte) (width : Reference.AArch64.MemoryWidth)
+    (encoded : GeneratedArm64Width.effective flags.toNat = width.bytes) :
+    decodeMemoryWidth flags = some width := by
+  simp only [decodeMemoryWidth, encoded]
+  cases width <;> rfl
+
+def dispatchEncodedPrefix (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  (decodeDataWidth flags).bind (fun width =>
+    dispatchThroughSelect code aux width dst src src2 src3 value sourceScalar sourceStack s)
+
+/-- The next actual LOAD gate consumes the same raw FLAGS byte, including
+byte and halfword widths which are never coerced to integer W/X. -/
+def dispatchThroughLoad (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchEncodedPrefix code flags aux dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => if code = GeneratedArm64DispatchSingleton.code .load then
+      (decodeMemoryWidth flags).map (fun width => scalarMemoryBody true width aux dst src src2 value tagIsScalar s)
+    else none
+
+theorem load_reached (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughLoad (GeneratedArm64DispatchSingleton.code .load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack tagIsScalar s =
+      (decodeMemoryWidth flags).map (fun width => scalarMemoryBody true width aux dst src src2 value tagIsScalar s) := by
+  have before : dispatchEncodedPrefix (GeneratedArm64DispatchSingleton.code .load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack s = none := by
+    unfold dispatchEncodedPrefix
+    cases decoded : decodeDataWidth flags with
+    | none => rfl
+    | some width =>
+        change dispatchThroughSelect (GeneratedArm64DispatchSingleton.code .load) aux width dst src src2 src3 value
+          sourceScalar sourceStack s = none
+        rfl
+  unfold dispatchThroughLoad
+  rw [before]
+  rfl
+
+theorem load_earlier_preserved (code : Nat) (flags : Byte) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack tagIsScalar : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth width))
+    (binding : SelectBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughLoad code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step native s) := by
+  have before : dispatchEncodedPrefix code flags aux dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+    unfold dispatchEncodedPrefix
+    rw [decode_data_width flags width encoded]
+    exact step_through_select_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding
+  unfold dispatchThroughLoad
+  rw [before]
+
+theorem load_immediate_refines (i : Reference.AArch64.AddressedMemoryInstruction) (data : Register)
+    (flags : Byte) (aux : BitVec 32) (immediate : Word) (src3 : Byte)
+    (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State)
+    (transfer : i.transfer = .load data none) (offset : i.offset = .immediate immediate)
+    (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback))
+    (alignment : Reference.AArch64.spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else immediate)) i.width.bytes = true) :
+    dispatchThroughLoad (GeneratedArm64DispatchSingleton.code .load) flags aux (Arm64Register.registerCode data)
+      (memoryBaseCode i.base) GeneratedArm64MemIndex.indexSentinel src3 immediate sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step (.addressedMemory i) s) := by
+  rw [load_reached, decode_memory_width flags i.width encoded]
+  change some (scalarMemoryBody true i.width aux (Arm64Register.registerCode data) (memoryBaseCode i.base)
+    GeneratedArm64MemIndex.indexSentinel immediate tagIsScalar s) = _
+  exact congrArg some (scalar_memory_immediate_refines true i data aux immediate tagIsScalar s transfer offset
+    memoryFlags alignment accessible)
+
+
+theorem load_indexed_refines (i : Reference.AArch64.AddressedMemoryInstruction) (data index : Register)
+    (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (flags : Byte) (aux : BitVec 32) (src3 : Byte)
+    (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State)
+    (transfer : i.transfer = .load data none) (offset : i.offset = .register index kind scaled)
+    (noWriteback : i.writeback = .none) (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then i.width.scale else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then i.width.scale else 0))
+    (alignment : Reference.AArch64.spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (Reference.AArch64.memoryBase s i.base + Arm64WritebackMemory.offsetValue i.width s i.offset) i.width.bytes = true) :
+    dispatchThroughLoad (GeneratedArm64DispatchSingleton.code .load) flags aux (Arm64Register.registerCode data)
+      (memoryBaseCode i.base) (Arm64Register.registerCode index) src3 0 sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step (.addressedMemory i) s) := by
+  rw [load_reached, decode_memory_width flags i.width encoded]
+  change some (scalarMemoryBody true i.width aux (Arm64Register.registerCode data) (memoryBaseCode i.base)
+    (Arm64Register.registerCode index) 0 tagIsScalar s) = _
+  rw [scalar_memory_body_indexed true i.width aux data i.base index kind scaled tagIsScalar s memoryFlags mod amount]
+  have access : permitted (match i.transfer with | .load _ _ => s.memory.readable | .store _ => s.memory.writable)
+      (Reference.AArch64.memoryBase s i.base + Arm64WritebackMemory.offsetValue i.width s i.offset) i.width.bytes = true := by
+    simpa only [transfer] using accessible
+  have result := Arm64WritebackMemory.indexed_refines i s noWriteback alignment access
+  rw [transfer, offset] at result
+  exact congrArg some result
+
+/-- Raw instruction-field identities only; access witnesses are deliberately
+separate below, never a component-step equality hidden in a constructor. -/
+inductive LoadBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+      (value : Word) (native : Reference.AArch64.Instruction)
+      (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth width))
+      (binding : SelectBinding pc code aux width dst src src2 src3 value native) :
+      LoadBinding pc code flags aux dst src src2 src3 value native
+  | immediate (i : Reference.AArch64.AddressedMemoryInstruction) (data : Register) (flags : Byte)
+      (aux : BitVec 32) (immediate : Word) (src3 : Byte) (transfer : i.transfer = .load data none)
+      (offset : i.offset = .immediate immediate) (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback)) :
+      LoadBinding pc (GeneratedArm64DispatchSingleton.code .load) flags aux (Arm64Register.registerCode data)
+        (memoryBaseCode i.base) GeneratedArm64MemIndex.indexSentinel src3 immediate (.addressedMemory i)
+
+  | indexed (i : Reference.AArch64.AddressedMemoryInstruction) (data index : Register)
+      (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (flags : Byte) (aux : BitVec 32) (src3 : Byte)
+      (transfer : i.transfer = .load data none) (offset : i.offset = .register index kind scaled)
+      (noWriteback : i.writeback = .none) (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+      (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+          (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then i.width.scale else 0) = 0))
+      (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then i.width.scale else 0)) :
+      LoadBinding pc (GeneratedArm64DispatchSingleton.code .load) flags aux (Arm64Register.registerCode data)
+        (memoryBaseCode i.base) (Arm64Register.registerCode index) src3 0 (.addressedMemory i)
+
+/-- Original SP-alignment/read-permission assumptions required by the C
+success core. They are not runtime guards, nor derived from tag/shadow values.
+Kernel/Entry/O2/O4 still must establish them for an admitted artifact. -/
+def scalarMemoryAccess (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State) : Prop :=
+  match native with
+  | .addressedMemory i =>
+      Reference.AArch64.spAlignmentFault s i.base = none ∧
+        permitted (match i.transfer with | .load _ _ => s.memory.readable | .store _ => s.memory.writable)
+          (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else
+            Reference.AArch64.memoryOffset s i.width.scale i.offset)) i.width.bytes = true
+  | _ => True
+
+theorem step_through_load_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : LoadBinding s.pc code flags aux dst src src2 src3 value native)
+    (access : scalarMemoryAccess native s) :
+    dispatchThroughLoad code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux width dst src src2 src3 value native encoded earlier =>
+      exact load_earlier_preserved code flags aux width dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s encoded earlier
+  | immediate i data flags aux _ src3 transfer offset encoded memoryFlags =>
+      rcases access with ⟨alignment, accessible⟩
+      have readable : permitted s.memory.readable
+          (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else value)) i.width.bytes = true := by
+        simpa only [transfer, offset, Reference.AArch64.memoryOffset] using accessible
+      exact load_immediate_refines i data flags aux value src3 sourceScalar sourceStack tagIsScalar s
+        transfer offset encoded memoryFlags alignment readable
+  | indexed i data index kind scaled flags aux src3 transfer offset noWriteback encoded memoryFlags mod amount =>
+      rcases access with ⟨alignment, accessible⟩
+      have readable : permitted s.memory.readable
+          (Reference.AArch64.memoryBase s i.base + Arm64WritebackMemory.offsetValue i.width s i.offset) i.width.bytes = true := by
+        rw [← Arm64WritebackMemory.offset_refines i.width s i.offset] at accessible
+        simpa only [transfer, noWriteback, reduceCtorEq, ↓reduceIte] using accessible
+      exact load_indexed_refines i data index kind scaled flags aux src3 sourceScalar sourceStack tagIsScalar s
+        transfer offset noWriteback encoded memoryFlags mod amount alignment readable
+
 end KProgFormal.Refinement.Arm64Dispatcher
