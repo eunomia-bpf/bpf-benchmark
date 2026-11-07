@@ -220,6 +220,28 @@ theorem store_agrees {frame : Word} {first second : Memory}
     trivial
   · simpa only [storeMemory, inside, ite_false] using same.2.2 address outside
 
+
+/-- Exact reads survive a byte-disjoint actual store, including wrapping
+addresses and initialization bits. Uses the single reference memory model. -/
+theorem read_disjoint_store (m : Memory) (destination value address : Word)
+    (written count : Nat)
+    (apart : ∀ i < count, ¬ ((address + BitVec.ofNat 64 i) - destination).toNat < written) :
+    readMemory (storeMemory m destination value written) address count =
+      readMemory m address count := by
+  have bytes : bytesAt (storeMemory m destination value written) address count = bytesAt m address count := by
+    apply List.map_congr_left
+    intro i inside
+    simp only [storeMemory, apart i (List.mem_range.mp inside), ite_false]
+  have init : initializedAt (storeMemory m destination value written) address count = initializedAt m address count := by
+    apply Bool.eq_iff_iff.mpr
+    simp only [initializedAt, permitted, List.all_eq_true]
+    constructor
+    · intro h i inside
+      simpa only [storeMemory, apart i (List.mem_range.mp inside), ite_false] using h i inside
+    · intro h i inside
+      simpa only [storeMemory, apart i (List.mem_range.mp inside), ite_false] using h i inside
+  simp only [readMemory, wordAt, store_readable, bytes, init]
+
 end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.two_spills_preserve_guest
 #print axioms KProgTV.PrivateSpills.guest_bytes_preserved
@@ -233,3 +255,5 @@ end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.erased_event_private
 
 #print axioms KProgTV.PrivateSpills.store_agrees
+
+#print axioms KProgTV.PrivateSpills.read_disjoint_store

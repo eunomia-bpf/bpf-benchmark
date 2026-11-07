@@ -1212,3 +1212,23 @@ the existing BV/private-spill proofs introduce Lean.ofReduceBool, so native
 proof evaluation is an explicit proof-tool trust item alongside Lean's logical
 axioms. Exact prefix scope/dependencies are in `trusted-simple-prefix.json`.
 This is a concrete partial refinement, not a whole-program certificate.
+
+The captured compiler initializer (B pc3..10) now has a complete-state path
+proof, `initialization_block`. It checks the actual second8-byte spill,
+32-bit register zeroing, two8-byte and one4-byte initialization writes,
+explicit native-stack input, and both8-byte reloads. Every write/read remains
+in the six-event trace. A generic disjoint-store lemma in `PrivateSpills`
+preserves read values, permissions and initialization bits with architectural
+wraparound. The two reload values follow from actual stores and this lemma.
+`initialization_after_context_prefix` derives the first saved-pointer read
+from the earlier real spill before constructing the actual BPF execution.
+The native stack input is an arbitrary bound environment value, with an
+explicit nativeInput witness; it is not substituted with zero.
+
+This is the pc3..10 subpath entered at the proven context-prefix state. It
+still needs composition under a common platform environment with pc0..2,
+privacy projection for all initializer accesses, and the native register/flag
+operations and guard. Successful accesses and actual stack permissions remain
+explicit kernel/platform premises. It does not yet discharge whole-BB/program,
+fault, ABI or immutable-P materialization obligations. Exact source/axiom
+scope is recorded in `trusted-simple-initialization.json`.

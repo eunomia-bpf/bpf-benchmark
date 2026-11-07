@@ -308,6 +308,152 @@ theorem two_load_prefix_correspondence (n : X86.State) (p : BPF.State)
   · simpa [nativePrefixFinal, nativeAfterSecond, nativeAfter, proofPrefixFinal, BPF.setReg, memory]
       using spill_preserves_guest p pointer
 
+
+/-- The actual earlier 8B stack slot is disjoint from any later slot8..40
+bytes above it, even if the architectural addresses wrap at zero. -/
+theorem earlier_slot_apart (frame earlier later index : Word)
+    (small : index < (8#64)) (distance : (8#64) ≤ earlier-later)
+    (bounded : earlier-later ≤ (40#64)) :
+    ¬ ((frame-earlier+index)-(frame-later)) < (8#64) := by
+  unfold Word at *
+  bv_decide
+
+theorem earlier_read_preserved (m : Memory) (frame earlier later value : Word)
+    (written : Nat) (width : written ≤ 8)
+    (distance : (8#64) ≤ earlier-later) (bounded : earlier-later ≤ (40#64)) :
+    readMemory (storeMemory m (frame-later) value written) (frame-earlier) 8 =
+      readMemory m (frame-earlier) 8 := by
+  apply PrivateSpills.read_disjoint_store
+  intro i small
+  have fits : i < 2^64 := by omega
+  have smallWord : BitVec.ofNat 64 i < (8#64) := by
+    simp only [BitVec.lt_def, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits]
+    exact small
+  have outside := earlier_slot_apart frame earlier later (BitVec.ofNat 64 i) smallWord distance bounded
+  change ¬ ((frame-earlier+BitVec.ofNat 64 i)-(frame-later)).toNat < 8 at outside
+  omega
+
+def valueMemory (m : Memory) (frame limit : Word) : Memory :=
+  storeMemory m (frame-(32#64)) limit 8
+
+def initializedMemory (m : Memory) (frame limit : Word) : Memory :=
+  storeMemory (storeMemory (storeMemory (valueMemory m frame limit)
+    (frame-(24#64)) (0#64) 8) (frame-(16#64)) (0#64) 8) (frame-(8#64)) (0#64) 4
+
+theorem initialized_pointer_read (m : Memory) (frame pointer limit : Word) (event : Event)
+    (read : readMemory m (frame-(40#64)) 8 = .ok (pointer,event)) :
+    readMemory (initializedMemory m frame limit) (frame-(40#64)) 8 = .ok (pointer,event) := by
+  unfold initializedMemory valueMemory
+  rw [earlier_read_preserved _ frame (40#64) (8#64) (0#64) 4 (by decide) (by decide) (by decide)]
+  rw [earlier_read_preserved _ frame (40#64) (16#64) (0#64) 8 (by decide) (by decide) (by decide)]
+  rw [earlier_read_preserved _ frame (40#64) (24#64) (0#64) 8 (by decide) (by decide) (by decide)]
+  rw [earlier_read_preserved _ frame (40#64) (32#64) limit 8 (by decide) (by decide) (by decide)]
+  exact read
+
+theorem initialized_limit_read (m : Memory) (frame limit : Word)
+    (permission : permitted m.readable (frame-(32#64)) 8 = true) :
+    readMemory (initializedMemory m frame limit) (frame-(32#64)) 8 =
+      .ok (limit,.memory .read (frame-(32#64)) (valueBytes limit 8) true) := by
+  unfold initializedMemory valueMemory
+  rw [earlier_read_preserved _ frame (32#64) (8#64) (0#64) 4 (by decide) (by decide) (by decide)]
+  rw [earlier_read_preserved _ frame (32#64) (16#64) (0#64) 8 (by decide) (by decide) (by decide)]
+  rw [earlier_read_preserved _ frame (32#64) (24#64) (0#64) 8 (by decide) (by decide) (by decide)]
+  exact PrivateSpills.spill_read m (frame-(32#64)) limit permission
+
+def initializationFinal (p : BPF.State) (pointer limit stack : Word) : BPF.State :=
+  { BPF.setReg (BPF.setReg (BPF.setReg (BPF.setReg p 1 (0#64)) 0 stack) 2 pointer) 3 limit with
+    memory := initializedMemory p.memory (p.regs 10) limit
+    pc := 11 }
+
+def initializationEvents (frame pointer limit : Word) : List Event :=
+  [.memory .write (frame-(32#64)) (valueBytes limit 8) true,
+   .memory .write (frame-(24#64)) (valueBytes (0#64) 8) true,
+   .memory .write (frame-(16#64)) (valueBytes (0#64) 8) true,
+   .memory .write (frame-(8#64)) (valueBytes (0#64) 4) true,
+   .memory .read (frame-(40#64)) (valueBytes pointer 8) true,
+   .memory .read (frame-(32#64)) (valueBytes limit 8) true]
+
+theorem virtual_decode3 : BPF.decode proof 3 = .ok ⟨0x7b,10,1,0xffe0,0⟩ := rfl
+theorem virtual_decode4 : BPF.decode proof 4 = .ok ⟨0xb4,1,0,0,0⟩ := rfl
+theorem virtual_decode5 : BPF.decode proof 5 = .ok ⟨0x7a,10,0,0xffe8,0⟩ := rfl
+theorem virtual_decode6 : BPF.decode proof 6 = .ok ⟨0x7a,10,0,0xfff0,0⟩ := rfl
+theorem virtual_decode7 : BPF.decode proof 7 = .ok ⟨0x62,10,0,0xfff8,0⟩ := rfl
+theorem virtual_decode8 : BPF.decode proof 8 = .ok ⟨0xb7,0,9,1,2⟩ := rfl
+theorem virtual_decode9 : BPF.decode proof 9 = .ok ⟨0x79,2,10,0xffd8,0⟩ := rfl
+theorem virtual_decode10 : BPF.decode proof 10 = .ok ⟨0x79,3,10,0xffe0,0⟩ := rfl
+
+/-- Exact captured B steps3..10, retaining every initializer/reload event.
+The native stack value is a bound environment input, never invented zero. -/
+theorem initialization_block (env : BPF.Environment) (p : BPF.State) (pointer limit stack : Word)
+    (position : p.pc = 3) (active : p.halted = false) (savedLimit : p.regs 1 = limit)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (pointerRead : readMemory p.memory (p.regs 10-(40#64)) 8 =
+      .ok (pointer,.memory .read (p.regs 10-(40#64)) (valueBytes pointer 8) true)) :
+    BPFPath.evaluate env proof [3,4,5,6,7,8,9,10] p =
+      .ok ⟨initializationFinal p pointer limit stack,
+        initializationEvents (p.regs 10) pointer limit, none⟩ := by
+  have pointerAfter := initialized_pointer_read p.memory (p.regs 10) pointer limit _ pointerRead
+  have limitAfter := initialized_limit_read p.memory (p.regs 10) limit read32
+  simp only [initializedMemory, valueMemory] at pointerAfter limitAfter
+  have neg8 (v : Word) : v + (18446744073709551608#64) = v - (8#64) := by
+    change v + -(8#64) = v - (8#64)
+    exact BitVec.add_neg_eq_sub
+  have neg16 (v : Word) : v + (18446744073709551600#64) = v - (16#64) := by
+    change v + -(16#64) = v - (16#64)
+    exact BitVec.add_neg_eq_sub
+  have neg24 (v : Word) : v + (18446744073709551592#64) = v - (24#64) := by
+    change v + -(24#64) = v - (24#64)
+    exact BitVec.add_neg_eq_sub
+  have neg32 (v : Word) : v + (18446744073709551584#64) = v - (32#64) := by
+    change v + -(32#64) = v - (32#64)
+    exact BitVec.add_neg_eq_sub
+  have neg40 (v : Word) : v + (18446744073709551576#64) = v - (40#64) := by
+    change v + -(40#64) = v - (40#64)
+    exact BitVec.add_neg_eq_sub
+  simp +decide [BPFPath.evaluate, virtual_decode3, virtual_decode4, virtual_decode5,
+    virtual_decode6, virtual_decode7, virtual_decode8, virtual_decode9, virtual_decode10,
+    BPF.execute, BPF.store, BPF.load,
+    BPF.source, BPF.alu, BPF.setReg, position, active, savedLimit, nativeStack,
+    initializedMemory, valueMemory, initializationFinal, initializationEvents,
+    writeMemory, write32, write24, write16, write8, pointerAfter, limitAfter,
+    neg8, neg16, neg24, neg32, neg40, littleEndian, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+
+/-- The pointer reload premise of the generic initializer is obtained from
+this captured prefix's real first spill. No post-spill word is assumed. -/
+theorem initialization_after_context_prefix (env : BPF.Environment) (p : BPF.State)
+    (pointer limit stack : Word) (active : p.halted = false)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true) :
+    Execution (BPFPath.instructionStep env proof) (proofPrefixFinal p pointer limit)
+      (initializationEvents (p.regs 10) pointer limit)
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack) := by
+  let q := proofPrefixFinal p pointer limit
+  have pointerRead : readMemory q.memory (q.regs 10-(40#64)) 8 =
+      .ok (pointer,.memory .read (q.regs 10-(40#64)) (valueBytes pointer 8) true) := by
+    simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using
+      PrivateSpills.spill_read p.memory (p.regs 10-(40#64)) pointer read40
+  have block := initialization_block env q pointer limit stack rfl
+    (by simpa [q,proofPrefixFinal,afterSpill,BPF.setReg] using active)
+    (by simp +decide [q,proofPrefixFinal,BPF.setReg]) nativeStack
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write32)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write24)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write16)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write8)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using read32) pointerRead
+  have run := BPFPath.evaluate_sound env proof [3,4,5,6,7,8,9,10] q _ block
+  simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using run
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -328,3 +474,9 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.prefix_event_projection
 
 #print axioms KProgTV.TrustedSimpleX86.two_load_prefix_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.initialized_pointer_read
+#print axioms KProgTV.TrustedSimpleX86.initialized_limit_read
+#print axioms KProgTV.TrustedSimpleX86.initialization_block
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_after_context_prefix
