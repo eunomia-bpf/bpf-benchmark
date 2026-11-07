@@ -1,6 +1,6 @@
 {
   "recorded": "2026-11-07T18:26:38.749670+00:00",
-  "phase": "completed CPU/C observation; full canonical job still running",
+  "phase": "CPU/C complete; canonical replay now independently verified",
   "forms": 1144,
   "cases_per_form": 1024,
   "cases": 1171456,
@@ -10,12 +10,14 @@
   "self_xor_cpu_c_mismatches": 0,
   "rsp_self_xor_cases": 4096,
   "rsp_self_xor_cpu_c_mismatches": 0,
-  "canonical_outcome": "pending; not inferred from empty active error streams",
-  "overall_job_exit": "not yet available",
+  "canonical_outcome": "1144 forms / 1171456 cases / zero CPU-reference and C-reference differences / zero unavailable forms",
+  "overall_job_exit": 0,
   "binary_sha256": "02bec25ed8c300a99ee52d5af41a0fd057aeec9bdaee2f3706a426c249a7598f",
   "actual_compilation_files_verified": 90,
   "production_source_files_exact_to_commit": 82,
   "production_source_commit": "af2f58c899d99f4092a710734ceb4cdac2b5e6df",
   "generator_source_commit": "820ef1f034a479261500069b70aab93512c93eae",
-  "previous_1080_assembly_order_unchanged": true
+  "previous_1080_assembly_order_unchanged": true,
+  "terminal_review": "2026-11-07T18:30:44.670854+00:00",
+  "prior_pending_status_correction": "The replay finished before the CPU-only review. That review did not inspect terminal files; its assertion that replay was still running was inaccurate. This terminal review establishes exit 0 and all rows."
 }
