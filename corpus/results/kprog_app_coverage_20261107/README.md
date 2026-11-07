@@ -50,3 +50,5 @@ All14 captured programs generated, compiled and linked. The actual-type verifier
 ## Fixed-input perf results
 
 `per-run-profile/READY2M.md` records exclusiveCPU0 five-event PMU and actual BPF runtime for balancer_ingress/generic_kprobe_event, with loaded JIT bytes and full logs. Waiting for upstream Tetragon event-reader readiness fixes the initial startup confound. Katran nominal-warm native executes2M misses versus JIT0, so its slower observed path includes different state work; lowering-OFF/cache-key diagnostics investigate that defect. Original compiler-table single-window results show no benefit. No six-app bound-coverage completion is claimed.
+
+Lowering-OFF follow-up completed12windows on exclusiveCPU0. Both Katran arms now have0warm-cache misses/2M inputs and matching VIP packets/bytes; actual ns/run77.360JIT/79.862native. `per-run-profile/LOWERING-OFF.md` separates this observation from the ON behavior defect and retains all5PMU counters, exactcachekeys, JITbytes and rawlogs. The production lowering fix remains pending.

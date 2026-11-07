@@ -2,7 +2,7 @@
 import bisect,collections,csv,json
 from pathlib import Path
 H=Path(__file__).resolve().parent
-RUNS=['run-baseline-20261107T055424Z','run-tables-20261107T055854Z']
+RUNS=['run-baseline-20261107T055424Z','run-tables-20261107T055854Z','run-no-lowering-20261107T060652Z']
 rows=[];cache=[];profiles=[]
 for run in RUNS:
  data=json.loads((H/run/'summary.json').read_text())

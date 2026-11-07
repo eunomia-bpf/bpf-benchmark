@@ -40,3 +40,5 @@ The first acquired lease reached the actual upstream Katran server and stable VI
 ## Measured follow-ups
 
 `PILOT.md` retains the200k-input pilot and its Tetragon startup confound. `READY2M.md` reports the corrected upstream-ready2M-input run pair, all five PMU counters, loaded JIT identities and the Katran all-miss native-cache discrepancy. Raw archives and derived CSV/JSON are separate. These are unbound native measurements, not whole-application verified-path acceptance.
+
+`LOWERING-OFF.md` records the completed same-image counterfactual on exclusiveCPU0: native warm-cache misses return to0 and actual79.862ns/run versus JIT77.360. This distinguishes the ON repeated-miss behavior from the cost of a matched hit path. Tetragon OFF remains near JIT in this individual observation. Full raw OFF archive and extended counter/profile tables are retained.
