@@ -1069,3 +1069,32 @@ Lane R's timing request uses the same target with
 guest disk and scratch roots as soon as the guest exits. The immutable runtime
 package and Docker image permit immediate re-export for that next run. The
 other five applications remain active work; this is BCC completion only.
+
+
+## Direct specialization for large application proofs (local continuation)
+
+Five operations now call their existing C handler directly: PUSH, POP,
+MOVBE_STORE, MOV_LOAD_MAP_PTR and MOV_LOAD_HELPER_ID. The generic dispatcher
+uses the same extracted pointer-load body. This changes macro expansion size;
+it introduces no instruction, branch, guard, fuel or fallback. The JSON contract,
+generated C/Python/Lean, independent Lean dispatch specification and both existing
+host oracles agree on all five rows (52 direct forms).
+
+An isolated source snapshot passes the complete `make -C kprog/formal check`
+and `make -C kprog/x86 micro-proofs-build` (negative plus all29 workloads).
+Focused specialization/chain hosts pass508/198 cases. The snapshot starts at
+9487f632f and overlays only the nine capacity files plus A's independently
+published stack-barrier checker correction. Initial incomplete-export failures
+and the checker false positive are retained beside the successful full run.
+[Exact source and raw checks](direct-specialization-artifacts.tar.gz) include
+provenance, compiler output and the generated micro artifacts. Native-link,
+entry-definedness, high-byte and numeric-environment WIP are excluded from this
+validation snapshot. Reproduce from the archived source with the two Make
+commands above; its vendor dependencies are from the recorded repository.
+
+All14 OTel application entries now render through the actual source/native
+pairing, including the transient read_task_struct program. OTel phase3 removes
+Clang's source-location exhaustion; six proofs compile and eight retain a
+backend short-branch-range failure. Those eight remain active. The next phase
+uses installed clang18's BPFv4 long-jump target for every program. No OTel
+application bound execution or timing is claimed here.
