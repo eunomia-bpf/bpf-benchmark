@@ -127,3 +127,12 @@ their captured identities. The generic CORE mechanism result records102400
 valid reads per epoch and84 protected reads across x86/ARM and kernel/legacy
 helper variants. Universal safety evidence comes from simulator/token/link
 laws; these tables and archives record runtime observations.
+
+
+The closed [OTel generic narrow-stack candidate202331](otel-stack-narrow/README.md)
+also generates/compiles3 requests and binds2, reaching1,000,001 verifier
+instructions (75,937 total states). Its636,928-case byte oracle passes; the
+candidate stays private and the production header remains47fb. The next
+representation repair continues from this complete runtime result. Tracee's
+helper-preserving whole-application replay is now active in a separate serial
+batch with native input7479850e2345 and exact new image/input identities.

@@ -1,0 +1,487 @@
+{
+  "driver_exit": 0,
+  "launch_inputs": {
+    "cpus": "20-23",
+    "vcpus": 4,
+    "guest_memory": "12G",
+    "samples": 1,
+    "duration": 2,
+    "app": "otelcol-ebpf-profiler/profiling",
+    "started": "2026-11-07T20:21:03.468578+00:00",
+    "source_head": "7a3c371961132b24e8a064d5167ec3e39e1ed0e9",
+    "sha256": {
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+      "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+      "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+      "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+      "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "kinsn/module/include/native_lab_group.h": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "fba9989aa0641ca4654a02405e3f27f9532e9d1c4ccf8bfa38b0a4242044b2a1",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/guest.py": "32edbe1f1a1ceb06fe9b44ba1e12c22094309be008579ca925e1f6f60d46a1e2",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile": "53f2ddab6f1fdf86df7873181d442066fbb609ea6ad1924f9d183ba68775b77d",
+      "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "kprog/formal/tools/generate_x86_mem_access_spec.py": "9d9ab4d23938bee79e30c92211e9891fadaca73e4711b31e7d3a3cf04db42f34"
+    },
+    "candidate_header": {
+      "base_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "candidate_sha256": "369210a17590754be8c7061864f68d706b9cd8703490b30cc2c52bb169fb58d8",
+      "refresh_children": [
+        "3548069"
+      ]
+    },
+    "image": "sha256:1ead525666cc9da03d9740230bb9f1ac4cb567e36eb255172a7bd63ffa5a2b16",
+    "driver_pid": 3690782
+  },
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "started": "2026-11-07T20:23:43.838339+00:00",
+      "prog_id": 22,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/1.success.tar.gz",
+      "finished": "2026-11-07T20:23:48.111452+00:00",
+      "entry": "read_task_struct",
+      "generated_source": true,
+      "compiled_object": true,
+      "native_sha256_verified": true,
+      "load_error_tail": ""
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 23,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "started": "2026-11-07T20:23:48.132888+00:00",
+      "prog_id": 24,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/2.success.tar.gz",
+      "finished": "2026-11-07T20:24:16.779766+00:00",
+      "entry": "perf_unwind_stop",
+      "generated_source": true,
+      "compiled_object": true,
+      "native_sha256_verified": true,
+      "load_error_tail": ""
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 25,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "started": "2026-11-07T20:24:16.802294+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '3', '25', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/request.native.o', 'perf_unwind_native', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_10_stack_deltas', '205', 'null', 'exe_id_to_11_stack_deltas', '169', 'null', 'exe_id_to_12_stack_deltas', '175', 'null', 'exe_id_to_13_stack_deltas', '177', 'null', 'exe_id_to_14_stack_deltas', '189', 'null', 'exe_id_to_15_stack_deltas', '225', 'null', 'exe_id_to_16_stack_deltas', '218', 'null', 'exe_id_to_17_stack_deltas', '173', 'null', 'exe_id_to_18_stack_deltas', '185', 'null', 'exe_id_to_19_stack_deltas', '203', 'null', 'exe_id_to_20_stack_deltas', '221', 'null', 'exe_id_to_21_stack_deltas', '199', 'null', 'exe_id_to_22_stack_deltas', '187', 'null', 'exe_id_to_23_stack_deltas', '183', 'null', 'exe_id_to_8_stack_deltas', '195', 'null', 'exe_id_to_9_stack_deltas', '216', 'null', 'filter_error_frames', '196', '0', 'filter_idle_frames', '196', '1', 'interpreter_offsets', '179', 'null', 'inverse_pac_mask', '196', '8', 'kprobe_progs', '222', 'null', 'metrics', '170', 'null', 'off_cpu_threshold', '196', '16', 'per_cpu_records', '171', 'null', 'perf_progs', '222', 'null', 'pid_page_to_mapping_info', '181', 'null', 'stack_delta_page_to_info', '219', 'null', 'stack_ptregs_offset', '196', '36', 'task_stack_offset', '196', '32', 'tpbase_offset', '196', '24', 'unwind_info_array', '214', 'null', 'with_debug_output', '196', '40']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 241, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '3', '25', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/request.native.o', 'perf_unwind_native', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/request-2qumi25z/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_10_stack_deltas', '205', 'null', 'exe_id_to_11_stack_deltas', '169', 'null', 'exe_id_to_12_stack_deltas', '175', 'null', 'exe_id_to_13_stack_deltas', '177', 'null', 'exe_id_to_14_stack_deltas', '189', 'null', 'exe_id_to_15_stack_deltas', '225', 'null', 'exe_id_to_16_stack_deltas', '218', 'null', 'exe_id_to_17_stack_deltas', '173', 'null', 'exe_id_to_18_stack_deltas', '185', 'null', 'exe_id_to_19_stack_deltas', '203', 'null', 'exe_id_to_20_stack_deltas', '221', 'null', 'exe_id_to_21_stack_deltas', '199', 'null', 'exe_id_to_22_stack_deltas', '187', 'null', 'exe_id_to_23_stack_deltas', '183', 'null', 'exe_id_to_8_stack_deltas', '195', 'null', 'exe_id_to_9_stack_deltas', '216', 'null', 'filter_error_frames', '196', '0', 'filter_idle_frames', '196', '1', 'interpreter_offsets', '179', 'null', 'inverse_pac_mask', '196', '8', 'kprobe_progs', '222', 'null', 'metrics', '170', 'null', 'off_cpu_threshold', '196', '16', 'per_cpu_records', '171', 'null', 'perf_progs', '222', 'null', 'pid_page_to_mapping_info', '181', 'null', 'stack_delta_page_to_info', '219', 'null', 'stack_ptregs_offset', '196', '36', 'task_stack_offset', '196', '32', 'tpbase_offset', '196', '24', 'unwind_info_array', '214', 'null', 'with_debug_output', '196', '40']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/stack-narrow-candidate/trusted-artdmuij/requests/3.failure.tar.gz",
+      "finished": "2026-11-07T20:29:52.176403+00:00",
+      "entry": "perf_unwind_native",
+      "generated_source": true,
+      "compiled_object": true,
+      "native_sha256_verified": true,
+      "load_error_tail": "ffff8f465490,21242:0xffffffff8f465490,21321:0xffffffff8f4637a0,21391:0xffffffff8f4637a0,21631:0xffffffff8f465490,21774:0xffffffff8f4b97a0,21910:0xffffffff8f4c7770,22120:0xffffffff8f465490,22277:0xffffffff8f465490,22429:0xffffffff8f465490,22568:0xffffffff8f465490,22738:0xffffffff8f465490,22900:0xffffffff8f465490,23012:0xffffffff8f465490,23396:0xffffffff8f465490,23623:0xffffffff8f4c7770,23910:0xffffffff8f465490,24349:0xffffffff8f465490,24466:0xffffffff8f4b97a0,24575:0xffffffff8f4b97a0,24652:0xffffffff8f4b97a0,24734:0xffffffff8f4b97a0,24813:0xffffffff8f4b97a0,24895:0xffffffff8f4b97a0,24974:0xffffffff8f4b97a0,25056:0xffffffff8f4b97a0,25135:0xffffffff8f4b97a0,25217:0xffffffff8f4b97a0,25296:0xffffffff8f4b97a0,25378:0xffffffff8f4b97a0,25457:0xffffffff8f4b97a0,25539:0xffffffff8f4b97a0,25618:0xffffffff8f4b97a0,25700:0xffffffff8f4b97a0,25775:0xffffffff8f4b97a0,25870:0xffffffff8f4b97a0,26663:0xffffffff8f465490,26810:0xffffffff8f465490,26948:0xffffffff8f465490,27542:0xffffffff8f465490,27706:0xffffffff8f465490,27779:0xffffffff8f4637a0,27982:0xffffffff8f4637a0,28199:0xffffffff8f465490,28257:0xffffffff8f4637a0,28409:0xffffffff8f465490,28521:0xffffffff8f465490,28668:0xffffffff8f465490,28821:0xffffffff8f465490,28960:0xffffffff8f465490,29107:0xffffffff8f465490,29219:0xffffffff8f465490,29354:0xffffffff8f465490,29458:0xffffffff8f465490,29536:0xffffffff8f465490,29790:0xffffffff8f4637a0,29931:0xffffffff8f465490,30070:0xffffffff8f465490,30153:0xffffffff8f465490,30256:0xffffffff8f4637a0,30326:0xffffffff8f4637a0,30567:0xffffffff8f4b97a0,30700:0xffffffff8f4c7770,30910:0xffffffff8f465490,31104:0xffffffff8f465490,31320:0xffffffff8f465490,31446:0xffffffff8f465490,31592:0xffffffff8f465490,31761:0xffffffff8f465490,31954:0xffffffff8f465490,32116:0xffffffff8f465490,32228:0xffffffff8f465490,32488:0xffffffff8f465490,33:0xab,107:0x28000000c4,136:0xaa,411:0xaa,754:0xdb,853:0xd8,925:0xad,967:0xb1,1009:0xc7,1042:0xa9,1075:0xcb,1104:0xe1,1130:0xb7,1142:0xc3,1154:0xda,1166:0xaf,1178:0xdd,1190:0xcd,1202:0xb9,1214:0xbd,1226:0xbb,1306:0x28000000c4,2502:0x28000000c4,2606:0xaa,2695:0x28000000c4,2959:0xd6,3041:0x28000000c4,3103:0x28000000c4,3243:0x28000000c4,3480:0x28000000c4,3606:0x28000000c4,3742:0x28000000c4,4004:0x28000000c4,5679:0x28000000c4,5803:0x28000000c4,6098:0xaa,6168:0x28000000c4,6212:0x28000000c4,6233:0xaa,6434:0x28000000c4,6494:0x28000000c4,6841:0x28000000c4,6904:0xb5,7000:0x28000000c4,7048:0xb3,7131:0x28000000c4,7169:0x28000000c4,7851:0x28000000c4,8152:0xaa,8213:0x28000000c4,8249:0x28000000c4,8284:0xaa,8690:0xdb,8784:0xd8,8831:0xad,8873:0xb1,8915:0xc7,8948:0xa9,8981:0xcb,9010:0xe1,9036:0xb7,9048:0xc3,9060:0xda,9072:0xaf,9084:0xdd,9096:0xcd,9108:0xb9,9120:0xbd,9132:0xbb,9218:0x28000000c4,10621:0x28000000c4,10717:0xaa,10781:0x28000000c4,10815:0x28000000c4,10850:0xd6,10937:0x28000000c4,10984:0x28000000c4,11150:0x28000000c4,11390:0x28000000c4,11657:0x28000000c4,11796:0x28000000c4,13308:0x28000000c4,13440:0x28000000c4,13850:0xaa,13915:0x28000000c4,14059:0x28000000c4,14073:0x28000000c4,14146:0x28000000c4,14481:0x28000000c4,14633:0xb5,14721:0x28000000c4,14769:0xb3,14852:0x28000000c4,14890:0x28000000c4,15132:0x28000000c4,15439:0x28000000c4,15740:0xaa,15801:0x28000000c4,15835:0x28000000c4,15862:0xaa,15925:0x28000000c4,16099:0x28000000c4,16133:0x28000000c4,16299:0xdb,16346:0x28000000c4,16415:0xd8,16462:0xad,16504:0xb1,16546:0xc7,16579:0xa9,16612:0xcb,16641:0xe1,16667:0xb7,16679:0xc3,16691:0xda,16703:0xaf,16715:0xdd,16727:0xcd,16739:0xb9,16751:0xbd,16763:0xbb,16851:0x28000000c4,18207:0x28000000c4,18302:0xaa,18414:0x28000000c4,18536:0x28000000c4,18571:0xd6,18650:0x28000000c4,18697:0x28000000c4,18855:0x28000000c4,19087:0x28000000c4,19343:0x28000000c4,19482:0x28000000c4,19888:0x28000000c4,20887:0x28000000c4,21019:0x28000000c4,21429:0xaa,21494:0x28000000c4,21638:0x28000000c4,21652:0x28000000c4,21756:0xb5,21844:0x28000000c4,21892:0xb3,21975:0x28000000c4,22013:0x28000000c4,22438:0x28000000c4,22745:0x28000000c4,23046:0xaa,23107:0x28000000c4,23141:0x28000000c4,23168:0xaa,23231:0x28000000c4,23405:0x28000000c4,23439:0x28000000c4,23605:0xdb,23652:0x28000000c4,23725:0xd8,23954:0xad,23996:0xb1,24034:0xc7,24063:0xa9,24092:0xcb,24121:0xe1,24150:0xb7,24177:0x28000000c4,24361:0xc3,24373:0xda,24385:0xaf,24397:0xdd,24409:0xcd,24421:0xb9,24433:0xbd,24445:0xbb,24533:0x28000000c4,25899:0x28000000c4,26008:0xaa,26091:0x28000000c4,26128:0x28000000c4,26156:0xab,26255:0xaa,26316:0xde,26368:0xde,26383:0xde,26960:0x28000000c4,27082:0x28000000c4,27117:0xd6,27196:0x28000000c4,27243:0x28000000c4,27331:0xaa,27397:0x28000000c4,27634:0x28000000c4,27874:0x28000000c4,28130:0x28000000c4,28269:0x28000000c4,28675:0x28000000c4,29674:0x28000000c4,29806:0x28000000c4,30364:0xaa,30425:0x28000000c4,30445:0x28000000c4,30549:0xb5,30634:0x28000000c4,30682:0xb3,30765:0x28000000c4,30803:0x28000000c4,30929:0x28000000c4,31121:0x28000000c4,31455:0x28000000c4,31599:0x28000000c4,31961:0x28000000c4,32262:0xaa,32323:0x28000000c4\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Argument list too long\n"
+    }
+  ],
+  "native_requests": 3,
+  "generated": 3,
+  "compiled": 3,
+  "accepted_bound": 2,
+  "failed": 1,
+  "corpus_metadata": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_202331_180002/metadata.json",
+      "status": "error",
+      "error_message": "corpus suite reported errors"
+    }
+  ],
+  "terminal_archives_verified": 3,
+  "service_archive": "corpus-20261107T203003654929Z.tar.gz",
+  "service_archive_sha256": "f506bf8d9ab2c1a7b8b2e80d9a69f6e3e6168cbdce77033dbcf8597c678f1916",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_202331_180002",
+  "metadata_status": "error",
+  "app_status": "error",
+  "app_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n2026-11-07T20:23:43.569Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-11-07T20:23:43.569Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-11-07T20:23:43.570Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 4}\n2026-11-07T20:23:43.570Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-11-07T20:23:43.571Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-11-07T20:23:47.233Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25b8\t{\"resource\": {\"service.instance.id\": \"a3360f82-8856-483a-95d9-fd07038c8367\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+  "rejit_result": {
+    "enabled_passes": [],
+    "mode": "verified_native_loader",
+    "status": "ok"
+  },
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 14983,
+        "bytes_xlated": 24736,
+        "id": 10,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "11": {
+        "bytes_jited": 19605,
+        "bytes_xlated": 33208,
+        "id": 11,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "12": {
+        "bytes_jited": 17840,
+        "bytes_xlated": 30280,
+        "id": 12,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "13": {
+        "bytes_jited": 20215,
+        "bytes_xlated": 33448,
+        "id": 13,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "14": {
+        "bytes_jited": 22797,
+        "bytes_xlated": 37440,
+        "id": 14,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "15": {
+        "bytes_jited": 1572,
+        "bytes_xlated": 2504,
+        "id": 15,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "16": {
+        "bytes_jited": 792,
+        "bytes_xlated": 1320,
+        "id": 16,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 30,
+        "run_time_ns_delta": 89554,
+        "type": "tracepoint"
+      },
+      "17": {
+        "bytes_jited": 3815,
+        "bytes_xlated": 5904,
+        "id": 17,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 9138,
+        "run_time_ns_delta": 76460649,
+        "type": "perf_event"
+      },
+      "18": {
+        "bytes_jited": 3679,
+        "bytes_xlated": 5712,
+        "id": 18,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6": {
+        "bytes_jited": 3650,
+        "bytes_xlated": 6144,
+        "id": 6,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "7": {
+        "bytes_jited": 21868,
+        "bytes_xlated": 37024,
+        "id": 7,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "8": {
+        "bytes_jited": 18424,
+        "bytes_xlated": 28080,
+        "id": 8,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "9": {
+        "bytes_jited": 18264,
+        "bytes_xlated": 29640,
+        "id": 9,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "2",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.0347940959999846,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=3973040 elapsed_s=2.002006 worker=0 sink=365415121",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "2",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.034914494999981,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=4654344 elapsed_s=2.000010 worker=1 sink=1916064858",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "2",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.1317022409999993,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=10182366 elapsed_s=2.004630 worker=0 sink=819372075",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "2",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.262004661999981,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=11230532 elapsed_s=2.000013 worker=1 sink=931161102",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "2",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.294753928999995,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=8921253 elapsed_s=2.000119 worker=0 sink=4263267328",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "2",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.299629784999979,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=10244413 elapsed_s=2.000077 worker=1 sink=161878528",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "2",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.299713242999985,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=4394503 elapsed_s=2.000001 worker=0 sink=1345617920",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "2",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.2997623229999817,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=4959757 elapsed_s=2.010854 worker=1 sink=4099508071",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "2",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.2998469739999905,
+            "returncode": 0,
+            "stderr": "php int_loop ops=18127471 elapsed_s=2.000003 worker=0 sink=61112888",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "2",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 2.299914051999991,
+            "returncode": 0,
+            "stderr": "php int_loop ops=18517624 elapsed_s=2.003884 worker=1 sink=1992486186",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "2s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/0e262509"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 2.299975128,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [1918] setting to a 2 secs run per stressor\nstress-ng: info:  [1918] dispatching hogs: 1 cpu\nstress-ng: info:  [1918] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1918] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1918]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1918] cpu                1160      2.00      0.72      0.00       579.96        1613.60\nstress-ng: info:  [1918] skipped: 0\nstress-ng: info:  [1918] passed: 1: cpu (1)\nstress-ng: info:  [1918] failed: 0\nstress-ng: info:  [1918] metrics untrustworthy: 0\nstress-ng: info:  [1918] successful run completed in 2.03 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "post_rejit": null,
+  "native_replaced": 2,
+  "native_failed": 1,
+  "artifact_sha256": {
+    "driver.log.gz": "dd281ec2795048cab74a62e7ecb8bda4d58a6dc6667ac9e3c95d43be90329b3a",
+    "service.tar.gz": "31ea78d6fa22121150127133f4ea263803519aa8f78feb5a22385f3b07ba1e28",
+    "launch.tar.gz": "ab280bc4f8a59b72535dd1e2ee3a09eff33438d2bdf2147fbe3bd7d328a018f4",
+    "result.tar.gz": "e874afd34ce3cafffe01663a742c85f437d13d967eb15709df2372a3040d062a"
+  }
+}
