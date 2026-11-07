@@ -354,9 +354,18 @@ native data symbol .L.str.14 exceeds BPF data map value_size for .rodata.str1.1
 ```
 
 — one symbol, all 151 loads, so **0 programs replace** and tracee has no
-native number. This is a loader placement defect (a readonly data symbol
-stuffed into a map value too small for it), not an app property. Reported;
-recorded as blocked rather than as a boundary.
+native number.
+
+The check is `native_loader.cpp:3893`, `if (*off + sym.st_size >
+map->value_size)`, and the process created a **`value_size=0`** map for
+this section. A zero-sized map can never hold a symbol, so every data
+symbol overflows; either the map is declared with zero entries and libbpf
+sizes it from a section the native object's placement does not match, or
+`source_data_symbol_offset` returns an offset past the map. It is a
+loader placement/sizing defect, not an app property, and it matters
+because tracee is the one app whose reference ratio (0.958x) is below 1.
+Reported, recorded as blocked with these specifics rather than as a
+boundary.
 
 # Blockers cleared to reach the native arm
 
