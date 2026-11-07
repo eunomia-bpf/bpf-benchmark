@@ -59,7 +59,6 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
         actual.nr_jited_ksyms != addresses.size() || actual.nr_jited_func_lens != lengths.size() ||
         !addresses.front())
         fail("read actual bound JIT bytes/address/layout: " + std::string(std::strerror(errno)));
-#if defined(__aarch64__)
     const auto emitted_path = std::filesystem::path(kNativeLabTarget.debugfs_dir) / "emitted_native";
     std::ifstream emitted_input(emitted_path, std::ios::binary);
     if (!emitted_input) fail("open emitted native sites " + emitted_path.string());
@@ -101,7 +100,6 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
         if (matches != 1 || image_offset != jit.size())
             fail("reported native entry is not contained in one actual JIT function");
     }
-#endif
     const auto output = std::filesystem::path(directory) /
         (std::to_string(attrs.source_prog_id) + "-" + std::to_string(info.id));
     std::filesystem::create_directories(output.parent_path());
@@ -110,9 +108,7 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
     auto save = [&](const char *name, const void *bytes, size_t count) {
         write_binary_file(output/name, static_cast<const uint8_t *>(bytes), count);
     };
-#if defined(__aarch64__)
     save("emitted.bin", emitted.data(), emitted.size());
-#endif
     save("checked.snapshot.bin", snapshot.data(), snapshot.size());
     save("native.bin", linked.blob.data(), linked.blob.size());
     save("native.relocs", linked.relocs.data(), linked.relocs.size());

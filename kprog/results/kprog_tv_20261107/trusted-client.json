@@ -35,7 +35,7 @@
     "value_offset": "null=map object; integer including0=direct value"
   },
   "remaining": [
-    "real BCC/x86 and Katran/ARM REQUIRE_BOUND_PROOF=1 runs",
+    "complete BCC application set/x86 and real Katran/ARM REQUIRE_BOUND_PROOF=1 runs",
     "AArch64 common-service helper acceptance/execution",
     "token-FD delegation",
     "source/profile/artifact binding refinement certificates on the new path",
@@ -85,5 +85,13 @@
     "borrowed MapMeta FD serialization failed EBADFD; fixed by reopening pinned map ID, actual three-map guest passes",
     "synthetic manifest symbol selector lacked source entry BTF and matched no entry; fixture uses explicit native API entry with manifest native/map selection, guest passes"
   ],
-  "raw_output": "summarized and removed per CLEANUP NOW; C retains compressed actual positive and BCC failure counterexamples"
+  "raw_output": "summarized and removed per CLEANUP NOW; C retains compressed actual positive and BCC failure counterexamples",
+  "real_application": {
+    "owner_commit": "b37c64eaa",
+    "receipt": "corpus/results/kprog_app_coverage_20261107/trusted-service-bcc/summary.json",
+    "programs": 5,
+    "app": "upstream BCC vfsstat",
+    "result": "all5 actual fentry programs freshly generated, verified, bound and attached; bound_required=1/prebuilt_proof=0, app exit0 and actual stats output",
+    "limit": "not the full BCC/six-app corpus or same-work measurement"
+  }
 }

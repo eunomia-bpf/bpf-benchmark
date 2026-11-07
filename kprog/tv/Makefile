@@ -746,3 +746,19 @@ guest-trusted-client-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko
 	./build/test-trusted-client ../../vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o kprobe_vfs_read
+
+.PHONY: trusted-capture-check guest-trusted-capture-check
+trusted-capture-check:
+	$(MAKE) -C ../libnativeloader trusted-service-check
+	cmake --build ../libnativeloader/build --target trusted-service-client
+	clang -O2 -fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o ../libnativeloader/build/trusted-native.o
+	$(MAKE) module-check ARCH=x86 KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-trusted-capture-check'
+
+guest-trusted-capture-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 capture_trusted_service.py

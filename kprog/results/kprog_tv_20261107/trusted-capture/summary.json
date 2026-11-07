@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "architecture": "x86",
+  "route": "registered native-only common service",
+  "client": {
+    "ok": true,
+    "original_prog_id": 3,
+    "native_prog_id": 8,
+    "retval": 2,
+    "prebuilt_proof": false
+  },
+  "completion": {
+    "request_id": 1,
+    "source_prog_id": 3,
+    "native_sha256": "d94117a420fcf032246cd6a869ef4a7f17e7def7ee610762f9116b90a4a18cf3",
+    "started": "2026-11-07T09:27:07.642020+00:00",
+    "prog_id": 8,
+    "status": 0,
+    "artifact_archive": "/workspaces/repository/kprog/results/kprog_tv_20261107/trusted-capture/.live-jnfj3t9j/requests/1.success.tar.gz",
+    "finished": "2026-11-07T09:27:09.466087+00:00"
+  },
+  "capture_sha256": {
+    "checked.snapshot.bin": "e98bac78f5ef5ec64c88cb3c65116ddc3d5ab7dd13588560c14901355fead114",
+    "emitted.bin": "a16dc16b8e64fcbbb97f5a6e5886b226f31a8f2a7acfeb2dee48f2429c9a4b52",
+    "native.bin": "fc72ce175089f36aa239fefbf8d02a877ceb6a02f1fe5a424e4371707f2f0824",
+    "native.relocs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "proof-input.bin": "b836a84129c5f6a512a04f128e894b3676ccea3928abd1099bb90233788cf8cf",
+    "jit.bin": "43ca7c14d18ef4dc8fd5a4fe63151da5b41b82703404ebd1fecb3117c06b2694",
+    "jit-addresses.bin": "32ddac22bf42e72d4d12544235b3d01e442fc026acde41ea6f77b81efe7bd305",
+    "jit-lengths.bin": "bb549140670e7cab3f174160e750d9ed261491b7feb8fb75ec32f0d788f0abce",
+    "stub.bin": "390885678d6520b4a8b6895a635d7b6a9678ae6bec5546bbf06632cd338c75fc",
+    "load.json": "5aa7cfce4fcc3c4d20cbc99929422d8bd69477d0ba5cf9a54a693f28000bc84c"
+  },
+  "sources": {
+    "kprog/libnativeloader/src/native_tv_capture.hpp": "84b0597ac279a40f293451c05273dbd7b57c83289f9380b8fe92ac075d5fe2b6",
+    "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "3d1e78cc172e72c6765be11e26dd2df4debe3321d29e3a219eb8180458e33499",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "6f03b95301fdb094647d3e85e5f06570eb4e5f77df5070e65d8bb6c9ff0d8f2a"
+  },
+  "validated_by_loader": "actual checked binding/generation/context; emission entry inside actual JIT layout; exact native bytes when no relocation",
+  "remaining": "ISA/translation certificate and trust of kernel binding code are not discharged by capture",
+  "archive_sha256": "61a9d1c31e854915db070f5d092d5180db5da05a8628a6b8eb66537cb5150ce3",
+  "capture_layout": {
+    "native_bytes": 5,
+    "verifier_insns": 4,
+    "proof_input_insns": 3,
+    "emitted_sites": 1,
+    "native_relocations": 0,
+    "source_prog_id": 3,
+    "native_prog_id": 8,
+    "generation": 4
+  },
+  "harness_sha256": "67c0f074be25645e8970804100a48d5e6b35e2f5200401f888bcee9ad8980a91"
+}

@@ -1105,3 +1105,32 @@ Handle symbols forbid a nonzero relative addend. Intermediate arithmetic is
 128-bit so negative, full-width and overflowing values cannot wrap into a
 safe offset. `source-map-check` covers14 controls under ASan/UBSan. The
 legacy manifest/source-instruction binding contract is unchanged.
+
+
+Actual x86 emission entry on the trusted service path
+----------------------------------------------------
+
+`trusted-capture-check` uses C's unchanged common service, adapter and control
+client with the existing optional TV export. The x86 callback records its
+actual final RX entry (`final_ip + off`) through the same emitted-site wire
+record as ARM. The loader validates the reported generation, extent, ABI,
+source identity and entry against the actual JIT addresses/function lengths.
+For relocation-free native code it compares every emitted byte at that entry.
+Capture stays under the upload lock and completes before the helper publishes
+the successful program to its application.
+
+The retained `kprog/results/kprog_tv_20261107/trusted-capture/artifacts.tar.gz`
+contains the actual expanded four-instruction verifier artifact, linked
+five-byte native body, compiler proof, JIT image/layout and successful load
+identity, along with the common service's immutable ELF/entry/metadata request
+and fresh generation inputs. The native-only client executes that accepted
+program and returns2 with prebuilt=false. Temporary run files are removed.
+These are concrete binding inputs; the capture is not an ISA/translation
+certificate. Relocated application bodies still need the corresponding
+patch/materialization refinement.
+
+C's first real upstream BCC vfsstat service replay is published at b37c64eaa:
+five fentry programs are freshly verified, bound and attached, with
+bound_required=1, prebuilt_proof=0, application exit0 and statistics output.
+This is the first BCC application path; the full corpus and ARM Katran remain
+separate active obligations.

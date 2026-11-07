@@ -8,9 +8,7 @@ module_param_named(capture_checked, native_lab_capture_checked, bool, 0600);
 MODULE_PARM_DESC(capture_checked, "Capture exact verified expanded proof before restoration");
 static void *native_lab_checked_bytes;
 static size_t native_lab_checked_size;
-#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
 static struct native_lab_emitted_site native_lab_emitted_sites[NATIVE_LAB_MAX_BLOBS];
-#endif
 
 /* All callers hold blobs_lock. Mutation invalidates stale program evidence. */
 static void native_lab_forget_checked(void)
@@ -18,9 +16,7 @@ static void native_lab_forget_checked(void)
 	kvfree(native_lab_checked_bytes);
 	native_lab_checked_bytes = NULL;
 	native_lab_checked_size = 0;
-#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
 	memset(native_lab_emitted_sites, 0, sizeof(native_lab_emitted_sites));
-#endif
 }
 
 static bool native_lab_checked_map_insn(const struct bpf_insn *insn)
@@ -153,11 +149,10 @@ static const struct file_operations native_lab_checked_fops = {
 	.release = native_lab_checked_release, .llseek = default_llseek,
 };
 
-#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
 /* Called with blobs_lock after the final generation/context recheck. The
  * address comes from the JIT's final RX image, never its temporary scratch. */
 static int native_lab_capture_emit(u32 blob_id, u32 generation, u32 abi_mask,
-				   const u32 *final_ip)
+				   const void *final_ip)
 {
 	const struct native_lab_checked_header *checked = native_lab_checked_bytes;
 
@@ -224,6 +219,5 @@ static const struct file_operations native_lab_emitted_fops = {
 	.owner = THIS_MODULE, .open = native_lab_emitted_open, .read = native_lab_checked_read,
 	.release = native_lab_checked_release, .llseek = default_llseek,
 };
-#endif
 
 #endif
