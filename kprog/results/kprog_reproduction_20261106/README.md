@@ -614,6 +614,21 @@ Each was reproducible, and each is named with the evidence that cleared it.
 
 ## Lane F: stage2 helper/map, three runtimes
 
+**Re-run on 2026-11-07 and now blocked**, which is worth recording because
+it is a regression rather than a property of the suite. The loader gained
+an application/trusted-worker split whose application branch rejects a
+submission that carries any proof field
+(`native_loader.cpp:5547`, `applications submit native programs and
+cannot supply a proof`), and the micro `native_proof` runtime does carry
+one, so all 13 stage2 programs fail and the run exits 2. The same command
+completed at 11:28. Corpus is unaffected — it takes the application path
+with no proof fields, and a katran re-check after the change still
+replaces its program and completes — so the regression is confined to the
+micro `native_proof` runtime, which needs to be recognised as a
+trusted-worker submission. Reported.
+
+The figures below are from the earlier successful run.
+
 `RUNTIMES="native_kernel kernel native_proof" SAMPLES=3 WARMUPS=1
 INNER_REPEAT=100000` -> RC=0,
 `micro/results/x86_kvm_micro_20261106_181845_426714`. All 13 cases ran on
