@@ -1,0 +1,126 @@
+{
+  "input_records": 44,
+  "inputs": [
+    {
+      "path": "corpus/results/kprog_app_coverage_20261106/bcc-complete-18/workload-counters.json",
+      "sha256": "328734a0f0c7ff484f4ea5186119ad6fdba3f6463f8ac189fe54278b3e332bad"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_060516_326524/details/apps/bcc__set.json",
+      "sha256": "c6b7b2b3cdd5200079f384a13507dd0896b220f094e497ce26eb1df90a7d3baa"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_060516_326524/metadata.json",
+      "sha256": "83a51294134f09bbe944e695b89fda8277df65c78bc70f111589cc77df674016"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_051705_921756/details/apps/bcc__set.json",
+      "sha256": "eff854a9e9ae5aab67cdef40fb6f57dd846612ebd0491107edb8f0a1b66b4210"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_051705_921756/metadata.json",
+      "sha256": "f1596cb96b878744765c489ac53d1fe7ed51900b7489cf7bcb639c24657aa3c2"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_054048_802782/details/apps/bcc__set.json",
+      "sha256": "5975a245a2513055c56196219b853c4a7c253fb3f39b1107d91be136e913375b"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_054048_802782/metadata.json",
+      "sha256": "d85bcf86e75eb97cde481d1f1aa4108e905f67dcbc38c7493f3a75e14bc73797"
+    }
+  ],
+  "source_runs": [
+    {
+      "run": "x86_kvm_corpus_20261107_060516_326524",
+      "status": "ok",
+      "error": "",
+      "workload_only": true,
+      "post_rejit_present": false
+    },
+    {
+      "run": "x86_kvm_corpus_20261107_051705_921756",
+      "status": "error",
+      "error": "BCC tool capable exited before BPF programs were tracked by shim",
+      "workload_only": false,
+      "post_rejit_present": false
+    },
+    {
+      "run": "x86_kvm_corpus_20261107_054048_802782",
+      "status": "error",
+      "error": "BCC tool capable exited before BPF programs were tracked by shim",
+      "workload_only": false,
+      "post_rejit_present": false
+    }
+  ],
+  "short_syscall": [
+    {
+      "run": "C-short-verified",
+      "phase": "baseline",
+      "sample": 0,
+      "mode": "JIT",
+      "workload_seconds": 2.019662015999984,
+      "returncode": 0,
+      "stressor": "syscall",
+      "bogo_ops": 8434,
+      "real_seconds": 2.0,
+      "user_seconds": 0.01,
+      "system_seconds": 0.06
+    },
+    {
+      "run": "C-short-verified",
+      "phase": "post_rejit",
+      "sample": 0,
+      "mode": "historical_verified_native_loader",
+      "workload_seconds": 3.019759854999961,
+      "returncode": 0,
+      "stressor": "syscall",
+      "bogo_ops": 514,
+      "real_seconds": 3.0,
+      "user_seconds": 0.01,
+      "system_seconds": 0.03
+    }
+  ],
+  "no_bpf_syscall": [
+    {
+      "run": "x86_kvm_corpus_20261107_060516_326524",
+      "phase": "baseline",
+      "sample": 0,
+      "mode": "no_application_bpf",
+      "workload_seconds": 180.019829482,
+      "returncode": 0,
+      "stressor": "syscall",
+      "bogo_ops": 8434,
+      "real_seconds": 180.0,
+      "user_seconds": 0.01,
+      "system_seconds": 0.14
+    },
+    {
+      "run": "x86_kvm_corpus_20261107_060516_326524",
+      "phase": "baseline",
+      "sample": 1,
+      "mode": "no_application_bpf",
+      "workload_seconds": 180.01996536899998,
+      "returncode": 0,
+      "stressor": "syscall",
+      "bogo_ops": 514,
+      "real_seconds": 180.0,
+      "user_seconds": 0.02,
+      "system_seconds": 0.09
+    },
+    {
+      "run": "x86_kvm_corpus_20261107_060516_326524",
+      "phase": "baseline",
+      "sample": 2,
+      "mode": "no_application_bpf",
+      "workload_seconds": 180.019861935,
+      "returncode": 0,
+      "stressor": "syscall",
+      "bogo_ops": 514,
+      "real_seconds": 180.0,
+      "user_seconds": 0.02,
+      "system_seconds": 0.04
+    }
+  ],
+  "conclusion": "Both 8434 and 514 occur in the same workload-only no-app-BPF run. Their short-arm difference alone does not establish a native-induced behavior regression. Same-work and the blocking/calibration mechanism remain to be measured on the new trusted application path."
+}
