@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-34 x86 register/control tokens; full raw ISA and compiled-simulator closure continue.
+36 x86 register/control/stack tokens; full raw ISA and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
 
@@ -58,8 +58,11 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Twenty-two direct and eight generic register token bodies have semantic equality to interpreter
-dispatch for arbitrary fields and invocations. Safety work is generic per
+Twenty-five direct, nine generic and two branch token bodies have semantic
+equality to their covered interpreter dispatch for arbitrary fields and
+invocations. PUSH/POP register/immediate forms compose full64 stack offsets,
+partialSP writeback and observed guest-memory effects; mode2 addresses and the
+private-arena/permission relation retain explicit completion interfaces. Safety work is generic per
 simulator and token; historical per-program proofs are frozen and excluded
 from the argument. Remaining tokens and native-link/compiler preservation
 are being connected through [generic composition](../tv/Composition.lean).

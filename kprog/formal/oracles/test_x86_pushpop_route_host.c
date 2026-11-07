@@ -16,8 +16,8 @@
  * contract tables plus a model but never includes the simulator header), this
  * oracle covers the routing the two bodies now perform. It plants, per
  * opcode, cases where each routed fact is *numerically distinguishable* from
- * the wrong selection: a `PUSH` carrying a narrow `FLAGS` code must still move
- * the stack pointer by eight and store all eight bytes, a `POP` carrying the
+ * the wrong selection: a `PUSH` carrying a narrow `FLAGS` code adjusts
+ * RSP by its resolved width and stores the corresponding low bytes, a `POP` carrying the
  * absent code must still read and write eight bytes, and a direction swap
  * must move the stack pointer the opposite way.
  *
@@ -81,7 +81,7 @@ static __u64 model_mask(unsigned width)
  * little-endian. */
 static void model_store(__u8 *frame, __s64 off, unsigned width, __u64 value)
 {
-	__u32 index = (__u32)((__s64)off + FRAME);
+	__u64 index = (__u64)off + FRAME;
 	__u64 narrowed = value & model_mask(width);
 	unsigned i;
 
@@ -92,7 +92,7 @@ static void model_store(__u8 *frame, __s64 off, unsigned width, __u64 value)
 /* The stack helper's load, restated. */
 static __u64 model_load(const __u8 *frame, __s64 off, unsigned width)
 {
-	__u32 index = (__u32)((__s64)off + FRAME);
+	__u64 index = (__u64)off + FRAME;
 	__u64 v = 0;
 	unsigned i;
 
@@ -127,7 +127,8 @@ static __u64 model_write(__u64 old, __u64 value, unsigned width)
  */
 static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 		       unsigned src, unsigned dst, __s64 rsp,
-		       unsigned via_dispatch)
+		       unsigned via_dispatch, __u64 native_base, unsigned aliases,
+		       unsigned immediate)
 {
 	__u64 mreg[16];
 	__u8 mtag[16];
@@ -135,6 +136,10 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	__s64 mrsp = rsp;
 	unsigned i;
 	unsigned w = flags ? flags : X86_WIDTH_64;
+	__u64 arena_top;
+	__u64 immediate_value = immediate ? 0xffffffff87654321ULL : 0;
+	unsigned planted = native_base != 0 || aliases || immediate;
+	__u32 aux = immediate ? (1U << 24) : (aliases ? (0x7bU << 24) : 0U);
 
 	X86_SIM_L_DECLARE_STATE();
 	struct x86_sim_xdp_abi __x86_sim_abi = {};
@@ -178,9 +183,25 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 		__x86_stack_mem.b[i] = b;
 	}
 
+	__x86_native_stack_base = native_base;
+	arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[FRAME];
+	if (aliases) {
+		for (i = 0; i < 16U; i++) {
+			if (i == X86_RSP)
+				continue;
+			mreg[i] = arena_top - 8U * (i + 1U);
+			mtag[i] = X86_SIM_TAG_STACK;
+			X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)mreg[i], mtag[i]);
+		}
+	}
+	__x86_cf = planted; __x86_zf = 0; __x86_sf = planted;
+	__x86_of = 0; __x86_pf = planted; __x86_af = planted;
+
 	/* ---- independent model of the stack-transfer step ---- */
 	if (!op_is_pop) {
-		__u64 value = mreg[src];
+		__u64 value = immediate ? immediate_value :
+			(src == X86_RSP ? mreg[src] + native_base :
+			 mtag[src] == X86_SIM_TAG_STACK ? mreg[src] - arena_top + native_base : mreg[src]);
 
 		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] - w);
 		model_store(mframe, (__s64)mreg[X86_RSP], w,
@@ -189,7 +210,10 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 		__u64 value = model_load(mframe, (__s64)mreg[X86_RSP], w);
 
 		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] + w);
-		mreg[dst] = model_write(mreg[dst], value, w);
+		__u64 old = dst == X86_RSP ? mreg[dst] + native_base :
+			mtag[dst] == X86_SIM_TAG_STACK ? mreg[dst] - arena_top + native_base : mreg[dst];
+		__u64 result = model_write(old, value, w);
+		mreg[dst] = dst == X86_RSP ? result - native_base : result;
 		mtag[dst] = X86_SIM_TAG_SCALAR;
 
 	}
@@ -198,16 +222,16 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	/* ---- run the real body ---- */
 	if (!op_is_pop) {
 		if (via_dispatch)
-			X86_SIM_L_EXEC(X86_OP_PUSH, X86_REG_NONE, src, flags, 0U,
-				       0ULL);
+			X86_SIM_L_EXEC(X86_OP_PUSH, X86_REG_NONE, src, flags, aux,
+				       immediate_value);
 		else
-			X86_SIM_L_EXEC_PUSH(src, flags);
+			X86_SIM_L_EXEC_PUSH_OP(src, flags, aux, immediate_value);
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_POP, dst, X86_REG_NONE, flags,
-				       0U, 0ULL);
+				       aux, immediate_value);
 		else
-			X86_SIM_L_EXEC_POP(dst, flags);
+			X86_SIM_L_EXEC_POP_OP(dst, flags, aux, immediate_value);
 	}
 
 	/* ---- compare the stack pointer ---- */
@@ -261,7 +285,8 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 
 	/* ---- neither body writes a flag ---- */
 	cases++;
-	if (__x86_cf != 0 || __x86_zf != 0 || __x86_sf != 0 || __x86_of != 0) {
+	if (__x86_cf != planted || __x86_zf != 0 || __x86_sf != planted || __x86_of != 0 ||
+	    __x86_pf != planted || __x86_af != planted) {
 		printf("MISMATCH %s pop=%u flags=%u rsp=%lld wrote a flag\n",
 		       what, op_is_pop, flags, (long long)rsp);
 		failures++;
@@ -330,11 +355,31 @@ int main(void)
 								src_regs[si],
 								dst_regs[di],
 								rsp_values[ri],
-								via);
+								via, 0, 0, 0);
 						}
 					}
 				}
 			}
+		}
+	}
+
+	/* The same frame oracle covers every source/destination cell, actual
+	 * native stack bases, typed aliases, and PUSH's immediate AUX route. */
+	{
+		static const __u64 bases[] = {0, 0x7fffffffef91ULL,
+			0xffff80000000fff1ULL, 0xfffffffffffffff9ULL};
+		static const unsigned legal_flags[] = {0, X86_WIDTH_16, X86_WIDTH_64};
+		unsigned bi, ai, reg, immediate;
+		for (via = 0; via < 2; via++)
+		for (bi = 0; bi < sizeof(bases) / sizeof(bases[0]); bi++)
+		for (ai = 0; ai < 2; ai++)
+		for (fi = 0; fi < sizeof(legal_flags) / sizeof(legal_flags[0]); fi++)
+		for (reg = 0; reg < 16; reg++) {
+			check_step("native-pop", 1, legal_flags[fi], 0, reg, -24,
+				via, bases[bi], ai, 0);
+			for (immediate = 0; immediate < 2; immediate++)
+				check_step("native-push", 0, legal_flags[fi], reg, 0, -24,
+					via, bases[bi], ai, immediate);
 		}
 	}
 
