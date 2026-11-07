@@ -10,7 +10,7 @@
 static void require(bool value,const char *message) { if (!value) throw std::runtime_error(message); }
 int main(int argc,char **argv)
 {
-    if (argc!=4) return 2;
+    if (argc!=4 && argc!=5) return 2;
     try {
         std::ifstream source(argv[1],std::ios::binary);
         std::vector<char> bytes((std::istreambuf_iterator<char>(source)),{});
@@ -58,6 +58,18 @@ int main(int argc,char **argv)
             rejected=std::strstr(error.what(),"BPF_PROG_LOAD native_lab stub:")!=nullptr;
         }
         require(rejected,"proof that erases source value offset accepted");
+        if (argc==5) {
+            options.manifest_path=argv[4];
+            bool bytes_rejected=false;
+            try {
+                auto wrong=native_loader::load_from_fd(options);
+                native_loader::close_loaded_program(&wrong);
+            } catch (const std::exception &error) {
+                std::printf("wrong-readonly proof rejected: %s\n",error.what());
+                bytes_rejected=std::strstr(error.what(),"readonly proof data does not match native bytes")!=nullptr;
+            }
+            require(bytes_rejected,"proof with changed readonly bytes accepted");
+        }
         require(close(original)==0 && close(map)==0,"close fixture resources");
     } catch (const std::exception &error) {std::fprintf(stderr,"source-map-probe: %s\n",error.what());return 1;}
     return 0;

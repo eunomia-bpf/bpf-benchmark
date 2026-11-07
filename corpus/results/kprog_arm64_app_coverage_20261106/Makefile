@@ -532,13 +532,13 @@ startup-arm64-collect:
 
 .PHONY: source-map-arm64-build
 source-map-arm64-build:
-	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE)
+	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) $(SOURCE_MAP_ARGS)
 
 .PHONY: source-map-arm64-check
 source-map-arm64-check:
 	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
 		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$(HERE)/source_map_probe.cpp /workspaces/.agent-state/kprog-lanes/T/context-v2-source-map/arm64/libnative_loader.a \
+		$(HERE)/source_map_probe.cpp $(ROOT)/kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.a \
 		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/source-map-probe
 	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
@@ -616,3 +616,13 @@ entry-abi-build: direct-header-generate
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
 		-c $$source -o $${source%.c}.o || exit 1; \
 	done
+
+.PHONY: runtime-loader-build
+runtime-loader-build:
+	PKG_CONFIG_LIBDIR=$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
+		PKG_CONFIG_SYSROOT_DIR=$(ROOT)/.cache/aarch64-sysroot \
+		CXX=aarch64-linux-gnu-g++ CC=aarch64-linux-gnu-gcc taskset -c 16-19 $(MAKE) -C $(ROOT)/kprog/libnativeloader \
+		BUILD_DIR=build-arm64-a-map-order-v3 \
+		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
+		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		KERNEL_OFFSETS_INCLUDE=$(ROOT)/micro/programs/build-arm64

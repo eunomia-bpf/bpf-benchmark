@@ -913,3 +913,11 @@ helpers. Six focused cases,154 helper ABI cases and the isolated complete
 formal check pass. Both source/simulator/bound QEMU controls write37/return2
 after adjust_head4, with generation1. The complete built replay is retained;
 numeric SP/LR changes remain owned by F.
+
+## Source-map externs with private readonly data
+
+[Mixed relocation handling](source-map-readonly-result/README.md) now preserves
+source-map identity and exact readonly object bytes in the same proof. The
+actual QEMU regression writes42 at16/generation1; wrong offsets and changed
+readonly bytes both reject before native execution. Static/shared ARM builds
+pass. New runtimev11 is queued for all six real application startups.

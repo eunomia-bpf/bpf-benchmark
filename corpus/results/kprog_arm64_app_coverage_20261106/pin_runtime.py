@@ -5,7 +5,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[3]
 source=Path('/workspaces/.agent-state/kprog-lanes/T/context-v2-exclusive-choice/arm64')
-library=ROOT/'kprog/libnativeloader/build-arm64-a-map-order-v2'
+library=ROOT/'kprog/libnativeloader/build-arm64-a-map-order-v3'
 base=Path(sys.argv[1]).resolve()
 kernel=base/'kernel'
 boot=kernel/'arch/arm64/boot';boot.mkdir(parents=True,exist_ok=True)
