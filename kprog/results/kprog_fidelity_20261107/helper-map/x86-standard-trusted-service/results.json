@@ -1,0 +1,557 @@
+{
+  "run": "x86_kvm_micro_20261107_173730_247516",
+  "source_publication": "aaf7b9dc425f00ef9ee1f3e18ef0a5ef70e65201",
+  "archives": {
+    "raw.tar.gz": "0a031f6fd5606e776373946b9d580ebddc46a35ad29b610790f614b038026cb1",
+    "service-requests.tar.gz": "3e7638c1725f1f1ff1cba7bbfd262c0ac29d368fb9e28942926cb3b000ef0e7f"
+  },
+  "raw_result_sha256": "25e4aee6b08e51fcb2cb055607fbcbbf75fcb625969ea3f5433dba5e8e96985d",
+  "suite_sha256": "ec6242c79b45c8c41fb3b7194e7122f1ffed41d612e51a9fee7a0dadad57e742",
+  "benchmarks_checked": 13,
+  "exact_result_and_retval_samples": 39,
+  "fresh_successful_requests": 26,
+  "distinct_bound_program_ids": 26,
+  "kernel_to_generated_native_identity_matches": 26,
+  "service_ready": true,
+  "application_returncode": 0,
+  "service_teardown_returncode": -15,
+  "captured_runner_sha256": "6af68aec1c00f5bc2150beba0a89e610f20ee0f90e13445f04d3621d04720108",
+  "captured_supervisor_sha256": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+  "final_supervisor_sha256": "8763816abaf2707e496f5bc03b709c9c21724a63754d76d185208f76a3281e24",
+  "source_identity_sets": {
+    "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d": {
+      "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+      "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+      "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+      "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+    }
+  },
+  "benchmarks": {
+    "helper_only_uid_gid": {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 1,
+          "source_prog_id": 9,
+          "bound_prog_id": 14,
+          "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f",
+          "request_archive_sha256": "531dfd899d0c475795303533b7ad8a6b3ba3c12a02502ffc36b44c85b7ce01ec",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 0,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 2,
+          "source_prog_id": 20,
+          "bound_prog_id": 25,
+          "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f",
+          "request_archive_sha256": "0dabf6233dd9abac36f5ca409226f6a1909497fefde789ce283602f689409875",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 0,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "helper_chain_simple": {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 3,
+          "source_prog_id": 37,
+          "bound_prog_id": 38,
+          "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4",
+          "request_archive_sha256": "aa7741712b3e757416d31c3037fb2f7c0d4e2a6be244f18950d86a8c00ac72eb",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 4,
+          "source_prog_id": 44,
+          "bound_prog_id": 45,
+          "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4",
+          "request_archive_sha256": "5ed2cd91aa6f0fa39dbd1d67189451f304c81175ec049e3561e8677898e9b4ba",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_array_lookup": {
+      "expected_result": 16045690984503050241,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 16045690984503050241,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 16045690984503050241,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 16045690984503050241,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 5,
+          "source_prog_id": 57,
+          "bound_prog_id": 58,
+          "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1",
+          "request_archive_sha256": "edb2921772e29133d1ffbdee7c8b21ad2f4c18ad900e7ed8b6a79a9187b3c3d4",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 6,
+          "source_prog_id": 64,
+          "bound_prog_id": 65,
+          "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1",
+          "request_archive_sha256": "d661b8fb27b1810bc8251d33f655f11cb4c2bd254d95c2dc605d763a04091f8c",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_array_index_packet": {
+      "expected_result": 16045690984503098046,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 16045690984503098046,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 16045690984503098046,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 16045690984503098046,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 7,
+          "source_prog_id": 77,
+          "bound_prog_id": 78,
+          "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af",
+          "request_archive_sha256": "d86bd20532c120b64e514a67efca5cc10f05c452f4a2f835eca9a7cb9d662944",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 8,
+          "source_prog_id": 84,
+          "bound_prog_id": 85,
+          "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af",
+          "request_archive_sha256": "c1a25cd252e92f80149ae5609345d7c7213ca44b0685c2a2a8be6def62f1ca9b",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_hash_lookup": {
+      "expected_result": 1234605616436508552,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1234605616436508552,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1234605616436508552,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1234605616436508552,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 9,
+          "source_prog_id": 97,
+          "bound_prog_id": 98,
+          "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537",
+          "request_archive_sha256": "169a93715e2559f91dd80f80e21b74a928d1c1f193d759d4c16df58c5d557236",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 10,
+          "source_prog_id": 104,
+          "bound_prog_id": 105,
+          "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537",
+          "request_archive_sha256": "e89f9b306795d35bc7823f4d0c411cecbfb11eaa72b5c3f75780bf7b620da413",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_hash_str_key": {
+      "expected_result": 18369614221520256751,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 18369614221520256751,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 18369614221520256751,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 18369614221520256751,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 11,
+          "source_prog_id": 118,
+          "bound_prog_id": 120,
+          "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f",
+          "request_archive_sha256": "77d6480cc43cf5824e7e474415a323248b7ddd2eb7c1b3245998eefe4e97993c",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 12,
+          "source_prog_id": 127,
+          "bound_prog_id": 129,
+          "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f",
+          "request_archive_sha256": "bae625edb8242293ebd279b7d0865e6e10a20e6f067609d75ee0a8fc5ad2f0ec",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_percpu_array": {
+      "expected_result": 18369614221190019774,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 18369614221190019774,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 18369614221190019774,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 18369614221190019774,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 13,
+          "source_prog_id": 143,
+          "bound_prog_id": 144,
+          "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73",
+          "request_archive_sha256": "59279785c69938b949cb1c8cc5e1c88535458978dc18c58269539f52ceb6a3f7",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 14,
+          "source_prog_id": 150,
+          "bound_prog_id": 151,
+          "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73",
+          "request_archive_sha256": "80670d000a8aa552346e49d3b975dc945552965122ada99eeb2b36a889f9a553",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_lru_hash_counter": {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 15,
+          "source_prog_id": 163,
+          "bound_prog_id": 164,
+          "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9",
+          "request_archive_sha256": "118151ac815540a8e7ab9c81d77f4217c079aff50e537faf30fa51c37de4401b",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 16,
+          "source_prog_id": 170,
+          "bound_prog_id": 171,
+          "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9",
+          "request_archive_sha256": "4e79aeb15d0bd41e5504bd6ece8901bd0d2c392bd277338282432d1e45b577af",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "map_percpu_hash_counter": {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 17,
+          "source_prog_id": 183,
+          "bound_prog_id": 184,
+          "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5",
+          "request_archive_sha256": "25577f75b4c3ecbed2d0f6ddeb833dddb61c6fb3aabf855790d7b65f8a20c8cd",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 18,
+          "source_prog_id": 190,
+          "bound_prog_id": 191,
+          "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5",
+          "request_archive_sha256": "f99145ab3ef39d3a18d15f877adc0d51712738a28e9e9e0f9ce6621576dad16f",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "combined_helper_map": {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 19,
+          "source_prog_id": 203,
+          "bound_prog_id": 204,
+          "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12",
+          "request_archive_sha256": "98b384727e70fdbc1c1894bebf5ad1442a7249c25bf4759d898bdf95380dc6a4",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 20,
+          "source_prog_id": 210,
+          "bound_prog_id": 211,
+          "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12",
+          "request_archive_sha256": "a15d26dbd289895e0575be005923b4e4109a630b8c84b804e37fd4a3a3eacfab",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "multi_map_policy": {
+      "expected_result": 1311768465173141112,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1311768465173141112,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1311768465173141112,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1311768465173141112,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 21,
+          "source_prog_id": 223,
+          "bound_prog_id": 224,
+          "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac",
+          "request_archive_sha256": "053c08b00cdbf7a063975e5b6a8f33440cdb21af98c881b6a37e9268e3528380",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 3,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 22,
+          "source_prog_id": 230,
+          "bound_prog_id": 231,
+          "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac",
+          "request_archive_sha256": "d2f648669e07c928d17059629a5386462de5a2c9b1273f6aa488c84a8d249fb4",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 3,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "packet_5tuple_classify": {
+      "expected_result": 3405691582,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 3405691582,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 3405691582,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 3405691582,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 23,
+          "source_prog_id": 243,
+          "bound_prog_id": 244,
+          "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965",
+          "request_archive_sha256": "2bf550ec5677af3d592e95754ed82120b0088c74e7a3aa13c69137f69d5bf505",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 24,
+          "source_prog_id": 250,
+          "bound_prog_id": 251,
+          "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965",
+          "request_archive_sha256": "9ff2e1913752047d01c8b4f2e1727bbfbbedb22386a01a9e2aeff5b39fd71e03",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 1,
+          "fresh_compile_commands": 2
+        }
+      ]
+    },
+    "stats_mixed_helpers": {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      },
+      "requests": [
+        {
+          "request_id": 25,
+          "source_prog_id": 263,
+          "bound_prog_id": 264,
+          "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664",
+          "request_archive_sha256": "f4f0575dbb2ff3e44c1e939b585baccb70ac89ba691f0899ed8afed191e3a928",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 2,
+          "fresh_compile_commands": 2
+        },
+        {
+          "request_id": 26,
+          "source_prog_id": 270,
+          "bound_prog_id": 271,
+          "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664",
+          "request_archive_sha256": "dcf986fd22ad475059daa034f771edfe1561e7db2d36903890e5b64c7c40d1d6",
+          "source_identity_set_sha256": "8c5ff0b21ca191ba4c67844a4edc362d7c8b6e3dd6734ad34d43dffca650316d",
+          "map_count": 2,
+          "fresh_compile_commands": 2
+        }
+      ]
+    }
+  },
+  "scope": "independent reanalysis of existing raw functional run; no new execution or timing claim"
+}
