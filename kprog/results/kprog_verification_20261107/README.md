@@ -1162,3 +1162,12 @@ existing semantic/route hosts passed 40080 cases,2072 cases,136 cases,225292 cas
 no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper
 changes. Original C warnings remain visible. Exact261's just-finished full pass
 predates BITFIELD, arithmetic/logical flags and this ORN composition.
+
+Exact `26137eada3d767c3d9fe170e0b2ca2ec98ae1739` completed the full
+`make -C kprog/formal check` with exit **0**, including the uniform-byte
+multiply/divide, MVN/NEG, CNEG and EXTR/REV/SXT dispatcher compositions and
+all earlier Lean, contract, executable-reference/wire/compiler and C semantic
+checks. The immutable source/cache export was deleted automatically. Compressed
+CALL CPU observations retain this440-case run. BITFIELD, arithmetic/logical
+flag rows and ORN are later increments and are not included in this pass.
+The complete77/72 theorem and O2/O4 bindings remain open.
