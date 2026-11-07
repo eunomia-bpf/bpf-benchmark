@@ -1936,3 +1936,9 @@ flags, memory, events and faults remain exact for every permission/branch
 outcome. Relational AF/accepted-extent/whole-execution transport follows next.
 Terminal RET needs separate boundary transport: its saved absolute caller
 continuation must not be shifted along with the payload's internal PCs.
+
+`trusted-simple-based-extents.json` proves canonical accepted-extent uniqueness
+and absence of payload-end decoding at every64-bit codebase. Bounded native
+byte offsets prevent PC-wrap aliases, and canonical consumed lengths determine
+the actual extent. Relational execution transport into the PC0 certificate
+remains the next component; no new ISA or runtime behavior is introduced.

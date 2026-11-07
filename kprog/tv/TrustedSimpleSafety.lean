@@ -1637,6 +1637,57 @@ theorem simple_native_canonical_code_shift (base : Word) (s : X86.State) (offset
       X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
       BitVec.add_assoc])
 
+
+/-- Arbitrary real code bases cannot authorize another payload start/length.
+Extent uniqueness uses canonical consumption and bounded native byte offsets,
+including any wrapping code-address arithmetic. -/
+theorem simple_native_based_extent_unique (base : Word) (s : X86.State) (offset : Nat)
+    (entry : X86Path.Entry) (instruction : X86.Instruction)
+    (member : offset ∈ simpleNativeOffsets) (position : s.pc=base+BitVec.ofNat 64 offset)
+    (accepted : X86Path.decodeAt base native entry s=.ok instruction) :
+    entry.offset=offset ∧ entry.length=simpleNativeLength offset := by
+  obtain ⟨pc,positive,bounded,inside,fall⟩ := decode_extent_constraints base native entry s instruction accepted
+  obtain ⟨offsetBound,_,lengthBound⟩ := simple_native_metadata_bounds offset member
+  have starts : base+BitVec.ofNat 64 entry.offset=base+BitVec.ofNat 64 offset := pc.symm.trans position
+  have words : BitVec.ofNat 64 entry.offset=BitVec.ofNat 64 offset :=
+    (BitVec.add_right_inj base).mp starts
+  have nats := congrArg BitVec.toNat words
+  change entry.offset % 18446744073709551616=offset % 18446744073709551616 at nats
+  have codeBound : entry.offset+entry.length≤60 := inside
+  have start : entry.offset=offset := by omega
+  have raw := decode_extent_reflects_raw base native entry s instruction accepted
+  have projected : decodedNativeFallthrough s (native.extract offset (offset+entry.length))=
+      some (X86.Instruction.fallthrough instruction) := by
+    rw [← start]
+    unfold decodedNativeFallthrough
+    rw [raw]
+  have shape := simple_native_decode_length_shape s offset entry.length member bounded
+  rw [projected] at shape
+  by_cases truncated : entry.length<simpleNativeLength offset
+  · simp only [truncated,ite_true] at shape
+    cases shape
+  · simp only [truncated,ite_false] at shape
+    have sameFall := Option.some.inj shape
+    have sameSum : s.pc+BitVec.ofNat 64 entry.length=s.pc+BitVec.ofNat 64 (simpleNativeLength offset) :=
+      fall.symm.trans sameFall
+    have lengths : BitVec.ofNat 64 entry.length=BitVec.ofNat 64 (simpleNativeLength offset) :=
+      (BitVec.add_right_inj s.pc).mp sameSum
+    have sizes := congrArg BitVec.toNat lengths
+    change entry.length % 18446744073709551616=(simpleNativeLength offset) % 18446744073709551616 at sizes
+    exact ⟨start,by omega⟩
+
+/-- The payload end has no accepted instruction extent at any real base. -/
+theorem simple_native_based_end_no_decode (base : Word) (s : X86.State)
+    (entry : X86Path.Entry) (instruction : X86.Instruction) (position : s.pc=base+(60#64))
+    (accepted : X86Path.decodeAt base native entry s=.ok instruction) : False := by
+  obtain ⟨pc,positive,_,inside,_⟩ := decode_extent_constraints base native entry s instruction accepted
+  have starts : base+BitVec.ofNat 64 entry.offset=base+(60#64) := pc.symm.trans position
+  have words : BitVec.ofNat 64 entry.offset=(60#64) := (BitVec.add_right_inj base).mp starts
+  have nats := congrArg BitVec.toNat words
+  change entry.offset % 18446744073709551616=60 at nats
+  have codeBound : entry.offset+entry.length≤60 := inside
+  omega
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1750,3 +1801,7 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.original_native_invocation_return
 
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_canonical_code_shift
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_based_extent_unique
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_based_end_no_decode
