@@ -1,0 +1,109 @@
+{
+  "utc": "2026-11-07T20:27:42.064321+00:00",
+  "scope": "Private source-of-truth integration of generic ARM immediate alias mechanism",
+  "production_state": "Active application source epochs retained; integration awaits their closure and owner synchronization",
+  "source_files_changed": 16,
+  "source_pins_verified": 256,
+  "c_checks": {
+    "cases": [
+      2072,
+      136,
+      256,
+      35152
+    ],
+    "total": 37616,
+    "exit": 0,
+    "dependency_files": 80
+  },
+  "lean_checks": {
+    "modules": [
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64DispatchFamily",
+        "returncode": 0,
+        "source_sha256": "e9d7e6be7f9400b41b3872f08155444f28a431eae6e9827fe87f70538335cbe3",
+        "olean_sha256": "36efe3a937a4726d4c39ab49d8579eaf57b4d75b237e12df7e4cb1d954d0054c"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64AluOperandSelect",
+        "returncode": 0,
+        "source_sha256": "cd512684d5c5524b9d85002974028672d9c59f0376a5a813cf9e3cce1d92f9a2",
+        "olean_sha256": "9b5427a8bbbf49abe78759a1382386a1072d2643cbb67dec21f1cbe1a9536fc8"
+      },
+      {
+        "module": "KProgFormal.Arm64DispatchFamily",
+        "returncode": 0,
+        "source_sha256": "f9e4363624f36d290a4d031e90e795d2cec472e28e3860ba6e9a418e58367f2e",
+        "olean_sha256": "411daf915658bf1e32b1e9d3123e2ec39609df05bf4b6b4f07190bdd3499ead7"
+      },
+      {
+        "module": "KProgFormal.Arm64AluOperandSelect",
+        "returncode": 0,
+        "source_sha256": "80404b12baaf7a1acb15934f6462b87c6f7ab720a51ff1913fdefd639583efbe",
+        "olean_sha256": "b581bedaa76173687c12672186c27e0863b2aab73a6c2b0e42ee35cff8a8dca0"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Shift",
+        "returncode": 0,
+        "source_sha256": "f9468a04f9b1686311679ca43f96089ccf76b00a6ca4a52cb424fa8fb721945a",
+        "olean_sha256": "da014ae80b215a972cdef814abc531267af199bed915d563e9fcddb74ea87aad"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Logic",
+        "returncode": 0,
+        "source_sha256": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56",
+        "olean_sha256": "74e1b48df9b99587dddbc69eafa1c273e059b6d69c99f314fd0b7cadc759d5a3"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Arithmetic",
+        "returncode": 0,
+        "source_sha256": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac",
+        "olean_sha256": "a9da152e2e49a7ff7318e8cba0664f7988e65943887ae5d805605ccd1e1fc72d"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Mul",
+        "returncode": 0,
+        "source_sha256": "7507b5a8876587220ce1e2b92989c176cfda0ffb6a3e345b20f84106a55a1b46",
+        "olean_sha256": "f4786cbf2f72fa760f8f337941f9ee6081654c0c40848f2bd53d1a9e1d830eca"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Extrev",
+        "returncode": 0,
+        "source_sha256": "1c7d14dfeb0d107e97fed285021c9b91e142b04c85b4ff24b9fd2b0a331e78be",
+        "olean_sha256": "867d907d4a44680f3ebb03fd1c429a5d841d3b95eb95c5a08be126d4164ab98c"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Select",
+        "returncode": 0,
+        "source_sha256": "876850c5f8b86dd4f99f28bb9e2d6e1f9de87280736cf1e514f5990ce4c91500",
+        "olean_sha256": "fee7db04b2aba61be2ed5eb6bede5921c442c1744645e8858bccebebda129c84"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Dispatcher",
+        "returncode": 0,
+        "source_sha256": "2e0635e8a93756cf9f01157f29d9d33a98ea5c80a304dcff927bf09c98f40cc8",
+        "olean_sha256": "bd44eaa8a583151ae7be475d1ab463775afeeea0a6026d71d60d19040c2f5519"
+      }
+    ],
+    "exit": 0,
+    "audits": 4,
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "direct_dispatch": {
+    "tokens": 71,
+    "changed": [
+      "ARM64_OP_ADD_IMM",
+      "ARM64_OP_SUB_IMM"
+    ],
+    "retained": 69,
+    "shared_body": "ARM64_SIM_DIRECT_BODY_4"
+  },
+  "semantics": "Labels3/4 share generic immediate label6 for every AUX value, width, register assignment, operand and incoming state; AUX retains ALU operation selection.",
+  "universal_theorem": "KProgFormal.Refinement.Arm64Dispatcher.immediate_alias_dispatch",
+  "related_generic_replay": "acd62b43cc9173cc16426bf160e3e09778b02d9f",
+  "diffstat": " .../kprog/arm64/arm64_sim_direct.h                 |   4 +-\n .../formal/KProgFormal/Arm64AluOperandSelect.lean  |  16 +--\n .../formal/KProgFormal/Arm64DispatchFamily.lean    |  10 +-\n .../Generated/GeneratedArm64AluOperandSelect.lean  |  14 +--\n .../Generated/GeneratedArm64DispatchFamily.lean    |  10 +-\n .../KProgFormal/Refinement/Arm64Arithmetic.lean    |   6 +-\n .../KProgFormal/Refinement/Arm64Dispatcher.lean    |  10 ++\n .../contracts/arm64_alu_operand_select_spec.json   |   2 +-\n .../contracts/arm64_dispatch_family_spec.json      |   2 +-\n .../formal/generated/arm64_alu_operand_select.h    |  18 ++--\n .../kprog/formal/generated/arm64_dispatch_family.h |  10 +-\n .../oracles/test_arm64_alu_operand_select_host.c   |   4 +\n .../test_arm64_alu_operand_select_route_host.c     |  10 +-\n .../oracles/test_arm64_dispatch_family_host.c      |   5 +-\n .../generate_arm64_alu_operand_select_spec.py      | 115 ++++++---------------\n .../tools/generate_arm64_dispatch_family_spec.py   |  41 ++------\n 16 files changed, 116 insertions(+), 161 deletions(-)\n",
+  "patch_sha256": "22826e256616b865ad6a87b5ebb911f62fde496252aeafa237052441aced2ae1",
+  "inputs_sha256": "1f26e955931593fbad76e7b1a8ca3da5be0d5251f615e95b165655d240fb73e1"
+}
