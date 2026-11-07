@@ -47,7 +47,7 @@ run's metadata) removes the runtime-counter overhead from the workload.
 | katran | 1.018x | **1.001x** | 1 / 1 |
 | tetragon/observer | 1.008x | **0.805x** | 118 / 118 |
 | otelcol | 1.013x | **1.026x** | 14 / 14 |
-| cilium/agent | 1.229x | — | blocked, below |
+| cilium/agent | 1.229x | **1.061x** | 177 / 177 |
 
 Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
 programs replaced, no oops, 256,984,354 bogo-ops baseline against
@@ -67,41 +67,22 @@ That also reframes the stats-on number: 1.008x there is close to parity
 only because the counter overhead is present in both arms. Removing it
 exposes the native cost.
 
-**Cilium has no stats-off arm.** Its native arm yields 0 packets, in two
-steps worth separating.
+**Cilium's stats-off arm now measures**, after `native-link` gained
+full-source-map-identity resolution (`bfbb60d1a`): 177 programs replaced,
+0 failed, 3 samples of 180 s per arm, 691,320,365 against 733,235,372
+received packets, **1.061x** where stats-on gave 1.229x.
 
-`native-link` refuses 33 of its programs:
+The earlier failure — and why it took a linker change — is worth keeping,
+because it was a *correct* refusal rather than a bug:
+`cilium_ipv4_frag_datagrams` is 26 characters, the kernel keeps only
+`cilium_ipv4_fra`, and cilium has more than one `cilium_ipv4_frag_*` map,
+so they collide in those 15 bytes. Resolving by truncated name would risk
+binding the wrong map; the fix was to carry the full source map identity
+through, which the linker now does. That closed 33 failing programs.
 
-```
-Error: x86 bpf_map_update_elem native call 0 uses map
-  "cilium_ipv4_frag_datagrams", which truncation-matches multiple
-  update_sites entries
-```
-
-That is **correct behaviour, not a bug**: `cilium_ipv4_frag_datagrams` is
-26 characters, the kernel keeps only `cilium_ipv4_fra`, and cilium has
-more than one `cilium_ipv4_frag_*` map, so they collide in those 15
-bytes. The resolver admits a truncation match only when exactly one
-unused site matches (the exact-match and address paths both run first), so
-picking one would risk binding the wrong map. What is missing is
-disambiguation in cilium's own metadata — its update-site entries should
-carry the resolved kernel map address rather than the truncated name.
-
-The evidence step then aborts the app with `native-loader log ... did not
-publish symbols for live programs [317, 318, 334, ...]`, because programs
-that passed through have no native symbol to publish. The operator's rule
-is that a failed native load stays eBPF and does not stop the run, so that
-step is stricter than the rule. Both are reported.
-
-A lane is currently adding address-based disambiguation to the linker, and
-I tested it: it does not resolve this case yet, because the address path
-only fires when the map address is known and **cilium's manifest carries
-no `map_addrs`** — its entries are `native_object`, `program`,
-`source_map_prefix`, `symbol`. So the fix needs both halves: the linker's
-address preference, and cilium's manifest entries carrying the resolved
-kernel map identity, which is `write_native_manifest.py` /
-`vendor/bpf/Makefile`'s `native-cilium` target. The stats-on arm succeeds
-because those programs happened to resolve on the truncation path.
+Both cilium arms also confirm the general pattern: with runtime counters
+off, the native advantage narrows (1.229x → 1.061x), the same direction as
+katran (1.018x → 1.001x).
 
 One caveat remains:
 
