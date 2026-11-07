@@ -67,6 +67,8 @@ specs = [
     ("x86", "x86-cmp-signed-current", "real_x86_cpu", "enumerated_instruction_forms"),
     ("x86", "x86-rorx-current", "real_x86_cpu", "enumerated_instruction_forms"),
     ("x86", "x86-numeric-tokens", "real_x86_cpu", "legal_numeric_token_binding"),
+    ("x86", "x86-dshift-cl", "real_x86_cpu", "cl_register_alias_forms"),
+    ("x86", "x86-dshift-cl16", "real_x86_cpu", "defined_16bit_cl_domain"),
     ("x86", "x86-control", "real_x86_cpu", "finite_control_composites"),
     ("arm64", "arm64-current-core", "qemu_user", "enumerated_instruction_forms"),
     ("arm64", "arm64-control-branches", "qemu_user", "finite_control_composites"),

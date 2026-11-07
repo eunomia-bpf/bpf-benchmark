@@ -1,5 +1,5 @@
 {
-  "source_head": "0cdf0b7f3eb6a9ef6b291e735c943b16a9444a40",
+  "source_head": "5f521818000103b8fc524aa0de3a58080fbc0686",
   "files": {
     "kprog/x86/x86_sim.h": {
       "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
@@ -42,6 +42,30 @@
     },
     "kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/actual-compiled-inputs.tar.gz": {
       "sha256": "57d7f4e1f3ab8c25e7fd2a9ccdd6b6b1319c306e2b3cc4fa9c56f58a57995715"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl/summary.json": {
+      "sha256": "5274559ca86bac9cfb3792fc78c7d633ccdb2fd539e60826076fc00906519b74"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl/forms.tsv": {
+      "sha256": "aba0135b1233b7107e2828e7fd8e5afe8fc5679e8999e4b1e641b058eb946483"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl/reference-forms.tsv": {
+      "sha256": "1c0f31c206368d4ef74fe66b6f45e839a3680d7c5f5a2099bb7c8e79dfa95037"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl/actual-compiled-inputs.tar.gz": {
+      "sha256": "832a9b14c5898b0b7076be19cf3d748bdf664669c52bdb0900b1c42b802ae63a"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl16/summary.json": {
+      "sha256": "3be13ec163c15e12f0f311b78cb37128e69202d8190177dacf8f67358223a045"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl16/forms.tsv": {
+      "sha256": "4e16ec95b32e620454b66ea4505e7f934ede8183fe5414721e90063f9c7e6c55"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl16/reference-forms.tsv": {
+      "sha256": "e120ef3f3f46f1ebdd966cc45f12b9e908ca715b0d3dd067385a68c46ffe16c3"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl16/actual-compiled-inputs.tar.gz": {
+      "sha256": "76a4e74a66acd9f562e9f97d501126dde3d9f1b1d7323267682c9f9b0167b163"
     },
     "kprog/results/kprog_fidelity_20261107/differential/x86-control/summary.json": {
       "sha256": "33490060aabbef115f1b021b2b5dce4be29a7af9a8575bb30511925be8e9f756"
@@ -182,6 +206,30 @@
       "operation_rows": 4,
       "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
       "executable_sha256": "51b7b4172dfdf90caca657d978123a0db8dc38df8033d7c673c2150d8cdc72a0",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-dshift-cl",
+      "scope": "cl_register_alias_forms",
+      "backend": "real_x86_cpu",
+      "forms": 64,
+      "cases": 65536,
+      "operation_rows": 2,
+      "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "executable_sha256": "e5e5a54ce159ffe215db7523cd91a61bb6662e463111ac1ca9ac8718403fa16b",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-dshift-cl16",
+      "scope": "defined_16bit_cl_domain",
+      "backend": "real_x86_cpu",
+      "forms": 32,
+      "cases": 32768,
+      "operation_rows": 2,
+      "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "executable_sha256": "9f1fd9b686989143ad82dae6b5b22150deadd2c5af568edbffa23bb47ee02b26",
       "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
     },
     {
