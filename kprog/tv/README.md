@@ -2183,3 +2183,9 @@ check pass; runtime regression is pending in this source receipt. C owns the
 standard micro bootstrap and driver integration. Obsolete caller proof-open
 and proof-verifier timing fields are removed; native_load_ns includes waiting
 for the service. This introduces no application proof-upload exemption.
+
+The later owner commit `af2f58c89` publishes the exact d30 header used by that
+capture; `source-review.json` records the committed-byte comparison. The
+original capture-time attribution is preserved. B29's accepted bytes therefore
+also correspond to that published producer header, without reusing another
+session's JIT addresses or claiming completion of the semantic certificate.

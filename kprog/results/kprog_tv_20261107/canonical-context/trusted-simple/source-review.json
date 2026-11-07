@@ -27,8 +27,16 @@
   "published_header_sha256_at_review": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
   "physical_header_matches_published_at_review": false,
   "remaining": [
-    "Owner header integration was uncommitted during capture; exact physical source recorded, no published-source attribution.",
+    "Capture was made while header integration was uncommitted; the later owner-publication record proves exact correspondence to the published header, preserving the original capture-time facts.",
     "B29 components cover context faults and guards; stores/full relation/whole-program TV remain open.",
     "JIT address/return displacement vary by capture; this receipt does not silently substitute the new JIT bytes into the old same-session Lean JIT certificate."
-  ]
+  ],
+  "later_owner_publication": {
+    "utc": "2026-11-07T17:37:54.138678+00:00",
+    "commit": "af2f58c899d99f4092a710734ceb4cdac2b5e6df",
+    "header_sha256": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+    "matches_actual_capture_input": true,
+    "remote_ancestor_verified": true,
+    "interpretation": "Capture occurred before publication; subsequent owner commit is byte-identical, so no recapture or change to historical attribution is needed."
+  }
 }
