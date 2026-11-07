@@ -1,0 +1,125 @@
+{
+  "utc": "2026-11-07T20:46:59.391297+00:00",
+  "scope": "Whole-application Katran two-start functional work observation through the common native-only service",
+  "archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/run-20261107T185947373335Z.tar.gz",
+  "archive_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250",
+  "raw_members_sha256": {
+    "run/corpus-results/arm64_qemu_corpus_19700101_000107_019811/details/apps/katran.json": "6fa0adeb21728ca1a1644af9d341d6f366070a34edf2faae3e111ab99f9275d9",
+    "run/corpus-results/arm64_qemu_corpus_19700101_000107_019811/details/shim-logs/katran.baseline.log": "112a26c7c948a0f9a121f1f4766baa95b9241288c0507a55884baeb60e48c2bc",
+    "run/corpus-results/arm64_qemu_corpus_19700101_000107_019811/details/shim-logs/katran.post_rejit.log": "ce07295710996a4e2d195c17ad49d11ec1a836daa18ee194cc060290e29267dd"
+  },
+  "application_status": "ok",
+  "guest_exit": 0,
+  "host_reported_ok": false,
+  "host_hashes_unchanged": false,
+  "launch_to_analysis_hash_changes": {
+    "kprog/formal/generated/x86_mem_access.h": {
+      "launch": "f91533e6a8a031bdfbee072729575f8121f014ec932a4c4ae40a5ca105d85184",
+      "observed": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e"
+    }
+  },
+  "hash_change_observation_scope": "Analysis-time bytes compared with launch; the original host summary records a drift boolean.",
+  "service_request_counts": {
+    "bound_accepted": 1
+  },
+  "phases": {
+    "baseline": {
+      "programs": [
+        {
+          "bytes_jited": 14440,
+          "bytes_xlated": 23808,
+          "id": 17,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 26197,
+          "run_time_ns_delta": 569939792,
+          "type": "xdp"
+        }
+      ],
+      "pktgen_packets": 26197,
+      "pktgen_error_observations": [
+        0,
+        0
+      ],
+      "bpf_runs": 26197,
+      "receiver_packets": 26197,
+      "vip_packets": 26197,
+      "total_packets": 26197,
+      "tx_packets": 26197,
+      "lru_accesses": 26197,
+      "lru_misses": 1,
+      "fallback_lru_selections": 26197,
+      "drop_packets": 0,
+      "pass_packets": 0,
+      "encapsulation_failures": 0,
+      "consistent_hash_drops": 0,
+      "receiver_bytes": 2200548,
+      "workload_config": {
+        "clone_skb": 0,
+        "dst_ip": "10.100.1.1",
+        "dst_port": 8080,
+        "iface": "rtlb0",
+        "namespace": "katran-router",
+        "pkt_size": 64,
+        "proto": 17,
+        "shared_skb": true,
+        "src_ip": "10.0.0.2",
+        "threads": [
+          7
+        ],
+        "tool": "kernel_pktgen",
+        "xmit_mode": "start_xmit"
+      },
+      "packet_work_counts_match": true
+    },
+    "post_rejit": {
+      "programs": [
+        {
+          "bytes_jited": 10264,
+          "bytes_xlated": 24,
+          "id": 32,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 23208,
+          "run_time_ns_delta": 530137376,
+          "type": "xdp"
+        }
+      ],
+      "pktgen_packets": 23208,
+      "pktgen_error_observations": [
+        0,
+        0
+      ],
+      "bpf_runs": 23208,
+      "receiver_packets": 23208,
+      "vip_packets": 23208,
+      "total_packets": 23208,
+      "tx_packets": 23208,
+      "lru_accesses": 23208,
+      "lru_misses": 1,
+      "fallback_lru_selections": 23208,
+      "drop_packets": 0,
+      "pass_packets": 0,
+      "encapsulation_failures": 0,
+      "consistent_hash_drops": 0,
+      "receiver_bytes": 1949472,
+      "workload_config": {
+        "clone_skb": 0,
+        "dst_ip": "10.100.1.1",
+        "dst_port": 8080,
+        "iface": "rtlb0",
+        "namespace": "katran-router",
+        "pkt_size": 64,
+        "proto": 17,
+        "shared_skb": true,
+        "src_ip": "10.0.0.2",
+        "threads": [
+          7
+        ],
+        "tool": "kernel_pktgen",
+        "xmit_mode": "start_xmit"
+      },
+      "packet_work_counts_match": true
+    }
+  },
+  "workload_configs_equal": true,
+  "timing_scope": "QEMU supplies functional observations; hardware performance follows current coordination priorities."
+}
