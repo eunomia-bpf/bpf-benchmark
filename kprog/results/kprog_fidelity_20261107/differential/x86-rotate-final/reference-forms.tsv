@@ -1,0 +1,241 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	rol al, 0	1024	1024	0	0	checked	none
+1	rol al, 1	1024	1024	0	0	checked	none
+2	rol al, 7	1024	1024	0	0	checked	none
+3	rol al, 8	1024	1024	0	0	checked	none
+4	rol al, 15	1024	1024	0	0	checked	none
+5	rol al, 16	1024	1024	0	0	checked	none
+6	rol al, 31	1024	1024	0	0	checked	none
+7	rol al, 32	1024	1024	0	0	checked	none
+8	rol al, 63	1024	1024	0	0	checked	none
+9	rol al, 64	1024	1024	0	0	checked	none
+10	rol al, 255	1024	1024	0	0	checked	none
+11	rol al, cl	1024	1024	0	0	checked	none
+12	ror al, 0	1024	1024	0	0	checked	none
+13	ror al, 1	1024	1024	0	0	checked	none
+14	ror al, 7	1024	1024	0	0	checked	none
+15	ror al, 8	1024	1024	0	0	checked	none
+16	ror al, 15	1024	1024	0	0	checked	none
+17	ror al, 16	1024	1024	0	0	checked	none
+18	ror al, 31	1024	1024	0	0	checked	none
+19	ror al, 32	1024	1024	0	0	checked	none
+20	ror al, 63	1024	1024	0	0	checked	none
+21	ror al, 64	1024	1024	0	0	checked	none
+22	ror al, 255	1024	1024	0	0	checked	none
+23	ror al, cl	1024	1024	0	0	checked	none
+24	rol ax, 0	1024	1024	0	0	checked	none
+25	rol ax, 1	1024	1024	0	0	checked	none
+26	rol ax, 7	1024	1024	0	0	checked	none
+27	rol ax, 8	1024	1024	0	0	checked	none
+28	rol ax, 15	1024	1024	0	0	checked	none
+29	rol ax, 16	1024	1024	0	0	checked	none
+30	rol ax, 31	1024	1024	0	0	checked	none
+31	rol ax, 32	1024	1024	0	0	checked	none
+32	rol ax, 63	1024	1024	0	0	checked	none
+33	rol ax, 64	1024	1024	0	0	checked	none
+34	rol ax, 255	1024	1024	0	0	checked	none
+35	rol ax, cl	1024	1024	0	0	checked	none
+36	ror ax, 0	1024	1024	0	0	checked	none
+37	ror ax, 1	1024	1024	0	0	checked	none
+38	ror ax, 7	1024	1024	0	0	checked	none
+39	ror ax, 8	1024	1024	0	0	checked	none
+40	ror ax, 15	1024	1024	0	0	checked	none
+41	ror ax, 16	1024	1024	0	0	checked	none
+42	ror ax, 31	1024	1024	0	0	checked	none
+43	ror ax, 32	1024	1024	0	0	checked	none
+44	ror ax, 63	1024	1024	0	0	checked	none
+45	ror ax, 64	1024	1024	0	0	checked	none
+46	ror ax, 255	1024	1024	0	0	checked	none
+47	ror ax, cl	1024	1024	0	0	checked	none
+48	rol eax, 0	1024	1024	0	0	checked	none
+49	rol eax, 1	1024	1024	0	0	checked	none
+50	rol eax, 7	1024	1024	0	0	checked	none
+51	rol eax, 8	1024	1024	0	0	checked	none
+52	rol eax, 15	1024	1024	0	0	checked	none
+53	rol eax, 16	1024	1024	0	0	checked	none
+54	rol eax, 31	1024	1024	0	0	checked	none
+55	rol eax, 32	1024	1024	0	0	checked	none
+56	rol eax, 63	1024	1024	0	0	checked	none
+57	rol eax, 64	1024	1024	0	0	checked	none
+58	rol eax, 255	1024	1024	0	0	checked	none
+59	rol eax, cl	1024	1024	0	0	checked	none
+60	ror eax, 0	1024	1024	0	0	checked	none
+61	ror eax, 1	1024	1024	0	0	checked	none
+62	ror eax, 7	1024	1024	0	0	checked	none
+63	ror eax, 8	1024	1024	0	0	checked	none
+64	ror eax, 15	1024	1024	0	0	checked	none
+65	ror eax, 16	1024	1024	0	0	checked	none
+66	ror eax, 31	1024	1024	0	0	checked	none
+67	ror eax, 32	1024	1024	0	0	checked	none
+68	ror eax, 63	1024	1024	0	0	checked	none
+69	ror eax, 64	1024	1024	0	0	checked	none
+70	ror eax, 255	1024	1024	0	0	checked	none
+71	ror eax, cl	1024	1024	0	0	checked	none
+72	rol rax, 0	1024	1024	0	0	checked	none
+73	rol rax, 1	1024	1024	0	0	checked	none
+74	rol rax, 7	1024	1024	0	0	checked	none
+75	rol rax, 8	1024	1024	0	0	checked	none
+76	rol rax, 15	1024	1024	0	0	checked	none
+77	rol rax, 16	1024	1024	0	0	checked	none
+78	rol rax, 31	1024	1024	0	0	checked	none
+79	rol rax, 32	1024	1024	0	0	checked	none
+80	rol rax, 63	1024	1024	0	0	checked	none
+81	rol rax, 64	1024	1024	0	0	checked	none
+82	rol rax, 255	1024	1024	0	0	checked	none
+83	rol rax, cl	1024	1024	0	0	checked	none
+84	ror rax, 0	1024	1024	0	0	checked	none
+85	ror rax, 1	1024	1024	0	0	checked	none
+86	ror rax, 7	1024	1024	0	0	checked	none
+87	ror rax, 8	1024	1024	0	0	checked	none
+88	ror rax, 15	1024	1024	0	0	checked	none
+89	ror rax, 16	1024	1024	0	0	checked	none
+90	ror rax, 31	1024	1024	0	0	checked	none
+91	ror rax, 32	1024	1024	0	0	checked	none
+92	ror rax, 63	1024	1024	0	0	checked	none
+93	ror rax, 64	1024	1024	0	0	checked	none
+94	ror rax, 255	1024	1024	0	0	checked	none
+95	ror rax, cl	1024	1024	0	0	checked	none
+96	rol ah, 0	1024	1024	0	0	checked	none
+97	rol ah, 1	1024	1024	0	0	checked	none
+98	rol ah, 7	1024	1024	0	0	checked	none
+99	rol ah, 8	1024	1024	0	0	checked	none
+100	rol ah, 15	1024	1024	0	0	checked	none
+101	rol ah, 16	1024	1024	0	0	checked	none
+102	rol ah, 31	1024	1024	0	0	checked	none
+103	rol ah, 32	1024	1024	0	0	checked	none
+104	rol ah, 63	1024	1024	0	0	checked	none
+105	rol ah, 64	1024	1024	0	0	checked	none
+106	rol ah, 255	1024	1024	0	0	checked	none
+107	rol ah, cl	1024	1024	0	0	checked	none
+108	rol ch, 0	1024	1024	0	0	checked	none
+109	rol ch, 1	1024	1024	0	0	checked	none
+110	rol ch, 7	1024	1024	0	0	checked	none
+111	rol ch, 8	1024	1024	0	0	checked	none
+112	rol ch, 15	1024	1024	0	0	checked	none
+113	rol ch, 16	1024	1024	0	0	checked	none
+114	rol ch, 31	1024	1024	0	0	checked	none
+115	rol ch, 32	1024	1024	0	0	checked	none
+116	rol ch, 63	1024	1024	0	0	checked	none
+117	rol ch, 64	1024	1024	0	0	checked	none
+118	rol ch, 255	1024	1024	0	0	checked	none
+119	rol ch, cl	1024	1024	0	0	checked	none
+120	rol dh, 0	1024	1024	0	0	checked	none
+121	rol dh, 1	1024	1024	0	0	checked	none
+122	rol dh, 7	1024	1024	0	0	checked	none
+123	rol dh, 8	1024	1024	0	0	checked	none
+124	rol dh, 15	1024	1024	0	0	checked	none
+125	rol dh, 16	1024	1024	0	0	checked	none
+126	rol dh, 31	1024	1024	0	0	checked	none
+127	rol dh, 32	1024	1024	0	0	checked	none
+128	rol dh, 63	1024	1024	0	0	checked	none
+129	rol dh, 64	1024	1024	0	0	checked	none
+130	rol dh, 255	1024	1024	0	0	checked	none
+131	rol dh, cl	1024	1024	0	0	checked	none
+132	rol bh, 0	1024	1024	0	0	checked	none
+133	rol bh, 1	1024	1024	0	0	checked	none
+134	rol bh, 7	1024	1024	0	0	checked	none
+135	rol bh, 8	1024	1024	0	0	checked	none
+136	rol bh, 15	1024	1024	0	0	checked	none
+137	rol bh, 16	1024	1024	0	0	checked	none
+138	rol bh, 31	1024	1024	0	0	checked	none
+139	rol bh, 32	1024	1024	0	0	checked	none
+140	rol bh, 63	1024	1024	0	0	checked	none
+141	rol bh, 64	1024	1024	0	0	checked	none
+142	rol bh, 255	1024	1024	0	0	checked	none
+143	rol bh, cl	1024	1024	0	0	checked	none
+144	ror ah, 0	1024	1024	0	0	checked	none
+145	ror ah, 1	1024	1024	0	0	checked	none
+146	ror ah, 7	1024	1024	0	0	checked	none
+147	ror ah, 8	1024	1024	0	0	checked	none
+148	ror ah, 15	1024	1024	0	0	checked	none
+149	ror ah, 16	1024	1024	0	0	checked	none
+150	ror ah, 31	1024	1024	0	0	checked	none
+151	ror ah, 32	1024	1024	0	0	checked	none
+152	ror ah, 63	1024	1024	0	0	checked	none
+153	ror ah, 64	1024	1024	0	0	checked	none
+154	ror ah, 255	1024	1024	0	0	checked	none
+155	ror ah, cl	1024	1024	0	0	checked	none
+156	ror ch, 0	1024	1024	0	0	checked	none
+157	ror ch, 1	1024	1024	0	0	checked	none
+158	ror ch, 7	1024	1024	0	0	checked	none
+159	ror ch, 8	1024	1024	0	0	checked	none
+160	ror ch, 15	1024	1024	0	0	checked	none
+161	ror ch, 16	1024	1024	0	0	checked	none
+162	ror ch, 31	1024	1024	0	0	checked	none
+163	ror ch, 32	1024	1024	0	0	checked	none
+164	ror ch, 63	1024	1024	0	0	checked	none
+165	ror ch, 64	1024	1024	0	0	checked	none
+166	ror ch, 255	1024	1024	0	0	checked	none
+167	ror ch, cl	1024	1024	0	0	checked	none
+168	ror dh, 0	1024	1024	0	0	checked	none
+169	ror dh, 1	1024	1024	0	0	checked	none
+170	ror dh, 7	1024	1024	0	0	checked	none
+171	ror dh, 8	1024	1024	0	0	checked	none
+172	ror dh, 15	1024	1024	0	0	checked	none
+173	ror dh, 16	1024	1024	0	0	checked	none
+174	ror dh, 31	1024	1024	0	0	checked	none
+175	ror dh, 32	1024	1024	0	0	checked	none
+176	ror dh, 63	1024	1024	0	0	checked	none
+177	ror dh, 64	1024	1024	0	0	checked	none
+178	ror dh, 255	1024	1024	0	0	checked	none
+179	ror dh, cl	1024	1024	0	0	checked	none
+180	ror bh, 0	1024	1024	0	0	checked	none
+181	ror bh, 1	1024	1024	0	0	checked	none
+182	ror bh, 7	1024	1024	0	0	checked	none
+183	ror bh, 8	1024	1024	0	0	checked	none
+184	ror bh, 15	1024	1024	0	0	checked	none
+185	ror bh, 16	1024	1024	0	0	checked	none
+186	ror bh, 31	1024	1024	0	0	checked	none
+187	ror bh, 32	1024	1024	0	0	checked	none
+188	ror bh, 63	1024	1024	0	0	checked	none
+189	ror bh, 64	1024	1024	0	0	checked	none
+190	ror bh, 255	1024	1024	0	0	checked	none
+191	ror bh, cl	1024	1024	0	0	checked	none
+192	ror BYTE PTR [rdi+8], 0	1024	1024	0	0	checked	none
+193	ror BYTE PTR [rdi+8], 1	1024	1024	0	0	checked	none
+194	ror BYTE PTR [rdi+8], 7	1024	1024	0	0	checked	none
+195	ror BYTE PTR [rdi+8], 8	1024	1024	0	0	checked	none
+196	ror BYTE PTR [rdi+8], 15	1024	1024	0	0	checked	none
+197	ror BYTE PTR [rdi+8], 16	1024	1024	0	0	checked	none
+198	ror BYTE PTR [rdi+8], 31	1024	1024	0	0	checked	none
+199	ror BYTE PTR [rdi+8], 32	1024	1024	0	0	checked	none
+200	ror BYTE PTR [rdi+8], 63	1024	1024	0	0	checked	none
+201	ror BYTE PTR [rdi+8], 64	1024	1024	0	0	checked	none
+202	ror BYTE PTR [rdi+8], 255	1024	1024	0	0	checked	none
+203	ror BYTE PTR [rdi+8], cl	1024	1024	0	0	checked	none
+204	ror WORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+205	ror WORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+206	ror WORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+207	ror WORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+208	ror WORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+209	ror WORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+210	ror WORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+211	ror WORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+212	ror WORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+213	ror WORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+214	ror WORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+215	ror WORD PTR [rdi+8], cl	1024	1024	0	0	checked	none
+216	ror DWORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+217	ror DWORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+218	ror DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+219	ror DWORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+220	ror DWORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+221	ror DWORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+222	ror DWORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+223	ror DWORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+224	ror DWORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+225	ror DWORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+226	ror DWORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+227	ror DWORD PTR [rdi+8], cl	1024	1024	0	0	checked	none
+228	ror QWORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+229	ror QWORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+230	ror QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+231	ror QWORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+232	ror QWORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+233	ror QWORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+234	ror QWORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+235	ror QWORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+236	ror QWORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+237	ror QWORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+238	ror QWORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+239	ror QWORD PTR [rdi+8], cl	1024	1024	0	0	checked	none

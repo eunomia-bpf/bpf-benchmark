@@ -77,3 +77,5 @@ checks, per coordinator disk instruction. Their hashes/sizes remain in
 trace-retention.json. All baseline counterexamples are compressed and
 retained. The latest published ROR producer plus this same SP patch is being
 validated separately; it is not silently substituted for this tested source.
+
+The subsequent combined immutable FULL exits2 at the unchanged aluMemDispatch oracle:7,680 raw-RSP setup mismatches. V1 normalized WRITE_REG_PTR_TAG even for its internal already-relative initialization API. V2 preserves that API and moves normalization into native MOV/LEA handlers. The unchanged261,137-case failing route check then passes. FULL-v1 source pins/log are retained; FULL-v2 and extended33-sequence/narrow-LEA checks are running. The runtime header is still private.

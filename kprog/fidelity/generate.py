@@ -48,7 +48,7 @@ def x86_forms(cc_aux):
         if a == "ah":
             continue
         forms += [f"xchg {a}, {b}"]
-        for op in ["shl", "shr", "sar", "rol"]:
+        for op in ["shl", "shr", "sar", "rol", "ror"]:
             forms += [f"{op} {a}, {n}" for n in [0, 1, 7, 8, 15, 16, 31, 32, 63, 64, 255]]
             forms += [f"{op} {a}, cl"]
         if width >= 16:
@@ -61,6 +61,13 @@ def x86_forms(cc_aux):
             for op in ["shlx", "shrx", "sarx", "rorx"]:
                 count = "7" if op == "rorx" else c
                 forms += [f"{op} {a}, {b}, {count}", f"{op} {a}, {m}, {count}"]
+    for op in ["rol", "ror"]:
+        for reg in ["ah", "ch", "dh", "bh"]:
+            forms += [f"{op} {reg}, {n}" for n in [0,1,7,8,15,16,31,32,63,64,255]]
+            forms += [f"{op} {reg}, cl"]
+    for mem in ["BYTE", "WORD", "DWORD", "QWORD"]:
+        forms += [f"ror {mem} PTR [rdi+8], {n}" for n in [0,1,7,8,15,16,31,32,63,64,255]]
+        forms += [f"ror {mem} PTR [rdi+8], cl"]
     for dst in ["ax", "eax", "rax"]:
         for src, mem in [("bl", "BYTE"), ("bx", "WORD")]:
             if dst == "ax" and src == "bx":

@@ -1,0 +1,283 @@
+assembly	opcode	cases	mismatches
+rol al, 0	X86_OP_ALU_IMM	1024	0
+rol al, 1	X86_OP_ALU_IMM	1024	0
+rol al, 7	X86_OP_ALU_IMM	1024	0
+rol al, 8	X86_OP_ALU_IMM	1024	0
+rol al, 15	X86_OP_ALU_IMM	1024	0
+rol al, 16	X86_OP_ALU_IMM	1024	0
+rol al, 31	X86_OP_ALU_IMM	1024	0
+rol al, 32	X86_OP_ALU_IMM	1024	0
+rol al, 63	X86_OP_ALU_IMM	1024	0
+rol al, 64	X86_OP_ALU_IMM	1024	0
+rol al, 255	X86_OP_ALU_IMM	1024	0
+rol al, cl	X86_OP_ALU_REG	1024	0
+ror al, 0	X86_OP_ROR	1024	0
+ror al, 1	X86_OP_ROR	1024	0
+ror al, 7	X86_OP_ROR	1024	0
+ror al, 8	X86_OP_ROR	1024	0
+ror al, 15	X86_OP_ROR	1024	0
+ror al, 16	X86_OP_ROR	1024	0
+ror al, 31	X86_OP_ROR	1024	0
+ror al, 32	X86_OP_ROR	1024	0
+ror al, 63	X86_OP_ROR	1024	0
+ror al, 64	X86_OP_ROR	1024	0
+ror al, 255	X86_OP_ROR	1024	0
+ror al, cl	X86_OP_ROR	1024	0
+rol ax, 0	X86_OP_ALU_IMM	1024	0
+rol ax, 1	X86_OP_ALU_IMM	1024	0
+rol ax, 7	X86_OP_ALU_IMM	1024	0
+rol ax, 8	X86_OP_ALU_IMM	1024	0
+rol ax, 15	X86_OP_ALU_IMM	1024	0
+rol ax, 16	X86_OP_ALU_IMM	1024	0
+rol ax, 31	X86_OP_ALU_IMM	1024	0
+rol ax, 32	X86_OP_ALU_IMM	1024	0
+rol ax, 63	X86_OP_ALU_IMM	1024	0
+rol ax, 64	X86_OP_ALU_IMM	1024	0
+rol ax, 255	X86_OP_ALU_IMM	1024	0
+rol ax, cl	X86_OP_ALU_REG	1024	0
+ror ax, 0	X86_OP_ROR	1024	0
+ror ax, 1	X86_OP_ROR	1024	0
+ror ax, 7	X86_OP_ROR	1024	0
+ror ax, 8	X86_OP_ROR	1024	0
+ror ax, 15	X86_OP_ROR	1024	0
+ror ax, 16	X86_OP_ROR	1024	0
+ror ax, 31	X86_OP_ROR	1024	0
+ror ax, 32	X86_OP_ROR	1024	0
+ror ax, 63	X86_OP_ROR	1024	0
+ror ax, 64	X86_OP_ROR	1024	0
+ror ax, 255	X86_OP_ROR	1024	0
+ror ax, cl	X86_OP_ROR	1024	0
+rol eax, 0	X86_OP_ALU_IMM	1024	0
+rol eax, 1	X86_OP_ALU_IMM	1024	0
+rol eax, 7	X86_OP_ALU_IMM	1024	0
+rol eax, 8	X86_OP_ALU_IMM	1024	0
+rol eax, 15	X86_OP_ALU_IMM	1024	0
+rol eax, 16	X86_OP_ALU_IMM	1024	0
+rol eax, 31	X86_OP_ALU_IMM	1024	0
+rol eax, 32	X86_OP_ALU_IMM	1024	0
+rol eax, 63	X86_OP_ALU_IMM	1024	0
+rol eax, 64	X86_OP_ALU_IMM	1024	0
+rol eax, 255	X86_OP_ALU_IMM	1024	0
+rol eax, cl	X86_OP_ALU_REG	1024	0
+ror eax, 0	X86_OP_ROR	1024	0
+ror eax, 1	X86_OP_ROR	1024	0
+ror eax, 7	X86_OP_ROR	1024	0
+ror eax, 8	X86_OP_ROR	1024	0
+ror eax, 15	X86_OP_ROR	1024	0
+ror eax, 16	X86_OP_ROR	1024	0
+ror eax, 31	X86_OP_ROR	1024	0
+ror eax, 32	X86_OP_ROR	1024	0
+ror eax, 63	X86_OP_ROR	1024	0
+ror eax, 64	X86_OP_ROR	1024	0
+ror eax, 255	X86_OP_ROR	1024	0
+ror eax, cl	X86_OP_ROR	1024	0
+rol rax, 0	X86_OP_ALU_IMM	1024	0
+rol rax, 1	X86_OP_ALU_IMM	1024	0
+rol rax, 7	X86_OP_ALU_IMM	1024	0
+rol rax, 8	X86_OP_ALU_IMM	1024	0
+rol rax, 15	X86_OP_ALU_IMM	1024	0
+rol rax, 16	X86_OP_ALU_IMM	1024	0
+rol rax, 31	X86_OP_ALU_IMM	1024	0
+rol rax, 32	X86_OP_ALU_IMM	1024	0
+rol rax, 63	X86_OP_ALU_IMM	1024	0
+rol rax, 64	X86_OP_ALU_IMM	1024	0
+rol rax, 255	X86_OP_ALU_IMM	1024	0
+rol rax, cl	X86_OP_ALU_REG	1024	0
+ror rax, 0	X86_OP_ROR	1024	0
+ror rax, 1	X86_OP_ROR	1024	0
+ror rax, 7	X86_OP_ROR	1024	0
+ror rax, 8	X86_OP_ROR	1024	0
+ror rax, 15	X86_OP_ROR	1024	0
+ror rax, 16	X86_OP_ROR	1024	0
+ror rax, 31	X86_OP_ROR	1024	0
+ror rax, 32	X86_OP_ROR	1024	0
+ror rax, 63	X86_OP_ROR	1024	0
+ror rax, 64	X86_OP_ROR	1024	0
+ror rax, 255	X86_OP_ROR	1024	0
+ror rax, cl	X86_OP_ROR	1024	0
+rol ah, 0	X86_OP_ALU_IMM	1024	0
+rol ah, 1	X86_OP_ALU_IMM	1024	0
+rol ah, 7	X86_OP_ALU_IMM	1024	0
+rol ah, 8	X86_OP_ALU_IMM	1024	0
+rol ah, 15	X86_OP_ALU_IMM	1024	0
+rol ah, 16	X86_OP_ALU_IMM	1024	0
+rol ah, 31	X86_OP_ALU_IMM	1024	0
+rol ah, 32	X86_OP_ALU_IMM	1024	0
+rol ah, 63	X86_OP_ALU_IMM	1024	0
+rol ah, 64	X86_OP_ALU_IMM	1024	0
+rol ah, 255	X86_OP_ALU_IMM	1024	0
+rol ah, cl	X86_OP_ALU_REG	1024	0
+rol ch, 0	X86_OP_ALU_IMM	1024	0
+rol ch, 1	X86_OP_ALU_IMM	1024	0
+rol ch, 7	X86_OP_ALU_IMM	1024	0
+rol ch, 8	X86_OP_ALU_IMM	1024	0
+rol ch, 15	X86_OP_ALU_IMM	1024	0
+rol ch, 16	X86_OP_ALU_IMM	1024	0
+rol ch, 31	X86_OP_ALU_IMM	1024	0
+rol ch, 32	X86_OP_ALU_IMM	1024	0
+rol ch, 63	X86_OP_ALU_IMM	1024	0
+rol ch, 64	X86_OP_ALU_IMM	1024	0
+rol ch, 255	X86_OP_ALU_IMM	1024	0
+rol ch, cl	X86_OP_ALU_REG	1024	0
+rol dh, 0	X86_OP_ALU_IMM	1024	0
+rol dh, 1	X86_OP_ALU_IMM	1024	0
+rol dh, 7	X86_OP_ALU_IMM	1024	0
+rol dh, 8	X86_OP_ALU_IMM	1024	0
+rol dh, 15	X86_OP_ALU_IMM	1024	0
+rol dh, 16	X86_OP_ALU_IMM	1024	0
+rol dh, 31	X86_OP_ALU_IMM	1024	0
+rol dh, 32	X86_OP_ALU_IMM	1024	0
+rol dh, 63	X86_OP_ALU_IMM	1024	0
+rol dh, 64	X86_OP_ALU_IMM	1024	0
+rol dh, 255	X86_OP_ALU_IMM	1024	0
+rol dh, cl	X86_OP_ALU_REG	1024	0
+rol bh, 0	X86_OP_ALU_IMM	1024	0
+rol bh, 1	X86_OP_ALU_IMM	1024	0
+rol bh, 7	X86_OP_ALU_IMM	1024	0
+rol bh, 8	X86_OP_ALU_IMM	1024	0
+rol bh, 15	X86_OP_ALU_IMM	1024	0
+rol bh, 16	X86_OP_ALU_IMM	1024	0
+rol bh, 31	X86_OP_ALU_IMM	1024	0
+rol bh, 32	X86_OP_ALU_IMM	1024	0
+rol bh, 63	X86_OP_ALU_IMM	1024	0
+rol bh, 64	X86_OP_ALU_IMM	1024	0
+rol bh, 255	X86_OP_ALU_IMM	1024	0
+rol bh, cl	X86_OP_ALU_REG	1024	0
+ror ah, 0	X86_OP_ROR	1024	0
+ror ah, 1	X86_OP_ROR	1024	0
+ror ah, 7	X86_OP_ROR	1024	0
+ror ah, 8	X86_OP_ROR	1024	0
+ror ah, 15	X86_OP_ROR	1024	0
+ror ah, 16	X86_OP_ROR	1024	0
+ror ah, 31	X86_OP_ROR	1024	0
+ror ah, 32	X86_OP_ROR	1024	0
+ror ah, 63	X86_OP_ROR	1024	0
+ror ah, 64	X86_OP_ROR	1024	0
+ror ah, 255	X86_OP_ROR	1024	0
+ror ah, cl	X86_OP_ROR	1024	0
+ror ch, 0	X86_OP_ROR	1024	0
+ror ch, 1	X86_OP_ROR	1024	0
+ror ch, 7	X86_OP_ROR	1024	0
+ror ch, 8	X86_OP_ROR	1024	0
+ror ch, 15	X86_OP_ROR	1024	0
+ror ch, 16	X86_OP_ROR	1024	0
+ror ch, 31	X86_OP_ROR	1024	0
+ror ch, 32	X86_OP_ROR	1024	0
+ror ch, 63	X86_OP_ROR	1024	0
+ror ch, 64	X86_OP_ROR	1024	0
+ror ch, 255	X86_OP_ROR	1024	0
+ror ch, cl	X86_OP_ROR	1024	0
+ror dh, 0	X86_OP_ROR	1024	0
+ror dh, 1	X86_OP_ROR	1024	0
+ror dh, 7	X86_OP_ROR	1024	0
+ror dh, 8	X86_OP_ROR	1024	0
+ror dh, 15	X86_OP_ROR	1024	0
+ror dh, 16	X86_OP_ROR	1024	0
+ror dh, 31	X86_OP_ROR	1024	0
+ror dh, 32	X86_OP_ROR	1024	0
+ror dh, 63	X86_OP_ROR	1024	0
+ror dh, 64	X86_OP_ROR	1024	0
+ror dh, 255	X86_OP_ROR	1024	0
+ror dh, cl	X86_OP_ROR	1024	0
+ror bh, 0	X86_OP_ROR	1024	0
+ror bh, 1	X86_OP_ROR	1024	0
+ror bh, 7	X86_OP_ROR	1024	0
+ror bh, 8	X86_OP_ROR	1024	0
+ror bh, 15	X86_OP_ROR	1024	0
+ror bh, 16	X86_OP_ROR	1024	0
+ror bh, 31	X86_OP_ROR	1024	0
+ror bh, 32	X86_OP_ROR	1024	0
+ror bh, 63	X86_OP_ROR	1024	0
+ror bh, 64	X86_OP_ROR	1024	0
+ror bh, 255	X86_OP_ROR	1024	0
+ror bh, cl	X86_OP_ROR	1024	0
+ror BYTE PTR [rdi+8], 0	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 1	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 7	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 8	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 15	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 16	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 31	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 32	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 63	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 64	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], 255	X86_OP_ROR_MEM	1024	0
+ror BYTE PTR [rdi+8], cl	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 0	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 1	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 7	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 8	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 15	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 16	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 31	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 32	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 63	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 64	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], 255	X86_OP_ROR_MEM	1024	0
+ror WORD PTR [rdi+8], cl	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 0	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 1	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 7	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 8	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 15	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 16	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 31	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 32	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 63	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 64	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], 255	X86_OP_ROR_MEM	1024	0
+ror DWORD PTR [rdi+8], cl	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 0	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 1	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 7	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 8	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 15	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 16	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 31	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 32	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 63	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 64	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], 255	X86_OP_ROR_MEM	1024	0
+ror QWORD PTR [rdi+8], cl	X86_OP_ROR_MEM	1024	0
+ja forward	X86_OP_JCC	1024	0
+ja backward	X86_OP_JCC	1024	0
+jae forward	X86_OP_JCC	1024	0
+jae backward	X86_OP_JCC	1024	0
+jb forward	X86_OP_JCC	1024	0
+jb backward	X86_OP_JCC	1024	0
+jbe forward	X86_OP_JCC	1024	0
+jbe backward	X86_OP_JCC	1024	0
+je forward	X86_OP_JCC	1024	0
+je backward	X86_OP_JCC	1024	0
+jne forward	X86_OP_JCC	1024	0
+jne backward	X86_OP_JCC	1024	0
+jg forward	X86_OP_JCC	1024	0
+jg backward	X86_OP_JCC	1024	0
+jge forward	X86_OP_JCC	1024	0
+jge backward	X86_OP_JCC	1024	0
+jl forward	X86_OP_JCC	1024	0
+jl backward	X86_OP_JCC	1024	0
+jle forward	X86_OP_JCC	1024	0
+jle backward	X86_OP_JCC	1024	0
+js forward	X86_OP_JCC	1024	0
+js backward	X86_OP_JCC	1024	0
+jns forward	X86_OP_JCC	1024	0
+jns backward	X86_OP_JCC	1024	0
+jo forward	X86_OP_JCC	1024	0
+jo backward	X86_OP_JCC	1024	0
+jno forward	X86_OP_JCC	1024	0
+jno backward	X86_OP_JCC	1024	0
+jp forward	X86_OP_JCC	1024	0
+jp backward	X86_OP_JCC	1024	0
+jpe forward	X86_OP_JCC	1024	0
+jpe backward	X86_OP_JCC	1024	0
+jnp forward	X86_OP_JCC	1024	0
+jnp backward	X86_OP_JCC	1024	0
+jpo forward	X86_OP_JCC	1024	0
+jpo backward	X86_OP_JCC	1024	0
+jmp forward	X86_OP_JMP	1024	0
+call and ret (stack return address)	X86_OP_CALL	1024	0
+rep movsb	X86_OP_REP_MOVS	1024	0
+rep movsw	X86_OP_REP_MOVS	1024	0
+rep movsd	X86_OP_REP_MOVS	1024	0
+rep movsq	X86_OP_REP_MOVS	1024	0
