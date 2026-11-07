@@ -1198,3 +1198,32 @@ hosts passed 240 cases,40080 cases,5120 cases,122880 cases,2105024 cases,2072 ca
 declaration remains byte-identical. No placeholders, new tests, filtering,
 ISA/runtime/generator/oracle/paper changes. Original compiler warnings remain
 visible. The active exact45d full check predates this extension.
+
+## Uniform byte conditional selects composed after CCMP
+
+`Arm64Dispatcher.dispatchThroughSelect` appends all eight actual conditional
+select numeric rows. Its byte body evaluates the whole AUX condition and keeps
+the generated CSEL/X pointer-copy branch before scalar generated selection and
+width write. No scalar provenance premise removes that pointer branch. Native
+value/provenance materialization remains Entry/O4. Each body preserves all
+other state components and advances PC once, including aliased sources/destinations.
+
+Derived typed-body equality feeds the four direct CSEL/CSINC/CSINV/CSNEG
+canonical steps and four CINC/CINV/CSET/CSETM aliases. Alias non-AL validity,
+condition inversion and ZR sources remain explicit. Native NV15 uses the actual
+producer AL14 normalization while retaining code15 in the canonical step; raw
+whole-AUX15 or larger is not interpreted as a low-byte condition. CINC/CINV
+ignore arbitrary SRC2, and CSET/CSETM ignore arbitrary SRC and SRC2, including
+SP32/NONE255. SRC3 and IMM are unused for every row. Literal numeric disjointness
+derives reachability through all prior gates. One step_through_select_refines
+covers field/code/condition-only bindings and every earlier result with no
+semantic/component-refinement premise. Remaining memory/control/vector families,
+native byte/raw-width and compiled-artifact/O2/O4 bindings remain open.
+
+Validation: focused77-job dispatcher/reference Lean build (first compile passed),
+eight existing contract freshness checks, direct-dispatch/model checks and12
+existing semantic/route hosts passed 240 cases,80 cases,40080 cases,2072 cases,136 cases,192 cases,160161 cases,1024 cases,512 cases,6913 cases,257 cases,6401 cases. Exact proof SHA256
+`80f2016b1cc898a888b65453961b4b152b2a929c0869d0d533680785328496af` stayed unchanged; all earlier declaration bytes
+remain identical. No placeholders, new tests, input filtering, ISA/runtime/
+generator/oracle/paper changes. Original C warnings remain visible. Active
+exact45d's full check predates CCMP and this select extension.

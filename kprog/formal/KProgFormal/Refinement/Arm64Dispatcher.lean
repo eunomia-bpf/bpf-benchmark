@@ -1627,4 +1627,140 @@ theorem step_through_compare_refines (code : Nat) (aux : BitVec 32) (width : Wid
   | immediate => apply compare_immediate_refines
   | register => apply compare_register_refines
 
+
+/-- The production CSEL/X pointer-copy branch precedes the scalar generated
+select. Numeric pointer values must be the materialized native values; tag
+transport remains Entry/O4 rather than an invented scalar-source restriction. -/
+def selectBody (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst src src2 : Byte) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let taken := generatedArm64Cond (Arm64Condition.flags s.flags) predicate
+  let state := if GeneratedArm64CselPtr.ptrTagPath op (Arm64Register.handlerWidth width) then
+      Arm64Move.Fields.write s dst (if taken then Arm64Move.Fields.read s src else Arm64Move.Fields.read s src2) .w64
+    else Arm64Move.Fields.write s dst
+      (GeneratedArm64Csel.value op taken (Arm64Move.Fields.read s src) (Arm64Move.Fields.read s src2)) width
+  ⟨{ state with pc := s.pc + 4 }, [], none⟩
+
+theorem select_body_typed (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst src rhs : Register) (s : Reference.AArch64.State) :
+    selectBody op predicate width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (Arm64Register.registerCode rhs) s = Arm64Select.rawStep op width dst src rhs predicate s := by
+  simp only [selectBody, Arm64Select.rawStep, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+def dispatchThroughSelect (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughCompare code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Select.decodeOpcode code).bind (fun op =>
+      (Arm64Condition.decode aux.toNat).map (fun predicate => selectBody op predicate width dst src src2 s))
+
+theorem select_reached (op : GeneratedArm64Csel.Csel) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughSelect (GeneratedArm64Csel.code op) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      (Arm64Condition.decode aux.toNat).map (fun predicate => selectBody op predicate width dst src src2 s) := by
+  have before : dispatchThroughCompare (GeneratedArm64Csel.code op) aux width dst src src2 src3 value
+      sourceScalar sourceStack s = none := by cases op <;> rfl
+  unfold dispatchThroughSelect
+  rw [before, Arm64Select.decode_code]
+  rfl
+
+theorem select_condition_decode (predicate : Arm64Cond) :
+    Arm64Condition.decode (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)).toNat = some predicate := by
+  cases predicate <;> rfl
+
+theorem select_refines (width : Width) (alternative : Reference.AArch64.SelectElse) (dst src rhs : Register)
+    (predicate : Arm64Cond) (src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughSelect (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.select width alternative dst src rhs (Arm64Condition.nativeCode predicate)) s) := by
+  rw [select_reached, select_condition_decode]
+  change some (selectBody (Arm64Select.opcode alternative) predicate width (Arm64Register.registerCode dst)
+    (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) s) = _
+  rw [select_body_typed, Arm64Select.raw_step_refines]
+
+/-- Native NV15 is normalized to the existing producer AL14 condition. The
+native instruction retains its original code15 in the canonical step. -/
+theorem select_normalized_nv_refines (width : Width) (alternative : Reference.AArch64.SelectElse)
+    (dst src rhs : Register) (src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughSelect (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+      (BitVec.ofNat 32 (GeneratedArm64CcDecode.code .nv)) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.select width alternative dst src rhs 15) s) :=
+  select_refines width alternative dst src rhs .al src3 value sourceScalar sourceStack s
+
+/-- CINC/CINV ignore the second source; CSET/CSETM ignore both. No encoding,
+presence or provenance predicate is imposed on the ignored bytes. -/
+theorem select_alias_unused (alias : Arm64Select.Alias) (predicate : Arm64Cond) (width : Width)
+    (dst src : Register) (unusedSrc rhs : Byte) (s : Reference.AArch64.State) :
+    selectBody (Arm64Select.aliasOpcode alias) predicate width (Arm64Register.registerCode dst)
+      (match alias with | .increment | .invert => Arm64Register.registerCode src | .set | .mask => unusedSrc) rhs s =
+    selectBody (Arm64Select.aliasOpcode alias) predicate width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode 31) s := by
+  cases alias <;> cases width <;> rfl
+
+theorem select_alias_refines (alias : Arm64Select.Alias) (width : Width) (dst src : Register)
+    (predicate : Arm64Cond) (unusedSrc rhs src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) (valid : predicate ≠ .al) :
+    dispatchThroughSelect (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+      (match alias with | .increment | .invert => Arm64Register.registerCode src | .set | .mask => unusedSrc)
+      rhs src3 value sourceScalar sourceStack s = some (Reference.AArch64.step
+        (.select width (Arm64Select.aliasAlternative alias) dst (Arm64Select.aliasSource alias src)
+          (Arm64Select.aliasSource alias src) (Arm64Condition.nativeCode (Arm64Select.inverse predicate))) s) := by
+  rw [select_reached, select_condition_decode]
+  change some (selectBody (Arm64Select.aliasOpcode alias) predicate width (Arm64Register.registerCode dst)
+    (match alias with | .increment | .invert => Arm64Register.registerCode src | .set | .mask => unusedSrc) rhs s) = _
+  rw [select_alias_unused, select_body_typed, Arm64Select.raw_alias_refines width alias dst src 31 predicate s valid]
+
+theorem select_bad_condition (op : GeneratedArm64Csel.Csel) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State)
+    (bad : 15 ≤ aux.toNat) :
+    dispatchThroughSelect (GeneratedArm64Csel.code op) aux width dst src src2 src3 value sourceScalar sourceStack s = none := by
+  rw [select_reached, Arm64Condition.decode_bad aux.toNat bad]
+  rfl
+
+theorem select_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : CompareBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughSelect code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughSelect,
+    step_through_compare_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive SelectBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : CompareBinding pc code aux width dst src src2 src3 value native) :
+      SelectBinding pc code aux width dst src src2 src3 value native
+  | select (width : Width) (alternative : Reference.AArch64.SelectElse) (dst src rhs : Register)
+      (predicate : Arm64Cond) (src3 : Byte) (value : Word) :
+      SelectBinding pc (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+        (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value
+        (.select width alternative dst src rhs (Arm64Condition.nativeCode predicate))
+  | normalizedNv (width : Width) (alternative : Reference.AArch64.SelectElse) (dst src rhs : Register)
+      (src3 : Byte) (value : Word) :
+      SelectBinding pc (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+        (BitVec.ofNat 32 (GeneratedArm64CcDecode.code .nv)) width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) src3 value (.select width alternative dst src rhs 15)
+  | alias (alias : Arm64Select.Alias) (width : Width) (dst src : Register) (predicate : Arm64Cond)
+      (unusedSrc rhs src3 : Byte) (value : Word) (valid : predicate ≠ .al) :
+      SelectBinding pc (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+        (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+        (match alias with | .increment | .invert => Arm64Register.registerCode src | .set | .mask => unusedSrc)
+        rhs src3 value (.select width (Arm64Select.aliasAlternative alias) dst (Arm64Select.aliasSource alias src)
+          (Arm64Select.aliasSource alias src) (Arm64Condition.nativeCode (Arm64Select.inverse predicate)))
+
+theorem step_through_select_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : SelectBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughSelect code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact select_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | select => apply select_refines
+  | normalizedNv => apply select_normalized_nv_refines
+  | alias => apply select_alias_refines; assumption
+
 end KProgFormal.Refinement.Arm64Dispatcher
