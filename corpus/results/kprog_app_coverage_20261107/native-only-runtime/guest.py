@@ -53,6 +53,11 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
      rel=item.relative_to(root);keep.mkdir(parents=True,exist_ok=True)
      (keep/rel).parent.mkdir(parents=True,exist_ok=True);shutil.copy2(item,keep/rel)
      retained.append(str(rel))
+  # The service's own stdout is the other half of the evidence and lives
+  # in the deleted .live- directory.
+  if (live/'service.log').is_file():
+   keep.mkdir(parents=True,exist_ok=True)
+   shutil.copy2(live/'service.log',keep/'service.log');retained.append('service.log')
   summary['retained_service_state']=str(keep) if retained else None
   summary['retained_service_files']=sorted(retained)
   log.close();summary['finished']=datetime.now(timezone.utc).isoformat()
