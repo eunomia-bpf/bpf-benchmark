@@ -78,6 +78,7 @@ specs = [
     ("arm64", "arm64-current-bank32/bitfield", "qemu_user", "enumerated_bitfield_forms"),
     ("arm64", "arm64-current-bank32/exclusive/observed-projection", "qemu_user",
      "explicit_monitor_observation"),
+    ("x86", "x86-production-current", "real_x86_cpu", "production_instruction_epoch"),
 ]
 observations, source_summaries = [], []
 for arch, name, backend, scope in specs:
@@ -151,6 +152,50 @@ for arch, name, backend, scope in specs:
         assert set(changes["used_snapshot_changes"]) == set(summary["candidate_source_sha256"])
         for path in changes["used_snapshot_changes"]:
             assert changes["changes"][path]["after_sha256"] == summary["candidate_source_sha256"][path]
+
+    if scope == "production_instruction_epoch":
+        interface = json.loads(read(directory / "replay-interface.json"))
+        manifest = json.loads(read(directory / "actual-compiled-inputs.json"))
+        control_rows = table(directory / "control-reference/reference-forms.tsv")
+        control_status = json.loads(read(directory / "control-reference/status.json"))
+        collection = json.loads(read(directory / "collection-status.json"))
+        assert summary["initial_command_exit"] == interface["initial_command_exit"] == 2
+        assert summary["canonical_completion_exit"] == control_status["exit"] == collection["exit"] == 0
+        assert summary["reference_cases"] == interface["final_reference_cases"] == 292864
+        assert summary["forms_awaiting_reference"] == 0
+        assert interface["control_forms"] == sorted(int(row["form"]) for row in control_rows)
+        assert len(control_rows) == interface["initial_forms_awaiting_reference"] == 38
+        assert interface["control_cases"] == sum(int(row["reference_cases"]) for row in control_rows) == 9728
+        assert interface["binary_sha256"] == control_status["binary_sha256"] == binary
+        assert interface["trace_sha256"] == control_status["trace_sha256"] == summary["trace_sha256"]
+        assert interface["control_table_sha256"] == sha((directory / "control-reference/reference-forms.tsv").read_bytes())
+        assert interface["final_reference_table_sha256"] == sha((directory / "reference-forms.tsv").read_bytes())
+        with tarfile.open(fileobj=io.BytesIO(read(directory / "initial-canonical-attempt.tar.gz"))) as initial:
+            old_table = initial.extractfile("reference-forms.tsv").read()
+            old_rows = list(csv.DictReader(io.StringIO(old_table.decode()), delimiter=chr(9)))
+        assert sha(old_table) == interface["initial_reference_table_sha256"]
+        assert len(old_rows) == len(reference)
+        selected = {int(row["form"]): row for row in control_rows}
+        assert all(reference[i] == selected[i] if i in selected else reference[i] == old_rows[i]
+                   for i in range(len(reference)))
+        assert sum(int(row["reference_cases"]) for row in old_rows) == interface["initial_canonical_cases"] == 283136
+        with tarfile.open(fileobj=io.BytesIO(read(directory / "launch-inputs.tar.gz"))) as launch:
+            reader = launch.extractfile("kprog/fidelity/reference_check.py").read()
+            assert sha(reader) == control_status["source_sha256"]
+        source_count = 0
+        with tarfile.open(fileobj=io.BytesIO((archive).read_bytes())) as compiled:
+            members = {m.name:m for m in compiled.getmembers() if m.isfile()}
+            assert set(members) == set(manifest)
+            for path, digest in manifest.items():
+                assert sha(compiled.extractfile(members[path]).read()) == digest
+                if "/snapshot/" in path:
+                    relative = path.split("/snapshot/",1)[1]
+                    published = subprocess.check_output(["git","show",summary["source_head"]+":"+relative],cwd=ROOT)
+                    assert sha(published) == digest
+                    source_count += 1
+        assert source_count == summary["production_snapshot_files"] == 82
+        assert len(manifest) == summary["compiled_input_files"] == 90
+        assert summary["production_snapshot_git_equal"]
 
     forms_path = str((directory / "forms.tsv").relative_to(ROOT))
     refs_path = str((directory / "reference-forms.tsv").relative_to(ROOT))

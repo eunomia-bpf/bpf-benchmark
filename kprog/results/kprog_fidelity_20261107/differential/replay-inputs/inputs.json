@@ -1,5 +1,5 @@
 {
-  "source_head": "0b71deb65cd06d4971b27df9b0e7b88f7e4b20f5",
+  "source_head": "071476a17f6526ef706404743ca19049201ed5e1",
   "files": {
     "kprog/x86/x86_sim.h": {
       "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
@@ -181,6 +181,39 @@
     "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/compiled-inputs.tar.gz": {
       "sha256": "5553c31cf53ebec8aeb0791eb68d72fd3394a54ccbfa73cd3b65e775c53d0b02"
     },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/summary.json": {
+      "sha256": "b289569a2e5429e118798e66bee1771364a9e06901ea3f9fd4ffac2b572a4009"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/forms.tsv": {
+      "sha256": "52b911b5810f3bcc532a2fc695baeb6f9c2b9238e4263c4e602f62fb2ceb7555"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/reference-forms.tsv": {
+      "sha256": "2c3a85d124660224f5513f9a0d84258eefd665615c74fd5561235f0466e11ef9"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/actual-compiled-inputs.tar.gz": {
+      "sha256": "5ae0c5aa68520f5e896de4c2e2a3cd076b8c07c62404e66d4b5714b02d21f6bd"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/replay-interface.json": {
+      "sha256": "eb3eb1786c26a6daf33bfc45ecf50f37e465a9d90fb46f2e870701dca58aecf1"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/actual-compiled-inputs.json": {
+      "sha256": "6ada6e53cc2414119d1eb37cf0381c05d3d8db2b83c245e8013c942827b56d90"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/control-reference/reference-forms.tsv": {
+      "sha256": "95c77561ef965751bd510b55fd47304237eb62bb6f65dea59507cc01f1542caf"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/control-reference/status.json": {
+      "sha256": "111f25879f00b1915116739229a8a3aeaf0e2f8451011ba89ba4ea03136c260c"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/collection-status.json": {
+      "sha256": "5fef99ef0103a5396370e8cd8491f19c0363383414744e06a838846e72e09aac"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/initial-canonical-attempt.tar.gz": {
+      "sha256": "fe166dc19c6052249df43d5c5f007169edd16558a5b5acd1491c0290f46d2b87"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-production-current/launch-inputs.tar.gz": {
+      "sha256": "ca46d31e27389bc6ce634856d148faaaa37e7055238c13ca9df2507ea8c1d57c"
+    },
     "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/canonical-after/summary.json": {
       "sha256": "a547915e755b3d71d854e2aa8ad8b4550dac13f0565d73f60c4db0c1fd200509"
     }
@@ -351,6 +384,18 @@
       "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
       "executable_sha256": "8391b40fc6c9755c5cc08e3a5e52e1273f0a159528be81e923c18721ba1753d7",
       "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-production-current",
+      "scope": "production_instruction_epoch",
+      "backend": "real_x86_cpu",
+      "forms": 1144,
+      "cases": 292864,
+      "operation_rows": 62,
+      "simulator_header_sha256": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+      "executable_sha256": "5188ecdedc827345a010d08d837a2aabf92870f9ddf5660d9d9f7130131fe1f7",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
     },
     {
       "isa": "x86",

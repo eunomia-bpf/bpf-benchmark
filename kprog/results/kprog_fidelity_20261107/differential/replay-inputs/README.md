@@ -17,14 +17,14 @@ The requested 77/72 operation domain also needs V's semantic/control-family
 alignment; numeric tokens, native instruction families and specialization
 tokens each retain their own identities.
 
-replay-observations.tsv contains 157 operation/source rows from fourteen published
+replay-observations.tsv contains 219 operation/source rows from fifteen published
 snapshots. Each row records form counts, case counts, three comparison
 counts, backend, compiled simulator header, binary and reference hashes,
 and original per-form table paths. Both forms tables are joined by their
 exact assembly names and checked for equal case counts and zero differences.
 numeric-token-input.tsv lists all 146 numeric tokens, including the pending
 replay entries, with their supporting source paths. inputs.json pins all
-61 source artifacts used by the collector and records the aliases.
+72 source artifacts used by the collector and records the aliases.
 
 The main x86 snapshot covers 1,144 forms and 1,171,456 real-CPU/C/reference
 states with header 4fe6817. The later focused RORX snapshot covers four
@@ -32,6 +32,24 @@ forms and 4,096 states with header 47fb5565. Four additional numeric-token
 bindings contribute 32 raw/direct route/form groups and 32,768 real-CPU/
 C/reference states with that header and memory header 3ba4bc78. Each source
 keeps its own epoch, binding scope and counts.
+The later production source epoch adds1,144 forms and292,864 real-CPU/
+C/reference observations with main header6b3f3173 and tagged-write headercf27e323.
+Its compiled90-file archive contains82 source snapshots matching launch commit
+be2bbfbb exactly. The executable is5188ecdedc827345a010d08d837a2aabf92870f9ddf5660d9d9f7130131fe1f7;
+the canonical executable remainsc110b03a. The published result01ce447e records
+zero differences in all three comparisons.
+
+That production epoch preserves its initial283,136 canonical cases and38 pending
+branch/CALL forms, followed by the existing --control-paths saved-state replay
+of9,728 cases. The initial command's exit2 and the control completion's exit0
+remain explicit. The collector verifies the initial archive, exact38-row
+replacement,1106 retained rows, table/binary/trace hashes and the original
+reference-reader source. Eleven additional artifact pins record this complete
+source and interface history. All157 preceding operation/source rows and61
+artifact pins retain their values; the existing numeric-token totals remain66
+x86 and65 ARM plus one explicit-monitor observation. The added62 operation/source
+rows describe the adopted production epoch and preserve each token's domain.
+
 Two CL double-shift snapshots add 96 raw/direct groups and 98,304 real-CPU/
 C/reference observations. The 32/64-bit snapshot covers all effective counts;
 the 16-bit snapshot samples its defined count domain 0–16. Both retain RCX/RSP
