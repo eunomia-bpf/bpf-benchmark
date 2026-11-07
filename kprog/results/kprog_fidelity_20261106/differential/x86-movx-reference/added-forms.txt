@@ -1,0 +1,26 @@
+cdqe
+popcnt ax, bx
+popcnt eax, ebx
+popcnt rax, rbx
+movzx ax, bl
+movzx ax, BYTE PTR [rdi+8]
+movsx ax, bl
+movsx ax, BYTE PTR [rdi+8]
+movzx eax, bl
+movzx eax, BYTE PTR [rdi+8]
+movsx eax, bl
+movsx eax, BYTE PTR [rdi+8]
+movzx eax, bx
+movzx eax, WORD PTR [rdi+8]
+movsx eax, bx
+movsx eax, WORD PTR [rdi+8]
+movzx rax, bl
+movzx rax, BYTE PTR [rdi+8]
+movsx rax, bl
+movsx rax, BYTE PTR [rdi+8]
+movzx rax, bx
+movzx rax, WORD PTR [rdi+8]
+movsx rax, bx
+movsx rax, WORD PTR [rdi+8]
+movsxd rax, ebx
+movsxd rax, DWORD PTR [rdi+8]
