@@ -877,3 +877,63 @@ All359 formal modules/C/Rust/wires and688566 focused C cases pass. Four actual
 W/X STXR/STLXR bound positives return37/retval2/generation1; all four formerly
 accepted failure-branch negatives now reject. The exact new kernel/initrd replay
 is retained. Numeric-address and platform-ordering obligations stay active.
+
+## Actual Katran and OTel startup coverage
+
+[Runtimev8](runtime-context-v8/README.md) records the first actual resident
+program failures: Katran balancer and OTel read_task_struct lack simulator
+proofs. Their baseline counters contain one and12 rows respectively; neither
+returns native counters. All31 startup attempts and the exact packaged inputs
+remain. The new actual Katran balancer proof has compiled and is running in
+runtimev9 with T's fully matched kernel/module/loader bundle.
+
+## Actual ARM balancer proof integration
+
+[Runtimev9](runtime-context-v9/README.md) generates and compiles the actual
+Katran balancer against its original map declarations. Its unchanged baseline
+records250179 runs; native startup reaches proof relocation and fails on a
+full/truncated map-name resolution order defect. The exact proof build,
+packaged inputs and all12 startup attempts remain. The existing alias-resolution
+step is being moved before proof-map reuse for the next application retry.
+
+## First complete actual Katran ARM workload
+
+[Runtimev10](runtime-context-v10/README.md) replaces the actual balancer
+1/1 resident programs with a prebuilt generation-bound proof. Both workload
+arms finish: JIT250388 and bound268634 program runs, matching their packet
+counts and zero pktgen errors. XDP/map/receiver/drop counters are retained.
+OTel records12 baseline programs and0 native replacements; mixed extern/private
+readonly relocation handling is under repair. QEMU timing is functional only.
+
+## Real helper context and packet-view refresh
+
+[The ARM helper-context bridge](context-helper-result/README.md) preserves
+the original context identity and refreshes XDP packet pointers after adjust
+helpers. Six focused cases,154 helper ABI cases and the isolated complete
+formal check pass. Both source/simulator/bound QEMU controls write37/return2
+after adjust_head4, with generation1. The complete built replay is retained;
+numeric SP/LR changes remain owned by F.
+
+## Source-map externs with private readonly data
+
+[Mixed relocation handling](source-map-readonly-result/README.md) now preserves
+source-map identity and exact readonly object bytes in the same proof. The
+actual QEMU regression writes42 at16/generation1; wrong offsets and changed
+readonly bytes both reject before native execution. Static/shared ARM builds
+pass. New runtimev11 is queued for all six real application startups.
+
+## Completed resumed frozen census
+
+[The historical defined-frozen census](defined-frozen/README.md) now retains
+all1136 artifacts:706 generation failures,61 compiler failures,43 verifier
+acceptances,300 verifier rejections and26 loader failures. Compiler causes
+are60 recorded LLVM out-of-memory exits and1 timeout. All raw inputs/logs
+remain; this XDP diagnostic snapshot is separate from current real app runs.
+
+## Priority2 ARM division boundary audit
+
+[Sixteen actual bound UDIV controls](divide-bound-v1/README.md) pass both
+entry ABI modes: zero divisors,32-bit truncation,full-width values,destination
+aliasing and preserved equality flags. Source/simulator/native results match,
+with one generation each. Existing F SP/LR numeric wiring and its published
+unsafe-load rejection evidence are linked without claiming a new full proof.
