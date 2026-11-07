@@ -1,0 +1,215 @@
+{
+  "status": "actual_published_producer_B29_all_store_permission_outcomes_and_exit_components_proved_not_whole_TV",
+  "utc": "2026-11-07T17:42:14.480644+00:00",
+  "capture_commit": "090564a50dfd6c7a38452b5df27a845948cb7d44",
+  "producer_binding_commit": "56b78767b31222e579895cdbafc73dd78a0bf1da",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "All four possible first failing actual B29 packet stores retain exact preceding successful writes and the full fault state/memory, with no later effects.",
+    "The actual JA/EXIT trailer retains registers and memory with no memory/helper effects, terminating B at PC29 corresponding to native body boundary60 before its JIT epilogue.",
+    "Total store block correspondence holds for every canonical memory permission assignment; the first-failure index is computed by the certificate, not inserted into native or BPF execution.",
+    "Every canonical relational native execution of the selected actual store extents has the exact resulting state, ordered effects and fault, paired with actual B29. No successful permission or assumed native next-state premise is needed."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-b29-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29.stack_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.data_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.end_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_context_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.context_fault_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.second_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.zero_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.exit_evaluation": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.exit_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_any_permissions": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "dependency_scope": "same unchanged eleven reference/dependency pins as bffd entry receipt; only own B29 source extended; all affected dependencies previously rechecked for published213d/494c",
+    "log_sha256": "cf8fed46bf061601bf9c0600aa768d6de4d251e24975dd8fff67b9d756425e62"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "3134b58249e33ad93e45a5ceee796c41ddae2d6a5be2ef472d649e88978a12c9",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "74455f9271e4099ce25ba721bc5f57b377469c3ee1ecb9716611aa1509a64e2d"
+  },
+  "premises": [
+    "nativePC35/BPFPC11 active, nativeRCX=BPFr2 packet pointer and exact shared memory.",
+    "Selected first-failure index is derived from the existing canonical memory; all permissions/fault cases are covered.",
+    "The existing canonicalV nativeISA and BPF/referenceMemory/platform semantics; declared XDP expansion provenance for entry components remains explicit."
+  ],
+  "remaining": [
+    "Entry/all-block composition and full architectural reconstruction relation, whole-program universal TV and physical native-body/caller composition.",
+    "All other micro/application certificates."
+  ],
+  "trusted": [
+    "single canonicalV nativeISA and shared BPF/referenceMemory/platform specification",
+    "Lean kernel and reported logical axioms",
+    "actual verifier/native/JIT capture and kernel binding/XDP platform provenance",
+    "Lean.ofReduceBool explicitly reported for closed Boolean reduction in guard correspondence"
+  ]
+}

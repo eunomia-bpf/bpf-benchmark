@@ -532,6 +532,177 @@ theorem stores_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
   all_goals simp +decide [packetNativeFinal,packetNativeFourth,packetNativeThird,packetNativeSecond,packetNativeFirst,
     storesAfter,packetWriteMemory,BPF.setReg,memory,pointer]
 
+
+-- Full partial state before the same faulting store, with actual B29 PCs.
+def storesFaultState (p : BPF.State) (index : Nat) : BPF.State :=
+  {packetProofFaultState p index with pc:=(packetProofFaultState p index).pc-7}
+def storesFaultPath : Nat → List Nat
+  | 0 => [11,12,13,14,15]
+  | 1 => [11,12,13,14,15,16,17,18,19]
+  | 2 => [11,12,13,14,15,16,17,18,19,20,21,22]
+  | _ => [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+
+/-- Every first failing store of actual B29. Only successful earlier writes
+occur, and the failing operation preserves the complete incoming fault state. -/
+theorem stores_fault_evaluation (env : BPF.Environment) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (position : p.pc=11) (active : p.halted=false)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false) :
+    BPFPath.evaluate env proof (storesFaultPath index) p=
+      .ok ⟨storesFaultState p index,packetFaultEvents (p.regs 2) index,
+        some (packetStoreFault (p.regs 2) index)⟩ := by
+  have plus2 : (2#64)+p.regs 2=p.regs 2+(2#64) := BitVec.add_comm _ _
+  have plus3 : (3#64)+p.regs 2=p.regs 2+(3#64) := BitVec.add_comm _ _
+  have plus7 : (7#64)+p.regs 2=p.regs 2+(7#64) := BitVec.add_comm _ _
+  have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+  rcases choices with rfl | rfl | rfl | rfl
+  · simp only [packetStorePermission] at bad
+    simp +decide [BPFPath.evaluate,decode11,decode12,decode13,decode14,decode15,decode16,
+      decode17,decode18,decode19,decode20,decode21,decode22,decode23,decode24,decode25,
+      BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+      storesFaultPath,storesFaultState,packetProofFaultState,packetProofBeforeFirst,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,plus2,plus3,plus7,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;> simp [one,three,four]
+  · have w0 := prior 0 (by omega)
+    simp only [packetStorePermission] at w0 bad
+    simp +decide [BPFPath.evaluate,decode11,decode12,decode13,decode14,decode15,decode16,
+      decode17,decode18,decode19,decode20,decode21,decode22,decode23,decode24,decode25,
+      BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+      storesFaultPath,storesFaultState,packetProofFaultState,packetProofBeforeFirst,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,plus2,plus3,plus7,w0,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;> simp [one,three,four]
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    simp only [packetStorePermission] at w0 w1 bad
+    simp +decide [BPFPath.evaluate,decode11,decode12,decode13,decode14,decode15,decode16,
+      decode17,decode18,decode19,decode20,decode21,decode22,decode23,decode24,decode25,
+      BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+      storesFaultPath,storesFaultState,packetProofFaultState,packetProofBeforeFirst,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,plus2,plus3,plus7,w0,w1,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;> simp [one,three,four]
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    have w2 := prior 2 (by omega)
+    simp only [packetStorePermission] at w0 w1 w2 bad
+    simp +decide [BPFPath.evaluate,decode11,decode12,decode13,decode14,decode15,decode16,
+      decode17,decode18,decode19,decode20,decode21,decode22,decode23,decode24,decode25,
+      BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+      storesFaultPath,storesFaultState,packetProofFaultState,packetProofBeforeFirst,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,plus2,plus3,plus7,w0,w1,w2,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;> simp [one,three,four]
+
+theorem stores_fault_execution (env : BPF.Environment) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (position : p.pc=11) (active : p.halted=false)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false) :
+    Execution (instructionStep env) p (packetFaultEvents (p.regs 2) index) (storesFaultState p index) := by
+  have outside : ∀ pc ∈ storesFaultPath index, pc≠1 ∧ pc≠2 := by
+    intro pc inside
+    unfold storesFaultPath at inside
+    split at inside <;> simp_all <;> omega
+  exact ordinary_execution env (storesFaultPath index) p
+    ⟨storesFaultState p index,packetFaultEvents (p.regs 2) index,some (packetStoreFault (p.regs 2) index)⟩
+    outside (stores_fault_evaluation env p index bounded position active prior bad)
+
+theorem stores_fault_component (env : BPF.Environment) (n : X86.State) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (nativePC : n.pc=35) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (memory : n.memory=p.memory)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false) :
+    X86Path.Execution 0 native n (packetFaultEvents (p.regs 2) index) (packetNativeFaultState n index) ∧
+    Execution (instructionStep env) p (packetFaultEvents (p.regs 2) index) (storesFaultState p index) ∧
+    (packetNativeFaultState n index).memory=(storesFaultState p index).memory := by
+  have evaluated := packet_all_native_store_faults n index bounded nativePC
+    (by simpa only [memory,pointer] using prior) (by simpa only [memory,pointer] using bad)
+  refine ⟨?_,stores_fault_execution env p index bounded proofPC active prior bad,?_⟩
+  · simpa only [pointer] using X86Path.evaluate_sound _ _ _ _ _ evaluated
+  · have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+    rcases choices with rfl | rfl | rfl | rfl
+    all_goals simp only [storesFaultState,packetProofFaultState,packetProofBeforeFirst,
+      packetNativeFaultState,packetNativeFirst,packetNativeSecond,packetNativeThird,
+      packetStoredPrefix,BPF.setReg,memory,pointer]
+
+
+def exitAfter (p : BPF.State) : BPF.State := {p with pc:=29,halted:=true}
+
+/-- Actual JA/EXIT trailer. It retains every register, memory and effect;
+the native body's corresponding boundary is PC60 before the JIT epilogue. -/
+theorem exit_evaluation (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=27) (active : p.halted=false) :
+    BPFPath.evaluate env proof [27,28] p=.ok ⟨exitAfter p,[],none⟩ := by
+  simp +decide [BPFPath.evaluate,decode27,decode28,BPF.execute,position,active,exitAfter,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+theorem exit_execution (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=27) (active : p.halted=false) :
+    Execution (instructionStep env) p [] (exitAfter p) := by
+  exact ordinary_execution env [27,28] p ⟨exitAfter p,[],none⟩
+    (by intro pc inside; simp at inside; omega) (exit_evaluation env p position active)
+
+
+def storesOutcome (p : BPF.State) (index : Nat) : BPF.State :=
+  if index=4 then storesAfter p else storesFaultState p index
+
+/-- Total packet block for every canonical byte-permission assignment.
+Selection is a certificate computation, not an inserted native/BPF check. -/
+theorem stores_any_permissions (env : BPF.Environment) (n : X86.State) (p : BPF.State) (index : Nat)
+    (nativePC : n.pc=35) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (memory : n.memory=p.memory)
+    (selected : index=packetFirstFailure p.memory (p.regs 2)) :
+    index≤4 ∧
+    X86Path.Execution 0 native n (packetOutcomeEvents (p.regs 2) index) (packetNativeOutcome n index) ∧
+    Execution (instructionStep env) p (packetOutcomeEvents (p.regs 2) index) (storesOutcome p index) ∧
+    (packetNativeOutcome n index).memory=(storesOutcome p index).memory := by
+  have spec := packet_first_failure_spec p.memory (p.regs 2)
+  change packetFirstFailure p.memory (p.regs 2)≤4 ∧ _ at spec
+  rw [← selected] at spec
+  by_cases success : index=4
+  · have permissions := spec.2.2 success
+    obtain ⟨nativeRun,proofRun,same,_,_,_⟩ := stores_component env n p nativePC proofPC active pointer memory
+      (permissions 0 (by omega)) (permissions 1 (by omega))
+      (permissions 2 (by omega)) (permissions 3 (by omega))
+    refine ⟨spec.1,?_,?_,?_⟩
+    · simpa only [packetOutcomeEvents,packetNativeOutcome,success,ite_true] using nativeRun
+    · simpa only [packetOutcomeEvents,storesOutcome,success,ite_true] using proofRun
+    · simpa only [packetNativeOutcome,storesOutcome,success,ite_true] using same
+  · have failed : index<4 := by omega
+    obtain ⟨prior,bad⟩ := spec.2.1 failed
+    obtain ⟨nativeRun,proofRun,same⟩ := stores_fault_component env n p index failed
+      nativePC proofPC active pointer memory prior bad
+    refine ⟨spec.1,?_,?_,?_⟩
+    · simpa only [packetOutcomeEvents,packetNativeOutcome,success,ite_false] using nativeRun
+    · simpa only [packetOutcomeEvents,storesOutcome,success,ite_false] using proofRun
+    · simpa only [packetNativeOutcome,storesOutcome,success,ite_false] using same
+
+/-- Every canonical relational native execution of the actual selected store
+path is paired with B29, including the precise first fault and partial memory.
+No successful permission, branch value, or native next-state premise is used. -/
+theorem stores_relational_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (index : Nat) (actual : Transition X86.State)
+    (nativePC : n.pc=35) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (memory : n.memory=p.memory)
+    (selected : index=packetFirstFailure p.memory (p.regs 2))
+    (run : CanonicalRelationalPath 0 native (packetNativeOutcomePath index) n actual) :
+    actual=⟨packetNativeOutcome n index,packetOutcomeEvents (p.regs 2) index,
+      if index=4 then none else some (packetStoreFault (p.regs 2) index)⟩ ∧
+    Execution (instructionStep env) p actual.events (storesOutcome p index) ∧
+    actual.state.memory=(storesOutcome p index).memory := by
+  obtain ⟨bounded,_,proofRun,same⟩ := stores_any_permissions env n p index nativePC proofPC active pointer memory selected
+  have nativeSelected : index=packetFirstFailure n.memory (n.gpr 1) := by simpa only [memory,pointer] using selected
+  obtain ⟨unique,_⟩ := defined_relational_result_unique run (packet_outcome_path_defined index bounded)
+    (packet_native_any_evaluation n index nativePC nativeSelected)
+  have endpoint : actual=⟨packetNativeOutcome n index,packetOutcomeEvents (p.regs 2) index,
+      if index=4 then none else some (packetStoreFault (p.regs 2) index)⟩ := by simpa only [pointer] using unique
+  exact ⟨endpoint,by simpa only [endpoint] using proofRun,by simpa only [endpoint] using same⟩
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
@@ -565,3 +736,13 @@ end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stores_evaluation
 #print axioms KProgTV.TrustedSimpleB29.stores_execution
 #print axioms KProgTV.TrustedSimpleB29.stores_component
+
+#print axioms KProgTV.TrustedSimpleB29.stores_fault_evaluation
+#print axioms KProgTV.TrustedSimpleB29.stores_fault_execution
+#print axioms KProgTV.TrustedSimpleB29.stores_fault_component
+
+#print axioms KProgTV.TrustedSimpleB29.exit_evaluation
+#print axioms KProgTV.TrustedSimpleB29.exit_execution
+
+#print axioms KProgTV.TrustedSimpleB29.stores_any_permissions
+#print axioms KProgTV.TrustedSimpleB29.stores_relational_component

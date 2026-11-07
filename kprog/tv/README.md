@@ -2189,3 +2189,11 @@ capture; `source-review.json` records the committed-byte comparison. The
 original capture-time attribution is preserved. B29's accepted bytes therefore
 also correspond to that published producer header, without reusing another
 session's JIT addresses or claiming completion of the semantic certificate.
+
+`trusted-simple-b29-store-outcomes.json` completes all four first store faults
+and the actual JA/EXIT trailer. It retains every preceding successful write,
+full partial memory, fault state and fault event. The total store-block
+correspondence covers every canonical permission assignment; its universal
+native relational theorem fixes state/effects/fault without a next-state
+premise. All35 accumulated audits pass. Entry/all-block composition, the full
+architectural reconstruction relation and whole-program TV remain open.
