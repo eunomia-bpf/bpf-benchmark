@@ -32,8 +32,22 @@ class TrustedApplicationBootstrap(unittest.TestCase):
                 if command[1]==str(Path(service.__file__).resolve()):
                     # This fixture supplies no proof and never models a kernel
                     # acceptance. It checks supervisor lifecycle only.
-                    command=[sys.executable,'-c',
-                        'import time; print('+repr(json.dumps(dict(ready=ready)))+',flush=True); time.sleep(60)']
+                    state=Path(command[command.index('--state')+1])
+                    code='''import fcntl, os, signal
+from pathlib import Path
+state=Path(STATE)
+state.mkdir(parents=True)
+with (state/'request.lock').open('w') as lock:
+    fcntl.flock(lock,fcntl.LOCK_EX)
+    print(READY,flush=True)
+    # Compression represents terminal archival work after kernel completion.
+    import gzip
+    payload=gzip.compress(bytes(range(256))*16384)
+    (state/'terminal.json').write_text('{"status":0}')
+    fcntl.flock(lock,fcntl.LOCK_UN)
+    signal.pause()
+'''.replace('STATE',repr(str(state))).replace('READY',repr(json.dumps(dict(ready=ready))))
+                    command=[sys.executable,'-c',code]
                 return real_popen(command,**kwargs)
             with patch.object(service.subprocess,'Popen',side_effect=worker):
                 if ready:
@@ -48,6 +62,8 @@ class TrustedApplicationBootstrap(unittest.TestCase):
                 self.assertIsNotNone(receipt['service_returncode'])
                 self.assertEqual(receipt.get('returncode'),status if ready else None)
                 self.assertIn('service/service.log',archive.getnames())
+                if ready:
+                    self.assertEqual(json.loads(archive.extractfile('service/requests/terminal.json').read()),dict(status=0))
             self.assertEqual(list(args.state.iterdir()),[])
     def test_nonzero_application_status_and_evidence_survive_teardown(self):
         self.exercise(True,7)

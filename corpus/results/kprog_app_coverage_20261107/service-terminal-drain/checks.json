@@ -1,0 +1,20 @@
+{
+  "original_terminal_row_present": false,
+  "drained_terminal_requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 6,
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01",
+      "started": "2026-11-07T18:22:43.716663+00:00",
+      "prog_id": 11,
+      "status": 0,
+      "artifact_archive": "/run/c-cmp-candidate/session-az6zi2_n/requests/1.success.tar.gz",
+      "finished": "2026-11-07T18:22:48.917255+00:00"
+    }
+  ],
+  "actual_result": 16,
+  "actual_retval": 2,
+  "lifecycle_checks": 12,
+  "raw_sha256": "312bb0ce9f6dc85d07864022311a654dc5b66a4952478ba8e79ce1f4167b51dd",
+  "scope": "Terminal request durability; actual native replay uses separate private CMP candidate header, not current canonical admission coverage"
+}

@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import ctypes as c
 import errno
+import fcntl
 import importlib.util
 import json
 import os
@@ -194,11 +195,13 @@ def serve(args):
     if stat.st_uid != os.geteuid() or stat.st_mode & 0o077:
         raise ValueError('service state must be private to its owner')
     worker = adapter(args.arch)
+    request_lock = os.open(root/'request.lock',os.O_CREAT | os.O_RDWR | os.O_CLOEXEC,0o600)
     fd = os.open(args.endpoint,os.O_RDWR | os.O_CLOEXEC)
     try:
         print(json.dumps(dict(ready=True,arch=args.arch,endpoint=str(args.endpoint))),flush=True)
         while True:
             request, (native,entry_bytes,meta_bytes) = next_request(fd)
+            fcntl.flock(request_lock,fcntl.LOCK_EX)
             record = dict(request_id=request.request_id,source_prog_id=request.source_prog_id,
                 native_sha256=hashlib.sha256(native).hexdigest(),started=datetime.now(timezone.utc).isoformat())
             with tempfile.TemporaryDirectory(prefix='request-',dir=root) as temporary:
@@ -258,8 +261,10 @@ def serve(args):
                 with (root/'requests.jsonl').open('a') as log:
                     log.write(json.dumps(record)+'\n')
                 print(json.dumps(record),flush=True)
+            fcntl.flock(request_lock,fcntl.LOCK_UN)
     finally:
         os.close(fd)
+        os.close(request_lock)
 
 
 def run_application(args):
@@ -313,7 +318,16 @@ def run_application(args):
             finally:
                 if service is not None:
                     if service.poll() is None:
-                        os.killpg(service.pid,signal.SIGTERM)
+                        if 'service' in summary:
+                            # COMPLETE wakes the native client before the worker
+                            # has archived/logged its terminal request. Let that
+                            # request finish before terminating the idle service.
+                            with (private/'requests/request.lock').open('rb') as request_lock:
+                                fcntl.flock(request_lock,fcntl.LOCK_EX)
+                                if service.poll() is None:
+                                    os.killpg(service.pid,signal.SIGTERM)
+                        else:
+                            os.killpg(service.pid,signal.SIGTERM)
                     summary['service_returncode']=service.wait()
                 if reader is not None:
                     reader.join()
