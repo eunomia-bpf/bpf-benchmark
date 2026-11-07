@@ -1,0 +1,1582 @@
+{
+  "paper": {
+    "loader": {
+      "size": 1808328,
+      "sha256": "c6d07f902faaa3c42b349e4fcdc64b7c5e9eee5ef782f8975f2d8d22d4615a97"
+    },
+    "shim": {
+      "size": 461384,
+      "sha256": "d69b45c8abbec877d7958e79b30634675e1e5d597591c511cc90ac48ab7396b0"
+    },
+    "native-link": {
+      "size": 2432824,
+      "sha256": "0dc2098e25778f108e8c4f06c3359af46435e081f17b9323488774e7fb4c8408"
+    },
+    "cilium-agent": {
+      "size": 184932848,
+      "sha256": "969142afac43fad4ea5dbb88b3a7a3224484d1a29e5465a998b0182e4da28c4c"
+    },
+    "kernel-offsets": {
+      "size": 933,
+      "sha256": "8fe43977c5534feacaa980bc6b317a2291c3961d2000b3e8839afc2ecc0dc449"
+    },
+    "native-cilium/bpf_alignchecker.native.o": {
+      "size": 112016,
+      "sha256": "f82cb30d101f7f489800cbc0780ca313ca2697283f3483cf40394e3b67f68489"
+    },
+    "native-cilium/bpf_wireguard.native.o": {
+      "size": 424384,
+      "sha256": "425ef9740b2e6b6ee61d0fe6f937654f81a8eb9338636b1a85846294603650ba"
+    },
+    "native-cilium/manifest.json": {
+      "size": 17437,
+      "sha256": "36d61d0357e45c499430dba507ef079460c9f7f4fbe039608cc92359b6420d69"
+    },
+    "native-cilium/bpf_host.native.o": {
+      "size": 634688,
+      "sha256": "3767bbac8a6170aaa7cd61dbd6d046e32a982485abb2ec4a002fd63f2bc93015"
+    },
+    "native-cilium/bpf_xdp.native.o": {
+      "size": 288240,
+      "sha256": "8ee21f61bbc7c9eaa1cce43e94d4608707d04e28978064a8ebdbe15653718153"
+    },
+    "native-cilium/bpf_lxc.native.o": {
+      "size": 721728,
+      "sha256": "6cf578f21604862ffdd7e90ea97fe6071acbb62266d891ba53db710a0c049856"
+    },
+    "native-cilium/bpf_sock.native.o": {
+      "size": 135896,
+      "sha256": "553a38f3bb443d634c1502ae85e38600128df508b340fd5659e615ce36d145a5"
+    },
+    "native-cilium/bpf_overlay.native.o": {
+      "size": 448440,
+      "sha256": "7c518cea97404a5918e2105e88b6ad797bbfcadc28ec611767778b847777791b"
+    },
+    "kinsn/.bpf_x86_shd.ko.cmd": {
+      "size": 295,
+      "sha256": "3663205c877e76a0d42b6ac96e9325f36e47fb0f973d06a9fb97044741f99cc3"
+    },
+    "kinsn/.bpf_x86_native_lab.mod.o.cmd": {
+      "size": 105954,
+      "sha256": "c3d7804d7c8358bbfdae3007ded2cdcef75f50ba04608de2ec80fc696e16e912"
+    },
+    "kinsn/.bpf_x86_imul.ko.cmd": {
+      "size": 299,
+      "sha256": "a598ef34bd74443f8a8f35b45641f97c50a562fecd4afea3a6d6188ebbe40c31"
+    },
+    "kinsn/.bpf_x86_bmi1.mod.cmd": {
+      "size": 116,
+      "sha256": "e4bcdeceedebcbd8d0ef4bfb1ae95a2e5369e56cc8a801af69aeab625788142f"
+    },
+    "kinsn/bpf_x86_not.mod.o": {
+      "size": 154432,
+      "sha256": "6eb3aa1fbedb6983e3984f42d39f6a33ea6a9843a347f042a54cfa23d3ca323d"
+    },
+    "kinsn/.gitignore": {
+      "size": 39,
+      "sha256": "d84c55de4ab10a0b54fe0976dfe6f87046a21aa281aa146387d5091b84427c0d"
+    },
+    "kinsn/bpf_x86_shd.mod": {
+      "size": 16,
+      "sha256": "50a144a5fd0ed5131fab2294133c5fcc453edee28d1969441ebb80aa6dc5f462"
+    },
+    "kinsn/.bpf_x86_byteorder.mod.o.cmd": {
+      "size": 105939,
+      "sha256": "e43a233573af52a8fdc1f65586e2e0c6017d70c4b1f7f1ce2324cd53d578924d"
+    },
+    "kinsn/bpf_x86_bmi1.mod.c": {
+      "size": 720,
+      "sha256": "a51def29429cd2ed6fd87eaccd84b32e01026bfd15f16c422e3321ba7720e270"
+    },
+    "kinsn/bpf_x86_stack.mod": {
+      "size": 18,
+      "sha256": "fc2f777217a447f9b10540e2f1149bd6964dae5a2aa4c418bee208de12e744bf"
+    },
+    "kinsn/.bpf_x86_rotate.mod.cmd": {
+      "size": 122,
+      "sha256": "9c61908911a13dcc2990ff54bc72868020e7a269461fd7498e27b70647939a49"
+    },
+    "kinsn/bpf_x86_imul.ko": {
+      "size": 609216,
+      "sha256": "68fbcb75e09412ccb86d34305991cdf797f32ee23a69b23297a78fd50a06bc52"
+    },
+    "kinsn/modules.order": {
+      "size": 241,
+      "sha256": "19432165aa2ae40a6e78cd502ef6bf4109a816fa17943e1005b9dfc9fcc3a8a0"
+    },
+    "kinsn/.bpf_x86_popcnt.ko.cmd": {
+      "size": 307,
+      "sha256": "a800931758b40f754b089f74d5978a3501e80f3f15a76e3cab594f0149818387"
+    },
+    "kinsn/.bpf_x86_alu.o.cmd": {
+      "size": 153471,
+      "sha256": "03edbaf3940eb550af7154fe5fd32560baeb0f890d5e16dec5ca8c1fae4676e3"
+    },
+    "kinsn/bpf_x86_imul.o": {
+      "size": 443472,
+      "sha256": "ab661902ba18a6acf61b937ff5c322239a0de3b71af28e553ddbdd4f15077330"
+    },
+    "kinsn/.bpf_x86_shd.mod.cmd": {
+      "size": 113,
+      "sha256": "24b7f8e48ab32c19f870fc3f5a0485fe6d20d886f046b641efca1f7e0b99ff17"
+    },
+    "kinsn/bpf_x86_rotate.o": {
+      "size": 511376,
+      "sha256": "fed3dc4fde1c999fcc7a95828ab386c077915d234bacf88bf5f07964ae1a257b"
+    },
+    "kinsn/bpf_x86_imul.mod.c": {
+      "size": 607,
+      "sha256": "33a0e4fb21bfb3394808d1e8833bcc6043fffc685dd61d4d9101e167ee87304a"
+    },
+    "kinsn/.bpf_x86_rotate.mod.o.cmd": {
+      "size": 105894,
+      "sha256": "0f028cafb51b325a31cfd12ab9c7260b814feb29c58d4a586bb1a74d4cdd4e78"
+    },
+    "kinsn/bpf_x86_bmi1.ko": {
+      "size": 650672,
+      "sha256": "2e20f8b7383af87522af25b6e5d9fef1215cc4e05c3eea855e7fdd418fa6b05d"
+    },
+    "kinsn/bpf_x86_native_lab.mod": {
+      "size": 23,
+      "sha256": "f11399e071f5409f48390786d933723fbc054686716df35fc30b5d99b7a566dc"
+    },
+    "kinsn/bpf_x86_prefetch.mod.c": {
+      "size": 713,
+      "sha256": "00e60d9c66ccea33fcdf9b4b3b08e93f4b58fdaf2749d7da156732e7800462f9"
+    },
+    "kinsn/.bpf_x86_movbe.ko.cmd": {
+      "size": 303,
+      "sha256": "839e6d8be4d6523ba940b4bca41102e6f46651ddb7d0517b643a9da0ff35a7fe"
+    },
+    "kinsn/bpf_x86_prefetch.mod.o": {
+      "size": 154512,
+      "sha256": "2143b0765c29e12ab95a849902d4f836347c54d46f7a237201ab3fb9f62eb430"
+    },
+    "kinsn/.bpf_x86_shd.o.cmd": {
+      "size": 153471,
+      "sha256": "11ecc1e0f8e28307897587683fc1457504247bfce121ce6fcd1f3e020f45539b"
+    },
+    "kinsn/bpf_x86_rotate.mod.c": {
+      "size": 713,
+      "sha256": "15de90e18be1415a918e858cdb19a3fb2fe5e8a426a626c178bacc21f2f5de85"
+    },
+    "kinsn/bpf_x86_stack.o": {
+      "size": 448128,
+      "sha256": "5cd5eb5e9c600b344e2ddccb79cb94760dd6a2364c23b3e418105363fc52742b"
+    },
+    "kinsn/.module-common.o": {
+      "size": 13912,
+      "sha256": "01829fe0fc33f91c8da4f357e1e0d688a3f2031f3dbc3b5eb7dbf65c79e55149"
+    },
+    "kinsn/.bpf_x86_rotate.o.cmd": {
+      "size": 153516,
+      "sha256": "02bd25ca7e9783ae21d37919e0f9ca47851066ccd04c9b7a7d5b3933c4ec40cd"
+    },
+    "kinsn/.bpf_x86_lea.ko.cmd": {
+      "size": 295,
+      "sha256": "d5d02987e3b24b61f24002191bc4ab9bca3d1569e5e1bd43f615b370c1fd7b13"
+    },
+    "kinsn/bpf_x86_not.mod": {
+      "size": 16,
+      "sha256": "b15ebcc37be3f1f58de246735f5edbd37528110895108781689bc5bc0d9e597b"
+    },
+    "kinsn/.bpf_x86_alu.mod.cmd": {
+      "size": 113,
+      "sha256": "49ac1310f1efb7336029f494bce70e9e727abcc04fa9e9d200f84b7e64b90b8a"
+    },
+    "kinsn/bpf_x86_prefetch.ko": {
+      "size": 594144,
+      "sha256": "5a6d40194c49e8c4cf553e8698c507a2fbbd5dada8f39b49fb38c893cf1d8427"
+    },
+    "kinsn/.bpf_x86_cmov.ko.cmd": {
+      "size": 299,
+      "sha256": "781d6fda654dc9b493caedceb885d72aab4e3353b20a90dbf579e298142b4cb3"
+    },
+    "kinsn/.bpf_x86_stack.mod.cmd": {
+      "size": 119,
+      "sha256": "07e009aee65ba15d2e5ce145b7814f1a6f96d76c95f34215d67f57fafb93603f"
+    },
+    "kinsn/bpf_x86_movbe.mod.c": {
+      "size": 747,
+      "sha256": "4839c6315e41c76d93cffc9d1af322ef3a0f428715d9ad4f5d64cc61a2b373e4"
+    },
+    "kinsn/bpf_x86_lea.o": {
+      "size": 496104,
+      "sha256": "552b566682fe2789f0864d4c0580367d67a156c594c6490229a30831d31facd7"
+    },
+    "kinsn/bpf_x86_rotate.ko": {
+      "size": 676216,
+      "sha256": "977fc77ae459e27620067656dd121b30883398bb07b8e62d96d083faf7018d5e"
+    },
+    "kinsn/bpf_x86_alu.o": {
+      "size": 958120,
+      "sha256": "c6a6fcdebc6a31ef65ac1da795b4fb5097ce4d1724fbabced66ceb19be82a289"
+    },
+    "kinsn/Makefile": {
+      "size": 645,
+      "sha256": "b1c23beb4dbe4844a37bb016068a79ace4c502a7aef18331398a6d6c4d823749"
+    },
+    "kinsn/bpf_x86_alu.mod.c": {
+      "size": 713,
+      "sha256": "36fea90e2b20287c8132a56ae7f7091d50adf59d5487f6abcc493bd5bce82707"
+    },
+    "kinsn/..module-common.o.cmd": {
+      "size": 108069,
+      "sha256": "ba890f3472623ae5fe995019a8a993443e2b20a72dc2ccd89cc9129d2cfc983e"
+    },
+    "kinsn/.bpf_x86_byteorder.ko.cmd": {
+      "size": 319,
+      "sha256": "83a228520584581abb39e3c6e6443468c333a80cc12d3f882243e29df9342228"
+    },
+    "kinsn/.bpf_x86_not.ko.cmd": {
+      "size": 295,
+      "sha256": "c206b16a6a61d5976b68964810a8e9cd663a69992f2e59ff510bbfcacdfac385"
+    },
+    "kinsn/bpf_x86_byteorder.mod.c": {
+      "size": 713,
+      "sha256": "0550c1ac67c73cb42ee724aa3bc9425d07907102eb046ad89552e3690ec27087"
+    },
+    "kinsn/bpf_x86_popcnt.o": {
+      "size": 457688,
+      "sha256": "d15fa2eedbb88beef4299c015cef42c605ed31f7ad279952b21a67ae09a68d3f"
+    },
+    "kinsn/bpf_x86_shd.ko": {
+      "size": 640072,
+      "sha256": "6e4e3bac94e6c2ceff0f255740d3ecc5e1a1bc351ba584ae2e1b5cae71c7b567"
+    },
+    "kinsn/bpf_x86_native_lab.mod.c": {
+      "size": 1625,
+      "sha256": "0d47b47d56e4b6adddb38b7a59a501227fc1e5f0b712188e8297fffd5d07b09d"
+    },
+    "kinsn/bpf_x86_alu.ko": {
+      "size": 1112728,
+      "sha256": "e711c5fe09856402da389c1cec6c1dbdf7ab79b67cb380f47914a525e6bd489b"
+    },
+    "kinsn/.bpf_x86_imul.mod.o.cmd": {
+      "size": 105864,
+      "sha256": "ce24b8a5dab1f9ecc9c88a34239a511f1966409976c1f5e3fcbf204c19d53895"
+    },
+    "kinsn/.bpf_x86_bmi1.ko.cmd": {
+      "size": 299,
+      "sha256": "e18840874c88b94d07980bdc7f0511cf6eff0ce77e579c0c22d437c54375ed71"
+    },
+    "kinsn/.bpf_x86_shd.mod.o.cmd": {
+      "size": 105849,
+      "sha256": "fb7a09ba8c5db857cceac21be635a11d12acdfa61e905803c0a26c0c5ee48d2b"
+    },
+    "kinsn/.bpf_x86_cmov.mod.cmd": {
+      "size": 116,
+      "sha256": "2601e5f633f0b4ee68112e6ace350be6321c96fdefc605e7020283183730a063"
+    },
+    "kinsn/.bpf_x86_popcnt.mod.o.cmd": {
+      "size": 105894,
+      "sha256": "c9dd60868edc8b40438f00ab19eec910fd6e5749431f147781fb0a583ab0d337"
+    },
+    "kinsn/bpf_x86_bmi1.mod": {
+      "size": 17,
+      "sha256": "fd57eaeb108a3860abdf032fd0d991edb913ca2b576a8797100ecd61f596edd8"
+    },
+    "kinsn/bpf_x86_mov.o": {
+      "size": 839800,
+      "sha256": "f875a710f1360854d6be9b85347c9dbb12d8f0c578f31af527486c9063ebe15b"
+    },
+    "kinsn/.bpf_x86_mov.o.cmd": {
+      "size": 153471,
+      "sha256": "915619314221eb7960822cfadf663c9865306f249f913099a2506af573ac8232"
+    },
+    "kinsn/bpf_x86_not.mod.c": {
+      "size": 713,
+      "sha256": "89fa2ac5a8e94c9d53c35efaef23cd4ddf352555b2cf0a12f8407ff0a85780b9"
+    },
+    "kinsn/bpf_x86_prefetch.o": {
+      "size": 428144,
+      "sha256": "1c102b3a949e40136adf4796ac46128d12ccaed61b00dc3289e20d9bd554693e"
+    },
+    "kinsn/bpf_x86_mov.mod.c": {
+      "size": 713,
+      "sha256": "0d78432d932223c88da329490b6223eab81749e9f5b2549d32ea0ce5792f2231"
+    },
+    "kinsn/.bpf_x86_bmi1.mod.o.cmd": {
+      "size": 105864,
+      "sha256": "55d2ee539aea45bcbea2fdf5aa999c4d06f214a507f9ab179d7307236e117b6a"
+    },
+    "kinsn/bpf_x86_mov.mod": {
+      "size": 16,
+      "sha256": "12263b7b61e008e71e3815064591f48b6272962351c673c2064265c80d388e88"
+    },
+    "kinsn/.bpf_x86_prefetch.mod.cmd": {
+      "size": 128,
+      "sha256": "e625d6e1dd8668ac034adcff525760a4d9c074d4ef8148dd9fca7f1e217646cc"
+    },
+    "kinsn/.bpf_x86_movbe.o.cmd": {
+      "size": 153501,
+      "sha256": "6ac81c562551e3602e977ab681b2bed98cb3c3d1821d3341cacde433db3aca57"
+    },
+    "kinsn/.bpf_x86_lea.o.cmd": {
+      "size": 153471,
+      "sha256": "d15d38328e74e3e709fd956749f421b64c28ce1ac3623ad18b3719c7bd277ec6"
+    },
+    "kinsn/bpf_x86_mov.ko": {
+      "size": 1001848,
+      "sha256": "c766a531f6801f2253080e1b0d7521d8e4bf6c88af62d99e4499c9cde7521278"
+    },
+    "kinsn/bpf_x86_popcnt.ko": {
+      "size": 623608,
+      "sha256": "77d4adbf213c061b0138dba6c4d146988c696dce72e99d3f126133bdac68a1a0"
+    },
+    "kinsn/bpf_x86_shd.o": {
+      "size": 475312,
+      "sha256": "ed60ce3f8d0b0a6f99a518aba463b4e4b26a82956d30b4b9b794e2530d641723"
+    },
+    "kinsn/.modules.order.cmd": {
+      "size": 410,
+      "sha256": "a83a4b32bb75a789c3ab640c1c6b953c18782a596db5160ec4f8a3560d918d21"
+    },
+    "kinsn/.bpf_x86_movbe.mod.cmd": {
+      "size": 119,
+      "sha256": "77a779dbce2fadea61c6483dabd8f36a2dcf3ee8102a4509396e6a64fd961b1b"
+    },
+    "kinsn/.Module.symvers.cmd": {
+      "size": 331,
+      "sha256": "fb9cf984b398f2050b3f191d8dea468f288285a876a03fc0d7862d793186bea2"
+    },
+    "kinsn/bpf_x86_cmov.mod": {
+      "size": 17,
+      "sha256": "ee5e535a0160424c86ef26466b83952e5a2215018c18b0f30c858a224c17f800"
+    },
+    "kinsn/bpf_x86_imul.mod": {
+      "size": 17,
+      "sha256": "a0a65b6261fc6d8b72e87015673b74137abcde2148d9ef67e1309f9632de19fd"
+    },
+    "kinsn/.bpf_x86_native_lab.ko.cmd": {
+      "size": 323,
+      "sha256": "63e9534da1e1e73d0111bf88993f1e509422dd34d88d82d9c37b2bf54b5e77f4"
+    },
+    "kinsn/.bpf_x86_mov.ko.cmd": {
+      "size": 295,
+      "sha256": "f3c93dae4937c73fd3c6766b5f570ce0fbfc156c1044131a172a27b03c436a6b"
+    },
+    "kinsn/bpf_x86_lea.mod": {
+      "size": 16,
+      "sha256": "a7f4b9221a22ffec57b31ae804d8e78e92515fa1553e73727674b1e73b05a8ed"
+    },
+    "kinsn/.bpf_x86_byteorder.mod.cmd": {
+      "size": 131,
+      "sha256": "56be5e814bd0568988ff49d872b4f38e44d588be53a7e488eea82f13628402d6"
+    },
+    "kinsn/.bpf_x86_popcnt.mod.cmd": {
+      "size": 122,
+      "sha256": "9726d68c4168a792e9bce428fa0690f081a6fa84059e47076d59ba4fd0186ab3"
+    },
+    "kinsn/.bpf_x86_stack.ko.cmd": {
+      "size": 303,
+      "sha256": "4f7a52368831eb819ff0e6edcfe912f94951b76733611bdec347ba6b989e06f2"
+    },
+    "kinsn/bpf_x86_stack.mod.o": {
+      "size": 154432,
+      "sha256": "24828e1d1bb3cb8ad54236a67a206e7b119afe606df11044e2b3b79d26db4519"
+    },
+    "kinsn/bpf_x86_cmov.mod.c": {
+      "size": 713,
+      "sha256": "e95df4dd89fe1fb42df5cc739e410f3a9096c643823b1df2dba30dc84558745f"
+    },
+    "kinsn/.bpf_x86_byteorder.o.cmd": {
+      "size": 153561,
+      "sha256": "1a0363b8724ef9c012c2d7e706f69dad30d9b097485be865eb1094e94050953f"
+    },
+    "kinsn/.bpf_x86_native_lab.mod.cmd": {
+      "size": 134,
+      "sha256": "560498d4379c0f15a67deec22cf7509eb75d67caf9a4d6a1cdfe0a15a01debb9"
+    },
+    "kinsn/bpf_x86_native_lab.o": {
+      "size": 509872,
+      "sha256": "6c0396c6cd0d74810574a21a5b5510d4e9c8469424b94e8ac18878cbd64c4727"
+    },
+    "kinsn/bpf_x86_popcnt.mod.o": {
+      "size": 154440,
+      "sha256": "c89bc2502de62e9df9d784c14c4be1b77ddc884ac31548466261891f742f1dfd"
+    },
+    "kinsn/bpf_x86_byteorder.mod": {
+      "size": 22,
+      "sha256": "9ed6d19e4e9144893e88046d7a759899c20ec40d4343ae0194cb970066a86e15"
+    },
+    "kinsn/.bpf_x86_lea.mod.cmd": {
+      "size": 113,
+      "sha256": "e2dabc182b1f2c67e3e2f90cc6ea36224f21901b4400976066dad3688a2a077f"
+    },
+    "kinsn/.bpf_x86_not.mod.o.cmd": {
+      "size": 105849,
+      "sha256": "2cee03cf4761719c61b4fca21d68faf8c3b246b45b1a6933f98ce1fe54007313"
+    },
+    "kinsn/bpf_x86_bmi1.o": {
+      "size": 485504,
+      "sha256": "3d8fc910e5521838a1e6a5ea21b7bbb823125bcbab8da0d9a02c0dabb04dbc05"
+    },
+    "kinsn/.bpf_x86_movbe.mod.o.cmd": {
+      "size": 105879,
+      "sha256": "2d541a7cfe56e81d429fb896293dfab513448649cbcdd90db23f84054ada8a30"
+    },
+    "kinsn/bpf_x86_shd.mod.o": {
+      "size": 154432,
+      "sha256": "4f516594005fa1754527b36980b367e77b8860a9056aa594b1a155bbffc9e91d"
+    },
+    "kinsn/.bpf_x86_native_lab.o.cmd": {
+      "size": 153708,
+      "sha256": "dba6708c9e832004056b82f4a316548293dbdc04d1395eaeed3d070cee008c63"
+    },
+    "kinsn/bpf_x86_imul.mod.o": {
+      "size": 154240,
+      "sha256": "30ddf9efafc2f3d52db7a0ebc2430ea9b1b3a7e203650409b0052834ed7ede16"
+    },
+    "kinsn/.bpf_x86_imul.o.cmd": {
+      "size": 153486,
+      "sha256": "b63a497db8cd27461b6829e370478423b50e938236ee2c78c5697def21d7544c"
+    },
+    "kinsn/bpf_x86_lea.mod.o": {
+      "size": 154496,
+      "sha256": "5611695fc0f6ef1125bfb52f2e3655b6efad83fd926a5b2224b7a25c004256e1"
+    },
+    "kinsn/bpf_x86_bmi1.mod.o": {
+      "size": 154432,
+      "sha256": "de460ea18595e4746078e680da2dc5a9b9510c43b8eff413491b268beff5e9bd"
+    },
+    "kinsn/.bpf_x86_stack.o.cmd": {
+      "size": 153501,
+      "sha256": "9e77ba4d8368b0ed8cf938a6254f4155d062b102e2d1c883242f808fd642bf83"
+    },
+    "kinsn/.bpf_x86_not.mod.cmd": {
+      "size": 113,
+      "sha256": "e996811a86a724a2a19e6096681e8356373cbdfae32230087ac5d37128d44807"
+    },
+    "kinsn/bpf_x86_cmov.o": {
+      "size": 899664,
+      "sha256": "356beb91c7e7f387c720676bdb44f3af13bc3b5c3b0f6993e29af258944ed624"
+    },
+    "kinsn/bpf_x86_native_lab.ko": {
+      "size": 676048,
+      "sha256": "5e03f29cf1254f63ef9ebbd1d13b68bb37e1d99c92e3e57024c6c64644193007"
+    },
+    "kinsn/.bpf_x86_cmov.mod.o.cmd": {
+      "size": 105864,
+      "sha256": "55dbae5a49e02a1422c38425c1d1c2b884fd5e75f99ff95ae8ce4337c2369336"
+    },
+    "kinsn/bpf_x86_movbe.mod": {
+      "size": 18,
+      "sha256": "fd65174c2eb5d7b345d6758bd374590c786e7e316cb575c4cc2377a370708475"
+    },
+    "kinsn/bpf_x86_not.ko": {
+      "size": 640960,
+      "sha256": "c6f2ba65d9aa270a06f116e7ebb11641bcb23e9a5e3a98e0714f3f99c194425e"
+    },
+    "kinsn/.bpf_x86_prefetch.ko.cmd": {
+      "size": 315,
+      "sha256": "de19421b066b6bf37245d90c276610330f0b3a5780a11ec8dbc3f7c66f9e45bd"
+    },
+    "kinsn/bpf_x86_byteorder.mod.o": {
+      "size": 154512,
+      "sha256": "430d5a986daf9bda0b98258bf568b36fea10551047180c9972e8ad74b2bd9185"
+    },
+    "kinsn/bpf_x86_cmov.mod.o": {
+      "size": 154432,
+      "sha256": "5afc97005b1f2201bd34180a072f05238d291f92aa6c7689bdf9a56e028f0265"
+    },
+    "kinsn/bpf_x86_lea.mod.c": {
+      "size": 749,
+      "sha256": "0fae93c7d96d54a296f5fc88f00c54f9f65dfcc3767e210704bc88b17eaf700c"
+    },
+    "kinsn/bpf_x86_byteorder.o": {
+      "size": 466408,
+      "sha256": "51b3260376abca31ebfe60b44700304445b5dfeb8598905963f7f02d76c23711"
+    },
+    "kinsn/Module.symvers": {
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "kinsn/bpf_x86_rotate.mod": {
+      "size": 19,
+      "sha256": "f51174bc568fee1eb12a0a71639b47e64677bd1d0bd64921bd87be2969aa4508"
+    },
+    "kinsn/.bpf_x86_rotate.ko.cmd": {
+      "size": 307,
+      "sha256": "57615b66ac3afd6196195b24fb3539fd7487bb64a0b5cc877f78ea9f4719cbbf"
+    },
+    "kinsn/bpf_x86_stack.ko": {
+      "size": 613656,
+      "sha256": "f9c58f2589071361a05ae940514f91254f95546f61d7c1da9e02839f4e52858c"
+    },
+    "kinsn/bpf_x86_movbe.ko": {
+      "size": 641264,
+      "sha256": "8808a938fcb365ad166e18b82fa5e37ea0feacc27daa4a302ad1534b6c9d5751"
+    },
+    "kinsn/.bpf_x86_prefetch.o.cmd": {
+      "size": 153546,
+      "sha256": "9e051365842f6b7b5e6c430112a04eaeb656f1b7c2028db16d1e4caef4495a6c"
+    },
+    "kinsn/bpf_x86_stack.mod.c": {
+      "size": 713,
+      "sha256": "8de9b45cfc395a51688a90775136af1e0a6d071c020f4a33971725b14ab265ab"
+    },
+    "kinsn/bpf_x86_popcnt.mod": {
+      "size": 19,
+      "sha256": "a6adb99a97ba78d7986bc01159347d1ae03da3b4d5cb487f13f42b2b933053cd"
+    },
+    "kinsn/bpf_x86_native_lab.mod.o": {
+      "size": 156184,
+      "sha256": "8c0deca782e7d44b606f5f35b53cd086f01837d1eb30a01719fa38a49c929d5c"
+    },
+    "kinsn/.bpf_x86_cmov.o.cmd": {
+      "size": 153486,
+      "sha256": "1257453b6650c047c728e4e37cd18f01043d2778c4706c6a3853ffd2d3d8b912"
+    },
+    "kinsn/.bpf_x86_not.o.cmd": {
+      "size": 153471,
+      "sha256": "8255589f8d0a41e7956e06410ba4e60d8a2a4986f69c3d5c5c6e8fd72b1b4627"
+    },
+    "kinsn/bpf_x86_rotate.mod.o": {
+      "size": 154440,
+      "sha256": "7ca4c28fc46821680d1711ce5361ebfd476272edf7a256d97a48a8a098a1a08d"
+    },
+    "kinsn/bpf_x86_prefetch.mod": {
+      "size": 21,
+      "sha256": "39501435ad362ba005c83edb9f6226be6c6282ad5b9bc3063f7a13577dc85ef3"
+    },
+    "kinsn/bpf_x86_not.o": {
+      "size": 476128,
+      "sha256": "da747c32d232a08ed9cb76f1d8017171f6e2febc496a6f0033ebe04e2cb05f90"
+    },
+    "kinsn/.bpf_x86_mov.mod.o.cmd": {
+      "size": 105849,
+      "sha256": "f37bb8c00cfa38eac725d70ca8a2fa1feafb457b6a6461911684db9f432e8f39"
+    },
+    "kinsn/bpf_x86_shd.mod.c": {
+      "size": 713,
+      "sha256": "351bd74176ea6a736773b218206d7c6e0c540a92be115a4628d8ae79090a8304"
+    },
+    "kinsn/bpf_x86_popcnt.mod.c": {
+      "size": 720,
+      "sha256": "076820a857a0c24b88e4fc034b5cebb4538f37e228cce5c508daf8e25542d60f"
+    },
+    "kinsn/.bpf_x86_alu.ko.cmd": {
+      "size": 295,
+      "sha256": "94c353047573efc67c29ee68556418157059d2845f177c07acc24a94b23c9b5b"
+    },
+    "kinsn/bpf_x86_movbe.o": {
+      "size": 476072,
+      "sha256": "4a5b694c7da2c1020dd5c9daa7ebf8741184054d89943dda9e061b881ca1d4af"
+    },
+    "kinsn/bpf_x86_movbe.mod.o": {
+      "size": 154496,
+      "sha256": "8e29e7a78376252fd395ffe4c69403b6ce5e6d2ea85d78e5b631cd3047e1b79e"
+    },
+    "kinsn/.bpf_x86_mov.mod.cmd": {
+      "size": 113,
+      "sha256": "fc4fff9a04f7f41191e828c8601f57276ca0df0b5006132667b81722d0e6995b"
+    },
+    "kinsn/.bpf_x86_lea.mod.o.cmd": {
+      "size": 105849,
+      "sha256": "0fe6f9051d146f04d6b363516e38d730edc8c8310f65572afd6fe5bfadc33a94"
+    },
+    "kinsn/bpf_x86_byteorder.ko": {
+      "size": 631568,
+      "sha256": "ab600b5d5cb0427bae945f60554f2f4db4007c76ccea660a866062c0363e9be9"
+    },
+    "kinsn/bpf_x86_alu.mod": {
+      "size": 16,
+      "sha256": "2a63acdc149889e6e9472fcfdfffbd4cbe25d5d7304a069510492e2eac94d702"
+    },
+    "kinsn/bpf_x86_cmov.ko": {
+      "size": 1057784,
+      "sha256": "169e83c6f00e4c90921546acafde57cda4b94f63b39c996fe34dff898f384520"
+    },
+    "kinsn/.bpf_x86_alu.mod.o.cmd": {
+      "size": 105849,
+      "sha256": "b13e7bc790b948e2484edf562b43a080e0d06b1d306ef14f9bff8e07b1894eab"
+    },
+    "kinsn/.bpf_x86_prefetch.mod.o.cmd": {
+      "size": 105924,
+      "sha256": "be688b99cb9322038dd15f774d09a20ff7913f829c2fed725dcb9eaafef905c1"
+    },
+    "kinsn/bpf_x86_alu.mod.o": {
+      "size": 154432,
+      "sha256": "457c9e5170b93129464769573463b00726ed9389a673fe85e98b86813f4ea09c"
+    },
+    "kinsn/.bpf_x86_bmi1.o.cmd": {
+      "size": 153486,
+      "sha256": "ee096a7d43d764c31e4ca071984605f781235075f034491aa30472d368d440bd"
+    },
+    "kinsn/bpf_x86_lea.ko": {
+      "size": 661712,
+      "sha256": "fca6759fbd2c04373d972b81bdd819080843813b098f9c0f8fb926a34cb2db19"
+    },
+    "kinsn/.bpf_x86_popcnt.o.cmd": {
+      "size": 153516,
+      "sha256": "7612dcd439b4bf14de6e229d85edf358ef1ad9d5b79b3a00e6b0bfdfc7459953"
+    },
+    "kinsn/.bpf_x86_imul.mod.cmd": {
+      "size": 116,
+      "sha256": "be07a7285ef31038667aa9d920c3551a315d031d643674d1dff6f16df684dd15"
+    },
+    "kinsn/bpf_x86_mov.mod.o": {
+      "size": 154432,
+      "sha256": "b3e52a4aed5bc62a390ba8b0b09440ce077c912fad14bfe49073e60d748773f6"
+    },
+    "kinsn/.bpf_x86_stack.mod.o.cmd": {
+      "size": 105879,
+      "sha256": "06a0aba683847fb85466ee8154228f605a46373e62a26a7fd45f1858734254b5"
+    }
+  },
+  "current": {
+    "loader": {
+      "size": 782840,
+      "sha256": "207395c17491cc2a4e898b1ea9d47bb6621cfe145045a4ab0793326a8d122aef"
+    },
+    "shim": {
+      "size": 568976,
+      "sha256": "3f87d69f15bed7782780bf1cbad36b30772d6c12cda7b995946000f4bc333b3c"
+    },
+    "native-link": {
+      "size": 2512624,
+      "sha256": "81f9b219acbc5ea653711395dfe689eed27f72c453fa68209df0dff1ea05bc11"
+    },
+    "cilium-agent": {
+      "size": 184932848,
+      "sha256": "969142afac43fad4ea5dbb88b3a7a3224484d1a29e5465a998b0182e4da28c4c"
+    },
+    "kernel-offsets": {
+      "size": 1014,
+      "sha256": "03627be2020f5cf780369ca6f5779119f23856870fa47ef03d6b9387e7c0a7eb"
+    },
+    "native-cilium/bpf_overlay.tail_nodeport_nat_egress_ipv4.proof.o": {
+      "size": 8824,
+      "sha256": "3af9010dd7ab72ed2f30d0ff9c8b4dc3a213a04b1837eb0b1629bd54d7ff4843"
+    },
+    "native-cilium/bpf_host.tail_handle_ipv4_cont_from_host.proof.o": {
+      "size": 2320,
+      "sha256": "95f2a5afe1f44c4b5c985408552176840c1f0ea5996cd9c13b02185a348829fd"
+    },
+    "native-cilium/bpf_host.tail_nodeport_rev_dnat_ipv4.proof.o": {
+      "size": 5600,
+      "sha256": "48c5e150ef11cbb7ee4579ee1b7fc3ef8d9309921942d69261731ee36774687b"
+    },
+    "native-cilium/bpf_sock.cil_sock6_recvmsg.proof.o": {
+      "size": 2088,
+      "sha256": "67f384c949ac2f57c6045268392578ca96160b6a7e820ef1759e70a3d9fa1137"
+    },
+    "native-cilium/bpf_wireguard.tail_nodeport_rev_dnat_ipv4.proof.o": {
+      "size": 5912,
+      "sha256": "b4f45fdcea31771fb60c2c19966eddabd234b614904849a94ff470bd4ee41ded"
+    },
+    "native-cilium/bpf_sock.cil_sock6_sendmsg.proof.o": {
+      "size": 4088,
+      "sha256": "5df353858857e60c04e28a9c0692f5188a7f6582d7d2415c2c4c73ccb3651c0a"
+    },
+    "native-cilium/bpf_sock.cil_sock6_connect.proof.o": {
+      "size": 4080,
+      "sha256": "dbd92cb152cc7e1a77cfc46f0f9bd9ccd307851df4d2d96b7e7abca3dea068b9"
+    },
+    "native-cilium/bpf_overlay.tail_nodeport_rev_dnat_ipv4.proof.o": {
+      "size": 5664,
+      "sha256": "1969786b1270a5a602749d8601ac87ac65f081197000e84a7f5359cfb6fecf47"
+    },
+    "native-cilium/bpf_host.cil_from_host.proof.o": {
+      "size": 5272,
+      "sha256": "ab6b7c2c40c21e4420e46af6d7872fda95c13bbf23d65eeaea82fb225e338b6a"
+    },
+    "native-cilium/bpf_alignchecker.native.o": {
+      "size": 111896,
+      "sha256": "ed2c6543301b18fc27a30168165394f916ceb9a3ff2372301346f02f8b1ae390"
+    },
+    "native-cilium/bpf_wireguard.native.o": {
+      "size": 424264,
+      "sha256": "5075b09a452c715081b5046c7b1e9e7311a03c60c0ebdbefd18d5faee8a852d6"
+    },
+    "native-cilium/bpf_alignchecker.tail_icmp6_send_time_exceeded.proof.o": {
+      "size": 2536,
+      "sha256": "e304ce1d39b115eea8716122d16ebacd538d2d32afb29f3c2a55dd96f0138ebf"
+    },
+    "native-cilium/bpf_lxc.tail_nodeport_ipv4_dsr.proof.o": {
+      "size": 3480,
+      "sha256": "fb77be69637ac094752a2ce16ad6a221be1a73b8b8ffeca6cef2d849156b49c4"
+    },
+    "native-cilium/bpf_lxc.tail_ipv4_to_endpoint.proof.o": {
+      "size": 11592,
+      "sha256": "0e8b9233d1f23b1b012483fb6c6535a56ce985ab8f2a60391e5931df52d65350"
+    },
+    "native-cilium/bpf_host.tail_icmp6_handle_ns.proof.o": {
+      "size": 3776,
+      "sha256": "3fbf548e1c0316c82fd87b97b5a7312a489e36b59af17a8aa8d7b478ec90a601"
+    },
+    "native-cilium/bpf_overlay.tail_handle_snat_fwd_ipv4.proof.o": {
+      "size": 10080,
+      "sha256": "c98d422f91449bf15c09e49c18dd9baab1adb613a3fa732c661a43e11e8bdb4f"
+    },
+    "native-cilium/bpf_lxc.tail_nodeport_nat_egress_ipv4.proof.o": {
+      "size": 8152,
+      "sha256": "e14e19f23ffcd4c5433e058eb3d9f0e6e527e6778924dd8035b43c0f76b9eb8c"
+    },
+    "native-cilium/bpf_lxc.cil_to_container.proof.o": {
+      "size": 3464,
+      "sha256": "5b01464faebc51a780e7b866ae4222041080a03313cdc180410ad7b0c9cd6e4a"
+    },
+    "native-cilium/bpf_lxc.tail_drop_notify.proof.o": {
+      "size": 2176,
+      "sha256": "ad6cec3bbcd096e7798a523bd6216e1bec63290bac552530694eaeb370548523"
+    },
+    "native-cilium/bpf_wireguard.tail_no_service_ipv4.proof.o": {
+      "size": 2816,
+      "sha256": "1ec33fa8b2a51dfb03ed9de3fcb3059aa91232d77b3416803d76f85a85a54f59"
+    },
+    "native-cilium/bpf_lxc.tail_ipv4_ct_egress.proof.o": {
+      "size": 8784,
+      "sha256": "e52b9ca81a088b24e9ebea21aee0aef22330fefd38d963007ac02856a0d0cb4e"
+    },
+    "native-cilium/bpf_lxc.tail_handle_ipv4.proof.o": {
+      "size": 9040,
+      "sha256": "2409585e85c2445e42822dc0cc2d50fd283724c39056ae709fa6636ac7bb23d7"
+    },
+    "native-cilium/manifest.json": {
+      "size": 18378,
+      "sha256": "11e83f2f275e22f935292e09354da9f19568fd7a5b75cf9780a3956cd385d287"
+    },
+    "native-cilium/bpf_overlay.tail_handle_nat_fwd_ipv4.proof.o": {
+      "size": 5336,
+      "sha256": "00c851a60341477a60233ba11d37836721a2b3e1ea732559f3fa1f030df9db81"
+    },
+    "native-cilium/bpf_host.native.o": {
+      "size": 634912,
+      "sha256": "34a0f4c39e33c82b2246bbe089a4964cf0300c9dddc34b3e0be9980f501934f6"
+    },
+    "native-cilium/bpf_host.tail_handle_nat_fwd_ipv4.proof.o": {
+      "size": 8224,
+      "sha256": "0beface36abc239067c1e2addfadc13cf04fe07bf27c7ceeac5a09ec2a496e4e"
+    },
+    "native-cilium/bpf_xdp.tail_nodeport_nat_egress_ipv4.proof.o": {
+      "size": 9016,
+      "sha256": "280c43dba57d4ae3230d9e7efc7f511a9366ac671030247baf8b998fc0ede7e2"
+    },
+    "native-cilium/bpf_host.cil_host_policy.proof.o": {
+      "size": 704,
+      "sha256": "d7d46a95dd1d406eb77915656e3ab85f87c5e22a6e2ff54c69ffe21ab8b46c9b"
+    },
+    "native-cilium/bpf_lxc.tail_ipv4_policy.proof.o": {
+      "size": 11896,
+      "sha256": "aae1a48fa550cf0ea0872da8f54b5b8e4b1608759b0f3db28aa521ff492afd37"
+    },
+    "native-cilium/bpf_sock.cil_sock4_recvmsg.proof.o": {
+      "size": 2032,
+      "sha256": "3c9c1f4ac3517f046c0570d92eb30d1d7cac6661b4ce9ed8ab31804c01241a02"
+    },
+    "native-cilium/bpf_xdp.cil_xdp_entry.proof.o": {
+      "size": 2200,
+      "sha256": "ec7dcb15b152fc50d77de12ce29ead2d0c3cb6d481b9d14874c2c6e278c0ae05"
+    },
+    "native-cilium/bpf_xdp.tail_nodeport_nat_ingress_ipv4.proof.o": {
+      "size": 11664,
+      "sha256": "b224e84859b45ff47996fddff4ab6d953ea918dcc8312f9dc620cc280cc70865"
+    },
+    "native-cilium/bpf_overlay.tail_drop_notify.proof.o": {
+      "size": 2112,
+      "sha256": "60947fc70a67352a48883da9a2087f96262b2918c85ac9b7160d0daf920e25a4"
+    },
+    "native-cilium/bpf_wireguard.tail_nodeport_nat_ingress_ipv4.proof.o": {
+      "size": 11048,
+      "sha256": "c5e7cdc9ce440edd29f75396bf9db4f2781e014860ac9556bb8b947b8a777035"
+    },
+    "native-cilium/bpf_lxc.cil_lxc_policy_egress.proof.o": {
+      "size": 712,
+      "sha256": "dfa5f0c7b2398a8871ca6f608cb1d12ed68790de54bf34893a038262443c47dc"
+    },
+    "native-cilium/bpf_wireguard.tail_icmp6_send_time_exceeded.proof.o": {
+      "size": 2648,
+      "sha256": "2d8e98749ebacb9c9a463adb73446ba3b1d77a5dbf7c404b0ad167cd54d3a311"
+    },
+    "native-cilium/bpf_host.tail_drop_notify.proof.o": {
+      "size": 2776,
+      "sha256": "1445c9b287d96e41d7637c1eaf524228f90403fc1a94a1e3b1455ef53492ad52"
+    },
+    "native-cilium/bpf_xdp.tail_no_service_ipv4.proof.o": {
+      "size": 2984,
+      "sha256": "2a644a0f395448cb8286a689cd5675c9686c5fdbac3776413ea6af74df07577d"
+    },
+    "native-cilium/bpf_wireguard.cil_to_wireguard.proof.o": {
+      "size": 6120,
+      "sha256": "07c64ddb88c9a5334544a10945396921e1560092c1fedcee4873c86e5e1df11b"
+    },
+    "native-cilium/bpf_lxc.tail_ipv4_ct_ingress_policy_only.proof.o": {
+      "size": 7240,
+      "sha256": "ed9e46041029fa412a15b30f184b007fb3bae14756f78761868005eb6d812248"
+    },
+    "native-cilium/bpf_host.tail_no_service_ipv4.proof.o": {
+      "size": 2912,
+      "sha256": "dc22737651a8e982b0385e16c0860e0631fb8e9dfac04cb91d485642675d8259"
+    },
+    "native-cilium/bpf_sock.cil_sock6_post_bind.proof.o": {
+      "size": 1832,
+      "sha256": "996a8b7e96fd452d27b67bfc1a445623a13d39fac910548176c44352a5c298e3"
+    },
+    "native-cilium/bpf_wireguard.tail_handle_nat_fwd_ipv4.proof.o": {
+      "size": 5320,
+      "sha256": "3d037e7428f6faeb481cae159e615f9d0f7f1f943908aa6faf6c726d6acb1d09"
+    },
+    "native-cilium/bpf_host.tail_handle_ipv4_from_netdev.proof.o": {
+      "size": 15792,
+      "sha256": "dfce6287ae3835f623a667347c84cee45d31cc33880075e81344238d2e7205ac"
+    },
+    "native-cilium/bpf_lxc.tail_nodeport_nat_ingress_ipv4.proof.o": {
+      "size": 10512,
+      "sha256": "d6be786c020f6abd829f7a968a14d3a02df2b82cf9e594f6259f4e119858b1ae"
+    },
+    "native-cilium/bpf_host.tail_nodeport_nat_ingress_ipv4.proof.o": {
+      "size": 10704,
+      "sha256": "65ae1e90f2c356a1bd38553bb5f6accbee79c10b2235fae3e188fff0fa3f52ed"
+    },
+    "native-cilium/bpf_overlay.tail_nodeport_ipv4_dsr.proof.o": {
+      "size": 3480,
+      "sha256": "b409b5b44f7daaca4c33ac21e2eca2a1430ccb984b430519818d41bec7b52b05"
+    },
+    "native-cilium/bpf_xdp.tail_nodeport_rev_dnat_ipv4.proof.o": {
+      "size": 6440,
+      "sha256": "c0af9e2d4ab9b1a58130adb3c1db4ea82506c7ddbf7b46cd96fd98e1c9c27a65"
+    },
+    "native-cilium/bpf_sock.cil_sock4_sendmsg.proof.o": {
+      "size": 3952,
+      "sha256": "b9a648b693623b6f6a44d1230db3b9c35a0e9ba4d900ee8116b86309fb0d3752"
+    },
+    "native-cilium/bpf_sock.cil_sock4_connect.proof.o": {
+      "size": 3976,
+      "sha256": "9545f8014b45082eb786528881df74de1bd08971e31ddd448df32721245164bd"
+    },
+    "native-cilium/bpf_host.tail_nodeport_nat_egress_ipv4.proof.o": {
+      "size": 8472,
+      "sha256": "8be9024e4f01a7572d6a220fe81c199427323a563934902e156f2d944ecdee36"
+    },
+    "native-cilium/bpf_xdp.native.o": {
+      "size": 288112,
+      "sha256": "f85cdb2b30e32d473f0a9223b50335553bd515b28628d82c838fbc5bcf76a3f6"
+    },
+    "native-cilium/bpf_xdp.tail_drop_notify.proof.o": {
+      "size": 2496,
+      "sha256": "79b9d3a0dd2095066cac173bead082301aa4bcee5283f4656b1a247d98a52c18"
+    },
+    "native-cilium/bpf_lxc.tail_no_service_ipv4.proof.o": {
+      "size": 2816,
+      "sha256": "6ad7455760eed7cb8802251fcd4b7164d642ddc6f3e7357869a3c3f9b98061b0"
+    },
+    "native-cilium/bpf_wireguard.tail_nodeport_ipv4_dsr.proof.o": {
+      "size": 3600,
+      "sha256": "bfe1e13ac6a1f18026e4748ee9ed9a46001755605308eb47bc9553b351833d6d"
+    },
+    "native-cilium/bpf_sock.cil_sock4_post_bind.proof.o": {
+      "size": 1568,
+      "sha256": "c64b8ce09585612e4a2d0247a329c921e6f4b62b86757e8934e3122ab2092920"
+    },
+    "native-cilium/bpf_wireguard.cil_from_wireguard.proof.o": {
+      "size": 1784,
+      "sha256": "d4afc76e686ae1f6ab85d1103255d4d18c529244f20b4dac4bffebd791f03e35"
+    },
+    "native-cilium/bpf_host.tail_nodeport_ipv4_dsr.proof.o": {
+      "size": 3856,
+      "sha256": "4a15f2c4673437a558395149fa0a427948ed52ce0f2bd29111bb6b9e3c519235"
+    },
+    "native-cilium/bpf_lxc.native.o": {
+      "size": 721600,
+      "sha256": "63450c91387b8d4862918b0ea8534040e1aab0d2f2f9efdf4e2b9e49c4ea4a4e"
+    },
+    "native-cilium/bpf_alignchecker.tail_icmp6_handle_ns.proof.o": {
+      "size": 3488,
+      "sha256": "62fb2446f1965e4f3a9cea3475975cf197d65ca223276d0e23529b8b47f8cb62"
+    },
+    "native-cilium/bpf_overlay.tail_handle_ipv4.proof.o": {
+      "size": 13072,
+      "sha256": "893ad5f0eb07d71b0dd82a07cf59366d527085db121f44cdcdd1c9d0748e9c70"
+    },
+    "native-cilium/bpf_sock.native.o": {
+      "size": 135776,
+      "sha256": "61a00c02eb2d346220174741eef357def850dbd11ec9ed305d3730a2fe3db932"
+    },
+    "native-cilium/bpf_sock.cil_sock_release.proof.o": {
+      "size": 1112,
+      "sha256": "a436b5075d60a69802668a5cb6002786ff3f3617ad2c9cecc836c7a6625523cd"
+    },
+    "native-cilium/bpf_overlay.tail_nodeport_nat_ingress_ipv4.proof.o": {
+      "size": 10896,
+      "sha256": "9e04cfa0883700f5f3a92a90e6424933cebe8ea6144ef9dcbedc2f774bc2672d"
+    },
+    "native-cilium/bpf_xdp.tail_nodeport_ipv4_dsr.proof.o": {
+      "size": 4208,
+      "sha256": "0165d4b7cc7eb8e3134513566035c970c11d9980cb3b5b4be0b58035f34e807b"
+    },
+    "native-cilium/bpf_host.cil_from_netdev.proof.o": {
+      "size": 5064,
+      "sha256": "4314a9ae8e5fbc3cd98f8c00a3502a8455e45e4e01ec727357990f081bce36ba"
+    },
+    "native-cilium/bpf_overlay.tail_icmp6_send_time_exceeded.proof.o": {
+      "size": 2648,
+      "sha256": "357320d3d10faaf13a29be8145b7468e97bd61fd74d7ff8c5ee5671eb01cb856"
+    },
+    "native-cilium/bpf_wireguard.tail_handle_ipv4.proof.o": {
+      "size": 15688,
+      "sha256": "7ec9187c5f7993a09a30f6862ac3a6245ff56f18e742a7ba511ef5f3b6d2e5c4"
+    },
+    "native-cilium/bpf_lxc.tail_icmp6_handle_ns.proof.o": {
+      "size": 4792,
+      "sha256": "cb986d0eb707a5a7c9c34a0496397aae5086dd08f195794ea0108d114961eda4"
+    },
+    "native-cilium/bpf_lxc.tail_handle_arp.proof.o": {
+      "size": 1688,
+      "sha256": "95421933361490224b39b517dabad3c21dde9549da12987244b155a1a0f8deaf"
+    },
+    "native-cilium/bpf_lxc.cil_lxc_policy.proof.o": {
+      "size": 7800,
+      "sha256": "66671483d43734fee6682fa6ccdb921dddcb3de7e26b100db83dff0268269fbb"
+    },
+    "native-cilium/bpf_wireguard.tail_nodeport_nat_egress_ipv4.proof.o": {
+      "size": 8976,
+      "sha256": "a6e7a3ea1563a4c41c3fa79e39d4642aa4a643d974be872b4961039925f0d359"
+    },
+    "native-cilium/bpf_lxc.tail_icmp6_send_time_exceeded.proof.o": {
+      "size": 2648,
+      "sha256": "357320d3d10faaf13a29be8145b7468e97bd61fd74d7ff8c5ee5671eb01cb856"
+    },
+    "native-cilium/bpf_wireguard.tail_handle_snat_fwd_ipv4.proof.o": {
+      "size": 1432,
+      "sha256": "083e164e65edf288b0b3d087be896c0739ef941609fbff0ad159f0ae572952bb"
+    },
+    "native-cilium/bpf_lxc.tail_nodeport_rev_dnat_ipv4.proof.o": {
+      "size": 5256,
+      "sha256": "4cf330275a0702cf206ae65347b9437f85a256e8b93c6423257eb53d77f8e4ff"
+    },
+    "native-cilium/bpf_lxc.cil_from_container.proof.o": {
+      "size": 2760,
+      "sha256": "f3339acee1e61bbc29eb3164bcf3018998c72b2a00c0430ccc2042892acfbd11"
+    },
+    "native-cilium/bpf_host.tail_handle_ipv4_cont_from_netdev.proof.o": {
+      "size": 2304,
+      "sha256": "8c221110dba166d868d1871d6c143ff07c72c0d854a1eb4feb9d4c747d2f2b2a"
+    },
+    "native-cilium/bpf_host.tail_handle_snat_fwd_ipv4.proof.o": {
+      "size": 17544,
+      "sha256": "cad9c366b0599f05af5f41f17bf7fe05d101786315f222a3c360483dd564e7b7"
+    },
+    "native-cilium/bpf_lxc.tail_policy_denied_ipv4.proof.o": {
+      "size": 3248,
+      "sha256": "c8f184c6e9a1382910b7591f8f05f770e64e67bde02d523d0255c6743ecbf88f"
+    },
+    "native-cilium/bpf_overlay.tail_no_service_ipv4.proof.o": {
+      "size": 2816,
+      "sha256": "7687ec623ad83c12c32aa0887bb76eb2383f0fad5b0339aad15826418b3cb7ec"
+    },
+    "native-cilium/bpf_host.tail_icmp6_send_time_exceeded.proof.o": {
+      "size": 2648,
+      "sha256": "e68ecdd253e52cd46632e842a149901b8cafe6e050a26149ae827a61838bb5b2"
+    },
+    "native-cilium/bpf_wireguard.tail_drop_notify.proof.o": {
+      "size": 2584,
+      "sha256": "4cb01ae8d7c77601c378971203ebe2d949cccb072bbe6295bef1256de70fa0dc"
+    },
+    "native-cilium/bpf_overlay.cil_from_overlay.proof.o": {
+      "size": 2488,
+      "sha256": "ae8ffd9a4068db1bea3ffecf471666cfa65672fd9c79850d753f7da13a0d86fa"
+    },
+    "native-cilium/bpf_lxc.tail_handle_ipv4_cont.proof.o": {
+      "size": 18760,
+      "sha256": "9a11458deecc98e5a77db5e2b1dd0080e988d88435a480389cc62e072a08bc00"
+    },
+    "native-cilium/bpf_host.cil_to_host.proof.o": {
+      "size": 4336,
+      "sha256": "581e12c01b1fa47449d6ad36bded2ee2340d770c0c8cc7845b8d96dc9031811d"
+    },
+    "native-cilium/bpf_host.tail_handle_ipv4_from_host.proof.o": {
+      "size": 2440,
+      "sha256": "934c12c9202d17b5898443ff5da4459ccd2a0dece856fad8da6aabdee17be16a"
+    },
+    "native-cilium/bpf_host.cil_to_netdev.proof.o": {
+      "size": 9648,
+      "sha256": "1b2678f09cbf43ace252ad62385c35ad6407f52c546e7512e7c7bf548325608c"
+    },
+    "native-cilium/bpf_overlay.cil_to_overlay.proof.o": {
+      "size": 6120,
+      "sha256": "a057115b9b7f06d865512eaf7254ebd056cdd21742b14972dc43e4484d0f08b2"
+    },
+    "native-cilium/bpf_overlay.native.o": {
+      "size": 448320,
+      "sha256": "3c66e741935bdf26792b4daa8497fc522eb86e798cd85cea69e2989a7ffb1197"
+    },
+    "native-cilium/bpf_lxc.tail_ipv4_ct_ingress.proof.o": {
+      "size": 7232,
+      "sha256": "abdbe3dc4195bebe2c3afa83516c23ad64a72e901034906581401fe3e1153d3d"
+    },
+    "kinsn/.bpf_x86_shd.ko.cmd": {
+      "size": 237,
+      "sha256": "68e94bfe54f45c9ce3693b66adedcd23785cfd5ac4a8d0cbbe1a464f38e46bf3"
+    },
+    "kinsn/.bpf_x86_native_lab.mod.o.cmd": {
+      "size": 73590,
+      "sha256": "8f759e6b1ca16c7b5cd9839c23a104ef9df2f01e56a8e75630a6c5c632bb7538"
+    },
+    "kinsn/.bpf_x86_imul.ko.cmd": {
+      "size": 241,
+      "sha256": "bb9390df4590c685469dc937b4794b5ba7943c75dec94ab97420f1687fec5fa0"
+    },
+    "kinsn/.bpf_x86_bmi1.mod.cmd": {
+      "size": 116,
+      "sha256": "e4bcdeceedebcbd8d0ef4bfb1ae95a2e5369e56cc8a801af69aeab625788142f"
+    },
+    "kinsn/bpf_x86_not.mod.o": {
+      "size": 153800,
+      "sha256": "0e3801638ed9b8567bde6c145c0bd60c602a9b3a55feb393a9b175b27cc2aae5"
+    },
+    "kinsn/.gitignore": {
+      "size": 39,
+      "sha256": "d84c55de4ab10a0b54fe0976dfe6f87046a21aa281aa146387d5091b84427c0d"
+    },
+    "kinsn/bpf_x86_shd.mod": {
+      "size": 16,
+      "sha256": "50a144a5fd0ed5131fab2294133c5fcc453edee28d1969441ebb80aa6dc5f462"
+    },
+    "kinsn/.bpf_x86_byteorder.mod.o.cmd": {
+      "size": 73575,
+      "sha256": "4711545de8b395fc12a972600879c378e115f15d074f13568a5914b5baba264f"
+    },
+    "kinsn/bpf_x86_bmi1.mod.c": {
+      "size": 720,
+      "sha256": "aacd3c21bf7039991e7a87265b585e24874b49f427338b1d609cd8f49c120230"
+    },
+    "kinsn/.bpf_x86_rotate.mod.cmd": {
+      "size": 122,
+      "sha256": "9c61908911a13dcc2990ff54bc72868020e7a269461fd7498e27b70647939a49"
+    },
+    "kinsn/bpf_x86_imul.ko": {
+      "size": 595736,
+      "sha256": "71dbc14baa81e9fa30856992705435da737ebdc443b271c31876b3a95c944968"
+    },
+    "kinsn/modules.order": {
+      "size": 246,
+      "sha256": "042d02481c3c404b42d9446551918cc74a4096d569ee815a336c6d748d8610f3"
+    },
+    "kinsn/.bpf_x86_popcnt.ko.cmd": {
+      "size": 249,
+      "sha256": "0365549a41b500028973bd2d0ab0cec26ab0033d6d3acd700d8ac7359068802c"
+    },
+    "kinsn/.bpf_x86_alu.o.cmd": {
+      "size": 107071,
+      "sha256": "99b18f43c085a363b1257790316c011240c6120eaf8a93db07f1b6df97f6fc2d"
+    },
+    "kinsn/bpf_x86_imul.o": {
+      "size": 431208,
+      "sha256": "1721f81430a717bb764732a2b32b649403bbf16c170f8091428ed653333f4787"
+    },
+    "kinsn/.bpf_x86_shd.mod.cmd": {
+      "size": 113,
+      "sha256": "24b7f8e48ab32c19f870fc3f5a0485fe6d20d886f046b641efca1f7e0b99ff17"
+    },
+    "kinsn/bpf_x86_rotate.o": {
+      "size": 477800,
+      "sha256": "26658d57eed8fe709bd7b17389f56920a9a7b427ef854ec8f2bb528aeff1bad1"
+    },
+    "kinsn/bpf_x86_imul.mod.c": {
+      "size": 607,
+      "sha256": "af2d53215b98203d1d43631d4a86131893ea21deec40c8f4cf2e9882b67b90b3"
+    },
+    "kinsn/.bpf_x86_rotate.mod.o.cmd": {
+      "size": 73530,
+      "sha256": "3a2aaed17d31945620aa78bd0342b350d8d6acad1c9ab0205b06b8ebc2fcb320"
+    },
+    "kinsn/bpf_x86_bmi1.ko": {
+      "size": 643000,
+      "sha256": "01ef33964435695a3b07a4e9f284bdfe1574fc156e2ab79a9cab51c9f12ff9ba"
+    },
+    "kinsn/bpf_x86_native_lab.mod": {
+      "size": 23,
+      "sha256": "f11399e071f5409f48390786d933723fbc054686716df35fc30b5d99b7a566dc"
+    },
+    "kinsn/bpf_x86_prefetch.mod.c": {
+      "size": 713,
+      "sha256": "87b3c8369072a83ffcb0450dde0a790c1abb6deb608ffab0254e9e9537d80521"
+    },
+    "kinsn/.bpf_x86_movbe.ko.cmd": {
+      "size": 245,
+      "sha256": "bc443289e961552349698f622f44f632056f21a42cc5113594e7e719998a846d"
+    },
+    "kinsn/bpf_x86_prefetch.mod.o": {
+      "size": 153880,
+      "sha256": "983d42460338ef7491b628276a016c8a02219abc73dde341ac855dc3e2105a84"
+    },
+    "kinsn/.bpf_x86_shd.o.cmd": {
+      "size": 107071,
+      "sha256": "33528b707aa1d2158489aa3c4f2e4caac5b970302e82c1ee506a3d51ab3f080d"
+    },
+    "kinsn/bpf_x86_rotate.mod.c": {
+      "size": 713,
+      "sha256": "4dfc6d314e66403928983324a547b0ca1c09b69fb8bcc745867e43be09959665"
+    },
+    "kinsn/.module-common.o": {
+      "size": 13288,
+      "sha256": "539a7494ba2578ac2ac71a386f16c69d9ff828b50bd33fb6bb21e2ae1b647c30"
+    },
+    "kinsn/.bpf_x86_rotate.o.cmd": {
+      "size": 107116,
+      "sha256": "e1a9e0361f15a0a53d39d8be2e3012aba6d581dc76f4ec5b82cde6a5faecaeff"
+    },
+    "kinsn/.bpf_x86_lea.ko.cmd": {
+      "size": 237,
+      "sha256": "ecd84abd6fa2662ce0303eb17433e4cfe86a77edbb66b525350b3193cedb5750"
+    },
+    "kinsn/bpf_x86_not.mod": {
+      "size": 16,
+      "sha256": "b15ebcc37be3f1f58de246735f5edbd37528110895108781689bc5bc0d9e597b"
+    },
+    "kinsn/.bpf_x86_alu.mod.cmd": {
+      "size": 113,
+      "sha256": "49ac1310f1efb7336029f494bce70e9e727abcc04fa9e9d200f84b7e64b90b8a"
+    },
+    "kinsn/bpf_x86_bmi2_shift.mod.o": {
+      "size": 153896,
+      "sha256": "91081c21e22104051334393e6379d8b68dfc0443be3b843c41279916254f47c4"
+    },
+    "kinsn/bpf_x86_prefetch.ko": {
+      "size": 592688,
+      "sha256": "e781cb86ee379fe75c5388aad7a674add5b8d3b962621a1a0feb11a53acbf68a"
+    },
+    "kinsn/.bpf_x86_cmov.ko.cmd": {
+      "size": 241,
+      "sha256": "890d0efcd152099ef63803fd86b3fddd333a6b3501fc0d16395afe3569b2733c"
+    },
+    "kinsn/bpf_x86_movbe.mod.c": {
+      "size": 747,
+      "sha256": "681c9d48b9db5066957526efc8f03ef56ba5e8bef4e83bdc5dbc2315122a7986"
+    },
+    "kinsn/bpf_x86_lea.o": {
+      "size": 474432,
+      "sha256": "0290a8bda0cec6bf8ccd35234d5c66c78c801282e93845dda41140738989bddd"
+    },
+    "kinsn/bpf_x86_rotate.ko": {
+      "size": 641600,
+      "sha256": "f9a405c2cd919a073e69e9e8e131e11da5667499364694d3a3ff6afcb7281351"
+    },
+    "kinsn/bpf_x86_bmi2_shift.o": {
+      "size": 502088,
+      "sha256": "e1ec0dd73d7f9ec78267dceb1ab8cb496c41a8161966bcc013731f361d9604a4"
+    },
+    "kinsn/bpf_x86_alu.o": {
+      "size": 786128,
+      "sha256": "1cdde1ee89efb1724c51e6e29fed207cdd4efef74dc9e0ac167978aa2e3ed8ae"
+    },
+    "kinsn/Makefile": {
+      "size": 367,
+      "sha256": "2415f6ba86a857d0d47698ce9a2cfadde2db5e22fc06ffda85aa33c4d9562d7e"
+    },
+    "kinsn/bpf_x86_alu.mod.c": {
+      "size": 749,
+      "sha256": "2701048b91b0fe09ff3693365b51683cde06edc717f2360448415e0ef13e74f3"
+    },
+    "kinsn/..module-common.o.cmd": {
+      "size": 75183,
+      "sha256": "b98528696b61ebedfe6a6a8301d066d822f0aee77614f57771bc6b86ef39d9f6"
+    },
+    "kinsn/.bpf_x86_byteorder.ko.cmd": {
+      "size": 261,
+      "sha256": "8bbc4d1a847c926f972acfc79969cda4a62da94ace7212ecf6811ba7f35b66d0"
+    },
+    "kinsn/.bpf_x86_not.ko.cmd": {
+      "size": 237,
+      "sha256": "4985cf7ee8af0d2cc643be4dc3ffacf935b43ab9dcd53aba842bbfa90f10105b"
+    },
+    "kinsn/bpf_x86_byteorder.mod.c": {
+      "size": 713,
+      "sha256": "9aa9eaf95a28fc76d6bc94e51e4fa49b6a194fa8986f4a3f7ba9d6ce875f056b"
+    },
+    "kinsn/bpf_x86_popcnt.o": {
+      "size": 446816,
+      "sha256": "f268fa79142249519d2c2e651264fb019224ae502ba38589109a515beec23a99"
+    },
+    "kinsn/bpf_x86_shd.ko": {
+      "size": 625016,
+      "sha256": "fda130e649565955cdff9e66641c5055298f680b88ceb5c67ba534731eafbc9b"
+    },
+    "kinsn/.bpf_x86_bmi2_shift.o.cmd": {
+      "size": 107176,
+      "sha256": "813d7f14c2a557d28fe28a9d1ee5335e4edea4d501d4d66df1b6baa71e790079"
+    },
+    "kinsn/bpf_x86_native_lab.mod.c": {
+      "size": 1692,
+      "sha256": "5e700702a338d79c425295732b558db8ce1496cc6056fbc31912c1184b851fa3"
+    },
+    "kinsn/bpf_x86_alu.ko": {
+      "size": 940544,
+      "sha256": "af58a952949f79f3c0037c3c8201dbd4dfee11c95479470524b58e52d1fc37d4"
+    },
+    "kinsn/.bpf_x86_imul.mod.o.cmd": {
+      "size": 73500,
+      "sha256": "165918e11554f47cd231929de8ebeca09b759a5b4a78efe329a057eb8476e4cd"
+    },
+    "kinsn/.bpf_x86_bmi1.ko.cmd": {
+      "size": 241,
+      "sha256": "0d6f404678add9b7b850af9f513c6d3b898fb996146d359583ae295d8ff37f64"
+    },
+    "kinsn/.bpf_x86_shd.mod.o.cmd": {
+      "size": 73485,
+      "sha256": "120996f15de0e68071d74d9e3fc9243773375e5cc14e8919e8b1ef695c2f7e66"
+    },
+    "kinsn/bpf_x86_bmi2_shift.mod": {
+      "size": 23,
+      "sha256": "2feb386da9dd6cd2eb64e6fdbd3c296b2e8c85379520e351bc9ad6eb9cc237ac"
+    },
+    "kinsn/.bpf_x86_cmov.mod.cmd": {
+      "size": 116,
+      "sha256": "2601e5f633f0b4ee68112e6ace350be6321c96fdefc605e7020283183730a063"
+    },
+    "kinsn/.bpf_x86_popcnt.mod.o.cmd": {
+      "size": 73530,
+      "sha256": "447e494ac0fac5bd1b070ce2a6d921e5780325de7e13c40f708dd512fef632c8"
+    },
+    "kinsn/bpf_x86_bmi1.mod": {
+      "size": 17,
+      "sha256": "fd57eaeb108a3860abdf032fd0d991edb913ca2b576a8797100ecd61f596edd8"
+    },
+    "kinsn/bpf_x86_mov.o": {
+      "size": 727504,
+      "sha256": "3f82afe18bc3937e72557d7b4133928b04fd5e65dd98f2b0360495116d998fa7"
+    },
+    "kinsn/.bpf_x86_mov.o.cmd": {
+      "size": 107071,
+      "sha256": "a823e658475224775597cf4c2e655da801761856fddb91a426bc93d913e86ac1"
+    },
+    "kinsn/bpf_x86_not.mod.c": {
+      "size": 713,
+      "sha256": "87e575192a004c288ba866ff9d13ef300606e5b5fc5b8cc92ebc9ffaf1d53152"
+    },
+    "kinsn/bpf_x86_prefetch.o": {
+      "size": 427976,
+      "sha256": "06d5bb207ab031dd505cc0b06b17ce0162f11d12b521da591a7249c796782167"
+    },
+    "kinsn/bpf_x86_mov.mod.c": {
+      "size": 749,
+      "sha256": "59adafb00cc9cc9f909cbc22a5aa3c39e7c50fde305c4bc69be080de7ed2f911"
+    },
+    "kinsn/.bpf_x86_bmi1.mod.o.cmd": {
+      "size": 73500,
+      "sha256": "8d16ebcb75eed95f882e1f7c3c8f24573d87b9db22cfc9c959744896d5b92b3f"
+    },
+    "kinsn/bpf_x86_mov.mod": {
+      "size": 16,
+      "sha256": "12263b7b61e008e71e3815064591f48b6272962351c673c2064265c80d388e88"
+    },
+    "kinsn/.bpf_x86_prefetch.mod.cmd": {
+      "size": 128,
+      "sha256": "e625d6e1dd8668ac034adcff525760a4d9c074d4ef8148dd9fca7f1e217646cc"
+    },
+    "kinsn/.bpf_x86_movbe.o.cmd": {
+      "size": 107101,
+      "sha256": "13ebdfcd899ed65549006a4a5db2e7dd66c6e28ea03896ab30469c7ab91a3e03"
+    },
+    "kinsn/.bpf_x86_lea.o.cmd": {
+      "size": 107071,
+      "sha256": "eb7c450375d5069f39c25c47e9850fc1851993904f9944e0ba4a5cf4ad77fb6f"
+    },
+    "kinsn/bpf_x86_mov.ko": {
+      "size": 888808,
+      "sha256": "e11594e6adba3a267d53ad335feaf4af1d8c36d9ddf906f41cc0beabd102dbb1"
+    },
+    "kinsn/bpf_x86_popcnt.ko": {
+      "size": 611600,
+      "sha256": "dbb2ebf6c2465eaceae2dba5b691b3f5cdaad8a2dd968e72b847bf6ae270b767"
+    },
+    "kinsn/bpf_x86_bmi2_shift.mod.c": {
+      "size": 720,
+      "sha256": "338aa89c30f88fcac11e03a2ee52dc6fb2f74bc65ac1106f61e39fda999ea809"
+    },
+    "kinsn/bpf_x86_shd.o": {
+      "size": 461488,
+      "sha256": "a81d102a8f26b3b484aacaab340432fda2980d6c0234c1eeed1cdad40cc783e7"
+    },
+    "kinsn/.modules.order.cmd": {
+      "size": 415,
+      "sha256": "d7b79c994447365eccedb5fdbc2f9111fd6d118358683a68dec91fc28362f1c8"
+    },
+    "kinsn/.bpf_x86_movbe.mod.cmd": {
+      "size": 119,
+      "sha256": "77a779dbce2fadea61c6483dabd8f36a2dcf3ee8102a4509396e6a64fd961b1b"
+    },
+    "kinsn/.Module.symvers.cmd": {
+      "size": 215,
+      "sha256": "e750d9612526d569327364fb07aa098bd93e7c2853cb02b15978b6d3604acd18"
+    },
+    "kinsn/bpf_x86_cmov.mod": {
+      "size": 17,
+      "sha256": "ee5e535a0160424c86ef26466b83952e5a2215018c18b0f30c858a224c17f800"
+    },
+    "kinsn/bpf_x86_imul.mod": {
+      "size": 17,
+      "sha256": "a0a65b6261fc6d8b72e87015673b74137abcde2148d9ef67e1309f9632de19fd"
+    },
+    "kinsn/.bpf_x86_native_lab.ko.cmd": {
+      "size": 265,
+      "sha256": "1f57fba9bae5e6cf87f08c0cb3a883ac8ca4d599ea9b86dd02f929cadcc1f48a"
+    },
+    "kinsn/.bpf_x86_mov.ko.cmd": {
+      "size": 237,
+      "sha256": "94d0b5121495789b5f2ecf6f19fc8ec65083d6c48c068dfff6ade5e2c3d2e1b3"
+    },
+    "kinsn/bpf_x86_lea.mod": {
+      "size": 16,
+      "sha256": "a7f4b9221a22ffec57b31ae804d8e78e92515fa1553e73727674b1e73b05a8ed"
+    },
+    "kinsn/.bpf_x86_byteorder.mod.cmd": {
+      "size": 131,
+      "sha256": "56be5e814bd0568988ff49d872b4f38e44d588be53a7e488eea82f13628402d6"
+    },
+    "kinsn/.bpf_x86_popcnt.mod.cmd": {
+      "size": 122,
+      "sha256": "9726d68c4168a792e9bce428fa0690f081a6fa84059e47076d59ba4fd0186ab3"
+    },
+    "kinsn/bpf_x86_cmov.mod.c": {
+      "size": 713,
+      "sha256": "ddd93c689994e13892c001cdd965f8aed34aa2502acd784955fbf4f82c199f4c"
+    },
+    "kinsn/.bpf_x86_byteorder.o.cmd": {
+      "size": 107161,
+      "sha256": "af0ea253f90433fc9766a349fa685be3bf1731e2c030b41daf20ff7d35844af2"
+    },
+    "kinsn/.bpf_x86_native_lab.mod.cmd": {
+      "size": 134,
+      "sha256": "560498d4379c0f15a67deec22cf7509eb75d67caf9a4d6a1cdfe0a15a01debb9"
+    },
+    "kinsn/bpf_x86_native_lab.o": {
+      "size": 529264,
+      "sha256": "08cdec135646e4f807df933b69d3e3c3274d86a79e76023a94d5846d51dc3509"
+    },
+    "kinsn/bpf_x86_popcnt.mod.o": {
+      "size": 153880,
+      "sha256": "dde21dd35ff220b1f37affab84fa86257e2f41efa4873800bed0b5cfb4c7fd3e"
+    },
+    "kinsn/bpf_x86_byteorder.mod": {
+      "size": 22,
+      "sha256": "9ed6d19e4e9144893e88046d7a759899c20ec40d4343ae0194cb970066a86e15"
+    },
+    "kinsn/.bpf_x86_lea.mod.cmd": {
+      "size": 113,
+      "sha256": "e2dabc182b1f2c67e3e2f90cc6ea36224f21901b4400976066dad3688a2a077f"
+    },
+    "kinsn/.bpf_x86_not.mod.o.cmd": {
+      "size": 73485,
+      "sha256": "6f404d961e6d05470b16433e4ad0cc31b6068ebd35693ccc57a5c8db3fbc0e65"
+    },
+    "kinsn/bpf_x86_bmi1.o": {
+      "size": 479184,
+      "sha256": "aa62d3c5f83d70ac45a4e7487e06a0b3a60a1fed649707ce87ef3f5f12878b8f"
+    },
+    "kinsn/.bpf_x86_movbe.mod.o.cmd": {
+      "size": 73515,
+      "sha256": "b58de64bb88a41f5a7a50649152c436fdfab6c4f3c08ef0893afc16992cbe930"
+    },
+    "kinsn/bpf_x86_shd.mod.o": {
+      "size": 153800,
+      "sha256": "7c867b7fb92c34095c453eb9eccf9f51908e83fc5d7c7fc81409fc2617b19d60"
+    },
+    "kinsn/.bpf_x86_native_lab.o.cmd": {
+      "size": 107250,
+      "sha256": "0b4b24b8ca7ec7ac5ac9873ebfdfdbc8d2dffc6d3a5c54e219fa2e938864cf15"
+    },
+    "kinsn/bpf_x86_imul.mod.o": {
+      "size": 153616,
+      "sha256": "54eed0dbb3ee5da82790a558949c1ec16549a568f98bcd4680e3375209847cbf"
+    },
+    "kinsn/.bpf_x86_imul.o.cmd": {
+      "size": 107086,
+      "sha256": "4b9c4b4410bd790d4dbf4814ec2a06093ed361f181f2dda5c239bbf8cb452e18"
+    },
+    "kinsn/bpf_x86_lea.mod.o": {
+      "size": 153864,
+      "sha256": "62b34517ae61bfe2c3f66f09429c2ce25d6321451a4d2f63947ff4c43686e4ff"
+    },
+    "kinsn/bpf_x86_bmi1.mod.o": {
+      "size": 153808,
+      "sha256": "92793d770f01c8a5ad0ac9b8e18dada31d8adcda28d8dc0566f5e6d6dee4a0f7"
+    },
+    "kinsn/.bpf_x86_not.mod.cmd": {
+      "size": 113,
+      "sha256": "e996811a86a724a2a19e6096681e8356373cbdfae32230087ac5d37128d44807"
+    },
+    "kinsn/bpf_x86_cmov.o": {
+      "size": 456480,
+      "sha256": "ccbc0dd0ddf1116544392a3503169b179a93e8e872fbb8a08121205d5b84c93b"
+    },
+    "kinsn/bpf_x86_native_lab.ko": {
+      "size": 693880,
+      "sha256": "5c084e81350f577222925d2ed5ea9e78f4537b0f39ccd043e7f42989f32646fd"
+    },
+    "kinsn/.bpf_x86_cmov.mod.o.cmd": {
+      "size": 73500,
+      "sha256": "2eb208886b76ec2ab56c96e82148fcfdce18e3c8e5e847568373882a295538c3"
+    },
+    "kinsn/bpf_x86_movbe.mod": {
+      "size": 18,
+      "sha256": "fd65174c2eb5d7b345d6758bd374590c786e7e316cb575c4cc2377a370708475"
+    },
+    "kinsn/bpf_x86_not.ko": {
+      "size": 615368,
+      "sha256": "7a05a6986621032ab9998891989aeaf12a24d60c1ab18b17e6d01694c5a7cd69"
+    },
+    "kinsn/.bpf_x86_bmi2_shift.mod.cmd": {
+      "size": 134,
+      "sha256": "f4b6700968eff04b391f1a72d1a5bfd2e15e4026d67179f2198617acd84781dd"
+    },
+    "kinsn/.bpf_x86_prefetch.ko.cmd": {
+      "size": 257,
+      "sha256": "e021ff1938e96964880855dc1abaf6bfa70cff453854be23eb397cff11180f3f"
+    },
+    "kinsn/bpf_x86_byteorder.mod.o": {
+      "size": 153888,
+      "sha256": "c0d4a89fe726c87a3b29a2154836eb616f92fe07c8a52345682fd0af77a0dfd6"
+    },
+    "kinsn/bpf_x86_cmov.mod.o": {
+      "size": 153808,
+      "sha256": "6346b72acef183acf421580e14e12214412748c80f1a88b7b777743000ef6825"
+    },
+    "kinsn/bpf_x86_lea.mod.c": {
+      "size": 749,
+      "sha256": "7c65fb970d4be633e185ae562dd9611c86807528581c52048795ee03c6e1fb71"
+    },
+    "kinsn/bpf_x86_byteorder.o": {
+      "size": 457384,
+      "sha256": "26036988f95dc911083736c6f3a66a0144ad60a371c94e376e70b5de7046605e"
+    },
+    "kinsn/Module.symvers": {
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "kinsn/.bpf_x86_bmi2_shift.mod.o.cmd": {
+      "size": 73590,
+      "sha256": "39b427d326ade88df02cdc04945fab31ab3370f60df492818b5b5209f5300de5"
+    },
+    "kinsn/bpf_x86_rotate.mod": {
+      "size": 19,
+      "sha256": "f51174bc568fee1eb12a0a71639b47e64677bd1d0bd64921bd87be2969aa4508"
+    },
+    "kinsn/.bpf_x86_rotate.ko.cmd": {
+      "size": 249,
+      "sha256": "e8f9e396390fa37b535d4747a340b9a158209fc07ab5d7f642d97123e900a844"
+    },
+    "kinsn/.bpf_x86_bmi2_shift.ko.cmd": {
+      "size": 265,
+      "sha256": "72667f9f1c27be7a996da3e129a99f40d63a0d4a7949ac90d1081dd81405b9f0"
+    },
+    "kinsn/bpf_x86_movbe.ko": {
+      "size": 633904,
+      "sha256": "1ecabab7dd74fa5890f37e84f02b12191f6fe8eb23e462a6fb3cdcf02805deca"
+    },
+    "kinsn/.bpf_x86_prefetch.o.cmd": {
+      "size": 107146,
+      "sha256": "1cb74d3f56418191d95f418f3f3f77481ade686e5e6836f21877ba7f24c8a871"
+    },
+    "kinsn/bpf_x86_popcnt.mod": {
+      "size": 19,
+      "sha256": "a6adb99a97ba78d7986bc01159347d1ae03da3b4d5cb487f13f42b2b933053cd"
+    },
+    "kinsn/bpf_x86_native_lab.mod.o": {
+      "size": 155680,
+      "sha256": "1a8bef777901bf6e711cba2379156919c304d78488d318b1a41c4a163582bfee"
+    },
+    "kinsn/.bpf_x86_cmov.o.cmd": {
+      "size": 107086,
+      "sha256": "3ee47644aa7792b8578e8c73cac5f842a6af807ac60f5bb9556f68f257992543"
+    },
+    "kinsn/.bpf_x86_not.o.cmd": {
+      "size": 107071,
+      "sha256": "c46dcab67a271772368d974352a973d5c2030d18eeee1bac57a5aa3f1751fae7"
+    },
+    "kinsn/bpf_x86_rotate.mod.o": {
+      "size": 153816,
+      "sha256": "ac19db0bf70b4887255ce1b70829a50b00f35159f22f74462a10bb27ce366299"
+    },
+    "kinsn/bpf_x86_prefetch.mod": {
+      "size": 21,
+      "sha256": "39501435ad362ba005c83edb9f6226be6c6282ad5b9bc3063f7a13577dc85ef3"
+    },
+    "kinsn/bpf_x86_not.o": {
+      "size": 451832,
+      "sha256": "feaeca22806f6940f1dad0aeb19a73b84fe3ff37339193d43ced14bfdb8cc5fe"
+    },
+    "kinsn/.bpf_x86_mov.mod.o.cmd": {
+      "size": 73485,
+      "sha256": "cb4dc0c9effa3ee30cd0df266796b66e72e411ce55db6c543033a8383b8149d6"
+    },
+    "kinsn/bpf_x86_shd.mod.c": {
+      "size": 713,
+      "sha256": "82da21a80c68bd1e3ae361745bdc6d191640135b27357057159d1dfe6cac97c1"
+    },
+    "kinsn/bpf_x86_popcnt.mod.c": {
+      "size": 747,
+      "sha256": "881c553f85c1b3ce04d36ad7c591fb4bbaf074da6464aaa70ec9be37585edfde"
+    },
+    "kinsn/.bpf_x86_alu.ko.cmd": {
+      "size": 237,
+      "sha256": "a773c7f7513c77fcad84d6709bbce140478d3f2b12498071978869e93a81c484"
+    },
+    "kinsn/bpf_x86_movbe.o": {
+      "size": 469968,
+      "sha256": "5f86d6b6a8b81f267a9609d7bc773f7eac317c8945307c4088daa82340f525bf"
+    },
+    "kinsn/bpf_x86_movbe.mod.o": {
+      "size": 153872,
+      "sha256": "4b1b81e744b6e5e37377942c0a9b9a9c2f99b23e7ee3b3cb9a58e1a7cc746bae"
+    },
+    "kinsn/.bpf_x86_mov.mod.cmd": {
+      "size": 113,
+      "sha256": "fc4fff9a04f7f41191e828c8601f57276ca0df0b5006132667b81722d0e6995b"
+    },
+    "kinsn/.bpf_x86_lea.mod.o.cmd": {
+      "size": 73485,
+      "sha256": "084a3524cdd3a398801a0c0b91c4fd0e3cc80d316640e1de38eebf2d8e9dbb1b"
+    },
+    "kinsn/bpf_x86_byteorder.ko": {
+      "size": 621264,
+      "sha256": "94e9526a5968c695b90122c1a80496688b2be30b82449c81474b6e11a6807c6a"
+    },
+    "kinsn/bpf_x86_alu.mod": {
+      "size": 16,
+      "sha256": "2a63acdc149889e6e9472fcfdfffbd4cbe25d5d7304a069510492e2eac94d702"
+    },
+    "kinsn/bpf_x86_cmov.ko": {
+      "size": 620416,
+      "sha256": "2a17232fea09c25027b776ed67b7ca0399a94bbfae1483a2e52288b1b3ccc9a2"
+    },
+    "kinsn/.bpf_x86_alu.mod.o.cmd": {
+      "size": 73485,
+      "sha256": "df453cca007bf71dc73295ce8534eff6cf3ff4d61afd7ce4586245b7d501a02e"
+    },
+    "kinsn/.bpf_x86_prefetch.mod.o.cmd": {
+      "size": 73560,
+      "sha256": "41739f835a15d30015442058404d2f224039c3ecb829b5f25b491b3bf3aec0c8"
+    },
+    "kinsn/bpf_x86_alu.mod.o": {
+      "size": 153864,
+      "sha256": "072545f212c74d546012f6bd5412a9cc37853f5f8831980ffa77bd14bda94927"
+    },
+    "kinsn/bpf_x86_bmi2_shift.ko": {
+      "size": 664800,
+      "sha256": "c20b2ee435f9bf47ca67ba66c6cb7770d4b8536322c73e2c4a5fb2bcc3a78629"
+    },
+    "kinsn/.bpf_x86_bmi1.o.cmd": {
+      "size": 107086,
+      "sha256": "d816c0a710036f3bf18a6b76d5eae1eefa402e52d2ba9ad5025bf27517bda91e"
+    },
+    "kinsn/bpf_x86_lea.ko": {
+      "size": 638864,
+      "sha256": "0057e415e04dbcd6f47fbd3816327339eceee929417ab5aa1da10cd4e5293d56"
+    },
+    "kinsn/.bpf_x86_popcnt.o.cmd": {
+      "size": 107116,
+      "sha256": "b30c6d8de71fdbcd594c7c41b6ff3fb26f21a3d19ebb69d166d26ce801623ce8"
+    },
+    "kinsn/.bpf_x86_imul.mod.cmd": {
+      "size": 116,
+      "sha256": "be07a7285ef31038667aa9d920c3551a315d031d643674d1dff6f16df684dd15"
+    },
+    "kinsn/bpf_x86_mov.mod.o": {
+      "size": 153864,
+      "sha256": "e87f8d3919c4a4dd6f05a1921c2ba76439f6bc792a1f4db3c2b09738a67d3816"
+    }
+  }
+}

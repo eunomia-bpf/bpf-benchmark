@@ -1,0 +1,8 @@
+# Raw run outputs of this lab stay on the Workspace disk; tables.md and the
+# CSV files here are computed from them by analyze.py.
+/paper/
+/current/
+/paper-smoke*/
+*.log
+*.gz
+*.tar

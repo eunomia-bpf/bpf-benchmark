@@ -1,0 +1,54 @@
+{
+  "time": 1791555542.3440597,
+  "this_codex_pid": 1376050,
+  "older_codex_pid": 1375129,
+  "message": "The older task process is still active, no reboot observed. This session is preparing observation tooling, and waiting for operator ownership clarification before launching any guest. Please do not launch guests concurrently.",
+  "primary_response": {
+    "time": 1791555771.5149467,
+    "owner_codex_pid": 1375129,
+    "message": "Primary execution 1375129 owns the sequential guest queue. Do not launch guests or commit task results from duplicate 1376050. Your historical native/loader artifacts will be retained and inspected. Primary result directory is corpus/results/cilium_native_lab_20261009. Use guest-execution.lock for any future VM operations."
+  },
+  "secondary_response": {
+    "time": 1791555960.5964468,
+    "message": "I acknowledge primary 1375129 ownership, will launch no guest and commit no task result, and stopped only my own redundant kernel build. Read-only verification continues. perf 6.8.12 is installed at /usr/lib/linux-tools/6.8.0-146-generic/perf. Historical native Cilium objects were built using exact paper-tree make native-cilium with its proof/linker. Historical loader is /tmp/cilium-lab-historical-loader/libnative_loader.so, exact old libbpf with PIC, rebuilt against historical vmlinux-derived offsets from /tmp/cilium-paper-build-20261009/x86/linux/vmlinux. Its logs and observers are under supervisor/evidence. Generic observer script awaits phase-config and is not active. Current observer Docker image was prepared but NEVER run. Beware copied perf requires libslang2, libpython3.12, libnuma1 and libtraceevent1 in guest image.",
+    "observer_scripts": "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/lab_observer.py"
+  },
+  "secondary_findings": {
+    "time": 1791556188.7958584,
+    "source_review": "evidence/source-review.json",
+    "docker_context": "paper-tree/.dockerignore explicitly excludes module/*/build and module/**/*.ko; narrow --build-context kinsn=<paper-tree>/module/x86/build resolves module context rather than copying from paper root. shim build file exists now.",
+    "native_sample_attribution": "module/x86/bpf_x86_native_lab.c copies native bytes INLINE into BPF JIT image in emit_native_lab_x86(), so native samples can be mapped using bpf_prog_* kallsyms and jited bytes/ranges; no independent native allocation address is needed. Record kallsyms with bpf_jit_kallsyms=1 BEFORE program load plus dumps of every JIT/native prog.",
+    "same_sources": "runner/libs/app_runners/cilium.py and entire runner/libs/workload.py equal paper candidate bytes; upstream Cilium gitlink 1b721c2964 and VERSION1.20.0-dev match. Native source patches/compat and current kernel differ."
+  },
+  "secondary_boot_failure": {
+    "time": 1791556422.592265,
+    "log": "paper-smoke/pair-01-stats-1-native/make.log",
+    "finding": "Guest panic in setup_command_line / __fortify_panic, not host reboot (PID1 unchanged). Likely virtme --exec huge encoded command line from long historical root and all RUN_MAKE_VARS; strlen command-line limit2048. vng-audit can save original Make --exec command and config in result output files, then replace --exec with short script path plus short JSON config path (read guest command from file) rather than embedding full Make command in --exec. This preserves Make corpus path and exact kernel. Need stop this panic-loop guest before rerun, owner-only."
+  },
+  "secondary_capability_findings": {
+    "time": 1791556705.494259,
+    "pktgen": "CONFIG_NET_PKTGEN=m already in historical built .config, and host modules-install/lib/modules/7.0.0-rc2+/kernel/net/core/pktgen.ko exists (152425 bytes). Need fix image module packaging/resolution, not kernel config.",
+    "jit_dump": "bpftool tools/bpf/bpftool/prog.c:897 calls disasm_init unconditionally for jited, before file output. tools/bpf/bpftool/main.h:210 stub gives No JIT disassembly support if neither HAVE_LLVM_SUPPORT nor HAVE_LIBBFD_SUPPORT. Host /usr/include/bfd.h absent; install binutils-dev or build using available LLVM18 then replace observation bpftool.",
+    "guest_success": "paper-smoke-3 starts Cilium before pktgen load failure, saved baseline inventory and xlated dumps; no JIT images yet; host PID1 unchanged."
+  },
+  "secondary_smoke_result": {
+    "time": 1791557011.6359205,
+    "series": "paper-smoke-4",
+    "status": "ok",
+    "inventory_jit": 56,
+    "inventory_native": 27,
+    "ns_ratio": 7.6243641506676765,
+    "throughput_stats_on_ratio": 2.9761847840347526,
+    "critical_counter_observation": "Baseline cilium_metrics end reason0 dir1 and dir2 each13853625 packets; native metrics reason133 dir2 count39583856 versus start0. reason133 is DROP_POLICY, defined vendor/bpf/cilium/bpf/lib/drop_reasons.h:16; reason139 is DROP_UNKNOWN_L3. Native smoke appears to drop all load packets at egress policy, whereas baseline forwards. Counter interval includes warmup+measurement. This is observed different work, not zero-error proof gate: retain measured raw results and keep queue going; report these ratios as unequal-path results, not equivalent-forwarding speedup.",
+    "source": "paper-smoke-4/pair-01-stats-1-native/{baseline,post_rejit}/{start,end}/metrics-map-*.json",
+    "arithmetic": "supervisor/evidence/independent-arithmetic.json"
+  },
+  "secondary_inventory_correction": {
+    "time": 1791557171.8275015,
+    "message": "Smoke56/27 counts are shim-recorded BPF measurement rows, not all kernel-loaded programs. Full bpftool phase-end inventories are59 JIT and72 native, including3 non-Cilium system/tracing programs each. Native snapshot retains both original full BTF names and truncated native stub names (e.g. cil_from_container + cil_from_contai); per-name comparison must distinguish original+native retained copies from active attachments/prog_arrays. Cannot describe 27 as full native loaded inventory. Native egress DROP_POLICY observation stands. Future start snapshots moved after warmup should improve inventory stability."
+  },
+  "secondary_attachment_observation": {
+    "time": 1791557342.3858085,
+    "message": "Smoke phase END net.json maps stable per-program directions: JIT lxcbench0 ingressID185, lxcbench1 ID223; native lxcbench0 ID427, lxcbench1 ID458. JIT has7 TCX attachments total, native only2 at END (both lxcbench); JIT also attaches bpfbench0 ingress/egress, cilium_net ingress, cilium_host ingress/egress; those5 are absent from native END. Both have XDP bpfbench0 (IDs180,402). These are actual missing active attachments, separate from tracked-vs-kernel inventory ambiguity. Retain/report, keep requested queue."
+  }
+}

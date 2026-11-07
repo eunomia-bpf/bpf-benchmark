@@ -1,0 +1,54 @@
+[
+  {
+    "path": "llvm-backend/llvm",
+    "required": "3663de5d5a4593d24f45b3d379e67ed242ed1452"
+  },
+  {
+    "path": "vendor/libbpf",
+    "required": "6ddc03d4fe0535ac0fb6c8525db31ac88a018ddd"
+  },
+  {
+    "path": "vendor/linux-framework",
+    "required": "8e116c79d1043f8e4dadd708f3a1ee5a26d19246"
+  },
+  {
+    "path": "vendor/llvmbpf",
+    "required": "96fb87aefa5fd80b6db5bf60f8e389de3465fef2"
+  },
+  {
+    "path": "vendor/repos/bcc",
+    "required": "07ca7ba9df379bf063b3b2afca6983b8d91bc2a2"
+  },
+  {
+    "path": "vendor/repos/bpftrace",
+    "required": "75aca47dd8e1d642ff31c9d3ce330e0c616e5b96"
+  },
+  {
+    "path": "vendor/repos/cilium",
+    "required": "1b721c2964e7799cab3e18c38066905ea240fa34"
+  },
+  {
+    "path": "vendor/repos/cilium-ebpf",
+    "required": "88256f7afc6f895e6396d0b85e6e9c4e2e1d2cf0"
+  },
+  {
+    "path": "vendor/repos/deepflow",
+    "required": "1db10dd0d7c9381dd8ad3a4db03d7e1bcbe46c62"
+  },
+  {
+    "path": "vendor/repos/katran",
+    "required": "3f3a3daedfd136315c908cae94ed1fbcb789bf45"
+  },
+  {
+    "path": "vendor/repos/opentelemetry-ebpf-profiler",
+    "required": "2689a430a04318cb69f79f76adcba10dd40bb218"
+  },
+  {
+    "path": "vendor/repos/tetragon",
+    "required": "8ca052908600a83c4fad7429a3023a921bc15851"
+  },
+  {
+    "path": "vendor/repos/tracee",
+    "required": "0c93eb3d2336e7a134b4d480fa55d20d45603dd7"
+  }
+]
