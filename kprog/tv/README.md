@@ -1610,3 +1610,16 @@ Full states and outside-private36 memory values/init/permissions are retained.
 These are model-only proofs, with no unsafe native execution. The dated
 context-faults JSON/log records all six axiom audits. All-outcome composition,
 universal relational simulation and ABI/platform/materialization remain open.
+
+### All context-read and packet-write outcomes
+
+`captured_all_read_write_outcomes` now constructs the actual canonical native
+and B platform executions from entry for every guest read/write permission
+assignment: either context-load fault, guard return0, four writes/return2, or
+any first packet-store fault. No guest access success/failure or branch outcome
+is assumed. Complete partial/final states and precise private memory agreement
+are retained. Setup-only projection keeps every guest suffix and fault.
+Private-frame permissions, entry/context relation, stack-input witness and
+captured platform remain explicit. This is a canonical representative execution
+correspondence, not yet a universal relational or unconditional artifact TV
+certificate. Evidence: all-read-write-outcomes JSON/log in the dated results.

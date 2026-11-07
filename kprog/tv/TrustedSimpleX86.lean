@@ -2656,6 +2656,117 @@ theorem second_context_fault_correspondence (env : BPF.Environment) (n : X86.Sta
     exact (spill_preserves_guest p pointer).2.2 address
       (fun inside => outside (initialization_spill_private _ _ inside))
 
+
+/-- An error from the existing canonical scalar read is precisely its access
+fault and failed permission, never an invented result or different fault. -/
+theorem canonical_read_error {m : Memory} {address : Word} {count : Nat} {fault : Fault}
+    (failed : readMemory m address count=.error fault) :
+    permitted m.readable address count=false ∧ fault=.read address count := by
+  cases permission : permitted m.readable address count with
+  | false =>
+    have same : (.read address count : Fault)=fault := by simpa [readMemory,permission] using failed
+    exact ⟨rfl,same.symm⟩
+  | true => simp [readMemory,permission] at failed
+
+/-- These descriptions use only actual canonical context reads and the
+already certified captured paths; they add no checks to either artifact. -/
+def allReadSetupTrace (p : BPF.State) : List Event :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error _ => []
+  | .ok (pointer,first) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error _ => [first,.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true]
+    | .ok (limit,second) => prefixEvents p pointer first second++initializationEvents (p.regs 10) pointer limit
+
+def allReadGuestTrace (p : BPF.State) : List Event :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error fault => [.fault fault]
+  | .ok (pointer,_) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error fault => [.fault fault]
+    | .ok (limit,_) => completeGuestSuffix p.memory pointer limit
+
+def allReadNativeTrace (p : BPF.State) : List Event :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error fault => [.fault fault]
+  | .ok (pointer,first) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error fault => [first,.fault fault]
+    | .ok (limit,second) => [first,second]++completeGuestSuffix p.memory pointer limit
+
+def allReadNativeFinal (n : X86.State) (p : BPF.State) : X86.State :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error _ => n
+  | .ok (pointer,_) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error _ => nativeAfter n pointer
+    | .ok (limit,_) => completeNativeFinal n pointer limit
+
+def allReadProofFinal (p : BPF.State) (stack : Word) : BPF.State :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error _ => p
+  | .ok (pointer,_) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error _ => afterSpill p pointer
+    | .ok (limit,_) => completeProofFinal p pointer limit stack
+
+/-- Captured complete executions for every canonical context-read and packet-
+write outcome, from entry to actual EXIT or first guest fault. Private frame,
+platform and entry-ABI premises remain explicit. This existence theorem does
+not yet cover every canonical relational native execution or materialization. -/
+theorem captured_all_read_write_outcomes (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack : Word) (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n (allReadNativeTrace p) (allReadNativeFinal n p) ∧
+    Execution (initializedInstructionStep env) p (allReadSetupTrace p++allReadGuestTrace p) (allReadProofFinal p stack) ∧
+    (allReadSetupTrace p).filterMap (initializationProjectEvent (p.regs 10))++allReadGuestTrace p = allReadNativeTrace p ∧
+    initializationAgreesOutside (p.regs 10) (allReadNativeFinal n p).memory (allReadProofFinal p stack).memory := by
+  cases read0 : readMemory p.memory (p.regs 1) 8 with
+  | error fault =>
+    obtain ⟨bad,rfl⟩ := canonical_read_error read0
+    obtain ⟨nrun,prun,mem⟩ := first_context_fault_correspondence env n p nativePC proofPC active context memory bad
+    refine ⟨?_,?_,?_,?_⟩
+    · simpa only [allReadNativeTrace,allReadNativeFinal,read0] using nrun
+    · simpa only [allReadSetupTrace,allReadGuestTrace,allReadProofFinal,read0,List.nil_append] using prun
+    · simp only [allReadSetupTrace,allReadGuestTrace,allReadNativeTrace,read0,List.filterMap_nil,List.nil_append]
+    · simp only [allReadNativeFinal,allReadProofFinal,read0]
+      rw [mem]
+      exact ⟨rfl,rfl,fun _ _ => ⟨rfl,rfl⟩⟩
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | error fault =>
+      obtain ⟨bad,rfl⟩ := canonical_read_error read1
+      obtain ⟨nrun,prun,projection,mem⟩ := second_context_fault_correspondence env n p pointer first
+        nativePC proofPC active context memory read0 write40 guest0 bad
+      refine ⟨?_,?_,?_,?_⟩
+      · simpa only [allReadNativeTrace,allReadNativeFinal,read0,read1] using nrun
+      · simpa only [allReadSetupTrace,allReadGuestTrace,allReadProofFinal,read0,read1,List.cons_append,List.nil_append] using prun
+      · have kept := initialization_read_retained p.memory (p.regs 10) _ _ _ first read0 guest0
+        simp only [allReadSetupTrace,allReadGuestTrace,allReadNativeTrace,read0,read1,
+          List.filterMap_cons,List.filterMap_nil,kept]
+        simp [initializationProjectEvent,initializationSlot,valueBytes]
+      · simpa only [allReadNativeFinal,allReadProofFinal,read0,read1] using mem
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      obtain ⟨nrun,prun,projection,mem,_⟩ := complete_all_store_outcomes_correspondence env n p pointer limit stack first second
+        nativePC proofPC active context memory nativeStack read0 read1 write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+      refine ⟨?_,?_,?_,?_⟩
+      · simpa only [allReadNativeTrace,allReadNativeFinal,read0,read1] using nrun
+      · simpa only [allReadSetupTrace,allReadGuestTrace,allReadProofFinal,read0,read1] using prun
+      · simpa only [allReadSetupTrace,allReadGuestTrace,allReadNativeTrace,read0,read1] using projection
+      · simpa only [allReadNativeFinal,allReadProofFinal,read0,read1] using mem
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2890,3 +3001,7 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.first_context_fault_correspondence
 
 #print axioms KProgTV.TrustedSimpleX86.second_context_fault_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.canonical_read_error
+
+#print axioms KProgTV.TrustedSimpleX86.captured_all_read_write_outcomes
