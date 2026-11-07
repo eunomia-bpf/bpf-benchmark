@@ -1,0 +1,10 @@
+{
+  "base": "f734ec40200cbcd1816f37b1d7f5c07fad4d5b64",
+  "C_direct_SP_candidate_base": "e8034604702e23a1ec5e242fd4ebec2a96b1cfaf",
+  "C_header_overlays": {
+    "kprog/x86/x86_sim_local_bpf.h": "7a81468d6cacf79f3d0aaa06510292a518a8900f5089053b40ebc87cd01987bb",
+    "kprog/x86/x86_sim.h": "272eee4ced9b3a28062db130d1cb2c625409bc48703712effee1dfb268d10e14"
+  },
+  "F_observer_generate_sha256": "0ec6b4dc2130749450d33c58503fcf5ee8857266b204b2b90b60581971bdf902",
+  "scope": "exact published f734ec402 direct-SP plus F entry-base observer; excludes ROOT stack prototype"
+}

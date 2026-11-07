@@ -216,6 +216,8 @@ def main():
     if len(insns) != len(forms):
         raise RuntimeError(f"decoded {len(insns)} instructions for {len(forms)} forms")
     c = ['#include "../driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{snapshot}/kprog/{arch}/{arch}_sim_local_bpf.h"']
+    if arch == "x86":
+        c += ['extern uint64_t native_stack_base;']
     if arch == "arm64":
         c += ['extern uint64_t native_stack_base;', 'static void arm64_sim_unsupported_opcode(void) { abort(); }', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
     entries, coverage = [], []
@@ -240,7 +242,7 @@ def main():
     for i, (assembly, encoded, special, native_body, decoded) in enumerate(pairs):
         c += [f"extern unsigned char native_pc_{i}, native_next_{i};", f"extern void native_{i}(struct state *);", f"static void sim_{i}(struct state *s) {{"]
         if arch == "x86":
-            c += ["X86_SIM_L_DECLARE_STATE(); X86_SIM_L_DECLARE_STACK(); __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;"]
+            c += ["X86_SIM_L_DECLARE_STATE(); X86_SIM_L_DECLARE_STACK(); __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;", "__x86_native_stack_base = native_stack_base;"]
             regs = ["rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi"] + [f"r{j}" for j in range(8, 16)]
             c += [f"__x86_{reg}.ptr = (void *)(uintptr_t)s->r[{j}];" for j, reg in enumerate(regs)]
             c += ["for (unsigned k=0;k<64;k++) __x86_stack_mem.b[k]=s->stack[k];"]

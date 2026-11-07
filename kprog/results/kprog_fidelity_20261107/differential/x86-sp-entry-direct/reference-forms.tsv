@@ -1,0 +1,13 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	mov rax, rsp	1024	1024	0	1024	checked	none
+1	mov eax, esp	1024	1024	0	0	checked	none
+2	lea rax, [rsp+16]	1024	1024	0	1024	checked	none
+3	cmp rsp, 0	1024	1024	0	0	checked	none
+4	mov rsp, rax	1024	1024	0	1024	checked	none
+5	mov esp, eax	1024	1024	0	0	checked	none
+6	lea rsp, [rsp+16]	1024	1024	0	0	checked	none
+7	add rsp, 16	1024	1024	0	0	checked	none
+8	push rsp	1024	1024	0	0	checked	none
+9	pop rsp	1024	1024	0	0	checked	none
+10	push sp	1024	1024	0	0	checked	none
+11	pop sp	1024	1024	0	0	checked	none
