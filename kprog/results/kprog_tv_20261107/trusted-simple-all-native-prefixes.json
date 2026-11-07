@@ -1,0 +1,82 @@
+{
+  "status": "every_finite_canonical_decoded_native_execution_has_only_events_from_checked_complete_trace",
+  "utc": "2026-11-07T14:19:07.898889+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleSafety.guarded_native_reject_end",
+    "KProgTV.TrustedSimpleSafety.complete_native_no_fault_end",
+    "KProgTV.TrustedSimpleSafety.all_read_native_no_fault_end",
+    "KProgTV.TrustedSimpleSafety.captured_native_prefix_effects_checked"
+  ],
+  "claims": [
+    "Complete no-fault execution reaches actual payload end PC60; both context read failures and every store failure are derived from canonical outcomes.",
+    "For ANY finite decoded native execution from PC0, every event is checked whenever the complete canonical trace is checked.",
+    "Native execution has arbitrary accepted decoder extents, guest permissions, actual branch outcomes and undefined AF choices. No execution fuel or determinism premise.",
+    "Terminal fault repeats in the execution wrapper are explicitly covered; actual complete path witness is constructed, not assumed."
+  ],
+  "premises": [
+    "native entry PC0",
+    "every event in the complete native trace is checked (concrete verifier/binding instantiation follows separately)",
+    "single canonical reference ISA/decoder/memory"
+  ],
+  "not_yet_claimed": [
+    "final concrete accepted-B/exact-artifact binding instantiation of universal-prefix theorem",
+    "strict B basic-block correspondence across reordered guards",
+    "semantic entry/ABI/RET/platform transport",
+    "unconditional whole-artifact TV or other programs"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "d9db0bfc83d5b74d197e98e66711bcc3b1418325d7345ab19a3ba2397398c1c8",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate -o trusted-simple-cfg-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.guarded_native_reject_end": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.complete_native_no_fault_end": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.all_read_native_no_fault_end": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.captured_native_prefix_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "d015631a355e61044fb20c1552f692da833ede6a4d56a848d82868438b86e53d",
+    "combined_log_sha256": "e8b7e9e53b880413fdcda9f0c9498daf05bfbf68aeee1cf9a6981a4e1c9030cd"
+  },
+  "trusted": [
+    "single canonical reference ISA/decoder/memory",
+    "Lean kernel/logical axioms and reported native proof reduction",
+    "verifier soundness/kernel binding/entry and platform semantics remain explicit in concrete safety composition"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "f02a45d6496e072ceae233ce6725c9690577e5441dfd6969ec8a6b75cf47ce08",
+    "kprog/tv/Makefile": "02aeab2e0864840dac9a7a815ec0ae335cb4af559031a438d69d22fa382925eb",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  }
+}

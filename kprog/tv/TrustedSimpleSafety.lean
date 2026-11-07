@@ -720,6 +720,85 @@ theorem related_payload_end_quiet (checked : Event → Prop) (terminal : X86.Sta
   rw [← same] at decoded
   exact False.elim (simple_native_end_no_decode terminal entry instruction atEnd decoded)
 
+
+/-- A successful captured guard return reaches the actual payload end. -/
+theorem guarded_native_reject_end (n : X86.State) (pointer limit : Word)
+    (reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit) :
+    (guardedNativeFinal n pointer limit).pc=60 := by
+  by_cases first : pointer>limit
+  · simp only [guardedNativeFinal,first,ite_true]
+    change (if pointer>limit then (60 : Word) else 17)=60
+    exact if_pos first
+  · simp only [guardedNativeFinal,first,ite_false]
+    rw [remaining_native_successor]
+    have reg6 : (guardFinal (nativePrefixFinal n pointer limit)).gpr 6=pointer := by
+      simp +decide [guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,
+        nativeAfterSecond,nativeAfter]
+    have reg2 : (guardFinal (nativePrefixFinal n pointer limit)).gpr 2=limit := by
+      simp +decide [guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,
+        nativeAfterSecond,nativeAfter]
+    rw [reg6,reg2,if_pos (reject.resolve_left first)]
+
+/-- No-fault completion derives either a guard return or four successful
+stores; it does not assume a packet-access outcome. -/
+theorem complete_native_no_fault_end (n : X86.State) (pointer limit : Word)
+    (first second : Event) (clean : (completeNativeResult n pointer limit first second).fault=none) :
+    (completeNativeResult n pointer limit first second).state.pc=60 := by
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · simpa only [completeNativeResult,completeNativeFinal,reject,ite_true] using
+      guarded_native_reject_end n pointer limit reject
+  · have success : packetFirstFailure n.memory pointer=4 := by
+      by_cases success : packetFirstFailure n.memory pointer=4
+      · exact success
+      · simp only [completeNativeResult,completeNativeFault,reject,ite_false,success] at clean
+        cases clean
+    simp only [completeNativeResult,completeNativeFinal,reject,ite_false,packetNativeOutcome,
+      success,ite_true,packetNativeFinal]
+
+/-- Every complete no-fault outcome of the actual byte-decoded payload ends
+at PC60, including both possible context read failures by contradiction. -/
+theorem all_read_native_no_fault_end (n : X86.State)
+    (clean : (allReadNativeResult n).fault=none) : (allReadNativeResult n).state.pc=60 := by
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault =>
+    simp only [allReadNativeResult,read0] at clean
+    cases clean
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault =>
+      simp only [allReadNativeResult,read0,read1] at clean
+      cases clean
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      simp only [allReadNativeResult,read0,read1] at clean ⊢
+      exact complete_native_no_fault_end n pointer limit first second clean
+
+/-- All finite decoded native executions, with arbitrary extents, permission
+outcomes and undefined-output observations, inherit the checked complete
+trace. Fault repeats allowed by the wrapper are covered as well. -/
+theorem captured_native_prefix_effects_checked (checked : Event → Prop)
+    (n : X86.State) (position : n.pc=0)
+    (allowed : ∀ event ∈ (allReadNativeResult n).events, checked event)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (relationalNativeInstructionStep 0 native) n trace last) :
+    ∀ event ∈ trace, checked event := by
+  have valid : simpleClosedPC n.pc := by simp [simpleClosedPC,simpleNativeOffsets,position]
+  have complete := all_read_native_complete_execution n position
+  have quiet : ∀ {state events next}, nativeStatesRelated (allReadNativeResult n).state state →
+      relationalNativeInstructionStep 0 native state events next →
+      nativeStatesRelated (allReadNativeResult n).state next ∧ ∀ event ∈ events, checked event := by
+    intro state events next relation step
+    cases outcome : (allReadNativeResult n).fault with
+    | none => exact related_payload_end_quiet checked _ (all_read_native_no_fault_end n outcome) relation step
+    | some fault =>
+      have bad : (allReadNativeResult n).fault.isSome=true := by rw [outcome]; rfl
+      exact related_terminal_quiet_from_fault_path checked (all_read_native_path_exists n position)
+        valid bad allowed relation step
+  exact execution_checked_of_related_complete nativeStatesRelated
+    related_native_instruction_steps_match checked complete allowed quiet
+    (native_states_related_refl n valid) run
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -787,3 +866,11 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_fault_path
 
 #print axioms KProgTV.TrustedSimpleSafety.related_payload_end_quiet
+
+#print axioms KProgTV.TrustedSimpleSafety.guarded_native_reject_end
+
+#print axioms KProgTV.TrustedSimpleSafety.complete_native_no_fault_end
+
+#print axioms KProgTV.TrustedSimpleSafety.all_read_native_no_fault_end
+
+#print axioms KProgTV.TrustedSimpleSafety.captured_native_prefix_effects_checked

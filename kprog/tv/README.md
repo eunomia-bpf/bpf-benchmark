@@ -1873,3 +1873,11 @@ coupling covers every related terminal state, including the wrapper's explicit
 fault-repeat overapproximation. This closes the terminal premise needed by
 related-prefix composition; its final concrete instantiation and entry/ABI/RET/
 platform transport remain open. No ISA or runtime behavior changes.
+
+`trusted-simple-all-native-prefixes.json` records the concrete simple-payload
+instantiation of related-prefix composition. Every finite decoded native
+execution from PC0 emits only checked events if its constructed complete
+canonical trace is checked. Arbitrary extents, guest permissions, branches and
+undefined AF are covered, with no fuel or determinism premise. No-fault runs
+reach PC60; terminal fault repeats are covered by the checked-loop theorem.
+The accepted-B/full-artifact binding instantiation follows separately.
