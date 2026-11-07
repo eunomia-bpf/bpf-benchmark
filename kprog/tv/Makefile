@@ -863,3 +863,8 @@ trusted-simple-current-audit: trusted-simple-entry-certificate
 trusted-simple-jit-certificate: trusted-simple-safety-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleJIT.olean ../tv/TrustedSimpleJIT.lean
+
+.PHONY: trusted-simple-b29-certificate
+trusted-simple-b29-certificate: trusted-simple-entry-certificate
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimpleB29.olean ../tv/TrustedSimpleB29.lean

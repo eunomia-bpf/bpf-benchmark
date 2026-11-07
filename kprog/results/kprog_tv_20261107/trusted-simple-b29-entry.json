@@ -1,0 +1,69 @@
+{
+  "status": "actual_accepted_candidate_B29_initial_SP_and_context_read_success_components_proved_not_whole_TV",
+  "utc": "2026-11-07T17:10:29.259652+00:00",
+  "capture_commit": "26d51b0b942fbcde93ce3a1aab3922b548ff0a09",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "B_instructions": 29,
+  "native_bytes": 60,
+  "claims": [
+    "Exact accepted B29 bytes decoded by the existing BPF specification; nativeP is byte-identical to the existing canonical60-byte capture.",
+    "The actual first marker is nativeSP (offset1), ABIversion2 (imm2), with empty memory/helper effects.",
+    "Actual B29 PC1/2 use the same existing declared kernel XDP expansion bytes at their correct positions, giving64-bit data then end reads.",
+    "First3 BPF steps and first2 byte-decoded native instructions have identical ordered context-read events and full explicit endpoints, loaded words and unchanged memory; no simulator spill."
+  ],
+  "premises": [
+    "initial nativePC0/BPFPC0 active, exact common argument word and memory",
+    "bound nativeSP input is defined, arbitrarily64-bit",
+    "successful two context reads explicit in this initial component",
+    "the declared/bound XDP platform expansion relation; runtime conversion provenance remains its kernel trust boundary"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-b29-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29.stack_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.data_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.end_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_context_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "log_sha256": "f194478aacda5942f3f65d70dab5640daa846f12c2fc9a6264bfedcd60b756bc"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "35eb273339678694337c20f0092c92b3f9d23ee5467a47bb05a1a6848e53cae7",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "74455f9271e4099ce25ba721bc5f57b377469c3ee1ecb9716611aa1509a64e2d"
+  },
+  "remaining": [
+    "Read-fault cases, firstguard/fullarchitecturalbasic-block relation, remainingguards/stores and universal per-program TV.",
+    "Canonical header promotion and allother micro/application programs."
+  ],
+  "trusted": [
+    "single canonicalV nativeISA and shared BPF/referenceMemory/platform specification",
+    "Lean kernel and reported logical axioms",
+    "actual verifier/native/JIT capture and kernel binding/XDP platform provenance"
+  ]
+}

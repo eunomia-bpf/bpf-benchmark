@@ -2132,3 +2132,12 @@ check passes after a JIT-only decode-normalization correction. Actual kernel
 caller/profile/stack premises, the full native-body embedding and exact B29
 TV remain explicit. The caller return read is not silently classified as a
 verifier-checked guest access.
+
+`make -C kprog/tv trusted-simple-b29-certificate` checks the actual accepted
+candidate bytes in `TrustedSimpleB29.lean`. The first SP marker and two context
+loads match the canonical native two-load execution with the same ordered
+reads and full explicit endpoints. Offset1 selects SP; imm2 is the input ABI
+version. The existing declared XDP expansions are applied at PCs1/2, with no
+simulator spills. Four axiom audits pass; this initial component explicitly
+assumes successful reads. Read faults, guards/stores and the full basic-block
+relation remain required, so this is not a whole-program TV certificate.
