@@ -860,6 +860,6 @@ trusted-simple-current-audit: trusted-simple-entry-certificate
 		-o ../tv/build/TrustedSimpleCurrent.olean ../tv/TrustedSimpleCurrent.lean
 
 .PHONY: trusted-simple-jit-certificate
-trusted-simple-jit-certificate: trusted-simple-entry-certificate
+trusted-simple-jit-certificate: trusted-simple-safety-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleJIT.olean ../tv/TrustedSimpleJIT.lean

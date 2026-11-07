@@ -1,4 +1,4 @@
-import TrustedSimpleX86
+import TrustedSimpleSafety
 
 /-! The actual82-byte fresh jit-invocation capture. This certificate covers its
 entry wrapper independently of the unvalidated current B30. Stack writes are
@@ -7,7 +7,7 @@ set_option maxRecDepth 4096
 set_option maxHeartbeats 2000000
 namespace KProgTV.TrustedSimpleJIT
 open KProgFormal.Reference
-open TrustedSimpleX86
+open TrustedSimpleX86 TrustedSimpleSafety
 
 def image : Array Byte := #[0xf,0x1f,0x44,0x0,0x0,0xf,0x1f,0x0,0x55,0x48,0x89,0xe5,0x41,0x57,0x48,0x8b,0xf,0x48,0x8b,0x57,0x8,0x48,0x89,0xce,0x31,0xc0,0x48,0x39,0xd6,0x77,0x2b,0x48,0x8d,0x7e,0x8,0x48,0x39,0xd7,0x77,0x22,0x48,0x83,0xc6,0x48,0x48,0x39,0xd6,0x77,0x19,0x66,0xc7,0x1,0x4e,0x61,0xc6,0x41,0x2,0xbc,0xc7,0x41,0x3,0x0,0x0,0x0,0x0,0xc6,0x41,0x7,0x0,0xb8,0x2,0x0,0x0,0x0,0x41,0x5f,0xc9,0xe9,0xba,0x2f,0xc1,0xcb]
 theorem image_size : image.size = 82 := rfl
@@ -207,6 +207,106 @@ theorem actual_return_edge (base : Word) (s : X86.State) (position : s.pc=base+(
 
 theorem captured_return_symbol : returnTarget (18446744072640010388#64) = (18446744071763478688#64) := by decide
 
+
+/-- Generalize the existing return-slot lemma to either save slot or the
+outer return slot. Every packet-store success/fault outcome remains covered. -/
+theorem complete_body_preserves_slot (n : X86.State) (pointer limit slot : Word)
+    (first second : Event) (apart : packetReturnSlotApart pointer slot) :
+    readMemory (completeNativeResult n pointer limit first second).state.memory slot 8 =
+      readMemory n.memory slot 8 := by
+  obtain ⟨pointerMatch,_,memoryMatch⟩ := guarded_native_return_slot_frame n pointer limit
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · simp only [completeNativeResult,completeNativeFinal,reject,ite_true,memoryMatch]
+  · have guardedApart : packetReturnSlotApart ((guardedNativeFinal n pointer limit).gpr 1) slot := by
+      rw [pointerMatch]; exact apart
+    have unchanged := packet_native_outcome_return_slot (guardedNativeFinal n pointer limit)
+      (packetFirstFailure n.memory pointer) slot guardedApart
+    simpa only [completeNativeResult,completeNativeFinal,reject,ite_false,memoryMatch] using unchanged
+
+theorem total_body_preserves_slot (n : X86.State) (slot : Word)
+    (apart : ∀ pointer event, readMemory n.memory (n.gpr 7) 8 = .ok (pointer,event) →
+      packetReturnSlotApart pointer slot) :
+    readMemory (allReadNativeResult n).state.memory slot 8 = readMemory n.memory slot 8 := by
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault => simp only [allReadNativeResult,read0]
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault => simp only [allReadNativeResult,read0,read1,nativeAfter]
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      simp only [allReadNativeResult,read0,read1]
+      exact complete_body_preserves_slot n pointer limit slot first second (apart pointer first read0)
+
+/-- The slot is chosen independently of RSP. This applies to actual complete
+canonical paths, with arbitrary extents, AF observations and access outcomes. -/
+theorem actual_body_preserves_slot (n : X86.State) (actual : Transition X86.State) (slot : Word)
+    (position : n.pc=0)
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual)
+    (apart : ∀ pointer event, readMemory n.memory (n.gpr 7) 8 = .ok (pointer,event) →
+      packetReturnSlotApart pointer slot) :
+    readMemory actual.state.memory slot 8 = readMemory n.memory slot 8 := by
+  rw [all_read_native_relational_result n actual position run]
+  exact total_body_preserves_slot n slot apart
+
+theorem decode74 (s : X86.State) : X86.decode (image.extract 74 76) s = .ok
+    (.pop .w64 15 (s.pc+(2#64))) := by
+  have bytes : image.extract 74 76 = #[0x41,0x5f] := by decide
+  rw [bytes]; canonical_x86_decode
+
+def afterPop (base : Word) (s : X86.State) (value : Word) : X86.State :=
+  {s with
+    gpr := fun r => if r=15 then value else if r=4 then s.gpr 4+(8#64) else s.gpr r
+    pc := base+(76#64)}
+
+/-- The actual tail POP restores its value from memory, advances SP and
+retains the read event; the subsequent LEAVE is still a separate instruction. -/
+theorem actual_pop_step (base : Word) (s : X86.State) (value : Word) (event : Event)
+    (position : s.pc=base+(74#64))
+    (read : readMemory s.memory (s.gpr 4) 8 = .ok (value,event)) :
+    X86Path.decodeAt base image ⟨74,2⟩ s = .ok (.pop .w64 15 (base+(76#64))) ∧
+    X86.step (.pop .w64 15 (base+(76#64))) s = ⟨afterPop base s value,[event],none⟩ := by
+  constructor
+  · simp +decide [X86Path.decodeAt,image_size,decode74,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,BitVec.add_assoc,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  · simp +decide [X86.step,X86.readSource,X86.StackWidth.bytes,X86.StackWidth.registerWidth,
+      X86.cmovValue,read,afterPop]
+
+
+/-- Connect actual wrapper stores to arbitrary canonical body outcomes. The
+three separation facts are kernel invocation-layout obligations, not runtime
+checks or assumptions of successful guest accesses. -/
+theorem actual_body_saved_words (base : Word) (caller n : X86.State)
+    (actual : Transition X86.State)
+    (entry : n={bodyEntry base caller with pc := 0})
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual)
+    (apart : ∀ pointer event, readMemory n.memory (n.gpr 7) 8 = .ok (pointer,event) →
+      packetReturnSlotApart pointer (caller.gpr 4-(16#64)) ∧
+      packetReturnSlotApart pointer (caller.gpr 4-(8#64)) ∧
+      packetReturnSlotApart pointer (caller.gpr 4))
+    (readR15 : permitted caller.memory.readable (caller.gpr 4-(16#64)) 8 = true)
+    (readBP : permitted caller.memory.readable (caller.gpr 4-(8#64)) 8 = true) :
+    readMemory actual.state.memory (caller.gpr 4-(16#64)) 8 = .ok
+      (caller.gpr 15,.memory .read (caller.gpr 4-(16#64)) (valueBytes (caller.gpr 15) 8) true) ∧
+    readMemory actual.state.memory (caller.gpr 4-(8#64)) 8 = .ok
+      (caller.gpr 5,.memory .read (caller.gpr 4-(8#64)) (valueBytes (caller.gpr 5) 8) true) ∧
+    readMemory actual.state.memory (caller.gpr 4) 8 = readMemory caller.memory (caller.gpr 4) 8 := by
+  have position : n.pc=0 := by rw [entry]
+  have lower := actual_body_preserves_slot n actual (caller.gpr 4-(16#64)) position run
+    (fun pointer event read => (apart pointer event read).1)
+  have upper := actual_body_preserves_slot n actual (caller.gpr 4-(8#64)) position run
+    (fun pointer event read => (apart pointer event read).2.1)
+  have outer := actual_body_preserves_slot n actual (caller.gpr 4) position run
+    (fun pointer event read => (apart pointer event read).2.2)
+  refine ⟨?_,?_,?_⟩
+  · rw [lower,entry]
+    exact actual_saved_r15 base caller readR15
+  · rw [upper,entry]
+    exact actual_saved_bp base caller readBP
+  · rw [outer,entry]
+    exact actual_outer_return_slot base caller
+
 end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.emitted_payload
 #print axioms KProgTV.TrustedSimpleJIT.actual_entry_path
@@ -217,3 +317,9 @@ end KProgTV.TrustedSimpleJIT
 #print axioms KProgTV.TrustedSimpleJIT.actual_saved_bp
 #print axioms KProgTV.TrustedSimpleJIT.actual_return_edge
 #print axioms KProgTV.TrustedSimpleJIT.captured_return_symbol
+#print axioms KProgTV.TrustedSimpleJIT.complete_body_preserves_slot
+#print axioms KProgTV.TrustedSimpleJIT.total_body_preserves_slot
+#print axioms KProgTV.TrustedSimpleJIT.actual_body_preserves_slot
+#print axioms KProgTV.TrustedSimpleJIT.actual_pop_step
+
+#print axioms KProgTV.TrustedSimpleJIT.actual_body_saved_words

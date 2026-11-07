@@ -2066,3 +2066,12 @@ The proof has explicit stack write/read permissions. Canonical LEAVE, the
 whole epilogue, actual kernel caller/context premises, runtime thunk text and
 current B30 refinement remain to be composed; no host-ABI event is silently
 erased or claimed verifier-checked by this component.
+
+`trusted-simple-jit-body-frame.json` extends the same certificate to arbitrary
+8-byte save/return slots across every complete canonical body outcome. Actual
+RBP/R15 readbacks and the outer return-slot read follow from the wrapper's
+stores and explicit packet/host-frame separation; guest access success is not
+assumed. The captured tail POP also has an exact canonical full-state step
+with its read retained. The14 audit reports pass. LEAVE and whole-epilogue
+composition still await the single reference rule validated by F's hardware
+fault observations; no separate ISA implementation is introduced here.
