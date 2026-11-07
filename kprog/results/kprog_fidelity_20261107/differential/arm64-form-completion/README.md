@@ -66,3 +66,14 @@ Actual ARM hardware execution remains pending. These constant-form observers
 do not close entry ABI projection, the independent dynamic-dispatch host
 compile regression, exclusive monitor/order effects or all O1-O4 obligations.
 The separately completed ARM34 and x86 safety suites retain their own scope.
+
+## Raw trace cleanup, 2026-11-07
+
+At the coordinator's explicit disk-cleanup request, the closed
+`cpu-states.bin` (1,500,684,312 bytes, SHA256
+`51c4052b1ef0ebd9943fb72f0ce2c4b0bf45aa0d6de115376cde75407ad6af9c`) was deleted after checking every
+visible process's file descriptors and mappings: no users or inaccessible
+processes. The summary and per-form tables were already committed and
+published. Static executables, compiled input archives, logs, counterexample
+streams and incremental build caches remain. Regenerate the trace with the
+recorded run command before any future `--reuse-trace` replay.

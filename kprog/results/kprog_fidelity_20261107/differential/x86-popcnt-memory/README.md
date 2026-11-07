@@ -27,7 +27,8 @@ and zero differences. The preceding 1077 assembly/opcode rows are unchanged.
 All three compressed mismatch/unavailable JSONL streams are empty. Any
 mismatch would have included its register/flag/vector/stack and memory inputs
 in those streams. `summary.json` records the complete trace size and SHA;
-the original 2,008,350,744-byte state trace remains in this Workspace.
+the original 2,008,350,744-byte state trace was removed after all replay
+readers closed, as recorded below.
 `compiled-inputs.json` and its independently checked archive preserve the
 actual production-header/encoder snapshot, generated assembly/C and observer
 inputs. `pins.json` identifies the static executable and the same c110b03a
@@ -42,3 +43,14 @@ observers. This matrix does not replace the separate SP observer results,
 helper/service safety suites, real ARM hardware runs, invocation/ABI/platform
 transport proofs or universal O1–O4 obligations. No production simulator or
 canonical semantics changed for these three additional forms.
+
+## Raw trace cleanup, 2026-11-07
+
+At the coordinator's explicit disk-cleanup request, the closed
+`cpu-states.bin` (2,008,350,744 bytes, SHA256
+`a6ee4572cdad33fa9c8c1d80449cd32f991888d8734f35dc46b7a99f92be3407`) was deleted after checking every
+visible process's file descriptors and mappings: no users or inaccessible
+processes. The summary and per-form tables were already committed and
+published. Static executables, compiled input archives, logs, counterexample
+streams and incremental build caches remain. Regenerate the trace with the
+recorded run command before any future `--reuse-trace` replay.
