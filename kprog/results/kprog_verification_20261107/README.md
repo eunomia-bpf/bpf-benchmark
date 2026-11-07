@@ -13,24 +13,26 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 8/75 | 0/71 |
-| Additional partial-model handler families | 23/75 | 0 |
+| Addressed memory model / composed step | 13/75 | 0/71 |
+| Additional partial-model handler families | 18/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
-| Declared opcode dispatcher gaps | 0 | 2/71 |
+| Conditional direct immediate-alias handler / dispatcher | 0 | 2/71 |
+| Alias source-emission binding completion | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 44/75 | 0/71 |
+| O2 C-model token-body equality | 49/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 44 x86 O2 equalities cover32 direct bodies, ten generic calls and two
+The 49 x86 O2 equalities cover37 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining23 x86 reference-family handlers have partial model proofs; eight
+The remaining18 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
-premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
-immediate-operand gate coverage; the current modeled/C gate selects6/7.
+premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
+immediate-body gate and have conditional direct alias state laws. Their unified
+source-emission binding and per-token equality stages continue.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -53,7 +55,7 @@ ledger. These finite observations support the universal theorem work.
 
 `proved-raw-register`, `proved-stack-memory-model`, `proved-addressed-memory-model`,
 `partial-model`,
-`conditional-observed`, `proved-C-model`
+`conditional-observed`, `conditional-direct-alias`, `proved-C-model`
 and `pending` retain their distinct meanings. V updates the table and these
 totals with each proof/status-changing publication; T supplies token/link-law
 status and F supplies source-pinned replay inputs. Safety evidence follows the
@@ -3647,3 +3649,43 @@ The integration archive records `x86_modify_memory_dispatch_tokens` and
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_0df15f53f`. Every check retains its exact published source identity.
+
+### Memory compare/test frame, dispatcher and token refinement
+
+CMP_MEM_IMM, TEST_MEM_IMM, CMP_MEM_REG, TEST_MEM_REG and CMP_REG_MEM now
+compose the complete numeric read/flags frame through the unified x86 step
+and per-token body/native-successor laws. The field binding derives optional
+base/index/scale addresses from the incoming state. CMP_MEM_REG and
+CMP_REG_MEM use complete64-bit displacements; TEST_MEM_REG and both immediate
+forms use signed high32 displacement. The immediate value uses low32 with
+sign extension at64/default width. Numeric register reads cover RSP and STACK
+aliases; operand-bit lemmas connect them to native low lanes. CMP's actual
+OF=SF xor signedLT assignment uses its existing identity theorem. The model
+preserves complete GPR/vector/memory state and retains all six status flags,
+initialization metadata and ordered read/fault effects. Arena/permission, ABI,
+definedness, C-model correspondence, compiler and native-link stages retain
+their universal interfaces.
+
+Focused141-module x86 and current ARM/default Lean builds passed, together
+with16 theorem axiom audits. All100 NumericAddress and55 Dispatcher public
+signatures are retained. The existing CMP-memory oracle passed22,371,524
+UBSan observations:2,244 original checks plus657,920 complete frames with34
+observations each. Address matrices cover all16 data GPRs, widths/default,
+heap/RSP/STACK/absent-base forms, source/base/index aliases, scales, three
+native origins and direct/dispatcher routes. Packed displacement fixtures
+use three present-base kinds and small indices for representable signed32
+deltas; the formal bindings retain the complete native field domain. Separate
+matrices cover all64 incoming six-flag combinations and width-specific value
+boundaries. Actual C/proof source hashes and initial proof diagnostics remain
+in the existing integration archive under `x86_compare_memory_dispatch_tokens`.
+
+The source audit also records A's publishedf0517e493 numeric3/4 immediate
+aliases. All17 current generic source files match that publication, HEAD and
+the passing0df15f53f full-check manifest. The universal direct dispatcher/
+arithmetic alias theorems pass fresh audits; their conditional direct status
+is explicit in four central operation/token rows. Unified ExecBinding/source-
+emission alias transport and per-token specialized-body equality continue as
+separate universal stages. The existing ARM observation and ABI premises
+retain their scope. Coverage now has49 x86 O2 tokens (37 direct, ten generic,
+two branch),13 addressed-memory models and18 additional partial families.
+Replay rows and all T O4 cells retain their values.

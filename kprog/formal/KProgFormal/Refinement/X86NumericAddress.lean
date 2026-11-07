@@ -2163,4 +2163,114 @@ theorem rotate_memory_frame_refines (env : Environment) (frame : Frame) (arena :
         show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
       split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
 
+
+/-- Memory comparisons sample one guest read and update only flags and PC.
+Permissions and initialization remain in the original ordered read event. -/
+def flagsMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (flags : NativeWord → NativeWord → NativeWord) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (source, reads) =>
+      ⟨nativeRegisters env frame arena (registerPc (registerFlags state (flags source state.raw.rflags)) nextPc), reads, none⟩
+
+theorem compare_memory_value_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (right address nextPc : NativeWord) :
+    flagsMemoryFrame env frame arena state width (fun source old => X86Arithmetic.compareFlags width source right old)
+      address nextPc = Reference.X86.step (.arithmetic width .compare (.memory address) (.immediate right) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Arithmetic.step_refines]
+  simp only [flagsMemoryFrame, X86Arithmetic.handlerStep, Reference.X86.ScalarDestination.source,
+    X86Scalar.read_refines, Reference.X86.scalarRead, X86Arithmetic.compare_flags_eq]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, Reference.X86.scalarRead,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl, List.append_nil, ↓reduceIte]
+
+theorem test_memory_value_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (right address nextPc : NativeWord) :
+    flagsMemoryFrame env frame arena state width (fun source old => X86Logic.flags width .test source right old)
+      address nextPc = Reference.X86.step (.logic width .test (.memory address) (.immediate right) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Logic.step_refines]
+  simp only [flagsMemoryFrame, X86Logic.handlerStep, Reference.X86.ScalarDestination.source,
+    X86Scalar.read_refines, Reference.X86.scalarRead]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, Reference.X86.scalarRead,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl, List.append_nil, ↓reduceIte]
+
+/-- Numeric full-cell reads and native low-lane reads have the same operand
+bits, including RSP offsets and STACK-tagged aliases. -/
+theorem register_low_operand_bits (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (reg : Reference.X86.Register) :
+    (registerValue env frame arena state reg).setWidth width.bits =
+      (readRegister env frame arena state width (.low reg)).setWidth width.bits := by
+  cases width <;> simp only [readRegister, X86Scalar.handlerWidth, X86Scalar.lane,
+    Reference.X86.RegisterSlice.reg, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    GeneratedX86RegRead.readAt, Nat.reduceMul, NativeWord, Reference.Word] <;> bv_decide
+
+theorem compare_memory_register_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (right : Reference.X86.Register)
+    (address nextPc : NativeWord) :
+    flagsMemoryFrame env frame arena state width
+      (fun source old => X86Arithmetic.compareFlags width source (registerValue env frame arena state right) old)
+      address nextPc = Reference.X86.step (.arithmetic width .compare (.memory address) (.register (.low right)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have flags (source old : NativeWord) :
+      X86Arithmetic.compareFlags width source (registerValue env frame arena state right) old =
+        X86Arithmetic.compareFlags width source (readRegister env frame arena state width (.low right)) old := by
+    simp only [X86Arithmetic.compare_flags_eq]
+    exact arithmetic_flags_operand_bits width .compare source _ _ old (register_low_operand_bits env frame arena state width right)
+  simp only [flagsMemoryFrame, flags]
+  change flagsMemoryFrame env frame arena state width
+    (fun source old => X86Arithmetic.compareFlags width source (readRegister env frame arena state width (.low right)) old)
+      address nextPc = _
+  rw [compare_memory_value_refines, native_register_read]
+  rfl
+
+theorem test_memory_register_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (right : Reference.X86.Register)
+    (address nextPc : NativeWord) :
+    flagsMemoryFrame env frame arena state width
+      (fun source old => X86Logic.flags width .test source (registerValue env frame arena state right) old)
+      address nextPc = Reference.X86.step (.logic width .test (.memory address) (.register (.low right)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have flags (source old : NativeWord) := logic_flags_operand_bits width .test source
+    (registerValue env frame arena state right) (readRegister env frame arena state width (.low right)) old
+    (register_low_operand_bits env frame arena state width right)
+  simp only [flagsMemoryFrame, flags]
+  change flagsMemoryFrame env frame arena state width
+    (fun source old => X86Logic.flags width .test source (readRegister env frame arena state width (.low right)) old)
+      address nextPc = _
+  rw [test_memory_value_refines, native_register_read]
+  rfl
+
+theorem compare_register_memory_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (left : Reference.X86.Register)
+    (address nextPc : NativeWord) :
+    flagsMemoryFrame env frame arena state width
+      (fun source old => X86Arithmetic.flags width .compare (registerValue env frame arena state left) source old)
+      address nextPc = Reference.X86.step (.arithmetic width .compare (.register (.low left)) (.memory address) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have flags (source old : NativeWord) :
+      X86Arithmetic.flags width .compare (registerValue env frame arena state left) source old =
+        X86Arithmetic.flags width .compare (readRegister env frame arena state width (.low left)) source old := by
+    simp only [X86Arithmetic.flags, X86Arithmetic.value,
+      arithmetic_narrow_operand_bits width _ _ (register_low_operand_bits env frame arena state width left)]
+  rw [← X86Arithmetic.step_refines]
+  simp only [flagsMemoryFrame, flags, X86Arithmetic.handlerStep, Reference.X86.ScalarDestination.source,
+    X86Scalar.read_refines, Reference.X86.scalarRead, ← native_register_read]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, Reference.X86.scalarRead,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl,
+        List.nil_append, List.append_nil, ↓reduceIte]
+
 end KProgFormal.Refinement.X86NumericAddress

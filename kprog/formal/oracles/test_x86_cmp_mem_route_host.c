@@ -37,6 +37,7 @@ typedef signed int __s32;
 #include "x86_no_helpers_host.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static int failures;
 static unsigned long cases;
@@ -372,6 +373,115 @@ static void check_selectors(void)
 	}
 }
 
+
+/* Complete numeric frames pin displacement asymmetry and all six flags. */
+static __u64 compare_native_cell(const __u64 *r, const __u8 *tags, unsigned reg,
+                                  __u64 arena, __u64 base)
+{
+    return reg == X86_RSP ? r[reg] + base :
+        tags[reg] == X86_SIM_TAG_STACK ? r[reg] - arena + base : r[reg];
+}
+
+static void check_compare_frame(unsigned mode, unsigned flags, unsigned data_reg,
+                                 unsigned base_kind, unsigned index_kind, unsigned scale,
+                                 __u64 native_base, unsigned seed, unsigned fv, unsigned via)
+{
+    static const unsigned operations[] = {X86_OP_CMP_MEM_IMM, X86_OP_TEST_MEM_IMM,
+        X86_OP_CMP_MEM_REG, X86_OP_TEST_MEM_REG, X86_OP_CMP_REG_MEM};
+    static const __u32 low[] = {0U, 0x7fffffffU, 0x80000001U, 0xffffffffU};
+    __u8 h[192], eh[192], es[X86_SIM_STACK_BYTES], tags[16], ef[6];
+    __u64 r[16], arena, base, index, target, disp, encoded, sample, left, right, result, mask, sign;
+    unsigned width = flags ? flags : 8, bits = width * 8, i, bad, parity = 0;
+    unsigned packed = mode != 2 && mode != 4, test = mode == 1 || mode == 3;
+    unsigned br = base_kind == 0 ? X86_RSP : base_kind == 3 ? X86_REG_NONE : X86_RBP;
+    unsigned ir = index_kind == 0 ? X86_REG_NONE : index_kind == 1 ? X86_RCX :
+        index_kind == 2 ? (packed ? X86_RDX : X86_RSP) : X86_RBP;
+    __u32 aux = ir | (scale << 8) | (0xd3U << 16) | (0x9aU << 24);
+    __u8 *memory;
+    X86_SIM_L_DECLARE_STATE();
+    struct x86_sim_xdp_abi __x86_sim_abi = {};
+    struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
+    __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+    X86_SIM_L_DECLARE_STACK();
+    (void)__x86_sim_abi; (void)__x86_sim_skb_ctx; (void)__x86_sim_abi_kind;
+    (void)__x86_sim_ret_addr; (void)__x86_sim_helper_abi_base;
+    mask = width == 8 ? ~0ULL : (1ULL << bits) - 1; sign = 1ULL << (bits - 1);
+    arena = (__u64)(unsigned long)&__x86_stack_mem.b[X86_SIM_STACK_BYTES];
+    for (i = 0; i < X86_SIM_STACK_BYTES; i++) es[i] = __x86_stack_mem.b[i] = (__u8)(i * 37 + 11);
+    for (i = 0; i < sizeof(h); i++) eh[i] = h[i] = (__u8)(i * 19 + 0xa7);
+    for (i = 0; i < 16; i++) {r[i] = 0x123456789abcdef0ULL + i * 0x10101; tags[i] = X86_SIM_TAG_SCALAR;}
+    r[X86_RSP] = (__u64)-32; r[X86_RCX] = 3; r[X86_RDX] = 5;
+    r[X86_RBP] = base_kind == 2 ? arena - 40 : (__u64)(unsigned long)&h[48];
+    tags[X86_RBP] = base_kind == 2 ? X86_SIM_TAG_STACK : X86_SIM_TAG_SCALAR;
+    for (i = 0; i < 16; i++) X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)r[i], tags[i]);
+    __x86_native_stack_base = native_base;
+    for (i = 0; i < 6; i++) ef[i] = (fv >> i) & 1;
+    __x86_cf = ef[0]; __x86_zf = ef[1]; __x86_sf = ef[2]; __x86_of = ef[3]; __x86_pf = ef[4]; __x86_af = ef[5];
+    __x86_xmm0_lo = 0x12345678abcdef01ULL; __x86_xmm0_hi = 0xfedcba9876543210ULL;
+    base = br == X86_REG_NONE ? 0 : r[br];
+    index = ir == X86_REG_NONE ? 0 : compare_native_cell(r, tags, ir, arena, native_base);
+    target = base_kind == 0 ? (__u64)-17 : base_kind == 2 ? arena - 17 : (__u64)(unsigned long)&h[97];
+    disp = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
+    encoded = packed ? ((__u64)(__u32)disp << 32) | low[seed & 3] : disp;
+    if (packed && (__u64)(__s64)(__s32)(encoded >> 32) != disp) {
+        printf("MISMATCH compare fixture signed32 displacement\n"); failures++; return;
+    }
+    right = mode < 2 ? low[seed & 3] : compare_native_cell(r, tags, data_reg, arena, native_base);
+    if (mode < 2 && width == 8 && (right & 0x80000000ULL)) right |= 0xffffffff00000000ULL;
+    sample = seed == 0 ? 0 : seed == 1 ? 1 : seed == 2 ? ~0ULL : seed == 3 ? sign - 1 :
+        seed == 4 ? sign : seed == 5 ? 0xf : seed == 6 ? 0x10 : right;
+    memory = base_kind == 0 || base_kind == 2 ? &es[X86_SIM_STACK_BYTES - 17] : &eh[97];
+    for (i = 0; i < width; i++) memory[i] = (__u8)(sample >> (i * 8));
+    if (base_kind == 0 || base_kind == 2)
+        for (i = 0; i < width; i++) __x86_stack_mem.b[X86_SIM_STACK_BYTES - 17 + i] = memory[i];
+    else for (i = 0; i < width; i++) h[97 + i] = memory[i];
+    left = sample & mask; right &= mask;
+    if (mode == 4) {__u64 saved = left; left = right; right = saved;}
+    result = test ? (left & right) : (left - right) & mask;
+    ef[0] = test ? 0 : left < right;
+    ef[1] = result == 0; ef[2] = (result & sign) != 0;
+    ef[3] = test ? 0 : ((left ^ right) & (left ^ result) & sign) != 0;
+    if (!test) ef[5] = ((left ^ right ^ result) >> 4) & 1;
+    for (i = 0; i < 8; i++) parity ^= (result >> i) & 1;
+    ef[4] = !parity;
+    if (via) X86_SIM_L_EXEC(operations[mode], mode == 4 ? data_reg : br,
+        mode == 4 ? br : data_reg, flags, aux, encoded);
+    else if (mode == 4) X86_SIM_L_EXEC_CMP_REG_MEM(data_reg, br, flags, aux, encoded);
+    else X86_SIM_L_EXEC_CMP_MEM(operations[mode], br, data_reg, flags, aux, encoded);
+    bad = memcmp(h, eh, sizeof(h)) != 0;
+    for (i = 0; i < X86_SIM_STACK_BYTES; i++) bad |= es[i] != __x86_stack_mem.b[i];
+    cases++;
+    if (bad) {printf("MISMATCH compare preserved memory\n"); failures++; return;}
+    for (i = 0; i < 16; i++) {
+        cases += 2;
+        if ((__u64)(unsigned long)X86_SIM_L_REG_VALUE(i) != r[i] || X86_SIM_L_REG_TAG(i) != tags[i]) {
+            printf("MISMATCH compare preserved reg%u\n", i); failures++; return;
+        }
+    }
+    cases++;
+    if (__x86_cf != ef[0] || __x86_zf != ef[1] || __x86_sf != ef[2] || __x86_of != ef[3] || __x86_pf != ef[4] || __x86_af != ef[5] ||
+        __x86_xmm0_lo != 0x12345678abcdef01ULL || __x86_xmm0_hi != 0xfedcba9876543210ULL) {
+        printf("MISMATCH compare flags/vector mode=%u width=%u reg=%u seed=%u flags=%u\n", mode, width, data_reg, seed, fv); failures++;
+    }
+}
+
+static void check_compare_frames(void)
+{
+    static const unsigned widths[] = {0, 1, 2, 4, 8}, regs[] = {0, 4, 5, 15};
+    static const __u64 bases[] = {0, 0x7fffffffef91ULL, 0xfffffffffffffff9ULL};
+    unsigned wi, mode, reg, bk, ik, sc, bi, via, seed, fv, whole;
+    for (wi = 0; wi < 5; wi++) for (mode = 0; mode < 5; mode++) {
+        whole = mode == 2 || mode == 4;
+        for (reg = 0; reg < 16; reg++) for (bk = 0; bk < (whole ? 4U : 3U); bk++)
+        for (ik = 0; ik < (whole ? 4U : 3U); ik++) for (sc = 0; sc < 4; sc++)
+        for (bi = 0; bi < 3; bi++) for (via = 0; via < 2; via++) for (seed = 0; seed < 4; seed++)
+            check_compare_frame(mode, widths[wi], reg, bk, ik, sc, bases[bi], seed, (seed * 13) & 63, via);
+    }
+    for (wi = 0; wi < 5; wi++) for (mode = 0; mode < 5; mode++) for (reg = 0; reg < 4; reg++)
+    for (bk = 0; bk < 2; bk++) for (via = 0; via < 2; via++) for (seed = 0; seed < 8; seed++) for (fv = 0; fv < 64; fv++)
+        check_compare_frame(mode, widths[wi], regs[reg], bk, 0, 0, bases[2], seed, fv, via);
+}
+
 int main(void)
 {
 	static const __u8 mem_ops[4] = { X86_OP_CMP_MEM_IMM, X86_OP_TEST_MEM_IMM,
@@ -457,6 +567,7 @@ int main(void)
 				  0, 0, 0x1234567890abcdefULL, twin_imm, 0);
 	}
 
+	check_compare_frames();
 	check_selectors();
 
 	if (failures != 0) {

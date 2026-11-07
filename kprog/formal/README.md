@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-44 x86 register/control/memory tokens; full raw ISA and compiled-simulator closure continue.
+49 x86 register/control/memory tokens; full raw ISA and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
 
@@ -58,7 +58,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Thirty-two direct, ten generic and two branch token bodies have semantic
+Thirty-seven direct, ten generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -72,6 +72,10 @@ MOV_STORE_REG/IMM also compose full numeric-frame stores, native source byte
 lanes and packed immediate fields through the same dispatcher/token interface.
 Memory INC/DEC/NEG/NOT and classic ROR also compose their captured read,
 generated result and flags, observed store and precise fault effects.
+Memory CMP/TEST also compose packed/whole displacement fields, numeric
+register operands and complete six-flag/read/fault effects. ARM numeric3/4
+have conditional direct immediate-alias state laws; unified source-emission
+binding and per-token equality are being connected.
 Safety work is generic per
 simulator and token; historical per-program proofs are frozen and excluded
 from the argument. Remaining tokens and native-link/compiler preservation
