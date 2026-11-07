@@ -1493,5 +1493,442 @@
   },
   "manifest_after_sha256": "bff94acd86fa5e9f7253db1c486ff6d9002687ac5485fc6656ca70c9feeafa10",
   "make_exit": 0,
-  "raw_archive_sha256": "ecc22c29e8227b74cff92616b5e75e620537a36b8cad3d703580bd1543032231"
+  "raw_archive_sha256": "ecc22c29e8227b74cff92616b5e75e620537a36b8cad3d703580bd1543032231",
+  "packaged_source_identity": [
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_cgroup_mkdir_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_cgroup_mkdir_v511.o",
+      "source_sha256": "162c17ebb579da5f7af23856fb701dd2bf991d2228583a6c3a4ed23759682841",
+      "packaged_sha256": "162c17ebb579da5f7af23856fb701dd2bf991d2228583a6c3a4ed23759682841",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_cgroup_release_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_cgroup_release_v511.o",
+      "source_sha256": "74900a40575d12c08e9201cdc34a0df24e32c15506ffc73ebec781675f925ddf",
+      "packaged_sha256": "74900a40575d12c08e9201cdc34a0df24e32c15506ffc73ebec781675f925ddf",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_cgroup_rmdir_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_cgroup_rmdir_v511.o",
+      "source_sha256": "45907a894d6b6e973cb9fdedeefacdc7badc5653d128d3b35d77023a6cbe0221",
+      "packaged_sha256": "45907a894d6b6e973cb9fdedeefacdc7badc5653d128d3b35d77023a6cbe0221",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_event_v310.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_event_v310.o",
+      "source_sha256": "97a82b409462ed8b968c6d2b76a08ae09d66eda1360fce27a4832937403c1160",
+      "packaged_sha256": "97a82b409462ed8b968c6d2b76a08ae09d66eda1360fce27a4832937403c1160",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_event_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_event_v511.o",
+      "source_sha256": "976b26cde2145a6f5ee97c0495d6ab2b978dc02b27d39b3905513e94c77da312",
+      "packaged_sha256": "976b26cde2145a6f5ee97c0495d6ab2b978dc02b27d39b3905513e94c77da312",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_event_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_event_v53.o",
+      "source_sha256": "e25083ef9bc564b18baeac4a60d1f35a0eb88b5037fd700cfcf2e6f72cf4a6f2",
+      "packaged_sha256": "e25083ef9bc564b18baeac4a60d1f35a0eb88b5037fd700cfcf2e6f72cf4a6f2",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_event_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_event_v61.o",
+      "source_sha256": "c114160cde70f568a46442def67564f1b409e7451af6d2aab308011c0789bf1c",
+      "packaged_sha256": "c114160cde70f568a46442def67564f1b409e7451af6d2aab308011c0789bf1c",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_map_update_v511.o",
+      "source_sha256": "f45a7fe30948f63dd15a449d021a5d7aeee8e582f8f4e63f0ab8ed72830e3154",
+      "packaged_sha256": "f45a7fe30948f63dd15a449d021a5d7aeee8e582f8f4e63f0ab8ed72830e3154",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_map_update_v53.o",
+      "source_sha256": "a30a189951a8afe403a884489e3beee1ee8aaf4a3615895d03da15c01d26134a",
+      "packaged_sha256": "a30a189951a8afe403a884489e3beee1ee8aaf4a3615895d03da15c01d26134a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_execve_map_update_v61.o",
+      "source_sha256": "c9693d94f803a71042a40b25c459a96f9ccd7fc19dabc626c4efa0c10d2bd518",
+      "packaged_sha256": "c9693d94f803a71042a40b25c459a96f9ccd7fc19dabc626c4efa0c10d2bd518",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_exit_v310.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_exit_v310.o",
+      "source_sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a",
+      "packaged_sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_exit_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_exit_v511.o",
+      "source_sha256": "eeec931e112b69b87f15834ed2fd507628fd47564eb44e65ee41eb40c85d41f9",
+      "packaged_sha256": "eeec931e112b69b87f15834ed2fd507628fd47564eb44e65ee41eb40c85d41f9",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_fork_v310.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_fork_v310.o",
+      "source_sha256": "f7c62938a385d849222194ac3750e7a5fdf128557e3fc3997cade646c8f26339",
+      "packaged_sha256": "f7c62938a385d849222194ac3750e7a5fdf128557e3fc3997cade646c8f26339",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_fork_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_fork_v511.o",
+      "source_sha256": "2475b60906371ce8b09d8285e7843292fff47fdea716a0375f923ca6e557c6d0",
+      "packaged_sha256": "2475b60906371ce8b09d8285e7843292fff47fdea716a0375f923ca6e557c6d0",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fentry_v511.o",
+      "source_sha256": "fb3caa14427529d9279e29c6039611bc78a832b69bc26bd2d7f9f9de50007953",
+      "packaged_sha256": "fb3caa14427529d9279e29c6039611bc78a832b69bc26bd2d7f9f9de50007953",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fentry_v53.o",
+      "source_sha256": "eea691557e6d2062068da1c453af67a7d316aa7f479c7f6ff940f22bbef7663a",
+      "packaged_sha256": "eea691557e6d2062068da1c453af67a7d316aa7f479c7f6ff940f22bbef7663a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fentry_v61.o",
+      "source_sha256": "95dccd8cba8417e15e77c84e16cf6684f23a1f3b30e5d8a749a8aad286e03429",
+      "packaged_sha256": "95dccd8cba8417e15e77c84e16cf6684f23a1f3b30e5d8a749a8aad286e03429",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fexit_v511.o",
+      "source_sha256": "2953387e91b7b1e348b1ce00ea74f9aa480f844b99e6f83f4823aa5408456009",
+      "packaged_sha256": "2953387e91b7b1e348b1ce00ea74f9aa480f844b99e6f83f4823aa5408456009",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fexit_v53.o",
+      "source_sha256": "47a4b9f12454c58c323d55b9e0bc827ffc621b15a51136bd983b9bb30d2f96ec",
+      "packaged_sha256": "47a4b9f12454c58c323d55b9e0bc827ffc621b15a51136bd983b9bb30d2f96ec",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_fexit_v61.o",
+      "source_sha256": "43a7a9770dac8e88ca5f018118fcd39fc77483deb66068bdd89821d392fcf76c",
+      "packaged_sha256": "43a7a9770dac8e88ca5f018118fcd39fc77483deb66068bdd89821d392fcf76c",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_kprobe_v511.o",
+      "source_sha256": "49a3fddcf24fd8edcd9ce1813fb77cb5e89d4c575dbb44a7631b94f99f5cf419",
+      "packaged_sha256": "49a3fddcf24fd8edcd9ce1813fb77cb5e89d4c575dbb44a7631b94f99f5cf419",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_kprobe_v53.o",
+      "source_sha256": "200c2c79a27577b0b9e6d70ee644e3dc552c32b49e55fe33505a23c29fce953b",
+      "packaged_sha256": "200c2c79a27577b0b9e6d70ee644e3dc552c32b49e55fe33505a23c29fce953b",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_kprobe_v61.o",
+      "source_sha256": "fcc191dc556b6e3a1b043b7e3352a4dd25576f0e69572907cf1a55665136e9f1",
+      "packaged_sha256": "fcc191dc556b6e3a1b043b7e3352a4dd25576f0e69572907cf1a55665136e9f1",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_core_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_core_v511.o",
+      "source_sha256": "d55b71804e6f253395712d4e17eb0e19de0f4ce5504eae745cd737f9336e3354",
+      "packaged_sha256": "d55b71804e6f253395712d4e17eb0e19de0f4ce5504eae745cd737f9336e3354",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_core_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_core_v61.o",
+      "source_sha256": "45ccec300b9286f930e0aac68012deebf65c32c6c43c845454cf09c99e4ecb81",
+      "packaged_sha256": "45ccec300b9286f930e0aac68012deebf65c32c6c43c845454cf09c99e4ecb81",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+      "source_sha256": "03692bbee5a814860edf114955410dc9d36550c25feb4518baae8252d9d6fd03",
+      "packaged_sha256": "03692bbee5a814860edf114955410dc9d36550c25feb4518baae8252d9d6fd03",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+      "source_sha256": "fe1aaa9a3b88d9859bc729d477e35bdb145370ecc11579187388be65660268d1",
+      "packaged_sha256": "fe1aaa9a3b88d9859bc729d477e35bdb145370ecc11579187388be65660268d1",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_ima_file_v511.o",
+      "source_sha256": "a09f7cca80e0615ff18e014db526da748c7974708ec8e7ba10293b047ac0c789",
+      "packaged_sha256": "a09f7cca80e0615ff18e014db526da748c7974708ec8e7ba10293b047ac0c789",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_ima_file_v61.o",
+      "source_sha256": "0c6a23399f8b91777dc19080561dd1ee9448be62405e735bc2ba50a9db4b023a",
+      "packaged_sha256": "0c6a23399f8b91777dc19080561dd1ee9448be62405e735bc2ba50a9db4b023a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_output_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_output_v511.o",
+      "source_sha256": "f98b94237a44e8f560dd98b21eda47d0a67d0684d0eb22b657cca207a9cc0584",
+      "packaged_sha256": "f98b94237a44e8f560dd98b21eda47d0a67d0684d0eb22b657cca207a9cc0584",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_output_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_lsm_output_v61.o",
+      "source_sha256": "1186ef1145a158636a88cd3e70bcc857e2b91b4a7b3cac5dac62754aa8175e66",
+      "packaged_sha256": "1186ef1145a158636a88cd3e70bcc857e2b91b4a7b3cac5dac62754aa8175e66",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_rawtp_v511.o",
+      "source_sha256": "77c6c5bef27aa4cef2dbb1687de4081b843bf49493b443dd2c5df9b333d0fb30",
+      "packaged_sha256": "77c6c5bef27aa4cef2dbb1687de4081b843bf49493b443dd2c5df9b333d0fb30",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_rawtp_v53.o",
+      "source_sha256": "8413d4541d9903c2c3320553018062e8da14aa52f35a689fd000c6e6835b6134",
+      "packaged_sha256": "8413d4541d9903c2c3320553018062e8da14aa52f35a689fd000c6e6835b6134",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_rawtp_v61.o",
+      "source_sha256": "8ea277c8fd6c67304f282239251c0df6cb32f3cdd82f75d2decff71e3cc18cb6",
+      "packaged_sha256": "8ea277c8fd6c67304f282239251c0df6cb32f3cdd82f75d2decff71e3cc18cb6",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retkprobe_v511.o",
+      "source_sha256": "1e38fc47039735e8b54e1bb61ca1ec59959fa7bb6af344534e2ae3a9cde96ac6",
+      "packaged_sha256": "1e38fc47039735e8b54e1bb61ca1ec59959fa7bb6af344534e2ae3a9cde96ac6",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retkprobe_v53.o",
+      "source_sha256": "18dc9772d859bb1c6820bc8e1e30b9cacdcceac9b58c7e8d88f8281cdb41f072",
+      "packaged_sha256": "18dc9772d859bb1c6820bc8e1e30b9cacdcceac9b58c7e8d88f8281cdb41f072",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retkprobe_v61.o",
+      "source_sha256": "d4b7a4be6e6aa6224e33ad363ed07a2815d5c39d76d2f44e6ae05f2a8ae14caf",
+      "packaged_sha256": "d4b7a4be6e6aa6224e33ad363ed07a2815d5c39d76d2f44e6ae05f2a8ae14caf",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retuprobe_v511.o",
+      "source_sha256": "05f90220a5c3e43ab49185e9ced519c9817eef055bdb7bbed7f175c6dbb53bd1",
+      "packaged_sha256": "05f90220a5c3e43ab49185e9ced519c9817eef055bdb7bbed7f175c6dbb53bd1",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retuprobe_v53.o",
+      "source_sha256": "649dceaff37eddf34fc125567dd4fcb8542b0e3f87eb9d54b6c86825cc790ffb",
+      "packaged_sha256": "649dceaff37eddf34fc125567dd4fcb8542b0e3f87eb9d54b6c86825cc790ffb",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_retuprobe_v61.o",
+      "source_sha256": "0839fbe78f938d247e05a05de7176c0fc7f1b3fd4d2f865312fe1f9db8bc8fc0",
+      "packaged_sha256": "0839fbe78f938d247e05a05de7176c0fc7f1b3fd4d2f865312fe1f9db8bc8fc0",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_tracepoint_v511.o",
+      "source_sha256": "f9816cca0a02dbbab3c33a06ae8bf112a668888b81baeb6296a4b9a30fcde028",
+      "packaged_sha256": "f9816cca0a02dbbab3c33a06ae8bf112a668888b81baeb6296a4b9a30fcde028",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_tracepoint_v53.o",
+      "source_sha256": "e2be33c4d8b0d5776466037da82d4eb4148d3db1d14b032ba10913e1b8a3b655",
+      "packaged_sha256": "e2be33c4d8b0d5776466037da82d4eb4148d3db1d14b032ba10913e1b8a3b655",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_tracepoint_v61.o",
+      "source_sha256": "bba84e4c72fa6526999d86222be3cf2b6e55fc3a885ad186a999fefaa9e9ef16",
+      "packaged_sha256": "bba84e4c72fa6526999d86222be3cf2b6e55fc3a885ad186a999fefaa9e9ef16",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_uprobe_v511.o",
+      "source_sha256": "19bafad372af72cd308fe2f274156381de8bf17243b6f87a4fc37abd1c09754a",
+      "packaged_sha256": "19bafad372af72cd308fe2f274156381de8bf17243b6f87a4fc37abd1c09754a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_uprobe_v53.o",
+      "source_sha256": "17206c8515446250a42e248cf2d73a3925e1eb8b68b8d1f15171b5893686b702",
+      "packaged_sha256": "17206c8515446250a42e248cf2d73a3925e1eb8b68b8d1f15171b5893686b702",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_uprobe_v61.o",
+      "source_sha256": "892bd196eb4578ce44ba12eaa507adc67066a7cf7b7a11590c5cc0faf1d94f41",
+      "packaged_sha256": "892bd196eb4578ce44ba12eaa507adc67066a7cf7b7a11590c5cc0faf1d94f41",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_usdt_v511.o",
+      "source_sha256": "3d831b7ebdd8398e1367463522608dd190a806e77c6cb29cd01dd0179117ea66",
+      "packaged_sha256": "3d831b7ebdd8398e1367463522608dd190a806e77c6cb29cd01dd0179117ea66",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_usdt_v53.o",
+      "source_sha256": "40234dd0a8847cc577180bc8ffcfbb571589955adbff6591f7ba304177a5f24a",
+      "packaged_sha256": "40234dd0a8847cc577180bc8ffcfbb571589955adbff6591f7ba304177a5f24a",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_generic_usdt_v61.o",
+      "source_sha256": "b1d519917fb17566d7e75fdf0a34a7b33aaeb1238c770c9e02210ae522bcdae2",
+      "packaged_sha256": "b1d519917fb17566d7e75fdf0a34a7b33aaeb1238c770c9e02210ae522bcdae2",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_loader_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_loader_v511.o",
+      "source_sha256": "3a77a48c8c149eecff82906543a6f38e6b27755f31d72d8ed4079c5a312c81e0",
+      "packaged_sha256": "3a77a48c8c149eecff82906543a6f38e6b27755f31d72d8ed4079c5a312c81e0",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_kprobe_v511.o",
+      "source_sha256": "57f148bd3ee5d94d1e2b337bb5f75a9bfc46cfd342ba52490babbfacbbf33a7f",
+      "packaged_sha256": "57f148bd3ee5d94d1e2b337bb5f75a9bfc46cfd342ba52490babbfacbbf33a7f",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_kprobe_v53.o",
+      "source_sha256": "900e5cbfa7061e74a9c3557c259c1ec7f52764842ea909d7aefdd0ad28b9a6ef",
+      "packaged_sha256": "900e5cbfa7061e74a9c3557c259c1ec7f52764842ea909d7aefdd0ad28b9a6ef",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_kprobe_v61.o",
+      "source_sha256": "84117d909d5514a4941689debbe977c95bc1770683f9791726781c602d5aba2e",
+      "packaged_sha256": "84117d909d5514a4941689debbe977c95bc1770683f9791726781c602d5aba2e",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_retkprobe_v511.o",
+      "source_sha256": "b21212d5280086e52b45da81979c4d712ed0dff9cbc326e081ba050a87300366",
+      "packaged_sha256": "b21212d5280086e52b45da81979c4d712ed0dff9cbc326e081ba050a87300366",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v53.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_retkprobe_v53.o",
+      "source_sha256": "99ac7c4848bb859f6861454a1b2329ebd114431e3447b2af50f8876afa993654",
+      "packaged_sha256": "99ac7c4848bb859f6861454a1b2329ebd114431e3447b2af50f8876afa993654",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_retkprobe_v61.o",
+      "source_sha256": "d19f68f1cfca82f4ec61c89e61170ee058657bfa3da88a616d7985f59d2d3379",
+      "packaged_sha256": "d19f68f1cfca82f4ec61c89e61170ee058657bfa3da88a616d7985f59d2d3379",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_retuprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_retuprobe_v511.o",
+      "source_sha256": "3dda436cdec0fcdeb9bf07124dc22a3232213d70e73415765386ea8a2ea5aff8",
+      "packaged_sha256": "3dda436cdec0fcdeb9bf07124dc22a3232213d70e73415765386ea8a2ea5aff8",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_retuprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_retuprobe_v61.o",
+      "source_sha256": "963c07f968733882e954f42a8ddd7482c9025570902ab379480c6bdce00a79e5",
+      "packaged_sha256": "963c07f968733882e954f42a8ddd7482c9025570902ab379480c6bdce00a79e5",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_uprobe_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_uprobe_v511.o",
+      "source_sha256": "6da03709abe13e51f9f5d2159534da65f1c0742569b234a4050e25177176f942",
+      "packaged_sha256": "6da03709abe13e51f9f5d2159534da65f1c0742569b234a4050e25177176f942",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_uprobe_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_uprobe_v61.o",
+      "source_sha256": "27b681c3c3b993ef0a0ffc7cde63c686a4ab38eecbfbccf6a4a4e9d7c67a8c76",
+      "packaged_sha256": "27b681c3c3b993ef0a0ffc7cde63c686a4ab38eecbfbccf6a4a4e9d7c67a8c76",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_usdt_v511.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_usdt_v511.o",
+      "source_sha256": "daf3b80b2b0d7279ec2caa0b42da093a35099ce36e0bf05c6c1a23836f013b6d",
+      "packaged_sha256": "daf3b80b2b0d7279ec2caa0b42da093a35099ce36e0bf05c6c1a23836f013b6d",
+      "equal": true
+    },
+    {
+      "source": "vendor/build/arm64/tetragon/bpf_multi_usdt_v61.o",
+      "packaged": "kprog/arm64/build/app-runtime-v35/root/artifacts/tetragon/bpf_multi_usdt_v61.o",
+      "source_sha256": "792887ed387a9c84d1d024d2780e39f750930fc6e645b04e5a9acd9f7fd31e3f",
+      "packaged_sha256": "792887ed387a9c84d1d024d2780e39f750930fc6e645b04e5a9acd9f7fd31e3f",
+      "equal": true
+    }
+  ],
+  "packaged_source_matches": 62
 }
