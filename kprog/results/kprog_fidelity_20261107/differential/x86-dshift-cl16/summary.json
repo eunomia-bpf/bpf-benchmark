@@ -1,0 +1,33 @@
+{
+  "forms": 32,
+  "native_forms": 16,
+  "cases": 32768,
+  "differences": {
+    "cpu_simulator": 0,
+    "cpu_reference": 0,
+    "simulator_reference": 0
+  },
+  "forms_awaiting_reference": 0,
+  "all_effective_counts_observed": true,
+  "count_zero": 2058,
+  "count_one": 1959,
+  "unchanged_memory_cases": 32768,
+  "compiled_input_files": 94,
+  "production_snapshot_files": 82,
+  "production_snapshot_git_equal": true,
+  "encoded_fields_preserved": true,
+  "input_sampling": {
+    "scope": "16-bit SHLD/SHRD architectural defined count domain 0..16; upper RCX bits and all remaining sampled state retained.",
+    "original_driver_sha256": "7cadcc3540eb1b8ad85e7fb7f2da411d43acfcaea485177aa757d1b7ccd6e762",
+    "sampled_driver_sha256": "4570ae879fcd87b8e14b9d416ac43fee9e63e8885cb5f4af77114a136b065633",
+    "inserted_input_assignment": "            input.r[1] = (input.r[1] & ~UINT64_C(255)) | (c < 128 ? c % 17 : (input.r[1] & 255) % 17);\n"
+  },
+  "raw_direct_native_byte_pairs": 16,
+  "source_head": "e12bbe76b1d128fb3ea098ae271fef8e238641e8",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "binary_sha256": "9f1fd9b686989143ad82dae6b5b22150deadd2c5af568edbffa23bb47ee02b26",
+  "trace_bytes": 59506712,
+  "trace_sha256": "0718185346c3e11c1fe0987ed369900bf810975f522f61550c268214e88a0199",
+  "finished": "2026-11-07T20:28:12.474000+00:00",
+  "source_drift": {}
+}

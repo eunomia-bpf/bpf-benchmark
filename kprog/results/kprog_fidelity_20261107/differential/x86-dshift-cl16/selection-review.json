@@ -1,0 +1,30 @@
+{
+  "original_generator_sha256": "897a1385da018269df070befca388ad26e143fb396a037be0717cf18c9ea8fb6",
+  "selected_generator_sha256": "1987efc7d5ee7e533fd8865b234ace3f2122febacab91aa7ed1cea37e3b91a72",
+  "matrix": [
+    "shld ax, bx, cl",
+    "shld ax, ax, cl",
+    "shld cx, ax, cl",
+    "shld ax, cx, cl",
+    "shld cx, cx, cl",
+    "shld sp, ax, cl",
+    "shld ax, sp, cl",
+    "shld sp, sp, cl",
+    "shrd ax, bx, cl",
+    "shrd ax, ax, cl",
+    "shrd cx, ax, cl",
+    "shrd ax, cx, cl",
+    "shrd cx, cx, cl",
+    "shrd sp, ax, cl",
+    "shrd ax, sp, cl",
+    "shrd sp, sp, cl"
+  ],
+  "inserted_block": "\n    from dataclasses import asdict\n    selected,bindings=[],[]\n    for assembly,e,special,body,decoded in pairs:\n        if assembly not in forms:\n            continue\n        for route in ['raw','direct']:\n            step=(f'X86_SIM_RUN_OP({e.op}, {e.dst}, {e.src}, '\n                  f'{e.flags}, {e.aux}, {e.imm})') if route=='raw' else None\n            selected.append((assembly,e,step,body,decoded))\n            bindings.append(dict(form=len(selected)-1,assembly=assembly,route=route,encoded=asdict(e)))\n    assert len(selected)==32\n    pairs=selected\n    (out/'numeric-bindings.json').write_text(json.dumps(bindings,indent=2)+'\\n')\n",
+  "scope": "Production encoding preserved, raw/direct routes, 16-bit defined CL counts and RCX/RSP aliases; shared states, observer and comparison masks retained.",
+  "input_sampling": {
+    "scope": "16-bit SHLD/SHRD architectural defined count domain 0..16; upper RCX bits and all remaining sampled state retained.",
+    "original_driver_sha256": "7cadcc3540eb1b8ad85e7fb7f2da411d43acfcaea485177aa757d1b7ccd6e762",
+    "sampled_driver_sha256": "4570ae879fcd87b8e14b9d416ac43fee9e63e8885cb5f4af77114a136b065633",
+    "inserted_input_assignment": "            input.r[1] = (input.r[1] & ~UINT64_C(255)) | (c < 128 ? c % 17 : (input.r[1] & 255) % 17);\n"
+  }
+}
