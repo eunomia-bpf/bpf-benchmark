@@ -1,0 +1,72 @@
+{
+  "status": "current_compiled_kernel_XDP_layout_and_source_conversion_match_declared_two_simple_context_expansions",
+  "utc": "2026-11-07T15:08:09.450949+00:00",
+  "kernel_build_id": "79824595980857fd636e49a7dc2faf131d2bf21d",
+  "pahole_version": "v1.25",
+  "queries": [
+    "pahole -C xdp_buff kprog/tv/build-kernel-x86/vmlinux",
+    "pahole -C xdp_md kprog/tv/build-kernel-x86/vmlinux"
+  ],
+  "compiled_fields": {
+    "xdp_buff.data": {
+      "offset": 0,
+      "bytes": 8
+    },
+    "xdp_buff.data_end": {
+      "offset": 8,
+      "bytes": 8
+    },
+    "xdp_md.data": {
+      "offset": 0,
+      "bytes": 4
+    },
+    "xdp_md.data_end": {
+      "offset": 4,
+      "bytes": 4
+    }
+  },
+  "expansions": {
+    "0": {
+      "virtual_offset": 0,
+      "virtual_bytes": 4,
+      "physical_offset": 0,
+      "physical_bytes": 8,
+      "physical_instruction_hex": "7912000000000000",
+      "declaration_matches_compiled_layout": true
+    },
+    "2": {
+      "virtual_offset": 4,
+      "virtual_bytes": 4,
+      "physical_offset": 8,
+      "physical_bytes": 8,
+      "physical_instruction_hex": "7911080000000000",
+      "declaration_matches_compiled_layout": true
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/build-kernel-x86/vmlinux": "a20b4a208137335a37fe77aae9769cb4ece24e95eb897741648dd23b38d7e95c",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+    "vendor/linux-framework/include/net/xdp.h": "2274f74651cb6d9971f57a1dee2ebb29f82d50fb75cdccd5a169ec92d151f3ac",
+    "vendor/linux-framework/include/uapi/linux/bpf.h": "901cb52e54e973f56c3f915f6bb9b29d8ff39e8f4a9ccf6edc75ebe4756a888a",
+    "vendor/linux-framework/include/linux/filter.h": "c854908814c2145d2a9626dfde62945041235f2d41be0e27b8cf9d2150a8e440",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e"
+  },
+  "source_conversion_sha256": "2c05347504e315bf050230e64718b074623321f8073d53d60c47f55e2183d679",
+  "log_sha256": "8c5662f7d343e438e97321928bcf8c8383569ad48c8fb3998ac74639005847b4",
+  "claims": [
+    "Existing compiled vmlinux types expose xdp_md data/data_end at0/4 size4 and xdp_buff data/data_end at0/8 size8.",
+    "Current kernel xdp_convert_ctx_access source has exactly one corresponding BPF_LDX_MEM with unchanged src/dst and actual field width/offset for each of those fields.",
+    "Encoded declarations in pinned TrustedSimpleX86 agree byte-for-byte with those structural facts."
+  ],
+  "not_yet_claimed": [
+    "this vmlinux/bzImage is the historical accepted b61f291a8 capture kernel: historical manifest does not pin that binary",
+    "machine-checked C compilation or actual post-conversion kernel instruction capture",
+    "physical invocation safety/whole-program TV or hardware ISA fidelity"
+  ],
+  "trusted": [
+    "pahole/ELF type parser",
+    "kernel build/source provenance and conversion implementation (not a C semantic proof)",
+    "historical accepted-byte capture provenance remains a separate trusted binding input"
+  ]
+}
