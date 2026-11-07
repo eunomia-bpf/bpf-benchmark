@@ -1104,6 +1104,139 @@ theorem captured_native_prefix_abi_frame {n last : X86.State} {trace : List Even
     rw [stateEq] at nextValid frame
     exact (ih nextValid).trans frame
 
+
+/-- An entry/invocation memory-layout obligation, with wrapping addresses.
+This is not a new native or proof runtime check. -/
+def packetReturnSlotApart (pointer stack : Word) : Prop :=
+  ∀ i<8, ¬ ((stack+BitVec.ofNat 64 i)-pointer).toNat<8
+
+/-- The four actual writes occupy byte subranges of the packet's first8B. -/
+theorem packet_return_slot_subranges (pointer stack : Word)
+    (apart : packetReturnSlotApart pointer stack) :
+    (∀ i<8, ¬ ((stack+BitVec.ofNat 64 i)-pointer).toNat<2) ∧
+    (∀ i<8, ¬ ((stack+BitVec.ofNat 64 i)-(pointer+(2#64))).toNat<1) ∧
+    (∀ i<8, ¬ ((stack+BitVec.ofNat 64 i)-(pointer+(3#64))).toNat<4) ∧
+    (∀ i<8, ¬ ((stack+BitVec.ofNat 64 i)-(pointer+(7#64))).toNat<1) := by
+  have sub2 (a p : Word) (inside : (a-(p+(2#64))).toNat<1) : (a-p).toNat<8 := by
+    have lower : a-(p+(2#64)) < (1#64) := by simpa only [BitVec.lt_def] using inside
+    have upper : a-p < (8#64) := by
+      unfold Word at *
+      bv_decide
+    simpa only [BitVec.lt_def] using upper
+  have sub3 (a p : Word) (inside : (a-(p+(3#64))).toNat<4) : (a-p).toNat<8 := by
+    have lower : a-(p+(3#64)) < (4#64) := by simpa only [BitVec.lt_def] using inside
+    have upper : a-p < (8#64) := by
+      unfold Word at *
+      bv_decide
+    simpa only [BitVec.lt_def] using upper
+  have sub7 (a p : Word) (inside : (a-(p+(7#64))).toNat<1) : (a-p).toNat<8 := by
+    have lower : a-(p+(7#64)) < (1#64) := by simpa only [BitVec.lt_def] using inside
+    have upper : a-p < (8#64) := by
+      unfold Word at *
+      bv_decide
+    simpa only [BitVec.lt_def] using upper
+  refine ⟨?_,?_,?_,?_⟩
+  · intro i small inside
+    exact apart i small (by omega)
+  · intro i small inside
+    exact apart i small (sub2 _ _ inside)
+  · intro i small inside
+    exact apart i small (sub3 _ _ inside)
+  · intro i small inside
+    exact apart i small (sub7 _ _ inside)
+
+/-- Every successful or first-fault packet-write outcome preserves the
+entire return-slot read, including permissions, bytes and initialization. -/
+theorem packet_native_outcome_return_slot (s : X86.State) (index : Nat) (stack : Word)
+    (apart : packetReturnSlotApart (s.gpr 1) stack) :
+    readMemory (packetNativeOutcome s index).memory stack 8=readMemory s.memory stack 8 := by
+  obtain ⟨apart0,apart2,apart3,apart7⟩ := packet_return_slot_subranges (s.gpr 1) stack apart
+  have one : readMemory (packetNativeFirst s).memory stack 8=readMemory s.memory stack 8 :=
+    PrivateSpills.read_disjoint_store s.memory (s.gpr 1) (24910#64) stack 2 8 apart0
+  have two : readMemory (packetNativeSecond s).memory stack 8=readMemory s.memory stack 8 :=
+    (PrivateSpills.read_disjoint_store (packetNativeFirst s).memory (s.gpr 1+(2#64))
+      (188#64) stack 1 8 apart2).trans one
+  have three : readMemory (packetNativeThird s).memory stack 8=readMemory s.memory stack 8 :=
+    (PrivateSpills.read_disjoint_store (packetNativeSecond s).memory (s.gpr 1+(3#64))
+      (0#64) stack 4 8 apart3).trans two
+  have four : readMemory (packetNativeFourth s).memory stack 8=readMemory s.memory stack 8 :=
+    (PrivateSpills.read_disjoint_store (packetNativeThird s).memory (s.gpr 1+(7#64))
+      (0#64) stack 1 8 apart7).trans three
+  by_cases success : index=4
+  · simpa only [packetNativeOutcome,success,ite_true,packetNativeFinal] using four
+  · simp only [packetNativeOutcome,success,ite_false]
+    cases index with
+    | zero => rfl
+    | succ index =>
+      cases index with
+      | zero => exact one
+      | succ index =>
+        cases index with
+        | zero => exact two
+        | succ index => exact three
+
+/-- The guard region never changes memory, its packet pointer or native SP.
+These are consequences of the concrete captured operations. -/
+theorem guarded_native_return_slot_frame (n : X86.State) (pointer limit : Word) :
+    (guardedNativeFinal n pointer limit).gpr 1=pointer ∧
+    (guardedNativeFinal n pointer limit).gpr 4=n.gpr 4 ∧
+    (guardedNativeFinal n pointer limit).memory=n.memory := by
+  by_cases first : pointer>limit
+  · simp +decide [guardedNativeFinal,first,guardFinal,guardCompare,guardZero,guardMove,
+      nativePrefixFinal,nativeAfterSecond,nativeAfter]
+  · by_cases second : pointer+(8#64)>limit <;>
+      simp +decide [guardedNativeFinal,first,second,guardFinal,guardCompare,guardZero,guardMove,
+        nativePrefixFinal,nativeAfterSecond,nativeAfter,remainingNativeFinal,
+        remainingNative8,remainingNativeCmp8,remainingNativeLea,
+        remainingNative72,remainingNativeCmp72,remainingNativeAdd]
+
+theorem complete_native_return_slot (n : X86.State) (pointer limit : Word)
+    (first second : Event) (apart : packetReturnSlotApart pointer (n.gpr 4)) :
+    readMemory (completeNativeResult n pointer limit first second).state.memory (n.gpr 4) 8=
+      readMemory n.memory (n.gpr 4) 8 := by
+  obtain ⟨pointerMatch,_,memoryMatch⟩ := guarded_native_return_slot_frame n pointer limit
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · simp only [completeNativeResult,completeNativeFinal,reject,ite_true,memoryMatch]
+  · have guardedApart : packetReturnSlotApart ((guardedNativeFinal n pointer limit).gpr 1) (n.gpr 4) := by
+      rw [pointerMatch]
+      exact apart
+    have unchanged := packet_native_outcome_return_slot (guardedNativeFinal n pointer limit)
+      (packetFirstFailure n.memory pointer) (n.gpr 4) guardedApart
+    simpa only [completeNativeResult,completeNativeFinal,reject,ite_false,memoryMatch] using unchanged
+
+/-- The actual context read determines the packet pointer in the entry-layout
+premise. No read success or write outcome is assumed by this total theorem. -/
+theorem all_read_native_return_slot (n : X86.State)
+    (apart : ∀ pointer event, readMemory n.memory (n.gpr 7) 8=.ok (pointer,event) →
+      packetReturnSlotApart pointer (n.gpr 4)) :
+    readMemory (allReadNativeResult n).state.memory (n.gpr 4) 8=readMemory n.memory (n.gpr 4) 8 := by
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault => simp only [allReadNativeResult,read0]
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault => simp only [allReadNativeResult,read0,read1,nativeAfter]
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      simp only [allReadNativeResult,read0,read1]
+      exact complete_native_return_slot n pointer limit first second (apart pointer first read0)
+
+/-- Every full canonical relational outcome has the same native return-slot
+read as entry; the callee-save certificate derives SP identity as well. -/
+theorem captured_native_return_slot_read (n : X86.State) (actual : Transition X86.State)
+    (position : n.pc=0)
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual)
+    (apart : ∀ pointer event, readMemory n.memory (n.gpr 7) 8=.ok (pointer,event) →
+      packetReturnSlotApart pointer (n.gpr 4)) :
+    readMemory actual.state.memory (actual.state.gpr 4) 8=readMemory n.memory (n.gpr 4) 8 := by
+  have valid : simpleClosedPC n.pc := by simp [simpleClosedPC,simpleNativeOffsets,position]
+  have saved := captured_native_prefix_abi_frame (canonical_relational_path_execution run) valid
+  have stack := congrArg (fun frame => frame.2.1) saved
+  change actual.state.gpr 4=n.gpr 4 at stack
+  have exactResult := all_read_native_relational_result n actual position run
+  rw [stack,exactResult]
+  exact all_read_native_return_slot n apart
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1189,3 +1322,15 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_relational_abi_frame
 
 #print axioms KProgTV.TrustedSimpleSafety.captured_native_prefix_abi_frame
+
+#print axioms KProgTV.TrustedSimpleSafety.packet_return_slot_subranges
+
+#print axioms KProgTV.TrustedSimpleSafety.packet_native_outcome_return_slot
+
+#print axioms KProgTV.TrustedSimpleSafety.guarded_native_return_slot_frame
+
+#print axioms KProgTV.TrustedSimpleSafety.complete_native_return_slot
+
+#print axioms KProgTV.TrustedSimpleSafety.all_read_native_return_slot
+
+#print axioms KProgTV.TrustedSimpleSafety.captured_native_return_slot_read

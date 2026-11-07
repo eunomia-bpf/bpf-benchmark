@@ -1900,3 +1900,12 @@ remain covered. This supplies callee-save/SP evidence for ABI transport. It
 does not prove return-slot memory integrity: canonical RET reads eight bytes
 from native RSP and may fault, and guest writes can alias that slot without
 the physical invocation/platform disjointness fact. RET transport remains open.
+
+`trusted-simple-native-return-slot.json` supplies the return-slot memory
+component: when the invocation's packet bytes are disjoint from its native
+return slot, every actual complete outcome preserves the entire entry
+return-slot read, including permission, byte values and initialization.
+All actual read/write faults and guards remain covered, and the initial
+context read determines the packet pointer. This uses the canonical memory
+model and existing disjoint-store theorem. Establishing that separation for
+the physical invocation and transporting the original RET remain open.
