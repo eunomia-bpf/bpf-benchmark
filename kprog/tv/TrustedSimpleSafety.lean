@@ -1237,6 +1237,108 @@ theorem captured_native_return_slot_read (n : X86.State) (actual : Transition X8
   rw [stack,exactResult]
   exact all_read_native_return_slot n apart
 
+
+/-- Original immutable ELF entry certified by check_trusted_capture.py:
+exact captured payload plus the terminal RET byte, not a new emitted program. -/
+def originalNative : Array Byte := native ++ #[0xc3]
+
+theorem original_native_size : originalNative.size=61 := rfl
+
+/-- Appending the original RET cannot change any accepted payload extent. -/
+theorem original_native_payload_extract (entry : X86Path.Entry)
+    (inside : entry.offset+entry.length≤native.size) :
+    originalNative.extract entry.offset (entry.offset+entry.length)=
+      native.extract entry.offset (entry.offset+entry.length) := by
+  have low : entry.offset-native.size=0 := by omega
+  have high : entry.offset+entry.length-native.size=0 := by omega
+  unfold originalNative
+  rw [Array.extract_append]
+  simp [low,high]
+
+/-- Exact instruction/PC/extent transport into the original ELF entry. -/
+theorem original_native_payload_decode (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (decoded : X86Path.decodeAt 0 native entry s=.ok instruction) :
+    X86Path.decodeAt 0 originalNative entry s=.ok instruction := by
+  have inside := (decode_extent_constraints 0 native entry s instruction decoded).2.2.2.1
+  have same := original_native_payload_extract entry inside
+  have before : ¬ native.size<entry.offset+entry.length := by omega
+  have after : ¬ originalNative.size<entry.offset+entry.length := by
+    change ¬ 61<entry.offset+entry.length
+    change entry.offset+entry.length≤60 at inside
+    omega
+  unfold X86Path.decodeAt at decoded ⊢
+  rw [same]
+  simpa only [before,after,ite_false] using decoded
+
+/-- Every canonical relational payload path has identical state, effects and
+fault in the original ELF, with the same actual instruction extent list. -/
+theorem original_native_payload_path {entries : List X86Path.Entry} {s : X86.State}
+    {actual : Transition X86.State} (run : CanonicalRelationalPath 0 native entries s actual) :
+    CanonicalRelationalPath 0 originalNative entries s actual := by
+  induction run with
+  | nil state => exact .nil state
+  | fault entry instruction decoded step failed =>
+    exact .fault entry instruction (original_native_payload_decode _ _ _ decoded) step failed
+  | next entry instruction decoded step continued suffix ih =>
+    exact .next entry instruction (original_native_payload_decode _ _ _ decoded) step continued ih
+
+/-- The real terminal byte is decoded by the single canonical x86 decoder. -/
+theorem original_native_ret_decode (s : X86.State) :
+    X86.decode (originalNative.extract 60 61) s=.ok (.returnNear (0#16) (s.pc+1)) := by
+  have bytes : originalNative.extract 60 61=#[0xc3] := by decide
+  rw [bytes]
+  canonical_x86_decode
+
+theorem original_native_ret_at (s : X86.State) (position : s.pc=60) :
+    X86Path.decodeAt 0 originalNative ⟨60,1⟩ s=.ok (.returnNear (0#16) 61) := by
+  simp +decide [X86Path.decodeAt,original_native_size,original_native_ret_decode,position,
+    X86Path.fallthrough,X86.Instruction.fallthrough,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Compose existing reference transitions, retaining RET's read and faults.
+A fault in the body stops before RET, as required by canonical execution. -/
+def originalNativePath (n : X86.State) : List X86Path.Entry :=
+  allReadNativePath n ++ if (allReadNativeResult n).fault.isSome then [] else [⟨60,1⟩]
+
+def originalNativeResult (n : X86.State) : Transition X86.State :=
+  let body := allReadNativeResult n
+  if body.fault.isSome then body
+  else let ret := X86.step (.returnNear (0#16) 61) body.state
+       ⟨ret.state,body.events++ret.events,ret.fault⟩
+
+/-- The original immutable61B entry has an actual complete relational path
+for EVERY guest permission outcome, including terminal RET read/canonicality
+faults. No successful-return, packet-separation or valid-stack premise. -/
+theorem original_native_complete_path_exists (n : X86.State) (position : n.pc=0) :
+    CanonicalRelationalPath 0 originalNative (originalNativePath n) n (originalNativeResult n) := by
+  have body := original_native_payload_path (all_read_native_path_exists n position)
+  cases outcome : (allReadNativeResult n).fault with
+  | some fault =>
+    simpa only [originalNativePath,originalNativeResult,outcome,Option.isSome,ite_true,
+      List.append_nil] using body
+  | none =>
+    have atEnd := all_read_native_no_fault_end n outcome
+    have decoded := original_native_ret_at (allReadNativeResult n).state atEnd
+    let instruction : X86.Instruction := .returnNear (0#16) 61
+    let effect := X86.step instruction (allReadNativeResult n).state
+    have step : X86.Step instruction (allReadNativeResult n).state effect := ⟨rfl,rfl,rfl⟩
+    have terminal : CanonicalRelationalPath 0 originalNative [⟨60,1⟩]
+        (allReadNativeResult n).state effect := by
+      cases retFault : effect.fault with
+      | some fault =>
+        exact .fault ⟨60,1⟩ instruction decoded step (by rw [retFault]; rfl)
+      | none =>
+        have one := CanonicalRelationalPath.next ⟨60,1⟩ instruction decoded step retFault
+          (CanonicalRelationalPath.nil effect.state)
+        have effectEq : (⟨effect.state,effect.events,none⟩ : Transition X86.State)=effect := by
+          calc
+            _ = ⟨effect.state,effect.events,effect.fault⟩ := by rw [retFault]
+            _ = effect := rfl
+        simpa only [List.append_nil,effectEq] using one
+    have combined := relational_path_append body outcome terminal
+    simpa only [originalNativePath,originalNativeResult,outcome,Option.isSome,ite_false,
+      instruction,effect] using combined
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1334,3 +1436,15 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.all_read_native_return_slot
 
 #print axioms KProgTV.TrustedSimpleSafety.captured_native_return_slot_read
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_payload_extract
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_payload_decode
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_payload_path
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_ret_decode
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_ret_at
+
+#print axioms KProgTV.TrustedSimpleSafety.original_native_complete_path_exists

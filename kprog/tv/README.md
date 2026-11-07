@@ -1909,3 +1909,13 @@ All actual read/write faults and guards remain covered, and the initial
 context read determines the packet pointer. This uses the canonical memory
 model and existing disjoint-store theorem. Establishing that separation for
 the physical invocation and transporting the original RET remain open.
+
+`trusted-simple-original-ret-path.json` transports every accepted payload
+instruction extent/path into the archived original61B ELF entry and constructs
+its complete canonical relational execution, including the real terminal RET.
+All permission outcomes remain covered: body faults stop before RET; otherwise
+its actual read and any read/noncanonical-target fault remain in the trace.
+No valid-stack or successful-return premise is needed. The archived entry
+bytes are independently rechecked against the Lean payload plus `c3`. This
+does not classify RET's extra read as a verifier-checked guest event or close
+the physical entry/return ABI transport.

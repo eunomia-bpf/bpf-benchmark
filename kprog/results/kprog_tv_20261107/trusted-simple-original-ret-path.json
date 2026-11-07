@@ -1,0 +1,108 @@
+{
+  "status": "original_immutable_61B_entry_has_actual_complete_canonical_path_including_terminal_RET_read_and_all_faults",
+  "utc": "2026-11-07T14:34:21.507458+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleSafety.original_native_payload_extract",
+    "KProgTV.TrustedSimpleSafety.original_native_payload_decode",
+    "KProgTV.TrustedSimpleSafety.original_native_payload_path",
+    "KProgTV.TrustedSimpleSafety.original_native_ret_decode",
+    "KProgTV.TrustedSimpleSafety.original_native_ret_at",
+    "KProgTV.TrustedSimpleSafety.original_native_complete_path_exists"
+  ],
+  "claims": [
+    "Every accepted payload instruction extent and every complete canonical relational payload path lift unchanged into original immutable entry bytes (payload60B plus original c3).",
+    "Actual original terminal byte decodes as canonical returnNear at offset60, length1. No second ISA semantics or forced successor.",
+    "Original61B complete canonical path EXISTS for every guest permission assignment. Body faults stop before RET; normal body completion executes actual RET with its memory-read and possible read/noncanonical-target faults retained.",
+    "Neither stack validity, packet/stack separation nor successful return is assumed for original-path existence."
+  ],
+  "premises": [
+    "native entry PC0",
+    "archived immutable ELF exact entry identity checked by existing ELF parser and SHA-pinned capture",
+    "single canonical reference decoder/ISA/memory"
+  ],
+  "not_yet_claimed": [
+    "original RET read is checked as a guest event by B (it is explicitly retained, not erased)",
+    "physical invocation entry/return transport or packet/stack separation",
+    "arbitrary original-program prefixes after returning into caller code",
+    "strict per-B-basic-block full-state correspondence or other programs"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "6514b7dfc0a6bfc118384a7542c2a2f4979a5beb00f44719f311e2cd3644ab64",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate -o trusted-simple-cfg-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.original_native_payload_extract": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.original_native_payload_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.original_native_payload_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.original_native_ret_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.original_native_ret_at": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.original_native_complete_path_exists": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "390b8025a455c3df375d8e46a61ece029e7d088fcc33b2cee9309b83c55d052e",
+    "combined_log_sha256": "c727611bc20efc004c6914dbe298be61bd022e2e4b4042b3e19f315a928c36a1"
+  },
+  "trusted": [
+    "verifier soundness for accepted actual B (explicit theorem premise)",
+    "single canonical native/reference memory semantics and BPF/platform interpretation; V owns semantics, F checks hardware fidelity",
+    "kernel binding implementation and physical invocation/ABI/entry/RET/platform transport remain trusted or explicitly undischarged",
+    "Lean kernel, logical axioms and reported Lean.ofReduceBool native proof reduction",
+    "capture parser/provenance for connecting the recorded accepted bytes to the concrete Lean byte arrays"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "9fb5fe7f96c85e84a431e26ac7cb94543653331a6cc8a09c911c1336dffcc5da",
+    "kprog/tv/Makefile": "02aeab2e0864840dac9a7a815ec0ae335cb4af559031a438d69d22fa382925eb",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  },
+  "materialization": {
+    "immutable_elf_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+    "original_entry_sha256": "c71a8cfa324e8809dea974c34e236736498e10770d31d6df129e71af30661ef2",
+    "original_entry_bytes": 61,
+    "payload_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+    "payload_bytes": 60,
+    "archive_sha256": "569acb40ff3753e5d4b03a5ba8a131707db8e34435219a82f025b442a049e731",
+    "original_entry_matches_Lean_payload_plus_RET": true
+  }
+}
