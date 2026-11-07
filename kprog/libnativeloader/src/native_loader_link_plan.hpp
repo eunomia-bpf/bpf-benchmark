@@ -102,7 +102,8 @@ inline void write_json_update_site(std::ostream &out,
         << ",\"elem_size\":" << site.elem_size
         << ",\"value_size\":" << site.value_size
         << ",\"value_offset\":" << site.value_offset
-        << ",\"percpu_base_addr\":" << site.percpu_base_addr;
+        << ",\"percpu_base_addr\":" << site.percpu_base_addr
+        << ",\"map_addr\":" << site.map_addr;
     if (!site.map_name.empty()) {
         out << ",\"map_name\":";
         write_json_string(out, site.map_name);

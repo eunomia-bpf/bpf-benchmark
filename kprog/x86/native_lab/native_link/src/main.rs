@@ -203,6 +203,7 @@ struct UpdateSiteSpec {
     value_offset: u32,
     percpu_base_addr: u64,
     map_name: Option<String>,
+    map_addr: u64,
 }
 
 #[derive(Debug)]
@@ -277,6 +278,8 @@ struct LinkPlanUpdateSite {
     value_offset: u32,
     percpu_base_addr: u64,
     map_name: Option<String>,
+    #[serde(default)]
+    map_addr: u64,
 }
 
 fn name_addr_vec_to_map(items: Vec<LinkPlanNameAddr>, label: &str) -> Result<HashMap<String, u64>> {
@@ -350,6 +353,7 @@ fn update_site_from_plan(site: LinkPlanUpdateSite) -> Result<UpdateSiteSpec> {
         value_offset: site.value_offset,
         percpu_base_addr: site.percpu_base_addr,
         map_name: site.map_name,
+        map_addr: site.map_addr,
     })
 }
 
@@ -5847,7 +5851,7 @@ mod tests {
         UpdateSiteSpec {
             kind: UpdateKind::Call, target_addr: 0x1234, value_size: 8,
             value_offset: 0, max_entries: 0, elem_size: 0,
-            percpu_base_addr: 0, map_name: map_name.map(str::to_owned),
+            percpu_base_addr: 0, map_name: map_name.map(str::to_owned), map_addr: 0,
         }
     }
 

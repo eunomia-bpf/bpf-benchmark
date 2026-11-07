@@ -2928,6 +2928,7 @@ struct NativeLinkArgs {
         uint32_t value_offset = 0;
         uint64_t percpu_base_addr = 0;
         std::string map_name;
+        uint64_t map_addr = 0;
     };
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
@@ -3027,6 +3028,7 @@ struct CompanionLoad {
         uint32_t value_offset;
         uint64_t percpu_base_addr;
         std::string map_name;
+        uint64_t map_addr = 0;
     };
     std::vector<UpdateSite> update_sites;
 };
@@ -4059,6 +4061,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = source_map_name_from_manifest(out, map_it->second);
+                site.map_addr = map_it->second.kernel_addr;
                 configure_update_site_for_shape(site,
                                                 map_shape_from_meta(map_it->second),
                                                 map_it->second.fd,
@@ -4141,6 +4144,8 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.value_size);
         hash.add_u64(arg.value_offset);
         hash.add_u64(arg.percpu_base_addr);
+        hash.add_string(arg.map_name);
+        hash.add_u64(arg.map_addr);
     }
     return hash.hex();
 }

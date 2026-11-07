@@ -284,11 +284,25 @@ fn select_lookup_site(
 
 fn select_update_site(
     update_sites: &[UpdateSiteSpec],
+    map_addrs: &HashMap<String, u64>,
     used: &mut [bool],
     native_call_index: usize,
     native_map_name: Option<&str>,
 ) -> Result<Option<(String, usize)>> {
     if let Some(map_name) = native_map_name {
+        if let Some(&address) = map_addrs.get(map_name).filter(|&&address| address != 0) {
+            if update_sites.iter().any(|site| site.map_addr != 0) {
+                // Repeated source calls and truncated names are not distinct
+                // maps. Match the full ELF symbol's resolved kernel identity.
+                if let Some((idx, _)) = update_sites.iter().enumerate().find(|(idx, site)|
+                    !used[*idx] && site.map_addr == address).or_else(||
+                        update_sites.iter().enumerate().find(|(_, site)| site.map_addr == address)) {
+                    used[idx] = true;
+                    return Ok(Some((idx.to_string(), idx)));
+                }
+                return Ok(None);
+            }
+        }
         if let Some((idx, _)) = update_sites.iter().enumerate().find(|(idx, spec)| {
             !used[*idx] && update_site_exactly_matches_native_map(spec, map_name)
         }) {
@@ -1798,6 +1812,7 @@ pub(super) fn rewrite_x86(
                             map_symbol_registers.get(&Register::RDI).map(String::as_str);
                         if let Some((site_label, site_index)) = select_update_site(
                             update_sites,
+                            map_addrs,
                             &mut update_site_used,
                             ordinal,
                             native_map_name,
@@ -4589,6 +4604,7 @@ mod tests {
             value_offset: 0,
             percpu_base_addr: 0,
             map_name: Some(map_name.to_string()),
+            map_addr: 0,
         }
     }
 
@@ -4600,10 +4616,47 @@ mod tests {
         ];
         let mut used = vec![false; sites.len()];
 
-        let selected = select_update_site(&sites, &mut used, 0, Some("target_map")).unwrap();
+        let selected = select_update_site(&sites, &HashMap::new(), &mut used, 0, Some("target_map")).unwrap();
 
         assert_eq!(selected, Some(("1".to_string(), 1)));
         assert_eq!(used, vec![false, true]);
+    }
+
+    #[test]
+    fn update_selection_uses_full_map_address_across_truncated_name_collisions() -> Result<()> {
+        let full = "cilium_ipv4_frag_datagrams";
+        let short = truncate_bpf_obj_name(full);
+        let mut wrong = test_update_site(&short, 0x1000);
+        wrong.map_addr = 0x1110;
+        let mut right = test_update_site(&short, 0x2000);
+        right.map_addr = 0x2220;
+        let sites = vec![wrong, right.clone(), right];
+        let maps = HashMap::from([(full.to_string(), 0x2220)]);
+        let mut used = vec![false; 3];
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 0, Some(full))?,
+            Some(("1".to_string(), 1)));
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 1, Some(full))?,
+            Some(("2".to_string(), 2)));
+        assert_eq!(used, vec![false, true, true]);
+        // A compiler-created extra call still uses the same map identity.
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 2, Some(full))?,
+            Some(("1".to_string(), 1)));
+        assert_eq!(used, vec![false, true, true]);
+        Ok(())
+    }
+
+    #[test]
+    fn update_selection_does_not_override_map_address_with_a_matching_name() -> Result<()> {
+        let mut site = test_update_site("full_map", 0x1000);
+        site.map_addr = 0x1110;
+        let sites = vec![site];
+        let maps = HashMap::from([("full_map".to_string(), 0x2220)]);
+        let mut used = vec![false];
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 0, Some("full_map"))?, None);
+        assert_eq!(used, vec![false]);
+        assert_eq!(select_update_site(&sites, &maps, &mut used, 0, None)?, None);
+        assert_eq!(used, vec![false]);
+        Ok(())
     }
 
     fn test_lookup_site(map_name: &str, target_addr: u64) -> LookupSiteSpec {
@@ -4730,9 +4783,9 @@ mod tests {
     fn unknown_update_map_does_not_borrow_named_site_by_order() -> Result<()> {
         let sites = vec![test_update_site("stats", 0x1000)];
         let mut used = vec![false];
-        assert_eq!(select_update_site(&sites, &mut used, 0, None)?, None);
+        assert_eq!(select_update_site(&sites, &HashMap::new(), &mut used, 0, None)?, None);
         assert_eq!(used, vec![false]);
-        assert_eq!(select_update_site(&sites, &mut used, 1, Some("stats"))?,
+        assert_eq!(select_update_site(&sites, &HashMap::new(), &mut used, 1, Some("stats"))?,
             Some(("0".to_string(), 0)));
         Ok(())
     }
@@ -4741,7 +4794,7 @@ mod tests {
     fn unmatched_update_map_does_not_borrow_another_maps_site() -> Result<()> {
         let sites = vec![test_update_site("stats", 0x1000)];
         let mut used = vec![false];
-        assert_eq!(select_update_site(&sites, &mut used, 0, Some("fallback_cache"))?, None);
+        assert_eq!(select_update_site(&sites, &HashMap::new(), &mut used, 0, Some("fallback_cache"))?, None);
         assert_eq!(used, vec![false]);
         Ok(())
     }

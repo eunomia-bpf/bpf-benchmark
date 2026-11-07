@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+status=0
+"$@" || status=$?
+out=/workspaces/repository/corpus/results/kprog_app_coverage_20261107/cilium-update-identity/cache-$(date -u +%Y%m%dT%H%M%SZ)-$$
+install -d "$out"
+printf '%s
+' "$status" > "$out/suite.exit"
+if test -d /tmp/native_kernel_link_cache; then cp -a /tmp/native_kernel_link_cache "$out/"; fi
+printf 'Native linked cache retained: %s
+' "$out"
+exit "$status"

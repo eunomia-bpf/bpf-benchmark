@@ -1,0 +1,10 @@
+{
+  "source": "corpus/results/x86_kvm_corpus_20261107_140240_997545/details/shim-logs/cilium__agent.post_rejit.log",
+  "source_sha256": "35ec06155a444990dfeabd4a7916f765a79cc2ca83de0d9a784b23fdbe543b7a",
+  "failed_native_loads": 33,
+  "map_error_counts": {
+    "cilium_ipv4_frag_datagrams": 18,
+    "cilium_ct_any4_global": 5,
+    "cilium_policystats": 10
+  }
+}
