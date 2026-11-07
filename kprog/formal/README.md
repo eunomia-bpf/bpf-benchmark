@@ -34,6 +34,8 @@ AND/OR/XOR/TEST use the same scalar operands and ordered memory effects;
 CF/OF clear, SF/ZF/PF follow the operand-width result, and AF is undefined.
 SHL/SHR/SAR/ROL use the legacy count mask, immediate/one/CL forms,
 byte-register aliases, partial/zero-extending writes and ordered RMW faults.
+Their whole-state handler refinements compose the generated value and flag
+contracts with scalar register/memory reads and writes.
 PF is updated for nonzero shifts and preserved by rotates. The reference
 relation leaves AF and count-dependent CF/OF unconstrained where the ISA does.
 TEST preserves its data destination. Native group/immediate forms share the

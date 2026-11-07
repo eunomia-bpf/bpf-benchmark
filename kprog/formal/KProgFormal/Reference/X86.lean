@@ -347,14 +347,15 @@ def legacyCount (width : ScalarWidth) (count : Word) : Word :=
   count &&& (if width = .w64 then 63 else 31)
 
 def legacyShiftValue (width : ScalarWidth) (kind : LegacyShift) (value count : Word) : Word :=
-  let a := value.setWidth width.bits
+  let a := (value.setWidth width.bits).setWidth 64
   let n := legacyCount width count
   let rotated := n &&& BitVec.ofNat 64 (width.bits - 1)
-  ((match kind with
+  let shifted := match kind with
     | .left => a <<< n
     | .right => a >>> n
-    | .arithmetic => a.sshiftRight' n
-    | .rotateLeft => (a <<< rotated) ||| (a >>> (BitVec.ofNat 64 width.bits - rotated))).setWidth 64)
+    | .arithmetic => ((value.setWidth width.bits).signExtend 64).sshiftRight' n
+    | .rotateLeft => (a <<< rotated) ||| (a >>> (BitVec.ofNat 64 width.bits - rotated))
+  (shifted.setWidth width.bits).setWidth 64
 
 /-- Flags unaffected by the ISA are preserved. AF, OF at counts beyond one,
 and logical-shift CF at counts at least the width use stable representatives;
