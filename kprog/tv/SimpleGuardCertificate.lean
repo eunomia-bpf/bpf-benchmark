@@ -86,8 +86,9 @@ def proofBefore (p : BPF.State) (pointer limit : Word) : BPF.State :=
     pc := 7
     halted := false }
 
-theorem proof_first_block (p : BPF.State) (pointer limit : Word) :
-    BPFPath.evaluate noExternals proof [7] (proofBefore p pointer limit) =
+theorem proof_first_block (p : BPF.State) (pointer limit : Word)
+    (env : BPF.Environment := noExternals) :
+    BPFPath.evaluate env proof [7] (proofBefore p pointer limit) =
       .ok ⟨{ proofBefore p pointer limit with pc := if pointer > limit then 27 else 8 }, [], none⟩ := by
   simp +decide [BPFPath.evaluate, proofDecode7, proofBefore, BPF.execute, BPF.source,
     BPF.comparison, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
@@ -147,8 +148,9 @@ def proofSecondFinal (p : BPF.State) (pointer limit : Word) : BPF.State :=
       (if pointer + (8#64) > limit then pointer + (8#64) else pointer + (72#64)) with
     pc := if pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit then 14 else 27 }
 
-theorem proof_second_block (p : BPF.State) (pointer limit : Word) :
-    BPFPath.evaluate noExternals proof (proofSecondPositions pointer limit) (proofSecondBefore p pointer limit) =
+theorem proof_second_block (p : BPF.State) (pointer limit : Word)
+    (env : BPF.Environment := noExternals) :
+    BPFPath.evaluate env proof (proofSecondPositions pointer limit) (proofSecondBefore p pointer limit) =
       .ok ⟨proofSecondFinal p pointer limit, [], none⟩ := by
   by_cases h8 : pointer + (8#64) > limit <;>
     by_cases h72 : pointer + (72#64) > limit <;>

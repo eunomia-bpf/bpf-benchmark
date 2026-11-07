@@ -76,6 +76,61 @@ theorem evaluate_sound (env : Environment) (program : Array Byte)
                             exact Execution.next head (ih first.state tail continued)
           · simp [evaluate, active, position] at accepted
 
+
+/-- Equality at the actual path positions and their possible LDDW
+continuations transports a certificate to another captured program. -/
+theorem evaluate_program_congr (env : Environment) (first second : Array Byte)
+    (positions : List Nat)
+    (same : ∀ pc ∈ positions, decode first pc = decode second pc ∧
+      decode first (pc + 1) = decode second (pc + 1)) (state : State) :
+    evaluate env first positions state = evaluate env second positions state := by
+  induction positions generalizing state with
+  | nil => rfl
+  | cons pc rest ih =>
+      have head := same pc (by simp)
+      have suffix : ∀ next ∈ rest, decode first next = decode second next ∧
+          decode first (next + 1) = decode second (next + 1) :=
+        fun next inside => same next (by simp [inside])
+      by_cases active : state.halted = true
+      · simp [evaluate, active]
+      · by_cases atPosition : state.pc = (pc : Int)
+        · have continuation : decode first (state.pc.toNat + 1) = decode second (state.pc.toNat + 1) := by
+            simpa [atPosition] using head.2
+          have executed : ∀ i, execute env first state i = execute env second state i :=
+            fun i => execute_program_congr env first second state i continuation
+          simp only [evaluate]
+          simp [active, atPosition, head.1, executed, ih suffix]
+        · simp [evaluate, active, atPosition]
+
+/-- Only an actual wide immediate may observe its continuation. This avoids
+requiring an ordinary block's following instruction to remain unchanged. -/
+theorem evaluate_program_congr_if_wide (env : Environment) (first second : Array Byte)
+    (positions : List Nat)
+    (same : ∀ pc ∈ positions, ∃ i,
+      decode first pc = .ok i ∧ decode second pc = .ok i ∧
+      (i.code = 0x18 → decode first (pc + 1) = decode second (pc + 1)))
+    (state : State) : evaluate env first positions state = evaluate env second positions state := by
+  induction positions generalizing state with
+  | nil => rfl
+  | cons pc rest ih =>
+      obtain ⟨i, firstDecode, secondDecode, high⟩ := same pc (by simp)
+      have suffix : ∀ next ∈ rest, ∃ i,
+          decode first next = .ok i ∧ decode second next = .ok i ∧
+          (i.code = 0x18 → decode first (next + 1) = decode second (next + 1)) :=
+        fun next inside => same next (by simp [inside])
+      by_cases active : state.halted = true
+      · simp [evaluate, active]
+      · by_cases atPosition : state.pc = (pc : Int)
+        · have execution := execute_program_congr_if_wide env first second state i
+            (by simpa [atPosition] using high)
+          simp only [evaluate]
+          simp [active, atPosition, firstDecode, secondDecode, execution, ih suffix]
+        · simp [evaluate, active, atPosition]
+
 end KProgTV.BPFPath
 
 #print axioms KProgTV.BPFPath.evaluate_sound
+
+#print axioms KProgTV.BPFPath.evaluate_program_congr
+
+#print axioms KProgTV.BPFPath.evaluate_program_congr_if_wide

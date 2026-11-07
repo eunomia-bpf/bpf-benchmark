@@ -798,3 +798,109 @@ in the development archive. Platform mapped-context/frame/disjointness and
 entry-memory facts remain explicit premises to be established by the kernel
 ABI relation. Guard/store/return composition and explicit CPU-profile binding
 continue before this becomes a whole-program certificate.
+
+Complete BB0: `simple-first-block-final-and-mutants.log` records the full
+entry+guard composition and unchanged/eight-mutant regression. The linker
+identity result is in `simple-kernel-artifact-first.log`; exact84-byte
+output, ABI, relocation/environment files and generated Lean arrays are in
+`simple-first-block-inputs.tar.gz`. Failed proof-development attempts remain
+in `simple-first-block-development.tar.gz`. This is a complete first-block
+certificate, with explicit private-frame/platform premises, not yet the
+whole generation-bound program certificate.
+
+Exact verifier-input capture: `checked-simple-arm64-first.log` retains the
+production loader's actual29-instruction expanded proof and successful exact
+original/native packet comparison. `checked-capture-artifact-final.log`
+retains the Arm binding/map/helper capture regression.
+`checked-capture-final-all.log` includes Lean byte identity,14 metadata
+corruptions, four byte-mutant rejections and the complete x86 regression.
+`checked-proof-inputs.tar.gz` preserves exact snapshots, mutation sources/logs,
+small guest runtime and both capture modules; development failures remain
+in `checked-proof-development.tar.gz`. Read-only API and ownership are
+documented in the TV README and wire header. No whole-program TV claim is
+made from capture or successful execution alone.
+
+Per-program verifier/JIT capture after successful bound load
+-----------------------------------------------------------
+
+The opt-in loader export passed both actual kernel paths. x86 retains41
+successful per-program records from the existing loader regressions, including
+helper/map and multichunk loads. Arm QEMU retains two successful loads of the
+actual simple artifact with distinct IDs/generations, exact direct/automatic
+snapshot equality, stable earlier bytes after another upload, and a real
+output-path IO failure that propagates. Native execution still returns2 and
+updates exactly8 packet bytes. Both static/shared loader libraries build for
+both ISAs. These checks use T's private modules/kernel outputs.
+
+`per-program-capture-arm64.log`, `per-program-capture-x86.log` and
+`per-program-capture-inputs.tar.gz` retain the run, all nine exact files per
+successful load and the per-program inventories. Inventories retain
+`translation_validation: not_validated`. Capturing accepted bytes closes the
+input-provenance gap; the full-state native/compiled-BPF relation and CPU-profile
+binding still need their certificates. The original first Arm run reached all
+assertions but its Makefile's final `rg` lookup failed because that binary is
+absent; the exact output check now uses `grep` and the complete rerun passes.
+
+All41 x86 records now pass offline extent/identity/JIT-layout checks:19 carry
+map facts,21 helper facts and3 multiple chunks. Real multichunk capture exposed
+the extractor's incorrect assumption that the kernel region array is ordered
+by instruction position; it is in reverse discovery order. Validation now
+checks sorted coordinates while preserving the exact original records. The
+three real reverse-order captures pass; overlapping regions, stale generation
+and a region beyond the program reject. Existing14 metadata corruptions and
+four actual instruction mutants still reject. Raw regression:
+`per-program-capture-negatives.log`.
+
+Complete expanded-program context conversion transport
+-----------------------------------------------------
+
+`checked-platform-final.log` checks every instruction position of the actual
+29-instruction expanded simple program, including both changed context loads,
+all ordinary operations, the redirected EXIT and final stub EXIT. The universal
+state theorem includes arbitrary memory and faults. `execution_transport`
+composes every successful physical instruction transition into an execution of
+the exact virtual verifier stream with identical complete state and ordered
+effects. PC bounds follow from actual decoding, rather than a supplied bound.
+Final theorem axioms are propext/Quot.sound, with no sorryAx. The separate byte
+prefix check retains its explicit Lean.ofReduceBool dependency. This transport
+is a platform component; it does not discharge the native block/ABI/CPU-profile
+obligations. Exact source/captured-array inputs are archived alongside the log.
+
+Coordinator map-inlining analysis, 2026-11-07 03:40 UTC
+-----------------------------------------------------
+
+T's answer is: keep the checked virtual helper call in B, and model the actual
+lowered accesses/branches/remaining calls in the TV platform comparison when P
+inlines it. Current opaque-helper events and target-address binding do not
+prove that equivalence. The kernel's real map generator supplies the expansion
+to bind and compare; the sole native ISA semantics remains V's reference.
+Array/per-CPU/hash/LRU expansions differ in both memory effects and surviving
+calls. Current loader/linker already implement some of these lowerings, so this
+is an existing explicit TV obligation, not just a future optimization concern.
+
+The TV README records exact source functions, current capture/binding limits,
+state/trace and specialization inputs, and the kernel-platform assumption. No
+runtime/default, benchmark, launcher, acceptance policy or paper changed for
+this analysis; C's unbound measurements remain independent. The coordinator
+notice carries the decision to C and V before verified-path implementation.
+
+Actual expanded verifier program: complete native BB0
+----------------------------------------------------
+
+`checked-bb0-final.log` passes `checked-first-block-check`. The complete native
+LDP/MOV/CMP/BHI basic block now matches the actual accepted expanded virtual B,
+including physical context conversion, both successors, complete post-states,
+guest-memory preservation and the ordered guest reads. Every erased compiler
+spill effect remains proved private. Existing mapped-context/frame premises
+remain explicit ABI obligations; no verifier-only runtime check was added.
+
+The exact prefix comparison checks decoded instructions through a Boolean
+certificate using the existing declared native reduction trust. Earlier
+attempts hit definitional equality limits, then a missing Except equality
+decider; those were proof-construction failures, with no passing claim. Final
+axioms are propext/Classical.choice/Lean.ofReduceBool/Quot.sound and no sorryAx.
+The generic path congruence now observes a following continuation only for an
+actual LDDW, avoiding a false dependence on the rewritten next-block EXIT.
+`checked-bb0-inputs.tar.gz` retains checker sources, exact native/checked B
+arrays, binding snapshot and layout inputs. This remains a BB0 certificate;
+remaining blocks, invocation relation and CPU-profile binding are pending.
