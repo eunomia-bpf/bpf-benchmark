@@ -1,5 +1,32 @@
 # Native artifact translation validation
 
+Operator reset, 2026-11-07 19:13 UTC: **“完全禁止逐个程序做.”**
+The active safety proof is now generic: O1/O2 are proved once per token for
+all artifacts, native-link transformations each need one universal
+preservation theorem, and `Composition.lean` derives the block relation and
+accepted-verifier/binding theorem for arbitrary programs. Every individual
+program proof/certificate/validation file and its old result below is frozen
+historical work: it is not extended, maintained, rechecked or used as current
+safety evidence. No new program-specific proof or validation file is allowed.
+
+`generic-program-composition.json` records the first generic composition
+increment. `TranslationValidation.trans` composes independent transformations;
+`tokenwise_validation` lifts universal token laws through real dispatch; the
+execution closure handles arbitrary finite blocks/prefixes without fuel.
+`generic_program_block_validation` and `generic_program_effects_checked`
+quantify O1, O2 and link laws over **every Artifact/token**, then instantiate
+the existing exact binding/verifier theorem. Six new audits pass (only
+`propext`, or no axioms); the generic BPF semantics checks also pass.
+
+These are composition theorems, not a claim that their concrete premises are
+already discharged. V's complete token/dispatcher refinement, specialization
+to the actual compiler output, and actual relocation/map/private-spill/helper/
+tail-call preservation remain required once for all programs. In particular,
+a C handler model does not establish clang output correctness. Tokens must
+include actual decoding/dispatch-PC binding; relations retain architecture,
+memory, ordered effects, control location and supported invocation metadata.
+
+
 Lane T owns this directory. The required certificate is about clang's compiled
 BPF instructions as instantiated into the verifier program, paired with the
 exact linked native bytes. A source macro census, a hash, a successful compile,

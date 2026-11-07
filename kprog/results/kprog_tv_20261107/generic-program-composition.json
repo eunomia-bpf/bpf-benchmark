@@ -1,0 +1,115 @@
+{
+  "utc": "2026-11-07T19:18:55.923503+00:00",
+  "status": "generic_for_all_artifacts_token_and_link_composition_proved_concrete_O1_O2_and_transform_laws_not_yet_discharged",
+  "operator_reset": "2026-11-07 19:13 UTC: completely prohibit individual-program proofs/certificates/validation files; all earlier program-specific work frozen and excluded from current safety evidence",
+  "scope": "Generic proof algebra and universal program instance only; no program literal, captured sample, instruction slice, program-specific file or frozen proof is used.",
+  "claims": [
+    "Step inclusion preserves every physical state and complete ordered event trace.",
+    "TranslationValidation.trans composes arbitrary independently proved preservation stages in the native-to-proof direction, retaining intermediate architectural relations.",
+    "A universal per-token native-to-proof law lifts through token dispatch without a per-program proof; real byte decoding/PC selection must be inside supplied steps and relations.",
+    "A validated instruction relation yields a block relation for ANY finite native execution, including all branches/fault prefixes, without a fixed path, endpoint, fuel or termination premise.",
+    "generic_program_block_validation quantifies native-to-interpreter O1, interpreter-to-specialized O2 and native-link/compiled-proof preservation over EVERY Artifact/token, producing one block instance for all programs.",
+    "generic_program_effects_checked instantiates Composition.native_effects_checked with those universal laws, full Artifact binding, accepted-proof verifier soundness and admitted entry. Only invocation/acceptance data is instantiated at load time, not a program proof file."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv bpf-check",
+    "exit": 0,
+    "new_axiom_audit": {
+      "KProgTV.Execution.of_step_imp": [],
+      "KProgTV.TranslationValidation.trans": [
+        "propext"
+      ],
+      "KProgTV.tokenwise_validation": [],
+      "KProgTV.TranslationValidation.execution": [
+        "propext"
+      ],
+      "KProgTV.generic_program_block_validation": [
+        "propext"
+      ],
+      "KProgTV.generic_program_effects_checked": [
+        "propext"
+      ]
+    },
+    "all_printed_audits": {
+      "KProgTV.validated_execution": [
+        "propext"
+      ],
+      "KProgTV.native_effects_checked": [
+        "propext"
+      ],
+      "KProgTV.execution_checked_of_complete": [
+        "propext"
+      ],
+      "KProgTV.TranslationValidation.trans": [
+        "propext"
+      ],
+      "KProgTV.TranslationValidation.execution": [
+        "propext"
+      ],
+      "KProgTV.generic_program_block_validation": [
+        "propext"
+      ],
+      "KProgTV.generic_program_effects_checked": [
+        "propext"
+      ],
+      "KProgTV.BPFPath.evaluate_sound": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_program_congr": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_execution_transport": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.expand_sound": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.step_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.physical_step_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.Execution.of_step_imp": [],
+      "KProgTV.tokenwise_validation": []
+    },
+    "no_sorryAx": true,
+    "log_sha256": "51636933f39b9747cb52c8d4f1e40ddb1b8e665ef6d9bedc06beac8c2c1b3f7d",
+    "dependency_scope": "Only generic Composition, BPF, BPFPath, BPFChecks and BPFPlatform checked. No frozen individual-program source is imported, executed or used as evidence."
+  },
+  "source_sha256": {
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/BPFChecks.lean": "e04dbfe3adf0b313c41c267c60c79eff14cfd02af9eec60d6fdfb1425aa045d7",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/Makefile": "a83bb2b46ddb6555741e059493e4f4352a3842c949e6cd446707a3456f5397c4"
+  },
+  "unresolved_concrete_premises": [
+    "Complete V canonical native-behavior\u2192actual handler/token relation for all supported x86/ARM operations and actual dispatcher fields, including architectural freedom and fault/control choices. A handler\u2192ISA membership statement alone is insufficient.",
+    "O2 must connect each specialized token to actual verifier-visible compiled B once for all programs; no C-model=clang-output assumption is supplied by this increment.",
+    "Prove each actual native-link transformation once (relocation, map lowering, private spill erasure, helper binding, tail-call binding), then compose those laws with trans to discharge linkLaw universally.",
+    "Connect kernel-derived entry/ABI/metadata and exact code binding to the generic state relation and actual accepted-proof entry."
+  ],
+  "trusted": [
+    "Verifier soundness is an explicit assumption on the actual accepted proof relation.",
+    "The single canonical ISA/Memory semantics and its separate hardware fidelity validation.",
+    "Kernel artifact binding and supported ABI/input provenance; their concrete enforcement remains separately accountable.",
+    "Lean kernel and the explicitly audited propext in the generic composition theorems."
+  ],
+  "not_claimed": [
+    "No complete O1/O2/O4 or whole-simulator safety closure yet: concrete universal token/compiler/link laws remain open.",
+    "Frozen individual-program results do not supply any premise or evidence in this result."
+  ]
+}
