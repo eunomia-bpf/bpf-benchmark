@@ -327,6 +327,35 @@ def writeData (s : State) (dst : RegisterRef) (value : Word) (width : Width) : S
   | .zero => s
   | .stack => { s with sp := value }
 
+/-- Logical-immediate masks from Arm DecodeBitMasks(immediate=TRUE).
+The highest set bit of N:NOT(imms) selects a power-of-two element. A rotated
+nonempty, non-full run of ones repeats across the operand width. Defining each
+output bit by its element index avoids a simulator shift/mask implementation.
+Arm DDI0602 AND/ORR/EOR/ANDS (immediate), with shared DecodeBitMasks:
+https://documentation-service.arm.com/static/68da52dfbd7cab51328c0622
+https://www.scs.stanford.edu/~zyedidia/arm64/shared_pseudocode.html#func_DecodeBitMasks_4
+-/
+def decodeLogicalMask (width : Width) (n : Bool) (immr imms : BitVec 6) : Except String Word := do
+  if width = .w32 ∧ n then throw "reserved logical-immediate N/sf combination"
+  let selector := (if n then 64 else 0) + (63 - imms.toNat)
+  if selector < 2 then throw "reserved logical-immediate element size"
+  let elementBits := 2 ^ selector.log2
+  let lastOne := imms.toNat % elementBits
+  if lastOne = elementBits - 1 then throw "reserved all-ones logical immediate"
+  let rotation := immr.toNat % elementBits
+  return (List.range width.bits).foldl (fun result bit =>
+    if (bit + rotation) % elementBits ≤ lastOne then result ||| ((1 : Word) <<< bit) else result) 0
+
+/-- Unlike shifted-register logical instructions, immediate AND/ORR/EOR may
+write SP. ANDS/TST instead decode destination31 as ZR; source31 always reads ZR.
+The native decoder below admits only the four architectural immediate variants.
+-/
+def logicImmediateStep (width : Width) (op : LogicOp) (dst : RegisterRef) (src : Register)
+    (immediate : Word) (s : State) : Transition State :=
+  let result := logicValue width op (readReg s src) immediate
+  let flags := if op.setFlags then logicFlags width result s.flags else s.flags
+  ⟨{ writeData s dst result width with flags := flags, pc := s.pc + 4 }, [], none⟩
+
 def moveRegStep (width : Width) (dst src : RegisterRef) (s : State) : Transition State :=
   ⟨{ writeData s dst (readData s src) width with pc := s.pc + 4 }, [], none⟩
 
@@ -839,6 +868,7 @@ inductive Instruction
       (predicate : Fin 16) (fallback : BitVec 4)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
+  | logicImmediate (width : Width) (op : LogicOp) (dst : RegisterRef) (src : Register) (immediate : Word)
   | keep (instruction : KeepInstruction)
   | moveImmediate (width : Width) (dst : Register) (value : Word)
   | moveRegister (width : Width) (dst src : RegisterRef)
@@ -882,6 +912,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .compare width lhs rhs predicate fallback => compareStep width lhs rhs predicate fallback s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
+  | .logicImmediate width op dst src immediate => logicImmediateStep width op dst src immediate s
   | .keep instruction => keepStep instruction s
   | .moveRegister width dst src => moveRegStep width dst src s
   | .moveImmediate width dst value =>
@@ -1021,6 +1052,14 @@ def decode (bytes : Array Byte) : Except String Instruction := do
     return .moveRegister width (dataRegister dst false) (dataRegister rhs false)
   if word &&& 0x7ffffc00 = 0x11000000 ∧ (dst.val = 31 ∨ lhs.val = 31) then
     return .moveRegister width (dataRegister dst true) (dataRegister lhs true)
+  if word &&& 0x1f800000 = 0x12000000 then
+    let opc := (word / 2^29) % 4
+    let op := match opc with
+      | 0 => LogicOp.conjunction false false | 1 => .disjunction false
+      | 2 => .exclusive | _ => .conjunction false true
+    let mask ← decodeLogicalMask width ((word / 2^22) % 2 == 1)
+      (BitVec.ofNat 6 (word / 2^16)) (BitVec.ofNat 6 (word / 2^10))
+    return .logicImmediate width op (dataRegister dst (opc != 3)) lhs mask
   if word &&& 0x1f800000 = 0x11000000 then
     let setFlags := (word / 2^29) % 2 == 1
     let subtract := (word / 2^30) % 2 == 1

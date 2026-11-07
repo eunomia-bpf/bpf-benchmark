@@ -24,7 +24,10 @@ contents, not invented zeros. Undefined x86 flags and double-shift destination b
 relational step instead of assigning them architectural guarantees. Single-step
 responses include `defined_registers` when destination bits are undefined. ARM memory and
 exclusive accesses carry their explicit architectural/environment inputs;
-control uses the current Cortex-A72 base profile without GCS/BTI state.
+control uses the current Cortex-A72 base profile without GCS/BTI state. Logical
+immediates decode native bitmask fields and reserved encodings, including
+SP destinations for AND/ORR/EOR and ZR destinations for ANDS/TST. Their generated
+value/width/flag lift preserves the same complete numeric state.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

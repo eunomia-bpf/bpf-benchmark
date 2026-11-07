@@ -6,8 +6,122 @@ import sys
 import json
 from pathlib import Path
 import subprocess
+import re
+import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+
+def check_logical_immediates(base):
+    """Construct native words from semantic runs, not a second mask decoder."""
+    base = copy.deepcopy(base)
+    base['state']['vectors'] = [base['state']['vector0']] + [((1 << 127) + i * 0x123456789ABCDEF) for i in range(1, 32)]
+    binary = str(ROOT / '.lake/build/bin/reference')
+    fullmask = (1 << 64) - 1
+    words = []
+    legal_fields = set()
+    for width in (32, 64):
+        for element in (2, 4, 8, 16, 32, 64):
+            if element > width:
+                continue
+            for run in range(1, element):
+                bits = '0' * (element - run) + '1' * run
+                imms = ((-2 * element) | (run - 1)) & 63
+                n = int(element == 64)
+                for rotation in range(element):
+                    rotated = bits[-rotation:] + bits[:-rotation] if rotation else bits
+                    value = int(rotated * (width // element), 2)
+                    for raw_rotation in range(rotation, 64, element):
+                        legal_fields.add((width, n, raw_rotation, imms))
+                        for opcode in range(4):
+                            word = (0x12000000 | (int(width == 64) << 31) | (opcode << 29)
+                                    | (n << 22) | (raw_rotation << 16) | (imms << 10) | (1 << 5))
+                            words.append((word, width, opcode, value))
+    assert len(words) == len({w for w, *_ in words})
+    # Independent LLVM decoding checks every raw encoding, including high
+    # rotation bits ignored for smaller elements; .inst retains those bits.
+    with tempfile.TemporaryDirectory(prefix='arm64-logical-') as tmp:
+        assembly = Path(tmp) / 'logical.s'
+        object_file = Path(tmp) / 'logical.o'
+        assembly.write_text('.text\n' + ''.join(f'.inst 0x{word:08x}\n' for word, *_ in words))
+        subprocess.run(['clang-18', '--target=aarch64-linux-gnu', '-c', str(assembly), '-o', str(object_file)], check=True)
+        disassembly = subprocess.run(['llvm-objdump-18', '-d', '--no-show-raw-insn', str(object_file)],
+                                     text=True, capture_output=True, check=True).stdout
+        rows = [line for line in disassembly.splitlines() if re.match(r'^\s*[0-9a-f]+:\s+', line)]
+        assert len(rows) == len(words), (len(rows), len(words))
+        for (word, width, opcode, mask), row in zip(words, rows):
+            match = re.search(r':\s+(and|orr|eor|ands)\s+([wx])0,\s*[wx]1,\s*#(-?0x[0-9a-f]+|-?[0-9]+)', row)
+            assert match, (hex(word), row)
+            assert match[1] == ('and', 'orr', 'eor', 'ands')[opcode], (word, row)
+            assert match[2] == ('w' if width == 32 else 'x'), (word, row)
+            assert int(match[3], 0) & ((1 << width) - 1) == mask, (word, row, mask)
+    completed = 0
+    with subprocess.Popen([binary], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, text=True, bufsize=1) as process:
+        def check(word, width, opcode, mask, source=1, destination=0,
+                  value=0xABCD987680000001, flags=0xA5A50000F0ABCDEF, pc=0x1000):
+            nonlocal completed
+            request = copy.deepcopy(base)
+            request['native_bytes'] = list(word.to_bytes(4, 'little'))
+            request['state'].update(flags=flags, pc=pc)
+            request['state']['registers'][source] = value
+            expected = copy.deepcopy(request['state'])
+            operand = value if source < 31 else 0
+            result = ((operand & mask) if opcode in (0, 3) else
+                      (operand | mask) if opcode == 1 else (operand ^ mask)) & ((1 << width) - 1)
+            if destination < 31 or opcode != 3:
+                expected['registers'][destination] = result
+            if opcode == 3:
+                expected['flags'] = ((flags & ~(15 << 28)) | ((result >> (width - 1)) << 31)
+                                     | (int(result == 0) << 30))
+            expected.update(pc=(pc + 4) & fullmask, defined_flags=fullmask, events=[], fault=None)
+            process.stdin.write(json.dumps(request) + '\n')
+            process.stdin.flush()
+            line = process.stdout.readline()
+            assert line, (request, process.stderr.read())
+            output = json.loads(line)
+            assert output == expected, (request, output, expected)
+            completed += 1
+        for word, width, opcode, mask in words:
+            check(word, width, opcode, mask)
+        # All architectural register numbers, aliases, ZR/SP and wrapping PC;
+        # W sources contain high bits that must not survive the destination.
+        for width in (32, 64):
+            for opcode in range(4):
+                for source in range(32):
+                    for destination in (source, 0, 30, 31):
+                        for value in (0, fullmask, 0xABCD987680000001):
+                            mask = 0xFF
+                            word = (0x12000000 | (int(width == 64) << 31) | (opcode << 29)
+                                    | (int(width == 64) << 22) | (7 << 10) | (source << 5) | destination)
+                            check(word, width, opcode, mask, source, destination, value,
+                                  flags=0x12345678FFFFFFFF, pc=fullmask - 3)
+        process.stdin.close()
+        assert process.stdout.read() == ''
+        assert process.wait() == 0, process.stderr.read()
+    rejected = 0
+    # All invalid N/sf/imms combinations, with low/high rotation positions and
+    # all four operations. These are decoder rejects, never synthetic faults.
+    for width in (32, 64):
+        for n in (0, 1):
+            for imms in range(64):
+                for rotation in (0, 1, 31, 32, 63):
+                    if (width, n, rotation, imms) in legal_fields:
+                        continue
+                    for opcode in range(4):
+                        word = (0x12000000 | (int(width == 64) << 31) | (opcode << 29)
+                                | (n << 22) | (rotation << 16) | (imms << 10) | (1 << 5))
+                        request = copy.deepcopy(base)
+                        request['native_bytes'] = list(word.to_bytes(4, 'little'))
+                        result = subprocess.run([binary], input=json.dumps(request) + '\n',
+                                                text=True, capture_output=True)
+                        assert result.returncode == 1 and result.stderr.startswith((
+                            'reference: reserved logical-immediate',
+                            'reference: reserved all-ones logical immediate')), (word, result)
+                        rejected += 1
+    print(f'AArch64 logical-immediate reference: {len(words)} LLVM-decoded raw encodings, '
+          f'{completed} complete states, {rejected} reserved-field rejects PASS')
 
 
 def main():
@@ -16,9 +130,21 @@ def main():
         flags=0xF0000000, vector0=(1 << 127) + 17, pc=0x1000,
         memory=[dict(address=0x2000, value=0xA5, readable=True,
                      writable=False, initialized=False)]))
+    check_logical_immediates(base)
     # Encoding words were independently assembled with GNU AArch64 as. Expected
     # results are fixed boundary examples, not an alternate ISA interpreter.
     cases = []
+    # Formerly classified as a reserved MOVK mutation, this exact word is
+    # legal ANDS W0,W20,#0xc000ffff. Retain it as a full-state positive case.
+    request = copy.deepcopy(base)
+    request['native_bytes'] = list((0x72024680).to_bytes(4, 'little'))
+    request['state']['registers'][20] = 0xFEDCBA9887654321
+    request['state']['flags'] = 0x12345678FFFFFFFF
+    expected = copy.deepcopy(request['state'])
+    expected['registers'][0] = 0x80004321
+    expected.update(flags=0x123456788FFFFFFF, pc=0x1004,
+                    defined_flags=(1 << 64) - 1, events=[], fault=None)
+    cases.append((request, expected))
     for word, lhs, rhs, addend, dst, result in [
             (0x1B020C20, 0xFFFFFFFF, 2, 3, 0, 1),  # MADD W
             (0x9B020C20, 0xFFFFFFFFFFFFFFFF, 2, 3, 0, 1),
@@ -785,7 +911,7 @@ def main():
     for word in (0xD61F0001, 0xD63F0400, 0xD65F0800, 0xD67F0000, 0x53474C20, 0xD3074C20, 0x53204C20, 0x53078020, 0x73074C20, 0xF3474C20,
                  0x2A2183E0, 0x4BC107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
-                 0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
+                 0x72C24680, 0x72E24680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
                  0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
                  0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800,

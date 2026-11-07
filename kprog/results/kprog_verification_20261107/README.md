@@ -685,3 +685,42 @@ reference/wire/compiler and semantic checks. The immutable source/cache export
 was deleted automatically; compressed CALL CPU observations retain this 440-case
 full run. The later logical-immediate ISA coverage addition is separate and
 requires its own validation; it is not implied by this earlier full pass.
+
+## Canonical AArch64 logical-immediate coverage
+
+The single `Reference/AArch64.lean` now decodes logical-immediate native words
+into a dedicated immediate step. `decodeLogicalMask` follows Arm's element/run
+encoding with a per-output-bit construction, rejecting invalid N/sf, element
+size and all-ones runs. Only the four architectural immediate variants enter
+this decoder. Non-flag AND/ORR/EOR decode destination31 as SP; ANDS/TST discard
+it as ZR, and source31 always reads ZR. W writes zero-extend. Old reference
+semantics are byte-identical after removing these added declarations/arms.
+
+Sources are Arm DDI0602 AND/ORR/EOR/ANDS immediate descriptions
+(https://documentation-service.arm.com/static/68da52dfbd7cab51328c0622), with
+Arm-authored DecodeBitMasks shared pseudocode mirrored at Stanford
+(https://www.scs.stanford.edu/~zyedidia/arm64/shared_pseudocode.html).
+No simulator/generated implementation definitions are imported by the ISA.
+`Arm64Logic.immediate_step_refines` composes existing generated logical values,
+width writes (including SP) and NZCV production against the same canonical
+complete-state step. No synthetic source GPR is introduced. Native mask/value,
+operation/width and Entry/O4 address/provenance bindings still require their
+producer/platform evidence; this is not compiler or whole-program certification.
+
+The existing reference checker now constructs masks from semantic run strings,
+checks every 45312 valid raw encoding independently with LLVM18, then compares
+48384 complete states including every source register, aliases, SP/ZR, W high
+clearing, all32 vector banks, opaque flags, memory permissions/init and wrapping
+PC. All invalid N/sf/imms classes are checked at five rotation positions across
+all four operations: 1580 decoder rejects. The exact old negative 0x72024680
+was LLVM-confirmed legal ANDS W0,W20,#0xc000ffff and retained as a positive
+full-state regression, not dropped. An initial run exposed a stale linked
+reference binary; rebuilding the existing `reference` target fixed it with
+unchanged inputs. No test failures remain or native programs are filtered.
+
+Validation: all376 incremental Lean jobs, seven related freshness checks,
+generated direct-dispatch freshness, existing3860 control states, addressed
+memory959states/18rejects and existing C ALU/logic-flags/flag/operand/route hosts
+(336/64/1152/21688/4470cases) passed. No runtime/generator/header/kernel policy
+or wire schema changed. F hardware replay and complete77/72 dispatch/O2 remain
+separate obligations. A new immutable full check follows publication.
