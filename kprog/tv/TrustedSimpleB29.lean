@@ -950,6 +950,48 @@ theorem bound_native_prefix_effects_checked (env : BPF.Environment) (n : X86.Sta
   have completeChecked := verifierSound validated acceptance admitted _ _ boundRun
   exact TrustedSimpleSafety.captured_native_prefix_effects_checked (checked validated) n nativePC completeChecked canonicalRun
 
+
+/-- Transport the exact B29 checked-effects theorem to an emitted native
+payload base. Only PC changes in the logical transport; all invocation
+registers, flags and memory are retained. Full JIT-image embedding is separate. -/
+theorem bound_based_native_prefix_effects_checked (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (codeBase : Word) (validated executed : Artifact) (binding : executed=validated)
+    (nativeImage : validated.nativeBytes=native.toList)
+    (proofImage : validated.proofBytes=proof.toList) (entryImage : validated.entry=0)
+    (accepted : Artifact → Prop) (proofEntry : Artifact → BPF.State → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ artifact, accepted artifact → proofEntry artifact p →
+      ∀ trace last, Execution (boundProofStep env artifact) p trace last →
+        ∀ event ∈ trace, checked artifact event)
+    (acceptance : accepted validated) (admitted : proofEntry validated p)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (TrustedSimpleSafety.relationalNativeInstructionStep
+      (codeBase+BitVec.ofNat 64 executed.entry) executed.nativeBytes.toArray) n trace last)
+    (stack : Word) (nativePC : n.pc=codeBase) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack) :
+    ∀ event ∈ trace, checked validated event := by
+  subst executed
+  have canonicalRun : Execution (TrustedSimpleSafety.relationalNativeInstructionStep codeBase native) n trace last := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList,BitVec.add_zero] using run
+  let logical := TrustedSimpleSafety.shiftNativeState (-codeBase) n
+  have logicalPC : logical.pc=0 := by
+    dsimp only [logical,TrustedSimpleSafety.shiftNativeState]
+    rw [nativePC]
+    unfold Word at *
+    bv_decide
+  have starts : TrustedSimpleSafety.shiftNativeState codeBase logical=n := by
+    simpa only [logical,BitVec.neg_neg] using TrustedSimpleSafety.shift_native_state_inverse (-codeBase) n
+  have valid : TrustedSimpleX86.simpleClosedPC logical.pc := by
+    simp [TrustedSimpleX86.simpleClosedPC,TrustedSimpleX86.simpleNativeOffsets,logicalPC]
+  obtain ⟨logicalLast,logicalRun,_⟩ := TrustedSimpleSafety.simple_native_based_execution_reflects codeBase
+    canonicalRun logical valid starts
+  have boundLogical : Execution (TrustedSimpleSafety.relationalNativeInstructionStep
+      (BitVec.ofNat 64 validated.entry) validated.nativeBytes.toArray) logical trace logicalLast := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList] using logicalRun
+  exact bound_native_prefix_effects_checked env logical p validated validated rfl nativeImage proofImage entryImage
+    accepted proofEntry checked verifierSound acceptance admitted boundLogical stack logicalPC proofPC active argument memory nativeStack
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
@@ -1004,3 +1046,5 @@ end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.all_inputs_relational_correspondence
 
 #print axioms KProgTV.TrustedSimpleB29.bound_native_prefix_effects_checked
+
+#print axioms KProgTV.TrustedSimpleB29.bound_based_native_prefix_effects_checked

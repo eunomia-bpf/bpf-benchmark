@@ -2235,3 +2235,9 @@ conversion/capture provenance remain trusted. Full per-basic-block
 architectural reconstruction and physical JIT/caller transport are still
 required; this is not a whole-machine safety claim or a certificate for other
 programs. The B29 Make target now depends on the native safety/CFG library.
+
+`trusted-simple-b29-based-prefix.json` transports that theorem to an arbitrary
+emitted payload code base, preserving every invocation field except the
+logical PC shift. All43 audits pass. Full JIT-image/caller embedding and
+architectural reconstruction remain separate; an absolute return address is
+not shifted by this payload transport.
