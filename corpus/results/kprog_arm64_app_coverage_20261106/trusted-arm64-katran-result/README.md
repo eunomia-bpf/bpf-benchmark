@@ -21,3 +21,12 @@ Builds reuse the canonical shared ARM shim/loader/native-link caches. The VM use
 After the shared source-used-map projection and ARM extern correction, the next real run successfully queried all 14 pinned map facts and generated the native-link proof. Its guest clang was killed by the kernel OOM killer at 3,437,480 KiB anonymous RSS in the 4 GiB guest. The native request failed with service status -5; compilation returned -9, and the verifier was never invoked. The application reported no attached XDP program and no workload ran. `compiler-oom.json` and `run-20261107T095459034219Z.tar.gz` preserve the actual receipt, kernel OOM line and full request inputs/logs. All recorded input hashes stayed unchanged.
 
 The next Katran replay uses 8 GiB guest RAM, within the lane limit, with the same eight guest vCPUs and CPUs 20-23 on the host. This is a response to the observed compiler OOM; no compiler flag, native input, kernel policy or workload change was made. Updated ARM shim/loader binaries must be built incrementally before that replay.
+
+
+## Completed 8 GiB replay
+
+The 8 GiB replay completed compilation and reached the real generation-bound verifier. It rejected instruction 2, `*(u64 *)(r10 - 568) = r1`, with `invalid write to stack R10 off=-568 size=8`. All 14 kernel-pinned map facts and native linking succeeded. The service returned status -5, the Katran process exited before shim program readiness, and no application workload ran. This is a verifier stack-size rejection, not the earlier compiler OOM and not application coverage.
+
+`summary.json` and `run-20261107T111747460800Z.tar.gz` retain the complete closed run: exact kernel/native inputs, generated C and BPF, compiler commands, verifier diagnostics, service/shim logs and the 14 map identities. The archive SHA256 is `804dcbd346c9468bd158e725eedf61ea6997dd8c0e864d5dff0bcc12f82b682e`. The kernel-owned native ELF matches the original and specializer input SHA256 `8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c`. All monitored input hashes stayed unchanged; guest exit was 1 and QEMU exit was 0.
+
+The initial command records host CPUs 20-23. Near the end, all live QEMU threads moved to the available lane CPUs 8-11; `run/host-affinity-migration.json` records the exact before/after affinities. This was a functional replay and supplies no performance result. The already queued compact-payload Katran replay started after this driver exited, using separate output state; its outcome remains pending here.

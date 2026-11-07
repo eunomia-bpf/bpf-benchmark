@@ -1,8 +1,8 @@
 {
   "ok": false,
   "case": "katran",
-  "started": "2026-11-07T09:54:59.034247+00:00",
-  "archive": "run-20261107T095459034219Z.tar.gz",
+  "started": "2026-11-07T11:17:47.460820+00:00",
+  "archive": "run-20261107T111747460800Z.tar.gz",
   "command": [
     "taskset",
     "-c",
@@ -15,7 +15,7 @@
     "-smp",
     "8",
     "-m",
-    "4096",
+    "8192",
     "-nographic",
     "-no-reboot",
     "-kernel",
@@ -34,8 +34,8 @@
   "hashes_before": {
     "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
     "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "6ee30c665196957ad8f91a3ab49f68615f37b812bec52dfbd3df40dc0b83f8e3",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "1c8fb869d502636b356e0bfe026d5963ab4dbbba846c7b71d3b0091e24a4cbc9",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "6afa31017265cc6445d28c57887917c1acfe4cb28787e9e8c6ebd85a1dd29c4d",
     "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
     "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "7d55f12233643c26968509e5c701743900ee1f1b5022178e69037f4a1cf9ab74",
     "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
@@ -46,9 +46,9 @@
     "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
     "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
-    "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py": "8b417d0b594ed3f675cf8ce3b50fa2c8071531a9055850cec4fc1850cd3ce603",
-    "bpfopt/shim/build-arm64/libbpfrejit_shim.so": "fc9dc34d079c4700456216dd7f57277f2d937325d3b000fb1c0f9376b2f7c2c2",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": "50e3d44affc202186bf18acf4a3dc63d280745a5d0b998f82da294a2fd66a68a",
+    "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py": "7327c24263b47fb661c82854acbe50f9bcdf56c5bdd61f78d5ce5927c86c3d97",
+    "bpfopt/shim/build-arm64/libbpfrejit_shim.so": "0763876e22dee6e2736cae2925d58eac599fafb3c265d283687902a12e25ee07",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": "cb3d38eb7529ef9b15e30a90de595a9936f28d3ab8eaec4f3a327a1b82d4c12f",
     "kprog/arm64/build/app-verified-stage/katran/manifest.json": "5161c0911ef19bef60714c3ce4ab6a37423f594b2665157ef0ca3f5e4551255d",
     "kprog/arm64/build/app-verified-stage/katran/balancer.native.o": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
     "kprog/arm64/build/app-runtime-v35/root/artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc": "8d90289251c7ca61cade7d649f74a192c779169ba63deb89fb26a66a28e66684",
@@ -63,12 +63,12 @@
     "ok": false,
     "arch": "arm64",
     "case": "katran",
-    "started": "1970-01-01T00:00:14.578528+00:00",
-    "error": "Katran server did not expose an attached XDP program on katran0",
-    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 102, in guest\n    summary.update(katran(live), ok=True)\n                   ^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 48, in katran\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 841, in start\n    session.__enter__()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 638, in __enter__\n    self.attach_info = self._wait_for_xdp_attach()\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 687, in _wait_for_xdp_attach\n    raise RuntimeError(f\"Katran server did not expose an attached XDP program on {self.iface}\")\nRuntimeError: Katran server did not expose an attached XDP program on katran0\n",
-    "finished": "1970-01-01T00:50:44.134309+00:00"
+    "started": "1970-01-01T00:00:12.853132+00:00",
+    "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI19700101 00:03:19.615020   873 KatranGrpcService.cpp:69] Starting Katran\nE19700101 00:03:19.976146   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.019339   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:03:20.285787   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.331862   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:03:20.671728   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.684832   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 102, in guest\n    summary.update(katran(live), ok=True)\n                   ^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 48, in katran\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 841, in start\n    session.__enter__()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 633, in __enter__\n    session.__enter__()\n  File \"/workspaces/repository/runner/libs/app_runners/process_support.py\", line 144, in __enter__\n    wait_for_app_shim_programs(\n  File \"/workspaces/repository/runner/libs/rejit.py\", line 382, in wait_for_app_shim_programs\n    raise RuntimeError(f\"{process_name} exited before BPF programs were tracked by shim{detail}\")\nRuntimeError: native app exited before BPF programs were tracked by shim\nstderr tail:\nI19700101 00:03:19.615020   873 KatranGrpcService.cpp:69] Starting Katran\nE19700101 00:03:19.976146   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.019339   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:03:20.285787   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.331862   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:03:20.671728   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:03:20.684832   873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\n",
+    "finished": "1970-01-01T01:15:37.452670+00:00"
   },
   "hashes_unchanged": true,
-  "finished": "2026-11-07T10:45:46.842505+00:00",
-  "archive_sha256": "fd484e05e02833cda549581650ee8a7d1e367e26bdcfb6e1cc428253639a92e6"
+  "finished": "2026-11-07T12:33:28.160606+00:00",
+  "archive_sha256": "804dcbd346c9468bd158e725eedf61ea6997dd8c0e864d5dff0bcc12f82b682e"
 }
