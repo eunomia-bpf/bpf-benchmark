@@ -8,7 +8,7 @@ epochs, binaries and canonical references.
 
 | Numeric C token catalog | Tokens | Sampled three-way replay | Explicit-monitor observation | Replay pending |
 | --- | ---: | ---: | ---: | ---: |
-| x86 | 75 | 62 | 0 | 13 |
+| x86 | 75 | 66 | 0 | 9 |
 | AArch64 | 71 | 65 | 1 | 5 |
 
 The numeric catalogs come directly from the committed x86_sim.h and
@@ -17,18 +17,21 @@ The requested 77/72 operation domain also needs V's semantic/control-family
 alignment; numeric tokens, native instruction families and specialization
 tokens each retain their own identities.
 
-replay-observations.tsv contains 148 operation/source rows from ten published
+replay-observations.tsv contains 152 operation/source rows from eleven published
 snapshots. Each row records form counts, case counts, three comparison
 counts, backend, compiled simulator header, binary and reference hashes,
 and original per-form table paths. Both forms tables are joined by their
 exact assembly names and checked for equal case counts and zero differences.
 numeric-token-input.tsv lists all 146 numeric tokens, including the pending
 replay entries, with their supporting source paths. inputs.json pins all
-41 source artifacts used by the collector and records the aliases.
+45 source artifacts used by the collector and records the aliases.
 
 The main x86 snapshot covers 1,144 forms and 1,171,456 real-CPU/C/reference
 states with header 4fe6817. The later focused RORX snapshot covers four
-forms and 4,096 states with header 47fb5565. Each keeps its source epoch.
+forms and 4,096 states with header 47fb5565. Four additional numeric-token
+bindings contribute 32 raw/direct route/form groups and 32,768 real-CPU/
+C/reference states with that header and memory header 3ba4bc78. Each source
+keeps its own epoch, binding scope and counts.
 The ARM core snapshot covers 807 forms and 826,368 QEMU/C/reference states
 with header c21833de. Full-register-bank FMOV, memory and bitfield snapshots
 supply their own rows and source hashes.

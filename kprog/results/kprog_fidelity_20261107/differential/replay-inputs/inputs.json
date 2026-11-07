@@ -1,5 +1,5 @@
 {
-  "source_head": "76df7ccb83c3cd31a5da6f40a3a631f78d30cd8e",
+  "source_head": "0cdf0b7f3eb6a9ef6b291e735c943b16a9444a40",
   "files": {
     "kprog/x86/x86_sim.h": {
       "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
@@ -30,6 +30,18 @@
     },
     "kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/actual-compiled-inputs.tar.gz": {
       "sha256": "35a51b426f171c7d3ba4275dbf6de1f43d505f5d9db9995a0905a0ebb7cbda04"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/summary.json": {
+      "sha256": "532c6ec19073cb019ca33e8f527fb89f36c4d95562bc90aa2458ee3e181b0cb1"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/forms.tsv": {
+      "sha256": "85fc27ca05c9bc4b82b8899edb63e55447d0f665b3316c33c5d37bd5ec655554"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/reference-forms.tsv": {
+      "sha256": "68ad86392431ccaf3915f93f6aaa91226f0d3c484acbb4a6abad810d7c3dc3ff"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/actual-compiled-inputs.tar.gz": {
+      "sha256": "57d7f4e1f3ab8c25e7fd2a9ccdd6b6b1319c306e2b3cc4fa9c56f58a57995715"
     },
     "kprog/results/kprog_fidelity_20261107/differential/x86-control/summary.json": {
       "sha256": "33490060aabbef115f1b021b2b5dce4be29a7af9a8575bb30511925be8e9f756"
@@ -158,6 +170,18 @@
       "operation_rows": 2,
       "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
       "executable_sha256": "613cb2637e315b9dd20c2f9d42e2d8b75a8867d6568d0f4510b930ab16aa8069",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-numeric-tokens",
+      "scope": "legal_numeric_token_binding",
+      "backend": "real_x86_cpu",
+      "forms": 32,
+      "cases": 32768,
+      "operation_rows": 4,
+      "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "executable_sha256": "51b7b4172dfdf90caca657d978123a0db8dc38df8033d7c673c2150d8cdc72a0",
       "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
     },
     {

@@ -66,6 +66,7 @@ for arch in ["x86", "arm64"]:
 specs = [
     ("x86", "x86-cmp-signed-current", "real_x86_cpu", "enumerated_instruction_forms"),
     ("x86", "x86-rorx-current", "real_x86_cpu", "enumerated_instruction_forms"),
+    ("x86", "x86-numeric-tokens", "real_x86_cpu", "legal_numeric_token_binding"),
     ("x86", "x86-control", "real_x86_cpu", "finite_control_composites"),
     ("arm64", "arm64-current-core", "qemu_user", "enumerated_instruction_forms"),
     ("arm64", "arm64-control-branches", "qemu_user", "finite_control_composites"),
