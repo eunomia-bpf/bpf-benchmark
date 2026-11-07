@@ -769,3 +769,7 @@ trusted-payload-worker-check:
 
 trusted-payload-katran-run:
 	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_payload_check.py host
+
+.PHONY: trusted-payload-negative-run
+trusted-payload-negative-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_payload_negative.py host

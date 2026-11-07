@@ -1,0 +1,45 @@
+{
+  "collected_utc": "2026-11-07T11:52:37.282929+00:00",
+  "scope": "first completed no-stack native control on private compact worker; stack-spill control and negative-suite outcomes pending at this checkpoint",
+  "expected_cases": 34,
+  "safe_cases": 4,
+  "unsafe_cases": 30,
+  "control": {
+    "name": "valid_control",
+    "assembly": "mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+    "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/valid_control.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+      "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_array.bpf.o",
+      "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/valid_control.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 0,
+    "request": {
+      "request_id": 1,
+      "source_prog_id": 8,
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "started": "1970-01-01T00:01:05.025637+00:00",
+      "prog_id": 13,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/1.success.tar.gz",
+      "finished": "1970-01-01T00:02:36.356528+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "valid_executed",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=13 chunks=0 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  },
+  "stdout": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=13 chunks=0 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+  "stderr": "",
+  "candidate_layout": {
+    "stack_min": 0,
+    "stack_max": 0,
+    "ghost_offsets": [],
+    "hashes_unchanged": true
+  },
+  "request_archive_sha256": "90e260fad72da8363a878926279daa375f9fc2f850476a3b18730d82424aef80",
+  "inputs_archive_sha256": "12489d19bd7786e2eb99f9f353f8b3dfe9b97e4445a4a90ed0aa93f107526f41"
+}
