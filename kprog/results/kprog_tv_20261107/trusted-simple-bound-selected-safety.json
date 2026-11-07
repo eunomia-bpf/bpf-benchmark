@@ -1,0 +1,85 @@
+{
+  "status": "concrete_captured_selected_path_verifier_acceptance_binding_safety_composition_checked",
+  "utc": "2026-11-07T13:31:58.938938+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleSafety.bound_captured_selected_path_effects_checked",
+  "claims": [
+    "exact full Artifact equality binds native/proof bytes, entry, ABI and specialization metadata",
+    "native path decodes the executed artifact bytes at the bound entry, rather than a substitute image",
+    "verifier soundness is applied to the accepted artifact actual B bytes and actual raw B execution",
+    "proved setup projection never invents or changes a surviving event; guest suffix is retained without projection",
+    "every event of the actual selected canonical native path is one checked by accepted B, including all memory/helper/fault event forms",
+    "all guest permission assignments and XOR AF choices inherited from captured all-permissions relational theorem"
+  ],
+  "premises": [
+    "explicit verifier acceptance and admitted B entry",
+    "explicit verifier soundness for the actual B platform execution",
+    "exact executed=validated Artifact, validated native/proof image equal captured bytes, entry offset0",
+    "actual selected canonical native path witness, not arbitrary extent/CFG coverage",
+    "initial PC/context/memory relation, private-frame permissions/disjointness and native stack-input witness"
+  ],
+  "not_yet_claimed": [
+    "arbitrary extent/CFG path coverage and all finite native prefixes",
+    "strict per-basic-block mapping across reordered guards",
+    "semantic entry/ABI/RET/platform transport from actual kernel execution",
+    "kernel C binding code proved in Lean",
+    "unconditional whole-program artifact TranslationValidation or all micro/app programs"
+  ],
+  "trusted": [
+    "Linux verifier soundness for B (explicit theorem hypothesis)",
+    "canonical reference ISA/memory, validated separately against hardware by F",
+    "explicit B kernel context conversion and native-input platform interpretation",
+    "kernel immutable artifact ownership/binding implementation and capture provenance",
+    "Lean checking kernel, listed logical axioms and native proof reduction",
+    "ELF/parser/archive materialization checker until its semantic bridge is completed"
+  ],
+  "validation": {
+    "base_command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "base_exit": 0,
+    "composition_command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-safety-certificate",
+    "composition_exit": 0,
+    "prerequisite_reuse": "the unchanged dependency was checked immediately before; -o prevents duplicate compilation",
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.initialization_projection_never_invents": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleSafety.initialization_projected_events_checked": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.bound_captured_selected_path_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "base_log_sha256": "6be38a3c77ce828e4d65a1040d2890f08bd45075d875a520425bf0c9d0694744",
+    "composition_log_sha256": "e57351123c0cacb11c10e83576c6e47ab598a895f9dae6511c095817549243fd",
+    "combined_log_sha256": "7c0377b859ba86d4a2d32ca87dd7df695e92c77bee80738c2d49ab9349b0b31a",
+    "working_makefile_sha256": "8924423892908c26ac8efe7bb19cb08fed6cc5d82e10fbc2a5c93d5318ec5c55",
+    "published_makefile_scope": "only safety target committed; independent CFG target remains WIP; base and safety recipes byte-identical"
+  },
+  "compatibility": {
+    "TrustedSimpleX86_source": "byte-identical to HEAD; all existing declarations preserved",
+    "ISA_runtime_binding_implementation": "unchanged"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "252bd173008a13c18792968616a623c9e36831f7ec9b24bb82264497199514cf",
+    "kprog/tv/Makefile": "b4099a86fc0eb15b82f7b5ba3f23432b33edf6d09d8e51683149ff92c825add4"
+  },
+  "TCB_inventory": "kprog/results/kprog_fidelity_20261107/tcb/README.md"
+}

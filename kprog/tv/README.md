@@ -1748,3 +1748,23 @@ canonical reads, comparisons and store permissions; proving that every arbitrary
 extent/CFG path is covered, finite-prefix closure, strict per-basic-block mapping,
 ABI/platform/RET transport and unconditional artifact TV remain open. See
 all-permissions-relational JSON/log for the precise scope and source pins.
+
+### Concrete selected-path safety with exact artifact binding
+
+`TrustedSimpleSafety.bound_captured_selected_path_effects_checked` instantiates
+verifier acceptance/soundness with the actual captured B execution and the
+all-permissions canonical native path. Full `Artifact` equality includes native
+and proof bytes, entry, ABI and metadata; native execution decodes that executed
+image, and verifier soundness applies to the accepted proof image. The setup
+projection only erases events and never changes or invents a surviving event.
+Every native event on the selected path is consequently checked by B.
+
+Run `make -C kprog/tv trusted-simple-safety-certificate`. The certificate lives in
+a separate module so CFG proof development does not change the established
+entry/permission certificate. Evidence is in bound-selected-safety JSON/log.
+Verifier soundness, canonical ISA/memory, explicit kernel platform semantics,
+kernel ownership/binding code, Lean kernel/native reduction and capture/ELF
+provenance remain trusted or explicit premises; the dated fidelity TCB inventory
+records source scope separately. Arbitrary CFG/extent and finite-prefix coverage,
+strict basic-block mapping and semantic entry/ABI/RET/platform transport remain
+open. This conditional selected-path theorem is not unconditional artifact TV.
