@@ -39,3 +39,23 @@ confirms that the context-shadow issue affects an ordinary store. The guest
 exit2 is the harness correctly surfacing that finding, not a safety-suite pass.
 Production projection repair remains open; no code or admission rule was
 weakened. ARM evidence is still pending.
+
+The corresponding ARM full-system QEMU check also confirms an **accepted
+ordinary-context-store finding**. Its return2 control executes correctly in
+the original kernel and fresh bound native path; the negative obtains a
+nonzero-generation bound program in LOAD-ONLY mode and is never executed.
+`arm64-summary.json` retains the host/guest exits and unchanged source pins;
+compressed outcomes retain exact messages/native identities. The untouched
+host archive is `arm64/trusted-arm64-service-result/run-20261107T123409304825Z.tar.gz`;
+`arm64-inputs.tar.gz` preserves the native/probe/context input bytes. This uses
+F's corrected return-target linker, so it is a separate context-effect defect.
+
+The paired native/proof disassemblies show the concrete representation gap:
+the native store targets the entry context, while the proof store targets its
+private stack ABI object. The x86 proof retains the store (at instruction13)
+rather than optimizing it away; its destination derives from R10-40. No
+corresponding store reaches the external context. This narrows the required
+repair to context-effect projection, not a blanket relaxation of binding or
+helper rules. C/A own the ISA implementations and F retains these regressions.
+The original34-case ARM replay remains separate and active; these findings
+prevent a simulator-wide safety claim even if those original34 later pass.
