@@ -1,0 +1,44 @@
+{
+  "scope": "Generic readonly section parsing mechanism: same ELF payload through both production parser functions and staged ARM repair. The fixture contains data only. Existing app/native/kernel/service inputs are unchanged.",
+  "command": [
+    "gcc",
+    "-c",
+    "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-candidate/cross-isa-parser/data.S",
+    "-o",
+    "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-candidate/cross-isa-parser/data.o"
+  ],
+  "expected_hex": "6465616462656566303030303030303064656164626565663030303030303030",
+  "object_sha256": "43653b5245add8f1702f1cba1f1c8d17889ec9cc8d7fa6b4f8044e8a8e344c25",
+  "rows": [
+    {
+      "architecture": "x86",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "source_sha256": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "expected_length": 32,
+      "parsed_length": 48,
+      "equal": false,
+      "actual_hex": "64656164626565663030303030303030deadbeef0000000064656164626565663030303030303030deadbeef00000000"
+    },
+    {
+      "architecture": "arm64",
+      "source": "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+      "source_sha256": "b9eb4c7cba928342851ff055117e60e6debbc6d9c41dd1a34d5e5fa7e8b8f97f",
+      "expected_length": 32,
+      "parsed_length": 48,
+      "equal": false,
+      "actual_hex": "64656164626565663030303030303030deadbeef0000000064656164626565663030303030303030deadbeef00000000"
+    },
+    {
+      "architecture": "arm64-candidate",
+      "source": "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-candidate/generator.after.py",
+      "source_sha256": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+      "expected_length": 32,
+      "parsed_length": 32,
+      "equal": true,
+      "actual_hex": "6465616462656566303030303030303064656164626565663030303030303030"
+    }
+  ],
+  "archive_sha256": "c795848c8de366af0a174792965472fdbc759883a61b0a0c569116451ca6bcfd",
+  "x86_source_changed": false,
+  "arm64_repair_still_queued": true
+}
