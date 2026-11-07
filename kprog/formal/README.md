@@ -52,6 +52,11 @@ stack cores are distinct from helper and outer-invocation platform certificates.
 compose generated base updates with the transfer, under explicit accessible-memory
 and original-SP alignment witnesses. Their numeric projection still needs Entry/O4
 tag and address transport. Faulting pre/post accesses remain a separate obligation.
+The scalar writeback lift in `Arm64WritebackMemory.lean` composes the actual
+pre/access/post order for ordinary and signed loads/stores, all four widths,
+and generated register-offset modifiers. It uses the canonical writeback-alias
+restriction and explicit successful-access/original-SP witnesses; its LOAD and
+STORE singleton compositions preserve the same complete numeric state and effects.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

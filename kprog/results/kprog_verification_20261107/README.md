@@ -164,3 +164,32 @@ existing generated, reference, compiler, wire and C semantic checks. The private
 immutable source/cache export was deleted automatically. The compressed CALL
 CPU observations now retain this successful full run; shared incremental caches
 remain intact. Subsequent scalar-writeback work requires separate validation.
+
+## Scalar pre/access/post transfer composition
+
+`Refinement/Arm64WritebackMemory.lean` composes the generated pre-delta,
+byte-width load/store primitives, load narrowing/sign extension, register
+write and generated post-delta in actual body order. `core_refines` proves
+complete numeric state and exact ordered byte effects against the existing
+`AArch64.step (.addressedMemory ...)` for all immediate modes and widths.
+The canonical instruction's existing `noOverlap` proof discharges writeback
+alias restrictions; no extra restriction is imposed on no-writeback aliases.
+`indexed_refines` also composes generated UXTW/SXTW/LSL/SXTX modifiers, all
+four scalar scales and ZR indexes before access, allowing a load to overwrite
+its own base or index. LOAD and STORE singleton predicates are composed with
+the same core theorem; signed loads retain their explicit signed destination
+parameter and are not mislabeled as unsigned LOAD dispatch.
+
+The numeric core contains no invented permission/alignment guard. Refinement
+requires successful access at the computed native address and alignment of the
+original incoming SP. Faulting writeback paths and tag/address transport remain
+separate Entry/O4 obligations. No Q16B/two8B trace abstraction or new reference
+specification is introduced, and no complete 72-operation dispatcher is claimed.
+Every prior theorem and semantic oracle is retained; runtime source is unchanged.
+
+Validation: incremental Lean/reference dependency build passed (37 jobs), the
+existing addressed/vector reference suite passed 959 complete-state cases and
+18 precise rejects, and the existing actual pre/post route host passed 135,170
+cases. Early attempts failed on dependent record syntax and proof rewriting;
+no architectural input was filtered and no reference/premise was weakened.
+The full check of this increment is run separately after publication.
