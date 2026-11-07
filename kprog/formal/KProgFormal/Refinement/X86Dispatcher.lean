@@ -463,6 +463,11 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
         pure ⟨nativeRegisters env frame arena
           (logicRegister env frame arena state width .test destination source nextPc), [], none⟩
+      else if code = GeneratedX86Opcode.code .ror then do
+        let width ← widthOf flags
+        let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (rotateRightRegister env frame arena state width destination value nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .imulImm then do
         let width ← cmovWidthOf flags
         let destination ← registerOf dst
@@ -508,6 +513,19 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | rotateImmediate (width : ScalarWidth) (destination : RegisterSlice) (encoded : Byte)
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (countField : value = encoded.setWidth 64) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .ror)
+        (.rotateRight width (.register destination) (encoded.setWidth 64) nextPc)
+  | rotateCl (width : ScalarWidth) (destination : RegisterSlice)
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (countField : value = Reference.X86.scalarRegisterValue nativeState .w8 (.low 1)) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .ror)
+        (.rotateRight width (.register destination)
+          (Reference.X86.scalarRegisterValue nativeState .w8 (.low 1)) nextPc)
   | shiftImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
       (kind : Reference.X86.LegacyShift) (destination : RegisterSlice)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
@@ -658,8 +676,21 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .xchg)
         (.exchange width (.low destination) (.low source) nextPc)
 
+/-- The dynamic IMM argument emitted for classic ROR CL is derived from
+its real raw pre-state read. It is not a chosen count or result premise. -/
+theorem rotate_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (nextPc : Reference.Word) (width : ScalarWidth) (destination : RegisterSlice)
+    (widthField : WidthBinding flags width)
+    (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination) :
+    RegisterBinding flags aux dst src (readRegister env frame arena state .w8 (.low 1)) nextPc
+      (nativeRegisters env frame arena state) (GeneratedX86Opcode.code .ror)
+      (.rotateRight width (.register destination)
+        (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1)) nextPc) :=
+  .rotateCl width destination widthField dstField (rotate_right_cl_operand env frame arena state)
+
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic/unary/multiply/shift ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL) plus logical/arithmetic/unary/multiply/shift ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
@@ -672,6 +703,23 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | rotateImmediate width destination encoded widthField dstField countField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstDecoded, countField] using
+        congrArg some (rotate_right_register_frame_refines env frame arena state width destination
+          (encoded.setWidth 64) (encoded.setWidth 64) nextPc rfl)
+  | rotateCl width destination widthField dstField countField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstDecoded, countField] using
+        congrArg some (rotate_right_register_frame_refines env frame arena state width destination
+          (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1))
+          (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1)) nextPc rfl)
   | shiftImmediate op width kind destination familyField operationField widthField dstField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := shift_kind_binding_decodes _ kind operationField

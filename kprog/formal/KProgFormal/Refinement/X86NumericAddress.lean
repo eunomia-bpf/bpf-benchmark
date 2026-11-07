@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86RotateRight
 import KProgFormal.Refinement.X86LegacyShift
 import KProgFormal.Refinement.X86Multiply
 import KProgFormal.Refinement.X86Unary
@@ -1016,5 +1017,53 @@ theorem shift_register_count (env : Environment) (frame : Frame) (arena : Native
     Reference.X86.scalarRegisterValue, Reference.X86.RegisterSlice.shift,
     Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes, Nat.reduceMul,
     reduceCtorEq, ↓reduceIte] <;> bv_decide
+
+/-- Classic ROR uses the full already-evaluated IMM operand, not the ALU
+immediate decoder. The encoder supplies either imm8 or a pre-write CL read. -/
+def rotateRightRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (rawCount nextPc : NativeWord) : RegisterState :=
+  let source := readRegister env frame arena state width dst
+  let result := X86RotateRight.value width source rawCount
+  let written := writeRegister env frame arena state width dst result
+  registerPc (registerFlags written (X86RotateRight.flags width result rawCount state.raw.rflags)) nextPc
+
+theorem rotate_right_value_count (width : Reference.X86.ScalarWidth)
+    (source raw native : NativeWord) (field : ShiftCountBinding width raw native) :
+    X86RotateRight.value width source raw = X86RotateRight.value width source native := by
+  unfold ShiftCountBinding at field
+  simp only [X86RotateRight.value, X86BmiShift.legacy_ror_value_refines,
+    Reference.X86.rotateRightValue, field]
+
+theorem rotate_right_flags_count (width : Reference.X86.ScalarWidth)
+    (result raw native old : NativeWord) (field : ShiftCountBinding width raw native) :
+    X86RotateRight.flags width result raw old = X86RotateRight.flags width result native old := by
+  unfold ShiftCountBinding at field
+  simp only [X86RotateRight.flags, X86LegacyShift.count_refines, field]
+
+theorem rotate_right_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (rawCount nativeCount nextPc : NativeWord)
+    (field : ShiftCountBinding width rawCount nativeCount) :
+    (⟨nativeRegisters env frame arena (rotateRightRegister env frame arena state width dst rawCount nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.rotateRight width (.register dst) nativeCount nextPc)
+        (nativeRegisters env frame arena state) := by
+  have values (source : NativeWord) := rotate_right_value_count width source rawCount nativeCount field
+  have flags (source old : NativeWord) := rotate_right_flags_count width source rawCount nativeCount old field
+  rw [← X86RotateRight.step_refines]
+  simp only [rotateRightRegister, native_register_pc, native_register_flags, native_register_write,
+    native_register_read, X86RotateRight.handlerStep, X86Scalar.read_refines,
+    Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
+    Reference.X86.scalarWrite, List.nil_append, List.append_nil, flags, values]
+  rfl
+
+/-- This is the encoder's actual CL expression. It is sampled before the
+ROR writer, including RCX/CH destination aliases and private STACK inputs. -/
+theorem rotate_right_cl_operand (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) :
+    readRegister env frame arena state .w8 (.low 1) =
+      Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1) :=
+  native_register_read env frame arena state .w8 (.low 1)
 
 end KProgFormal.Refinement.X86NumericAddress

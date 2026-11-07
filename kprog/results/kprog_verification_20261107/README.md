@@ -2667,3 +2667,32 @@ Exact old/new source, diffs, commands, logs, input identities and provenance
 are appended to the existing integration JSON/gzip. A new complete make-check
 on this published model/current C header will be a separate immutable record;
 prior full231 PASS is not relabeled. Other opcodes and O2/O4 remain active.
+
+
+### Full published a07627419 check and classic ROR register dispatcher
+
+`make check` completed with actual exit0 (queue exit0) at immutable published
+`a076274192b88e7c3865b57ceac53d3145ef2a93`. All1,140 selected source SHA256s
+were independently checked against that commit's Git blobs. It includes the
+legacy ALU shifts and current CMP overflow identity with production header
+4fe6817. Warm incremental caches were copied; shared vendor submodules were
+used. The temporary export was deleted. Later source drift is recorded in
+JSON; this snapshot predates the new ROR lift.
+
+Classic ROR's production register body now refines the canonical rotate-right
+step through the raw numeric frame and the existing dispatcher theorem.
+Legal byte/high-byte/word/dword/qword destinations, RSP/STACK aliases, imm8
+and the encoder's actual pre-write CL expression are covered. RCX/CH aliases
+sample the same incoming state. No chosen output, flag or state equation is
+assumed. Zero masked count preserves flags; counts equal to byte/word width
+still use the architectural CF/OF rule and the actual partial-register writer.
+
+Focused113-module and complete default Lean builds passed, with six axiom
+audits and stable input hashes. Unchanged checks passed504 encoded handlers,
+17,640 register/CL/flag/RMW results,40 rendered BPF artifacts and20,320
+independent rotate-result cases under UBSan; five generator checks passed.
+Two initial elaboration failures and their inputs are retained. C changed the
+physical RORX body after these stable checks; the tested4fe header is archived
+and its classic ROR body remains byte-identical. No reference ISA, C handler,
+encoder or oracle was changed by V. Memory ROR, remaining operations and the
+compiled O2/O4 link remain open.
