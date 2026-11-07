@@ -2257,3 +2257,11 @@ view using actual B registers, canonical CMP and the immutable invocation
 frame. Every byte-decoded canonical native execution has that complete state,
 empty effects/fault and the actual successor, including64-bit wrap. All6 state
 audits pass. +72/store reconstruction and full-state TV remain open.
+
+`trusted-cmp-overflow-review.json` is read-only mathematical support for C's
+private CMP candidate: canonical OF equals SF xor signedLT of the properly
+width-narrowed operands for all8/16/32/64-bit inputs and old flags. SF/result
+must be from the same actual zero-borrow subtraction. The single audit passes;
+source, reviewed patch, command and log are archived. C still owns actual
+macro/width routing and compiler regressions; no producer or ISA change is
+made by this review and no full handler/artifact TV is inferred.

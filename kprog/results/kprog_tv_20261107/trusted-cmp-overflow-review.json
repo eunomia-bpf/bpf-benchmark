@@ -1,0 +1,35 @@
+{
+  "utc": "2026-11-07T18:18:36.436997+00:00",
+  "status": "canonical_CMP_overflow_identity_proved_for_all_four_widths_read_only_candidate_assessment",
+  "theorem": "KProgTV.CompareOverflowReview.cmp_overflow_identity",
+  "claim": "Canonical OF = canonical SF xor signedLT(signExtend64(width-narrowed lhs), signExtend64(width-narrowed rhs)), for width8/16/32/64, all64bit input operands and old flags.",
+  "required_scope": [
+    "Actual CMP subtraction with carry=false; SF and OF come from that same canonical subtraction.",
+    "This is not an identity for an arbitrary free RESULT/SF, nor a claim about SBB/borrow or TEST."
+  ],
+  "candidate_review": "Private CMP-only patch applies the expression after the existing real SUB flag computation; generated SF is a normalized Boolean and the same width-narrowing sign extension is used. TEST, existing SUB and all other flags/read effects are unchanged by the reviewed hunk.",
+  "validation": {
+    "command": "cd kprog/formal && lake env lean /workspaces/.agent-state/kprog-lanes/T/cmp-overflow-review.lean",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.CompareOverflowReview.cmp_overflow_identity": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "log_sha256": "2bc463cf3c8a6c3b72af890bc34136c0e18c071c6f70e7f07b40da8f4e92c219"
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "private_review_Lean": "5144f7ee6fcd5fb8b1a17d35d4df5abce548db6c7c9c31c049ec9a39dab6695c",
+    "reviewed_private_patch": "72e139f5109b38075bb50316dce319de0dab31cd3dd7d1d086691d852e78088d"
+  },
+  "input_archive_sha256": "c646f5a201b566651231bd177e6602561e6f180727aeade8bd4ff75b6588f328",
+  "remaining": [
+    "C owns actual macro/field/width routing and compiled program regressions; V owns any canonical integration. No production/header/ISA edit or promotion by T.",
+    "A predicate/flag identity is not full handler/clang/artifact TV or a verifier-complexity/performance result."
+  ]
+}
