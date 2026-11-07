@@ -114,7 +114,7 @@ matching-work measurement continue from the reported failure classes.
 | OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
 | Tetragon | 289 | 3 | 3 | 2 | 0 | 0 confirmed; 1 native-stub EINVAL | [210552 batch](native-join-tetragon__observer/README.md) |
-| Katran | 1 | 1 | 1 | 0 | 0 | 1: partial pointer-register write | [201524 batch](native-coherent-katran/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
 | Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [211016 batch](tracee-join-helper/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
@@ -165,3 +165,10 @@ past the partial pointer mask to an unbounded index after a scalar spill/reload.
 The original native input stays fixed; provenance-selected storage is the next
 generic candidate. The production RSP LEA sum now uses unsigned wrapping addition,
 with48553route/62400composition/8401offset cases underUBSan and V's universal law.
+
+Katran's whole native-only registered-service epoch213447 binds1/1 and completes
+the existing workload. Both arms report one BPF invocation and one XDP TX per
+sent packet, with LRU hit-path counters and miss0. JIT2318117packets reaches the
+receiver; native2386430packets yields2377743received plus5158TX and3529receiver
+drops. The exact generic provenance-selected write include is retained in the
+linked raw archive; production generator adoption follows the current Tracee epoch.
