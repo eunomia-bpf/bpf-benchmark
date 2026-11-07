@@ -1,0 +1,10 @@
+{
+  "returncode": 0,
+  "sha256": {
+    "kinsn/module/include/native_lab_group.h": "7f1459c26b2719c098b3147f54f71b0bc3239c28036bff7858d4dab994e30443",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "11896a0bd5ea357b0fd36d8fc0b52ef4d74140bb51daf6ce45c75a85e720aebe",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795"
+  },
+  "runtime_archive": "run-20261107T103710411769Z.tar.gz",
+  "scope": "Incremental compilation passes; runtime startup fails biosnoop before other failure sites are reached."
+}

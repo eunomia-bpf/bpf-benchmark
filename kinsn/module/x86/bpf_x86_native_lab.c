@@ -279,6 +279,8 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			err = native_lab_trusted_bind_program(blobs[blob_id].trusted, prog);
 		if (err) {
 			mutex_unlock(&blobs_lock);
+			native_lab_emit_error("program_or_trusted_binding", err, payload,
+				blob_id, 0, 0, 0, 0, 0, 0);
 			return err;
 		}
 	}

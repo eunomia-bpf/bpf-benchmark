@@ -405,6 +405,8 @@ static int native_lab_validate_program(u64 payload, const struct bpf_prog *prog)
 	err = native_lab_group_use(blob_id, generation, abi_mask);
 	if (!err)
 		err = native_lab_group_program(prog, blob_id);
+	if (err)
+		pr_err_ratelimited("native_lab: validate_program err=%d prog_len=%u blob=%u\n", err, prog->len, blob_id);
 	mutex_unlock(&blobs_lock);
 	return err;
 }
@@ -604,6 +606,8 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 	if (!err)
 		err = native_lab_capture_proof(&blobs[blob_id], generation, env);
 out:
+	if (err)
+		pr_err_ratelimited("native_lab: validate_proof err=%d prog_len=%u blob=%u\n", err, env->prog->len, blob_id);
 	mutex_unlock(&blobs_lock);
 	return err;
 }

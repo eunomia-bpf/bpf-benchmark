@@ -1,11 +1,11 @@
 {
   "ok": false,
   "case": "bcc-set",
-  "started": "2026-11-07T10:30:48.814520+00:00",
-  "request_archive": "run-20261107T103048813742Z.tar.gz",
+  "started": "2026-11-07T10:37:10.412610+00:00",
+  "request_archive": "run-20261107T103710411769Z.tar.gz",
   "artifact_sha256": {
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
-    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "0d35301758c050463f26c71047b7008ae876a5b8d78e50900f759734543ba70c",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795",
     "vendor/build/x86/bcc/bin/vfsstat": "7620da18ec87eb09d12309cf965f35f25df6c3934492cf8f4edf831e1a676a83",
     "bpfopt/shim/build-x86/libbpfrejit_shim.so": "93b7f74137a3998f7893b88bdb932311c4a4577a31231229ed517733c2764062",
     "kprog/libnativeloader/build/libnative_loader.so": "9ed92e26a68068654217ec810aa1b737cc5907ab5cc6a0bac238072028d57561",
@@ -28,6 +28,6 @@
   },
   "error": "BCC tool biosnoop exited before BPF programs were tracked by shim",
   "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 108, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 37, in run_bcc_set\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/bcc_set.py\", line 88, in start\n    wait_for_app_shim_programs(\n  File \"/workspaces/repository/runner/libs/rejit.py\", line 382, in wait_for_app_shim_programs\n    raise RuntimeError(f\"{process_name} exited before BPF programs were tracked by shim{detail}\")\nRuntimeError: BCC tool biosnoop exited before BPF programs were tracked by shim\n",
-  "finished": "2026-11-07T10:32:43.112311+00:00",
-  "archive_sha256": "67649f0db17b59d7a5f5e4bd6008982fc5437198819d2cf06c2a0b80bb2729a9"
+  "finished": "2026-11-07T10:38:54.761129+00:00",
+  "archive_sha256": "4f982a04b0b08a93c80b404cc68b4ed4dd6298644a1b7b8b25dd79bc620fb559"
 }
