@@ -1,0 +1,30 @@
+{
+  "previous_publication": "50d313e120ccba9aab98f2ebd52bb713e3ce5f4c",
+  "checks": {
+    "prior19_batch_objects_equal": true,
+    "prior84_terminal_rows_equal": true,
+    "prior_failure_bytes_prefix_equal": true,
+    "prior43_input_pins_equal": true,
+    "prior_work_observations_equal": true,
+    "prior_source_vectors_equal": true,
+    "recorded_counts_match": true,
+    "final_counts_equal": true
+  },
+  "new_batch": "functional_223215",
+  "retained_batches": 19,
+  "retained_requests": 84,
+  "retained_input_pins": 43,
+  "new_requests": 5,
+  "new_bound": 4,
+  "new_input_pins": 4,
+  "verifier_stage": "verifier_rejected",
+  "verifier_diagnostic": "The sequence of 8193 jumps is too complex.",
+  "verifier_statistics": {
+    "processed": 188982,
+    "limit": 1000000,
+    "total_states": 1926,
+    "peak_states": 1926
+  },
+  "raw_loader_stderr_bytes": 15281589,
+  "raw_loader_stderr_sha256": "0958b0d930d82ad6af688311f9b6736879ec9090b8da181764adf639dbba5f46"
+}

@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles19 closed service batches across all six
-application names. All84 terminal requests preserve byte equality between the
+One generic archive reader reconciles20 closed service batches across all six
+application names. All89 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain80
-generated sources,79 compiled objects and69 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain85
+generated sources,84 compiled objects and73 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -32,11 +32,46 @@ and each service's terminal requests and archive set agree.
 | katran / arm64_functional_185947 | 1 | 1 | 1 | 1 | 0 |
 | tracee / functional_214037 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 | tetragon / functional_221545 | 4 | 4 | 4 | 4 | next manifest selector frontier |
+| tetragon / functional_223215 | 5 | 5 | 5 | 4 | 1 verifier_rejected |
 
-The19 rows retain distinct source, image and boot epochs. Counts describe observed
+The20 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## Tetragon complete-source manifest progression
+
+The later223215 cohort receives execve_send through the corrected generic
+source-function manifest. All five requests receive fresh generation and
+compilation; four bind and match their actual application replacement rows.
+Each timing row retains bound_required=1 and prebuilt_proof=0. The fifth
+request, execve_send, reaches this actual kernel verifier diagnostic:
+
+~~~text
+trusted-native-loader: BPF_PROG_LOAD native_lab stub: Argument list too long
+The sequence of 8193 jumps is too complex.
+processed 188982 insns (limit 1000000) max_states_per_insn 4 total_states 1926 peak_states 1926 mark_read 0
+~~~
+
+The existing shared reader classifies this E2BIG/log boundary as
+verifier_rejected and checks all parsed statistics against C's published
+observations. The complete15MB diagnostic stream and request commands remain
+in failures.jsonl.gz. manifest-increment.json records its exact byte length
+and SHA256, alongside the retained earlier observation identities.
+
+The raw baseline app JSON matches the coverage metadata:287 resident counters,
+682,697 BPF runs, and an existing stress workload returning0 after2.073563403
+seconds. The post_rejit measurement remains null and app status remains error.
+Source drift records the trusted_service.py diagnostic-wording update; each
+request's literal source identity vector retains its own execution epoch.
+
+This progression adds five requests and four bound replies to the preceding
+19 cohorts. The earlier84 terminal rows, complete failure-byte prefix,43 input
+pins and every prior batch/work/source-vector object retain their values.
+The20-cohort totals are89 requests,85 generated sources,84 compiled objects
+and73 bound replies. C owns the common CMP/compiler representation trial and
+complete application replay; V/T continue universal simulator/compiler/link
+and binding laws.
 
 ## Tetragon memcpy binding and the next startup frontier
 
@@ -80,7 +115,7 @@ The final reader completes with exit0. All prior18 batch objects,80 request
 rows, the entire failure archive,39 input pins and earlier workload/source
 vectors retain their exact values.
 
-The current totals are19 cohorts,84 terminal requests,80 generated sources,
+At the221545 checkpoint the totals are19 cohorts,84 terminal requests,80 generated sources,
 79 compiled objects and69 bound replies. The15 earlier terminal failure records
 remain intact. C owns the generic source-manifest callback closure repair and
 the next complete application replay. The universal simulator, compiler, token
@@ -307,7 +342,8 @@ summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. The five additional ARM met
 5d6d067cfd55a627d7f367054decc72e09bb7e51 identity. The later x86 Tracee metadata
 and service archive usef41ccb6b773d0b24273b8145d758680f9b3f8793.
 The Tetragon221545 metadata, service, raw result and published observations
-use4adeb4807bb26eddd57324799eb79d9dc0118d56. Forty-three published metadata/archive
+use4adeb4807bb26eddd57324799eb79d9dc0118d56. The later Tetragon223215 metadata, service, raw result and observations use
+071476a17f6526ef706404743ca19049201ed5e1. Forty-seven published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 
