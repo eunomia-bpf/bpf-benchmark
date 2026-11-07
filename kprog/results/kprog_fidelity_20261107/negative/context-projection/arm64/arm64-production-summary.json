@@ -1,0 +1,72 @@
+{
+  "recorded": "2026-11-07T13:48:01.319884+00:00",
+  "complete": true,
+  "production_fix": "b2b6f28d9bc59aa3f17c44eb558acdb1c2214d37",
+  "total_cases": 2,
+  "valid_controls": 1,
+  "unsafe_cases": 1,
+  "accepted_unsafe": 0,
+  "unsafe_native_executed": false,
+  "stages": {
+    "valid_executed": 1,
+    "verifier_rejected": 1
+  },
+  "host_started": "2026-11-07T13:44:05.557878+00:00",
+  "host_finished": "2026-11-07T13:47:39.298658+00:00",
+  "guest_exit": 0,
+  "qemu_returncode": 0,
+  "hashes_unchanged": true,
+  "archive": "trusted-arm64-service-result/run-20261107T134405557846Z.tar.gz",
+  "archive_sha256": "4a84ec99d036e4b6da02d14db8f7b714996f878e247eca5aea0b99f22b8f8f13",
+  "source_identities": {
+    "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "/workspaces/repository/kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
+    "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "/workspaces/repository/kprog/fidelity/build-return-linker/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+    "/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c"
+  },
+  "hashes_before": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "6afa31017265cc6445d28c57887917c1acfe4cb28787e9e8c6ebd85a1dd29c4d",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/fidelity/build-return-linker/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
+    "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+    "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "kprog/results/kprog_fidelity_20261107/negative/context-projection/check.py": "ee4975d07b7432309482d25827c20caeacb7cbc39784c68900d4ed9de0d4918b"
+  },
+  "cases": [
+    {
+      "name": "valid_control",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "kernel_capture_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "request_id": 1,
+      "diagnostics": []
+    },
+    {
+      "name": "context_field_write",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "b7d54fdc74aac022cbd82c810e629a6d19b1d869ef4aba75544474a861242ca0",
+      "kernel_capture_sha256": "b7d54fdc74aac022cbd82c810e629a6d19b1d869ef4aba75544474a861242ca0",
+      "request_id": 2,
+      "diagnostics": [
+        "invalid bpf_context access off=0 size=8"
+      ]
+    }
+  ],
+  "scope": "Production XDP context repair replay of retained exact native identities; SKB context projection and universal ISA/ABI safety remain separate."
+}

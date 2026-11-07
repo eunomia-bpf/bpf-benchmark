@@ -59,3 +59,25 @@ repair to context-effect projection, not a blanket relaxation of binding or
 helper rules. C/A own the ISA implementations and F retains these regressions.
 The original34-case ARM replay remains separate and active; these findings
 prevent a simulator-wide safety claim even if those original34 later pass.
+
+## Production ARM XDP repair regression
+
+The independent F replay of production repair `b2b6f28d9` completed on
+2026-11-07: the unchanged return2 control executes correctly through kernel
+and fresh bound native paths, and the original ordinary context store is
+verifier-rejected with `invalid bpf_context access off=0 size=8`. There are
+zero accepted negatives and no unsafe execution; guest and QEMU exits are0.
+The prior accepted finding above remains retained as pre-repair evidence.
+
+`arm64/arm64-production-summary.json` records both exact native identities,
+request IDs, kernel-captured native hashes, source pins and diagnostic.
+`arm64/arm64-production-outcomes.json.gz` retains complete messages. The
+unchanged original transport archive is
+`arm64/trusted-arm64-service-result/run-20261107T134405557846Z.tar.gz`
+(SHA256 `4a84ec99d036e4b6da02d14db8f7b714996f878e247eca5aea0b99f22b8f8f13`).
+Both requests use the published production header, all request source pins
+agree, and host input hashes are unchanged. No kernel, module, image, loader
+or native input was rebuilt. The command was
+`taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/context-projection/Makefile qemu`.
+The separate complete34-case production replay is running; this two-case
+result does not establish that replay, SKB projection or universal ABI safety.
