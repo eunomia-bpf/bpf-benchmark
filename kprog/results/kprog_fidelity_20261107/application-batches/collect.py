@@ -15,6 +15,7 @@ ROOT=Path(__file__).resolve().parents[4]
 OUT=Path(__file__).resolve().parent
 BASE='corpus/results/kprog_app_coverage_20261107/'
 PUBLICATION='afc178f46e725fe96f85694d76fcf4c45c842914'
+JOIN_PUBLICATION='21cf7278605fc3b4b6468b3bec639badec9ab0fb'
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -34,9 +35,9 @@ def service_archive(payload):
 
 def main():
     source_pins={}
-    def published(path):
-        data=subprocess.check_output(['git','show',PUBLICATION+':'+path],cwd=ROOT)
-        source_pins[path]=dict(publication=PUBLICATION,sha256=sha(data),bytes=len(data))
+    def published(path,publication=PUBLICATION):
+        data=subprocess.check_output(['git','show',publication+':'+path],cwd=ROOT)
+        source_pins[path]=dict(publication=publication,sha256=sha(data),bytes=len(data))
         return data
     capture_manifest=json.loads((OUT/'captured-inputs.json').read_text())
     with tarfile.open(OUT/'captured-inputs.tar.gz') as capture:
@@ -52,11 +53,14 @@ def main():
       ('tracee','functional_203243',BASE+'tracee-core-helper/coverage.json',BASE+'tracee-core-helper/service.tar.gz'),
       ('tetragon','functional_205401',None,'capture:tetragon-functional.service.tar.gz'),
       ('tetragon','timing_204105',None,'capture:tetragon-timing.service.tar.gz'),
+      ('tetragon','functional_210552',BASE+'native-join-tetragon__observer/coverage.json',BASE+'native-join-tetragon__observer/service.tar.gz'),
+      ('tracee','functional_211016',BASE+'tracee-join-helper/coverage.json',BASE+'tracee-join-helper/service.tar.gz'),
     ]
     batches=[];records=[];failures=[];identity_sets={}
     for app,batch,metadata_path,service_path in cases:
-        metadata=json.loads(published(metadata_path)) if metadata_path else {}
-        payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path)
+        publication=JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
+        payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
         with service:
             all_rows=[json.loads(line) for line in service.extractfile(log_path).read().splitlines()]
@@ -102,6 +106,8 @@ def main():
                         stage='compiler_rejected' if compiler else 'specialization_rejected'
                     elif not sources:
                         stage='specialization_rejected'
+                    elif re.search(r'^trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument$',stderr,re.M):
+                        stage='native_stub_load_error'
                     elif ('BPF program load failed' in stderr or 'load simulator program' in stderr
                           or ('BPF_PROG_LOAD' in stderr and re.search(r'processed \d+ insns \(limit \d+\)',stderr))):
                         stage='verifier_rejected'
@@ -140,6 +146,10 @@ def main():
                     compare[recorded]=dict(observed=stages[stage],recorded=metadata[recorded],equal=stages[stage]==metadata[recorded])
             if 'programs_total' in metadata:
                 compare['terminal_requests']=dict(observed=len(terminal),recorded=metadata['programs_total'],equal=len(terminal)==metadata['programs_total'])
+            classification=metadata.get('failure_classification',{})
+            for stage,key in [('verifier_rejected','confirmed_verifier_rejections'),('native_stub_load_error','native_stub_load_errors'),('specialization_rejected','specialization_errors')]:
+                if key in classification:
+                    compare[key]=dict(observed=stages[stage],recorded=classification[key],equal=stages[stage]==classification[key])
             batches.append(dict(app=app,batch=batch,metadata_path=metadata_path,service_path=service_path,
                                 service_sha256=sha(payload),**counts,stages=dict(stages),
                                 app_status=metadata.get('app_status','captured_service_batch'),
@@ -157,7 +167,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),

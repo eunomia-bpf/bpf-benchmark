@@ -1,96 +1,123 @@
-# Captured application-service batch outcomes
+# Application service batch observations
 
-One generic archive reader checks eight closed batches spanning BCC, OTel,
-Cilium, Tetragon, Katran and Tracee. All 42 terminal request archives have equal
-kernel-owned native bytes, worker input bytes and service native SHA receipts.
-Each source program ID agrees with its kernel facts. All 35 successful load
-replies agree with their request ID, assigned native program ID and service
-status. Request IDs and terminal archives reconcile within every batch.
+One generic archive reader reconciles10 closed service batches across all six
+application names. All51 terminal requests preserve byte equality between the
+kernel-owned native object, the worker's received copy and the service receipt's
+SHA256. Kernel source IDs match the service records. The batches contain47
+generated sources,46 compiled objects and42 successful bound replies.
 
-| Application | Captured batch | Requests | Generated | Compiled | Bound | Specializer rejection | Compiler rejection | Verifier rejection |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| bcc | functional_153239 | 25 | 25 | 25 | 25 | 0 | 0 | 0 |
-| otel | functional_192310 | 3 | 3 | 3 | 2 | 0 | 0 | 1 |
-| cilium | functional_201146 | 1 | 1 | 0 | 0 | 0 | 1 | 0 |
-| tetragon | functional_201956 | 3 | 2 | 2 | 2 | 1 | 0 | 0 |
-| katran | functional_201524 | 1 | 1 | 1 | 0 | 0 | 0 | 1 |
-| tracee | functional_203243 | 3 | 2 | 2 | 2 | 1 | 0 | 0 |
-| tetragon | functional_205401 | 3 | 2 | 2 | 2 | 1 | 0 | 0 |
-| tetragon | timing_204105 | 3 | 2 | 2 | 2 | 1 | 0 | 0 |
+Every bound reply's request ID, program ID and status exactly match load.stdout.
+All available published counts match the archive-derived counts, including the
+latest nested failure classifications. Each request archive is consumed once,
+and each service's terminal requests and archive set agree.
 
-The total is 35 bound requests, four specializer rejections, one compiler
-rejection and two verifier rejections. These counts cover eight separate
-runtime epochs, including repeated Tetragon startup requests. Their input
-identities and batch boundaries stay explicit in terminal-requests.tsv.
-All reported generation/compilation/binding counts available in the published
-batch metadata agree with archive contents.
+| Application / batch | Requests | Generated | Compiled | Bound | Other outcomes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| bcc / functional_153239 | 25 | 25 | 25 | 25 | 0 |
+| otel / functional_192310 | 3 | 3 | 3 | 2 | 1 verifier_rejected |
+| cilium / functional_201146 | 1 | 1 | 0 | 0 | 1 compiler_rejected |
+| tetragon / functional_201956 | 3 | 2 | 2 | 2 | 1 specialization_rejected |
+| katran / functional_201524 | 1 | 1 | 1 | 0 | 1 verifier_rejected |
+| tracee / functional_203243 | 3 | 2 | 2 | 2 | 1 specialization_rejected |
+| tetragon / functional_205401 | 3 | 2 | 2 | 2 | 1 specialization_rejected |
+| tetragon / timing_204105 | 3 | 2 | 2 | 2 | 1 specialization_rejected |
+| tetragon / functional_210552 | 3 | 3 | 3 | 2 | 1 native_stub_load_error |
+| tracee / functional_211016 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 
-## Observed failure stages
+The10 rows retain distinct source, image and boot epochs. Counts describe observed
+load instances; repeated native objects and repeated program IDs across boots stay
+in their original batches. Whole application completion and duration-driven
+workload measurements follow the recorded startup frontiers.
 
-- OTel native unwinder: the kernel log reports
-  ~~~text
-  BPF program is too large. Processed 1000001 insn
-  processed 1000001 insns (limit 1000000) max_states_per_insn 31 total_states 64869 peak_states 2495 mark_read 0
-  ~~~
-- Katran: the kernel log reports
-  ~~~text
-  R9 pointer arithmetic on map_value_or_null prohibited, null-check it first
-  processed 3013 insns (limit 1000000) max_states_per_insn 2 total_states 111 peak_states 111 mark_read 0
-  ~~~
-- Cilium compilation reports
-  ~~~text
-  error: use of undeclared identifier 'cilium_percpu_trace_id'
-  ~~~
-- Tetragon and Tracee specializer failures retain their exact helper
-  stack-origin diagnostics and full command/error records in failures.jsonl.gz.
+## Slot-join continuation
 
-These are recorded application/service outcomes. Universal simulator,
-specialization, native-link and binding laws carry the safety argument.
-Application completion and matching-work timing continue through the observed
-failure classes with their runtime owners.
-
-## Tetragon timing-stage diagnosis
-
-R's 204105 timing batch captures three service requests: two bound replies and
-a third request reaching the generator's helper stack-origin analysis. Its
-shim records 1,362 BPF instructions, giving an actual 10,896-byte extent.
-The kernel-owned native input for source program 337 and its worker copy match
-SHA 474212d9dc1c0972c12b8adf84af75d84b69759f3d32c4c2dbb87393adbcf5d4.
-The terminal entry and exact diagnostic are:
+The later Tetragon210552 batch reaches3 generated/compiled requests and2 bound
+replies. Its event_wake_up_new_task request carries the same kernel/worker native
+SHA256 as the earlier205401 helper-origin failure:
+474212d9dc1c0972c12b8adf84af75d84b69759f3d32c4c2dbb87393adbcf5d4.
+The new failure boundary is the native stub load:
 
 ~~~text
-event_wake_up_new_task
-native helper source stack relation unresolved at 0x9ab: call   rax
+trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument
+processed 34919 insns (limit 1000000) max_states_per_insn 4 total_states 526 peak_states 286 mark_read 0
 ~~~
 
-The 205401 functional batch reaches the same entry and helper-origin
-diagnostic. The timing batch retains metadata/result status error, three
-requested samples and a 180-second workload setting. This pins the observed
-binding frontier and the next generic source-analysis repair. C/V/T/R received
-the exact archive, kernel/worker identities and failure stage in coordination.
+Its context records4,618 native bytes,37 chunks and proof_bound=1. The full
+verifier stream starts with those statistics and continues with instruction
+trace. The generic reader records native_stub_load_error for that explicit EINVAL
+boundary. Final group/materialization diagnosis remains with C/T.
 
-## Inputs and reproduction
+The later Tracee211016 batch reaches6 generated/compiled requests and5 bound
+replies, including sys_enter_submit. sys_exit_submit reaches this explicit
+verifier diagnostic at BPF instruction5674:
 
-The six published functional rows use twelve metadata/service artifacts from
-Git afc178f46e725fe96f85694d76fcf4c45c842914. Their exact hashes and original
-paths appear in summary.json. captured-inputs.tar.gz preserves the two later
-closed service archives plus R's metadata, result and shim log. Its manifest
-records original paths, byte counts, hashes and capture time.
+~~~text
+invalid access to map value, value_size=80 off=1036 size=4
+R0 max value is outside of the allowed memory range
+processed 2147 insns (limit 1000000) max_states_per_insn 1 total_states 91 peak_states 91 mark_read 0
+~~~
 
-The reader accepts both service/ and corpus/ archive roots and single-archive
-wrappers. It reconciles every terminal log row with exactly one request archive,
-checks the kernel/worker input identity and loader reply, records generated
-source/object presence and classifies the observed terminal stage from command
-returns and verifier diagnostics. failures.jsonl.gz preserves the full original
-diagnostics, command records and verifier statistics. recorded-source-identities.json
-retains the service's reported source identity vectors.
+The raw stream shows a scalar index masked to1020, plus a16-byte displacement,
+followed by a four-byte read from the80-byte readonly object. All diagnostics and
+commands are retained in failures.jsonl.gz. C owns generic index/range
+preservation repair. These are batch runtime observations; universal simulator,
+token and native-link laws remain with V/T.
+
+## Earlier batch diagnostics
+
+OTel192310 reaches its exploration limit:
+
+~~~text
+BPF program is too large. Processed 1000001 insn
+processed 1000001 insns (limit 1000000) max_states_per_insn 31 total_states 64869 peak_states 2495 mark_read 0
+~~~
+
+Katran201524 retains the exact pointer diagnostic:
+
+~~~text
+R9 pointer arithmetic on map_value_or_null prohibited, null-check it first
+processed 3013 insns (limit 1000000) max_states_per_insn 2 total_states 111 peak_states 111 mark_read 0
+~~~
+
+Cilium201146 generates C and its compiler reports the undeclared
+cilium_percpu_trace_id identifier. The earlier Tetragon/Tracee helper-origin
+diagnostics remain in the same archive with their full commands and source IDs.
+
+The R Tetragon204105 timing attempt has metadata/result status error,3 requested
+samples and180-second workloads. Its selected entry extent is1362 BPF instructions
+or10,896 bytes. The actual selected request reaches the original helper-origin
+diagnostic at0x9ab. The timing context and raw shim/metadata/result captures remain
+separate from the later functional slot-join cohorts.
+
+## Source identity and reproduction
+
+The first six published cohorts use immutable Git blobs at
+afc178f46e725fe96f85694d76fcf4c45c842914. The new Tetragon/Tracee slot-join
+metadata and service archives use21cf7278605fc3b4b6468b3bec639badec9ab0fb.
+Sixteen published metadata/archive inputs have individual Git/hash/size pins in
+summary.json. Two additional captured Tetragon service epochs and the R timing
+inputs retain their exact five-file captured-inputs.tar.gz and manifest.
+
+recorded-source-identities.json groups literal service-reported file identities.
+Those vectors record reported file hashes; loaded Python module identity remains
+a separate execution-provenance boundary. Kernel/worker/receipt byte identity is
+checked directly from every archived request.
+
+join-increment.json confirms that the prior8 batches,42 terminal rows,7 failure
+records,12 published input pins and earlier identity vectors retain their values.
+The new increment adds9 requests and7 bound replies. The initial join collection
+classified Tetragon's native-stub EINVAL under the broad BPF verifier bucket; its
+raw collection output is retained. The final reader distinguishes that actual
+load boundary and reconciles every available published count.
+
+Run the generic reader from /workspaces/repository through bws.sh:
 
 ~~~sh
-cd /workspaces/repository
 taskset -c 16-19 python3 kprog/results/kprog_fidelity_20261107/application-batches/collect.py
 ~~~
 
-collection-status.json and collection.log.gz record the successful offline
-collection. The reader operates on captured batches and writes these outcome
-tables. Original application source, native objects, workload runs, active
-guests and the separate LEA fidelity build retain their existing state.
+The reader opens immutable published blobs and its captured input archive, then
+writes batch tables and diagnostic streams in this directory. Service archives
+support both service/ and corpus/ roots plus nested single-archive wrappers.
+Original application requests, workloads, source trees and runtime outcomes stay
+in their recorded epochs. Final collection exits0.

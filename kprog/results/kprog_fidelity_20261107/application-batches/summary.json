@@ -1,5 +1,8 @@
 {
   "source_publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+  "additional_source_publications": [
+    "21cf7278605fc3b4b6468b3bec639badec9ab0fb"
+  ],
   "batches": [
     {
       "app": "bcc",
@@ -285,16 +288,127 @@
       "baseline_accepted_loads": null,
       "baseline_resident_counters": 0,
       "recorded_counts": {}
+    },
+    {
+      "app": "tetragon",
+      "batch": "functional_210552",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/native-join-tetragon__observer/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/native-join-tetragon__observer/service.tar.gz",
+      "service_sha256": "ba174f7d073c47f8658f4e6d4745c7f9051b523b5ff991b21b063282862705c5",
+      "terminal_requests": 3,
+      "generated": 3,
+      "compiled": 3,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "native_stub_load_error": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": 289,
+      "baseline_resident_counters": 287,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "generated": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "confirmed_verifier_rejections": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "native_stub_load_errors": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "specialization_errors": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tracee",
+      "batch": "functional_211016",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tracee-join-helper/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tracee-join-helper/service.tar.gz",
+      "service_sha256": "a3e29010586ea1c486d37fef2b4a60a688fba4a50733a603bae29b476c18d156",
+      "terminal_requests": 6,
+      "generated": 6,
+      "compiled": 6,
+      "accepted_bound": 5,
+      "stages": {
+        "bound": 5,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": 151,
+      "baseline_resident_counters": 151,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "generated": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 5,
+          "recorded": 5,
+          "equal": true
+        },
+        "confirmed_verifier_rejections": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "native_stub_load_errors": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "specialization_errors": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 42,
+  "terminal_requests": 51,
   "stages": {
-    "bound": 35,
-    "verifier_rejected": 2,
+    "bound": 42,
+    "verifier_rejected": 3,
     "compiler_rejected": 1,
-    "specialization_rejected": 4
+    "specialization_rejected": 4,
+    "native_stub_load_error": 1
   },
-  "kernel_worker_receipt_identity_matches": 42,
+  "kernel_worker_receipt_identity_matches": 51,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -355,6 +469,26 @@
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
       "sha256": "0db461bc6932c5afb46808c09e522e30abdc8b500e3a4946ff1401bbc7712465",
       "bytes": 14059935
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-join-tetragon__observer/coverage.json": {
+      "publication": "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
+      "sha256": "567224eaf447d08d1c0441b909ee33b95b7d1eaa0a79f8c716fcdc60e84d4c9c",
+      "bytes": 107822
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-join-tetragon__observer/service.tar.gz": {
+      "publication": "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
+      "sha256": "ba174f7d073c47f8658f4e6d4745c7f9051b523b5ff991b21b063282862705c5",
+      "bytes": 2052385
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-join-helper/coverage.json": {
+      "publication": "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
+      "sha256": "4a897aee573c4e0cdc556af5b4d7ae3815c1f13d73ba0fc562ad86a539c4dbfa",
+      "bytes": 81783
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-join-helper/service.tar.gz": {
+      "publication": "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
+      "sha256": "a3e29010586ea1c486d37fef2b4a60a688fba4a50733a603bae29b476c18d156",
+      "bytes": 28648925
     }
   },
   "captured_input_manifest": {
