@@ -1,0 +1,6 @@
+entry,source_prog_id,native_prog_id,generated,compiled,verifier_accepted,specialization_failed,verifier_rejected,map_bindings
+fentry_vfs_read,5,6,1,1,1,0,0,"[{""name"":""stats"",""map_id"":3,""map_type"":2,""key_size"":4,""value_size"":40,""max_entries"":1,""map_flags"":1024,""value_offset"":0}]"
+fentry_vfs_write,7,8,1,1,1,0,0,"[{""name"":""stats"",""map_id"":3,""map_type"":2,""key_size"":4,""value_size"":40,""max_entries"":1,""map_flags"":1024,""value_offset"":0}]"
+fentry_vfs_fsync,9,10,1,1,1,0,0,"[{""name"":""stats"",""map_id"":3,""map_type"":2,""key_size"":4,""value_size"":40,""max_entries"":1,""map_flags"":1024,""value_offset"":0}]"
+fentry_vfs_open,11,12,1,1,1,0,0,"[{""name"":""stats"",""map_id"":3,""map_type"":2,""key_size"":4,""value_size"":40,""max_entries"":1,""map_flags"":1024,""value_offset"":0}]"
+fentry_vfs_create,13,14,1,1,1,0,0,"[{""name"":""stats"",""map_id"":3,""map_type"":2,""key_size"":4,""value_size"":40,""max_entries"":1,""map_flags"":1024,""value_offset"":0}]"

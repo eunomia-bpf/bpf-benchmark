@@ -1,0 +1,29 @@
+{
+  "before_sha256": "d97c6b947b7858c986c2ca29990c0b9e2fd19775d70fc32c9e0f24c2c34174ff",
+  "after_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+  "functions_before": {
+    "kprobe_vfs_read": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c",
+    "kprobe_vfs_write": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536",
+    "kprobe_vfs_fsync": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a",
+    "kprobe_vfs_open": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c",
+    "kprobe_vfs_create": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2",
+    "fentry_vfs_read": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c",
+    "fentry_vfs_write": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536",
+    "fentry_vfs_fsync": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a",
+    "fentry_vfs_open": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c",
+    "fentry_vfs_create": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+  },
+  "functions_after": {
+    "kprobe_vfs_read": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c",
+    "kprobe_vfs_write": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536",
+    "kprobe_vfs_fsync": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a",
+    "kprobe_vfs_open": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c",
+    "kprobe_vfs_create": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2",
+    "fentry_vfs_read": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c",
+    "fentry_vfs_write": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536",
+    "fentry_vfs_fsync": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a",
+    "fentry_vfs_open": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c",
+    "fentry_vfs_create": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+  },
+  "all_function_bytes_equal": true
+}
