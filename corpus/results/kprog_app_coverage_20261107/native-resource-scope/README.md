@@ -1,0 +1,7 @@
+# Native entry resource closure
+
+The common native-link `--mode resources` query reuses reachable-function discovery, then follows code and data relocations. Named section data and pointer tables extend the closure. The caller selects live map FDs and metadata from this entry closure and submits them through the existing kernel capsule resource API. The kernel retains its resource limit, object ownership, map queries, fresh generation, verifier and binding checks.
+
+89 native-link tests pass, including a shared-section entry/callee/sibling resource regression. The incremental caller/worker build and 12 service tests pass. Actual native inputs yield 2 resource symbols for Tracee sys_enter, 6 for Cilium cil_xdp_entry, 8 for the Tetragon exit entry, and 2 for OTel read_task_struct. Exact symbols and hashes appear in observations.json. Whole-application replay continues with paired caller/linker executables.
+
+Commands: `cargo test --offline --manifest-path C/native-resource-scope/crate/Cargo.toml --bin native-link-resources-c`, warm release build using the shared target cache, `make -f C/native-resource-scope/Makefile check`, then `native-link-resources-c --input INPUT --symbol ENTRY --mode resources --output QUERY`. `C` denotes `/workspaces/.agent-state/kprog-lanes/C`. raw.tar.gz retains source, real native query inputs, outputs and complete checks. Universal simulator, token and link laws supply the safety argument; these receipts record component behavior.

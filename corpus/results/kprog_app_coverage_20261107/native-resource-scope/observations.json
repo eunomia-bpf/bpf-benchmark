@@ -1,0 +1,56 @@
+{
+  "native_link_tests": 89,
+  "native_link_test_exit": 0,
+  "caller_build_and_service_tests": 12,
+  "caller_exit": 0,
+  "resource_queries": {
+    "tracee": {
+      "native_sha256": "7479850e23454e957f4c5880a18d92a91c27dd282af52f768e4422fe9366a722",
+      "symbols": [
+        "sys_32_to_64_map",
+        "sys_enter_init_tail"
+      ],
+      "version": 1
+    },
+    "cilium": {
+      "native_sha256": "1f4fd45a3af005078eb6741d0a599bfd1e05bdfe1e597916069f60f750fbc13e",
+      "symbols": [
+        "__config_enable_xdp_prefilter",
+        "__config_tracing_ip_option_type",
+        "cilium_cidr_v4_dyn",
+        "cilium_cidr_v4_fix",
+        "cilium_percpu_trace_id",
+        "cilium_xdp_scratch"
+      ],
+      "version": 1
+    },
+    "tetragon": {
+      "native_sha256": "c7889c6a576a7c471c599aa2e85f0b88bb279cfa1654cd7f1005cb142ade9bd2",
+      "symbols": [
+        "execve_map",
+        "execve_map_stats",
+        "exit_heap_map",
+        "tcpmon_map",
+        "tg_conf_map",
+        "tg_parents_bin",
+        "tg_rb_events",
+        "tg_stats_map"
+      ],
+      "version": 1
+    },
+    "otel": {
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "symbols": [
+        "system_analysis",
+        "with_debug_output"
+      ],
+      "version": 1
+    }
+  },
+  "artifacts": {
+    "kprog/x86/native_lab/native_link/target/release/native-link-resources-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
+    "/workspaces/.agent-state/kprog-lanes/C/native-resource-scope/libnative_loader.so": "8d698c0311784de26a9f7a4e01eeec3a4c4f61ce0f5337767b129687729f9b7a",
+    "/workspaces/.agent-state/kprog-lanes/C/native-resource-scope/trusted-native-loader": "ebd3d0660613e71e4319f7565d817c2cb63c7f1a8b81baf894534d4e8f5bcb62"
+  },
+  "runtime": "Whole-application replay follows matching caller/linker adoption."
+}

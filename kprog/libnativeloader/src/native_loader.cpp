@@ -5449,11 +5449,25 @@ native_loader::LoadedProgram submit_trusted_native(
     std::vector<std::unique_ptr<ScopedFd>> native_resource_fds;
     std::vector<int32_t> native_resource_numbers;
     std::unordered_set<uint32_t> native_resource_ids;
-    std::vector<std::string> symbols(companion.native_data_symbols.begin(), companion.native_data_symbols.end());
+    // Reuse native-link's instruction and data-reference closure for this entry.
+    ScopedFd resource_output(static_cast<int>(syscall(SYS_memfd_create, "native-resources", 0)));
+    if (resource_output.get() < 0)
+        fail("create native resource query output: " + std::string(std::strerror(errno)));
+    const std::string resource_path = "/proc/self/fd/" + std::to_string(resource_output.get());
+    const auto linker = native_link_binary(options.native_link_path);
+    if (run_subprocess({linker.string(), "--input", native_path.string(),
+                        "--symbol", entry, "--mode", "resources", "--output", resource_path}, {}) != 0)
+        fail("native entry resource discovery failed: " + entry);
+    const auto resources = read_text_file_required(resource_path);
+    if (json_object_u64(resources, "version") != 1)
+        fail("native resource query version mismatch");
+    auto symbols = json_object_string_list(resources, "symbols");
     std::sort(symbols.begin(), symbols.end());
+    symbols.erase(std::unique(symbols.begin(), symbols.end()), symbols.end());
     for (const auto &name : symbols) {
+        if (!companion.native_data_symbols.contains(name)) continue;
         const auto identity = companion.map_addr_ids.find(name);
-        if (identity == companion.map_addr_ids.end()) continue; // Not a bound map/data symbol.
+        if (identity == companion.map_addr_ids.end()) continue;
         const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
             [&](const auto &map) { return map.kernel_id == identity->second; });
         if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);

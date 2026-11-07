@@ -143,6 +143,8 @@ struct Args {
 enum LinkMode {
     Kernel,
     Proof,
+    /// Report relocation symbols reachable from the selected native entry.
+    Resources,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -498,12 +500,68 @@ struct SymInfo {
     section_index: object::SectionIndex,
 }
 
+fn native_resource_symbols(elf: &object::File, entry: &SymInfo) -> Result<Vec<String>> {
+    let reachable = |root: &SymInfo| match elf.architecture() {
+        object::Architecture::X86_64 => x86::discover_reachable(elf, root),
+        object::Architecture::Aarch64 => discover_reachable_arm64(elf, root),
+        other => bail!("native resource discovery requires a supported architecture: {other:?}"),
+    };
+    let mut pending: Vec<(object::SectionIndex, u64, u64)> = reachable(entry)?
+        .into_iter().map(|s| (s.section_index, s.address, s.size)).collect();
+    let mut seen = HashSet::new();
+    let mut names = BTreeSet::new();
+    while let Some((index, address, size)) = pending.pop() {
+        if !seen.insert((index, address, size)) { continue; }
+        let section = elf.section_by_index(index)?;
+        let start = address.checked_sub(section.address())
+            .ok_or_else(|| anyhow!("resource span begins below its section"))?;
+        let end = start.checked_add(size).ok_or_else(|| anyhow!("resource span overflow"))?;
+        if end > section.size() { bail!("resource span exceeds its section"); }
+        for (offset, reloc) in section.relocations() {
+            if offset < start || offset >= end { continue; }
+            let RelocationTarget::Symbol(symbol_index) = reloc.target() else { continue; };
+            let symbol = elf.symbol_by_index(symbol_index)?;
+            let name = symbol.name()?;
+            if !name.is_empty() { names.insert(name.to_string()); }
+            let Some(target_index) = symbol.section_index() else { continue; };
+            let target = elf.section_by_index(target_index)?;
+            if symbol.kind() == SymbolKind::Text && symbol.size() > 0 {
+                let root = SymInfo { name: name.to_string(), address: symbol.address(),
+                    size: symbol.size(), section_index: target_index };
+                pending.extend(reachable(&root)?.into_iter()
+                    .map(|s| (s.section_index, s.address, s.size)));
+            } else if symbol.kind() == SymbolKind::Section {
+                // Section-relative relocations keep every named data identity
+                // in that section; pointer-table relocations extend the closure.
+                for object in elf.symbols() {
+                    if object.section_index() == Some(target_index) && object.kind() == SymbolKind::Data {
+                        let name = object.name()?;
+                        if !name.is_empty() { names.insert(name.to_string()); }
+                    }
+                }
+                pending.push((target_index, target.address(), target.size()));
+            } else if symbol.size() > 0 {
+                pending.push((target_index, symbol.address(), symbol.size()));
+            }
+        }
+    }
+    Ok(names.into_iter().collect())
+}
+
 fn main() -> Result<()> {
     let args = Args::parse();
     let proof_mode = args.mode == LinkMode::Proof;
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
+    if args.mode == LinkMode::Resources {
+        let entry = find_symbol_by_name(&elf, &args.symbol)?;
+        let symbols = native_resource_symbols(&elf, &entry)?;
+        fs::write(&args.output, serde_json::to_vec(&serde_json::json!({
+            "version": 1, "symbols": symbols
+        }))?)?;
+        return Ok(());
+    }
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     if args.output_environment_layout.is_some() && elf.architecture() != object::Architecture::Aarch64 {
         bail!("exclusive environment layout requires ARM input");
@@ -4842,6 +4900,42 @@ mod tests {
         assert_eq!(cases, 10);
         assert!(layout_differences.is_empty(), "readonly extent mode differences: {layout_differences:?}");
         assert_eq!(collision_controls, 6);
+    }
+
+    #[test]
+    fn native_resource_closure_keeps_callees_and_excludes_sibling_maps() -> Result<()> {
+        let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+        let text = object.section_id(StandardSection::Text);
+        let data = object.add_section(Vec::new(), b".maps".to_vec(), SectionKind::Data);
+        object.append_section_data(data, &[0; 16], 8);
+        let mut map_symbols = Vec::new();
+        for (name, value) in [("entry_map", 0), ("sibling_map", 8)] {
+            map_symbols.push(object.add_symbol(WriteSymbol { name:name.as_bytes().to_vec(), value, size:8,
+                kind:SymbolKind::Data, scope:SymbolScope::Linkage, weak:false,
+                section:WriteSymbolSection::Section(data), flags:SymbolFlags::None }));
+        }
+        let bytes = [0xe8,0,0,0,0,0xc3, 0x48,0x8b,0x05,0,0,0,0,0xc3, 0x48,0x8b,0x05,0,0,0,0,0xc3];
+        object.append_section_data(text, &bytes, 1);
+        let mut functions = Vec::new();
+        for (name, value, size) in [("entry",0,6),("callee",6,8),("sibling",14,8)] {
+            functions.push(object.add_symbol(WriteSymbol { name:name.as_bytes().to_vec(), value, size,
+                kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
+                section:WriteSymbolSection::Section(text), flags:SymbolFlags::None }));
+        }
+        for (offset, symbol, r_type) in [(1,functions[1],4),(9,map_symbols[0],2),(17,map_symbols[1],2)] {
+            object.add_relocation(text, WriteRelocation { offset, symbol, addend:-4,
+                flags:RelocationFlags::Elf { r_type } })?;
+        }
+        let bytes = object.write()?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let root = find_symbol_by_name(&elf,"entry")?;
+        let symbols = native_resource_symbols(&elf,&root)?;
+        assert!(symbols.iter().any(|name| name=="entry_map"));
+        assert!(symbols.iter().any(|name| name=="callee"));
+        assert!(symbols.iter().all(|name| name!="sibling_map" && name!="sibling"));
+        let root = find_symbol_by_name(&elf,"sibling")?;
+        assert_eq!(native_resource_symbols(&elf,&root)?, vec!["sibling_map"]);
+        Ok(())
     }
 
     #[test]
