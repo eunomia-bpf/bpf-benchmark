@@ -1535,3 +1535,13 @@ immutable ELF to the materialized payload remain open. Verifier soundness,
 the canonical reference ISA/platform, kernel binding/capture, and the
 registered specialization/link service until complete TV remain trusted.
 Evidence and axiom audit: `trusted-simple-conditional-complete.json`.
+
+### Generation-zero ABI output initialization regression
+
+`make -C kprog/tv unbound-kernel-check` uses the existing x86 kernel and
+incrementally builds its module. The actual verifier/JIT test covers every
+callee-saved output mask across three generation-zero chunks, followed by a
+shared-loader native ELF case requiring mask15 and multiple chunks. Both execute
+and return2. Unbound instantiation now initializes r0 before ABI marker reads on
+both ISAs; nonzero-generation proof ordering is unchanged. Raw evidence is in
+`../results/kprog_tv_20261107/unbound-abi-regression/`.

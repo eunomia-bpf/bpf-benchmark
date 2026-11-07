@@ -119,3 +119,14 @@ int tv_stack_entry(void *ctx)
     (void)bpf_get_stack(ctx, stack, sizeof(stack), 0);
     return 0;
 }
+
+/* Force every callee-saved ABI marker while crossing several 128-byte chunks. */
+int tv_unbound_abi_entry(void *ctx)
+{
+ (void)ctx;
+ __asm__ __volatile__(".rept 80\naddq $1, %%rax\n.endr\n"
+                      "movq $1, %%rbx\nmovq $2, %%r13\n"
+                      "movq $3, %%r14\nmovq $4, %%r15\n"
+                      : : : "rax", "rbx", "r13", "r14", "r15", "cc");
+ return 2;
+}

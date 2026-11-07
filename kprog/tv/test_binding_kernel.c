@@ -711,7 +711,22 @@ static void helper_map_regressions(void)
 #include "test_native_inputs.h"
 #include "test_context.h"
 
-int main(void)
+/* Entry r0 is unreadable. Cover all output masks, including mask15 used by
+ * Katran, with three consecutive generation-zero chunks and real JIT execution. */
+static void unbound_abi_regressions(void)
+{
+ const uint32_t order[] = {0, 1, 2}, generations[] = {0, 0, 0};
+ for (test_slot = 0; test_slot < 3; test_slot++)
+  upload("", native, sizeof(native), 0);
+ test_slot = 0;
+ for (unsigned abi = 0; abi < 16; abi++) {
+  char name[96];
+  snprintf(name, sizeof(name), "unbound three-chunk ABI mask %u", abi);
+  load_group(order, generations, 3, abi, 0, name);
+ }
+}
+
+int main(int argc, char **argv)
 {
 	/* A static PID 1 allows AArch64 full-system testing without a runtime
 	 * image or userspace distribution. The initramfs contains only us/module.
@@ -727,6 +742,15 @@ int main(void)
 		if (close(fd))
 			fatal("close initramfs module");
 	}
+ if (argc == 2 && !strcmp(argv[1], "--unbound-only")) {
+  discover();
+  unbound_abi_regressions();
+  puts("unbound kernel regression: PASS");
+  if (getpid() == 1) reboot(RB_POWER_OFF);
+  return 0;
+ }
+ assert(argc == 1);
+
 	native_input_regressions();
 	native_input_blinding_regressions();
 	int source_context = create_context(BPF_PROG_TYPE_XDP, 0, "GPL");

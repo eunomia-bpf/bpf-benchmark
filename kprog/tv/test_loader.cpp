@@ -460,9 +460,44 @@ static void contextual_helpers_regressions()
     }
 }
 
-int main()
+static void unbound_multichunk_regression()
+{
+ const std::vector<bpf_insn> source{
+  {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 2},
+  {.code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0},
+ };
+ int original = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_unbound", "GPL",
+                             source.data(), source.size(), nullptr);
+ if (original < 0) throw std::runtime_error("unbound original load failed");
+ native_loader::FdLoadOptions options{};
+ options.original_prog_fd = original;
+ options.native_object_path = std::filesystem::absolute("build/native-entry.o");
+ options.symbol_name = "tv_unbound_abi_entry";
+ options.source_insns = source;
+ options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
+ auto loaded = native_loader::load_from_fd(options);
+ assert(loaded.replaced && loaded.prog_fd >= 0);
+ assert(loaded.native_chunk_count > 1 && loaded.native_callee_saved_mask == 15);
+ unsigned char packet[64]{};
+ bpf_test_run_opts run{};
+ run.sz = sizeof(run); run.data_in = packet; run.data_size_in = sizeof(packet);
+ if (bpf_prog_test_run_opts(loaded.prog_fd, &run))
+  throw std::runtime_error("unbound multi-chunk test run failed");
+ assert(run.retval == 2);
+ std::printf("unbound shared loader: PASS (%u chunks, mask15, native returned2)\n",
+             loaded.native_chunk_count);
+ native_loader::close_loaded_program(&loaded);
+ if (close(original)) throw std::runtime_error("close original failed");
+}
+
+int main(int argc, char **argv)
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
+    if (argc == 2 && !std::strcmp(argv[1], "--unbound-only")) {
+        try { unbound_multichunk_regression(); return 0; }
+        catch (const std::exception &error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+    }
+    assert(argc == 1);
     const std::vector<bpf_insn> constant{
         {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 0,
          .src_reg = 0, .off = 0, .imm = 2},

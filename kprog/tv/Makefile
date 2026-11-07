@@ -801,3 +801,18 @@ trusted-simple-entry-certificate: trusted-binding-check bpf-check
 		-o ../tv/build/PrivateSpills.olean ../tv/PrivateSpills.lean
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleX86.olean ../tv/TrustedSimpleX86.lean
+
+# Regression for unbound ABI output markers reading an undefined entry r0.
+.PHONY: unbound-kernel-check guest-unbound-kernel-check
+unbound-kernel-check: build/test-binding-kernel build/test-loader
+	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-unbound-kernel-check'
+
+guest-unbound-kernel-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko
+	./build/test-binding-kernel --unbound-only
+	./build/test-loader --unbound-only

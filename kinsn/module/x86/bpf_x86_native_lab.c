@@ -233,6 +233,10 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 	if (!insn_buf)
 		return hweight32(abi_mask) + 1;
 
+	/* The unbound stub must define r0 before the ABI marker reads it. */
+	if (!generation)
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
+
 	if (abi_mask & NATIVE_LAB_ABI_RBX)
 		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_0);
 	if (abi_mask & NATIVE_LAB_ABI_R13)
@@ -241,8 +245,6 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_0);
 	if (abi_mask & NATIVE_LAB_ABI_R15)
 		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_0);
-	if (!generation)
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
 	return cnt;
 }
 

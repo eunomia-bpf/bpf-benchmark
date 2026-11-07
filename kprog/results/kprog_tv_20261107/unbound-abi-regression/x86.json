@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "scope": "Generation-zero ABI markers initialized before reading R0; actual verifier/JIT/TEST_RUN on x86.",
+  "kernel_masks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "kernel_chunks": 3,
+  "loader_chunks": 3,
+  "loader_abi_mask": 15,
+  "retval": 2,
+  "katran_actual_startup": "pending separate regression",
+  "arm64_runtime": "pending",
+  "source_sha256": {
+    "kinsn/module/x86/bpf_x86_native_lab.c": "b41bfec11864afcd0ea0abac5dfd1f0363cb3ee5cbff6f98942604e71c1b54ba",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "a7d44bb00fa2fad8653e15c4d2d15dec1266ef80a7b434140c49fe94444ff343",
+    "kprog/tv/test_binding_kernel.c": "65585c97869027b94dbe1e02045eea60fce27f7c1cceaa31efbc3678697ea009",
+    "kprog/tv/test_loader.cpp": "aac0f5b9881e1933bc463da5ec70dbdc071304575273e9ca8f203c6542e045c7",
+    "kprog/tv/test_native_entry.c": "6155846e7fb42d0da5b1f457eaff453e6443c68c75c5991362907efc0aeab6ec",
+    "kprog/tv/Makefile": "7601a2cd1f7230efd9da1777905bd0ebaa736604f47c0ce7f684c2a491319f9d"
+  },
+  "kernel_sha256": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+  "module_sha256": "5c5b3ee437d74c0173e86dbff3da4ffc1f7315837ac20856a662de5928e3fc09"
+}

@@ -1,0 +1,24 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+insmod build-x86/bpf_x86_native_lab.ko
+./build/test-binding-kernel --unbound-only
+unbound three-chunk ABI mask 0: PASS (native execution returned 2)
+unbound three-chunk ABI mask 1: PASS (native execution returned 2)
+unbound three-chunk ABI mask 2: PASS (native execution returned 2)
+unbound three-chunk ABI mask 3: PASS (native execution returned 2)
+unbound three-chunk ABI mask 4: PASS (native execution returned 2)
+unbound three-chunk ABI mask 5: PASS (native execution returned 2)
+unbound three-chunk ABI mask 6: PASS (native execution returned 2)
+unbound three-chunk ABI mask 7: PASS (native execution returned 2)
+unbound three-chunk ABI mask 8: PASS (native execution returned 2)
+unbound three-chunk ABI mask 9: PASS (native execution returned 2)
+unbound three-chunk ABI mask 10: PASS (native execution returned 2)
+unbound three-chunk ABI mask 11: PASS (native execution returned 2)
+unbound three-chunk ABI mask 12: PASS (native execution returned 2)
+unbound three-chunk ABI mask 13: PASS (native execution returned 2)
+unbound three-chunk ABI mask 14: PASS (native execution returned 2)
+unbound three-chunk ABI mask 15: PASS (native execution returned 2)
+unbound kernel regression: PASS
+./build/test-loader --unbound-only
+unbound shared loader: PASS (3 chunks, mask15, native returned2)
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'
