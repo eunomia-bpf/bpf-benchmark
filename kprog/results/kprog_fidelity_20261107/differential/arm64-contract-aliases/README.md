@@ -77,6 +77,13 @@ taskset -c 16-19 python3 kprog/results/kprog_fidelity_20261107/differential/arm6
 The captured job wrapper additionally compresses the closed trace and writes
 trace-storage.json before completing. The review checks archived hashes, exact
 candidate and production source identities, all encoded/native-byte variants,
-per-form results and the complete decompressed observation stream. It writes
-summary.json and observations.tsv. Existing canonical source/executable
+per-form results and the complete decompressed observation stream. Candidate
+headers come from the candidate archive captured inside launch-inputs.tar.gz,
+with its exact original digest verified before reading the three headers.
+This retains the observed source epoch as the shared A bundle advances.
+It writes summary.json and observations.tsv. Existing canonical source/executable
 archives are shared with the c110b03a replay cohorts.
+
+A's later 1f0f20eb bundle retains byte-identical versions of the three C headers
+used here. The recorded 61,440 observations retain their captured f9b20a904
+source identity; the additional universal-model work retains A/V ownership.

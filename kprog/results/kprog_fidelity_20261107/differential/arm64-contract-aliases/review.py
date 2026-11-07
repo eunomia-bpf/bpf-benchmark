@@ -4,6 +4,7 @@ import csv
 from dataclasses import asdict
 import hashlib
 import importlib.util
+import io
 import json
 from pathlib import Path
 import struct
@@ -14,7 +15,7 @@ import tarfile
 ROOT=Path(__file__).resolve().parents[5]
 OUT=Path(__file__).resolve().parent
 BUILD=ROOT/'kprog/fidelity/build-arm64-contract-aliases'
-CANDIDATE=ROOT/'corpus/results/kprog_arm64_app_coverage_20261107/numeric-contract-sync'
+CANDIDATE_ARCHIVE='corpus/results/kprog_arm64_app_coverage_20261107/numeric-contract-sync/inputs.tar.gz'
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -42,7 +43,10 @@ def main():
     production={}
     candidate={}
     prefix='kprog/fidelity/build-arm64-contract-aliases/snapshot/'
-    with tarfile.open(CANDIDATE/'inputs.tar.gz') as archive:
+    with tarfile.open(OUT/'launch-inputs.tar.gz') as launch_archive:
+        candidate_payload=launch_archive.extractfile(CANDIDATE_ARCHIVE).read()
+    assert sha(candidate_payload)==changes['candidate_inputs_sha256']
+    with tarfile.open(fileobj=io.BytesIO(candidate_payload)) as archive:
         for name,digest in manifest.items():
             if name.startswith(prefix):
                 original=name[len(prefix):]
@@ -141,7 +145,7 @@ def main():
                  compiled_input_files=len(manifest),production_snapshot_files=len(production),
                  candidate_snapshot_files=len(candidate),production_snapshot_git_equal=True,
                  candidate_headers_equal_published_bundle=True,candidate_commit=changes['candidate_commit'],
-                 candidate_inputs_sha256=changes['candidate_inputs_sha256'],encoded_fields_preserved=True,
+                 candidate_inputs_sha256=changes['candidate_inputs_sha256'],candidate_archive_container='launch-inputs.tar.gz',encoded_fields_preserved=True,
                  native_byte_groups=10,raw_direct_native_byte_pairs=30,source_head=launch['source_head'],
                  reference_sha256=launch['reference_sha256'],binary_sha256=sha((BUILD/'cpu-differential').read_bytes()),
                  trace=storage,finished=status['finished'],source_drift=status['source_drift'],
