@@ -39,3 +39,20 @@ Source SHA is9fca3291b55b8ef0bfdfa8fab8afe8935210e5fd30f6c0314f7db53661b7afa8;
 reference binary SHA is19ce57b4a4cd897ee24713031de64cfb5f79b4734dce2d47529cb57cfb1e1ae6.
 The archived canonical-reference.gz is that exact failing executable. This is
 not a whole-JIT return certificate or a production simulator support claim.
+
+## Published source identity and comparison scope
+
+After the replay, all eight captured reference/configuration blobs were
+checked against V's published02e4592300a3567f91e9a82fc0f02d5c57b0f8a4.
+Every SHA matched. These counterexamples therefore apply to that published
+canonical source, while the source was still uncommitted at capture time.
+
+V explicitly describes the shared read failure as abstracting both PF and
+SS. The adapter's trap12-to-non_canonical rule checks a stronger fault-type
+contract:1024 differences remain under that strict comparison. Independently,
+all8192 cases agree on architectural GPRs, normalized full flags, PC,
+captured memory and fault occurrence. No unsafe acceptance or register
+rollback error was observed. Exact hardware exception classification remains
+outside the demonstrated canonical match; the strict failure and every
+counterexample are retained. No adapter, oracle or reference was changed to
+turn the strict failure into a zero-difference result.
