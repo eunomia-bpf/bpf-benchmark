@@ -1,0 +1,322 @@
+[
+  {
+    "key": "01d914ae95e3e790",
+    "entry": "tail_ipv4_to_endpoint",
+    "proof_sha256": "4d85d90f968566ee3f88d2039cf9ec5b16a2e2280a81d3b59a8e6163f798b7c2",
+    "plan_sha256": "7c27f9999080cb9cfc6b7c10d81bc7f435869f6cbb10af637f070f4a1625609c",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "155384298bee5605",
+    "entry": "tail_handle_snat_fwd_ipv4",
+    "proof_sha256": "ef328c1aea49bd4a59d58f74d4119ab2b49743179d3ba2af4d336a1f4e3f992f",
+    "plan_sha256": "8813a97723de6d191cad49de2cc8a4d14cfdbd7ee01d0066ff611736f881368c",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 3,
+      "cilium_ct_any4_global": 1,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "17c56e2f12ac9fc8",
+    "entry": "tail_handle_snat_fwd_ipv4",
+    "proof_sha256": "ef328c1aea49bd4a59d58f74d4119ab2b49743179d3ba2af4d336a1f4e3f992f",
+    "plan_sha256": "43eedb6f601f7c2d4981acb84f5749885a5729d1b3fb56ca9454a90a60dd6900",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 3,
+      "cilium_ct_any4_global": 1,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "65048680fcf6537f",
+    "entry": "tail_nodeport_nat_ingress_ipv4",
+    "proof_sha256": "b8fff21ce348f91b76c1fec34e13952ce451ffb0e1402df63400a1b3582c95e3",
+    "plan_sha256": "0d5ef5e8de0b9a079b72a329cd95a96d02d1a90b0c901f6c906cea7ea33a494a",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 2,
+      "cilium_ct_any4_global": 0,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "7b4200bb55531a69",
+    "entry": "tail_ipv4_to_endpoint",
+    "proof_sha256": "4d85d90f968566ee3f88d2039cf9ec5b16a2e2280a81d3b59a8e6163f798b7c2",
+    "plan_sha256": "0470bae492adf5f706551f3e056425eda49cf74598268abafba0c977c5883965",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "918cfac40da72bb3",
+    "entry": "tail_nodeport_nat_ingress_ipv4",
+    "proof_sha256": "b8fff21ce348f91b76c1fec34e13952ce451ffb0e1402df63400a1b3582c95e3",
+    "plan_sha256": "652e7477efbd00915d9c89a12450d3c6ed17439575fa687d5fca20c156d78785",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 2,
+      "cilium_ct_any4_global": 0,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "9571f3acd60557d9",
+    "entry": "tail_handle_snat_fwd_ipv4",
+    "proof_sha256": "ef328c1aea49bd4a59d58f74d4119ab2b49743179d3ba2af4d336a1f4e3f992f",
+    "plan_sha256": "ddcf0eda8b89421ccb0cd70b4a0abc4482fc200eccfabdaf95ae7825404f2533",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 3,
+      "cilium_ct_any4_global": 1,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "9a1dadb0b33de103",
+    "entry": "tail_nodeport_nat_ingress_ipv4",
+    "proof_sha256": "b8fff21ce348f91b76c1fec34e13952ce451ffb0e1402df63400a1b3582c95e3",
+    "plan_sha256": "e4a5b0084caab0a2b878010028ecebe7b7f928546c832b48bf5e81ed3dde80d6",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 2,
+      "cilium_ct_any4_global": 0,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "9c3e7b9e49eab206",
+    "entry": "tail_nodeport_nat_ingress_ipv4",
+    "proof_sha256": "b8fff21ce348f91b76c1fec34e13952ce451ffb0e1402df63400a1b3582c95e3",
+    "plan_sha256": "18b8f5febdebdb6d89d9b2c747351fc449c70ea78545db142018b8dc52090a61",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 2,
+      "cilium_ct_any4_global": 0,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "adf900b7d19c8123",
+    "entry": "tail_nodeport_nat_ingress_ipv4",
+    "proof_sha256": "b8fff21ce348f91b76c1fec34e13952ce451ffb0e1402df63400a1b3582c95e3",
+    "plan_sha256": "4e0a6ba23fa1ac3cfee2fdf649aefea4d22247df1e6acd6c124cb7b0acc31f4d",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 2,
+      "cilium_ct_any4_global": 0,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "b4fc271a2b8e3bfe",
+    "entry": "tail_handle_ipv4_cont",
+    "proof_sha256": "69eb99691e4571ac2b8ffb2141d648d18b417a9243d57d768ed4be9ca1b79790",
+    "plan_sha256": "2d3dccd5f3bcea3201c1a34a2d5ba23b7405b42a01ef1bb29774ed88458d8ba6",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "c30d162087332d85",
+    "entry": "tail_handle_snat_fwd_ipv4",
+    "proof_sha256": "ef328c1aea49bd4a59d58f74d4119ab2b49743179d3ba2af4d336a1f4e3f992f",
+    "plan_sha256": "836457448f33c8ef8f455a7d80a21d1914960b9f6e10b162996c10ba0109e407",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 3,
+      "cilium_ct_any4_global": 1,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "d00f82640a169ccf",
+    "entry": "tail_ipv4_policy",
+    "proof_sha256": "ef275899ab60182044dc264bd052cc3826f3996fa8e0d28d5abd49d381f6ad1f",
+    "plan_sha256": "d69472aa405b20f9a519a40f82531d449c871e20e03d20584010da49813450d0",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "d1a5d589da284369",
+    "entry": "tail_handle_ipv4_cont",
+    "proof_sha256": "69eb99691e4571ac2b8ffb2141d648d18b417a9243d57d768ed4be9ca1b79790",
+    "plan_sha256": "dcc2b5525a4abbf463f08237732bac28d10b37390f3b1ee9bea081a5832260c6",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "d7121cb8c9f7f26d",
+    "entry": "tail_handle_snat_fwd_ipv4",
+    "proof_sha256": "ef328c1aea49bd4a59d58f74d4119ab2b49743179d3ba2af4d336a1f4e3f992f",
+    "plan_sha256": "3252cff113359e79ac67661a370dced006f6d43a578b08f165b9e6e2ff127dd3",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 3,
+      "cilium_ct_any4_global": 1,
+      "cilium_policystats": 0
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  },
+  {
+    "key": "f79dda30e50095ea",
+    "entry": "tail_ipv4_policy",
+    "proof_sha256": "ef275899ab60182044dc264bd052cc3826f3996fa8e0d28d5abd49d381f6ad1f",
+    "plan_sha256": "2acaa8a81826aa2fe558bf17f1ce7105758185224ddddd5ad6acf9c82f71c08c",
+    "full_map_identity_matches": {
+      "cilium_ipv4_frag_datagrams": 0,
+      "cilium_ct_any4_global": 2,
+      "cilium_policystats": 2
+    },
+    "baseline": {
+      "returncode": 1,
+      "truncation_ambiguity": true
+    },
+    "corrected": {
+      "returncode": 0,
+      "truncation_ambiguity": false
+    },
+    "matches_actual_cached_blob": true
+  }
+]

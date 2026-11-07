@@ -1,0 +1,146 @@
+{
+  "result": "corpus/results/x86_kvm_corpus_20261107_151633_102078",
+  "driver_exit": 0,
+  "metadata_status": "completed",
+  "app_status": "ok",
+  "app_error": "",
+  "native_replaced": 177,
+  "native_failed": 0,
+  "truncation_ambiguities": 0,
+  "native_timing_receipts": 177,
+  "work": {
+    "baseline": [
+      {
+        "name": "cilium_endpoint_pktgen",
+        "components": [
+          {
+            "name": "cilium_endpoint_pktgen_forward",
+            "returncode": 0,
+            "duration_s": 2.021698035000014,
+            "packets": 611409,
+            "errors": 0
+          },
+          {
+            "name": "cilium_endpoint_pktgen_reverse",
+            "returncode": 0,
+            "duration_s": 2.0099404270000036,
+            "packets": 612157,
+            "errors": 0
+          }
+        ],
+        "outcomes": {
+          "cilium_metrics_map_ids": [
+            9
+          ],
+          "receivers": {
+            "bpfbench-cepa": {
+              "rx_bytes": 39178324,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 612160,
+              "tx_bytes": 39130544,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 611413
+            },
+            "bpfbench-cepb": {
+              "rx_bytes": 39130544,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 611413,
+              "tx_bytes": 39178324,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 612160
+            }
+          },
+          "verdicts": {
+            "reason=0,direction=1": {
+              "bytes": 78308868,
+              "count": 1223573
+            },
+            "reason=0,direction=2": {
+              "bytes": 78308938,
+              "count": 1223574
+            },
+            "reason=139,direction=2": {
+              "bytes": 0,
+              "count": 0
+            },
+            "reason=3,direction=1": {
+              "bytes": 140,
+              "count": 2
+            }
+          }
+        }
+      }
+    ],
+    "post_rejit": [
+      {
+        "name": "cilium_endpoint_pktgen",
+        "components": [
+          {
+            "name": "cilium_endpoint_pktgen_forward",
+            "returncode": 0,
+            "duration_s": 2.129164667999987,
+            "packets": 686831,
+            "errors": 0
+          },
+          {
+            "name": "cilium_endpoint_pktgen_reverse",
+            "returncode": 0,
+            "duration_s": 2.122860639999999,
+            "packets": 687182,
+            "errors": 0
+          }
+        ],
+        "outcomes": {
+          "cilium_metrics_map_ids": [
+            110
+          ],
+          "receivers": {
+            "bpfbench-cepa": {
+              "rx_bytes": 43980016,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 687186,
+              "tx_bytes": 43957552,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 686835
+            },
+            "bpfbench-cepb": {
+              "rx_bytes": 43957622,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 686836,
+              "tx_bytes": 43980016,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 687186
+            }
+          },
+          "verdicts": {
+            "reason=0,direction=1": {
+              "bytes": 87937568,
+              "count": 1374021
+            },
+            "reason=0,direction=2": {
+              "bytes": 87937638,
+              "count": 1374022
+            },
+            "reason=139,direction=2": {
+              "bytes": 0,
+              "count": 0
+            },
+            "reason=3,direction=1": {
+              "bytes": 0,
+              "count": 0
+            }
+          }
+        }
+      }
+    ]
+  },
+  "raw_archive_sha256": "4eb0723afb3a049cb1b9516dc2fa4cf56da67efef6b032f88f91a8273023888a"
+}

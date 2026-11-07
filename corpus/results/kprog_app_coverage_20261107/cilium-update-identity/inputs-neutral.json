@@ -1,0 +1,20 @@
+{
+  "image_id": "sha256:1a4d76c7de03744f1f6e73fdbcb5007ab05ba2b7055c055696d82ddb955fd069",
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "f9a52728b54ff90b9b6732fca7acbc70b4cdba3f0c3be826fc624c58768f1941",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "4b811749b020d99ec78c1a8b428de4c00a7a796a952c7dc5e038afb4c8fe645f",
+    "kprog/libnativeloader/src/native_loader_link_plan.hpp": "b1024931b2b97d698620856b2222dedcf2115f146eaeb573dcc67429eda95f9d",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506"
+  },
+  "binary_sha256": {
+    "native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+    "libnative_loader.so": "73c855291181b5a7426bd2089ea6e7cf3c96ba676d57035e10c613a554c110d5"
+  },
+  "kernel_sha256": "88b12ec672d462447306e8fffb128eada20081d53572a00fe8e598c2a0f7def8",
+  "base_image": "sha256:401e818569d1e630c68e2f416d9a067199f248882421f76701e0f98558dd05bf",
+  "baseline_native_link_sha256": "ed147232b680be95bbccf3843f1891dbb2a55272772bee3b33f6ed66b448260e",
+  "source_commit": "070559db815cc400216f94791693d40c85f29385",
+  "base_layers_verified": true,
+  "image_tar_sha256": "56da2cf1359b1dffe61b3b6df9fa4a7ef51edee5fe886caf24b0fc46b6eb0e9b"
+}
