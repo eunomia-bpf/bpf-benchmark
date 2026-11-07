@@ -806,8 +806,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 				(__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			break;                                             \
 		default: {                                               \
-			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
-			__a64_mrd_value = ARM64_SIM_L_LOAD_ADDR(__a64_mrd_addr, (WIDTH));\
+			__a64_mrd_value = KPROG_ARM64_LOAD_BYTES_OFFSET( \
+				ARM64_SIM_L_READ_REG_PTR(BASE), __a64_mrd_off, (WIDTH));\
 			break;                                             \
 		}                                                        \
 		}                                                        \

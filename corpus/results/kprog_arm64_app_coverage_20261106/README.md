@@ -955,3 +955,11 @@ now carries both source-site markers, with unchanged native bytes. Manifest
 refresh preserves all9 other startup selectors (32total). [Actual QEMU BCC retry](bcc-runtime-v12/README.md) records six startup replacements
 and four logged verifier failures; the application remains error with no native
 workload counters. The specific sys_exit load is not reached.
+
+## Direct context displacement admitted under QEMU
+
+[Width-preserving base/offset lowering](load-offset-result/README.md) passes
+1,052 numeric checks,32 BPF encoding cases and the20,024-case existing oracle.
+[Actual BCC v14](bcc-runtime-v14/README.md) admits the formerly rejected capable
+entry, with7startup replacements and3logged verifier failures. All23 proofs
+compile; the application still fails before native workload execution.

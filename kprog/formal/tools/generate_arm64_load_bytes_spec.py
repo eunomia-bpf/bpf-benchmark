@@ -92,12 +92,24 @@ def render_c(widths: list[dict]) -> str:
     access = ["#if defined(__bpf__) || defined(__BPF__)",
         "#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) " + chr(92),
         '\t__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + 0)" : "=r"(OUT) : "r"(ADDR) : "memory")',
+        "#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) " + chr(92),
+        "\tdo { " + chr(92),
+        "\t\tif (__builtin_constant_p(OFFSET) && (OFFSET) >= -32768 && (OFFSET) <= 32767) { " + chr(92),
+        "\t\t\tif ((OFFSET) < 0) " + chr(92),
+        '\t\t\t\t__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 - %2)" : "=r"(OUT) : "r"(BASE), "i"(-(OFFSET)) : "memory"); ' + chr(92),
+        "\t\t\telse " + chr(92),
+        '\t\t\t\t__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + %2)" : "=r"(OUT) : "r"(BASE), "i"(OFFSET) : "memory"); ' + chr(92),
+        "\t\t} else " + chr(92),
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT); " + chr(92),
+        "\t} while (0)",
         "#else"]
     for row in widths:
         bits = row["bytes"] * 8
         access.append(f"typedef __u{bits} kprog_arm64_load_u{bits}_unaligned __attribute__((aligned(1),may_alias));")
     access += ["#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) " + chr(92),
-        "\t((OUT) = *(volatile const kprog_arm64_load_u##BITS##_unaligned *)(ADDR))", "#endif"]
+        "\t((OUT) = *(volatile const kprog_arm64_load_u##BITS##_unaligned *)(ADDR))",
+        "#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) " + chr(92),
+        "\tKPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT)", "#endif"]
     access_text = "\n".join(access)
     body = [
         "\t({",
@@ -106,13 +118,13 @@ def render_c(widths: list[dict]) -> str:
         "\t\t__u8 __kprog_a64_lb_width = (WIDTH);",
         "\t\t__u64 __kprog_a64_lb_value;",
         "\t\tif (__kprog_a64_lb_width == ARM64_WIDTH_64)",
-        "\t\t\tKPROG_ARM64_LOAD_ACCESS(64, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS_OFFSET(64, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value);",
         "\t\telse if (__kprog_a64_lb_width >= ARM64_WIDTH_32)",
-        "\t\t\tKPROG_ARM64_LOAD_ACCESS(32, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS_OFFSET(32, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value);",
         "\t\telse if (__kprog_a64_lb_width >= ARM64_WIDTH_16)",
-        "\t\t\tKPROG_ARM64_LOAD_ACCESS(16, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS_OFFSET(16, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value);",
         "\t\telse",
-        "\t\t\tKPROG_ARM64_LOAD_ACCESS(8, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS_OFFSET(8, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value);",
         "\t\t__kprog_a64_lb_value;",
         "\t})",
     ]
@@ -129,13 +141,19 @@ def render_c(widths: list[dict]) -> str:
 {codes}
 {access_text}
 /*
- * ADDR is the (byte) source address; WIDTH is one of the four ARM64_WIDTH_*
+ * ADDR + OFFSET is the source address; WIDTH is one of the four ARM64_WIDTH_*
  * codes. One access reads exactly that width; no NZCV is written. The
  * result is the raw 64-bit value; the caller applies the destination width to
  * the *value* separately for the sign-extending loads.
  */
-#define KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH)                                 \\
+#define KPROG_ARM64_LOAD_BYTES_OFFSET(ADDR, OFFSET, WIDTH)                                 \\
 {continued}
+/* Keep constant displacements inside the BPF memory instruction: some context
+ * types forbid pointer arithmetic even for a fixed, valid field offset.
+ * Variable or out-of-encoding-range offsets use ordinary address arithmetic.
+ * Both forms read exactly WIDTH bytes at ADDR + OFFSET. */
+#define KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH) \\
+\tKPROG_ARM64_LOAD_BYTES_OFFSET((ADDR), 0, (WIDTH))
 #endif
 '''
 

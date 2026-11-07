@@ -1,0 +1,44 @@
+[
+  {
+    "command": [
+      "cc",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads.c",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads-host"
+    ],
+    "returncode": 0
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads-host"
+    ],
+    "returncode": 0
+  },
+  {
+    "command": [
+      "clang",
+      "-O2",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads.c",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads.bpf.o"
+    ],
+    "returncode": 0
+  },
+  {
+    "command": [
+      "llvm-objdump-18",
+      "-d",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/load-offset-result/loads.bpf.o"
+    ],
+    "returncode": 0
+  }
+]

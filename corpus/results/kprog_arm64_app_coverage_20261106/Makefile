@@ -643,3 +643,10 @@ otel-real-link:
 
 otel-real-install:
 	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE) install
+
+.PHONY: load-offset-check
+load-offset-check:
+	python3 $(ROOT)/kprog/formal/tools/generate_arm64_load_bytes_spec.py --check
+	python3 $(HERE)/load_offset_check.py $(HERE)/$(PHASE)
+	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal $(ROOT)/kprog/formal/oracles/test_arm64_load_bytes_host.c -o $(ROOT)/kprog/arm64/build/load-bytes-host
+	$(ROOT)/kprog/arm64/build/load-bytes-host

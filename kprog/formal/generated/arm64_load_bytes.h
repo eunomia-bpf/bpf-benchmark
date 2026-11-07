@@ -14,6 +14,16 @@ _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 load-bytes width code drift");
 #if defined(__bpf__) || defined(__BPF__)
 #define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \
 	__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + 0)" : "=r"(OUT) : "r"(ADDR) : "memory")
+#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) \
+	do { \
+		if (__builtin_constant_p(OFFSET) && (OFFSET) >= -32768 && (OFFSET) <= 32767) { \
+			if ((OFFSET) < 0) \
+				__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 - %2)" : "=r"(OUT) : "r"(BASE), "i"(-(OFFSET)) : "memory"); \
+			else \
+				__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + %2)" : "=r"(OUT) : "r"(BASE), "i"(OFFSET) : "memory"); \
+		} else \
+			KPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT); \
+	} while (0)
 #else
 typedef __u8 kprog_arm64_load_u8_unaligned __attribute__((aligned(1),may_alias));
 typedef __u16 kprog_arm64_load_u16_unaligned __attribute__((aligned(1),may_alias));
@@ -21,27 +31,35 @@ typedef __u32 kprog_arm64_load_u32_unaligned __attribute__((aligned(1),may_alias
 typedef __u64 kprog_arm64_load_u64_unaligned __attribute__((aligned(1),may_alias));
 #define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \
 	((OUT) = *(volatile const kprog_arm64_load_u##BITS##_unaligned *)(ADDR))
+#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) \
+	KPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT)
 #endif
 /*
- * ADDR is the (byte) source address; WIDTH is one of the four ARM64_WIDTH_*
+ * ADDR + OFFSET is the source address; WIDTH is one of the four ARM64_WIDTH_*
  * codes. One access reads exactly that width; no NZCV is written. The
  * result is the raw 64-bit value; the caller applies the destination width to
  * the *value* separately for the sign-extending loads.
  */
-#define KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH)                                 \
+#define KPROG_ARM64_LOAD_BYTES_OFFSET(ADDR, OFFSET, WIDTH)                                 \
 	({ \
 		volatile const __u8 *__kprog_a64_lb_addr = \
 			(volatile const __u8 *)(ADDR); \
 		__u8 __kprog_a64_lb_width = (WIDTH); \
 		__u64 __kprog_a64_lb_value; \
 		if (__kprog_a64_lb_width == ARM64_WIDTH_64) \
-			KPROG_ARM64_LOAD_ACCESS(64, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+			KPROG_ARM64_LOAD_ACCESS_OFFSET(64, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
 		else if (__kprog_a64_lb_width >= ARM64_WIDTH_32) \
-			KPROG_ARM64_LOAD_ACCESS(32, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+			KPROG_ARM64_LOAD_ACCESS_OFFSET(32, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
 		else if (__kprog_a64_lb_width >= ARM64_WIDTH_16) \
-			KPROG_ARM64_LOAD_ACCESS(16, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+			KPROG_ARM64_LOAD_ACCESS_OFFSET(16, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
 		else \
-			KPROG_ARM64_LOAD_ACCESS(8, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+			KPROG_ARM64_LOAD_ACCESS_OFFSET(8, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
 		__kprog_a64_lb_value; \
 	})
+/* Keep constant displacements inside the BPF memory instruction: some context
+ * types forbid pointer arithmetic even for a fixed, valid field offset.
+ * Variable or out-of-encoding-range offsets use ordinary address arithmetic.
+ * Both forms read exactly WIDTH bytes at ADDR + OFFSET. */
+#define KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH) \
+	KPROG_ARM64_LOAD_BYTES_OFFSET((ADDR), 0, (WIDTH))
 #endif

@@ -1,0 +1,9 @@
+{
+  "replacements": 7,
+  "logged_failures": 3,
+  "capable": [
+    "[165.613813 pid=805 tid=805] native-loader replaced prog=kprobe__cap_cap original_fd=15 native_fd=31 original_id=90 native_id=160 symbol=kprobe__cap_capable_entry native_object=/opt/bpf-benchmark/native-bpf/arm64/bcc/capable.native.o manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_805_4296331b8283033c.bpf"
+  ],
+  "application_status": "error",
+  "native_workload": false
+}
