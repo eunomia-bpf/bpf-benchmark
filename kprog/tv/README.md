@@ -2297,3 +2297,12 @@ fault and every guard/store outcome, has the reconstructed whole architecture
 and a matching actual B29 execution with the same ordered effects. All21 state
 audits pass. Packaging observer/CFG/fault coverage into the explicit generic
 TranslationValidation instance and physical JIT/caller transport remain open.
+
+`trusted-simple-b29-observer.json` adds a ghost observer whose physical state
+and effects erase exactly to real B29 execution. Every real B execution also
+lifts, so no safer subset is selected and no extra program predicate is added.
+Invocation/initial-state lineage is immutable; each initially absent store
+snapshot comes from an actually reached BPC11 state. The all-outcome complete
+native full-state theorem now has a real observed B execution with identical
+ordered events and actual fault. All9 observer audits pass. Explicit generic
+per-block TV, physical JIT/caller transport and other programs remain open.

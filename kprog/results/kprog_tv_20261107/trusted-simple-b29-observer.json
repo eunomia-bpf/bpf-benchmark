@@ -1,0 +1,95 @@
+{
+  "utc": "2026-11-07T18:49:01.893939+00:00",
+  "status": "actual_B29_ghost_observer_exact_erasure_lifting_and_real_store_snapshot_lineage_proved_generic_block_TV_pending",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "Every observed step erases to the actual accepted B29 step with identical physical endpoints and ordered events.",
+    "Every actual B29 finite execution lifts to the observer; ghost metadata adds no predicate or execution check and cannot select a safer subset.",
+    "Invocation inputs and initial proof state are immutable across every observed execution.",
+    "Every store-entry snapshot from an initially empty observer comes from an actually reached BPC11 state of that execution, not an assumed native endpoint.",
+    "Every canonical selected complete native path has the full reconstructed architecture, actual fault and same ordered events in a real observed B29 execution; all context, branch and store outcomes remain covered."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-state-certificate trusted-simple-b29-observer-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-observer-certificate",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29Observer.observed_step_erases": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.observed_execution_erases": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.observed_execution_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.checked_effects_transfer": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.observed_store_lineage": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.initial_store_snapshot_provenance": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.observed_execution_lifts": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.observed_execution_iff": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Observer.complete_native_observed_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "ee61fdfdb8bada31025ee12f97c9dbe1ed6280a96e846b291e8732db179d75f9",
+    "dependency_scope": "Focused new observer module imports previously checked 21-audit state module; canonical reference and all prior TV dependencies unchanged. Reproduction target includes prerequisites."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "c344946f8dd9112ef3dd24c33a5f47cef9b56e7d5d7869a4c25829201252627f",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "a96d42aece68ac79445998e564f994569319ec047a472bd29c670bd2064be7bd",
+    "kprog/tv/TrustedSimpleB29Observer.lean": "8722e3997f26a6685415ccd6dc3f1c4ce8a4ee0d17c787752f059a70aca5568a"
+  },
+  "premises": [
+    "Same context argument and exact initial memory, bound SP input, nativePC0/BPFPC0 active.",
+    "Successful-read first-block case explicitly takes the two actual read results; separate first/second fault theorems cover failed permissions.",
+    "Declared kernel XDP context map at B29PC1/2 and its physical conversion provenance remain explicit.",
+    "Store-block entry obeys the preceding third-guard reconstruction at nativePC35/BPC11 and its temporary invariant; the end snapshot is exactly actual entry B r1.",
+    "Canonical first-store-failure index is computed from existing memory permissions; neither successful permissions nor a native result is assumed."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Compose actual per-basic-block native/observed relations with CFG and fault handling into an explicit generic TranslationValidation instance.",
+    "Physical JIT/caller embedding, context-conversion provenance and every other micro/application certificate remain open."
+  ]
+}
