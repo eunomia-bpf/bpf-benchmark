@@ -208,6 +208,18 @@ theorem read_event_retained (m : Memory) (frame address value : Word) (count : N
     exact guest_memory_event_retained frame address .read _ _ guest
   · simp [readMemory, permission] at read
 
+/-- Applying the same actual write to related memories preserves every guest
+byte and initialization bit outside the frame, including wrapping accesses. -/
+theorem store_agrees {frame : Word} {first second : Memory}
+    (same : AgreesOutside frame first second) (base value : Word) (count : Nat) :
+    AgreesOutside frame (storeMemory first base value count) (storeMemory second base value count) := by
+  refine ⟨same.1, same.2.1, ?_⟩
+  intro address outside
+  by_cases inside : (address - base).toNat < count
+  · simp only [storeMemory, inside, ite_true]
+    trivial
+  · simpa only [storeMemory, inside, ite_false] using same.2.2 address outside
+
 end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.two_spills_preserve_guest
 #print axioms KProgTV.PrivateSpills.guest_bytes_preserved
@@ -219,3 +231,5 @@ end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.upper_spill_reload
 
 #print axioms KProgTV.PrivateSpills.erased_event_private
+
+#print axioms KProgTV.PrivateSpills.store_agrees

@@ -380,6 +380,69 @@ theorem second_rejection (n : AArch64.State) (p : BPF.State)
   · simpa only [nativeReturnFinal, nativeReturnBefore, rejectFinal, rejectBefore,
       AArch64.writeReg, proofReturnFinal, proofReturnBefore] using memory
 
+theorem short_write_trace_retained (frame : Word) (events : List Event)
+    (short : ∀ event ∈ events, match event with
+      | .memory .write _ bytes _ => bytes.length < 8
+      | .fault _ => True
+      | _ => False) : events.filterMap (PrivateSpills.projectEvent frame) = events := by
+  revert short
+  induction events with
+  | nil => intro _; rfl
+  | cons event rest ih =>
+    intro short
+    have head := short event (by simp)
+    have retained : PrivateSpills.projectEvent frame event = some event := by
+      cases event with
+      | memory kind address bytes initialized =>
+        cases kind with
+        | read => simp at head
+        | atomic => simp at head
+        | write =>
+          have notEight : bytes.length ≠ 8 := by omega
+          simp [PrivateSpills.projectEvent, notEight]
+      | fault => rfl
+      | helper => simp at head
+      | exclusive => simp at head
+    have tail : rest.filterMap (PrivateSpills.projectEvent frame) = rest :=
+      ih (fun e inside => short e (by simp [inside]))
+    simp [retained, tail]
+
+/-- Store execution on the real two memories, preserving complete state
+shapes and all guest effects. The compiled frame is never replaced by native
+memory at the block boundary. Success and every first-fault prefix are real
+executions of the canonical native and exact expanded verifier programs. -/
+theorem store_with_spills (n : AArch64.State) (p : BPF.State) (pointer frame : Word)
+    (same : PrivateSpills.AgreesOutside frame n.memory p.memory) :
+    ∃ nr pr,
+      ARM64Path.evaluate 0 native (SimpleStoreCertificate.nativePositions n.memory pointer)
+        (SimpleStoreCertificate.nativeInitial n pointer) = .ok nr ∧
+      BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
+        (SimpleStoreCertificate.proofPositions p.memory pointer)
+        (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer) = .ok pr ∧
+      nr.state = SimpleStoreCertificate.nativeStoreShape n pointer nr.state ∧
+      pr.state = SimpleStoreCertificate.proofStoreShape p pointer pr.state ∧
+      PrivateSpills.AgreesOutside frame nr.state.memory pr.state.memory ∧
+      nr.events = pr.events ∧ nr.fault = pr.fault ∧
+      nr.state.pc = SimpleStoreCertificate.proofNativePC pr.state.pc ∧
+      Execution (ARM64Path.instructionStep 0 native) (SimpleStoreCertificate.nativeInitial n pointer)
+        nr.events nr.state ∧
+      Execution SimpleCheckedPlatform.instructionStep
+        (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer) pr.events pr.state ∧
+      pr.events.filterMap (PrivateSpills.projectEvent frame) = nr.events := by
+  obtain ⟨nr, pr, nativeRun, proofRun, nativeShape, proofShape, memory, events, fault, pc, short⟩ :=
+    SimpleStoreCertificate.store_transition_relation (PrivateSpills.AgreesOutside frame)
+      (by
+        intro first second related address value count
+        exact PrivateSpills.store_agrees related address value count)
+      n p pointer SimpleCheckedPlatform.externals same.2.1 same
+  have actual := (body_evaluate SimpleCheckedPlatform.externals
+    (SimpleStoreCertificate.proofPositions p.memory pointer) (store_positions p.memory pointer)
+    (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer)).trans proofRun
+  refine ⟨nr, pr, nativeRun, actual, nativeShape, proofShape, memory, events, fault, pc,
+    ARM64Path.evaluate_sound _ _ _ _ _ nativeRun,
+    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), ?_⟩
+  simpa only [← events] using short_write_trace_retained frame nr.events short
+
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
 
@@ -391,3 +454,5 @@ end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_rejection
 
 #print axioms KProgTV.SimpleCheckedBlocks.second_rejection
+
+#print axioms KProgTV.SimpleCheckedBlocks.store_with_spills

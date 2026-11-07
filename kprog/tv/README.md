@@ -700,3 +700,12 @@ substituted at the second block. Complete final states, private-frame guest
 memory agreement and the exact ordered context reads are retained. Together
 with `first_rejection`, both guard-rejected paths are composed; store/fault and
 accepted-return paths still require the same whole-invocation relation.
+
+`store_with_spills` now runs the actual store/fault block on native memory and
+the proof's real spilled memory, retaining complete architectural state shapes,
+ordered events, fault identity and corresponding PC. Canonical writes preserve
+`AgreesOutside` without replacing either memory; all short-write/fault events
+survive projection. The older equal-memory observation is derived as an Eq
+instance of this transition relation. The full existing dependency check passes
+without sorryAx; exact inputs/logs are under results/kprog_tv_20261107. Original
+entry-to-store/return and invocation/profile binding composition remain active.
