@@ -77,3 +77,43 @@ The target is the kernel memset routine. The call policy remains unchanged;
 the exact-count repair is recorded in `../exact-memory-count/`. Context
 identity must be repaired before any memory-intrinsic admission is reconsidered.
 No complete BCC coverage, matching work, or timing result is claimed.
+
+## Native-only service full BCC startup, 14:12:53 UTC
+
+All eight upstream tools are ready and all25 observed original program loads
+produce fresh generated/compiled proofs, pass the verifier and complete bound
+loads. There are zero specialization failures and zero verifier rejections in
+this run. Exact kernel-memset binding86e0927e9 closes opensnoop's prior failure.
+All tools use the unchanged corpus spawn/readiness/stop paths and commands.
+
+| Tool | Programs generated/accepted/bound |
+|---|---:|
+| capable |2/2/2|
+| biosnoop |4/4/4|
+| vfsstat |5/5/5|
+| opensnoop |4/4/4|
+| syscount |2/2/2|
+| tcpconnect |4/4/4|
+| tcplife |1/1/1|
+| runqlat |3/3/3|
+| Total |25/25/25|
+
+After readiness, the guest completed10000 opens,10000 writes and10000 closes.
+`native-only-complete.json` retains every source/bound program identity, native
+ELF hash, raw before/after run counters and byte counts. Missing bpftool counter
+fields remain null rather than invented zeroes. Source FDs retained by the
+kernel capsule are not counted again as application programs. Full tool output,
+all source/bound snapshots and all25 raw service archives are retained in
+`run-20261107T141253106809Z.tar.gz`; its hash matches summary.json.
+
+```
+make -C kprog/libnativeloader trusted-bcc-set-kvm
+python3 corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/analyze.py
+```
+
+This establishes the complete frozen BCC eight-tool native-only startup and
+fixed-work functional path. It does not establish JIT/native work equivalence,
+all-tool event counts, the standard two-start corpus timing, six-app closure or
+whole-program O1/O4. The next integration uses the normal corpus workload with
+the trusted service outside its application container; no timing request is
+promoted yet.

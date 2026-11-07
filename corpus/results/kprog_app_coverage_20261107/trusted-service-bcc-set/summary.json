@@ -1,16 +1,16 @@
 {
-  "ok": false,
+  "ok": true,
   "case": "bcc-set",
-  "started": "2026-11-07T11:18:12.574530+00:00",
-  "request_archive": "run-20261107T111812573720Z.tar.gz",
+  "started": "2026-11-07T14:12:53.107943+00:00",
+  "request_archive": "run-20261107T141253106809Z.tar.gz",
   "artifact_sha256": {
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
-    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
     "vendor/build/x86/bcc/bin/vfsstat": "7620da18ec87eb09d12309cf965f35f25df6c3934492cf8f4edf831e1a676a83",
     "bpfopt/shim/build-x86/libbpfrejit_shim.so": "93b7f74137a3998f7893b88bdb932311c4a4577a31231229ed517733c2764062",
     "kprog/libnativeloader/build/libnative_loader.so": "9ed92e26a68068654217ec810aa1b737cc5907ab5cc6a0bac238072028d57561",
     "vendor/build/native-bpf/x86/stage/bcc/manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
-    "vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o": "8469e87a749f30508c16f2878bca8a5e6beb225773c12a2f940626fd7f2b8e30",
+    "vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
     "vendor/build/x86/bcc/bin/capable": "d628f54fbf9cd38ee1b191e09339173e02966cecf4e57f2b2e04df97a8bbcf70",
     "vendor/build/x86/bcc/bin/biosnoop": "b60783623a73b810971326599233190a00ec699b52f2fba47ff4a5a616772195",
     "vendor/build/x86/bcc/bin/opensnoop": "9c1aee16ff4f2d55481d9dc09fa68adf23e91981415448c94ca3336337afa0c4",
@@ -18,17 +18,269 @@
     "vendor/build/x86/bcc/bin/tcpconnect": "fe7080c629fda0557298c661e69cac8903837a070dfe9e14ca943ef6ec0b72f4",
     "vendor/build/x86/bcc/bin/tcplife": "4cc49d395678151bac3b6fa277ea07027528fb6358e82768af1a8c2be02e664a",
     "vendor/build/x86/bcc/bin/runqlat": "5c1e33359c5a84ce666526d124f4c8026a1d8b8d8200cca086f344d34439817e",
-    "vendor/build/native-bpf/x86/stage/bcc/capable.native.o": "28a33b67e1499d0adf21b7b8b5a7ef9a2561706370ef42ff64d31a436def7832",
-    "vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o": "198e8dddf5c875001ca72692155fc55822b4e83b4d587406dbf2aafd333c493c",
-    "vendor/build/native-bpf/x86/stage/bcc/opensnoop.native.o": "fe4acdc4bce27eb8dce0e6bdaac965152fd5169efc1240df443f624b64eeaf88",
-    "vendor/build/native-bpf/x86/stage/bcc/syscount.native.o": "f100cbab1af859479dcea9064db99b870f6c91764d1e5a74929fd2e4e8546abc",
-    "vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o": "5b7de964bbf14f2b2948a6f122a874e4b4c8e273f192358ce84faa12e7468fab",
-    "vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o": "ffaf5d2d19c988641e679182c65e589064c883e171398433d3ead02cdbac6e97",
-    "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o": "03de8f33615e9b9aeec7ccb3bab43bcff1f27c897832f32df1b104e1060edadd"
+    "vendor/build/native-bpf/x86/stage/bcc/capable.native.o": "e9b8e901b1bb9b3a3ba99eeac2cc105c195a69c3946d554cde5036029031a427",
+    "vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+    "vendor/build/native-bpf/x86/stage/bcc/opensnoop.native.o": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+    "vendor/build/native-bpf/x86/stage/bcc/syscount.native.o": "226056848c49ce5655582a802d26e0de7a51b7ac90ee81c30b8071bd1b0d5933",
+    "vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+    "vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o": "823d84c9fb802e6abe9c709f18ff7bf6fdd5059590cc9f5cae0a9fa3a4358b88",
+    "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63"
   },
-  "error": "BCC tools failed startup: opensnoop",
-  "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 128, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 57, in run_bcc_set\n    if failures:raise RuntimeError('BCC tools failed startup: '+', '.join(failures))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: BCC tools failed startup: opensnoop\n",
+  "returncode": 0,
+  "app": "bcc/set",
+  "completed_requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 18,
+      "native_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+      "started": "2026-11-07T14:12:56.223428+00:00",
+      "prog_id": 48,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/1.success.tar.gz",
+      "finished": "2026-11-07T14:13:00.002948+00:00"
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 30,
+      "native_sha256": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+      "started": "2026-11-07T14:13:00.029096+00:00",
+      "prog_id": 50,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/2.success.tar.gz",
+      "finished": "2026-11-07T14:13:04.041610+00:00"
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 47,
+      "native_sha256": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63",
+      "started": "2026-11-07T14:13:04.062024+00:00",
+      "prog_id": 53,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/3.success.tar.gz",
+      "finished": "2026-11-07T14:13:07.851657+00:00"
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 36,
+      "native_sha256": "226056848c49ce5655582a802d26e0de7a51b7ac90ee81c30b8071bd1b0d5933",
+      "started": "2026-11-07T14:13:07.876872+00:00",
+      "prog_id": 56,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/4.success.tar.gz",
+      "finished": "2026-11-07T14:13:12.214830+00:00"
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 9,
+      "native_sha256": "e9b8e901b1bb9b3a3ba99eeac2cc105c195a69c3946d554cde5036029031a427",
+      "started": "2026-11-07T14:13:12.238358+00:00",
+      "prog_id": 59,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/5.success.tar.gz",
+      "finished": "2026-11-07T14:13:16.404459+00:00"
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 13,
+      "native_sha256": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+      "started": "2026-11-07T14:13:16.432049+00:00",
+      "prog_id": 62,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/6.success.tar.gz",
+      "finished": "2026-11-07T14:13:20.713726+00:00"
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 34,
+      "native_sha256": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+      "started": "2026-11-07T14:13:20.738582+00:00",
+      "prog_id": 65,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/7.success.tar.gz",
+      "finished": "2026-11-07T14:13:24.448039+00:00"
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 43,
+      "native_sha256": "823d84c9fb802e6abe9c709f18ff7bf6fdd5059590cc9f5cae0a9fa3a4358b88",
+      "started": "2026-11-07T14:13:24.475305+00:00",
+      "prog_id": 68,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/8.success.tar.gz",
+      "finished": "2026-11-07T14:13:55.564697+00:00"
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 49,
+      "native_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+      "started": "2026-11-07T14:13:55.590725+00:00",
+      "prog_id": 71,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/9.success.tar.gz",
+      "finished": "2026-11-07T14:13:56.847210+00:00"
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 52,
+      "native_sha256": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+      "started": "2026-11-07T14:13:56.871785+00:00",
+      "prog_id": 73,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/10.success.tar.gz",
+      "finished": "2026-11-07T14:14:00.239954+00:00"
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 55,
+      "native_sha256": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63",
+      "started": "2026-11-07T14:14:00.266242+00:00",
+      "prog_id": 75,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/11.success.tar.gz",
+      "finished": "2026-11-07T14:14:03.946221+00:00"
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 58,
+      "native_sha256": "226056848c49ce5655582a802d26e0de7a51b7ac90ee81c30b8071bd1b0d5933",
+      "started": "2026-11-07T14:14:03.963384+00:00",
+      "prog_id": 79,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/12.success.tar.gz",
+      "finished": "2026-11-07T14:14:12.337236+00:00"
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 61,
+      "native_sha256": "e9b8e901b1bb9b3a3ba99eeac2cc105c195a69c3946d554cde5036029031a427",
+      "started": "2026-11-07T14:14:12.364146+00:00",
+      "prog_id": 81,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/13.success.tar.gz",
+      "finished": "2026-11-07T14:14:22.011407+00:00"
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 64,
+      "native_sha256": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+      "started": "2026-11-07T14:14:22.041012+00:00",
+      "prog_id": 83,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/14.success.tar.gz",
+      "finished": "2026-11-07T14:14:28.781921+00:00"
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 67,
+      "native_sha256": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+      "started": "2026-11-07T14:14:28.806782+00:00",
+      "prog_id": 87,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/15.success.tar.gz",
+      "finished": "2026-11-07T14:14:41.133366+00:00"
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 72,
+      "native_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+      "started": "2026-11-07T14:14:41.152634+00:00",
+      "prog_id": 89,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/16.success.tar.gz",
+      "finished": "2026-11-07T14:14:42.449259+00:00"
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 74,
+      "native_sha256": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+      "started": "2026-11-07T14:14:42.474770+00:00",
+      "prog_id": 91,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/17.success.tar.gz",
+      "finished": "2026-11-07T14:14:49.250274+00:00"
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 76,
+      "native_sha256": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63",
+      "started": "2026-11-07T14:14:49.278466+00:00",
+      "prog_id": 95,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/18.success.tar.gz",
+      "finished": "2026-11-07T14:15:19.385738+00:00"
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 84,
+      "native_sha256": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+      "started": "2026-11-07T14:15:19.410460+00:00",
+      "prog_id": 96,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/19.success.tar.gz",
+      "finished": "2026-11-07T14:15:27.818878+00:00"
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 88,
+      "native_sha256": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+      "started": "2026-11-07T14:15:27.835670+00:00",
+      "prog_id": 98,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/20.success.tar.gz",
+      "finished": "2026-11-07T14:15:31.712609+00:00"
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 90,
+      "native_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+      "started": "2026-11-07T14:15:31.741393+00:00",
+      "prog_id": 100,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/21.success.tar.gz",
+      "finished": "2026-11-07T14:15:32.990327+00:00"
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 92,
+      "native_sha256": "cdbbfe05f81e23b2490dd96b60eee1c7a6d388808cef00c69ffdb6ae367f7562",
+      "started": "2026-11-07T14:15:33.014491+00:00",
+      "prog_id": 102,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/22.success.tar.gz",
+      "finished": "2026-11-07T14:15:39.896507+00:00"
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 97,
+      "native_sha256": "650c5b17c08e856a63a63e3c88de36f322aad59504fe2abb283e759f6ab9ca1c",
+      "started": "2026-11-07T14:15:39.926550+00:00",
+      "prog_id": 104,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/23.success.tar.gz",
+      "finished": "2026-11-07T14:15:47.935516+00:00"
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 99,
+      "native_sha256": "86f8bfe83bd3b4b1ae18f32ef93d11129b47c30d71624a6a2845ce63d8dc761a",
+      "started": "2026-11-07T14:15:47.961074+00:00",
+      "prog_id": 108,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/24.success.tar.gz",
+      "finished": "2026-11-07T14:16:00.405834+00:00"
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 101,
+      "native_sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+      "started": "2026-11-07T14:16:00.432880+00:00",
+      "prog_id": 110,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-4a6r00p9/requests/25.success.tar.gz",
+      "finished": "2026-11-07T14:16:01.787320+00:00"
+    }
+  ],
   "kernel_log_returncode": 0,
-  "finished": "2026-11-07T11:21:12.564778+00:00",
-  "archive_sha256": "dc2aac044c206f81cf3658006897c60bbfa01f6d99e808440cdaf1d0b8ab4473"
+  "finished": "2026-11-07T14:16:17.997439+00:00",
+  "archive_sha256": "5f95d5073d799dd18f8a1b80a9ad613d1b1e232f707174ed36dea58cee1fadfa"
 }

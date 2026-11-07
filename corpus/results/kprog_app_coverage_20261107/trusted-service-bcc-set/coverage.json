@@ -226,6 +226,28 @@
       },
       "functional_work": null,
       "full_bcc_set": false
+    },
+    {
+      "kernel_capture_returncode": 0,
+      "kernel_native_messages": [
+        "<4>[    2.714735] bpf_x86_native_lab: loading out-of-tree module taints kernel."
+      ],
+      "archive": "run-20261107T141253106809Z.tar.gz",
+      "sha256": "5f95d5073d799dd18f8a1b80a9ad613d1b1e232f707174ed36dea58cee1fadfa",
+      "outer_ok": true,
+      "observed_requests": 25,
+      "proof_generated": 25,
+      "proof_compiled": 25,
+      "accepted": 25,
+      "causes": {
+        "accepted": 25
+      },
+      "functional_work": {
+        "opens_completed": 10000,
+        "writes_completed": 10000,
+        "closes_completed": 10000
+      },
+      "full_bcc_set": true
     }
   ],
   "scope": "Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded."
