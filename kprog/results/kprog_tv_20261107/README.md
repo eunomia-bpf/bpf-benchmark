@@ -391,3 +391,30 @@ are retained in packet-invocation-inputs.tar.gz, with pins adjacent. These
 results close original-entry/positive-store composition. Actual RX/host ABI
 transport and per-capture accepted-entry instantiation remain active; the
 complete updated dependency refresh follows separately.
+
+
+`simple_packet`: actual RX, every prefix, ABI and captured instances
+-----------------------------------------------------------------
+
+`packet-rx-abi-full.log` records EXIT0 for the complete source/dependency
+refresh, all packet PC/RX/ABI proofs and both actual accepted-entry instances.
+Every one of the17 native instructions preserves full-state/effect PC
+correspondence. Complete execution and real return/fault closure transport to
+the callback-reported RX entries. Every arbitrary actual execution prefix has
+only checked guest events and preserves SP, all SIMD and x12 through x30.
+The actual-entry identity uses explicit PC/x0/split-pair profile premises.
+
+The two exact captured native/B/ABI/metadata/JIT/RX instances compose full
+Artifact binding, acceptance and admitted entry with the proved TV. Both new
+coherent native/JIT and checked-B mutations reject at their exact Lean byte
+identities; both old simple mutations and both old simple positive instances
+pass their regression. The existing36 packet-site mutations also pass.
+Positive axioms contain propext/choice/ofReduceBool/Quot.sound, no sorryAx.
+
+`packet-rx-abi-focused.log` retains the final focused check. The archive/pins
+include all TV Lean sources, sole canonical ARM/memory sources, frozen inputs,
+both actual captures/generated instances, all mutation inputs/logs and earlier
+cache-shadowing/native-size proof development errors. Runtime CPU-profile
+metadata enforcement and other programs/native-only trusted loading remain
+active. No whole-corpus, real-hardware or unconditional kernel-entry proof is
+claimed; the explicit trusted contracts in program-validation.json apply.

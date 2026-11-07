@@ -69,10 +69,10 @@
     {
       "program": "simple_packet",
       "arch": "aarch64",
-      "status": "all_invocation_paths_at_relative_PC_under_entry_contract",
-      "theorem": "PacketInvocation.bound_native_prefix_checked",
-      "validation_log": "packet-invocation-final.log",
-      "validation_log_sha256": "21a947711bb9972dcef5703c4da5b52a6422f870b370f2df6a241d8948576d8d",
+      "status": "whole_program_under_explicit_entry_and_platform_contract",
+      "theorem": "PacketEmitted_6_7/6_8.accepted_actual_entry_prefix_checked",
+      "validation_log": "packet-rx-abi-full.log",
+      "validation_log_sha256": "d1f0d431d6d9f6f10f0e3e7c3f8e83c94023780f95681513f8e1958e7d34e90e",
       "captures": [
         {
           "record": "6-7",
@@ -114,8 +114,8 @@
         }
       ],
       "remaining": [
-        "actual_RX_every_prefix_and_ABI",
-        "actual_capture_bound_theorem_instances"
+        "runtime_CPU_profile_metadata_enforcement",
+        "other_programs_and_native_only_trusted_loader"
       ]
     }
   ]

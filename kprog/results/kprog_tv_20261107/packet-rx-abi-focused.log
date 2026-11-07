@@ -1,0 +1,15 @@
+'KProgTV.PacketPCRelocation.all_instructions' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketPCRelocation.step_at' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketExecutionRelocation.all_successors' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketExecutionRelocation.execution_rebase' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketExecutionRelocation.every_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketInvocationABI.all_instructions_preserve' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketInvocationABI.every_RX_prefix_preserves' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketInvocationABI.entry_is_model' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketInvocationABI.actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]

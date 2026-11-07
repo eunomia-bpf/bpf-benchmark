@@ -681,3 +681,28 @@ simple-packet-store-check: checked-first-block-check simple-packet-entry-check
 .PHONY: simple-packet-invocation-check
 simple-packet-invocation-check: simple-packet-store-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketInvocation.olean ../tv/PacketInvocation.lean
+
+.PHONY: simple-packet-pc-relocation-check simple-packet-execution-relocation-check simple-packet-invocation-abi-check
+simple-packet-pc-relocation-check: simple-packet-invocation-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketPCRelocation.olean ../tv/PacketPCRelocation.lean
+
+simple-packet-execution-relocation-check: simple-packet-pc-relocation-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketExecutionRelocation.olean ../tv/PacketExecutionRelocation.lean
+
+simple-packet-invocation-abi-check: simple-packet-execution-relocation-check simple-invocation-abi-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketInvocationABI.olean ../tv/PacketInvocationABI.lean
+
+.PHONY: simple-packet-emitted-check simple-packet-emitted-certificate simple-packet-emitted-negative-check
+simple-packet-emitted-check: simple-packet-invocation-abi-check
+	python3 extract_simple_emitted.py build/capture-loader-arm64-simple-packet build/simple-packet-emitted --program simple_packet
+	$(MAKE) simple-packet-emitted-certificate
+
+PACKET_EMITTED_DIR ?= build/simple-packet-emitted
+simple-packet-emitted-certificate:
+	@set -e; for source in $(PACKET_EMITTED_DIR)/PacketEmitted_*.lean; do \
+		cd $(CURDIR)/../formal; \
+		LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked:../tv/build/simple-packet-arm64 \
+		lake env lean -R ../tv/$(PACKET_EMITTED_DIR) ../tv/$$source; done
+
+simple-packet-emitted-negative-check:
+	python3 test_simple_emitted.py build/capture-loader-arm64-simple-packet --program simple_packet

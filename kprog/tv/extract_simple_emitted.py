@@ -1,4 +1,4 @@
-"""Instantiate concrete TV with actual completed simple loads and RX entries."""
+"""Instantiate concrete TV with actual completed simple-family loads and RX entries."""
 import argparse
 import json
 import struct
@@ -9,7 +9,9 @@ from emitted_sites import validate_emitted
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('exports', type=Path)
 parser.add_argument('output', type=Path)
+parser.add_argument('--program', choices=['simple', 'simple_packet'], default='simple')
 args = parser.parse_args()
+prefix = 'Packet' if args.program == 'simple_packet' else 'Simple'
 args.output.mkdir(parents=True, exist_ok=True)
 records = sorted(args.exports.glob('*/emitted.bin'))
 if not records:
@@ -29,7 +31,7 @@ for record in records:
             path.name != f"{load['source_prog_id']}-{load['native_prog_id']}":
         raise ValueError('completed simple supported inline XDP invocation identity required')
     site = sites[0]
-    namespace = 'KProgTV.SimpleEmitted_' + path.name.replace('-', '_')
+    namespace = 'KProgTV.' + prefix + 'Emitted_' + path.name.replace('-', '_')
     lines = ['import SimpleInvocationABI', 'namespace '+namespace,
         'open KProgFormal.Reference', 'set_option maxRecDepth 4096']
     arrays = {'native': files['native.bin'], 'program': program, 'jit': files['jit.bin'],
@@ -130,5 +132,18 @@ for record in records:
         '#print axioms '+namespace+'.accepted_bound_prefix_checked',
         '#print axioms '+namespace+'.accepted_RX_prefix_checked',
         '#print axioms '+namespace+'.accepted_actual_entry_prefix_checked', '']
-    (args.output/('SimpleEmitted_'+path.name.replace('-', '_')+'.lean')).write_text('\n'.join(lines))
+    if args.program == 'simple_packet':
+        replacements = {
+            'SimpleInvocationABI': 'PacketInvocationABI',
+            'SimpleCompiled': 'PacketCompiled',
+            'SimpleChecked.program': 'PacketCompiled.program',
+            'SimpleCheckedPlatform': 'PacketCheckedPlatform',
+            'SimpleCheckedBlocks.bound_native_prefix_checked': 'PacketInvocation.bound_native_prefix_checked',
+            'SimplePCRelocation': 'PacketPCRelocation',
+            'SimpleExecutionRelocation': 'PacketExecutionRelocation',
+        }
+        lines = ['import PacketInvocation'] + lines
+        for old, new in replacements.items():
+            lines = [line.replace(old, new) for line in lines]
+    (args.output/(prefix+'Emitted_'+path.name.replace('-', '_')+'.lean')).write_text('\n'.join(lines))
     print(path.name+': emitted native/program/entry/ABI/metadata certificate input generated')

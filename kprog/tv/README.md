@@ -964,3 +964,40 @@ native PC0. Transport to the two captured actual RX addresses, host ABI
 preservation and per-load accepted-entry instantiation are the next steps.
 The existing explicit kernel entry and ISA/hardware/profile trusted contracts
 remain required; no runtime CPU-profile enforcement is inferred.
+
+
+Packet execution at the actual RX entry and host ABI
+--------------------------------------------------
+
+`make -C kprog/tv simple-packet-emitted-check` composes the packet invocation
+certificate with its actual byte fetch at any RX base. PacketPCRelocation
+proves canonical full-state/effect commutation for every one of the17 native
+instructions. PacketExecutionRelocation proves every successor stays within
+the actual68-byte inline artifact or its real return boundary, transports the
+complete execution and first-fault closure, and checks every arbitrary actual
+RX execution prefix. No target PC is forced by the witness.
+
+PacketInvocationABI proves preservation of SP, every SIMD register and x12
+through x30 for every native prefix, including faults. It shares the pure ABI
+and entry-contract definitions with SimpleInvocationABI. The actual-entry
+contract requires the actual PC/RX entry, x0/context and Cortex-A72 split-pair
+profile; the entry identity theorem proves the actual state is the modeled
+one. It does not establish that contract by overwriting the actual state.
+
+`extract_simple_emitted.py --program simple_packet` uses the same capture and
+JIT-site validator as the default simple path. It produces two concrete
+accepted-entry theorem instances, one for each captured load/generation,
+including exact native bytes, checked B, full binding/specialization metadata,
+actual JIT bytes and callback-reported RX address. The final theorem composes
+verifier acceptance, admitted proof entry and full Artifact identity with the
+proved prefix correspondence and ABI preservation. It has no assumed TV
+premise. `simple-packet-emitted-negative-check` rejects a coherent native/JIT
+store-byte change and a checked-B store change at their exact Lean byte-
+identity theorems. Existing entry/store semantic mutations remain separate.
+
+These certificates concern the frozen captured artifacts. Verifier/admitted-
+entry soundness, BPF platform/context agreement, reference ISA/hardware/profile
+correspondence, kernel immutable binding/JIT/entry agreement and the Lean
+kernel/printed axioms remain trusted. Runtime CPU-profile metadata enforcement,
+other programs and the native-only trusted loader remain active work. This
+adds no performance-admission condition and changes no native/simulator code.
