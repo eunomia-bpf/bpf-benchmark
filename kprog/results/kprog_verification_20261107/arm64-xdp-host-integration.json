@@ -1,0 +1,390 @@
+{
+  "failed_binaries_executed": 0,
+  "failed_host_compilations": 4,
+  "first_full_failure": "oracles/test_arm64_imm_operand_route_host.c:348; Makefile:457; arm64_sim_local_bpf.h:823 arm64_sim_unmapped_xdp_read attribute(error)",
+  "focused": {
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.Arm64Dispatcher"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_width_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_stlxr_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_mem_offset_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_mem_index_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_reg_presence_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_reg_dispatch_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_store_bytes_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_mem_prepost_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_aux_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_mem_base_src_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_mem_index_value_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/check_dispatch_model.py"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_width_host.c -o build/test_arm64_width_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_width_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_width_effective_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_width_effective_route_host.c -o build/test_arm64_width_effective_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_width_effective_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_stlxr_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_stlxr_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host"
+        ],
+        "exit": 1
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_mem_offset_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_mem_index_host.c -o build/test_arm64_mem_index_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_mem_index_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_mem_index_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. oracles/test_arm64_reg_dispatch_host.c -o build/test_arm64_reg_dispatch_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_reg_dispatch_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_dispatch_route_host.c -o build/test_arm64_reg_dispatch_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_reg_dispatch_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_store_bytes_host.c -o build/test_arm64_store_bytes_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_store_bytes_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host"
+        ],
+        "exit": 1
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_mem_base_src_host.c -o build/test_arm64_mem_base_src_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_mem_base_src_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host"
+        ],
+        "exit": 1
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. oracles/test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_mem_prepost_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_prepost_route_host.c -o build/test_arm64_mem_prepost_route_host"
+        ],
+        "exit": 1
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_aux_host.c -o build/test_arm64_aux_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_aux_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_aux_route_host"
+        ],
+        "exit": 0
+      }
+    ],
+    "contracts": 11,
+    "existing_host_targets": 19,
+    "exit": 1,
+    "proof_sha256": "bd445348a58c1134f7ee83ded9487bdd8daaf8ba52c9baf0cb185681346a5bd6"
+  },
+  "full_exit": 2,
+  "full_head": "967fc6b49608634cd5566dfd6a2925aa828cdcbe",
+  "full_log_sha256": "99ea8d210591437b72f741b2f0349eb271ca9a3b1d1415dfe495222023e970ed",
+  "passed_existing_hosts": [
+    "test_arm64_width_host",
+    "test_arm64_width_effective_host",
+    "test_arm64_width_effective_route_host",
+    "test_arm64_stlxr_route_host",
+    "test_arm64_stlxr_host",
+    "test_arm64_mem_offset_host",
+    "test_arm64_mem_index_host",
+    "test_arm64_mem_index_route_host",
+    "test_arm64_reg_dispatch_host",
+    "test_arm64_reg_dispatch_route_host",
+    "test_arm64_store_bytes_host",
+    "test_arm64_mem_base_src_host",
+    "test_arm64_mem_prepost_host",
+    "test_arm64_aux_host",
+    "test_arm64_aux_route_host"
+  ],
+  "proof_axioms": [
+    "propext",
+    "Classical.choice",
+    "Lean.ofReduceBool",
+    "Quot.sound"
+  ],
+  "source_pins": {
+    "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+    "kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
+    "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+    "kprog/formal/oracles/test_arm64_imm_operand_route_host.c": "9b985653d0650ae5a251ed14cb78388fd0cf2540ce05f534e5f3a2273dec7621"
+  }
+}

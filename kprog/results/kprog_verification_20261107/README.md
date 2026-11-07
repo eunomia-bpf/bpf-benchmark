@@ -1409,3 +1409,48 @@ immutable source/cache export was deleted automatically. Compressed CALL CPU
 observations retain this440-case run. Signed-load and STORE extensions are
 later increments not included in this full pass. Native access/producer/artifact
 bindings, remaining operations and full77/72/O2/O4 completion remain open.
+
+## Actual STLXR bytes and explicit exclusive observation
+
+`dispatchThroughExclusive` adds the next actual gate after STORE. Physical DST
+is the fixed-W status, SRC is data and SRC2 is base (native SP31 becomes actual
+SP32). NONE index and zero displacement are proved to suppress every AUX byte;
+SRC3 is unused. Both outcomes retain exact native-width bytes and source-before-
+status aliases, with one PC advance and no NZCV change. `dispatchThroughExclusiveAt`
+queries the original physical IMM site and Booleanizes the complete64-bit result,
+including nonzero values with zero low32 bits. The raw numeric dispatcher adds
+no monitor or ordering events.
+
+The separate `observeExclusiveStore` attaches the existing canonical ghost
+monitor and attempt/release event. Derived byte-to-core equality and
+`step_through_exclusive_at_observed_refines` compose all earlier rows plus STXR/
+STLXR under field-only `ExclusiveBinding` and explicit native environment
+premises: monitor/commit outcome, original-SP/natural alignment and conditional
+per-byte writability. Failure may avoid memory access exactly when the canonical
+profile permits it. This observed theorem does not establish C atomicity/order,
+recover release from the shared opcode, bind the site to the native word, or
+certify LDXR/LDAXR aliases of ordinary LOAD. Those producer/platform/O2/O4
+obligations, remaining operations and full77/72 completion stay open.
+
+Validation: Lean93/93 dispatcher build,11 existing generated contracts and
+dispatch-model checks pass. Fifteen of19 existing semantic hosts compile and
+pass; four fail compilation in the current production XDP read branch
+(`arm64_sim_unmapped_xdp_read` attribute error), including `stlxr_route_host`,
+`test_arm64_store_bytes_route_host`, `test_arm64_mem_base_src_route_host` and
+`test_arm64_mem_prepost_route_host`. Failed-host stale binaries were never run.
+All prior declaration bytes are unchanged except the new import. Three new
+proof audits report only propext, Classical.choice, Lean.ofReduceBool and
+Quot.sound; no placeholders/new tests/ISA/runtime/oracle changes. Exact proof
+SHA256: `bd445348a58c1134f7ee83ded9487bdd8daaf8ba52c9baf0cb185681346a5bd6`.
+
+The combined immutable full `make check` at
+`967fc6b49608634cd5566dfd6a2925aa828cdcbe` (signed loads/STORE, A's production
+XDP fix and C's exact-count repair) exits **2**, first failing the unchanged
+`test_arm64_imm_operand_route_host.c:348` compilation at Makefile:457 with
+the same unmapped-XDP diagnostic. It predates this exclusive proof extension.
+This is an integration failure, not a full pass or an unsafe execution result.
+A owns the production repair; no oracle was weakened or removed. Exact pins,
+command exits and complete compressed original full/focused logs are retained
+in `arm64-xdp-host-integration.json` and `arm64-xdp-host-integration.log.gz`.
+The temporary full source/cache export was deleted automatically; shared
+incremental caches and every semantic oracle remain intact.

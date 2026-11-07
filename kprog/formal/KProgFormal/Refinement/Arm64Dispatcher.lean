@@ -1,4 +1,5 @@
 import KProgFormal.Refinement.Arm64Move
+import KProgFormal.Refinement.Arm64Exclusive
 import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Refinement.Arm64Mul
 import KProgFormal.Refinement.Arm64Select
@@ -2527,5 +2528,187 @@ theorem step_through_store_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
         simpa only [transfer, noWriteback, reduceCtorEq, ↓reduceIte] using accessible
       exact store_indexed_refines i data index kind scaled flags aux src3 sourceScalar sourceStack tagIsScalar s
         transfer offset noWriteback encoded memoryFlags mod amount alignment writable
+
+
+/-- The actual STLXR numeric body: SRC2 is the base, SRC is captured before
+DST's fixed-W status write, and NONE plus zero displacement makes every AUX
+byte irrelevant to the address. `failure` is the nonzero result of the
+site-indexed environment call, not a nondeterministic replacement for C. -/
+def exclusiveStoreBody (width : Width) (failure : Bool) (aux : BitVec 32)
+    (status data base : Byte) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let address := Arm64Move.Fields.read s base + memoryOffsetBody aux GeneratedArm64MemIndex.indexSentinel 0 s
+  let value := Arm64Move.Fields.read s data
+  let stored := if failure then s else
+    { s with memory := Arm64Memory.store (Arm64Exclusive.accessWidth width) s.memory address value }
+  let result := Arm64Move.Fields.write stored status (GeneratedArm64Stlxr.value .stlxr .w32 failure) .w32
+  ⟨{ result with pc := s.pc + 4 },
+    if failure then [] else [.memory .write address (valueBytes value width.bytes) true], none⟩
+
+theorem exclusive_zero_offset (aux : BitVec 32) (s : Reference.AArch64.State) :
+    memoryOffsetBody aux GeneratedArm64MemIndex.indexSentinel 0 s = 0 := by
+  rw [memory_offset_absent]
+  cases GeneratedArm64MemPrepost.suppressOffset aux <;> rfl
+
+/-- A proof observation, never a C instruction: attach the canonical monitor
+and attempt/order event to an already computed numeric transition. Its input
+must be tied to the original STXR/STLXR word and site by Entry/O2/O4. This
+function alone supplies no atomicity, ordering or native-identity guarantee. -/
+def observeExclusiveStore (width : Width) (release failure : Bool) (base : Byte)
+    (s : Reference.AArch64.State) (result : Transition Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  { result with
+    state := { result.state with exclusiveMonitor := (Arm64Exclusive.checkedState s).exclusiveMonitor }
+    events := [.exclusive .attempt (Arm64Move.Fields.read s base) width.bytes false release (!failure)] ++ result.events }
+
+theorem exclusive_body_observation (width : Width) (release failure : Bool) (aux : BitVec 32)
+    (status data base : Register) (s : Reference.AArch64.State) :
+    observeExclusiveStore width release failure (memoryBaseCode base) s
+      (exclusiveStoreBody width failure aux (Arm64Register.registerCode status)
+        (Arm64Register.registerCode data) (memoryBaseCode base) s) =
+      Arm64Exclusive.storeCore width release failure status data base s := by
+  simp only [exclusiveStoreBody, exclusive_zero_offset, BitVec.add_zero]
+  cases failure <;> cases retained : s.exclusiveInputs.retainLocal <;>
+    cases virtual : s.exclusiveInputs.virtualPass <;>
+    simp [observeExclusiveStore, exclusiveStoreBody, exclusive_zero_offset,
+      Arm64Move.Fields.register_read, Arm64Move.Fields.register_write, memory_base_read,
+      Arm64Exclusive.storeCore, Arm64Exclusive.checkedState, retained, virtual,
+      Arm64Memory.base_refines, Arm64Register.read_refines, Arm64Register.write_refines,
+      Reference.AArch64.writeReg, Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+
+/-- Numeric dispatcher extension in production order. The supplied outcome
+is obtained at IMM's environment site; no monitor or order event is added. -/
+def dispatchThroughExclusive (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughStore code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s with
+  | some result => some result
+  | none => if code = GeneratedArm64Stlxr.code .stlxr then
+      (decodeDataWidth flags).map (fun width => exclusiveStoreBody width failure aux dst src src2 s)
+    else none
+
+theorem exclusive_reached (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack tagIsScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExclusive (GeneratedArm64Stlxr.code .stlxr) flags aux dst src src2 src3 value
+      sourceScalar sourceStack tagIsScalar failure s =
+      (decodeDataWidth flags).map (fun width => exclusiveStoreBody width failure aux dst src src2 s) := by
+  have before : dispatchEncodedPrefix (GeneratedArm64Stlxr.code .stlxr) flags aux dst src src2 src3 value
+      sourceScalar sourceStack s = none := by
+    unfold dispatchEncodedPrefix
+    cases decoded : decodeDataWidth flags with
+    | none => rfl
+    | some width =>
+        change dispatchThroughSelect (GeneratedArm64Stlxr.code .stlxr) aux width dst src src2 src3 value
+          sourceScalar sourceStack s = none
+        rfl
+  unfold dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad
+  rw [before]
+  rfl
+
+/-- Only the exclusive row receives the explicit ghost observation. Earlier
+rows retain their exact states/events. `release` comes from the original
+native word, which is not recoverable from the shared STLXR opcode row. -/
+def observeExclusiveDispatch (code : Nat) (flags : Byte) (release failure : Bool) (base : Byte)
+    (s : Reference.AArch64.State) (result : Option (Transition Reference.AArch64.State)) :
+    Option (Transition Reference.AArch64.State) :=
+  if code = GeneratedArm64Stlxr.code .stlxr then
+    match decodeDataWidth flags with
+    | some width => result.map (observeExclusiveStore width release failure base s)
+    | none => result
+  else result
+
+/-- Native environmental conditions remain separate from field binding.
+Inaccessible memory can still be an architectural failed store when the
+profile does not preflight it; success always needs native writable bytes. -/
+def exclusiveStoreEnvironment (native : Reference.AArch64.Instruction) (failure : Bool)
+    (s : Reference.AArch64.State) : Prop :=
+  match native with
+  | .exclusive (.store width _ _ _ base) =>
+      failure = !Reference.AArch64.exclusiveStorePass s width.bytes ∧
+      Reference.AArch64.spAlignmentFault s base = none ∧
+      Reference.AArch64.exclusiveNaturalFault (Reference.AArch64.memoryBase s base) width.bytes = none ∧
+      ((Reference.AArch64.exclusiveMonitorPass s width.bytes || s.exclusiveInputs.abortOnFailure) = true →
+        permitted s.memory.writable (Reference.AArch64.memoryBase s base) width.bytes = true)
+  | _ => True
+
+inductive ExclusiveBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : StoreBinding pc code flags aux dst src src2 src3 value native) :
+      ExclusiveBinding pc code flags aux dst src src2 src3 value release native
+  | store (width : Width) (release : Bool) (status data base : Register) (flags : Byte)
+      (aux : BitVec 32) (src3 : Byte) (site : Word)
+      (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth width)) :
+      ExclusiveBinding pc (GeneratedArm64Stlxr.code .stlxr) flags aux (Arm64Register.registerCode status)
+        (Arm64Register.registerCode data) (memoryBaseCode base) src3 site release
+        (.exclusive (.store width release status data base))
+
+/-- A previously certified row cannot be the exclusive gate. This is derived
+from the actual dispatcher, rather than made another caller premise. -/
+theorem store_binding_not_exclusive (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : StoreBinding s.pc code flags aux dst src src2 src3 value native)
+    (access : scalarMemoryAccess native s) : code ≠ GeneratedArm64Stlxr.code .stlxr := by
+  intro equal
+  have actual := step_through_store_refines code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s binding access
+  rw [equal] at actual
+  have before : dispatchThroughStore (GeneratedArm64Stlxr.code .stlxr) flags aux dst src src2 src3 value
+      sourceScalar sourceStack tagIsScalar s = none := by
+    unfold dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix
+    cases decoded : decodeDataWidth flags with
+    | none => rfl
+    | some width => rfl
+  rw [before] at actual
+  contradiction
+
+/-- One step for the prefix through STLXR under the explicit native ghost
+observation and environment. This is not an unconditional claim about C
+atomicity/order or an end-to-end certificate for the compiled body. -/
+theorem step_through_exclusive_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack tagIsScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExclusiveBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (dispatchThroughExclusive code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar failure s) =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value release native earlier =>
+      have separate := store_binding_not_exclusive code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s earlier access
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte, dispatchThroughExclusive,
+        step_through_store_refines code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s earlier access]
+  | store width release status data base flags aux src3 site encoded =>
+      rw [exclusive_reached]
+      simp only [observeExclusiveDispatch, ↓reduceIte, decode_data_width flags width encoded, Option.map_some]
+      change some (observeExclusiveStore width release failure (memoryBaseCode base) s
+        (exclusiveStoreBody width failure aux (Arm64Register.registerCode status)
+          (Arm64Register.registerCode data) (memoryBaseCode base) s)) = _
+      rw [exclusive_body_observation]
+      rcases environment with ⟨outcome, spAligned, aligned, preflight⟩
+      exact congrArg some (Arm64Exclusive.store_core_refines width release failure status data base s
+        outcome spAligned aligned preflight)
+
+
+/-- NATIVE_LAB_EXCLUSIVE_FAILURE is queried at the physical IMM site. Its
+64-bit result is Booleanized exactly once: every nonzero word is failure,
+including values whose low 32 bits are zero. Native-site/layout binding is
+still required of the trusted producer and bound environment. -/
+def dispatchThroughExclusiveAt (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (site : Word) (sourceScalar sourceStack tagIsScalar : Bool) (outcomeAt : Word → Word)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  dispatchThroughExclusive code flags aux dst src src2 src3 site sourceScalar sourceStack tagIsScalar
+    (outcomeAt site != 0) s
+
+theorem step_through_exclusive_at_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (site : Word) (sourceScalar sourceStack tagIsScalar release : Bool)
+    (outcomeAt : Word → Word) (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExclusiveBinding s.pc code flags aux dst src src2 src3 site release native)
+    (access : scalarMemoryAccess native s)
+    (environment : exclusiveStoreEnvironment native (outcomeAt site != 0) s) :
+    observeExclusiveDispatch code flags release (outcomeAt site != 0) src2 s
+      (dispatchThroughExclusiveAt code flags aux dst src src2 src3 site sourceScalar sourceStack tagIsScalar outcomeAt s) =
+      some (Reference.AArch64.step native s) :=
+  step_through_exclusive_observed_refines code flags aux dst src src2 src3 site sourceScalar sourceStack tagIsScalar
+    release (outcomeAt site != 0) native s binding access environment
 
 end KProgFormal.Refinement.Arm64Dispatcher
