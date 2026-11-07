@@ -2526,3 +2526,25 @@ header, are stable. Exact initial failure, original/final C, compiler warnings,
 commands, source identities and diff are appended to the existing integration
 JSON/gzip. A fresh full make-check after publication will be a separate record;
 this focused pass does not replace the failed464 result or close77/72/O2/O4.
+
+## Complete make-check PASS on published5a44604f5
+
+The full make-check command on immutable published
+5a44604f56437a0975de525f39897256a69fb69a completed with actual exit0; the
+queue also propagated exit0. It includes the arithmetic687, unarydbb and
+ARM routeecb increments, all retained semantic oracles and all reference/
+generated/Lean checks. The prior POPCNT, CL/parity and ARM route fixture
+failures are resolved without dropping their semantic controls.
+
+All1140 exported input hashes were independently checked against the exact
+published Git blobs and the commit is an origin/master ancestor. Full runner/
+queue controls, commands, source manifest, compiler warnings, complete output
+and call CPU trace are appended to the existing integration JSON/gzip. Warm
+Lean/native-link caches and shared vendor symlinks were reused; the manifest
+describes selected repository inputs, not an immutable vendor snapshot. The
+private source/cache export was deleted and the sole FULL slot released.
+
+This is a full PASS for that exact snapshot. New IMUL raw-frame/dispatcher
+work is outside it and will carry separate validation; full77/72 operation,
+whole-ISA dispatch and compiled-B/O2/O4 remain active work. Earlier failed
+full runs and their original inputs/output remain separately retained.

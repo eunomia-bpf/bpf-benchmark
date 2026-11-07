@@ -1832,6 +1832,46 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_5a44604f5": {
+    "all_snapshot_sha256_match_published_blobs": true,
+    "archive_block_sha256": "38772c5ad18044b53466cce86fc0843ff66eabe0426c814bc9261f3615bed7f7",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full-published.txt": "227115ba5e63a245b1806960b1000bc80a58ceafc8fcf7a6eb27b0d9a2780c49",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full-queue.log": "7e461fc04f050707aef6a57dd95291ccda527b326a214aaa747393e525017a1f",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full-queue.py": "ba90734b32a31d99fe47b9666d11858cdd2b5341ccdecd4bc5b443b9e957a199",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full-queue.state": "6c020093f2b283485d6f198dba83f05571bb5e44064cce8394bb2195bf59e438",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full-run.py": "d1071e5154e851249fceda579d530c29a2216ded75dc652ac081a719e103daa7",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.cpu.jsonl.gz": "436d207a310518b96e07076146f278bd7198e93cf4d7a117ef0f3dbd08736f67",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.head": "227115ba5e63a245b1806960b1000bc80a58ceafc8fcf7a6eb27b0d9a2780c49",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.log": "ab42c3b9a5c36be1efdf0eca01a668b67cbeab5ad402bdd4219a71e93f66ea53",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.sources": "eb1756a3f033e6def1fb090f2defd6febd78512b023a5fd1eee6707ca3f17690",
+      "/workspaces/.agent-state/kprog-lanes/V/a64-full.state": "6c020093f2b283485d6f198dba83f05571bb5e44064cce8394bb2195bf59e438"
+    },
+    "cache_policy": "warm-copied .lake/build-native-link, shared vendor symlinks; no from-scratch rebuild",
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "make",
+      "-C",
+      "<immutable export>/kprog/formal",
+      "check"
+    ],
+    "commit": "5a44604f56437a0975de525f39897256a69fb69a",
+    "current_workspace_drift_since_snapshot": [
+      "kinsn/module/include/native_lab_group.h",
+      "kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+    ],
+    "exit": 0,
+    "export_deleted": true,
+    "queue_exit": 0,
+    "remote_ancestor_verified": true,
+    "scope": "complete check PASS on published5a446 including all previous arithmetic/unary/fixture fixes; newer IMUL WIP not included, separately validated next",
+    "slot_released": true,
+    "snapshot_file_count": 1140
+  },
   "full_make_check_5c754": {
     "archive_block_sha256": "b50b8806657ce27fd993d132b269ef227385c56fb613f12291eaa6f2fb46baa7",
     "archived_inputs": {
