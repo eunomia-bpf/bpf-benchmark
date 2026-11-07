@@ -1,0 +1,124 @@
+{
+  "utc": "2026-11-07T17:02:22.489454+00:00",
+  "scope": "private ARM Kbuild external C object and seven proof compiler checks only; not kernel link, boot, verifier admission, runtime or production promotion",
+  "patch_sha256": "2480264e275e8dafab9f745b36f788075f2d32d373771b3780c1bf0005dcb2f3",
+  "kernel_object": {
+    "machine": "EM_AARCH64",
+    "type": "ET_REL",
+    "text_bytes": 180252,
+    "sha256": "5420457f002c817617f280c99bed232d00dc2b67cfe56da888549dc8767a37d8"
+  },
+  "kernel_config_sha256": "29ec41dbd9a2c91e46dfd8b2fd5ad649fa0710fcafa80c67593ed406ba64e680",
+  "kernel_submodule_revision": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "compiler": "aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "source_pins": {
+    "include/linux/bpf_verifier.h": "10fc74c544057297d482d88bf23d9c78b93ae3a4b569dd7951abef5108b03ccd",
+    "kernel/bpf/verifier.c": "cd51c6690ad02f03e7036efc269651effd9158c95b7a8c44436cae2665224115"
+  },
+  "canonical_worker_commit": "b89015df9528fd5d3dcd4d2f451ba2a8e8b2dad9",
+  "regression_compiler_cases": [
+    {
+      "name": "valid_private_retry",
+      "symbol": "valid_private_retry",
+      "negative": false,
+      "bug_detected": "private stack retry with both outcomes and exact scalar updates",
+      "expectation": "bound native retval2; current kernel rejection is baseline, not expected repaired behavior",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "475aafd1a18cf556e16975ff28a79b9822e815967c428b7b35c56853f1fd278a"
+      },
+      "object_sha256": "e2b6da63f72b61eb91d2786c31a0c7e9d1a9789968d79e875c276f500bd8cff5"
+    },
+    {
+      "name": "valid_private_retry_twice",
+      "symbol": "valid_private_retry_twice",
+      "negative": false,
+      "bug_detected": "two exclusive sites in one sealed region",
+      "expectation": "bound native retval2; current kernel rejection is baseline, not expected repaired behavior",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "6ffd4f9336b87a4e5baee4f58e575e1d97a3c5ae10a6d24ee2bcb64853c71a3c"
+      },
+      "object_sha256": "3fc7e33d400f3710ba9f11785447c0a033eaf14b6c85b34e02c3efa33767e9a8"
+    },
+    {
+      "name": "unsafe_after_second_failure",
+      "symbol": "unsafe_after_second_failure",
+      "negative": true,
+      "bug_detected": "unsafe memory appears after two failures",
+      "expectation": "reject before native execution",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "b631482cd4472fdba14283acb1f103919711d928a76282d603c0335a116bc127"
+      },
+      "object_sha256": "4c3dd1e5da8c88f1a01bf45ca853d9127483163f64bf2ee3e7b00738dfcc50e4"
+    },
+    {
+      "name": "unsafe_success_after_two_failures",
+      "symbol": "unsafe_success_after_two_failures",
+      "negative": true,
+      "bug_detected": "success continuation reads a counter refined by prior failed attempts",
+      "expectation": "reject before native execution",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "ac64d1af3e3fce66f9c2a5e8b1cef1e917b8b784ea5daea1a9e051a8933dd753"
+      },
+      "object_sha256": "f1bc714cf364e1cac23198583fe06f5bcd26695be53504563fdb9007b4eabc2e"
+    },
+    {
+      "name": "unsafe_pointer_after_retry",
+      "symbol": "unsafe_pointer_after_retry",
+      "negative": true,
+      "bug_detected": "success continuation dereferences pointer modified only on failure",
+      "expectation": "reject before native execution",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "5d9aa6c168c270b1a9651a20e2690dcbea0e1984373504f3a251ebbfac9a42fa"
+      },
+      "object_sha256": "fe35a95749797a30421315a2288b557af7bdf11f31ae24375fb9099cf148e921"
+    },
+    {
+      "name": "unsafe_failure_memory",
+      "symbol": "unsafe_failure_memory",
+      "negative": true,
+      "bug_detected": "every failure has an unsafe memory operation",
+      "expectation": "reject before native execution",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "176c20138b5f0b0bc1dc0fb91d083d387a2d04384fc62bc08fd31202adbe6806"
+      },
+      "object_sha256": "6d9dc49d1ab13f285e6fd2060d3333be5036821d3ae812e8df2d666dcfec6307"
+    },
+    {
+      "name": "marker_free_infinite",
+      "symbol": "marker_free_infinite",
+      "negative": true,
+      "bug_detected": "pure native cycle has no exclusive marker",
+      "expectation": "reject before native execution",
+      "generated": true,
+      "compiled": true,
+      "executable_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "xdp": "d463823c627479cd6d4413ef615d0dfe0bae188ccc726967e72462561b969188"
+      },
+      "object_sha256": "08c160ab13f0578bea7622562494d4bb889550efdcb44ea515c9461e00212486"
+    }
+  ],
+  "live_kernel_sources_unchanged": true,
+  "bcc_input_drift": [],
+  "native_runtime_modified": false,
+  "verifier_or_runtime_acceptance": false,
+  "archive_sha256": "b8463aa0463eeef22e5666b942b9228437060dc214894c35b20a65d1cc08300f"
+}
