@@ -1,0 +1,11 @@
+{
+  "cpu_cases": 8192,
+  "reference_cases": 0,
+  "mismatches": 0,
+  "unavailable_classes": 8,
+  "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02",
+  "cpu_binary_sha256": "308f484b26db4e7c2537b1228ba837e026a22a2b7de875449e44c7f17a7da3d5",
+  "cpu_cases_gzip_sha256": "1a11e572a3177ae13acb9f664b6317c45787865b4c83099b261a54ee13dcf5a5",
+  "fault_flags_normalization": "clear exception-delivery RF bit16 only; compare all remaining RFLAGS",
+  "compared": "all16 GPR/full normalized flags/PC/memory plus fault presence and modeled class; SIMD and segment state not measured by this CPU fixture"
+}

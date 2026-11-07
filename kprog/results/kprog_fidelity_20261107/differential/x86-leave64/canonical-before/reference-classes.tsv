@@ -1,0 +1,9 @@
+input_class	cpu_cases	reference_cases	mismatches	status	error
+aligned_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+unaligned_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+last_readable_word	1024	0	0	reference_rejected	reference: truncated native encoding
+cross_page_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+protected_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+noncanonical_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+null_frame	1024	0	0	reference_rejected	reference: truncated native encoding
+valid_frame_bad_sp	1024	0	0	reference_rejected	reference: truncated native encoding
