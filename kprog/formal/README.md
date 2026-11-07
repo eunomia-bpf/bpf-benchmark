@@ -35,9 +35,9 @@ logical forms also compose the generated register RHS with AUX extraction,
 including the stack-ORR path and bare NONE modifiers. Non-flag ADD/SUB
 likewise retains the stack-SUB and pointer-ADD branches through immediate,
 shifted and extended-register numeric dispatch. The actual register-byte codec binds GPR/ZR/SP/NONE reads and writes.
-`Arm64Dispatcher.step_through_flag_arithmetic_refines` composes the production
+`Arm64Dispatcher.step_through_flag_logic_refines` composes the production
 NOP/address/MOV/MOVK, generic ALU, SHIFT, multiply/divide, MVN/NEG, CNEG,
-EXTR/REV/SXT, BITFIELD and ADDS/SUBS/CMP/CMN gates into one canonical step over field-only
+EXTR/REV/SXT, BITFIELD, arithmetic and logical flag gates into one canonical step over field-only
 bindings. It retains pointer branch order, native bounds, source/destination
 aliases and arbitrary unused fields. The remaining families still need composition.
 

@@ -1109,3 +1109,31 @@ semantic/route hosts passed 40080 cases,60144 cases,5120 cases,64 cases,2072 cas
 declarations remain byte-identical. No placeholders, new tests, input filtering,
 ISA/runtime/generator/oracle/paper edits. Original C warnings remain visible.
 The active exact261 full check predates both this and BITFIELD composition.
+
+## Uniform byte logical flags composed after arithmetic flags
+
+`Arm64Dispatcher.dispatchThroughFlagLogic` appends all six TST/ANDS/BICS
+numeric rows. The actual byte body keeps DST/SRC test roles versus SRC/SRC2
+writeback roles, independent generated operand selection, complete modifier
+switch (including extensions and unknown identity), generated logical result
+and NZCV, destination width write and one PC advance. No native-form modifier
+filter is added to the runtime projection. Native shifted and omitted-modifier
+cases retain all four kinds and bounds; no BIC-immediate native form is invented.
+
+Immediate tests ignore arbitrary SRC/SRC2, writeback immediates ignore arbitrary
+SRC2, and all register tests ignore arbitrary SRC2. All rows ignore SRC3; NONE
+ignores any amount byte and unused AUX0/3 remain arbitrary. Derived typed-body
+equalities compose existing full canonical states, retaining aliases, zero
+register/discard semantics, flag-word bits outside NZCV and untouched memory.
+Literal opcode disjointness proves the actual gate is reached. One
+step_through_flag_logic_refines theorem covers the field-only binding and
+all earlier rows with no component semantic premise. Remaining families,
+native byte/raw-width and O2/O4 transport are still open.
+
+Validation: focused77-job dispatcher/reference build (first compile passed),
+12 existing contract freshness checks, direct-dispatch/model checks and13
+existing semantic/route hosts passed 40080 cases,60144 cases,5120 cases,64 cases,2072 cases,136 cases,225292 cases,512 cases,6913 cases,257 cases,6401 cases,586829 cases,1115374 cases. Exact proof SHA256
+`6fdd4a4ad2987d4246dcab78e36a3c918aa0d20dd1cfed982cfd10adff5583bc` remained stable. Every old declaration is byte-identical;
+no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper
+changes. Original C warnings remain visible. Active exact261 full check predates
+BITFIELD and both flag-family compositions.

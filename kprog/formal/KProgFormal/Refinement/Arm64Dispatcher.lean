@@ -1251,4 +1251,163 @@ theorem step_through_flag_arithmetic_refines (code : Nat) (aux : BitVec 32) (wid
   | register => apply flag_arithmetic_register_refines
   | extended => apply flag_arithmetic_extended_refines
 
+
+/-- Actual logical-flag body: test rows read DST/SRC, writeback rows read
+SRC/SRC2. The runtime modifier switch retains extensions and unknown-byte
+identity; native-form certification below does not add a rejection rule. -/
+def flagLogicBody (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src src2 : Byte) (value : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let lhs := Arm64Move.Fields.read s (if writeback then src else dst)
+  let rhs := if GeneratedArm64FlagOperand.immediate (Arm64Logic.FlagDispatch.operandOp writeback immediate)
+    then value else GeneratedArm64Mod.value
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+      (Arm64Move.Fields.read s (if writeback then src2 else src))
+      ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64LogicFlagHandler.apply (if invert then .bic else .and) lhs rhs
+    (Arm64Register.handlerWidth width)
+  let state := if writeback then Arm64Move.Fields.write s dst result.value width else s
+  ⟨{ state with flags := Arm64Logic.flagsWord s.flags result.flags, pc := s.pc + 4 }, [], none⟩
+
+theorem flag_logic_body_typed (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    flagLogicBody invert writeback immediate aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value s =
+      Arm64Logic.FlagDispatch.rawStep invert writeback immediate width dst src rhs value
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+        ((GeneratedArm64Aux.b2 aux).setWidth 64) s := by
+  cases writeback <;> simp only [flagLogicBody, Arm64Logic.FlagDispatch.rawStep, Bool.false_eq_true,
+    ↓reduceIte, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+def dispatchThroughFlagLogic (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughFlagArithmetic code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Logic.FlagDispatch.decodeOpcode code).map
+      (fun choice => flagLogicBody choice.1 choice.2.1 choice.2.2 aux width dst src src2 value s)
+
+theorem flag_logic_reached (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State)
+    (native : invert = true → immediate = false) :
+    dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode invert writeback immediate)
+      aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (flagLogicBody invert writeback immediate aux width dst src src2 value s) := by
+  have before : dispatchThroughFlagArithmetic (Arm64Logic.FlagDispatch.operationCode invert writeback immediate)
+      aux width dst src src2 src3 value sourceScalar sourceStack s = none := by
+    cases invert <;> cases writeback <;> cases immediate <;> rfl
+  unfold dispatchThroughFlagLogic
+  rw [before, Arm64Logic.FlagDispatch.decode_code invert writeback immediate native]
+  rfl
+
+/-- Immediate TST ignores SRC as well as SRC2; ANDS still reads SRC. -/
+theorem flag_logic_immediate_body (writeback : Bool) (aux : BitVec 32) (width : Width) (dst src : Register)
+    (unusedSrc src2 : Byte) (value : Word) (s : Reference.AArch64.State) :
+    flagLogicBody false writeback true aux width (Arm64Register.registerCode dst)
+      (if writeback then Arm64Register.registerCode src else unusedSrc) src2 value s =
+    flagLogicBody false writeback true aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode 31) value s := by
+  cases writeback <;> rfl
+
+theorem flag_logic_register_body (invert writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs : Register) (unusedSrc2 : Byte) (value : Word) (s : Reference.AArch64.State) :
+    flagLogicBody invert writeback false aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (if writeback then Arm64Register.registerCode rhs else unusedSrc2) value s =
+    flagLogicBody invert writeback false aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value s := by
+  cases writeback <;> rfl
+
+theorem flag_logic_immediate_refines (writeback : Bool) (aux : BitVec 32) (width : Width) (dst src : Register)
+    (unusedSrc src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width
+      (Arm64Register.registerCode dst) (if writeback then Arm64Register.registerCode src else unusedSrc)
+      src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.logicImmediate width (.conjunction false true)
+        (Arm64Move.scalarDestination (if writeback then dst else 31)) (if writeback then src else dst) value) s) := by
+  rw [flag_logic_reached false writeback true aux width _ _ _ _ value sourceScalar sourceStack s (by simp),
+    flag_logic_immediate_body, flag_logic_body_typed]
+  have result := Arm64Logic.FlagDispatch.dispatch_immediate_refines writeback aux width dst src 31 value s
+  simp only [Arm64Logic.FlagDispatch.dispatch, Arm64Logic.FlagDispatch.decode_code false writeback true (by simp)] at result
+  simpa only [Arm64Logic.FlagDispatch.rawStep, Arm64Logic.FlagDispatch.operand_immediate, ↓reduceIte] using result
+
+theorem flag_logic_register_refines (invert writeback : Bool) (width : Width) (kind : Reference.AArch64.ShiftKind)
+    (amount : Fin width.bits) (dst src rhs : Register) (unusedSrc2 src3 lane0 lane3 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width kind amount dst src rhs)) s) := by
+  rw [flag_logic_reached invert writeback false _ width _ _ _ _ value sourceScalar sourceStack s (by simp),
+    flag_logic_register_body, flag_logic_body_typed]
+  change some (Arm64Logic.FlagDispatch.rawStep invert writeback false width dst src rhs value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1
+      (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)).toNat)
+    ((GeneratedArm64Aux.b2 (Arm64Arithmetic.FlagArithmetic.packedAux
+      (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)).setWidth 64) s) = _
+  rw [Arm64Arithmetic.FlagArithmetic.packed_modifier, Arm64Arithmetic.FlagArithmetic.packed_amount,
+    Arm64Shift.Unary.native_amount, Arm64Logic.FlagDispatch.raw_register_refines]
+
+theorem flag_logic_unmodified_refines (invert writeback : Bool) (width : Width) (dst src rhs : Register)
+    (unusedSrc2 src3 amount lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+      (Arm64Shift.Unary.packedAux .none amount lane0 lane3) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (if writeback then Arm64Register.registerCode rhs else unusedSrc2)
+      src3 value sourceScalar sourceStack s = some (Reference.AArch64.step
+        (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width .lsl
+          ⟨0, by cases width <;> decide⟩ dst src rhs)) s) := by
+  rw [flag_logic_reached invert writeback false _ width _ _ _ _ value sourceScalar sourceStack s (by simp),
+    flag_logic_register_body, flag_logic_body_typed]
+  change some (Arm64Logic.FlagDispatch.rawStep invert writeback false width dst src rhs value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1
+      (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)).toNat)
+    ((GeneratedArm64Aux.b2 (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)).setWidth 64) s) = _
+  rw [Arm64Arithmetic.FlagArithmetic.packed_modifier, Arm64Logic.FlagDispatch.raw_identity_refines]
+  exact congrArg some (Arm64Logic.FlagDispatch.raw_register_refines invert writeback width .lsl
+    ⟨0, by cases width <;> decide⟩ dst src rhs value s)
+
+theorem flag_logic_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : FlagArithmeticBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughFlagLogic code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughFlagLogic,
+    step_through_flag_arithmetic_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive FlagLogicBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : FlagArithmeticBinding pc code aux width dst src src2 src3 value native) :
+      FlagLogicBinding pc code aux width dst src src2 src3 value native
+  | immediate (writeback : Bool) (aux : BitVec 32) (width : Width) (dst src : Register)
+      (unusedSrc src2 src3 : Byte) (value : Word) :
+      FlagLogicBinding pc (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width
+        (Arm64Register.registerCode dst) (if writeback then Arm64Register.registerCode src else unusedSrc) src2 src3 value
+        (.logicImmediate width (.conjunction false true) (Arm64Move.scalarDestination (if writeback then dst else 31))
+          (if writeback then src else dst) value)
+  | register (invert writeback : Bool) (width : Width) (kind : Reference.AArch64.ShiftKind)
+      (amount : Fin width.bits) (dst src rhs : Register) (unusedSrc2 src3 lane0 lane3 : Byte) (value : Word) :
+      FlagLogicBinding pc (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+        (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value
+        (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width kind amount dst src rhs))
+  | unmodified (invert writeback : Bool) (width : Width) (dst src rhs : Register)
+      (unusedSrc2 src3 amount lane0 lane3 : Byte) (value : Word) :
+      FlagLogicBinding pc (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+        (Arm64Shift.Unary.packedAux .none amount lane0 lane3) width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value
+        (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width .lsl
+          ⟨0, by cases width <;> decide⟩ dst src rhs))
+
+theorem step_through_flag_logic_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : FlagLogicBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughFlagLogic code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact flag_logic_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | immediate => apply flag_logic_immediate_refines
+  | register => apply flag_logic_register_refines
+  | unmodified => apply flag_logic_unmodified_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher
