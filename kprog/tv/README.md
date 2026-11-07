@@ -2205,3 +2205,9 @@ actual compiler records and image binary hash. Both native labels execute P
 through the bound service. The captured earlier runner and later T binary are
 explicitly distinct. This functional evidence supplies no timing comparison,
 numeric generation, checked-byte snapshot or per-program TV certificate.
+
+The same review receipt pins the current classification sources: all six
+application proof/worker fields remain rejected; the worker must activate a
+live request through the service capability and match the kernel's worker
+identity. The micro runtime has no exception, and bootstrap passes no service
+FD to the application. This review required no loader or kernel rule changes.

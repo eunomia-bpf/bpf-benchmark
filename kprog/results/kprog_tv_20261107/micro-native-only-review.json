@@ -24,5 +24,38 @@
     "T old-driver private guest remains separately active and supplies no completed runtime result here.",
     "This is functional evidence, not a timing comparison or per-program semantic TV. Both native runtime labels currently use bound execution.",
     "ARM standard bootstrap and all-program translation validation remain separate."
-  ]
+  ],
+  "classification_review": {
+    "utc": "2026-11-07T17:47:23.571736+00:00",
+    "reviewed_head": "5e575b3ef356d6bc111d383930aa066560729736",
+    "source_sha256": {
+      "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "runner/src/native_lab_runner.cpp": "afa5c2567fc8d8ac486b231849f82ef0018f89455fc58d67970b140e3aedff5d",
+      "kprog/trusted_service.py": "8763816abaf2707e496f5bc03b709c9c21724a63754d76d185208f76a3281e24",
+      "micro/driver.py": "4e572bfa897e33d0bf607ea4c567f15d44319031afa72aa51331265f7597a73a",
+      "kinsn/module/include/native_lab_trusted.h": "c6274fad2057476882475b0fa47d946170f00b8f070029632c212f3cc1f4ed51",
+      "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713"
+    },
+    "result": "strict_application_worker_boundary_preserved_no_exemption",
+    "source_changes_by_review": false,
+    "application_rejection_fields": [
+      "proof_insns",
+      "proof_object_path",
+      "trusted_native_proof_path",
+      "trusted_simulator_program",
+      "trusted_maps",
+      "trusted_request_id"
+    ],
+    "worker_checks": [
+      "Nonnegative trusted_service_fd must successfully ACTIVATE its nonzero request through the kernel ioctl.",
+      "Kernel service-side ioctl requires CAP_SYS_ADMIN and the service file role; activation matches a live nonabandoned request and pins its worker TGID.",
+      "Proof/native emission authorization checks the active capsule and current worker TGID; no executable-name or micro_exec exemption exists."
+    ],
+    "micro_and_bootstrap": [
+      "Both native labels call run-native-kernel with the companion program and native ELF, without proof fields; the runner forces BOUND1.",
+      "Privileged bootstrap registers the common service outside the application container; only the generated worker receives the capability FD via pass_fds.",
+      "The application command is spawned separately with close_fds=True; its proof cannot be accepted by selecting a micro runtime label."
+    ],
+    "scope": "Source classification and capability plumbing review, alongside separately archived positive runtime evidence; not a whole-kernel capability/ISA soundness theorem."
+  }
 }
