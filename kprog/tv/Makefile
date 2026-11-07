@@ -883,3 +883,8 @@ trusted-simple-b29-observer-certificate: trusted-simple-b29-state-certificate
 trusted-simple-b29-blocks-certificate: trusted-simple-b29-observer-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleB29Blocks.olean ../tv/TrustedSimpleB29Blocks.lean
+
+.PHONY: trusted-simple-b29-embedding-certificate
+trusted-simple-b29-embedding-certificate: trusted-simple-b29-blocks-certificate
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimpleB29Embedding.olean ../tv/TrustedSimpleB29Embedding.lean

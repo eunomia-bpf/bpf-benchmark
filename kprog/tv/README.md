@@ -2336,3 +2336,18 @@ request85 finished before cleanup SIGTERM. Current supervisor source matches
 all85 captured physical service-source pins and stops after application return
 and terminal-request drain. No lifecycle patch or rerun follows from that
 claim. Decisive raw records are retained; no workload/timing/TV claim is added.
+
+`trusted-simple-b29-physical-payload.json` adds exact fresh82-byte JIT-image
+embedding. Canonical decoder proofs cover all17 payload instruction PCs and
+every candidate extent length0..15, including suffixes into the epilogue.
+Every accepted physical body extent reflects to the same canonical instruction
+in P60; arbitrary physical payload prefixes retain full translated state and
+identical ordered events. Complete binding and admitted-B verifier soundness
+then imply checked effects through the B29 prefix certificate. All8 embedding
+audits pass; no old-session return displacement/address is reused.
+
+`payloadInstructionStep` segments at physicalPC74, the actual P60/host-wrapper
+boundary, without adding an instruction or runtime check. Host prologue/
+epilogue/return memory operations remain separate and retained. Current-image
+wrapper composition, actual caller/context/stack provenance and other programs
+remain open. Reproduce with the embedding-certificate Make target.

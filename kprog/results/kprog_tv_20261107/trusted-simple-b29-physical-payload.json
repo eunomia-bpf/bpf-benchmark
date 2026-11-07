@@ -1,0 +1,122 @@
+{
+  "utc": "2026-11-07T19:05:36.378854+00:00",
+  "status": "fresh_actual_JIT_P60_payload_arbitrary_physical_instruction_prefix_full_state_and_event_reflection_to_canonical_semantics_and_bound_B29_checked_effects_proved_host_wrapper_transport_pending",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "capture_commit": "20e29a661f0a1708336126f2e90e8d4589a5ff6d",
+  "capture_archive_sha256": "cf734cc29bfa67762abddb624075d282e1f297cfa9ad5c415bf51e46117abda7",
+  "actual_JIT_sha256": "bc6517907c5cbdcfdf7278706b418e716f57ad7aeebde67b9ecd4d530e89e121",
+  "actual_JIT_hex": "0f1f4400000f1f00554889e54157488b0f488b57084889ce31c04839d6772b488d7e084839d777224883c6484839d6771966c7014e61c64102bcc7410300000000c6410700b802000000415fc9e9be2fc1df",
+  "actual_JIT_bytes": 82,
+  "payload_span": [
+    14,
+    74
+  ],
+  "captured_invocation_layout": {
+    "jit_base": 18446744072640010384,
+    "native_entry": 18446744072640010398,
+    "native_end": 18446744072640010458,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744072099023008,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 503316480,
+    "runtime_return_text_verified": true,
+    "runtime_thunk_text": "captured stable C3/CC before and after execution"
+  },
+  "claims": [
+    "The literal physical image is EXACTLY the fresh published-CMP native-only capture20e29, including its own current return displacement; image[14:74] equals exact bound P60. No old-session JIT address or return instruction bytes are substituted.",
+    "Canonical decoder length-shape proofs cover all17 payload PCs and every candidate length0..15, including physical slices extending into the epilogue. Any actually accepted arbitrary physical extent at a body PC has exactly the canonical start and length.",
+    "Physical decoding reflects to the standalone native payload at its actual emitted base using the same decoded canonical instruction, not a second decoder or ISA semantics.",
+    "Every arbitrary physical payload instruction prefix reflects to canonical logical native execution with identical ordered events and a complete translated architectural endpoint; every branch, permitted undefined AF and context/store fault remains covered without fuel or selected-success-path premises.",
+    "Complete Artifact binding, accepted-proof soundness/admitted entry and the existing B29 canonical-prefix certificate imply checked effects for every physical payload prefix of the explicitly identified loaded image.",
+    "Segmentation at physicalPC74 denotes the P60/host-wrapper boundary and adds no runtime instruction or verifier-only guard. Host wrapper operations are outside P60 and are not erased or claimed checked by B29."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-blocks-certificate trusted-simple-b29-embedding-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-embedding-certificate",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29Embedding.emitted_payload": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.physical_decode_length_shape": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.payload_instruction_bytes": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.physical_extent_unique": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.physical_decode_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.physical_payload_step_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.physical_payload_execution_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Embedding.bound_physical_payload_prefix_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "d1d6820823689d78f38420972260bdd8073e230d76d9887784417891a2fa9f32",
+    "dependency_scope": "New embedding module imports checked block/state/observer/B29 and unchanged canonical reference. Focused compilation; reproduction target includes prerequisites. No new VM/capture/timing or producer mutation."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "9c36b9a875620d8cb724fe46cdfdce1ff55cc5aac1f5b1c70591b9f79b485f6a",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "a96d42aece68ac79445998e564f994569319ec047a472bd29c670bd2064be7bd",
+    "kprog/tv/TrustedSimpleB29Observer.lean": "8722e3997f26a6685415ccd6dc3f1c4ce8a4ee0d17c787752f059a70aca5568a",
+    "kprog/tv/TrustedSimpleB29Blocks.lean": "1995d4cdb25f7338ca9166c1c57f1670670ddb673d107a293d7547632aef2f07",
+    "kprog/tv/TrustedSimpleB29Embedding.lean": "ebcc0664bd80704fc9327aec965b9f65c11a94fd3d650f08c5e0983ffb35b88b"
+  },
+  "premises": [
+    "Loaded82-byte image equals the literal fresh captured image; kernel capture/emission provenance is explicit rather than established by pure Lean.",
+    "Payload entryPC=JITbase+14, accepted BPC0 active, same native/B context argument and exact memory, supported bound SP input.",
+    "Executed/validated full Artifact equality, exact P60/B29 images and entry0, verifier acceptance and soundness for the admitted physical B state.",
+    "Declared kernel XDP expansion at actual BPC1/2 and canonical ISA hardware fidelity remain trusted."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Compose current actual-image prologue/epilogue/return semantics with payload transport, retaining their real host stack events and actual caller ABI/context/stack permissions. Existing older-session wrapper proofs cannot substitute a different captured return displacement or address.",
+    "Discharge physical caller/context conversion/capture provenance against the kernel binding implementation; this receipt remains conditional and is not a whole-machine safe_native theorem.",
+    "Every other micro/application program and generic automatic certificate production remain open."
+  ]
+}
