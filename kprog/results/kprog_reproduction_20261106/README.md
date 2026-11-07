@@ -45,18 +45,31 @@ run's metadata) removes the runtime-counter overhead from the workload.
 | bcc/set | 1.002x | **1.000x** | 18 |
 | tracee/monitor | 1.539x | **1.640x** | 148 / 151 |
 | katran | 1.018x | **1.001x** | 1 / 1 |
-| tetragon/observer | 1.008x | 1.017x | 70 (partial, below) |
+| tetragon/observer | 1.008x | **0.805x** | 118 / 118 |
 
 Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
 programs replaced, no oops, 256,984,354 bogo-ops baseline against
 421,466,196 native, both arms 3 samples of 180 s.
 
-Two caveats, stated rather than smoothed over:
+**Tetragon's stats-off arm is the sharpest result in this file.** With
+all 118 programs replaced and both arms running the same 7-stressor
+workload for the same 180 s, it gives **0.805x** where stats-on gave
+1.008x. The drop is uniform across every stressor — eventfd
+36,023,764 → 28,500,440, mmap 14,053 → 11,435, udp 59,961,108 →
+48,744,925, sock 213,223 → 172,315, each about 20% down — so it is the
+native arm slowing the whole workload rather than one noisy counter. With
+runtime counters off, tetragon's native execution is materially *worse*
+than its eBPF path.
 
-- **tetragon's stats-off arms are partial** (70 of 118 replaced) because
-  those runs were launched with tracee's manifest in the environment and
-  the shim read each app's own file — the replacements are real but
-  fewer, so 1.017x is indicative, not comparable to the 1.008x.
+That also reframes the stats-on number: 1.008x there is close to parity
+only because the counter overhead is present in both arms. Removing it
+exposes the native cost.
+
+One caveat remains:
+
+- **tetragon's earlier stats-off attempt** (70 of 118 replaced, 1.017x)
+  was launched with tracee's manifest in the environment; the standalone
+  rerun above supersedes it.
 - **katran's stats-off arm replaced on the third attempt** (1 of 1,
   `prebuilt_proof=1`, 802,911,496 against 803,348,250 packets, 1.001x).
   Two earlier attempts after the 10:50 kernel rebuild failed with
