@@ -1,0 +1,13 @@
+{
+  "messages": [
+    "[  170.853995] native_lab proof_binding_missing chunk=0 reloc=0 kind=2 offset=32 target=0xffff800080edc9c8",
+    "[  171.766661] native_lab proof_binding_missing chunk=0 reloc=0 kind=2 offset=32 target=0xffff800080edc9c8"
+  ],
+  "missing_native_symbol": "memset",
+  "source_call_byte_offset": 32,
+  "rule": "native_lab_validate_proof requires a matching real BPF helper for every external native helper relocation",
+  "simulator_representation": "libc memset C expansion; no BPF helper call to kernel memset",
+  "acceptance_changed": false,
+  "diagnostic_module_source": "a7e5d6d8f",
+  "raw_result": "arm64_qemu_corpus_19700101_000009_049119"
+}

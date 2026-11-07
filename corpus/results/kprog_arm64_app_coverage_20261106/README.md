@@ -1014,3 +1014,12 @@ entries fail on exclusive retry loops. Opensnoop reaches a 472-byte compiled
 frame but still returns EINVAL, so its precise cause remains under diagnosis.
 All 32 runtime manifest selectors, startup logs and portable Spark preparation
 are preserved. The application run is recorded as error.
+
+## Opensnoop external-libc binding diagnosis
+
+[A private diagnostic-module rerun](opensnoop-binding-result/README.md) identifies
+the first missing relocation as the native memset call at byte32. The simulator
+expands this into memory writes, while the binding callback expects a BPF helper
+call for the external target. Acceptance was unchanged during diagnosis. The
+repair embeds a real local ARM memset instruction body into the native ELF,
+following the existing x86 approach.
