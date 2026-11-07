@@ -1285,3 +1285,37 @@ and immutable-P/materialized-artifact transport remain open. It is not a
 whole-basic-block or whole-program certificate. The supported Make target
 and bound-artifact mismatch checks remain unchanged; see
 `trusted-simple-privacy.json` for hashes, premises and the axiom audit.
+
+
+The first unsigned guard of the actual x86 simple artifact
+
+`native_decode7`, `native_decode10`, `native_decode12`, and `native_decode15`
+check the actual MOV RSI,RCX / XOR EAX,EAX / CMP RSI,RDX / JA bytes. The
+first three reduce directly through the canonical decoder; the last uses
+one public `Reference.X86.decode_ja_rel8` lemma over that same decoder,
+including the signed byte displacement. No ISA definition changes.
+
+`native_first_guard` checks the actual path from native PC7 through these
+four instructions, with complete resulting state and an empty effect trace.
+Its successor is PC60 when pointer > limit and PC17 otherwise.
+`proof_first_guard` checks actual accepted Bpc11, whose corresponding
+successors are pc34 and pc12. `first_guard_correspondence` derives both
+executions and those successor choices from matching pointer/limit values;
+no branch outcome is a premise. The same explicit B environment/platform is
+used as at entry. Both guards perform no memory access or helper call.
+
+`compare_ja_predicate` proves the unsigned comparison from the canonical
+CMP flags for arbitrary incoming flags. `xor_compare_flags_choice` proves
+that every flags value allowed by XOR's mask, including every undefined AF
+choice, yields the same complete subsequent CMP flags;
+`guard_final_flags` specializes this to the captured guard. The native path
+witness uses the existing executable `X86Path.Execution`; full relational
+execution transport across the undefined intermediate flag is still an
+explicit remaining obligation. The path evaluator's conservative flag mask
+is retained unchanged.
+
+This discharges the local first-guard correspondence, not a whole-program
+certificate. Composition with the initialized prefix, later guards/stores/
+exit, fault and ABI/platform behavior, relational transport and the bound
+immutable-P/materialized-artifact connection remain open. Evidence and the
+complete supported-target/axiom audit are in `trusted-simple-first-guard.json`.

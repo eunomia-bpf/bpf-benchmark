@@ -781,6 +781,167 @@ theorem initialized_prefix_correspondence (env : BPF.Environment) (n : X86.State
     rw [memory]
     exact initialization_memory_agrees p pointer limit stack
 
+
+theorem native_decode7 (s : X86.State) :
+    X86.decode (native.extract 7 10) s = .ok
+      (.move .w64 (.register (.low 6)) (.register (.low 1)) (s.pc+3)) := by rfl
+
+theorem native_decode10 (s : X86.State) :
+    X86.decode (native.extract 10 12) s = .ok
+      (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) (s.pc+2)) := by rfl
+
+theorem native_decode12 (s : X86.State) :
+    X86.decode (native.extract 12 15) s = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) (s.pc+3)) := by rfl
+
+theorem native_decode15 (s : X86.State) :
+    X86.decode (native.extract 15 17) s = .ok
+      (.branch (some 7) ((s.pc+2)+(43#64)) (s.pc+2)) := by
+  have bytes : native.extract 15 17 = #[0x77,0x2b] := by decide
+  rw [bytes]
+  exact X86.decode_ja_rel8 s (0x2b#8)
+
+
+/-- The actual unsigned JA predicate following a 64-bit CMP. No assumption
+about the incoming flags, including XOR's undefined AF, is required. -/
+theorem compare_ja_predicate (left right old : Word) :
+    X86.condition (X86.arithmeticFlags .w64 true false left right old) 7 = (left > right) := by
+  simp only [X86.condition,X86.arithmeticFlags,X86.ScalarWidth.bits,X86.ScalarWidth.bytes]
+  unfold Word at *
+  bv_decide
+
+/-- CMP overwrites XOR's undefined AF. Every allowed incoming AF choice
+produces the same complete post-CMP flags; no undefined value is constrained. -/
+theorem xor_compare_flags_choice (left right value old actualFlags : Word)
+    (allowed : actualFlags &&& (0xffffffffffffffef#64) =
+      X86.logicalFlags .w32 .xor value value old &&& (0xffffffffffffffef#64)) :
+    X86.arithmeticFlags .w64 true false left right actualFlags =
+      X86.arithmeticFlags .w64 true false left right old := by
+  have preserved : actualFlags &&& (0xfffffffffffff72a : Word) = old &&& (0xfffffffffffff72a : Word) := by
+    simp only [X86.logicalFlags] at allowed
+    unfold Word at *
+    bv_decide
+  simp only [X86.arithmeticFlags,preserved]
+
+
+def guardMove (s : X86.State) : X86.State :=
+  { s with gpr := fun r => if r=6 then s.gpr 1 else s.gpr r, pc := 10 }
+
+def guardZeroFlags (flags : Word) : Word := X86.logicalFlags .w32 .xor (0#64) (0#64) flags
+
+def guardZero (s : X86.State) : X86.State :=
+  { guardMove s with
+    gpr := fun r => if r=0 then (0#64) else (guardMove s).gpr r
+    rflags := guardZeroFlags s.rflags
+    pc := 12 }
+
+def guardCompare (s : X86.State) : X86.State :=
+  { guardZero s with
+    rflags := X86.arithmeticFlags .w64 true false (s.gpr 1) (s.gpr 2) (guardZeroFlags s.rflags)
+    pc := 15 }
+
+def guardFinal (s : X86.State) : X86.State :=
+  { guardCompare s with pc := if s.gpr 1 > s.gpr 2 then 60 else 17 }
+
+theorem guard_move_step (s : X86.State) (position : s.pc=7) :
+    X86.step (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) s =
+      ⟨guardMove s,[],none⟩ := by
+  simp +decide [X86.step,X86.moveStep,X86.scalarRead,X86.scalarRegisterValue,X86.scalarWrite,X86.scalarWriteValue,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    guardMove,position]
+
+theorem guard_zero_step (s : X86.State) :
+    X86.step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) (guardMove s) =
+      ⟨guardZero s,[],none⟩ := by
+  simp +decide [X86.step,X86.logicalStep,X86.scalarRead,X86.scalarRegisterValue,X86.scalarWrite,X86.scalarWriteValue,
+    X86.ScalarDestination.source,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+    X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.logicalFlags,X86.logicalValue,X86.evenParity,
+    guardZero,guardZeroFlags,guardMove]
+
+theorem guard_compare_step (s : X86.State) :
+    X86.step (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) (guardZero s) =
+      ⟨guardCompare s,[],none⟩ := by
+  have nocarry (f : Word) : X86.ArithmeticKind.compare.carry f = false := by rfl
+  simp +decide [X86.step,X86.arithmeticStep,X86.scalarRead,X86.scalarRegisterValue,X86.ScalarDestination.source,
+    X86.ArithmeticKind.subtract,nocarry,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    guardCompare,guardZero,guardMove]
+
+theorem guard_branch_step (s : X86.State) :
+    X86.step (.branch (some 7) 60 17) (guardCompare s) = ⟨guardFinal s,[],none⟩ := by
+  simp only [X86.step,guardCompare,guardFinal,compare_ja_predicate]
+
+/-- The byte-decoded first native guard, with both actual successors and all
+state fields fixed. The evaluator stops after JA without forcing its target. -/
+theorem native_first_guard (s : X86.State) (position : s.pc=7) :
+    X86Path.Execution 0 native s [] (guardFinal s) := by
+  have d0 : X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok
+      (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode7,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (guardMove s).pc=10 := rfl
+  have pc2 : (guardZero s).pc=12 := rfl
+  have pc3 : (guardCompare s).pc=15 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨10,2⟩ (guardMove s) = .ok
+      (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode10,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨12,3⟩ (guardZero s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode12,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d3 : X86Path.decodeAt 0 native ⟨15,2⟩ (guardCompare s) = .ok
+      (.branch (some 7) 60 17) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode15,pc3,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have evaluated : X86Path.evaluate 0 native [⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] s =
+      .ok ⟨⟨guardFinal s,[],none⟩,(0xffffffffffffffef#64)⟩ := by
+    simp only [X86Path.evaluate,d0,d1,d2,d3,guard_move_step s position,
+      guard_zero_step,guard_compare_step,guard_branch_step,X86.definedFlags,
+      Option.isSome, Bool.false_eq_true, List.isEmpty_cons, List.isEmpty_nil,
+      List.nil_append, ite_false]
+    rfl
+  exact X86Path.evaluate_sound _ _ _ _ _ evaluated
+
+theorem virtual_decode11 : BPF.decode proof 11 = .ok ⟨0x2d,2,3,22,0⟩ := rfl
+
+def proofGuardFinal (p : BPF.State) : BPF.State :=
+  { p with pc := if p.regs 2 > p.regs 3 then 34 else 12 }
+
+theorem proof_first_guard (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=11) (active : p.halted=false) :
+    BPFPlatform.step (initializedPlatform env) proof p = .ok ⟨proofGuardFinal p,[],none⟩ := by
+  rw [initialized_ordinary_step env p (by omega) (by omega)]
+  simp +decide [BPF.step,position,active,virtual_decode11,BPF.execute,BPF.source,BPF.comparison,
+    proofGuardFinal,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+
+theorem guard_final_flags (s : X86.State) :
+    (guardFinal s).rflags = X86.arithmeticFlags .w64 true false (s.gpr 1) (s.gpr 2) s.rflags := by
+  exact xor_compare_flags_choice (s.gpr 1) (s.gpr 2) (0#64) s.rflags (guardZeroFlags s.rflags) rfl
+
+/-- Both first-guard executions and the matching actual conditional
+successors. State/flags come from the decoded instructions, not from a path
+annotation; no data access or helper event occurs in either guard. -/
+theorem first_guard_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=7) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (limit : n.gpr 2=p.regs 3) :
+    X86Path.Execution 0 native n [] (guardFinal n) ∧
+    Execution (initializedInstructionStep env) p [] (proofGuardFinal p) ∧
+    (guardFinal n).pc = (if p.regs 2 > p.regs 3 then 60 else 17) ∧
+    (proofGuardFinal p).pc = (if p.regs 2 > p.regs 3 then 34 else 12) ∧
+    (guardFinal n).rflags = X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 3) n.rflags := by
+  have proofStep : initializedInstructionStep env p [] (proofGuardFinal p) :=
+    ⟨⟨proofGuardFinal p,[],none⟩,proof_first_guard env p proofPC active,rfl,rfl⟩
+  refine ⟨native_first_guard n nativePC,?_,?_,rfl,?_⟩
+  · simpa using Execution.next proofStep (Execution.refl _)
+  · simp only [guardFinal,pointer,limit]
+  · simpa only [pointer,limit] using guard_final_flags n
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -832,3 +993,33 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.initialization_untouched_top
 
 #print axioms KProgTV.TrustedSimpleX86.initialized_prefix_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode7
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode10
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode12
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode15
+
+#print axioms KProgTV.TrustedSimpleX86.compare_ja_predicate
+
+#print axioms KProgTV.TrustedSimpleX86.xor_compare_flags_choice
+
+#print axioms KProgTV.TrustedSimpleX86.guard_move_step
+
+#print axioms KProgTV.TrustedSimpleX86.guard_zero_step
+
+#print axioms KProgTV.TrustedSimpleX86.guard_compare_step
+
+#print axioms KProgTV.TrustedSimpleX86.guard_branch_step
+
+#print axioms KProgTV.TrustedSimpleX86.native_first_guard
+
+#print axioms KProgTV.TrustedSimpleX86.proof_first_guard
+
+#print axioms KProgTV.TrustedSimpleX86.guard_final_flags
+
+#print axioms KProgTV.TrustedSimpleX86.first_guard_correspondence
+
+#print axioms KProgFormal.Reference.X86.decode_ja_rel8

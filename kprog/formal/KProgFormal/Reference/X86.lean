@@ -1512,4 +1512,13 @@ theorem decode_mov_rdx_rdi8 (s : State) :
     scalarSource, scalarDestination, Except.bind, Except.pure,
     Bind.bind, Pure.pure, Except.instMonad]
 
+
+/-- Public short unsigned-above branch decoding from the actual byte operand.
+The signed relative displacement and fall-through remain decoder outputs. -/
+theorem decode_ja_rel8 (s : State) (displacement : Byte) :
+    decode #[0x77,displacement] s = .ok
+      (.branch (some 7) ((s.pc+2)+displacement.signExtend 64) (s.pc+2)) := by
+  simp +decide [decode,prefixes,byteAt,signedDisplacement,fallthrough,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
 end KProgFormal.Reference.X86
