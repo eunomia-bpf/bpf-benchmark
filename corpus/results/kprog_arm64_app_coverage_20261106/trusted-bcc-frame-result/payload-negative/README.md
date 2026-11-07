@@ -14,3 +14,11 @@ The replay uses a separate 2 GiB, two-vCPU QEMU guest on host CPUs 20-23 and the
 
 
 All four existing safe controls have now completed: return-2, direct SP copy/restore, a scalar load through a stack alias, and SP restoration through a spilled stack pointer. Each kernel and bound native execution returns result 0/retval 2 with one nonzero generation. The spill/restore proof has a 32-byte native stack and the single ghost offset `-32`, exercising the compact representation on the real kernel path. Candidate input hashes remain unchanged. `safe-controls.json` and `safe-controls.tar.gz` retain all four complete requests, layouts, generated/compiled artifacts and raw probe output. The thirty unsafe outcomes and actual Katran application replay are still pending; these four controls do not establish either result.
+
+## Partial safety checkpoint
+
+The current immutable snapshot contains 19 of 34 completed cases: 4 safe executions, 8 verifier rejections, 6 specialization rejections and 1 loader rejection. The loader refusal is the unbounded-loop input whose proof has no BPF exit. No completed unsafe input was accepted or executed. The guest and the remaining 15 cases are still running; zero accepted among this prefix is not a full-suite result.
+
+`outcomes.json` retains every completed outcome, original native SHA, service receipt, rejection stage and pending case name. `completed-requests.tar.gz` contains exactly those closed success/failure request archives, with their raw generated C/BPF, compiler/load logs, kernel metadata and per-request source identities; each embedded kernel native ELF was checked against its original case SHA before publication. It contains no active request directory. The four safe controls have unchanged candidate-layout hashes and matching kernel/native retval 2.
+
+This replay retains its original native-link executable. The independently published return-target repair `e18af21bb` and lane F's fresh replay are separate evidence; the current partial snapshot makes no claim about the pending return-target cases. Katran baseline and candidate application runs remain pending, and the compact worker remains unpromoted.
