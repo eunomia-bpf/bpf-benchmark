@@ -1,0 +1,13 @@
+{
+  "started": "2026-11-07T20:23:35.436382+00:00",
+  "finished": "2026-11-07T21:56:49.640317+00:00",
+  "command": [
+    "make",
+    "-f",
+    "corpus/results/kprog_arm64_app_coverage_20261106/Makefile",
+    "trusted-service-arm64-run",
+    "TRUSTED_APP=tracee",
+    "TRUSTED_RESULTS=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107"
+  ],
+  "returncode": 2
+}
