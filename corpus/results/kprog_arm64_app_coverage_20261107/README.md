@@ -14,8 +14,8 @@ Set `TRUSTED_APP` to `bcc`, `otelcol-ebpf-profiler`, `cilium`, `tetragon`, `katr
 
 | Application | Packaged selectors | Extra data objects | Current native-only full application |
 | --- | ---: | ---: | --- |
-| BCC | 32 | 0 | Existing complete-start job running; raw collector owns its output |
-| OTel | 36 | 15 | Next serial run |
+| BCC | 32 | 0 | Closed error: 16 bound, 3 retry-loop rejections; native workload not reached |
+| OTel | 36 | 15 | Running in existing serial queue |
 | Cilium | 98 | 0 | Pending current native-only run |
 | Tetragon | 245 | 0 | Pending current native-only run |
 | Katran | 12 | 0 | Pending current native-only two-start run |
@@ -24,3 +24,20 @@ Set `TRUSTED_APP` to `bcc`, `otelcol-ebpf-profiler`, `cilium`, `tetragon`, `katr
 Current BCC job and collector are preserved. Their output is under [bcc-full-start](../kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/). Its closed result, actual resident inventory, proof/generated/verifier counts and work counters must be reviewed before declaring coverage. The older [six-app startup census](../kprog_arm64_app_coverage_20261106/runtime-context-v11/README.md) and [29-micro evidence](../kprog_arm64_app_coverage_20261106/memory-extension/README.md) remain historical evidence with their original paths and inputs; they are not relabeled as current native-only acceptance.
 
 The private broad exclusive-retry convergence candidate is not adopted: its [closed constant-cycle diagnostic](../kprog_arm64_app_coverage_20261106/trusted-exclusive-retry-result/candidate-constant-cycle/trusted-arm64-service-result/README.md) found load-time admissions that require repair. Canonical kernel/module hashes remain unchanged. No unsafe native execution was performed. All six applications and the remaining O1-O4 obligations are still incomplete. QEMU timing is functional only; Spark performance runs remain deferred by current coordination priorities.
+
+
+## Closed BCC full-start result
+
+[The complete native-only BCC startup](../kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/README.md) has 23 baseline resident counter rows, 19 distinct source-program requests, 19 emitted/compiled proof artifacts, 16 bound acceptances and three verifier rejections. The three errors are `infinite loop detected` in vfsstat `fentry_vfs_read`, syscount `sys_exit` and runqlat `sched_switch`. There were zero specialization failures among those 19 requests. BCC reports vfsstat exit97 and never reaches native workload measurement; the baseline four-stressor workload and all per-program counters remain in [bcc-full-start-coverage.json](bcc-full-start-coverage.json). The baseline and requested-program counts have distinct denominators; startup stopped before every baseline entry received a native request.
+
+| Baseline resident rows | Distinct requested source IDs | Proofs compiled | Bound accepted | Specialization failed | Verifier rejected | Native workload |
+| ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 23 | 19 | 19 | 16 | 0 | 3 infinite-loop | Not reached |
+
+All 19 closed request identities match the kernel-owned native ELF; no unfinished request directory remained. Host status is false and guest exit1. Physical source hashes changed during this already-running guest; the raw archive retains its original source capture and drift record. Its result is not relabeled as an unchanged-source run. The broad retry-convergence kernel candidate is not applied and its separate findings remain open.
+
+## Katran behavior audit
+
+[Direct raw-record review](katran-behavior-review.json) of the already published 14:59 native-only Katran run finds 19,391 pktgen packets, 19,391 bound-native program runs and 19,391 receiver packets. The LRU total is 19,391 and its miss field is 1; this ARM run does not miss on every packet. The fallback-LRU selection counter is 19,391, which counts selection of the fallback cache rather than misses. The separate `lru_miss` entry is the TCP SYN/non-SYN breakdown, so its zero fields are not used as the generic UDP miss count. Drop, pass, encapsulation-failure and consistent-hash-drop counters are zero in the retained record.
+
+This audit uses the same exact archived work.json, native identity and generation-bound receipt, without rerunning or changing the workload. The worker was subsequently promoted in b89015df9; the historical one-arm run is not presented as a new current two-start comparison. The new two-start Katran replay remains in the serial queue. QEMU values here establish functional work, not performance.

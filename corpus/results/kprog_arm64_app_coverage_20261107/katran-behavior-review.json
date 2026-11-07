@@ -1,0 +1,126 @@
+{
+  "utc": "2026-11-07T18:33:08.521202+00:00",
+  "scope": "Raw behavior audit of the closed 14:59 native-only functional run; no JIT comparison, fresh-current boot or timing claim",
+  "archive": "corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/context-native/trusted-arm64-katran-result/run-20261107T145906541111Z.tar.gz",
+  "archive_sha256": "ac6aa71a8c8f52c48a4510a72e950a2043e04663fa3be86c9e89d965e8fc381f",
+  "work_member": "run/work.json",
+  "work_sha256": "f0da6606a36f80e0167ea099308681c5843b50eaa675c6fb38fd380ec7d854e3",
+  "source_prog_id": 14,
+  "bound_prog_id": 15,
+  "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+  "pktgen_packets": 19391,
+  "pktgen_errors": 0,
+  "native_run_counts": [
+    {
+      "prog_id": 15,
+      "run_cnt_delta": 19391
+    }
+  ],
+  "receiver_rx_packets_delta": 19391,
+  "stats_deltas": {
+    "vip_0": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 969550
+    },
+    "lru": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1
+    },
+    "lru_miss": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "new_conn_rate": {
+      "packets_or_v1": 964,
+      "bytes_or_v2": 4440443232832
+    },
+    "fallback_lru": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 0
+    },
+    "icmp_too_big": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "lpm_src": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "remote_encap": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "encap_fail": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "global_lru": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "consistent_hash_drop": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "decap": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "quic_icmp": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "icmp_ptb_v6": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "icmp_ptb_v4": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "xpop_decap_success": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "udp_flow_migration": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "total": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1241024
+    },
+    "tx": {
+      "packets_or_v1": 19391,
+      "bytes_or_v2": 1241024
+    },
+    "drop": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    },
+    "pass": {
+      "packets_or_v1": 0,
+      "bytes_or_v2": 0
+    }
+  },
+  "counter_mapping": {
+    "lru.packets_or_v1": "stats[MAX_VIPS+LRU_CNTRS].v1; total packets",
+    "lru.bytes_or_v2": "same entry v2; LRU misses after consistent-hash fallback",
+    "lru_miss": "stats[MAX_VIPS+LRU_MISS_CNTR]; TCP SYN/non-SYN miss breakdown, not generic UDP misses"
+  },
+  "mapping_source_hashes": {
+    "runner/libs/app_outcomes.py": "a138c8bbd85a14fae340c071cd6a688e6776f115051e6d1c0077c3e049eb8b4e",
+    "vendor/bpf/katran/katran/lib/bpf/balancer.c": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+    "vendor/bpf/katran/katran/lib/bpf/balancer_consts.h": "7455fc95819d1b2c2bc66e1d852bd224321c1b5b1dd43851655be524066fce5f"
+  },
+  "observations": {
+    "packet_counts_agree": true,
+    "lru_total": 19391,
+    "lru_misses": 1,
+    "fallback_lru_packets": 19391,
+    "all_packets_miss": false
+  },
+  "source_worker_promotion_commit": "b89015df9528fd5d3dcd4d2f451ba2a8e8b2dad9",
+  "raw_run_publication_commit": "4b3d09c5543400e5b70aed41a671a1547dda2640",
+  "baseline_comparison": "not present in this one-arm diagnostic; current two-start replay remains queued"
+}
