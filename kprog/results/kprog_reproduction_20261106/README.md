@@ -45,7 +45,7 @@ run's metadata) removes the runtime-counter overhead from the workload.
 | bcc/set | 1.002x | **1.000x** | 18 |
 | tracee/monitor | 1.539x | **1.640x** | 148 / 151 |
 | katran | 1.018x | **1.001x** | 1 / 1 |
-| tetragon/observer | 1.008x | **0.805x** | 118 / 118 |
+| tetragon/observer | 1.008x | **0.988x** | 118 / 118 |
 | otelcol | 1.013x | **1.026x** | 14 / 14 |
 | cilium/agent | 1.229x | **1.061x** | 177 / 177 |
 
@@ -53,19 +53,28 @@ Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
 programs replaced, no oops, 256,984,354 bogo-ops baseline against
 421,466,196 native, both arms 3 samples of 180 s.
 
-**Tetragon's stats-off arm is the sharpest result in this file.** With
-all 118 programs replaced and both arms running the same 7-stressor
-workload for the same 180 s, it gives **0.805x** where stats-on gave
-1.008x. The drop is uniform across every stressor — eventfd
-36,023,764 → 28,500,440, mmap 14,053 → 11,435, udp 59,961,108 →
-48,744,925, sock 213,223 → 172,315, each about 20% down — so it is the
-native arm slowing the whole workload rather than one noisy counter. With
-runtime counters off, tetragon's native execution is materially *worse*
-than its eBPF path.
+**Tetragon's stats-off arm is 0.988x, and I first published it wrong.**
+The first run's mean gave 0.805x, which looked like a uniform 20% slowdown
+across every stressor. It was **one outlier sample**: that run's native
+samples were 13,269,134 / 32,133,315 / 32,026,666 where the baseline's
+were 31,343,150 / 32,431,534 / 32,437,464, so a single sample at 41% of
+the others dragged the mean down.
 
-That also reframes the stats-on number: 1.008x there is close to parity
-only because the counter overhead is present in both arms. Removing it
-exposes the native cost.
+Per-sample totals for both runs:
+
+| run | baseline samples | native samples | mean | **median** |
+| --- | --- | --- | ---: | ---: |
+| first | 31.34M, 32.43M, 32.44M | **13.27M**, 32.13M, 32.03M | 0.805x | **0.988x** |
+| repeat | 32.13M, 32.09M, 32.24M | 32.10M, 31.49M, 31.68M | 0.988x | **0.986x** |
+
+The median agrees across both runs (0.988x, 0.986x) and the repeat's mean
+agrees with them, so **0.988x is the figure** and the 0.805x was an
+artifact of one slow sample. The lesson is the ordinary one: with three
+samples, a single outlier moves the mean by 18% and the median by 0.2%.
+
+So tetragon is at parity both ways: 1.008x with counters on, 0.988x with
+them off. The stats-off figure does not expose a hidden native cost, and
+the earlier reading that it did was wrong.
 
 **Cilium's stats-off arm now measures**, after `native-link` gained
 full-source-map-identity resolution (`bfbb60d1a`): 177 programs replaced,
@@ -146,7 +155,7 @@ other way, and it is consistent with the 1.539x against 0.958x.
 | set | geomean |
 | --- | ---: |
 | All six apps, stats on | **1.120x** |
-| All six apps, stats off | **1.062x** |
+| All six apps, stats off | **1.099x** |
 | Reference, all six apps (stats on) | **1.349x** |
 
 **The 1.349x six-app reference does not reproduce.** All six apps now
