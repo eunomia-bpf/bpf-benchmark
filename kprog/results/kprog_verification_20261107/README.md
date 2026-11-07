@@ -10,17 +10,17 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
 | Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 25/75 | 0/71 |
-| Raw register dispatcher arm composition | 25/75 | 0/71 |
-| Additional partial-model handler families | 42/75 | 0 |
+| Raw register handler refinement | 27/75 | 0/71 |
+| Raw register dispatcher arm composition | 27/75 | 0/71 |
+| Additional partial-model handler families | 40/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
-| O2 C-model token-body equality | 25/75 | 0/71 |
-| Selected CPU/C/reference or QEMU/C/reference agreement | 62/75 | 65/71 |
+| O2 C-model token-body equality | 27/75 | 0/71 |
+| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
-| Numeric operations awaiting selected replay | 13/75 | 5/71 |
+| Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 25 x86 O2 equalities cover 19 direct bodies and six unchanged generic calls.
-The remaining 42 x86 reference-family handlers have partial model proofs; eight
+The 27 x86 O2 equalities cover 21 direct bodies and six unchanged generic calls.
+The remaining 40 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. Whole-simulator raw handler/dispatcher closure, compiled-B,
@@ -33,7 +33,7 @@ the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
-Replay integration uses F's published input set `600edcdbe36511d057c2167b9848463753c52ea7`
+Replay integration uses F's published input set `a13de4544662b94f6766be8aaa0f44d2f0c9fbee`
 ([source ledger](../kprog_fidelity_20261107/differential/replay-inputs/README.md)).
 Each `replay_source_epochs` cell records the actual backend, source snapshot,
 simulator/executable/reference hashes, selected forms, all three comparison
@@ -2944,3 +2944,29 @@ the requested 77/72 totals are recorded as an explicit scope reconciliation.
 The table adds no invented operation, proof or coverage count. Generic ABI,
 definedness, compiled-B and native-link preservation remain part of the
 whole-simulator proof work, with individual-program certificates frozen.
+
+Full `make check` at published snapshot `2ccfa5a8dc63343363c09a78d4fe37975a190d95` completed with make exit **0** and queue exit **0**. All **1,140** selected source hashes match that commit's Git blobs; remote ancestry is verified. The source epoch includes the memory-width fixture typedef repair and 25-token O2 interface. The complete log, source manifest, scripts, exit records and CPU trace are retained in the integration archive under `FULL MAKE CHECK 2CCFA5A8D PASS`. The private export has been retired and the shared incremental caches retained. The subsequent MOVX proof increment has its own validation record.
+
+The MOVZX/MOVSX register increment lifts the generated C source-width fallback
+and128..131 high-byte source selectors through the raw RSP/STACK frame, ordered
+dispatcher and shared direct specialization body. Source capture precedes every
+destination write, including aliases. `movx_source_width_binding` and
+`movx_encoded_source_binding` derive the field relations from ordinary native
+widths and source codes. The canonical ISA and production C retain their existing
+definitions. Coverage advances to **27** raw register operations and **27** token
+C-model equalities (21 direct and six generic).
+
+Validation: focused117 and all378 default Lean targets completed; eleven axiom
+audits retain standard Lean axioms. Existing UBSan oracles passed: MOVX route
+23,761, MOVX shape route118,803, generic specialization chain205 and specialization
+534 cases. The executable reference checked1,415 widening cases; sign-high
+retained6,144 actual CPU/encoded-handler results and three BPF compilations.
+Full `make check` at `2ccfa5a8d` retains its exact published source attribution.
+A full check including this increment follows its publication through the shared
+incremental verification entry point.
+
+F's published `a13de4544` ledger supplies four additional numeric replay entries
+(ADD_IMM, ADD_REG, XOR_REG, MOV_LOAD_SCALAR):32 raw/direct groups and32,768
+CPU/C/reference comparisons with all differences zero. Their source, header,
+executable and reference hashes remain in the table. Selected x86 replay totals
+advance to **66/75**, with nine numeric operations awaiting selected replay.

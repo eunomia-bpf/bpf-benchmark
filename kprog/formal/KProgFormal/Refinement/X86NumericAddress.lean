@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Movx
 import KProgFormal.Refinement.X86RotateRight
 import KProgFormal.Refinement.X86LegacyShift
 import KProgFormal.Refinement.X86Multiply
@@ -1270,5 +1271,34 @@ theorem set_condition_register_frame_refines (env : Environment) (frame : Frame)
   rw [native_register_pc, native_register_write]
   simp only [Reference.X86.step, Reference.X86.scalarWrite]
   rfl
+
+/-- MOVX captures its encoded source lane before the numeric destination
+writer. The complete raw frame includes RSP offsets and STACK aliases. -/
+def extendRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (sourceWidth targetWidth : Reference.X86.ScalarWidth)
+    (signed : Bool) (dst : Reference.X86.Register) (source : Reference.X86.RegisterSlice)
+    (nextPc : NativeWord) : RegisterState :=
+  let operand := readRegister env frame arena state sourceWidth source
+  let result := X86Movx.value sourceWidth signed operand
+  registerPc (writeRegister env frame arena state targetWidth (.low dst) result) nextPc
+
+/-- Extension preserves flags, memory, ordered effects and every other
+register for arbitrary source/destination aliases and projected stack values. -/
+theorem extend_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (sourceWidth targetWidth : Reference.X86.ScalarWidth)
+    (signed : Bool) (dst : Reference.X86.Register) (source : Reference.X86.RegisterSlice)
+    (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena
+      (extendRegister env frame arena state sourceWidth targetWidth signed dst source nextPc), [], none⟩ :
+        Transition Reference.X86.State) =
+      Reference.X86.step (.extend sourceWidth targetWidth signed dst (.register source) nextPc)
+        (nativeRegisters env frame arena state) := by
+  unfold extendRegister
+  rw [native_register_pc, native_register_write, native_register_read, X86Movx.value_refines]
+  simp only [Reference.X86.step, Reference.X86.scalarRead,
+    Reference.X86.RegisterSlice.reg, nativeRegisters]
+  congr 2
+  funext r
+  by_cases same : r = dst <;> simp [same]
 
 end KProgFormal.Refinement.X86NumericAddress

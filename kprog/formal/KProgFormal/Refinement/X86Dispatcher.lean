@@ -465,20 +465,93 @@ def aluRegisterRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
                   (shiftRegister env frame arena state width kind destination
                     (readRegister env frame arena state width source) nextPc), [], none⟩
 
-/-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
-prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
-raw opcode, width and GPR fields. Logical, arithmetic and unary ALU-register/immediate payloads
-and CMP/TEST register/immediate forms add their generated family/AUX/lane/low-imm32
-selection. Other unproved forms remain
-None. Distinct generated opcode identities prevent an intervening handler
-from taking these gates; None never means production success/rejection. -/
+/-- The C macro narrows AUX to its low byte, then resolves its absent zero
+code against the effective FLAGS width. Upper AUX bytes remain arbitrary. -/
+def movxSourceWidthCode (flags : Byte) (aux : BitVec 32) : Byte :=
+  BitVec.ofNat 8 (GeneratedX86MovxShape.srcWidth (aux.setWidth 8).toNat
+    (GeneratedX86Width.effective flags.toNat))
+
+def movxSourceRegister (source : Byte) : Byte :=
+  BitVec.ofNat 8 (GeneratedX86MovxShape.sourceRegister source.toNat)
+
+def movxSourceShift (source : Byte) : BitVec 32 :=
+  BitVec.ofNat 32 (GeneratedX86MovxShape.sourceShift source.toNat)
+
+/-- Native source-width fields determine the exact generated width code,
+including the absent-width fallback. Higher AUX bytes stay arbitrary. -/
+theorem movx_source_width_binding (flags : Byte) (aux : BitVec 32)
+    (sourceWidth targetWidth : ScalarWidth)
+    (targetField : WidthBinding flags targetWidth)
+    (sourceField : (aux.setWidth 8).toNat = sourceWidth.bytes ∨
+      ((aux.setWidth 8).toNat = 0 ∧ sourceWidth = targetWidth)) :
+    WidthBinding (movxSourceWidthCode flags aux) sourceWidth := by
+  rcases sourceField with explicit | ⟨absent, rfl⟩
+  · cases sourceWidth <;> simp [WidthBinding, movxSourceWidthCode,
+      GeneratedX86MovxShape.srcWidth, GeneratedX86MovxShape.srcWidthAbsentCode,
+      explicit, Reference.X86.ScalarWidth.bytes]
+  · rcases targetField with explicit | ⟨absentFlags, rfl⟩
+    · cases sourceWidth <;> simp [WidthBinding, movxSourceWidthCode,
+        GeneratedX86MovxShape.srcWidth, GeneratedX86MovxShape.srcWidthAbsentCode,
+        GeneratedX86Width.effective, GeneratedX86Width.absentCode,
+        GeneratedX86Width.defaultCode, absent, explicit, Reference.X86.ScalarWidth.bytes]
+    · simp [WidthBinding, movxSourceWidthCode, GeneratedX86MovxShape.srcWidth,
+        GeneratedX86MovxShape.srcWidthAbsentCode, GeneratedX86Width.effective,
+        GeneratedX86Width.absentCode, GeneratedX86Width.defaultCode, absent,
+        absentFlags, Reference.X86.ScalarWidth.bytes]
+
+/-- The encoder's legacy low-register and128..131 high-byte source codes
+establish the raw source selector for each legal architectural lane. -/
+theorem movx_encoded_source_binding (width : ScalarWidth) (source : RegisterSlice)
+    (legal : match source with | .low _ => True | .high _ => width = .w8) :
+    SliceBinding width
+      (movxSourceRegister (BitVec.ofNat 8 (X86Movx.sourceCode source)))
+      (movxSourceShift (BitVec.ofNat 8 (X86Movx.sourceCode source))) source := by
+  have fits := X86Movx.source_code_fits_byte source
+  simp only [SliceBinding, movxSourceRegister, movxSourceShift,
+    BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, X86Movx.source_register_refines]
+  refine ⟨rfl, ?_⟩
+  cases source with
+  | low reg =>
+      have lower : ¬128 ≤ reg.val := by have := reg.isLt; omega
+      cases width <;> simp [X86Movx.sourceCode, GeneratedX86MovxShape.sourceShift,
+        GeneratedX86MovxShape.sourceHigh, GeneratedX86MovxShape.sourceHighBase,
+        GeneratedX86MovxShape.sourceHighCount, lower]
+  | high reg =>
+      change width = .w8 at legal
+      subst width
+      have bound : 128 ≤ 128 + reg.val ∧ 128 + reg.val < 132 := by have := reg.isLt; omega
+      simp [X86Movx.sourceCode, GeneratedX86MovxShape.sourceShift,
+        GeneratedX86MovxShape.sourceHigh, GeneratedX86MovxShape.sourceHighBase,
+        GeneratedX86MovxShape.sourceHighCount, GeneratedX86MovxShape.sourceHighShift, bound]
+
+/-- Shared MOVX register macro, with the actual source-width and high-byte
+selectors followed by the RSP/STACK-aware numeric writeback. -/
+def movxRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (signed : Bool) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) := do
+  let targetWidth ← widthOf flags
+  let sourceWidth ← widthOf (movxSourceWidthCode flags aux)
+  let destination ← registerOf dst
+  let source ← sliceOf sourceWidth (movxSourceRegister src) (movxSourceShift src)
+  pure ⟨nativeRegisters env frame arena
+    (extendRegister env frame arena state sourceWidth targetWidth signed destination source nextPc), [], none⟩
+
+/-- Partial ordered register dispatcher. MOVX follows the existing NOP/MOV
+prefix and precedes the ALU, compare and singleton register gates. Distinct
+opcode identities preserve selection across the covered handler families.
+Option-valued decoding records the scope of the legal-field interface. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   match dispatchThroughMove env frame arena code flags aux dst src value nextPc state with
   | some result => some result
   | none =>
-      if aluImmediateHandled code then
+      if code = GeneratedX86Opcode.code .movzxReg then
+        movxRegisters env frame arena false flags aux dst src nextPc state
+      else if code = GeneratedX86Opcode.code .movsxReg then
+        movxRegisters env frame arena true flags aux dst src nextPc state
+      else if aluImmediateHandled code then
         aluImmediateRegisters env frame arena flags aux dst value nextPc state
       else if code = GeneratedX86DispatchFamily.code .cmpImm then do
         let width ← widthOf flags
@@ -597,6 +670,15 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | extend (signed : Bool) (sourceWidth targetWidth : ScalarWidth)
+      (destination : Register) (source : RegisterSlice)
+      (targetWidthField : WidthBinding flags targetWidth)
+      (sourceWidthField : WidthBinding (movxSourceWidthCode flags aux) sourceWidth)
+      (dstField : dst = registerByte destination)
+      (srcField : SliceBinding sourceWidth (movxSourceRegister src) (movxSourceShift src) source) :
+      RegisterBinding flags aux dst src value nextPc nativeState
+        (GeneratedX86Opcode.code (if signed then .movsxReg else .movzxReg))
+        (.extend sourceWidth targetWidth signed destination (.register source) nextPc)
   | andn (width : Reference.X86.BzhiWidth) (destination first second : Register)
       (widthField : WidthBinding flags (bswapScalarWidth width))
       (dstField : dst = registerByte destination) (srcField : src = registerByte first)
@@ -841,6 +923,17 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | extend signed sourceWidth targetWidth destination source targetWidthField sourceWidthField dstField srcField =>
+      apply exact_dispatch_refines
+      subst dst
+      have targetDecoded := width_binding_decodes flags targetWidth targetWidthField
+      have sourceDecoded := width_binding_decodes (movxSourceWidthCode flags aux) sourceWidth sourceWidthField
+      have laneDecoded := slice_binding_decodes sourceWidth (movxSourceRegister src) (movxSourceShift src) source srcField
+      cases signed <;>
+        simpa [dispatchRegisters, dispatchThroughMove, beforeMove, movxRegisters,
+          GeneratedX86Opcode.code, GeneratedX86DispatchSingleton.code,
+          targetDecoded, sourceDecoded, laneDecoded, register_of_byte] using
+          congrArg some (extend_register_frame_refines env frame arena state sourceWidth targetWidth _ destination source nextPc)
   | andn width destination first second widthField dstField srcField secondField =>
       subst dst; subst src; subst aux
       have widthDecoded := bswap_width_binding_decodes flags width widthField
@@ -1155,6 +1248,7 @@ def directRegisterOpcode : GeneratedX86Specialization.Op → Option GeneratedX86
   | .setcc => some .setcc | .ror => some .ror | .rorx => some .rorx
   | .andn => some .andn | .bt => some .bt | .btImm => some .btImm
   | .imulImm => some .imulImm
+  | .movzxReg => some .movzxReg | .movsxReg => some .movsxReg
   | .addImm => some .addImm | .aluImm => some .aluImm
   | .addReg => some .addReg | .xorReg => some .xorReg | .aluReg => some .aluReg
   | .cmpImm => some .cmpImm | .testImm => some .testImm
@@ -1188,6 +1282,8 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
       let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
       let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
       pure ⟨nativeRegisters env frame arena (moveRegister env frame arena state width destination source nextPc), [], none⟩
+  | .movzxReg => movxRegisters env frame arena false flags aux dst src nextPc state
+  | .movsxReg => movxRegisters env frame arena true flags aux dst src nextPc state
   | .cmov => do
       let width ← cmovWidthOf flags
       let destination ← registerOf dst
