@@ -1,0 +1,127 @@
+{
+  "native_bytes": 60,
+  "verifier_insns": 30,
+  "source_prog_id": 6,
+  "native_prog_id": 11,
+  "emitted_sites": [
+    {
+      "blob_id": 0,
+      "generation": 4,
+      "abi_mask": 0,
+      "entry_address": 18446744072640010414,
+      "jit_offset": 14,
+      "native_offset": 0,
+      "native_size": 60
+    }
+  ],
+  "materialization": {
+    "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+    "entry": "simple_xdp",
+    "entry_offset": 0,
+    "entry_bytes": 61,
+    "payload_bytes": 60,
+    "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+    "terminal_bytes_removed": "c3",
+    "generated_copy_byte_identical": true,
+    "native_link_abi": "native-link-abi-v2",
+    "callee_saved_mask": 0,
+    "relocations": 0,
+    "data_objects": 0,
+    "map_patches": 0,
+    "structural_only": true,
+    "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+  },
+  "utc": "2026-11-07T15:41:54.103602+00:00",
+  "binding": "passed",
+  "translation_validation": "NOT_VALIDATED: current 30-instruction accepted B differs from historical 37-instruction Lean literal",
+  "materialization_rejected_controls": [
+    "immutable input SHA",
+    "generated copy",
+    "entry offset",
+    "entry code",
+    "terminal RET",
+    "ELF machine",
+    "ELF type",
+    "ABI version",
+    "ABI mask",
+    "generated blob",
+    "data layout",
+    "map patches",
+    "native relocations",
+    "duplicate blob"
+  ],
+  "fresh_runtime_kernel_profile": {
+    "uname": [
+      "Linux",
+      "virtme-ng",
+      "7.0.0-rc2+",
+      "#62 SMP PREEMPT_DYNAMIC Sat Nov  7 11:00:04 UTC 2026",
+      "x86_64"
+    ],
+    "running_notes_sha256": "838ee36c3e4b70bbf07c3bde67b497fb80ec1dc26a67b72074e00707c2fffead",
+    "running_build_ids": [
+      "79824595980857fd636e49a7dc2faf131d2bf21d"
+    ],
+    "vmlinux_build_ids": [
+      "79824595980857fd636e49a7dc2faf131d2bf21d"
+    ],
+    "kernel_sha256": {
+      "kprog/tv/build-kernel-x86/vmlinux": "a20b4a208137335a37fe77aae9769cb4ece24e95eb897741648dd23b38d7e95c",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6"
+    },
+    "layout_profile_sha256": "a25ba781b1dd4896d3a9e2e3f6dd0b5a6bcd65e698a75b8bf279265ce5e4a0e6",
+    "interpretation": "structural XDP layout profile; not a post-conversion instruction capture",
+    "running_matches_vmlinux": true,
+    "layout_profile_matches_kernel": true,
+    "loaded_module_build_ids": [
+      "1b173d5c136a766c9283d0bfdd9afd2f11906619"
+    ],
+    "module_file_build_ids": [
+      "1b173d5c136a766c9283d0bfdd9afd2f11906619"
+    ],
+    "loaded_module_matches_file": true
+  },
+  "historical_comparison": {
+    "native.bin": true,
+    "proof-input.bin": false,
+    "checked.snapshot.bin": false
+  },
+  "historical_capture_preserved": true,
+  "launch_source_sha256": {
+    "kprog/tv/capture_trusted_service.py": "f622160691ffc22cdaaad803212a926567384f83670b729aefa7f8a45c07cce5",
+    "kprog/tv/Makefile": "138f0172f165b92e1cd95d4ef61686e6b594987246c914210d8ff70ca271eab6",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137"
+  },
+  "after_source_sha256": {
+    "kprog/tv/capture_trusted_service.py": "b68d19112f21714523b3882e938c1dadf99554e7bbb3561459fc7dddcc45b2f9",
+    "kprog/tv/Makefile": "138f0172f165b92e1cd95d4ef61686e6b594987246c914210d8ff70ca271eab6",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137"
+  },
+  "tool_source_note": "Guest loaded launch snapshot; published source differs only by one separating blank line; no executable statement changed.",
+  "archive_sha256": "6bb592ccd2a8313f4b9750c9c1da76eece02fada252a655e88b4fdbbf88cc014",
+  "source_sha256": {
+    "kprog/tv/check_trusted_capture.py": "43cb85f2f532683cfeca1f88c73db3ff0b9c4a4f7efabbfc70fccc16230af135",
+    "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252",
+    "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e"
+  },
+  "observed_compiled_B_changes": [
+    "Native payload still exactly equals the historical 60-byte P.",
+    "Actual B is now 30 instructions, input 29; old accepted B was 37, input 36.",
+    "Fresh B PC2 loads virtual data_end+4 before PC3 loads data+0; native P loads data+0 before data_end+8.",
+    "Fresh PC4 opcode2e is JMP32 JGT: data and end compare lower32 bits; native CMP RSI,RDX is64bit.",
+    "Fresh B guards +8 before +72; original B had +72 before +8."
+  ],
+  "not_yet_claimed": [
+    "Historical B37 certificate validates current B30: exact literal check correctly rejects.",
+    "Whether native invocation ABI rules out the JMP32 high-bit/cross-boundary counterexample; general full64bit preservation is not established.",
+    "Exact ordered context-read correspondence: clang reordered these reads.",
+    "Physical entry/return ABI, strict block full-state TV, post-conversion capture, other programs."
+  ]
+}

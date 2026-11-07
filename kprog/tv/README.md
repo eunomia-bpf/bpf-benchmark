@@ -2006,3 +2006,19 @@ codebase has checked events under the explicit invocation/private-frame
 premises. The result pins its committed dependency snapshot; F's concurrent
 uncommitted decoder extension is excluded. This proves neither historical
 kernel binary identity nor the remaining physical ABI/strict block obligations.
+
+`trusted-simple-current-reference.json` records a full dependent replay of the
+historical B37 certificate after F published the canonical FF/4 decoder
+extension. All dependencies, axiom reports and the complete actual log are
+pinned. This replay passes; it does not validate the newly produced B30.
+
+`current-kernel/trusted-simple/` contains a fresh native-only capture on the
+identified running kernel/module and matches the compiled XDP layout receipt.
+All8 exact packet checks and structural artifact binding pass, including14
+materialization mismatch controls. Native P remains60 bytes, but current clang
+output is30 accepted instructions rather than the historical37. The existing
+Lean literal comparison correctly rejects that new B. Its context loads are
+reordered and its first pointer guard uses JMP32; exact ordered-event and
+full-width branch correspondence need new validation. The archive and binding
+report retain these observations without substituting the old producer or
+claiming the old certificate covers new bytes.
