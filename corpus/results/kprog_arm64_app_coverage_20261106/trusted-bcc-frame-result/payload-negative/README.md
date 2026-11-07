@@ -11,3 +11,6 @@ make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-payloa
 ```
 
 The replay uses a separate 2 GiB, two-vCPU QEMU guest on host CPUs 20-23 and the retained runtime read-only. It reuses the matched kernel/module/loader without rebuilding them. The current Katran production run and its queued candidate replay are preserved. The private candidate remains unpromoted; this is not application coverage or performance evidence.
+
+
+All four existing safe controls have now completed: return-2, direct SP copy/restore, a scalar load through a stack alias, and SP restoration through a spilled stack pointer. Each kernel and bound native execution returns result 0/retval 2 with one nonzero generation. The spill/restore proof has a 32-byte native stack and the single ghost offset `-32`, exercising the compact representation on the real kernel path. Candidate input hashes remain unchanged. `safe-controls.json` and `safe-controls.tar.gz` retain all four complete requests, layouts, generated/compiled artifacts and raw probe output. The thirty unsafe outcomes and actual Katran application replay are still pending; these four controls do not establish either result.
