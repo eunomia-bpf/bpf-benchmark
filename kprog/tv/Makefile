@@ -807,6 +807,11 @@ trusted-simple-safety-certificate: trusted-simple-entry-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleSafety.olean ../tv/TrustedSimpleSafety.lean
 
+.PHONY: trusted-simple-cfg-certificate
+trusted-simple-cfg-certificate: trusted-simple-entry-certificate
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimpleCFG.olean ../tv/TrustedSimpleCFG.lean
+
 # Regression for unbound ABI output markers reading an undefined entry r0.
 .PHONY: unbound-kernel-check guest-unbound-kernel-check
 unbound-kernel-check: build/test-binding-kernel build/test-loader

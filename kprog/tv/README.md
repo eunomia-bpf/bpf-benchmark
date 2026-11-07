@@ -1786,3 +1786,19 @@ external extent proofs without another ISA implementation or global simp changes
 All earlier reference definitions and theorems remain byte-identical. The17-entry
 extent/CFG job remains separate and pending. Evidence for the checked generic
 composition and compiled interface is in related-prefix-composition JSON/log.
+
+### Canonical uniqueness of arbitrary native extents
+
+`TrustedSimpleCFG.simple_native_extent_unique` (in the shared
+`KProgTV.TrustedSimpleX86` namespace) proves that any successful `decodeAt` at
+one of the17 actual captured native PCs has exactly the correct byte offset
+and instruction length. All272 entry/length candidates0..15 reduce through
+the single canonical decoder: truncated encodings fail and extra suffix bytes
+do not change its actual fallthrough. Code-range guards also exclude modular
+PC aliases. Caller-selected lengths and CFG annotations are not assumed.
+
+Run `make -C kprog/tv trusted-simple-cfg-certificate`. All21 new theorem audits
+use only the listed logical axioms; earlier reference/entry/safety sources are
+unchanged. Evidence is in native-extent-unique JSON/log. Reachable CFG closure,
+arbitrary finite-prefix safety, strict block mapping and ABI/platform/RET
+transport remain separate obligations.
