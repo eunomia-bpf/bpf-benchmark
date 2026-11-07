@@ -56,6 +56,7 @@
 
 /* Name the exported entry, without compiler builtin/fortify substitution. */
 extern void *native_lab_x86_memset(void *, int, size_t) __asm__("memset");
+extern void *native_lab_x86_memcpy(void *, const void *, size_t) __asm__("memcpy");
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /*

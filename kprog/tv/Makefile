@@ -943,3 +943,29 @@ native-link-byte-layout-check: native-link-chunk-layout-check
 native-link-chunk-planner-check: native-link-byte-layout-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkChunkPlanner.olean ../tv/NativeLinkChunkPlanner.lean
+
+.PHONY: trusted-memory-check guest-trusted-memory-check
+build/trusted-memory-%.o: trusted_memory.c
+	install -d build
+	clang -O2 -fno-builtin -fno-vectorize -fno-slp-vectorize -fno-asynchronous-unwind-tables -DCOPY_BYTES=$* -c $< -o $@
+
+build/trusted-memory-unsafe.o: trusted_memory.c
+	install -d build
+	clang -O2 -fno-builtin -fno-vectorize -fno-slp-vectorize -fno-asynchronous-unwind-tables -DCOPY_BYTES=8 -DUNSAFE_DESTINATION -c $< -o $@
+
+trusted-memory-check: build/trusted-memory-8.o build/trusted-memory-32.o build/trusted-memory-96.o build/trusted-memory-unsafe.o build/test-trusted-transport
+	$(MAKE) -C ../libnativeloader trusted-service
+	cmake --build ../libnativeloader/build --target trusted-service-client
+	$(MAKE) module-check ARCH=x86 KDIR=$(CURDIR)/build-kernel-x86
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-trusted-memory-check'
+
+guest-trusted-memory-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko
+	./build/test-trusted-transport /sys/kernel/debug/bpf_x86_native_lab
+	rmmod bpf_x86_native_lab
+	insmod build-x86/bpf_x86_native_lab.ko
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 test_trusted_memory.py

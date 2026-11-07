@@ -120,6 +120,17 @@ Rust/iced field/image construction and implementation-value correspondence,
 final executable bytes/bases, complete PC/ABI and other ARM forms provide the
 surrounding production interfaces.
 
+`trusted-inline-memory-binding.json` records the common x86 binding repair
+for compiler `memcpy`: its generated inline accesses now share the existing
+registered-service target match with `memset`. Kind1, active capsule and direct
+context program-type checks remain in that match. Three fresh8/32/96-byte
+copy/fill controls bind and execute with exact bytes/returned pointers; an
+unsafe scalar destination reaches the verifier's memory rejection. The existing
+19 transport controls retain16 expected refusals. Common-service terminal
+archives and earlier fixture diagnostics are retained. This is runtime binding
+evidence; C supplies the whole-application replay and V/T supply universal
+intrinsic/compiler preservation.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

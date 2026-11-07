@@ -1,0 +1,220 @@
+{
+  "utc": "2026-11-07T21:34:05.246738+00:00",
+  "status": "authorized_x86_inline_memcpy_target_binding_regression_pass",
+  "problem": "The common worker represents compiler memcpy with exact-count verifier-visible memory operations. validate_proof previously recognized the analogous memset target only, so a completed memory verification reached an unmatched memcpy relocation.",
+  "implementation": "Match kind1 memcpy alongside memset under the existing active registered-capsule authorization and direct-context program-type conditions. Helper identity, source request, exact snapshot, generation, map and entry/ABI checks retain their existing path.",
+  "diagnosis": {
+    "archive": "corpus/results/kprog_app_coverage_20261107/native-join-tetragon__observer/service.tar.gz",
+    "archive_sha256": "ba174f7d073c47f8658f4e6d4745c7f9051b523b5ff991b21b063282862705c5",
+    "request_archive_sha256": "ca58b8583d14fb228da1e92756a6d8eb060c900da1586a4e73dce4d9624c6a9e",
+    "kernel_diagnostic_lines": [
+      "[    4.679672] bpf_x86_native_lab: loading out-of-tree module taints kernel.",
+      "[  224.464612] native_lab: proof relocation unmatched chunk=8 record=1 kind=1 offset=44 target=0xffffffff9c005f80 source_prog=337",
+      "[  224.466115] native_lab: validate_proof err=-22 prog_len=3811 blob=36",
+      "[  224.529835] native_lab: proof relocation unmatched chunk=8 record=1 kind=1 offset=44 target=0xffffffff9c005f80 source_prog=337",
+      "[  224.531386] native_lab: validate_proof err=-22 prog_len=3811 blob=36",
+      "[  224.595186] native_lab: proof relocation unmatched chunk=8 record=1 kind=1 offset=44 target=0xffffffff9c005f80 source_prog=337",
+      "[  224.596685] native_lab: validate_proof err=-22 prog_len=3811 blob=36"
+    ],
+    "compiler_memory_targets": {
+      "memset": "0xffffffff9c0062a0",
+      "memcpy": "0xffffffff9c005f80",
+      "memmove": "0xffffffff9c0060e0"
+    },
+    "generated_b_sha256": "1df5d6e5a2977a4b4cef3324ea70a0770b451f38321249e4f1be8afbbee3529e",
+    "generated_copy_macros": [
+      "X86_SIM_L_EXEC_CALL_MEMCPY(792ULL);",
+      "X86_SIM_L_EXEC_CALL_MEMCPY(144ULL);"
+    ],
+    "blob_sha256": "c946af60ff95c6101440a173962ded154c75ab4f80fb11252228e53de77ab1bb",
+    "blob_bytes": 4618,
+    "stage": "Final expanded-proof target materialization check after verifier memory analysis.",
+    "generic_class": "Authorized compiler-memory intrinsics represented by verifier-visible inline accesses."
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-memory-check",
+    "exit": 0,
+    "transport_controls": 19,
+    "expected_transport_rejections": 16,
+    "cases": [
+      {
+        "case": "8",
+        "object_sha256": "d569a86ad464292562bba7bb97c55889fe0dfaef1415f18128e03e082171a060",
+        "returncode": 0,
+        "stdout": "{\"ok\":true,\"original_prog_id\":6,\"native_prog_id\":11,\"retval\":2,\"prebuilt_proof\":false}\n",
+        "stderr": ""
+      },
+      {
+        "case": "32",
+        "object_sha256": "1f1d65bbeb18269c929c3db15f14f1b7da5ae2d4ad09d855a6b98ae6720a0ce9",
+        "returncode": 0,
+        "stdout": "{\"ok\":true,\"original_prog_id\":14,\"native_prog_id\":19,\"retval\":2,\"prebuilt_proof\":false}\n",
+        "stderr": ""
+      },
+      {
+        "case": "96",
+        "object_sha256": "09106a49e8844101f016a1121098cb1f7db8326153fbc41413a37776cbe21c9c",
+        "returncode": 0,
+        "stdout": "{\"ok\":true,\"original_prog_id\":22,\"native_prog_id\":27,\"retval\":2,\"prebuilt_proof\":false}\n",
+        "stderr": ""
+      },
+      {
+        "case": "unsafe",
+        "object_sha256": "7025d281ef12f0b1573fe26f33ef17e4bdd43f8ded16d8517dbe7f2525edd979",
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "trusted service control: trusted specializer refused native program: Input/output error\n"
+      }
+    ],
+    "terminal_records": [
+      {
+        "name": "service/requests/1.success.tar.gz",
+        "kernel_and_worker_native_sha256": "d569a86ad464292562bba7bb97c55889fe0dfaef1415f18128e03e082171a060",
+        "memory_macros": [
+          "X86_SIM_L_EXEC_CALL_MEMSET(8ULL);",
+          "X86_SIM_L_EXEC_CALL_MEMCPY(8ULL);"
+        ]
+      },
+      {
+        "name": "service/requests/2.success.tar.gz",
+        "kernel_and_worker_native_sha256": "1f1d65bbeb18269c929c3db15f14f1b7da5ae2d4ad09d855a6b98ae6720a0ce9",
+        "memory_macros": [
+          "X86_SIM_L_EXEC_CALL_MEMSET(32ULL);",
+          "X86_SIM_L_EXEC_CALL_MEMCPY(32ULL);"
+        ]
+      },
+      {
+        "name": "service/requests/3.success.tar.gz",
+        "kernel_and_worker_native_sha256": "09106a49e8844101f016a1121098cb1f7db8326153fbc41413a37776cbe21c9c",
+        "memory_macros": [
+          "X86_SIM_L_EXEC_CALL_MEMSET(96ULL);",
+          "X86_SIM_L_EXEC_CALL_MEMCPY(96ULL);"
+        ]
+      },
+      {
+        "name": "service/requests/4.failure.tar.gz",
+        "kernel_and_worker_native_sha256": "7025d281ef12f0b1573fe26f33ef17e4bdd43f8ded16d8517dbe7f2525edd979",
+        "rejection": "R2 invalid mem access 'scalar'",
+        "processed_insns": 47
+      }
+    ],
+    "negative_stage": "Actual verifier memory rejection at instruction46, processed47; native TEST_RUN belongs only to the three accepted controls.",
+    "raw_log_sha256": "9948f74bc879785b93beadcccc8a13e8b3230d0b4274a6618387d5febb11a2a7",
+    "raw_archive": "kprog/results/kprog_tv_20261107/trusted-inline-memory-binding.raw.tar.gz",
+    "raw_archive_sha256": "3ef1d31059efeb3dacbb7654c544109785a7fc19badd42f410d44a858e142a6c",
+    "initial_attempt_exits": [
+      2,
+      2,
+      2
+    ],
+    "initial_attempts": [
+      "Transport service registration is once per module lifetime; the regression uses fresh module instances between the transport and memory phases.",
+      "Initial loop fixture reached partial-AL/LEA definedness analysis before memory binding.",
+      "Initial unrolled constant-array fixture reached zero-size .LCPI proof relocation analysis."
+    ],
+    "fixture_scope": "Volatile byte arrays and full unrolling isolate inline-memory binding, exact count, copied bytes and return pointer from those independent producer domains."
+  },
+  "source_sha256": {
+    "kinsn/module/x86/bpf_x86_native_lab.c": "ffa42fd42f06d048dc050ae83ca77bdd4454238331b4f76416e24a2f95f58888",
+    "kinsn/module/include/native_lab_group.h": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+    "kprog/tv/Makefile": "e09bf8bf0f2218c897a417232b9578b141798a1dd791742eb468a3a16db8aae9",
+    "kprog/tv/trusted_memory.c": "2c8bf0e1f04e1fb28e1522608833454d6f6e82b939726e2d5324e53b2d422273",
+    "kprog/tv/test_trusted_memory.py": "3de5aa73d2eb83e213334cedfe8d6a3ca8b096ee992af45dc505dabd262c9cb2",
+    "kprog/tv/test_trusted_transport.c": "bd010ceaf538775ce11c4c8023b27a805973e5dd4a35d092ffa2c623a17875d1",
+    "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+    "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+    "kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+    "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+    "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841"
+  },
+  "source_observations": [
+    {
+      "path": "kinsn/module/include/native_lab_group.h",
+      "observed_sha256": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+      "published_sha256": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+      "difference": "Two existing extra blank lines after native_lab_checked.h; same implementation bodies."
+    }
+  ],
+  "tested_binary_sha256": {
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c3842be1caa33ad9f2b9516f33bb6742dc96f3662dda5f1ce106bc68fa6e56a8",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+    "kprog/libnativeloader/build/trusted-service-client": "c03e67539d181679e9bdd642466152629f9f1e6890bdb6e4f023eef3a5867329",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd"
+  },
+  "service_archives": [
+    {
+      "path": "kprog/tv/build/trusted-memory-service-1794086879500039835.tar.gz",
+      "sha256": "8305861c92c4726a87e66a719bead9f2b8b6d82cd89357a4eaffe5b217b8b43d"
+    },
+    {
+      "path": "kprog/tv/build/trusted-memory-service-1794086994366839654.tar.gz",
+      "sha256": "e082a14e62eccbcc9bc872e84bb5376b44deb8ad715fa6914b8934b662758982"
+    },
+    {
+      "path": "kprog/tv/build/trusted-memory-service-1794087098395487377.tar.gz",
+      "sha256": "d2efdbea5db1167248d7aa56a3186d0cae6780a68462089f01ea4d00d02c5e41"
+    }
+  ],
+  "evidence_boundary": "Finite generic mechanism regression and production target-matching correction. Complete Tetragon application replay remains with C; universal intrinsic/compiler/ISA preservation remains on V/T formal composition interfaces.",
+  "runtime_source_epochs": [
+    {
+      "terminal": "service/requests/1.success.tar.gz",
+      "captured_source_and_binary_sha256": {
+        "/workspaces/repository/kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+        "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+      }
+    },
+    {
+      "terminal": "service/requests/2.success.tar.gz",
+      "captured_source_and_binary_sha256": {
+        "/workspaces/repository/kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+        "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+      }
+    },
+    {
+      "terminal": "service/requests/3.success.tar.gz",
+      "captured_source_and_binary_sha256": {
+        "/workspaces/repository/kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+        "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+      }
+    },
+    {
+      "terminal": "service/requests/4.failure.tar.gz",
+      "captured_source_and_binary_sha256": {
+        "/workspaces/repository/kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+        "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+      }
+    }
+  ]
+}
