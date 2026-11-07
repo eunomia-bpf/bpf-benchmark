@@ -834,3 +834,11 @@ new tests, input filtering, canonical ISA, runtime, generator or oracle changes;
 original C warnings remain visible. The full77/72 dispatcher and compiled-body
 O2/O4 obligations remain open. A subsequent immutable full check includes this
 increment and the preceding generic ALU_REG logical increment together.
+
+Exact `2827f8b5c760e20cd7c69b897160d7398a05c61d` completed the full
+`make -C kprog/formal check` with exit **0**, including generic ALU_REG logical
+and non-flag ADD/SUB dispatch, T's published packet-tail decoding and every prior
+Lean, contract, reference/wire/compiler and C semantic check. The immutable
+source/cache export was deleted automatically; compressed CALL CPU observations
+retain this440-case run. Later actual register-byte and leading-dispatcher
+composition work is separate and requires its own subsequent full validation.
