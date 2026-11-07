@@ -1915,3 +1915,39 @@ All five source pins remained unchanged. Complete records and original
 probe diagnostics are in the existing compressed integration archive;
 JSON stores the summary and source/archive hashes without duplicating all
 1024 rows. Production source, ISA, oracles and tests remain untouched.
+
+## x86 raw-field NOP/MOV dispatch prefix
+
+The new `Refinement/X86Dispatcher.lean` uses the generated opcode table,
+GPR-cell contract, width fallback and AUX getters. `MoveBinding` consists
+only of encoded fields and native operand/next-PC/immediate identities.
+`step_through_move_refines` derives one complete canonical step for NOP,
+MOV-immediate and MOV-register under the published raw stack-register frame.
+The production pointer-load/libc/helper gates before MOV are explicitly
+retained as unproved branches. No handler equation or state/value equality
+is an assumption. Other operation bodies and compiled/native ABI/private
+memory transport remain open; this is not the whole77-operation theorem.
+
+GPR byte selection agrees with the generated contract on every byte,
+including absent16..255. Legal FLAGS retain absent0->64. Byte lanes retain
+low GPRs and high AH/CH/DH/BH slices; wider MOV ignores unused lane bytes.
+NOP ignores all operand/width/AUX fields and MOV-immediate ignores SRC.
+`None` denotes an unproved or out-of-binding interface case, not a new
+runtime guard, rejection or successful no-op for malformed fields/opcodes.
+
+Validation: focused56-job Lean graph and5 axiom audits PASS; only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies occur.
+Six existing generated checks and all five existing field hosts pass under
+UBSan:258 register,6401 register-route,7629 AUX,1280 width,518 width-route.
+The default incremental `lake build KProgFormal` library target also passes
+(371-job graph); a cached follow-up includes the root entry in all371
+unchanged source pins. All369 library Lean source files pass the code-token placeholder audit after nested
+comments/strings are removed. Shared caches are retained. No new test,
+ISA/runtime/header/oracle or build configuration changes were made.
+
+All original focused normalization failure and successful build/contract/
+C-host/library output, source hashes and commands are appended to the
+existing integration JSON/gzip. Full exact900 `make check` POPCNT EXIT2
+and the separate canonical CMOV-route pointer-alignment UBSan failure remain
+unresolved; no complete-check or whole77/72/O2/O4 pass is claimed.
+Proof SHA256 `63c715ee643a0754de4b703e8e87f10ea4e0c0849b62c91a3883d3e1ac639823`.
