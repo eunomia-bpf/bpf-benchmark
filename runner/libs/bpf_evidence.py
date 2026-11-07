@@ -176,10 +176,15 @@ def _live_program_graph(
         if program_id not in programs:
             continue
         kernel_name = str(programs[program_id].get("name") or "")
-        if kernel_name != symbol[:15]:
+        # BPF_OBJ_NAME_LEN is 16 and the kernel keeps every byte it was
+        # given: a symbol of 16 characters or more arrives truncated to 16,
+        # not 15. `tail_drop_notify` is exactly 16, which is what cilium
+        # hit. Accept the whole 16-byte prefix, so both a 15-character
+        # symbol and a 16-character one compare correctly.
+        if symbol[:16] != kernel_name[:16]:
             raise RuntimeError(
                 f"native program {program_id} kernel name {kernel_name!r} is not the "
-                f"15-byte truncation of loader symbol {symbol!r}"
+                f"16-byte truncation of loader symbol {symbol!r}"
             )
         canonical_names[program_id] = symbol
 
