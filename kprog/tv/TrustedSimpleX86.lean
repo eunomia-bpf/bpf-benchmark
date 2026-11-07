@@ -3061,6 +3061,67 @@ theorem packet_body_relational_correspondence (env : BPF.Environment) (frame : W
   · simpa only [exactResult] using memory
   · simpa only [exactResult] using returned
 
+
+/-- A one-instruction canonical path contains exactly that relational step,
+including its actual fault field. No representative is substituted here. -/
+theorem relational_single_step {entry : X86Path.Entry} {s : X86.State}
+    {actual : Transition X86.State} (run : CanonicalRelationalPath 0 native [entry] s actual) :
+    ∃ instruction, X86Path.decodeAt 0 native entry s=.ok instruction ∧ X86.Step instruction s actual := by
+  cases run with
+  | fault entry instruction decoded step failed => exact ⟨instruction,decoded,step⟩
+  | next entry instruction decoded step continued suffix =>
+    cases suffix with
+    | nil =>
+      refine ⟨instruction,decoded,?_⟩
+      simpa only [List.append_nil,← continued] using step
+
+/-- A nonterminal instruction of a multi-instruction path cannot fault. -/
+theorem relational_cons_split {entry second : X86Path.Entry} {rest : List X86Path.Entry}
+    {s : X86.State} {actual : Transition X86.State}
+    (run : CanonicalRelationalPath 0 native (entry::second::rest) s actual) :
+    ∃ instruction head tail,
+      X86Path.decodeAt 0 native entry s=.ok instruction ∧ X86.Step instruction s head ∧
+      head.fault=none ∧ CanonicalRelationalPath 0 native (second::rest) head.state tail ∧
+      actual=⟨tail.state,head.events++tail.events,tail.fault⟩ := by
+  cases run with
+  | next entry instruction decoded step continued suffix =>
+    exact ⟨instruction,_,_,decoded,step,continued,suffix,rfl⟩
+
+/-- Every actual canonical relational path through the first guard has the
+same complete boundary result, while XOR's undefined AF remains unrestricted. -/
+theorem first_guard_relational_path_result (s : X86.State) (actual : Transition X86.State)
+    (position : s.pc=7)
+    (run : CanonicalRelationalPath 0 native [⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] s actual) :
+    actual=⟨guardFinal s,[],none⟩ := by
+  obtain ⟨i0,t0,u0,d0,r0,_,tail0,e0⟩ := relational_cons_split run
+  obtain ⟨i1,t1,u1,d1,r1,_,tail1,e1⟩ := relational_cons_split tail0
+  obtain ⟨i2,t2,u2,d2,r2,_,tail2,e2⟩ := relational_cons_split tail1
+  obtain ⟨i3,d3,r3⟩ := relational_single_step tail2
+  obtain ⟨trace,_,_,_,branch⟩ := native_guard_decoded_relational_block s position
+    t0 t1 t2 u2 i0 i1 i2 i3 d0 r0 d1 r1 d2 r2 d3 r3
+  calc
+    actual=⟨u2.state,t0.events++t1.events++t2.events++u2.events,u2.fault⟩ := by
+      rw [e0,e1,e2]
+      simp only [List.append_assoc]
+    _=⟨guardFinal s,[],none⟩ := by rw [trace,branch]
+
+/-- The actual B first guard checks every canonical relational native guard
+path, including every undefined-AF choice and either derived successor. -/
+theorem first_guard_path_relational_correspondence (env : BPF.Environment)
+    (n : X86.State) (p : BPF.State) (actual : Transition X86.State)
+    (nativePC : n.pc=7) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (limit : n.gpr 2=p.regs 3)
+    (run : CanonicalRelationalPath 0 native [⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] n actual) :
+    actual=⟨guardFinal n,[],none⟩ ∧
+    Execution (initializedInstructionStep env) p actual.events (proofGuardFinal p) ∧
+    actual.state.pc=(if p.regs 2 > p.regs 3 then 60 else 17) ∧
+    (proofGuardFinal p).pc=(if p.regs 2 > p.regs 3 then 34 else 12) := by
+  have exactResult := first_guard_relational_path_result n actual nativePC run
+  obtain ⟨_,proofRun,npc,ppc,_⟩ := first_guard_correspondence env n p nativePC proofPC active pointer limit
+  refine ⟨exactResult,?_,?_,ppc⟩
+  · simpa only [exactResult] using proofRun
+  · simpa only [exactResult] using npc
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3321,3 +3382,11 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_native_any_evaluation
 
 #print axioms KProgTV.TrustedSimpleX86.packet_body_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.relational_single_step
+
+#print axioms KProgTV.TrustedSimpleX86.relational_cons_split
+
+#print axioms KProgTV.TrustedSimpleX86.first_guard_relational_path_result
+
+#print axioms KProgTV.TrustedSimpleX86.first_guard_path_relational_correspondence

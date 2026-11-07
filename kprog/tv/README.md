@@ -1682,3 +1682,13 @@ outside-private36 memory agreement are retained. The first-failure/path selectio
 is computed from permissions; no store success or branch result is assumed.
 Whole-program entry/guard/XOR composition, arbitrary CFG/extent completeness,
 ABI/platform and RET transport remain open. See packet-relational JSON/log.
+
+### First guard as a canonical relational path
+
+`first_guard_path_relational_correspondence` now accepts the actual four-extent
+canonical relational path at nativePC7/10/12/15, including every undefined XOR AF
+choice. The actual CMP determines one complete boundary state, and actual B11
+has the same empty trace and derived successor. It assumes no branch outcome
+or selected AF value. This lifts the prior step-wise universal guard result to
+the same path relation used by the packet body. Entry/remaining-guard/CFG and
+ABI/platform/RET composition remain open; see guard-relational-path JSON/log.
