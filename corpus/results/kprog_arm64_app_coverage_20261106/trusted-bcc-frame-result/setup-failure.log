@@ -1,0 +1,13 @@
+taskset -c 20-23 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_bcc_frame.py
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_bcc_frame.py", line 114, in <module>
+    main()
+  File "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_bcc_frame.py", line 93, in main
+    result = worker.specialize(native.read_bytes(), 'inet_sock_set_state', metadata, base, link)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/arm64/trusted_specializer.py", line 41, in specialize
+    output_dir.mkdir(parents=True, mode=0o700)
+  File "/usr/lib/python3.12/pathlib.py", line 1313, in mkdir
+    os.mkdir(self, mode)
+FileExistsError: [Errno 17] File exists: '/workspaces/repository/kprog/arm64/build/trusted-transport/bcc-frame-579qt9_a'
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:764: trusted-bcc-frame-check] Error 1

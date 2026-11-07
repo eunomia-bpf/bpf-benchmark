@@ -1,0 +1,200 @@
+{
+  "scope": "host compiler only; source libbpf pre-load facts, not kernel-pinned runtime facts",
+  "source_map_facts": [
+    {
+      "name": "birth",
+      "internal": false,
+      "map_type": 1,
+      "key_size": 8,
+      "value_size": 8,
+      "max_entries": 10240,
+      "map_flags": 0
+    },
+    {
+      "name": "idents",
+      "internal": false,
+      "map_type": 1,
+      "key_size": 8,
+      "value_size": 20,
+      "max_entries": 10240,
+      "map_flags": 0
+    },
+    {
+      "name": "events",
+      "internal": false,
+      "map_type": 4,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 0,
+      "map_flags": 0
+    },
+    {
+      "name": "tcplife.rodata",
+      "internal": true,
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 4106,
+      "max_entries": 1,
+      "map_flags": 1152
+    }
+  ],
+  "source_native_symbol_identities": [
+    {
+      "symbol": "target_family",
+      "section": ".rodata",
+      "offset": 4104,
+      "size": 2
+    },
+    {
+      "symbol": "filter_sport",
+      "section": ".rodata",
+      "offset": 0,
+      "size": 1
+    },
+    {
+      "symbol": "target_sports",
+      "section": ".rodata",
+      "offset": 2,
+      "size": 2048
+    },
+    {
+      "symbol": "filter_dport",
+      "section": ".rodata",
+      "offset": 1,
+      "size": 1
+    },
+    {
+      "symbol": "target_dports",
+      "section": ".rodata",
+      "offset": 2050,
+      "size": 2048
+    },
+    {
+      "symbol": "birth",
+      "section": ".maps",
+      "offset": 0,
+      "size": 32
+    },
+    {
+      "symbol": "target_pid",
+      "section": ".rodata",
+      "offset": 4100,
+      "size": 4
+    },
+    {
+      "symbol": "idents",
+      "section": ".maps",
+      "offset": 32,
+      "size": 32
+    },
+    {
+      "symbol": "events",
+      "section": ".maps",
+      "offset": 64,
+      "size": 24
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "prog_type": 5,
+    "section": "tracepoint/sock/inet_sock_set_state",
+    "maps": [
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "target_family",
+        "value_offset": 4104
+      },
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "filter_sport",
+        "value_offset": 0
+      },
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "target_sports",
+        "value_offset": 2
+      },
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "filter_dport",
+        "value_offset": 1
+      },
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "target_dports",
+        "value_offset": 2050
+      },
+      {
+        "map_type": 1,
+        "key_size": 8,
+        "value_size": 8,
+        "max_entries": 10240,
+        "map_flags": 0,
+        "name": "birth",
+        "value_offset": null
+      },
+      {
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 4106,
+        "max_entries": 1,
+        "map_flags": 1152,
+        "name": "target_pid",
+        "value_offset": 4100
+      },
+      {
+        "map_type": 1,
+        "key_size": 8,
+        "value_size": 20,
+        "max_entries": 10240,
+        "map_flags": 0,
+        "name": "idents",
+        "value_offset": null
+      },
+      {
+        "map_type": 4,
+        "key_size": 4,
+        "value_size": 4,
+        "max_entries": 0,
+        "map_flags": 0,
+        "name": "events",
+        "value_offset": null
+      }
+    ]
+  },
+  "input_sha256": {
+    "vendor/build/.bcc-libbpf/none/arm64/output/tcplife.bpf.o": "d07b6e30fe23cc74ee2d75ce01bf3169663b972c162a1de17df6d592a7a50233",
+    "kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o": "e5e635f1eab0e15aa3d773d0d5a4a568b0b111267d6a803431a69245c963250e",
+    "kprog/arm64/build/app-native-link/release/native-link": "736646a1b70254e5ae88dcf5d8e65d325d0a27bf89eb35e6b1b93336500d7722",
+    "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+    "kprog/arm64/arm64_sim_local_bpf.h": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
+    "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+    "corpus/results/kprog_arm64_app_coverage_20261106/trusted_bcc_frame.py": "bc23ecedf2939a00db4abb110dab82690a3d1a4c9e0029efb4410eea77966d5e"
+  },
+  "compile_returncode": 0,
+  "maximum_fp_minus_offset": 584,
+  "object_sha256": "6a38ab6761c222ae7de1ceab42cbdc5873b8b0bd7787200e47005ccebc8e290c",
+  "inputs_unchanged": true
+}

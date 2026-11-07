@@ -758,3 +758,7 @@ trusted-arm64-module-index:
 .PHONY: trusted-arm64-extern-check
 trusted-arm64-extern-check:
 	taskset -c 20-23 python3 $(HERE)/trusted_extern_check.py
+
+.PHONY: trusted-bcc-frame-check
+trusted-bcc-frame-check:
+	taskset -c 20-23 python3 $(HERE)/trusted_bcc_frame.py

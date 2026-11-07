@@ -1065,3 +1065,5 @@ negative plus 29 micro builds, and all 13 QEMU boundary expectations. Eight
 previously accepted invalid-address proofs now reject before native execution.
 The overall formal check exits 2 at the existing x86 unknown-map fixture;
 that independent failure and every candidate source hash remain recorded.
+
+The [trusted tcplife compiler frame check](trusted-bcc-frame-result/README.md) reproduces a 584-byte frame with the current extern worker and original source-ELF map facts; this remains an open load blocker, not new verifier acceptance.
