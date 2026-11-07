@@ -1718,3 +1718,29 @@ Complete original output/commands/source pins are appended to the existing
 integration archive/JSON. Exact900 full EXIT2 remains the complete-check
 result; no redundant full was started against its unchanged x86 harness
 failure. Private status propagation is fixed; shared caches/STOP retained.
+
+## One observed source-emission interface
+
+`SourceEmission` joins prior numeric/direct branch emissions with the
+proved source-token LINK/ADR/CODE-target arms.
+`source_emission_step_refines` is one step theorem over that interface and
+the SAME canonical ISA. Its `SourceBinding` retains layout and actual CODE/
+finite-target guards; original-native permissions, SP, pair profile and
+exclusive environment remain separate. Each case reuses a proved primitive,
+with no handler semantic equality supplied by the caller.
+
+This composes the modeled emission families, while ordinary code-word
+arithmetic/memory and compiled-frame/native-layout/ABI transport remain
+explicitly unproved. Untagged helper and outer RETURN-tag interfaces are
+still separate. The theorem does not complete full77/72/O2/O4.
+
+Fresh validation:98-job Lean target and one axiom audit PASS, reporting only
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound. All9 input pins stayed
+unchanged; non-proof inputs are byte-identical to the preceding CODE proof
+check. Its9 existing C-host results are reused without repeating them for
+this composition-only change. Old declarations remain byte-identical, with
+no placeholders/new tests/ISA/runtime/oracle edits. Proof SHA256
+`689a2e46aae8d849ce59844a15673ef378b7ea7521bcf76f4e1a88f525e467d6`.
+The fresh original proof log and source/predecessor pins are appended to the
+existing integration archive/JSON. Exact900 full EXIT2 remains unchanged;
+no new full was run against its unresolved dynamic x86 host failure.

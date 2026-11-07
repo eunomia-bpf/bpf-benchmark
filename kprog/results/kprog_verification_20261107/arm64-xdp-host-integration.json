@@ -2355,6 +2355,43 @@
     },
     "source_drift": []
   },
+  "source_emission_composition": {
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.Arm64Dispatcher"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/dispatcher-source-audit.lean"
+        ],
+        "exit": 0
+      }
+    ],
+    "exit": 0,
+    "fresh_c_hosts": 0,
+    "pins": {
+      "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+      "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "kprog/arm64/arm64_sim_local_bpf.h": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "1a0680419ddba423942158c4f01f1edba4929fd230f96b6e48b5b2ec0ad2e6a8",
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Refinement/Arm64Branch.lean": "bef3cf78cfcf68219f2aa2c7a5e55cec6159692a2d7963e3fc6c990b5fb69df8",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "689a2e46aae8d849ce59844a15673ef378b7ea7521bcf76f4e1a88f525e467d6",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69"
+    },
+    "prior_c_hosts_reused": 9,
+    "prior_source_commit": "c58cfbe541bc5961e959ceca25d7cd128bf3ef8e",
+    "source_drift": []
+  },
   "source_pins": {
     "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
     "kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",

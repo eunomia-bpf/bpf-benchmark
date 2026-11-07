@@ -50,7 +50,9 @@ TBZ/TBNZ through the actual source-selected branch shapes. Source labels and
 native PC words stay distinct under explicit current/next/target address
 identities. A separate CODE-token state projection derives LINK/ADR and
 finite CODE-tag BR/BLR/internal-RET primitive refinements, including LR
-aliases. Its layout/ordinary-code-value transport is still explicit. Faulting
+aliases. `source_emission_step_refines` joins those primitives with every
+prior numeric/direct-branch case under the same code-state observation. Its
+layout/ordinary-code-value transport is still explicit. Faulting
 writeback, helper/entry/outer-return transport, compiled bodies and full77/72
 completion remain open. Focused
 checks pass with the published ARM entry-selector repair; the latest complete

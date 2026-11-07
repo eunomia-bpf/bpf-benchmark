@@ -3626,4 +3626,73 @@ theorem code_target_observed_refines (nativeAddress : Word → Word) (link : Boo
       simp only [observeCodeTransition, sourceCallStep, native_code_pc, native_code_write,
         successorValue, Reference.AArch64.step, ↓reduceIte, read]
 
+
+/-- The existing emitted numeric/direct branch plus the actual source-token
+LINK/ADR/CODE-target arms. This joins implementation emission families only;
+helper/outer-return and compiled-frame transport remain outside this layer. -/
+inductive SourceEmission where
+  | numeric (emission : Emission)
+  | call (target successor : Word)
+  | address (dst : Register) (address fallthrough : Word)
+  | register (link : Bool) (src : Register) (targets : List Word) (successor : Word)
+
+def dispatchSourceEmission (nativeAddress : Word → Word) (emission : SourceEmission)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) (state : CodeState) :
+    Option (Transition Reference.AArch64.State) :=
+  match emission with
+  | .numeric ordinary => dispatchEmission nativeAddress ordinary sourceScalar sourceStack firstScalar
+      secondScalar release failure (nativeCodeView nativeAddress state)
+  | .call target successor => some (observeCodeTransition nativeAddress (sourceCallStep target successor state))
+  | .address dst address fallthrough => some (observeCodeTransition nativeAddress (sourceAddressStep dst address fallthrough state))
+  | .register link src targets successor =>
+      (dispatchCodeTarget link src targets successor state).map (observeCodeTransition nativeAddress)
+
+/-- Layout and actual CODE-arm guards are concrete input relations, never
+assumed handler-step equality. Existing numeric fields still need the
+compiled-frame relation; this binding does not manufacture it. -/
+inductive SourceBinding (nativeAddress : Word → Word) (state : CodeState) (release : Bool) :
+    SourceEmission → Reference.AArch64.Instruction → Prop where
+  | numeric (ordinary : Emission) (native : Reference.AArch64.Instruction)
+      (binding : EmissionBinding nativeAddress (nativeCodeView nativeAddress state).pc release ordinary native) :
+      SourceBinding nativeAddress state release (.numeric ordinary) native
+  | call (target successor displacement : Word)
+      (targetAddress : nativeAddress target = (nativeCodeView nativeAddress state).pc + displacement)
+      (successorAddress : nativeAddress successor = (nativeCodeView nativeAddress state).pc + 4) :
+      SourceBinding nativeAddress state release (.call target successor) (.branchLink displacement)
+  | address (dst : Register) (address fallthrough displacement : Word)
+      (addressValue : nativeAddress address = (nativeCodeView nativeAddress state).pc + displacement)
+      (fallAddress : nativeAddress fallthrough = (nativeCodeView nativeAddress state).pc + 4) :
+      SourceBinding nativeAddress state release (.address dst address fallthrough) (.pcAddress false dst displacement)
+  | register (link : Bool) (src : Register) (targets : List Word) (successor : Word)
+      (code : codeSource state src = true)
+      (allowed : targets.contains (Arm64Move.Fields.read state.bits (Arm64Register.registerCode src)) = true)
+      (successorAddress : link = true → nativeAddress successor = (nativeCodeView nativeAddress state).pc + 4) :
+      SourceBinding nativeAddress state release (.register link src targets successor) (.branchRegister link src)
+
+/-- One observed source-emission step theorem for L_EXEC, all direct branches,
+internal BL/ADR and CODE-tag BR/BLR/internal RET. Original memory/profile/
+exclusive premises stay explicit. Helper/outer-return tags, actual code-word
+arithmetic/memory and compiled/native-layout/ABI transport are not discharged
+by composing these proved primitives. -/
+theorem source_emission_step_refines (nativeAddress : Word → Word) (emission : SourceEmission)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (state : CodeState)
+    (binding : SourceBinding nativeAddress state release emission native)
+    (access : scalarMemoryAccess native (nativeCodeView nativeAddress state))
+    (environment : exclusiveStoreEnvironment native failure (nativeCodeView nativeAddress state))
+    (pairAccess : pairMemoryAccess native (nativeCodeView nativeAddress state))
+    (vectorAccess : vectorMemoryAccess native (nativeCodeView nativeAddress state)) :
+    dispatchSourceEmission nativeAddress emission sourceScalar sourceStack firstScalar secondScalar release failure state =
+      some (Reference.AArch64.step native (nativeCodeView nativeAddress state)) := by
+  cases binding with
+  | numeric ordinary native binding =>
+      exact emission_step_refines nativeAddress ordinary sourceScalar sourceStack firstScalar secondScalar release failure
+        native (nativeCodeView nativeAddress state) binding access environment pairAccess vectorAccess
+  | call target successor displacement targetAddress successorAddress =>
+      exact congrArg some (source_call_observed_refines nativeAddress target successor displacement state targetAddress successorAddress)
+  | address dst address fallthrough displacement addressValue fallAddress =>
+      exact congrArg some (source_address_observed_refines nativeAddress dst address fallthrough displacement state addressValue fallAddress)
+  | register link src targets successor code allowed successorAddress =>
+      exact code_target_observed_refines nativeAddress link src targets successor state code allowed successorAddress
+
 end KProgFormal.Refinement.Arm64Dispatcher
