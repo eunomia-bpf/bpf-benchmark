@@ -22,6 +22,7 @@ inductive Fault
   | read (address : Word) (bytes : Nat)
   | write (address : Word) (bytes : Nat)
   | divide
+  | nonCanonical (address : Word)
   | spAlignment (address : Word)
   | alignment (address : Word) (bytes : Nat)
   deriving DecidableEq, Repr

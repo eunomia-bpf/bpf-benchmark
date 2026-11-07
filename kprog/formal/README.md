@@ -38,7 +38,10 @@ families represented there. XMM0 MOVUPS/MOVAPS references include 16-byte
 permission and alignment faults; the two-lane C projection currently requires
 successful, suitably aligned access. REP MOVS includes direction, address32,
 segments and restart faults; its C core lift requires a matching bounded count,
-forward direction, default addressing and successful accesses. Individual module statements define their
+forward direction, default addressing and successful accesses. Near CALL/RET
+uses explicit 48/57-bit paging canonicality (default 48, optional
+`state.linear_address_bits`) with CET (IBT and shadow stacks) disabled. Internal call/return
+stack cores are distinct from helper and outer-invocation platform certificates. Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining
 handler lifts and their dispatcher composition is ongoing work.

@@ -32,6 +32,14 @@ def StackWidth.bytes : StackWidth → Nat | .w16 => 2 | .w64 => 8
 def StackWidth.registerWidth : StackWidth → CmovWidth
   | .w16 => .w16 | .w64 => .w64
 
+/-- Paging canonicality is an architectural input: CR4.LA57 selects57 bits,
+otherwise long mode uses48. The control profile here has CET shadow stacks off. -/
+inductive AddressWidth
+  | w48 | w57
+  deriving DecidableEq, Repr
+
+def AddressWidth.bits : AddressWidth → Nat | .w48 => 48 | .w57 => 57
+
 structure State where
   gpr : Register → Word
   rflags : Word
@@ -40,6 +48,7 @@ structure State where
   pc : Word
   fsBase : Word
   gsBase : Word
+  addressWidth : AddressWidth := .w48
 
 /-- All sixteen architectural condition codes, including parity. -/
 def condition (flags : Word) (code : Fin 16) : Bool :=
@@ -780,10 +789,39 @@ def repMovsStep (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Wo
   let start := stringStart address32 s
   repMovsLoop width address32 sourceBase nextPc (start.gpr 1).toNat start
 
+def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
+  (target.setWidth width.bits).signExtend 64 == target
+
+/-- Near CALL samples its source, including an incoming-RSP memory address,
+before pushing the fall-through. Stack access faults precede a noncanonical
+target fault; neither failure commits the prepared return-address write. -/
+def callStep (source : ScalarSource) (nextPc : Word) (s : State) : Transition State :=
+  match scalarRead s .w64 source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (target, reads) =>
+      let address := s.gpr 4 - 8
+      if permitted s.memory.writable address 8 then
+        if canonicalTarget s.addressWidth target then
+          pushTransfer .w64 nextPc reads target s
+        else ⟨s, reads ++ [.fault (.nonCanonical target)], some (.nonCanonical target)⟩
+      else ⟨s, reads ++ [.fault (.write address 8)], some (.write address 8)⟩
+
+/-- Near RET reads the complete64-bit target before either RSP or PC changes.
+The optional unsigned imm16 releases arguments after a successful pop. -/
+def returnStep (release : BitVec 16) (s : State) : Transition State :=
+  match readMemory s.memory (s.gpr 4) 8 with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (target, read) =>
+      if canonicalTarget s.addressWidth target then
+        ⟨{ s with gpr := fun r => if r = 4 then s.gpr 4 + 8 + release.setWidth 64 else s.gpr r, pc := target }, [read], none⟩
+      else ⟨s, [read, .fault (.nonCanonical target)], some (.nonCanonical target)⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | call (source : ScalarSource) (nextPc : Word)
+  | returnNear (release : BitVec 16) (nextPc : Word)
   | repMovs (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word)
   | xmm0Move (store aligned : Bool) (address nextPc : Word)
   | doubleShift (width : CmovWidth) (left : Bool) (dst source : Register) (count nextPc : Word)
@@ -826,7 +864,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -836,6 +874,8 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .call source nextPc => callStep source nextPc s
+  | .returnNear release _ => returnStep release s
   | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
   | .xmm0Move store aligned address nextPc => xmm0Step store aligned address nextPc s
   | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
@@ -935,6 +975,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .call .. | .returnNear .. => 0xffffffffffffffff
   | .repMovs .. => 0xffffffffffffffff
   | .xmm0Move .. => 0xffffffffffffffff
   | .doubleShift width _ _ _ count _ =>
@@ -1125,6 +1166,14 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if first = 0xe8 then
+    let displacement ← signedDisplacement bytes (count + 1) 4
+    let nextPc ← fallthrough s (count + 5)
+    return .call (.immediate (nextPc + displacement)) nextPc
+  if first = 0xc3 ∨ first = 0xc2 then
+    let size := if first = 0xc2 then 2 else 0
+    let raw ← signedDisplacement bytes (count + 1) size
+    return .returnNear (raw.setWidth 16) (← fallthrough s (count + 1 + size))
   if first = 0xa4 ∨ first = 0xa5 then
     if p.mandatoryPrefix ≠ 0xf3 then throw "MOVS reference requires the architectural REP prefix"
     let sourceBase := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
@@ -1329,6 +1378,9 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .pushImmediate width value (s.pc + BitVec.ofNat 64 length)
   if first = 0xff then
     let modrm ← byteAt bytes (count + 1)
+    if (modrm / 8) % 8 = 2 then
+      let (target, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      return .call (scalarSource p .w64 target) nextPc
     if (modrm / 8) % 8 = 6 then
       let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
       match source with

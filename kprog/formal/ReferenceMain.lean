@@ -57,10 +57,17 @@ private def parseState (j : Json) (cells : Array InputCell) : Except String X86.
     let pc ← fieldWord j "pc"
     let fs ← fieldWord j "fs_base"
     let gs ← fieldWord j "gs_base"
+    let addressWidth ← match j.getObjVal? "linear_address_bits" with
+      | .error _ => pure X86.AddressWidth.w48
+      | .ok value => do
+          let bits ← value.getNat?
+          if bits = 48 then pure X86.AddressWidth.w48
+          else if bits = 57 then pure X86.AddressWidth.w57
+          else throw "linear_address_bits must be 48 or 57"
     let xmm ← fieldNat j "xmm0"
     if xmm ≥ 2^128 then throw "xmm0 is outside the 128-bit range"
     pure { gpr := fun r => regs[r.val]'(by omega)
-           rflags := flags, xmm0 := BitVec.ofNat 128 xmm, memory := memoryOfCells cells, pc := pc, fsBase := fs, gsBase := gs }
+           rflags := flags, xmm0 := BitVec.ofNat 128 xmm, memory := memoryOfCells cells, pc := pc, fsBase := fs, gsBase := gs, addressWidth := addressWidth }
   else throw "registers must contain exactly 16 words"
 
 private def parseNativeBytes (j : Json) : Except String (Array Byte) := do
@@ -74,6 +81,7 @@ private def faultJson : Fault → Json
   | .read a n => Json.mkObj [("kind", toJson "read"), ("address", number a.toNat), ("bytes", number n)]
   | .write a n => Json.mkObj [("kind", toJson "write"), ("address", number a.toNat), ("bytes", number n)]
   | .divide => Json.mkObj [("kind", toJson "divide")]
+  | .nonCanonical address => Json.mkObj [("kind", toJson "non_canonical"), ("address", number address.toNat)]
   | .spAlignment address => Json.mkObj [("kind", toJson "sp_alignment"), ("address", number address.toNat)]
   | .alignment address bytes => Json.mkObj [("kind", toJson "alignment"), ("address", number address.toNat), ("bytes", number bytes)]
 
@@ -111,7 +119,10 @@ private def executeX86 (request : Json) : Except String Json := do
         let result ← X86Path.evaluate base bytes entries initial
         pure (result.effect, result.definedFlags, [])
   let s := output.state
-  pure <| Json.mkObj <| registers ++ [
+  let profile := match state.getObjVal? "linear_address_bits" with
+    | .error _ => []
+    | .ok _ => [("linear_address_bits", number s.addressWidth.bits)]
+  pure <| Json.mkObj <| profile ++ registers ++ [
     ("registers", toJson ((List.finRange 16).map (fun r => (s.gpr r).toNat))),
     ("flags", number s.rflags.toNat),
     ("defined_flags", number mask.toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),

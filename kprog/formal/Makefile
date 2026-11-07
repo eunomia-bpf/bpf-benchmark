@@ -169,6 +169,7 @@ check:
 	python3 tools/check_reference_x86_double_shift.py
 	python3 tools/check_reference_x86_xmm0.py
 	python3 tools/check_reference_x86_rep_movs.py
+	python3 tools/check_reference_x86_call.py
 	python3 tools/check_x86_divide_handler.py
 	python3 tools/check_x86_rotate_handler.py
 	python3 tools/check_x86_high_load.py
