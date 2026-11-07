@@ -1,0 +1,19 @@
+{
+  "architecture": "x86_64",
+  "platform": "KVM",
+  "cases": 38,
+  "valid_executed": 9,
+  "unsafe_cases": 29,
+  "accepted_unsafe": 0,
+  "stages": {
+    "valid_executed": 9,
+    "verifier_rejected": 22,
+    "loader_rejected": 1,
+    "specialization_rejected": 6
+  },
+  "unsafe_native_executed": false,
+  "application_proof_supplied": false,
+  "runtime_source_commit": "088f426a98d3548b7657cfe8765ee7d60ab41052",
+  "kernel_module_pins": "guest-input-pins.json",
+  "source_head": "0a9b8757c6e7baf6a40fea1c93d9ee3d88edf2f7"
+}

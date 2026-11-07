@@ -1,0 +1,26 @@
+{
+  "producer_command": [
+    "c++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-O2",
+    "-D__EXPORTED_HEADERS__",
+    "-DNATIVE_LINK_PATH=\"/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link\"",
+    "-I/workspaces/repository/vendor/linux-framework/include/uapi",
+    "-I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include",
+    "/workspaces/repository/kprog/fidelity/bound_probe.cpp",
+    "/workspaces/repository/kprog/libnativeloader/build/libnative_loader.a",
+    "/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+    "-lelf",
+    "-lz",
+    "-ldl",
+    "-pthread",
+    "-o",
+    "/workspaces/repository/kprog/formal/build/fidelity-trusted/bound-probe"
+  ],
+  "producer_sha256": "8b6af5925b4d7ea387f1c37f796672ef807d59d32d7d045a813920ff35a349e5",
+  "application_proofs_generated": false,
+  "negative_context": "mutable HASH,key0 may be absent; ARRAY key0 is a legitimate nonnull case"
+}

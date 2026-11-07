@@ -61,10 +61,12 @@ int main(int argc,char **argv)
         options.expected_attach_type=bpf_program__expected_attach_type(p);
         options.prog_flags=bpf_program__flags(p);
         options.manifest_path=std::filesystem::absolute(argv[2]);
+        /* Manifest selection needs the original source locally; it is not a proof. */
         options.source_insns.assign(bpf_program__insns(p),bpf_program__insns(p)+bpf_program__insn_cnt(p));
         options.native_link_path=std::filesystem::absolute(NATIVE_LINK_PATH);
         auto loaded=native_loader::load_from_fd(options);
         if (loaded.prog_fd<0 || !loaded.replaced) throw std::runtime_error("manifest did not produce a native program");
+        if (loaded.prebuilt_proof) throw std::runtime_error("expected fresh trusted-service proof");
         bpf_prog_info info{};uint32_t size=sizeof(info);
         if (bpf_obj_get_info_by_fd(loaded.prog_fd,&info,&size)) throw std::runtime_error("bound program info failed");
         std::vector<bpf_insn> image(info.xlated_prog_len/sizeof(bpf_insn));

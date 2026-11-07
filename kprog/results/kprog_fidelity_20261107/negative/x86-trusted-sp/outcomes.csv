@@ -1,0 +1,157 @@
+name,negative,stage,native_sha256,request_id,source_prog_id,exact_diagnostic,failure_archive
+valid_control,False,valid_executed,c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2,1,8,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=13 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_copy_restore,False,valid_executed,4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b,2,21,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=26 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_alias_load,False,valid_executed,df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217,3,34,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=39 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_cmov_alias,False,valid_executed,01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac,4,47,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=52 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_cmov_from_sp,False,valid_executed,a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589,5,60,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=65 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_cmov_to_sp,False,valid_executed,6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8,6,73,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=78 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_cmov_self_sp,False,valid_executed,59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d,7,86,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=91 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_xchg_alias,False,valid_executed,75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8,8,99,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=104 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+valid_spill_restore,False,valid_executed,9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f,9,112,"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=117 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2",
+past_data_end_read,True,verifier_rejected,d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2,10,123,R1 pointer arithmetic on pkt_end prohibited,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/10.failure.tar.gz
+past_data_end_write,True,verifier_rejected,6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322,11,133,R1 pointer arithmetic on pkt_end prohibited,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/11.failure.tar.gz
+missing_data_end_check,True,verifier_rejected,a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4,12,143,"invalid access to packet, off=0 size=1, R2(id=0,off=0,r=0)
+R2 offset is outside of the packet",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/12.failure.tar.gz
+map_value_oob,True,verifier_rejected,94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f,13,153,"invalid access to map value, value_size=8 off=8 size=8
+R1 min value is outside of the allowed memory range",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/13.failure.tar.gz
+nullable_map_dereference,True,verifier_rejected,c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4,14,159,"R1 pointer arithmetic on map_value_or_null prohibited, null-check it first",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/14.failure.tar.gz
+invalid_helper_argument,True,verifier_rejected,8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc,15,165,R1 type=scalar expected=map_ptr,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/15.failure.tar.gz
+stack_oob,True,verifier_rejected,551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601,16,175,invalid read from stack R3 off=-1031 size=1,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/16.failure.tar.gz
+uninitialized_stack,True,verifier_rejected,f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a,17,185,invalid read from stack R3 off=-15 size=1,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/17.failure.tar.gz
+unbounded_loop,True,loader_rejected,584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36,18,195,trusted-native-loader: native_kernel bound proof contains no BPF exit; insns=2 0:0xb7 1:0x5,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/18.failure.tar.gz
+unbounded_indirect_jump,True,specialization_rejected,cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11,19,205,unresolved finite indirect target at 0x3: jmp    rax,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/19.failure.tar.gz
+unsupported_instruction,True,specialization_rejected,2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53,20,211,unsupported mnemonic: ud2,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/20.failure.tar.gz
+immediate_push_branch,True,verifier_rejected,cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a,21,217,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=b243d5fbce0fd1ab word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/21.failure.tar.gz
+entry_return_slot_overwrite,True,specialization_rejected,4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50,22,227,native return address lacks call/entry provenance at 0xd: jmp    12 <entry+0x12> ; native-link entry RET,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/22.failure.tar.gz
+stack_base_flags,True,verifier_rejected,830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea,23,233,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=375f75a3c96d4ae9 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/23.failure.tar.gz
+undefined_entry_register,True,specialization_rejected,3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893,24,243,undefined native ABI flags at 0x3: je     11 <entry+0x11>,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/24.failure.tar.gz
+undefined_entry_flags,True,specialization_rejected,bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be,25,249,undefined native ABI flags at 0x0: jae    e <entry+0xe>,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/25.failure.tar.gz
+div8_zero,True,verifier_rejected,e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f,26,255,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=e1cd8c3a27ebc43a word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1
+chunk_bytes=0:16
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/26.failure.tar.gz
+div8_overflow,True,verifier_rejected,09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677,27,265,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=fe4d7f0c07975552 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/27.failure.tar.gz
+div16_zero,True,verifier_rejected,1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f,28,275,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=b13b009362b02121 word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/28.failure.tar.gz
+div16_overflow,True,verifier_rejected,93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc,29,285,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=9cc3013ebcaa2b45 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/29.failure.tar.gz
+div32_zero,True,verifier_rejected,5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a,30,295,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=845c6ca284a2783d word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1
+chunk_bytes=0:16
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/30.failure.tar.gz
+div32_overflow,True,verifier_rejected,7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde,31,305,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=24cba849e9bcf6c1 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/31.failure.tar.gz
+div64_zero,True,verifier_rejected,fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea,32,315,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=57fd9fdf36df4e1b word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/32.failure.tar.gz
+div64_overflow,True,verifier_rejected,824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4,33,325,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=deacdeffe54c2987 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/33.failure.tar.gz
+helper_clobbered_register,True,specialization_rejected,a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2,34,335,undefined native ABI flags at 0xe: je     19 <entry+0x19>,/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/34.failure.tar.gz
+high32_positive_byte,True,verifier_rejected,54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b,35,341,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=08ba4b52559dd074 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1
+chunk_bytes=0:34
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/35.failure.tar.gz
+high32_positive_qword,True,verifier_rejected,323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538,36,351,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=bdf3132db69dbad0 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1
+chunk_bytes=0:34
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/36.failure.tar.gz
+high32_negative_byte,True,verifier_rejected,58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e,37,361,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=3eb691181c9707da word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1
+chunk_bytes=0:37
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/37.failure.tar.gz
+high32_negative_qword,True,verifier_rejected,51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c,38,371,"kernel log tail:
+4,1718,5255357,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129951
+native_blob_diag: fnv64=10b4ce9a3c14dfc2 word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1
+chunk_bytes=0:37
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+",/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/requests/38.failure.tar.gz

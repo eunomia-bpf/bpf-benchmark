@@ -1,0 +1,6 @@
+{
+  "stage": "producer_setup_before_submit",
+  "message": "bound-probe: native_loader: manifest resolution requires source BPF bytecode\n",
+  "service": "{\"ready\": true, \"arch\": 1, \"endpoint\": \"/sys/kernel/debug/bpf_x86_native_lab/specializer\"}\n",
+  "safety_rejections": 0
+}

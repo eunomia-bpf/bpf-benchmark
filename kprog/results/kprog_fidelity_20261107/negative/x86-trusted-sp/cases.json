@@ -1,0 +1,268 @@
+[
+  {
+    "name": "valid_control",
+    "assembly": "mov eax,2; ret",
+    "negative": false,
+    "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_control.manifest.json"
+  },
+  {
+    "name": "valid_copy_restore",
+    "assembly": "mov rax,rsp; mov rsp,rax; mov eax,2; ret",
+    "negative": false,
+    "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_copy_restore.manifest.json"
+  },
+  {
+    "name": "valid_alias_load",
+    "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; mov ecx,DWORD PTR [rax]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "negative": false,
+    "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_alias_load.manifest.json"
+  },
+  {
+    "name": "valid_cmov_alias",
+    "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; xor edx,edx; xor ecx,ecx; cmovz rdx,rax; mov ecx,DWORD PTR [rdx]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "negative": false,
+    "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_cmov_alias.manifest.json"
+  },
+  {
+    "name": "valid_cmov_from_sp",
+    "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; xor eax,eax; xor ecx,ecx; cmovz rax,rsp; mov ecx,DWORD PTR [rax]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "negative": false,
+    "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_cmov_from_sp.manifest.json"
+  },
+  {
+    "name": "valid_cmov_to_sp",
+    "assembly": "mov rdx,rsp; lea rax,[rsp-16]; xor ecx,ecx; cmovz rsp,rax; mov rsp,rdx; mov eax,2; ret",
+    "negative": false,
+    "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_cmov_to_sp.manifest.json"
+  },
+  {
+    "name": "valid_cmov_self_sp",
+    "assembly": "xor ecx,ecx; cmovz rsp,rsp; mov eax,2; ret",
+    "negative": false,
+    "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_cmov_self_sp.manifest.json"
+  },
+  {
+    "name": "valid_xchg_alias",
+    "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; xor ecx,ecx; xchg rax,rcx; mov edx,DWORD PTR [rcx]; add rsp,16; cmp edx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "negative": false,
+    "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_xchg_alias.manifest.json"
+  },
+  {
+    "name": "valid_spill_restore",
+    "assembly": "sub rsp,32; lea rax,[rsp+16]; mov [rsp],rax; mov rax,[rsp]; mov rsp,rax; add rsp,16; mov eax,2; ret",
+    "negative": false,
+    "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/valid_spill_restore.manifest.json"
+  },
+  {
+    "name": "past_data_end_read",
+    "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+    "negative": true,
+    "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/past_data_end_read.manifest.json"
+  },
+  {
+    "name": "past_data_end_write",
+    "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/past_data_end_write.manifest.json"
+  },
+  {
+    "name": "missing_data_end_check",
+    "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+    "negative": true,
+    "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/missing_data_end_check.manifest.json"
+  },
+  {
+    "name": "map_value_oob",
+    "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+    "negative": true,
+    "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/map_value_oob.manifest.json"
+  },
+  {
+    "name": "nullable_map_dereference",
+    "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+    "negative": true,
+    "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/nullable_map_dereference.manifest.json"
+  },
+  {
+    "name": "invalid_helper_argument",
+    "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+    "negative": true,
+    "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/invalid_helper_argument.manifest.json"
+  },
+  {
+    "name": "stack_oob",
+    "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+    "negative": true,
+    "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/stack_oob.manifest.json"
+  },
+  {
+    "name": "uninitialized_stack",
+    "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+    "negative": true,
+    "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/uninitialized_stack.manifest.json"
+  },
+  {
+    "name": "unbounded_loop",
+    "assembly": "1: jmp 1b",
+    "negative": true,
+    "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/unbounded_loop.manifest.json"
+  },
+  {
+    "name": "unbounded_indirect_jump",
+    "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+    "negative": true,
+    "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/unbounded_indirect_jump.manifest.json"
+  },
+  {
+    "name": "unsupported_instruction",
+    "assembly": "ud2; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/unsupported_instruction.manifest.json"
+  },
+  {
+    "name": "immediate_push_branch",
+    "assembly": "mov eax, 2; push 1; pop rcx; test rcx, rcx; jz 1f; xor edx, edx; mov eax, DWORD PTR [rdx]; 1: ret",
+    "negative": true,
+    "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/immediate_push_branch.manifest.json"
+  },
+  {
+    "name": "entry_return_slot_overwrite",
+    "assembly": "mov QWORD PTR [rsp], 0; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/entry_return_slot_overwrite.manifest.json"
+  },
+  {
+    "name": "stack_base_flags",
+    "assembly": "mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret",
+    "negative": true,
+    "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/stack_base_flags.manifest.json"
+  },
+  {
+    "name": "undefined_entry_register",
+    "assembly": "test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/undefined_entry_register.manifest.json"
+  },
+  {
+    "name": "undefined_entry_flags",
+    "assembly": "jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/undefined_entry_flags.manifest.json"
+  },
+  {
+    "name": "div8_zero",
+    "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cl; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div8_zero.manifest.json"
+  },
+  {
+    "name": "div8_overflow",
+    "assembly": "mov eax, 256; xor edx, edx; mov ecx, 1; div cl; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div8_overflow.manifest.json"
+  },
+  {
+    "name": "div16_zero",
+    "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div16_zero.manifest.json"
+  },
+  {
+    "name": "div16_overflow",
+    "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div cx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div16_overflow.manifest.json"
+  },
+  {
+    "name": "div32_zero",
+    "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div ecx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div32_zero.manifest.json"
+  },
+  {
+    "name": "div32_overflow",
+    "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div ecx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div32_overflow.manifest.json"
+  },
+  {
+    "name": "div64_zero",
+    "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div rcx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div64_zero.manifest.json"
+  },
+  {
+    "name": "div64_overflow",
+    "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div rcx; mov eax, 2; ret",
+    "negative": true,
+    "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/div64_overflow.manifest.json"
+  },
+  {
+    "name": "helper_clobbered_register",
+    "assembly": "push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret",
+    "negative": true,
+    "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/helper_clobbered_register.manifest.json"
+  },
+  {
+    "name": "high32_positive_byte",
+    "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; add rsp,rcx; movzx eax,BYTE PTR [rsp]; mov rsp,rdx; ret",
+    "negative": true,
+    "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/high32_positive_byte.manifest.json"
+  },
+  {
+    "name": "high32_positive_qword",
+    "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; add rsp,rcx; mov rax,QWORD PTR [rsp]; mov rsp,rdx; ret",
+    "negative": true,
+    "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/high32_positive_qword.manifest.json"
+  },
+  {
+    "name": "high32_negative_byte",
+    "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; neg rcx; add rsp,rcx; movzx eax,BYTE PTR [rsp]; mov rsp,rdx; ret",
+    "negative": true,
+    "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/high32_negative_byte.manifest.json"
+  },
+  {
+    "name": "high32_negative_qword",
+    "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; neg rcx; add rsp,rcx; mov rax,QWORD PTR [rsp]; mov rsp,rdx; ret",
+    "negative": true,
+    "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/high32_negative_qword.manifest.json"
+  }
+]
