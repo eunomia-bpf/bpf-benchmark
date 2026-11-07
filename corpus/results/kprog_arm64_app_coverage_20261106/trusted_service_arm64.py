@@ -221,6 +221,9 @@ def host(case="control"):
                 ['capable', 'biosnoop', 'vfsstat', 'opensnoop', 'syscount', 'tcpconnect', 'tcplife', 'runqlat'])
             inputs.extend([ROOT / 'runner/libs/app_runners/native_loader_env.py',
                 ROOT / 'corpus/config/macro_apps.yaml', ROOT / 'corpus/config/benchmark_config.yaml'])
+            inputs.extend(sorted((ROOT / 'kinsn/module/arm64/build').glob('*.ko')))
+            inputs.extend([ROOT / 'vendor/build/arm64/linux/Module.symvers',
+                ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules' / (ROOT / 'vendor/build/arm64/linux/include/config/kernel.release').read_text().strip() / 'modules.dep'])
             inputs = list(dict.fromkeys(inputs))
         inputs.extend(sorted((ROOT / 'kprog/formal/generated').glob('*.h')))
         summary['command'] = argv
@@ -249,7 +252,9 @@ def host(case="control"):
                         if case in {'katran', 'bcc'}:
                             commands.append('mount --bind ' + str(ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so') + ' /usr/local/lib/bpfrejit/libbpfrejit_shim.so')
                         if case == 'bcc':
-                            commands.extend(['mount -t bpf bpffs /sys/fs/bpf',
+                            commands.extend(['mount --bind ' + str(ROOT / 'kinsn/module/arm64/build') + ' /artifacts/kinsn',
+                                'mount --bind ' + str(ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules') + ' /artifacts/lib/modules',
+                                'mount -t bpf bpffs /sys/fs/bpf',
                                 'mount -t tmpfs -o mode=1777 tmpfs /var/tmp',
                                 'install -d -m1777 /dev/shm', 'mount -t tmpfs -o mode=1777 tmpfs /dev/shm', 'ulimit -l unlimited'])
                         commands.extend([

@@ -72,3 +72,12 @@ kernel-mounted `/dev` lacked `/dev/shm`. The transport now creates that tmpfs
 mount point, as the standard init does. Its zero-request failure summary and
 raw archive are retained in `trusted-arm64-bcc-result/`; it is not an application
 acceptance result.
+
+The next bootstrap reached the registered service, then stopped before any
+application request: the readonly v35 image bundled older kinsn modules
+(`register_btf_kfunc_id_set` CRC0x94296922, current kernel0xd31a4c91).
+All11 existing current ARM modules match the current Module.symvers; the
+transport now mounts those modules and the current installed kernel-module
+tree into the guest. No rebuild or workload change was needed. See
+`trusted-arm64-bcc-result/module-compatibility.json` and the retained module
+startup failure archive. The next actual BCC replay is pending.

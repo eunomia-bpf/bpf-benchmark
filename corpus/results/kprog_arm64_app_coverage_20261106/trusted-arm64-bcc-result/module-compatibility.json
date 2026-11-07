@@ -1,0 +1,152 @@
+{
+  "scope": "existing ARM modules reuse; symbol CRC comparison, not guest load result",
+  "expected_register_btf_kfunc_id_set": "0xd31a4c91",
+  "old_image_register_btf_kfunc_id_set": "0x94296922",
+  "modules": [
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_ccmp.ko",
+      "sha256": "73c584277398cb7dcff5dd3da5d8f8438a993d573a90a21a98cdc14eee1f3432",
+      "versions": {
+        "__stack_chk_fail": "0xf0fdf6cb",
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_csel.ko",
+      "sha256": "44df0c5490316c3ffee5992c1262a72ae90628ba4bd0a6bc10b40581aa43ae2f",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_extr.ko",
+      "sha256": "325d64fe65cdc2ae95e5cfbf9dbfb2da9216ae540e0be35d4f187ba211966302",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_ldp.ko",
+      "sha256": "70c66d3575d3745af6682b3751ca355442e88b096232ac0a580dc058ba16c0ad",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_ldr.ko",
+      "sha256": "81932134202fbd8ba424652971aca30ec9f51f0c663cf3bc93667c26117b813e",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_mov.ko",
+      "sha256": "1780a19c2a34f49b07aaf339bccea29c65cb396682a2d191685fd20ca373e0f8",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_native_lab.ko",
+      "sha256": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
+      "versions": {
+        "kfree": "0x037a0cba",
+        "memcmp": "0x449ad0a7",
+        "__stack_chk_fail": "0xf0fdf6cb",
+        "mutex_lock": "0x81a4ceb2",
+        "btf_obj_id": "0x747339cb",
+        "mutex_unlock": "0xeb5546a2",
+        "bpf_prog_dev_bound_match": "0x00bf68b7",
+        "kvfree": "0x7aa1756e",
+        "kmalloc_caches": "0x6f38e04b",
+        "__kmalloc_cache_noprof": "0x8db5feb1",
+        "__kvmalloc_node_noprof": "0x7c9441bd",
+        "memcpy": "0x4829a47e",
+        "memset": "0xdcb764ad",
+        "__fortify_panic": "0x19dee613",
+        "debugfs_create_dir": "0xf06dba40",
+        "debugfs_create_file_full": "0x9cdcc873",
+        "scnprintf": "0x96848186",
+        "debugfs_remove": "0x3ce26622",
+        "simple_read_from_buffer": "0x619cb7dd",
+        "memchr_inv": "0x8df92f66",
+        "capable": "0xc6cbbc89",
+        "alt_cb_patch_nops": "0xa65c6def",
+        "bpf_prog_put": "0x5c5edc09",
+        "refcount_warn_saturate": "0x5d16eed4",
+        "__list_del_entry_valid_or_report": "0x950eb34e",
+        "__wake_up": "0xcead5019",
+        "put_pid": "0x5735a8e2",
+        "bpf_map_put": "0x5d82e99b",
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "vmemdup_user": "0xe2f93174",
+        "__bpf_call_base": "0xc9827693",
+        "__arch_copy_to_user": "0x6cbbfc54",
+        "kmemdup_noprof": "0x9d0129f8",
+        "validate_usercopy_range": "0x36dcb0a8",
+        "__check_object_size": "0x88db9f48",
+        "__arch_copy_from_user": "0x12a4e128",
+        "__kmalloc_noprof": "0xb8342c83",
+        "bpf_prog_by_id": "0x30b9cb44",
+        "memdup_user_nul": "0x1d07e365",
+        "memchr": "0xa07a37f0",
+        "__init_waitqueue_head": "0xf04a02c2",
+        "__list_add_valid_or_report": "0x7696f8c7",
+        "kstrtouint": "0x3b6c41ea",
+        "bpf_map_get": "0xfa549972",
+        "try_module_get": "0x1c1bb726",
+        "__sw_hweight32": "0x74c134b9",
+        "bpf_map_get_curr_or_next": "0x88349583",
+        "init_wait_entry": "0xfe487975",
+        "schedule": "0x01000e51",
+        "prepare_to_wait_event": "0xdb9c9937",
+        "finish_wait": "0xcc1f2035",
+        "get_task_pid": "0x75398b2e",
+        "___ratelimit": "0x488c520e",
+        "_printk": "0x122c3a7e",
+        "system_cpucaps": "0xdd766f86",
+        "default_llseek": "0x0133f405",
+        "param_ops_bool": "0xbce5a27c",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_prfm.ko",
+      "sha256": "4159f1cd590edc008b622cfc9746af2dcd73e5472e069cf14e2dc7516695fee2",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_rev.ko",
+      "sha256": "4f607fc8865764d87527e4abdbacb1d49138208f00fe4c4de1117b94fc64d225",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_str.ko",
+      "sha256": "c6c0f388925914601210b7e4771952d36f702e440768e9898f983b92aa31708d",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    },
+    {
+      "path": "kinsn/module/arm64/build/bpf_arm64_ubfm.ko",
+      "sha256": "0c215fd61afb4d39535d12bc750ce228f467c7b353fabe9369351f2468e244bd",
+      "versions": {
+        "register_btf_kfunc_id_set": "0xd31a4c91",
+        "module_layout": "0x008a44e9"
+      }
+    }
+  ]
+}
