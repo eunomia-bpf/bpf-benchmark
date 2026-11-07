@@ -2195,4 +2195,202 @@ theorem step_through_load_refines (code : Nat) (flags : Byte) (aux : BitVec 32) 
       exact load_indexed_refines i data index kind scaled flags aux src3 sourceScalar sourceStack tagIsScalar s
         transfer offset noWriteback encoded memoryFlags mod amount alignment readable
 
+
+/-- Signed loads choose memory width and sign operation from the opcode,
+then apply the independent FLAGS-selected W/X destination write. -/
+def signedMemorySuccess (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (dst : Byte)
+    (address : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let width := Arm64WritebackMemory.signedWidth op
+  let loaded := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth width) (wordAt s.memory address 8)
+  let value := GeneratedArm64Extrev.value (Arm64WritebackMemory.signedExtend op) loaded 0 0
+    (Arm64Register.handlerWidth output)
+  ⟨{ Arm64Move.Fields.write s dst value output with pc := s.pc + 4 },
+    [.memory .read address (bytesAt s.memory address width.bytes) (initializedAt s.memory address width.bytes)], none⟩
+
+theorem signed_memory_success_typed (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (dst : Register)
+    (address : Word) (s : Reference.AArch64.State) :
+    signedMemorySuccess op output (Arm64Register.registerCode dst) address s =
+      Arm64WritebackMemory.signedSuccess op dst output address s := by
+  simp only [signedMemorySuccess, Arm64WritebackMemory.signedSuccess, Arm64Move.Fields.register_write]
+
+def signedMemoryBody (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (aux : BitVec 32)
+    (dst base index : Byte) (immediate : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let before := bumpMemoryBase base (GeneratedArm64MemPrepost.preDelta aux immediate) s
+  let address := Arm64Move.Fields.read before base + memoryOffsetBody aux index immediate before
+  let transferred := signedMemorySuccess op output dst address before
+  { transferred with state := bumpMemoryBase base (GeneratedArm64MemPrepost.postDelta aux immediate) transferred.state }
+
+theorem signed_memory_body_immediate (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (aux : BitVec 32)
+    (dst base : Register) (mode : Reference.AArch64.Writeback) (immediate : Word) (s : Reference.AArch64.State)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    signedMemoryBody op output aux (Arm64Register.registerCode dst) (memoryBaseCode base)
+      GeneratedArm64MemIndex.indexSentinel immediate s =
+      Arm64WritebackMemory.signedCore op dst output mode base immediate s := by
+  obtain ⟨pre, post, suppressed⟩ := memory_flag_fields aux mode immediate flags
+  simp only [signedMemoryBody, Arm64WritebackMemory.signedCore, pre, post, suppressed,
+    memory_offset_absent, memory_base_bump_typed, memory_base_read,
+    signed_memory_success_typed, Arm64Memory.base_refines]
+
+theorem signed_memory_body_indexed (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (aux : BitVec 32)
+    (dst base index : Register) (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then (Arm64WritebackMemory.signedWidth op).scale else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 =
+      BitVec.ofNat 64 (if scaled then (Arm64WritebackMemory.signedWidth op).scale else 0)) :
+    signedMemoryBody op output aux (Arm64Register.registerCode dst) (memoryBaseCode base)
+      (Arm64Register.registerCode index) 0 s = Arm64WritebackMemory.signedCore op dst output .none base
+        (Arm64WritebackMemory.offsetValue (Arm64WritebackMemory.signedWidth op) s (.register index kind scaled)) s := by
+  have pre : GeneratedArm64MemPrepost.preDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.preDelta
+    split <;> rfl
+  have post : GeneratedArm64MemPrepost.postDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.postDelta
+    split <;> rfl
+  simp only [signedMemoryBody, pre, post, bumpMemoryBase, ↓reduceIte,
+    memory_offset_indexed (Arm64WritebackMemory.signedWidth op) aux index kind scaled s memoryFlags mod amount,
+    memory_base_read, signed_memory_success_typed]
+  simp only [Arm64WritebackMemory.signedCore, Arm64Memory.base_refines]
+  rfl
+
+/-- The canonical decoder reserves W-output word sign-loads. This is native
+field validity, not a new C guard on the generated numeric body. -/
+def signedNativeOutput (op : GeneratedArm64LdrSx.LdrSx) (output : Width) : Prop :=
+  op = .ldrSw → output = .w64
+
+def dispatchThroughSigned (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughLoad code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s with
+  | some result => some result
+  | none => (Arm64WritebackMemory.signedDecode code).bind (fun op =>
+      (decodeDataWidth flags).map (fun output => signedMemoryBody op output aux dst src src2 value s))
+
+theorem signed_reached (op : GeneratedArm64LdrSx.LdrSx) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughSigned (GeneratedArm64LdrSx.code op) flags aux dst src src2 src3 value
+      sourceScalar sourceStack tagIsScalar s =
+      (decodeDataWidth flags).map (fun output => signedMemoryBody op output aux dst src src2 value s) := by
+  have before : dispatchEncodedPrefix (GeneratedArm64LdrSx.code op) flags aux dst src src2 src3 value
+      sourceScalar sourceStack s = none := by
+    unfold dispatchEncodedPrefix
+    cases decoded : decodeDataWidth flags with
+    | none => rfl
+    | some width =>
+        change dispatchThroughSelect (GeneratedArm64LdrSx.code op) aux width dst src src2 src3 value
+          sourceScalar sourceStack s = none
+        cases op <;> rfl
+  have notLoad : GeneratedArm64LdrSx.code op ≠ GeneratedArm64DispatchSingleton.code .load := by cases op <;> decide
+  unfold dispatchThroughSigned dispatchThroughLoad
+  rw [before, if_neg notLoad, Arm64WritebackMemory.signed_decode_code]
+  rfl
+
+theorem signed_immediate_refines (op : GeneratedArm64LdrSx.LdrSx) (output : Width)
+    (i : Reference.AArch64.AddressedMemoryInstruction) (data : Register) (flags : Byte) (aux : BitVec 32)
+    (immediate : Word) (src3 : Byte) (sourceScalar sourceStack tagIsScalar : Bool) (s : Reference.AArch64.State)
+    (width : i.width = Arm64WritebackMemory.signedWidth op) (transfer : i.transfer = .load data (some output))
+    (offset : i.offset = .immediate immediate)
+    (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth output))
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback))
+    (alignment : Reference.AArch64.spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else immediate)) i.width.bytes = true) :
+    dispatchThroughSigned (GeneratedArm64LdrSx.code op) flags aux (Arm64Register.registerCode data)
+      (memoryBaseCode i.base) GeneratedArm64MemIndex.indexSentinel src3 immediate sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step (.addressedMemory i) s) := by
+  rw [signed_reached, decode_data_width flags output encoded]
+  change some (signedMemoryBody op output aux (Arm64Register.registerCode data) (memoryBaseCode i.base)
+    GeneratedArm64MemIndex.indexSentinel immediate s) = _
+  rw [signed_memory_body_immediate op output aux data i.base i.writeback immediate s memoryFlags]
+  exact congrArg some (Arm64WritebackMemory.signed_core_refines op i data output immediate s width transfer offset alignment accessible)
+
+theorem signed_indexed_refines (op : GeneratedArm64LdrSx.LdrSx) (output : Width)
+    (i : Reference.AArch64.AddressedMemoryInstruction) (data index : Register) (kind : Reference.AArch64.MemoryExtend)
+    (scaled : Bool) (flags : Byte) (aux : BitVec 32) (src3 : Byte) (sourceScalar sourceStack tagIsScalar : Bool)
+    (s : Reference.AArch64.State) (width : i.width = Arm64WritebackMemory.signedWidth op)
+    (transfer : i.transfer = .load data (some output)) (offset : i.offset = .register index kind scaled)
+    (noWriteback : i.writeback = .none)
+    (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth output))
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then i.width.scale else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then i.width.scale else 0))
+    (alignment : Reference.AArch64.spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (Reference.AArch64.memoryBase s i.base + Arm64WritebackMemory.offsetValue i.width s i.offset) i.width.bytes = true) :
+    dispatchThroughSigned (GeneratedArm64LdrSx.code op) flags aux (Arm64Register.registerCode data)
+      (memoryBaseCode i.base) (Arm64Register.registerCode index) src3 0 sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step (.addressedMemory i) s) := by
+  rw [signed_reached, decode_data_width flags output encoded]
+  change some (signedMemoryBody op output aux (Arm64Register.registerCode data) (memoryBaseCode i.base)
+    (Arm64Register.registerCode index) 0 s) = _
+  rw [width] at mod amount
+  rw [signed_memory_body_indexed op output aux data i.base index kind scaled s memoryFlags mod amount]
+  have result := Arm64WritebackMemory.signed_indexed_refines op i data output s width transfer noWriteback alignment accessible
+  rw [offset, width] at result
+  exact congrArg some result
+
+theorem signed_earlier_preserved (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : LoadBinding s.pc code flags aux dst src src2 src3 value native)
+    (access : scalarMemoryAccess native s) :
+    dispatchThroughSigned code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughSigned,
+    step_through_load_refines code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s binding access]
+
+inductive SignedBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : LoadBinding pc code flags aux dst src src2 src3 value native) :
+      SignedBinding pc code flags aux dst src src2 src3 value native
+  | immediate (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (i : Reference.AArch64.AddressedMemoryInstruction)
+      (data : Register) (flags : Byte) (aux : BitVec 32) (immediate : Word) (src3 : Byte)
+      (width : i.width = Arm64WritebackMemory.signedWidth op) (transfer : i.transfer = .load data (some output))
+      (offset : i.offset = .immediate immediate) (nativeOutput : signedNativeOutput op output)
+      (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth output))
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback)) :
+      SignedBinding pc (GeneratedArm64LdrSx.code op) flags aux (Arm64Register.registerCode data)
+        (memoryBaseCode i.base) GeneratedArm64MemIndex.indexSentinel src3 immediate (.addressedMemory i)
+  | indexed (op : GeneratedArm64LdrSx.LdrSx) (output : Width) (i : Reference.AArch64.AddressedMemoryInstruction)
+      (data index : Register) (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (flags : Byte) (aux : BitVec 32) (src3 : Byte)
+      (width : i.width = Arm64WritebackMemory.signedWidth op) (transfer : i.transfer = .load data (some output))
+      (offset : i.offset = .register index kind scaled) (noWriteback : i.writeback = .none)
+      (nativeOutput : signedNativeOutput op output)
+      (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth output))
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+      (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+          (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then i.width.scale else 0) = 0))
+      (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then i.width.scale else 0)) :
+      SignedBinding pc (GeneratedArm64LdrSx.code op) flags aux (Arm64Register.registerCode data)
+        (memoryBaseCode i.base) (Arm64Register.registerCode index) src3 0 (.addressedMemory i)
+
+theorem step_through_signed_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : SignedBinding s.pc code flags aux dst src src2 src3 value native)
+    (access : scalarMemoryAccess native s) :
+    dispatchThroughSigned code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value native earlier =>
+      exact signed_earlier_preserved code flags aux dst src src2 src3 value sourceScalar sourceStack tagIsScalar native s earlier access
+  | immediate op output i data flags aux _ src3 width transfer offset nativeOutput encoded memoryFlags =>
+      rcases access with ⟨alignment, accessible⟩
+      have readable : permitted s.memory.readable
+          (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else value)) i.width.bytes = true := by
+        simpa only [transfer, offset, Reference.AArch64.memoryOffset] using accessible
+      exact signed_immediate_refines op output i data flags aux value src3 sourceScalar sourceStack tagIsScalar s
+        width transfer offset encoded memoryFlags alignment readable
+  | indexed op output i data index kind scaled flags aux src3 width transfer offset noWriteback nativeOutput encoded memoryFlags mod amount =>
+      rcases access with ⟨alignment, accessible⟩
+      have readable : permitted s.memory.readable
+          (Reference.AArch64.memoryBase s i.base + Arm64WritebackMemory.offsetValue i.width s i.offset) i.width.bytes = true := by
+        rw [← Arm64WritebackMemory.offset_refines i.width s i.offset] at accessible
+        simpa only [transfer, noWriteback, reduceCtorEq, ↓reduceIte] using accessible
+      exact signed_indexed_refines op output i data index kind scaled flags aux src3 sourceScalar sourceStack tagIsScalar s
+        width transfer offset noWriteback encoded memoryFlags mod amount alignment readable
+
 end KProgFormal.Refinement.Arm64Dispatcher

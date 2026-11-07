@@ -44,8 +44,9 @@ aliases and arbitrary unused fields. Memory-base byte read/write/pre/post
 bridges separately retain native base31→SP32 and raw1/2/4/8-byte widths,
 including absent-width→doubleword. The actual byte-field scalar memory body
 also composes immediate pre/access/post transfers, both LOAD tag branches and
-all four widths under explicit original-SP/access witnesses. `step_through_load_refines` combines the raw-FLAGS prefix and actual LOAD gate
-for offset/pre/post and register-index forms. Its field-only binding is separate
+all four widths under explicit original-SP/access witnesses. `step_through_signed_refines` combines the raw-FLAGS prefix, ordinary LOAD and
+all three signed-load gates for offset/pre/post and register-index forms.
+Signed input width/sign operation and W/X output width remain independent. Its field-only binding is separate
 from explicit native SP-alignment/read-permission premises; no runtime guard is
 inserted. Faulting writeback and the remaining families still need completion.
 

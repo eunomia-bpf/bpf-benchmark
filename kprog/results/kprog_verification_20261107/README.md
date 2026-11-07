@@ -1338,3 +1338,35 @@ hosts passed 40080 cases,225292 cases,2048 cases,20168 cases,512 cases,22115 cas
 published declaration remains byte-identical. No placeholders, new tests, input
 filtering, ISA/runtime/generator/oracle/paper edits. Original warnings remain
 visible. Exact2c9's archived full pass predates this and the actual memory body.
+
+## Actual byte signed loads composed after LOAD
+
+`Arm64Dispatcher.dispatchThroughSigned` adds all three LDRSB/LDRSH/LDRSW numeric
+rows immediately after LOAD. Actual byte bodies select native memory width and
+the generated shared sign operation from the opcode, then apply the independent
+FLAGS-selected W/X destination write. Input width never substitutes for output
+width, and register-index scaling uses input width. Native output validity is
+explicit, retaining the canonical decoder's reserved W-output word sign-load.
+
+Derived byte-to-typed success/core equalities compose offset/pre/post immediate
+and native register-index forms, including UXTW/SXTW/LSL/SXTX, optional scaling,
+ZR, omitted unscaled X modifiers and permitted aliases. Physical index255 and
+SP32 remain distinct from native ZR31; unused AUX0/SRC3 and immediate-form modifier
+bytes remain arbitrary. Ordered native-width events/init/full state and one PC
+advance follow the existing canonical signed memory steps. No C alignment or
+permission guard is added; original native access witnesses stay explicit.
+
+Literal numeric disjointness derives reachability through every preceding gate.
+One step_through_signed_refines theorem covers the field-only SignedBinding and
+all earlier cases, separately requiring scalarMemoryAccess. It assumes no component
+semantic equality and derives no permission from a writable shadow/tag. Native
+producer/compiled-body/Entry/O2/O4 transport and faulting writeback remain open;
+this is not full77/72 completion.
+
+Validation: focused94-job dispatcher/reference Lean build (first compile passed),
+12 existing contract freshness checks, direct-dispatch/model checks and18 existing
+semantic/route hosts passed 40080 cases,120145 cases,1680 cases,256 cases,256 cases,98197 cases,20168 cases,512 cases,22115 cases,512 cases,6913 cases,257 cases,6401 cases,20024 cases,17 cases,3015 cases,4608 cases,135170 cases. Exact proof SHA256
+`8d57537bbccaa2f54422a93c520f21cb10a4c122af2cef091ae76d9fc9b0a5d7` remained stable. Every older declaration is byte-identical;
+no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper edits.
+Original compiler warnings remain visible. Active exactb757 full check predates
+this signed-load extension.
