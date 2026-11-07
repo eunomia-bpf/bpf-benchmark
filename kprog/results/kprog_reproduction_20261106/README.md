@@ -722,6 +722,39 @@ ratio.
 modes.** That matches the unbound arm (1.002x / 1.000x), so binding adds
 no measurable cost for this workload.
 
+## katran, timed through the trusted path
+
+Lane C posted the whole-application binding handoff (`1/1 fresh
+generated/compiled/accepted/bound`, app ok), so this is measured the same
+way as bcc: `CPUS=0-7 VM_CPUS=8 VM_MEM=64G SAMPLES=3 WORKLOAD_DURATION=180`,
+both stats modes, ratio against the JIT arm of the same run.
+
+| stats | JIT (M pkts) | verified native (M pkts) | median ratio |
+| --- | --- | --- | ---: |
+| on | 235.4, 239.1, 243.6 | 238.4, **324.6**, 237.4 | **0.997x** |
+| off | 269.6, 268.5, 267.0 | **532.3**, 269.4, 268.4 | **1.003x** |
+
+Both runs `status ok`, **1 of 1 program replaced with `bound_required=1`**.
+Artifacts `corpus/results/x86_kvm_corpus_20261107_225322_874390` and
+`..._232256_081248`.
+
+**The outlier problem again, in the other direction.** Each native arm has
+one sample far above the rest — 324.6M against ~238M, and 532.3M against
+~268M (1.98x the neighbours). The medians are 0.997x and 1.003x, i.e.
+parity; the means would be 1.115x and 1.329x, and quoting a mean would
+invent a 33% speedup that no sample pair supports. This is the same
+three-sample fragility that made tetragon read 0.805x, and it is why the
+median is the stated statistic.
+
+A sample twice the median is not a program change — katran's only program
+is unchanged between arms — so it is generator behaviour (pktgen is
+started with `count 0` and reports `pkts-sofar` on an interval). Worth
+noting for whoever owns the katran workload: the 1.98x sample is the one
+to explain.
+
+**Reading: the verified path is at parity with JIT on katran, both stats
+modes**, consistent with the unbound arm (1.018x stats on, 1.001x off).
+
 ## Other apps on the verified arm
 
 Only bcc is timeable so far. Tetragon, attempted with the same parameters
