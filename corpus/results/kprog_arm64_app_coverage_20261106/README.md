@@ -1003,3 +1003,13 @@ boundary outcomes and two source/simulator/bound result-37/generation-1 controls
 Opensnoop maximum stack offset falls from 880 to 472 bytes; tcplife remains 584.
 The extra sparse-payload trial gives no further reduction and is not promoted.
 The full formal check and actual BCC v27 startup continue separately.
+
+## Actual BCC v27 startup after stack representation changes
+
+[The v27 real application run](runtime-context-v27/README.md) records 14 bound
+startup replacements, five native-load failures, 23 baseline counter rows and
+no native workload counters. Tcplife still exceeds the BPF stack; three other
+entries fail on exclusive retry loops. Opensnoop reaches a 472-byte compiled
+frame but still returns EINVAL, so its precise cause remains under diagnosis.
+All 32 runtime manifest selectors, startup logs and portable Spark preparation
+are preserved. The application run is recorded as error.

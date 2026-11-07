@@ -1,0 +1,10 @@
+app,run,status,baseline_counter_rows,post_counter_rows,error
+bcc/set,arm64_qemu_corpus_19700101_000008_101854,error,23,0,"BCC tool tcplife exited with rc=97
+stderr tail:
+syscount:
+libbpf: elf: skipping unrecognized data section(11) .native_lab.rodata
+tcpconnect:
+libbpf: elf: skipping unrecognized data section(14) .native_lab.rodata
+libbpf: elf: skipping unrecognized data section(14) .native_lab.rodata
+runqlat:
+libbpf: elf: skipping unrecognized data section(19) .native_lab.rodata"

@@ -1,0 +1,34 @@
+{
+  "actual_app_status": "error",
+  "baseline_resident_programs": 23,
+  "native_workload_counter_rows": 0,
+  "proof_candidates_generated": 23,
+  "proof_candidates_compiled": 23,
+  "startup_bound_replacements": 14,
+  "native_load_failure_count": 5,
+  "failures": [
+    {
+      "program": "fentry_vfs_read",
+      "error": "verifier infinite loop: exclusive retry"
+    },
+    {
+      "program": "inet_sock_set_s",
+      "error": "verifier stack write -520; compiled maximum offset584"
+    },
+    {
+      "program": "tracepoint__sys",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "error": "EINVAL with no precise error in retained verifier tail; binding/verification diagnosis active"
+    },
+    {
+      "program": "sys_exit",
+      "error": "verifier infinite loop: exclusive retry"
+    },
+    {
+      "program": "sched_switch",
+      "error": "verifier infinite loop: exclusive retry"
+    }
+  ],
+  "total_startup_requests": 140,
+  "denominator": "23 baseline resident programs; probes, retries and not-reached startup entries remain in raw records"
+}

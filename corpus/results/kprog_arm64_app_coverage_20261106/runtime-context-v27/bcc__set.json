@@ -1,0 +1,269 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "18": {
+        "bytes_jited": 224,
+        "bytes_xlated": 232,
+        "id": 18,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 4691,
+        "run_time_ns_delta": 28137168,
+        "type": "kprobe"
+      },
+      "20": {
+        "bytes_jited": 464,
+        "bytes_xlated": 616,
+        "id": 20,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 4690,
+        "run_time_ns_delta": 72915728,
+        "type": "kprobe"
+      },
+      "26": {
+        "bytes_jited": 192,
+        "bytes_xlated": 200,
+        "id": 26,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "29": {
+        "bytes_jited": 472,
+        "bytes_xlated": 648,
+        "id": 29,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "31": {
+        "bytes_jited": 584,
+        "bytes_xlated": 824,
+        "id": 31,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "32": {
+        "bytes_jited": 224,
+        "bytes_xlated": 240,
+        "id": 32,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2389,
+        "run_time_ns_delta": 29071888,
+        "type": "tracepoint"
+      },
+      "34": {
+        "bytes_jited": 528,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "36": {
+        "bytes_jited": 552,
+        "bytes_xlated": 792,
+        "id": 36,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2389,
+        "run_time_ns_delta": 455104864,
+        "type": "tracepoint"
+      },
+      "37": {
+        "bytes_jited": 96,
+        "bytes_xlated": 48,
+        "id": 37,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 150,
+        "run_time_ns_delta": 828176,
+        "type": "tracing"
+      },
+      "38": {
+        "bytes_jited": 96,
+        "bytes_xlated": 48,
+        "id": 38,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 71,
+        "run_time_ns_delta": 294272,
+        "type": "tracing"
+      },
+      "39": {
+        "bytes_jited": 96,
+        "bytes_xlated": 48,
+        "id": 39,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "42": {
+        "bytes_jited": 96,
+        "bytes_xlated": 48,
+        "id": 42,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 2380,
+        "run_time_ns_delta": 15334448,
+        "type": "tracing"
+      },
+      "43": {
+        "bytes_jited": 96,
+        "bytes_xlated": 48,
+        "id": 43,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 6208,
+        "type": "tracing"
+      },
+      "47": {
+        "bytes_jited": 184,
+        "bytes_xlated": 184,
+        "id": 47,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "51": {
+        "bytes_jited": 552,
+        "bytes_xlated": 752,
+        "id": 51,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "54": {
+        "bytes_jited": 184,
+        "bytes_xlated": 184,
+        "id": 54,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "57": {
+        "bytes_jited": 552,
+        "bytes_xlated": 752,
+        "id": 57,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "59": {
+        "bytes_jited": 1448,
+        "bytes_xlated": 2240,
+        "id": 59,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "68": {
+        "bytes_jited": 192,
+        "bytes_xlated": 184,
+        "id": 68,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 19426,
+        "run_time_ns_delta": 140835280,
+        "type": "tracing"
+      },
+      "70": {
+        "bytes_jited": 192,
+        "bytes_xlated": 184,
+        "id": 70,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 40,
+        "run_time_ns_delta": 783632,
+        "type": "tracing"
+      },
+      "72": {
+        "bytes_jited": 1168,
+        "bytes_xlated": 1632,
+        "id": 72,
+        "name": "sched_switch",
+        "run_cnt_delta": 38693,
+        "run_time_ns_delta": 275127616,
+        "type": "tracing"
+      },
+      "73": {
+        "bytes_jited": 184,
+        "bytes_xlated": 168,
+        "id": 73,
+        "name": "sys_enter",
+        "run_cnt_delta": 70312,
+        "run_time_ns_delta": 838325824,
+        "type": "tracepoint"
+      },
+      "75": {
+        "bytes_jited": 568,
+        "bytes_xlated": 656,
+        "id": 75,
+        "name": "sys_exit",
+        "run_cnt_delta": 70276,
+        "run_time_ns_delta": 669948464,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "13462",
+          "--timeout",
+          "2s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/0233edfd"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 4.304587295999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [749] setting to a 2 secs run per stressor\nstress-ng: info:  [749] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [749] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [750] syscall: using method 'fast75'\nstress-ng: info:  [750] syscall: 290 system call tests, 217 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [750] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [750] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [750] syscall:              gettimeofday     6712.0       2016\nstress-ng: info:  [750] syscall:                      time    11536.0       4944\nstress-ng: info:  [750] syscall:                    getgid    45528.0      42112\nstress-ng: info:  [750] syscall:                   getpgrp    45944.0      41104\nstress-ng: info:  [750] syscall:                   geteuid    47248.0      45056\nstress-ng: info:  [750] syscall:                   getegid    47392.0      42288\nstress-ng: info:  [750] syscall:           set_robust_list    48744.0      41024\nstress-ng: info:  [750] syscall:                 getgroups    49000.0      45232\nstress-ng: info:  [750] syscall:                     umask    51952.0      43728\nstress-ng: info:  [750] syscall:           restart_syscall    52408.0      46128\nstress-ng: metrc: [749] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [749]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [749] syscall             507      3.56      0.39      1.90       142.61         221.20\nstress-ng: metrc: [749] cap                2442      2.00      0.29      1.73      1219.28        1210.11\nstress-ng: metrc: [749] set                 297      2.00      0.30      1.71       148.28         147.67\nstress-ng: metrc: [749] sockfd             2182      2.02      0.23      2.99      1080.67         677.90\nstress-ng: info:  [749] skipped: 0\nstress-ng: info:  [749] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [749] failed: 0\nstress-ng: info:  [749] metrics untrustworthy: 0\nstress-ng: info:  [749] successful run completed in 3.59 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "BCC tool tcplife exited with rc=97\nstderr tail:\nsyscount:\nlibbpf: elf: skipping unrecognized data section(11) .native_lab.rodata\ntcpconnect:\nlibbpf: elf: skipping unrecognized data section(14) .native_lab.rodata\nlibbpf: elf: skipping unrecognized data section(14) .native_lab.rodata\nrunqlat:\nlibbpf: elf: skipping unrecognized data section(19) .native_lab.rodata",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [],
+    "mode": "verified_native_loader",
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "runner_details": {
+    "command_used": [],
+    "process_output": {
+      "stderr_tail": "syscount:\nlibbpf: elf: skipping unrecognized data section(11) .native_lab.rodata\ntcpconnect:\nlibbpf: elf: skipping unrecognized data section(14) .native_lab.rodata\nlibbpf: elf: skipping unrecognized data section(14) .native_lab.rodata\nrunqlat:\nlibbpf: elf: skipping unrecognized data section(19) .native_lab.rodata",
+      "stdout_tail": "capable:\n00:03:08 0     822     tcpconnect       34      CAP_SYSLOG           0       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     822     tcpconnect       38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         21      CAP_SYS_ADMIN        0       allow\n00:03:08 0     802     biosnoop         21      CAP_SYS_ADMIN        0       allow\n00:03:08 0     802     biosnoop         21      CAP_SYS_ADMIN        0       allow\n00:03:08 0     802     biosnoop         21      CAP_SYS_ADMIN        0       allow\n00:03:08 0     802     biosnoop         21      CAP_SYS_ADMIN        0       allow\n00:03:08 0     802     biosnoop         39      CAP_BPF              1       allow\n00:03:08 0     802     biosnoop         39      CAP_BPF              1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\n00:03:08 0     802     biosnoop         38      CAP_PERFMON          1       allow\nbiosnoop:\nTIME(s)     COMM           PID     DISK    T    SECTOR     BYTES   LAT(ms)\ntcpconnect:\nPID    COMM         IP SADDR            DADDR            DPORT"
+    }
+  },
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "error"
+}
