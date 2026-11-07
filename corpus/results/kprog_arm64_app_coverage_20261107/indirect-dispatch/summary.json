@@ -1,0 +1,322 @@
+{
+  "utc": "2026-11-07T21:20:01.104200+00:00",
+  "scope": "Whole-application first-pass finite-dispatch source coverage from original common-service runtime artifacts. Universal O1/O2/O4 theorem work continues.",
+  "collector_source_sha256": "57435fa03c2afdc7b35b301f825c4b481c193d6821f7f4363c031d8226dd5736",
+  "applications": [
+    {
+      "app": "bcc",
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 1,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/run-20261107T172354861230Z.tar.gz",
+      "raw_archive_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda",
+      "source_summary_sha256": "bc2df545954c0b0bfc29a60e942dec30783671a29f36a05fc0134667c0039e18",
+      "terminal_requests": 19,
+      "request_status_counts": {
+        "refused": 3,
+        "bound": 16
+      },
+      "generated_source_artifacts": 19,
+      "generated_source_bytes": 329546,
+      "bound_source_artifacts": 16,
+      "bound_sources_with_indirect_dispatch": 0,
+      "counts": {
+        "return_sites": 24,
+        "return_sites_with_finite_case_macro": 24,
+        "raw_target_register_reads": 0
+      },
+      "bound_counts": {
+        "return_sites": 20,
+        "return_sites_with_finite_case_macro": 20,
+        "raw_target_register_reads": 0
+      },
+      "bound_target_count_histogram": {},
+      "bound_return_target_count_histogram": {
+        "0": 19,
+        "1": 1
+      },
+      "target_count_histogram": {},
+      "return_target_count_histogram": {
+        "0": 22,
+        "1": 2
+      },
+      "helper_target_histogram": {},
+      "source_artifact_digests": [
+        {
+          "request_archive": "1.failure.tar.gz",
+          "request_archive_sha256": "41cc02833c668d8eee57576aa0285d4c39758f6951ebc14672e86d895f827756",
+          "generated_source_sha256": "0321b09c78bf95a0657ac6d24c194f7dc1373727f22ef63f5dd89902bf1ebd0d"
+        },
+        {
+          "request_archive": "2.success.tar.gz",
+          "request_archive_sha256": "9d84005d77aaca14f1ec213b246a41fb2f094fef3824d8ac10b3236ea2413ce5",
+          "generated_source_sha256": "3be5813378fcf35e9e8a48fe0bd5d7c31b4d3843067ef584a1c28e9876a8193b"
+        },
+        {
+          "request_archive": "3.success.tar.gz",
+          "request_archive_sha256": "45f697d9e69be4b5a58f394430d097b03ccd293211e2d90c857013c9efeb8b98",
+          "generated_source_sha256": "0ac767cfa73597800144f21f52cc3b45ef3b5aede033d11ee6b8a49b613706fa"
+        },
+        {
+          "request_archive": "4.success.tar.gz",
+          "request_archive_sha256": "518b1989545a243682f7cbada425f7b87739615f09ffac3ede7f128bbecff8fd",
+          "generated_source_sha256": "4db844e73c6ca7e805f6553e6f2d4acdacedfd689eed75f631b902da0c35ebdd"
+        },
+        {
+          "request_archive": "5.success.tar.gz",
+          "request_archive_sha256": "1ab189139271edc4dba94c9e39261fc71e31ef0ecdfe2cf216c8871bac8198da",
+          "generated_source_sha256": "2c7af82e6f632de3500d69c54551443c5d5476665367aee536eb8ca01866aa2b"
+        },
+        {
+          "request_archive": "6.success.tar.gz",
+          "request_archive_sha256": "b461083c86c403636eb6aeec70e1440ddc0c1d6d87bb5be2d489b6f0461f6d68",
+          "generated_source_sha256": "e2d98e6647fdec838dc1352b325fe39a2868b8b475b666857f495facfcf93341"
+        },
+        {
+          "request_archive": "7.success.tar.gz",
+          "request_archive_sha256": "f87c5cd9cf31cc0ec5c1bfec55b542f767a431dcd910604aa897474ce787a613",
+          "generated_source_sha256": "3db7bb0e0761dd3d4b40428083464dd200ba322a3b91567ea64b108caad74d97"
+        },
+        {
+          "request_archive": "8.success.tar.gz",
+          "request_archive_sha256": "6d2d49793f322937d12a6c0357dc79325ba6879911248b1d95dea5ee7eb9b3ea",
+          "generated_source_sha256": "b7d4f0d00a75e57b3cc9efedeb25529d17985e1679acc0e6dbfbc98af3fd02f5"
+        },
+        {
+          "request_archive": "9.success.tar.gz",
+          "request_archive_sha256": "7064f97742097643e4dd7c255a6b1e8136b65722bbc1465c4ff1bbd2be148de5",
+          "generated_source_sha256": "531813107867b0560de344076533617eb6c579a84fd321c830db1d11db5e3c41"
+        },
+        {
+          "request_archive": "10.failure.tar.gz",
+          "request_archive_sha256": "656caf82857c865ae04b10a0e4da77dc7d48dd4c038b0056d082f5fcd7520de8",
+          "generated_source_sha256": "2368aec72648d4b33b5c71bd8246275c122daf07abc052fc378687b94199a39c"
+        },
+        {
+          "request_archive": "11.success.tar.gz",
+          "request_archive_sha256": "d159b7f00465e0d0c8c15cf2effc010800520dc94c159d07e2236d8f087ac840",
+          "generated_source_sha256": "96d20bed8f938bd59a1af8d1bd43af4c8f8e1e2a493fe12056361716b64bd1db"
+        },
+        {
+          "request_archive": "12.success.tar.gz",
+          "request_archive_sha256": "c52805adf733930c3b7ee11563f21146931488d52e0146a9d4248777afe46d2b",
+          "generated_source_sha256": "0f485ce9d2b5c2245c7d097671da9cbbb9821e7ba161c8c8afd67452e14db954"
+        },
+        {
+          "request_archive": "13.success.tar.gz",
+          "request_archive_sha256": "2d251c7751e628372b129f8921c9c8d16fe91f1beea4247809f547faf39060b6",
+          "generated_source_sha256": "ea24077669dde66b38267d28776ad87ff3795292d18769d2f189adc063cb8e65"
+        },
+        {
+          "request_archive": "14.success.tar.gz",
+          "request_archive_sha256": "049f6719eb77ce40c7aaf9516a1a849d22220d303e1296885c03a81d9e37f3cc",
+          "generated_source_sha256": "1620be9515b85fc04eea5533e2817e55a70ec0c37e4efee3077f8d7e960c55dc"
+        },
+        {
+          "request_archive": "15.failure.tar.gz",
+          "request_archive_sha256": "51875cb15813762f437cbd1cb48f479b366e867f7e4431c14c413d9b1c1244de",
+          "generated_source_sha256": "c605ed40b9579c6798420b07b7a8b6c4cf8a4c91c90be66eeb72a2fa04e7c3eb"
+        },
+        {
+          "request_archive": "16.success.tar.gz",
+          "request_archive_sha256": "bf770f7c4cf83fec394821466cbaa4954a7e9b92d9b7494dddf21786f396f8c3",
+          "generated_source_sha256": "666d6a3cd8830d2ab1ca4f6af1b8176a00791366318d20cf1e638e9a8c7d1f4b"
+        },
+        {
+          "request_archive": "17.success.tar.gz",
+          "request_archive_sha256": "a32f069b0f738c2c134b059fc2e64ae391c344ee73330e505ca2b52f3b14a9bb",
+          "generated_source_sha256": "7442f57ba5b37b81f0145536c1a152d08d17bbf29c0c9e6f61f90e9c96917f2b"
+        },
+        {
+          "request_archive": "18.success.tar.gz",
+          "request_archive_sha256": "c0704daa3e689b657c07a18cc5296caa6777c0aaebed5b48c0739df9f10148f0",
+          "generated_source_sha256": "21e962cfea8fbce4e2f33bcdab7242395344a05f45a5119d57d2e32f663282b7"
+        },
+        {
+          "request_archive": "19.success.tar.gz",
+          "request_archive_sha256": "297f5661b437ba12ac944dcdce4d660a378e188b599c32656ab259d8173f1ff9",
+          "generated_source_sha256": "cdebd541afed906927285783f8993fb1b7fa05e55e0c9e16d717a89b62fa0c61"
+        }
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 1,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T182921697243Z.tar.gz",
+      "raw_archive_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
+      "source_summary_sha256": "3e3e73bc09bb843edb373ce445fdeb68138422bce82fbafcc34f6a10e2e6cdc1",
+      "terminal_requests": 1,
+      "request_status_counts": {
+        "refused": 1
+      },
+      "generated_source_artifacts": 1,
+      "generated_source_bytes": 90764,
+      "bound_source_artifacts": 0,
+      "bound_sources_with_indirect_dispatch": 0,
+      "counts": {
+        "blr": 5,
+        "code_target_arms": 0,
+        "helper_target_arms": 5,
+        "tag_partitioned_sites": 5,
+        "register_read_sites": 5,
+        "switches": 10,
+        "reject_defaults": 10,
+        "two_switch_two_default_sites": 5,
+        "classified_literal_case_sites": 5,
+        "return_sites": 2,
+        "return_sites_with_finite_case_macro": 2,
+        "raw_target_register_reads": 5
+      },
+      "bound_counts": {},
+      "bound_target_count_histogram": {},
+      "bound_return_target_count_histogram": {},
+      "target_count_histogram": {
+        "1": 5
+      },
+      "return_target_count_histogram": {
+        "0": 2
+      },
+      "helper_target_histogram": {
+        "bpf_get_current_pid_tgid": 1,
+        "bpf_get_current_task": 1,
+        "bpf_map_lookup_elem": 1,
+        "bpf_probe_read_kernel": 1,
+        "bpf_trace_printk": 1
+      },
+      "source_artifact_digests": [
+        {
+          "request_archive": "1.failure.tar.gz",
+          "request_archive_sha256": "691a17755af224bf65eeb37a531d840cd3a6f371cbeb6d2146dab01069f0e13f",
+          "generated_source_sha256": "4c682f664de0d53cb8d99c79b3fc58099be4597a01214ba86a6d9ca75acb80c6"
+        }
+      ]
+    },
+    {
+      "app": "cilium",
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 1,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/run-20261107T183612879202Z.tar.gz",
+      "raw_archive_sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd",
+      "source_summary_sha256": "5d225662089d699fc945717cb78b184e0f8bfa714fb85bab5d5df6e25b42063f",
+      "terminal_requests": 0,
+      "request_status_counts": {},
+      "generated_source_artifacts": 0,
+      "generated_source_bytes": 0,
+      "bound_source_artifacts": 0,
+      "bound_sources_with_indirect_dispatch": 0,
+      "counts": {},
+      "bound_counts": {},
+      "bound_target_count_histogram": {},
+      "bound_return_target_count_histogram": {},
+      "target_count_histogram": {},
+      "return_target_count_histogram": {},
+      "helper_target_histogram": {},
+      "source_artifact_digests": []
+    },
+    {
+      "app": "tetragon",
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 1,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/run-20261107T183759739461Z.tar.gz",
+      "raw_archive_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
+      "source_summary_sha256": "70ce84f97fc22487ff66a636f8902714825e9cdbe1c1561ff49b689ac9a8d5c7",
+      "terminal_requests": 0,
+      "request_status_counts": {},
+      "generated_source_artifacts": 0,
+      "generated_source_bytes": 0,
+      "bound_source_artifacts": 0,
+      "bound_sources_with_indirect_dispatch": 0,
+      "counts": {},
+      "bound_counts": {},
+      "bound_target_count_histogram": {},
+      "bound_return_target_count_histogram": {},
+      "target_count_histogram": {},
+      "return_target_count_histogram": {},
+      "helper_target_histogram": {},
+      "source_artifact_digests": []
+    },
+    {
+      "app": "katran",
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 0,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/run-20261107T185947373335Z.tar.gz",
+      "raw_archive_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250",
+      "source_summary_sha256": "107256e7baf659d801e8d24e5f6d6e1f9ccf55839f13573dd509b328ee8383df",
+      "terminal_requests": 1,
+      "request_status_counts": {
+        "bound": 1
+      },
+      "generated_source_artifacts": 1,
+      "generated_source_bytes": 389549,
+      "bound_source_artifacts": 1,
+      "bound_sources_with_indirect_dispatch": 1,
+      "counts": {
+        "blr": 82,
+        "code_target_arms": 0,
+        "helper_target_arms": 82,
+        "tag_partitioned_sites": 82,
+        "register_read_sites": 82,
+        "switches": 164,
+        "reject_defaults": 164,
+        "two_switch_two_default_sites": 82,
+        "classified_literal_case_sites": 82,
+        "return_sites": 3,
+        "return_sites_with_finite_case_macro": 3,
+        "raw_target_register_reads": 82
+      },
+      "bound_counts": {
+        "blr": 82,
+        "code_target_arms": 0,
+        "helper_target_arms": 82,
+        "tag_partitioned_sites": 82,
+        "register_read_sites": 82,
+        "switches": 164,
+        "reject_defaults": 164,
+        "two_switch_two_default_sites": 82,
+        "classified_literal_case_sites": 82,
+        "return_sites": 3,
+        "return_sites_with_finite_case_macro": 3,
+        "raw_target_register_reads": 82
+      },
+      "bound_target_count_histogram": {
+        "1": 82
+      },
+      "bound_return_target_count_histogram": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      },
+      "target_count_histogram": {
+        "1": 82
+      },
+      "return_target_count_histogram": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      },
+      "helper_target_histogram": {
+        "bpf_get_smp_processor_id": 2,
+        "bpf_ktime_get_ns": 8,
+        "bpf_map_lookup_elem": 64,
+        "bpf_map_update_elem": 4,
+        "bpf_xdp_adjust_head": 4
+      },
+      "source_artifact_digests": [
+        {
+          "request_archive": "1.success.tar.gz",
+          "request_archive_sha256": "bedee7e144f79b51e4b9e037f879a17e6b08b6ab7d900f98953450a4832a3de3",
+          "generated_source_sha256": "2b6fba788a789c34c9822778b81e88dcb00bb88904657c1bfac3b1469e38e783"
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "state": "running_or_queued"
+    }
+  ]
+}
