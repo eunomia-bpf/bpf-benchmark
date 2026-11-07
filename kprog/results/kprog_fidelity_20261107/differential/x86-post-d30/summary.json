@@ -1,0 +1,15 @@
+{
+  "recorded": "2026-11-07T17:48:53.502444+00:00",
+  "exit": 0,
+  "complete": true,
+  "forms": 1080,
+  "cases": 1105920,
+  "mismatches": 0,
+  "binary_sha256": "5e2ee740194398aa0780cce7794d12a87b5befcef1faa8b738769d1d6dafc581",
+  "compiled_header_sha256": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+  "root_source_drift": [
+    "kprog/fidelity/generate.py"
+  ],
+  "self_xor_forms": 0,
+  "scope": "CPU/C only; not a fresh canonical replay or application/ABI validation"
+}
