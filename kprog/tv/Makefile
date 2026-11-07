@@ -664,3 +664,12 @@ simple-packet-guard-check: simple-blocks-check
 	python3 test_emitted_sites.py build/capture-loader-arm64-simple-packet --native-bytes 68 --store-offset 40
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-packet-arm64 -o ../tv/build/simple-packet-arm64/PacketCompiled.olean ../tv/build/simple-packet-arm64/PacketCompiled.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketGuardCertificate.olean ../tv/PacketGuardCertificate.lean
+
+.PHONY: simple-packet-entry-check simple-packet-entry-negative-check
+simple-packet-entry-check: checked-platform-check simple-packet-guard-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketEntryCertificate.olean ../tv/PacketEntryCertificate.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketCheckedPlatform.olean ../tv/PacketCheckedPlatform.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketCheckedBlocks.olean ../tv/PacketCheckedBlocks.lean
+
+simple-packet-entry-negative-check:
+	python3 test_packet_entry.py

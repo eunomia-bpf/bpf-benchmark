@@ -869,3 +869,35 @@ in the post-state. Entry/spill composition, all store faults, return, RX/ABI
 transport and the complete accepted invocation still need to be composed for
 this new program. Its successful runtime and guard proof alone do not certify
 the whole program.
+
+
+`simple_packet` entry through both guard successors
+-------------------------------------------------
+
+`make -C kprog/tv simple-packet-entry-check` additionally composes the actual
+entry LDP, the seven-instruction compiler prefix and the whole guard. It
+proves complete native and verifier-facing checked-B executions, ordered guest
+reads, the private memory relation and corresponding successors (32/11 for
+stores,24/24 for rejection). Only the two proved private8-byte compiler spill
+regions can be projected out; the proof retains every native guest event.
+The `SimpleBlocks.EntryConditions` mapped-context/private-frame premises remain
+explicit. The whole accepted invocation, store faults, return and ABI/RX prefix
+composition are subsequent obligations for this program.
+
+`PacketEntryCertificate` reuses the existing canonical LDP and exact physical
+prefix/private-spill proofs. `PacketCheckedPlatform` transports every successful
+physical step, including faults and returns, to the actual expanded virtual B.
+Its two XDP pointer-load conversions reuse the same already checked conversion
+rules for the bound XDP type/attach/flags. Generic program-congruence theorems
+in BPFPlatform compare the same byte-decoded BPF instruction and explicitly
+require the continuation bytes when it is LDDW. No native or BPF ISA is replaced.
+Kernel/platform agreement with these context conversions remains in the
+previously stated verifier/platform trusted base.
+
+`make -C kprog/tv simple-packet-entry-negative-check` changes an LDP destination,
+a compiler spill address, and a context offset. BPF mutations change both the
+compiled input and expanded checked arrays consistently. Each is rejected by
+its semantic entry/platform theorem. Every affected module is rebuilt in
+order for each mutation; a dependent compiled against an earlier definition
+is never reused. The successful original proof is checked by the positive
+entry command. Results are packet-entry-* and packet-guard-full.log.

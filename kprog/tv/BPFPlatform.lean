@@ -75,6 +75,34 @@ theorem expand_sound (env : BPF.Environment) (expansion : Expansion)
             exact ⟨physical, BPFPath.evaluate_sound _ _ _ _ _ evaluated,
               by simp_all, by cases h : physical.fault <;> simp_all, accepted.symm⟩
 
+/-- The platform classifier depends on the decoded instruction and actual PC,
+not bytes elsewhere in the artifact. Wide-immediate payloads remain explicit. -/
+theorem step_program_congr_if_wide (env : Environment) (first second : Array Byte)
+    (s : BPF.State) (i : BPF.Instruction)
+    (left : BPF.decode first s.pc.toNat = .ok i)
+    (right : BPF.decode second s.pc.toNat = .ok i)
+    (wide : i.code = 0x18 → BPF.decode first (s.pc.toNat+1) = BPF.decode second (s.pc.toNat+1)) :
+    step env first s = step env second s := by
+  have executed := BPF.execute_program_congr_if_wide env.bpf first second s i wide
+  cases active : s.halted <;> by_cases negative : s.pc < 0 <;>
+    simp [step, active, negative, left, right, executed,
+      Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+/-- Corresponding plain physical steps, with the same wide-payload condition. -/
+theorem physical_step_program_congr_if_wide (env : BPF.Environment) (first second : Array Byte)
+    (s : BPF.State) (i : BPF.Instruction)
+    (left : BPF.decode first s.pc.toNat = .ok i)
+    (right : BPF.decode second s.pc.toNat = .ok i)
+    (wide : i.code = 0x18 → BPF.decode first (s.pc.toNat+1) = BPF.decode second (s.pc.toNat+1)) :
+    BPF.step env first s = BPF.step env second s := by
+  have executed := BPF.execute_program_congr_if_wide env first second s i wide
+  cases active : s.halted <;> by_cases negative : s.pc < 0 <;>
+    simp [BPF.step, active, negative, left, right, executed,
+      Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
 end KProgTV.BPFPlatform
 
 #print axioms KProgTV.BPFPlatform.expand_sound
+
+#print axioms KProgTV.BPFPlatform.step_program_congr_if_wide
+#print axioms KProgTV.BPFPlatform.physical_step_program_congr_if_wide

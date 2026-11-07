@@ -310,3 +310,26 @@ Raw inputs, exact source/binary pins and failures are retained in packet-inputs.
 This is a component certificate for simple_packet. Its entry/private-spill,
 store/fault, return and every-prefix/accepted invocation composition remains
 active. No application or other micro is certified by this result.
+
+
+`simple_packet`: complete actual entry/guard block
+------------------------------------------------
+
+`packet-guard-full.log` records EXIT0 for the complete guard dependency refresh.
+`packet-entry-final.log` adds successful original native LDP/physical entry,
+actual virtual XDP context transport and the complete entry-through-guard block.
+It retains every full state, both guest reads, the private-spill memory relation
+and the exact corresponding store/reject successors. The two context-step
+proofs have only propext/Quot.sound; the complete block has the existing
+propext/choice/ofReduceBool/Quot.sound and no sorryAx. Entry memory/frame and
+kernel context-conversion agreement remain explicit premises/trusted base.
+
+Three coherent mutations reject at their semantic theorem: LDP destination at
+PacketEntryCertificate.decode0, spill address at prefix_instruction, and
+context offset at PacketCheckedPlatform.second_virtual. All preceding modules
+are freshly rebuilt against each modified array definition. Earlier proof
+normalization, typed-existential, source-root/search-path and finite-decision
+errors are retained in packet-entry-inputs.tar.gz with final source, exact
+generated arrays and mutation logs. No new runtime/image/native instruction or
+performance condition is introduced. The store/fault, return and complete
+accepted-invocation/ABI/RX obligations for simple_packet remain active.

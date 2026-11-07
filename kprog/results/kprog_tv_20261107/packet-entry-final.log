@@ -1,0 +1,14 @@
+'KProgTV.PacketEntryCertificate.native_full_state' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketEntryCertificate.entry_translation' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketCheckedPlatform.first_step' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketCheckedPlatform.second_step' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketCheckedPlatform.execution_transport' depends on axioms: [propext, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PacketCheckedBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+python3 test_packet_entry.py
+native-ldp-destination: REJECTED by PacketEntryCertificate.decode0; all preceding dependents rebuilt
+proof-spill-address: REJECTED by PacketEntryCertificate.prefix_instruction; all preceding dependents rebuilt
+proof-context-offset: REJECTED by PacketCheckedPlatform.second_virtual; all preceding dependents rebuilt
+actual entry/context/private-spill semantic mutation certificates: PASS

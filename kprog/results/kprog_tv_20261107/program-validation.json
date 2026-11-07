@@ -69,10 +69,10 @@
     {
       "program": "simple_packet",
       "arch": "aarch64",
-      "status": "guard_component_only",
-      "theorem": "PacketGuardCertificate.actual_guard_executions",
-      "validation_log": "packet-final.log",
-      "validation_log_sha256": "d17796b8782d63ea7bdef3d16a1948522f1f098bd1c04d544c12e976d9c1e08a",
+      "status": "entry_and_guard_component",
+      "theorem": "PacketCheckedBlocks.first_block",
+      "validation_log": "packet-entry-final.log",
+      "validation_log_sha256": "7a089c099d4ef9bcf5ad6475665d2f7f373878bef785816d6e10415747bde5da",
       "captures": [
         {
           "record": "6-7",
@@ -114,7 +114,6 @@
         }
       ],
       "remaining": [
-        "entry_and_private_spills",
         "stores_and_all_faults",
         "return",
         "actual_RX_every_prefix_and_ABI",
