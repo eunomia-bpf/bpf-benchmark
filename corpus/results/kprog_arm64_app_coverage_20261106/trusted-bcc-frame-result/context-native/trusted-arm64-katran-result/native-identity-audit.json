@@ -1,0 +1,39 @@
+{
+  "utc": "2026-11-07T16:14:32.416501+00:00",
+  "kind": "katran",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261107T145906541111Z.tar.gz",
+  "archive_sha256": "ac6aa71a8c8f52c48a4510a72e950a2043e04663fa3be86c9e89d965e8fc381f",
+  "host_reported_ok": true,
+  "hashes_unchanged": true,
+  "completed_counts": {
+    "service_accepted": 1,
+    "service_refused": 0
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 1,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "balancer_ingress",
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "eec37450269318f232c171c9ee951f108cfed3985a554d7b121e5447a2cebb4e",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "624a19d8c9ddc5a5127b1f0abe2cab80628adc572fb8d066586e818c9daef7a2",
+        "request/generated/trusted_arm64.bpf.o": "aec1570a4802915bead81070bf260a5cc6b129e73b19b998f50f7f1f22a14640",
+        "request/generated/trusted_arm64.bpf.c": "664f84652c4d31ff05d46d14347036ac1436e2ccebae2c0fcd0c458f79288de4",
+        "request/generation.metadata.json": "2eee2f1ee48e2e411751407db0161a50def6b10bb3ef6c8ed450c99b723d327f",
+        "request/kernel.facts.json": "ec0289fd414786d3e1178f2b51948938364cb72f158279f54108815a3b983f93",
+        "request/source-identities.json": "33400ee5c35205a2895fdc69a869281b537268c4e577d1e28427c9e8af74f2b0"
+      }
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}
