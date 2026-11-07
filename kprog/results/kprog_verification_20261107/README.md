@@ -1772,3 +1772,28 @@ commands/output/source pins are retained in the existing integration
 archive/JSON. Exact900 full `make check` EXIT2 at the x86 dynamic POPCNT
 harness remains unchanged; no redundant full was run against that failure.
 Proof SHA256 `5cbf3b6a9f1cd4d0d20c2604976cb81985a1ecf87b9ad11b72b722491abd63c3`.
+
+## One observed invocation-emission step
+
+`dispatchInvocationEmission` puts prior source emissions and actual RET_TO
+routes under the same invocation RETURN/CODE frame. Its single
+`invocation_emission_step_refines` theorem combines numeric L_EXEC,
+direct branches, source-token LINK/ADR/finite CODE branches, and both
+outer RETURN and finite CODE return routes against the SAME canonical ISA.
+`InvocationBinding` contains prior layout/field relations or literal raw-zero,
+tag and finite-target guards. It assumes no component transition equation;
+native access/SP/profile/exclusive premises stay separate.
+
+This is a modeled observed step, not a full72/77 or O2/O4 completion claim.
+Ordinary CODE-word data transport, compiled/native frame and layout,
+helpers, SKB exit copies and physical ABI/continuation remain open.
+
+Fresh98-job Lean target and one axiom audit pass with only propext,
+Classical.choice, Lean.ofReduceBool and Quot.sound. All8 pins stayed
+unchanged; non-proof inputs and the preceding13-case UBSan CALL/RET host
+source are byte-identical to the published return-route check, whose host
+result is reused without rerunning it. Prior declarations remain identical;
+no placeholders/ISA/runtime/oracle/test edits were introduced. Exact proof
+SHA256 `861aa645b1a0820dc61aa67632c8b26966f474f210b4e972fe699f1d76d861f5`.
+Complete original proof output/commands/source pins are appended to the
+integration archive/JSON. Exact900 full EXIT2 remains unchanged.

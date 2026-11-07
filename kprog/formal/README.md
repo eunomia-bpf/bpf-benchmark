@@ -56,6 +56,8 @@ layout/ordinary-code-value transport is still explicit. RET_TO additionally
 derives the raw-zero RETURN arm and finite CODE return arms against the same
 canonical register branch, using the invocation outer-LR base. The separate
 u32 result equation retains the unresolved ordinary CODE-value condition.
+`invocation_emission_step_refines` composes these return routes and all prior
+modeled source emissions under one RETURN/CODE frame and literal macro guards.
 Faulting writeback, helper/entry/physical-return transport, SKB exit copies,
 compiled bodies and full77/72 completion remain open. Focused
 checks pass with the published ARM entry-selector repair; the latest complete

@@ -1490,6 +1490,48 @@
   "full_exit": 2,
   "full_head": "967fc6b49608634cd5566dfd6a2925aa828cdcbe",
   "full_log_sha256": "99ea8d210591437b72f741b2f0349eb271ca9a3b1d1415dfe495222023e970ed",
+  "invocation_emission_composition": {
+    "archive_block_sha256": "7d1873e1959b3ff85ee2a9bd3f506b15d0fc18ed00b2d185ae95c9ca46165c52",
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.Arm64Dispatcher"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/invocation-audit.lean"
+        ],
+        "exit": 0
+      }
+    ],
+    "exit": 0,
+    "fresh_c_hosts": 0,
+    "pins": {
+      "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+      "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "kprog/arm64/arm64_sim_local_bpf.h": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "1a0680419ddba423942158c4f01f1edba4929fd230f96b6e48b5b2ec0ad2e6a8",
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "861aa645b1a0820dc61aa67632c8b26966f474f210b4e972fe699f1d76d861f5",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69"
+    },
+    "prior_c_hosts_reused": 1,
+    "prior_declarations_byte_identical": true,
+    "prior_existing_host_cases": 13,
+    "prior_source_commit": "3b3e32ad534e93c65a0eea154aac2a22e3c4f466",
+    "proof_lines_added": 69,
+    "scope": "modeled invocation-emission observed step; compiled/native ABI/helper and ordinary CODE data transport remain open",
+    "source_drift": [],
+    "stop_sha256": "6a9c1ee32919154cda9d68f2033856603cc029af2054ed577318cc5a14485d93"
+  },
   "pair_focused": {
     "commands": [
       {

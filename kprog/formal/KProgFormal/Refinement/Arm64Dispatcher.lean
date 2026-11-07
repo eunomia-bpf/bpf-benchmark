@@ -3801,4 +3801,73 @@ theorem outer_return_value (nativeAddress : Word → Word) (outerReturn : Word)
   simp only [beq_iff_eq]
   rw [if_neg notCode]
 
+
+/-- The ordinary source-emission interface and RET_TO share exactly one
+RETURN/CODE frame. The right-hand sum carries the actual return operand and
+per-site finite goto table; helper/ABI exit effects remain separate. -/
+def dispatchInvocationEmission (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (emission : SourceEmission ⊕ (Register × List Word))
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) (raw : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  let state := returnCodeState outerReturn tags raw
+  match emission with
+  | .inl ordinary => dispatchSourceEmission nativeAddress ordinary sourceScalar sourceStack
+      firstScalar secondScalar release failure state
+  | .inr (src, targets) => (returnRoute tags src targets raw).map (observeReturnRoute nativeAddress outerReturn state)
+
+/-- Native layout/field relations and the literal RET_TO guards only. No
+handler transition is a premise. Native access/profile/exclusive witnesses
+stay separate, as in the preceding numeric/control compositions. -/
+inductive InvocationBinding (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (raw : Reference.AArch64.State) (release : Bool) :
+    SourceEmission ⊕ (Register × List Word) → Reference.AArch64.Instruction → Prop where
+  | source (ordinary : SourceEmission) (native : Reference.AArch64.Instruction)
+      (binding : SourceBinding nativeAddress (returnCodeState outerReturn tags raw) release ordinary native) :
+      InvocationBinding nativeAddress outerReturn tags raw release (.inl ordinary) native
+  | outer (src : Register) (targets : List Word)
+      (zero : Arm64Move.Fields.read raw (Arm64Register.registerCode src) = 0)
+      (tag : returnTag tags src = 10) :
+      InvocationBinding nativeAddress outerReturn tags raw release (.inr (src, targets)) (.branchRegister false src)
+  | internal (src : Register) (targets : List Word) (tag : returnTag tags src = 9)
+      (allowed : targets.contains (Arm64Move.Fields.read raw (Arm64Register.registerCode src)) = true) :
+      InvocationBinding nativeAddress outerReturn tags raw release (.inr (src, targets)) (.branchRegister false src)
+
+/-- One observed invocation-emission step combines all preceding modeled
+numeric/direct/CODE arms with outer RETURN and finite CODE returns. This is
+not the physical compiled invocation/return, helper or arbitrary CODE-data
+transport theorem. Those boundaries cannot be obtained by case composition. -/
+theorem invocation_emission_step_refines (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (emission : SourceEmission ⊕ (Register × List Word))
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (raw : Reference.AArch64.State)
+    (binding : InvocationBinding nativeAddress outerReturn tags raw release emission native)
+    (access : scalarMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (environment : exclusiveStoreEnvironment native failure (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (pairAccess : pairMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (vectorAccess : vectorMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw))) :
+    dispatchInvocationEmission nativeAddress outerReturn tags emission sourceScalar sourceStack
+        firstScalar secondScalar release failure raw =
+      some (Reference.AArch64.step native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw))) := by
+  cases binding with
+  | source ordinary native earlier =>
+      exact source_emission_step_refines nativeAddress ordinary sourceScalar sourceStack firstScalar
+        secondScalar release failure native (returnCodeState outerReturn tags raw) earlier access environment pairAccess vectorAccess
+  | outer src targets zero tag =>
+      have reached : returnRoute tags src targets raw = some .outer := by
+        unfold returnRoute
+        dsimp only
+        rw [if_pos ⟨zero, tag⟩]
+      simp only [dispatchInvocationEmission, reached, Option.map_some]
+      exact congrArg some (return_route_observed_refines nativeAddress outerReturn tags src targets raw .outer reached)
+  | internal src targets tag allowed =>
+      have notOuter : ¬(Arm64Move.Fields.read raw (Arm64Register.registerCode src) = 0 ∧ returnTag tags src = 10) := by
+        intro h
+        exact (by decide : (9 : Byte) ≠ 10) (tag.symm.trans h.2)
+      have reached : returnRoute tags src targets raw = some (.internal (Arm64Move.Fields.read raw (Arm64Register.registerCode src))) := by
+        unfold returnRoute
+        dsimp only
+        rw [if_neg notOuter, if_pos ⟨tag, allowed⟩]
+      simp only [dispatchInvocationEmission, reached, Option.map_some]
+      exact congrArg some (return_route_observed_refines nativeAddress outerReturn tags src targets raw _ reached)
+
 end KProgFormal.Refinement.Arm64Dispatcher
