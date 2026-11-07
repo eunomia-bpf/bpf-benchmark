@@ -48,8 +48,11 @@ observations. Neither observation proves concurrent atomicity or platform
 ordering. `emission_step_refines` additionally composes B/B.cond, W/X CBZ/CBNZ and
 TBZ/TBNZ through the actual source-selected branch shapes. Source labels and
 native PC words stay distinct under explicit current/next/target address
-identities. Faulting writeback, internal/indirect calls, helper/entry/return
-transport, compiled bodies and full77/72 completion remain open. Focused
+identities. A separate CODE-token state projection derives LINK/ADR and
+finite CODE-tag BR/BLR/internal-RET primitive refinements, including LR
+aliases. Its layout/ordinary-code-value transport is still explicit. Faulting
+writeback, helper/entry/outer-return transport, compiled bodies and full77/72
+completion remain open. Focused
 checks pass with the published ARM entry-selector repair; the latest complete
 check fails in the x86 popcount host harness. Dated results preserve the
 exact failure and separate it from focused validation.

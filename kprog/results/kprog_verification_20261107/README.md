@@ -1678,3 +1678,43 @@ returned Python0 to its waiter. Its status propagation is now fixed; the
 waiter metadata was corrected from the authoritative make exit/log. This
 was never a complete-check pass. Immutable export was deleted automatically;
 shared caches and permanent STOP are retained.
+
+## Source CODE tokens and derived internal-call observation
+
+`CodeState` retains the actual source-token GPR payloads and CODE-tag mask.
+It layers over the existing numeric observation of non-CODE stack/return/
+data fields. `nativeCodeView` uses the bound source-label→native-byte map
+to materialize only CODE cells and PC; no second ISA or decoder is added.
+`native_code_write/read/pc` derive the exact complete-state correspondence
+for actual GPR/ZR token/tag writes, reads and control transfers.
+
+`source_call_observed_refines` proves LINK plus goto against canonical BL,
+using exact target/successor layout identities.
+`source_address_observed_refines` proves the emitted ADR CODE write and
+fallthrough against canonical ADR. `code_target_observed_refines` proves
+the actual CODE-tag finite-target BR/BLR/internal-RET arm against the same
+canonical register branch, with the incoming target captured before LINK,
+including BLR X30. CODE-tag and finite-membership premises are the actual
+branch guards; no component semantic equality is assumed. The unlinked
+arm imposes no successor-address condition. Full numeric state and empty
+guest-event/fault effects are retained under the explicit observation.
+
+These primitive proofs preserve original raw source tokens. Current C
+READ_REG materialization still leaves CODE unchanged, so the projection
+alone establishes no ordinary code-pointer arithmetic/memory transport,
+source/native layout identity, compiled-body correspondence or arbitrary
+program composition. Untagged helper and outer RETURN-tag paths remain
+separate; no path is silently reclassified as a successful no-op/rejection.
+Full77/72/O2/O4 and the outer invocation/return interface are not complete.
+
+Validation: Lean98-job graph,6 axiom audits,7 existing contracts/model
+checks and ALL9 existing semantic hosts pass:13call/ret,1201branch-route,
+257register,6401register-route,40080width,1280effective-width,586829AUX,
+1115374AUX-route,3804immediate-route cases. All9 source pins stayed
+unchanged; all prior declaration bytes are identical, no placeholders/
+new tests/ISA/runtime/oracle edits. Exact proof SHA256
+`512312c97fc9321ae3abee94653607b9d56675a1cb2e88036eeb45528118fc85`.
+Complete original output/commands/source pins are appended to the existing
+integration archive/JSON. Exact900 full EXIT2 remains the complete-check
+result; no redundant full was started against its unchanged x86 harness
+failure. Private status propagation is fixed; shared caches/STOP retained.

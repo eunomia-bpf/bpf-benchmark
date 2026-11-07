@@ -3511,4 +3511,119 @@ theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emissi
       rw [mapped_branch_refines nativeAddress current fallthrough target _ displacement s fallAddress targetAddress]
       rfl
 
+
+/-- Implementation code-token layer over the existing numeric observation:
+non-CODE fields already use the prior stack/return/data frame relation. CODE
+payloads remain source tokens, exactly as LINK/ADR and the finite switches
+store/read them. This is not another ISA state or decoder. -/
+structure CodeState where
+  bits : Reference.AArch64.State
+  code : Reference.AArch64.Gpr → Bool
+
+/-- The bound layout maps source tokens to native byte addresses. Numeric
+READ_REG on CODE currently leaves tokens unchanged; this observation alone
+therefore proves no code-pointer arithmetic/memory or compiled-body transport. -/
+def nativeCodeView (nativeAddress : Word → Word) (state : CodeState) : Reference.AArch64.State :=
+  { state.bits with
+    gpr := fun r => if state.code r then nativeAddress (state.bits.gpr r) else state.bits.gpr r
+    pc := nativeAddress state.bits.pc }
+
+def codeSource (state : CodeState) (src : Register) : Bool :=
+  if h : src.val < 31 then state.code ⟨src.val, h⟩ else false
+
+def writeCodeToken (state : CodeState) (dst : Register) (token : Word) : CodeState :=
+  ⟨Arm64Move.Fields.write state.bits (Arm64Register.registerCode dst) token .w64,
+    fun r => if r.val = dst.val then true else state.code r⟩
+
+def codePc (state : CodeState) (target : Word) : CodeState :=
+  { state with bits := { state.bits with pc := target } }
+
+def observeCodeTransition (nativeAddress : Word → Word) (result : Transition CodeState) :
+    Transition Reference.AArch64.State := ⟨nativeCodeView nativeAddress result.state, result.events, result.fault⟩
+
+theorem native_code_pc (nativeAddress : Word → Word) (state : CodeState) (target : Word) :
+    nativeCodeView nativeAddress (codePc state target) =
+      { nativeCodeView nativeAddress state with pc := nativeAddress target } := rfl
+
+theorem native_code_read (nativeAddress : Word → Word) (state : CodeState) (src : Register) :
+    Reference.AArch64.readReg (nativeCodeView nativeAddress state) src =
+      if codeSource state src then nativeAddress (Reference.AArch64.readReg state.bits src)
+      else Reference.AArch64.readReg state.bits src := by
+  by_cases general : src.val < 31 <;>
+    simp only [Reference.AArch64.readReg, nativeCodeView, codeSource, general, ↓reduceDIte, Bool.false_eq_true, ↓reduceIte]
+
+theorem native_code_write (nativeAddress : Word → Word) (state : CodeState) (dst : Register) (token : Word) :
+    nativeCodeView nativeAddress (writeCodeToken state dst token) =
+      Reference.AArch64.writeReg (nativeCodeView nativeAddress state) dst (nativeAddress token) := by
+  simp only [nativeCodeView, writeCodeToken, Arm64Move.Fields.register_write,
+    Arm64Register.write_refines, Reference.AArch64.writeReg, Reference.AArch64.narrow,
+    Reference.AArch64.Width.bits, BitVec.setWidth_eq]
+  congr 1
+  funext r
+  by_cases same : r.val = dst.val <;> simp [same]
+
+/-- LINK writes the source successor token and CODE tag before its goto;
+X30 data and its tag are updated together. The target is captured separately. -/
+def sourceCallStep (target successor : Word) (state : CodeState) : Transition CodeState :=
+  ⟨codePc (writeCodeToken state 30 successor) target, [], none⟩
+
+theorem source_call_observed_refines (nativeAddress : Word → Word) (target successor displacement : Word)
+    (state : CodeState)
+    (targetAddress : nativeAddress target = (nativeCodeView nativeAddress state).pc + displacement)
+    (successorAddress : nativeAddress successor = (nativeCodeView nativeAddress state).pc + 4) :
+    observeCodeTransition nativeAddress (sourceCallStep target successor state) =
+      Reference.AArch64.step (.branchLink displacement) (nativeCodeView nativeAddress state) := by
+  simp only [observeCodeTransition, sourceCallStep, native_code_pc, native_code_write,
+    targetAddress, successorAddress, Reference.AArch64.step]
+
+/-- ADR's code-address arm writes only a GPR/ZR cell and its CODE tag, then
+falls through. Native SP is not a destination of this source ADR form. -/
+def sourceAddressStep (dst : Register) (address fallthrough : Word) (state : CodeState) : Transition CodeState :=
+  ⟨codePc (writeCodeToken state dst address) fallthrough, [], none⟩
+
+theorem source_address_observed_refines (nativeAddress : Word → Word) (dst : Register)
+    (address fallthrough displacement : Word) (state : CodeState)
+    (addressValue : nativeAddress address = (nativeCodeView nativeAddress state).pc + displacement)
+    (fallAddress : nativeAddress fallthrough = (nativeCodeView nativeAddress state).pc + 4) :
+    observeCodeTransition nativeAddress (sourceAddressStep dst address fallthrough state) =
+      Reference.AArch64.step (.pcAddress false dst displacement) (nativeCodeView nativeAddress state) := by
+  simp only [observeCodeTransition, sourceAddressStep, native_code_pc, native_code_write,
+    addressValue, fallAddress, Reference.AArch64.step]
+  rfl
+
+/-- Actual CODE-tag finite-target arm of BR/BLR/internal RET. The incoming
+source target is captured before LINK, so BLR X30 does not branch to its newly
+written successor. None passes to the separate helper/outer-return/failure
+paths; those paths are not replaced with a successful no-op or newly rejected. -/
+def dispatchCodeTarget (link : Bool) (src : Register) (targets : List Word) (successor : Word)
+    (state : CodeState) : Option (Transition CodeState) :=
+  let target := Arm64Move.Fields.read state.bits (Arm64Register.registerCode src)
+  if codeSource state src && targets.contains target then
+    if link then some (sourceCallStep target successor state)
+    else some ⟨codePc state target, [], none⟩
+  else none
+
+theorem code_target_observed_refines (nativeAddress : Word → Word) (link : Bool) (src : Register)
+    (targets : List Word) (successor : Word) (state : CodeState)
+    (code : codeSource state src = true)
+    (allowed : targets.contains (Arm64Move.Fields.read state.bits (Arm64Register.registerCode src)) = true)
+    (successorAddress : link = true → nativeAddress successor = (nativeCodeView nativeAddress state).pc + 4) :
+    (dispatchCodeTarget link src targets successor state).map (observeCodeTransition nativeAddress) =
+      some (Reference.AArch64.step (.branchRegister link src) (nativeCodeView nativeAddress state)) := by
+  have read : Reference.AArch64.readReg (nativeCodeView nativeAddress state) src =
+      nativeAddress (Arm64Move.Fields.read state.bits (Arm64Register.registerCode src)) := by
+    rw [native_code_read, code]
+    simp only [↓reduceIte, Arm64Move.Fields.register_read, Arm64Register.read_refines]
+  cases link with
+  | false =>
+      simp only [dispatchCodeTarget, code, allowed, Bool.true_and, ↓reduceIte]
+      change some (observeCodeTransition nativeAddress ⟨codePc state _, [], none⟩) = _
+      simp only [observeCodeTransition, native_code_pc, Reference.AArch64.step, Bool.false_eq_true, ↓reduceIte, read]
+  | true =>
+      have successorValue := successorAddress rfl
+      simp only [dispatchCodeTarget, code, allowed, Bool.true_and, ↓reduceIte]
+      change some (observeCodeTransition nativeAddress (sourceCallStep _ successor state)) = _
+      simp only [observeCodeTransition, sourceCallStep, native_code_pc, native_code_write,
+        successorValue, Reference.AArch64.step, ↓reduceIte, read]
+
 end KProgFormal.Refinement.Arm64Dispatcher
