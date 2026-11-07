@@ -8,6 +8,7 @@ OUT=Path(__file__).resolve().parent
 STATE=Path('/workspaces/.agent-state/kprog-lanes/F')
 C='c664565ccb449e88d3580ebda1e3c079b71d8c53'
 A='bca4d587e9ca84a2d55043e2c30a95c02438e9cd'
+CONTROL_PUBLICATION='741f96936b4e1840457bd6f40afa04979950eebf'
 CB='corpus/results/kprog_app_coverage_20261107/native-resource-scope/'
 AB='corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/'
 PINS={}
@@ -54,6 +55,111 @@ def capture(arm,x86,raw_x86):
                 for digest,value in sorted(data.items()):
                     add(archive,manifest['blobs'][digest]['member'],value)
     temporary.replace(path)
+
+
+def registered_control(build,build_files):
+    publication=CONTROL_PUBLICATION
+    base=AB+'control/trusted-arm64-service-result/'
+    summary=json.loads(published(publication,base+'summary.json'))
+    coverage=json.loads(published(publication,base+'coverage.json'))
+    audit=json.loads(published(publication,base+'native-identity-audit.json'))
+    payload=published(publication,base+summary['archive'])
+    assert sha(payload)==summary['archive_sha256']==audit['archive_sha256']
+    raw=contents(payload)
+    guest=json.loads(raw['run/guest.json']);client=json.loads(raw['run/client.stdout'])
+    assert guest==summary['guest'] and all(client[key]==guest[key] for key in client)
+    assert guest['ok'] and summary['ok'] and summary['hashes_unchanged']
+    assert summary['hashes_before']==summary['hashes_after']
+    assert coverage['host_ok'] and coverage['hashes_unchanged']
+    assert summary['guest_exit']==summary['qemu_returncode']==coverage['guest_exit']==int(raw['run/guest.exit'])==0
+    assert guest['returncode']==0 and guest['retval']==2 and guest['prebuilt_proof'] is False
+    inputs=json.loads(raw['run/inputs.json'])
+    assert inputs['hashes_before']==summary['hashes_before'] and inputs['command']==summary['command']
+    events=[json.loads(line) for line in raw['run/requests/requests.jsonl'].splitlines()]
+    assert events==[guest['receipt']] and coverage['service_request_attempts']==audit['completed_requests_or_cases']==1
+    assert coverage['distinct_source_prog_ids']==coverage['proof_generated']==1
+    assert coverage['stages']==dict(bound_accepted=1) and coverage['applications']==[]
+    event=events[0];record=coverage['requests'][0];identity=audit['request_identities'][0]
+    assert event['status']==record['status']==identity['status']==0
+    assert event['source_prog_id']==record['source_prog_id']==guest['original_prog_id']==3
+    assert event['prog_id']==record['prog_id']==guest['native_prog_id']==8
+    assert guest['receipt']['request_id']==record['request_id']==identity['request_id']==1
+    request=raw[record['request_archive']]
+    assert sha(request)==record['request_archive_sha256']==identity['request_archive_sha256']
+    files=contents(request)
+    native=files['request/kernel.native.o']
+    assert native==files['request/generated/request.native.o']
+    assert sha(native)==event['native_sha256']==record['native_sha256']==identity['native_sha256']
+    assert sha(native)==build['binary_pins'][build['new_caller']+'/trusted-native.o']
+    assert native==build_files['bin/trusted-native.o']
+    assert native[:4]==b'\x7fELF' and int.from_bytes(native[18:20],'little')==183
+    entry=files['request/kernel.entry'].decode().strip()
+    assert entry==record['entry']==identity['entry']=='trusted_entry'
+    facts=json.loads(files['request/kernel.facts.json'])
+    metadata=json.loads(files['request/generation.metadata.json'])
+    assert facts['id']==3 and facts['maps']==metadata['maps']==[]
+    reply=json.loads(files['request/load.stdout'])
+    assert reply=={key:event[key] for key in ['request_id','prog_id','status']}
+    artifacts={}
+    for path,digest in identity['artifacts'].items():
+        assert sha(files[path])==digest;artifacts[path]=digest
+    assert len(artifacts)==6
+    assert record['proof_generated'] and record['source_generated']
+    commands=[json.loads(line) for line in files['request/generated/commands.jsonl'].splitlines()]
+    assert len(commands)==2 and all(row['returncode']==0 for row in commands)
+    assert '-target' in commands[1]['command'] and 'bpf' in commands[1]['command']
+    identities=json.loads(files['request/source-identities.json'])
+    input_hashes=summary['hashes_before'];overlap=0
+    source_hashes={}
+    binary_hashes={Path(path).name:digest for path,digest in build['binary_pins'].items()}
+    for path,digest in identities.items():
+        relative=path.removeprefix('/workspaces/repository/')
+        if relative in input_hashes:
+            assert input_hashes[relative]==digest;overlap+=1
+        if 'source/'+relative in build_files:
+            assert sha(build_files['source/'+relative])==digest
+            source_hashes[relative]=digest
+        elif relative.endswith('.py') or relative.endswith('.h'):
+            assert sha(published(publication,relative))==digest
+            source_hashes[relative]=digest
+        else:
+            assert digest==binary_hashes[Path(relative).name]
+    assert len(identities)==9 and overlap==8 and len(source_hashes)==7
+    loader=build['new_caller']+'/trusted-native-loader'
+    assert input_hashes[loader]==build['binary_pins'][loader]
+    client_path=build['new_caller']+'/trusted-service-client'
+    assert input_hashes[client_path]==build['binary_pins'][client_path]
+    linker=next(path for path in build['binary_pins'] if path.endswith('/native-link-arm64-entry-resources'))
+    assert input_hashes[linker]==build['binary_pins'][linker]
+    fixture=build['new_caller']+'/trusted-native.o'
+    assert input_hashes[fixture]==sha(native)
+    module_publication='340a4ea5e07c38d415031c51aca057b57f62d955'
+    module_base='corpus/results/kprog_arm64_app_coverage_20261107/native-resources/'
+    module_metadata=json.loads(published(module_publication,module_base+'summary.json'))
+    module_archive=contents(published(module_publication,module_base+'inputs-and-controls.tar.gz'))
+    module=module_archive['bin/bpf_arm64_native_lab.ko']
+    module_digest=sha(module)
+    assert module_digest==module_metadata['module_sha256']
+    assert input_hashes['kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko']==module_digest
+    assert module[:4]==b'\x7fELF' and int.from_bytes(module[18:20],'little')==183
+    assert audit['identity_errors']==[] and audit['all_recorded_identities_match']
+    assert audit['completed_counts']==dict(service_accepted=1,service_refused=0)
+    return dict(source_publication=publication,archive_sha256=sha(payload),
+        actual_archived_service_requests=1,fresh_generated_compiled_bound=1,
+        actual_archived_native_executions=1,native_retval=2,source_prog_id=3,bound_prog_id=8,
+        kernel_worker_receipt_native_sha256=sha(native),native_entry=entry,source_map_count=0,
+        native_fixture_matches_paired_build=True,actual_trusted_loader_sha256=input_hashes[loader],
+        actual_service_client_sha256=input_hashes[client_path],
+        paired_dso_build_sha256=build['binary_pins'][build['new_caller']+'/libnative_loader.so'],
+        actual_linker_sha256=input_hashes[linker],actual_module_sha256=module_digest,
+        actual_module_archive_publication=module_publication,
+        generated_artifact_sha256=artifacts,commands=commands,
+        recorded_source_identities=identities,checked_source_sha256=source_hashes,
+        initial_input_identity_count=len(input_hashes),request_input_identity_overlap=overlap,
+        source_hashes_stable=True,qemu_returncode=0,guest_exit=0,host_ok=True,
+        original_runtime_command=summary['command'],
+        scope='Archived fresh ARM registered-service scalar execution using the paired scoped-resource caller/linker and resource module.')
+
 
 def main():
     x86=json.loads(published(C,CB+'observations.json'))
@@ -186,6 +292,7 @@ def main():
     with (OUT/'queries.tsv').open('w') as output:
         writer=csv.DictWriter(output,fieldnames=list(results[0]),delimiter=chr(9),lineterminator='\n')
         writer.writeheader();writer.writerows(results)
+    runtime_control=registered_control(arm_build,raw_arm)
     report=dict(query_executions=609,x86_query_executions=4,aarch64_input_query_executions=605,
         matching_published_outputs=609,query_errors=0,aarch64_applications=apps,
         x86_applications=[dict(app=r['app'],entry=r['entry'],resource_symbols=json.loads(r['resource_symbols']))
@@ -198,12 +305,13 @@ def main():
         recorded_x86_artifact_sha256=x86['artifacts'],
         retained_producer_tests=dict(native_link=89,trusted_service=12,
             native_link_exit=0,caller_build_exit=0,service_tests_exit=0,arm_build_exits=[0,0,0]),
-        input_publications=[C,A],input_pins=PINS,
+        input_publications=[C,A,CONTROL_PUBLICATION,runtime_control['actual_module_archive_publication']],input_pins=PINS,
         native_input_archive_sha256=sha(bundle),native_input_archive_bytes=len(bundle),
         query_log_sha256=sha((OUT/'query.log.gz').read_bytes()),
         query_table_sha256=sha((OUT/'queries.tsv').read_bytes()),
         backend='x86-64 host metadata query over x86-64 and AArch64 ELF objects',
         scope='Generic entry/function/data relocation resource metadata and paired source/binary identity observations.')
+    report['registered_service_control']=runtime_control
     (OUT/'summary.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in
         ['input_pins','source_sha256','archived_arm_binary_sha256','recorded_x86_artifact_sha256']},indent=2))

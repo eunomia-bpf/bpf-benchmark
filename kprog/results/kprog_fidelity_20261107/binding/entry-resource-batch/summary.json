@@ -154,7 +154,9 @@
   },
   "input_publications": [
     "c664565ccb449e88d3580ebda1e3c079b71d8c53",
-    "bca4d587e9ca84a2d55043e2c30a95c02438e9cd"
+    "bca4d587e9ca84a2d55043e2c30a95c02438e9cd",
+    "741f96936b4e1840457bd6f40afa04979950eebf",
+    "340a4ea5e07c38d415031c51aca057b57f62d955"
   ],
   "input_pins": {
     "c664565ccb449e88d3580ebda1e3c079b71d8c53:corpus/results/kprog_app_coverage_20261107/native-resource-scope/observations.json": {
@@ -438,12 +440,206 @@
       "path": "kprog/x86/native_lab/native_link/Cargo.lock",
       "sha256": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
       "bytes": 8877
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/summary.json": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/summary.json",
+      "sha256": "9bb3138c85d209f0a01bbd8a2e35c90d0bb302059bd81155a8967da3015fb450",
+      "bytes": 38414
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/coverage.json": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/coverage.json",
+      "sha256": "df7d19e04738b5cb4c6ae11bb125f46b361114432e98206f5fbd675921a1d9e2",
+      "bytes": 1115
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/native-identity-audit.json": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/native-identity-audit.json",
+      "sha256": "0fb724e1f2a7dfa15c6f083d1a901520f1f5e02dae252909a6b87abdc7875074",
+      "bytes": 1839
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/run-20261107T233655554611Z.tar.gz": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/control/trusted-arm64-service-result/run-20261107T233655554611Z.tar.gz",
+      "sha256": "5a624efc51b8ba341832e579e1631a71d133b0374c5183434a42fca45eeb5643",
+      "bytes": 25502
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:kprog/trusted_generation.py": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "kprog/trusted_generation.py",
+      "sha256": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "bytes": 5994
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:kprog/arm64/trusted_specializer.py": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "kprog/arm64/trusted_specializer.py",
+      "sha256": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+      "bytes": 3772
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:kprog/arm64/arm64_sim_local_bpf.h": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "sha256": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+      "bytes": 114042
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:kprog/arm64/micro-prog/generate_micro_sim_proofs.py": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+      "sha256": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+      "bytes": 56106
+    },
+    "741f96936b4e1840457bd6f40afa04979950eebf:kinsn/module/include/native_lab_trusted_wire.h": {
+      "commit": "741f96936b4e1840457bd6f40afa04979950eebf",
+      "path": "kinsn/module/include/native_lab_trusted_wire.h",
+      "sha256": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+      "bytes": 3899
+    },
+    "340a4ea5e07c38d415031c51aca057b57f62d955:corpus/results/kprog_arm64_app_coverage_20261107/native-resources/summary.json": {
+      "commit": "340a4ea5e07c38d415031c51aca057b57f62d955",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/native-resources/summary.json",
+      "sha256": "2e4491b5bb07bb627d8f4e378d22cd73969c6f221fc2073ad2cb15d6501a80ea",
+      "bytes": 9636
+    },
+    "340a4ea5e07c38d415031c51aca057b57f62d955:corpus/results/kprog_arm64_app_coverage_20261107/native-resources/inputs-and-controls.tar.gz": {
+      "commit": "340a4ea5e07c38d415031c51aca057b57f62d955",
+      "path": "corpus/results/kprog_arm64_app_coverage_20261107/native-resources/inputs-and-controls.tar.gz",
+      "sha256": "4a0412a2c3255ee0fca6e502129d72e30fd9e0ad73ed743a424953c3eb11947f",
+      "bytes": 2704634
     }
   },
   "native_input_archive_sha256": "d62c16f73c51fa7b9c3395e3c7ce3d11ac0e2faaa7e9a855c307a27b69a60e7b",
   "native_input_archive_bytes": 33753909,
-  "query_log_sha256": "7e717e4cf807dcefd1c735209fcee487a37dfc3736dc7ce05f327970fe167975",
+  "query_log_sha256": "c00a672491289c298be1b81ac75a2214b6e69212187d8d3baf5e3133079647da",
   "query_table_sha256": "3da2d97840477d932f9a380725afe80904d7265409c4cb4f704ab15f2c988bac",
   "backend": "x86-64 host metadata query over x86-64 and AArch64 ELF objects",
-  "scope": "Generic entry/function/data relocation resource metadata and paired source/binary identity observations."
+  "scope": "Generic entry/function/data relocation resource metadata and paired source/binary identity observations.",
+  "registered_service_control": {
+    "source_publication": "741f96936b4e1840457bd6f40afa04979950eebf",
+    "archive_sha256": "5a624efc51b8ba341832e579e1631a71d133b0374c5183434a42fca45eeb5643",
+    "actual_archived_service_requests": 1,
+    "fresh_generated_compiled_bound": 1,
+    "actual_archived_native_executions": 1,
+    "native_retval": 2,
+    "source_prog_id": 3,
+    "bound_prog_id": 8,
+    "kernel_worker_receipt_native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "native_entry": "trusted_entry",
+    "source_map_count": 0,
+    "native_fixture_matches_paired_build": true,
+    "actual_trusted_loader_sha256": "9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab",
+    "actual_service_client_sha256": "ac4e84709efbe5f93b868af4e7ec5696ee4f488d22fdd8248a81989e72f63d50",
+    "paired_dso_build_sha256": "b4dfe444fb6e28a7ce82bd65a9e315f537007cdf26de708a8a981f6ac0625082",
+    "actual_linker_sha256": "e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9",
+    "actual_module_sha256": "0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0",
+    "actual_module_archive_publication": "340a4ea5e07c38d415031c51aca057b57f62d955",
+    "generated_artifact_sha256": {
+      "request/generated/trusted_arm64.proof.o": "bb3b438f99bbba1fabcb6c0122a45918e6a0047cd7d518be2fd0c46f6ae83d72",
+      "request/generated/trusted_arm64.bpf.o": "c238f62d43728bc6e2b5a482c7f86a47ebfa3a67643ebbed5c2dab468f3c042a",
+      "request/generated/trusted_arm64.bpf.c": "98fcc6de3452d71109f5e515b37a020b3322467850f7dc1dd1d7e3f1a72cd023",
+      "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+      "request/kernel.facts.json": "3e27cbcfea49be79fe5b81fdce1733bcb4d4409c2fb723646d9705377fdd7e28",
+      "request/source-identities.json": "bba39326b818b01e08a430f2a200d7fb9ed7811f331ed97cb0f20d0dc400554c"
+    },
+    "commands": [
+      {
+        "command": [
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources",
+          "--input",
+          "/workspaces/repository/kprog/arm64/build/trusted-transport/service-25cf9sy6/requests/request-f2pad54h/generated/request.native.o",
+          "--symbol",
+          "trusted_entry",
+          "--mode",
+          "proof",
+          "--preserve-entry-abi",
+          "--output",
+          "/workspaces/repository/kprog/arm64/build/trusted-transport/service-25cf9sy6/requests/request-f2pad54h/generated/trusted_arm64.proof.o"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "native-link: arm64 entry=trusted_entry (8 bytes), 1 reachable symbol(s) total\n  - trusted_entry (vaddr 0x0, 8 bytes) [entry]\nnative-link: wrote proof object 12 bytes, 0 reloc(s) -> /workspaces/repository/kprog/arm64/build/trusted-transport/service-25cf9sy6/requests/request-f2pad54h/generated/trusted_arm64.proof.o\n"
+      },
+      {
+        "command": [
+          "clang",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/aarch64-linux-gnu",
+          "-c",
+          "/workspaces/repository/kprog/arm64/build/trusted-transport/service-25cf9sy6/requests/request-f2pad54h/generated/trusted_arm64.bpf.c",
+          "-o",
+          "/workspaces/repository/kprog/arm64/build/trusted-transport/service-25cf9sy6/requests/request-f2pad54h/generated/trusted_arm64.bpf.o"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "recorded_source_identities": {
+      "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+      "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "/workspaces/repository/kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+      "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+      "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+      "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "9c05c0b6577d502c09502cd55a4050585a048ed7c698dca7da8dc8eea3cae895",
+      "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+      "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources": "e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9",
+      "/workspaces/repository/kprog/libnativeloader/build-arm64-entry-resources/trusted-native-loader": "9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab"
+    },
+    "checked_source_sha256": {
+      "kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+      "kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+      "kprog/libnativeloader/src/native_loader.cpp": "9c05c0b6577d502c09502cd55a4050585a048ed7c698dca7da8dc8eea3cae895",
+      "kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac"
+    },
+    "initial_input_identity_count": 157,
+    "request_input_identity_overlap": 8,
+    "source_hashes_stable": true,
+    "qemu_returncode": 0,
+    "guest_exit": 0,
+    "host_ok": true,
+    "original_runtime_command": [
+      "taskset",
+      "-c",
+      "8-11",
+      "qemu-system-aarch64",
+      "-M",
+      "virt",
+      "-cpu",
+      "max",
+      "-smp",
+      "2",
+      "-m",
+      "2048",
+      "-nographic",
+      "-no-reboot",
+      "-kernel",
+      "/workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image",
+      "-fsdev",
+      "local,id=rootfs,path=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root,security_model=none,readonly=on",
+      "-device",
+      "virtio-9p-device,fsdev=rootfs,mount_tag=rootfs",
+      "-fsdev",
+      "local,id=repo,path=/workspaces/repository,security_model=none",
+      "-device",
+      "virtio-9p-device,fsdev=repo,mount_tag=repo",
+      "-append",
+      "console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=-1 oops=panic"
+    ],
+    "scope": "Archived fresh ARM registered-service scalar execution using the paired scoped-resource caller/linker and resource module."
+  }
 }

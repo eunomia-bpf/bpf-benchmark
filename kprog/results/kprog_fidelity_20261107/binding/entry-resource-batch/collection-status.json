@@ -9,10 +9,19 @@
     "kprog/results/kprog_fidelity_20261107/binding/entry-resource-batch/Makefile",
     "replay"
   ],
-  "collector_sha256": "360bf4b878d4128d047ff80d89dfd49a9ec0c3d1ad88985f2591fdeea175572f",
+  "collector_sha256": "a95a220dab2647d7dd3e2b965771ce3303bcb5eca0ececf9c95395e2cfded0bd",
   "makefile_sha256": "cb3b6f1a0b57bdbd44f0ffa62cc185d7fe8ae5d6dd09579a54255f015df1d47c",
-  "raw_run_log_sha256": "fd0d1bc98c5ea1d8036c31dac1247251cf053bad61f210e3e9350aed992e34ff",
+  "raw_run_log_sha256": "b193e5f9d7955649eaf5b9d34d2d56d22ae3490835d5f0747406ce946f8c59bb",
   "query_records": 609,
   "independent_log_table_matches": 609,
-  "initial_setup_archive_sha256": "1bec828db96614bed48c8e4eae91e1a5c4ac62d34eea33e052e44aa7bc4a1bd4"
+  "archived_registered_native_executions": 1,
+  "retention_checks": {
+    "prior609_table_bytes_equal": true,
+    "prior_native_bundle_bytes_equal": true,
+    "prior47_pins_equal": true,
+    "prior_summary_fields_equal": true,
+    "prior609_query_records_path_normalized_equal": true,
+    "query_count_equal": true,
+    "final_input_pins_equal": true
+  }
 }

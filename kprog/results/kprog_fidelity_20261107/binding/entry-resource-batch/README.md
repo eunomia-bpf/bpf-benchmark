@@ -52,7 +52,8 @@ published source batch. Subsequent replay reads this fixed bundle.
 
 The reader consumes C's c664565ccb449e88d3580ebda1e3c079b71d8c53 and A's
 bca4d587e9ca84a2d55043e2c30a95c02438e9cd publications through immutable Git
-blobs. Forty-seven input pins retain their commit/path/hash/length identities.
+blobs. The original47 input pins retain their commit/path/hash/length identities;
+the registered-service extension below adds11.
 All21 frozen source files in A's build archive match both publications.
 C's archived main.candidate.rs and native_loader.candidate.cpp equal the
 corresponding frozen A sources. The shared mechanism follows selected-entry
@@ -68,6 +69,57 @@ The original x86 caller DSO/loader digests remain published metadata in
 summary.json. C's retained89 native-link tests and12 service tests, plus
 A's three successful build/query stages, retain their original archived
 logs and exit statuses. This replay executes the609 metadata queries.
+
+## Archived ARM execution with the paired scoped-resource components
+
+The reader also reconciles A's741f96936b4e1840457bd6f40afa04979950eebf
+registered-service control. Its original QEMU run uses two vCPUs,2 GiB and
+host CPUs8-11. The guest and QEMU exit0, the host report is true, and the native
+client returns2 with prebuilt_proof=false. Source program3 binds as native8
+after fresh generation and BPF compilation. The captured execution uses the
+paired entry-resource loader/linker from the build/query cohort above.
+
+Kernel-owned native bytes, the worker copy, service receipt, actual selected
+fixture and the paired build's native ELF agree on SHA256
+de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c.
+The client JSON equals the corresponding guest fields. The raw guest receipt,
+service event, kernel source ID, successful load reply, selected entry and
+published coverage record agree. Six published generated-artifact digests
+match the actual nested archive bytes. Both original generation/compilation
+commands return0.
+
+The actual runtime identities join the archived paired build:
+
+- Trusted worker loader:9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab.
+- Application service client:ac4e84709efbe5f93b868af4e7ec5696ee4f488d22fdd8248a81989e72f63d50.
+- Native linker:e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9.
+- Resource module:0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0.
+
+The module's actual AArch64 ELF bytes are checked against A's earlier
+340a4ea5e07c38d415031c51aca057b57f62d955 resource-build archive. The paired
+caller DSO retains its archived build identityb4dfe444. The run's157 watched
+path hashes agree before/after. Its nine-field request source/binary vector
+has eight matching watched paths; the remaining caller C++ source matches the
+frozen build archive. All seven source entries are checked against archived or
+published bytes. summary.json preserves these fields and the original runtime
+command under registered_service_control.
+
+Kernel facts and generated metadata record maps=[] for this scalar fixture.
+Its retained native execution count is one. The existing transport cohort
+supplies map-object, query and reference-lifetime observations; the609 host
+queries above supply resource-name closure observations. Each domain retains
+its original inputs and counts. C/A own complete application execution; V/T
+continue universal simulator, token, compiler, ABI, native-link and binding laws.
+
+The combined collector exits0. All609 table rows and the33,753,909-byte native
+bundle retain their exact published bytes. Every prior query-log record has
+equal inputs, flags, output and status after normalization of its temporary
+directory paths. The47 earlier input pins and original query counts, source/binary identities,
+input bundle and application distributions retain their values. The refreshed
+query-log digest records this replay\x27s actual command paths. Eleven further
+input pins bring the total to58.
+collection-status.json records these retention checks and keeps the host
+query count separate from the archived ARM native execution count.
 
 ## Relation to kernel authorization and application execution
 
