@@ -11979,6 +11979,28 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1258
   },
+  "full_make_check_1075cb7f2": {
+    "actual_exit": 0,
+    "archive_block_sha256": "8f7384ec634b5bfe08cdff6263477da0c413d7a5e7681391fb034fabe01b2c45",
+    "archive_file": "kprog/results/kprog_verification_20261107/full-make-check-1075cb7f2.log.gz",
+    "archive_marker": "=== FULL MAKE CHECK 1075CB7F2 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.archive-writer.py": "34ed8bf72cf3ad1ebbb9b7a7f4c94823a4179a3f2c0bad53c956d7f67e19bc36",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.cpu.jsonl.gz": "8244e5b39052d44f917ecf6d14da2e1882aeb378c60fc68c78257d27930473c4",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.head": "8e2185adb0a9f60789838b426890b9e3da2f7c61bb3a26de3c7019b76f3ec052",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.launch.log": "a943d83b24e7e534fe650ffbb21854c2216d40498781b8ec7d404ab9f3c2a6bc",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.log": "29439c1f38d9bed2da4bf8e7fdaf6c93570cbb4c4e63bf60c5137b3c6d578ece",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.py": "9089db4962c4a6730d0bde08274bac34d49cfd004e5dc3044f67885a323e37d1",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.sources": "a94678b6dd5c1f910df41bb357526b2cdf20e71214be9217c3e1df5a0eb3dd0a",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-shiftx-full.state": "fc188a285f6c01b0f9b0ad33f4a75b46f55b4a28d2e9ab1b6926f4632c4c10e7"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "1075cb7f2e4d2e634cbdd94a1b50b20cc17fd5ab",
+    "scope": "Complete formal make check of the exact published source tree 1075cb7f2e4d2e634cbdd94a1b50b20cc17fd5ab. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1259
+  },
   "full_make_check_1262fbdab": {
     "actual_exit": 0,
     "archive_block_sha256": "4db2cff510d56284f6cbd07432a3dc22ce7b08c616aa80bd75f1d0a7cf084e57",

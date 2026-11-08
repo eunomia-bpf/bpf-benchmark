@@ -5183,3 +5183,12 @@ the combined113 object. Memory/exclusive are preserved, visit advances23,
 and return has empty events and an absent fault. [Original evidence](compiled-shiftx.log.gz)
 retains source preprocessing, ELF, arrays and all proof attempts. Full register/
 flag/tag frame, physical ABI and compiler embedding remain explicit interfaces.
+
+### Published source full check 1075cb7f2
+
+`make check` on immutable published1075cb7f2 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_1075cb7f2`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-1075cb7f2.log.gz](full-make-check-1075cb7f2.log.gz).
