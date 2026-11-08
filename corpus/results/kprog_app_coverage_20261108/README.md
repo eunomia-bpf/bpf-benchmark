@@ -2,13 +2,17 @@
 
 The table records the latest closed whole-application attempt, including setup and compiler-transport outcomes. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the five-step native arm and have R timing ownership. The remaining four applications continue through the frontiers below.
 
+The coordinator-requested historical inactive-ghost candidate [c5a4b117b](stack-ghost-init/README.md) completes the exact [9positive/27verifier/2generation replay](ghost-adoption/historical/README.md),ff8485c4d. Its2 pointer-cell initializers are adopted in canonical87ab19c5c. The [current canonical composition](ghost-adoption/canonical/README.md),1ddcc86d5, completes9positive/28verifier/1generation: the published UD2 fixture advances from generation to stock-verifier rejection under73c6. Risky native executions0 in both epochs. Whole canonical Tracee is running with the original151-program baseline and native inputs; its actual terminal receipt will update the Tracee row.
+
+The [authorized OTel source edit](otel-counted-native-loop/README.md),65e7f7a0b, keeps the original4-frame unwind body/bound/order and changes its outer loop directive to counted form. Native, upstream JIT BPF and the embedded collector build from identical edited C bytes and all build targets exit0. The [source-change patch ledger](../kprog_app_source_changes/README.md) records the edit. Whole paired-source OTel follows canonical Tracee using captured paired artifacts and the existing workload.
+
 The current four-application cohort is [4e9a9c7b1](undefined-flags/four-apps-retry/README.md), captured on the canonical c1f6 PF/AF model and original native inputs. Fourteen terminal service requests generate14 and compile13, with10 installed,3 verifier rejections and1 compiler SIGKILL. Each application's original baseline completes and its native startup reaches the recorded frontier. Baseline resident counts come from this exact cohort; Cilium has60 resident programs in this startup. Whole Cilium with approved generic native-division lowering is running as its successor.
 
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/compiler errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [current canonical PF/AF and paired-runtime replay](undefined-flags/bcc-katran/README.md) |
 | OTel | 13 resident | 3 | 2 | 2 | 1: perf_unwind_native compiler SIGKILL | 0 | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
-| Cilium | 60 resident | 4 | 4 | 3 | 0 | 1: tail_handle_ipv4_from_host packet offset30/size4; length-derived end comparison | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
+| Cilium | 60 resident | 2 | 2 | 1 | 0 | 1: cil_to_netdev packet offset12/size2 | [whole native-division and UD2 cohort](native-division-ret/cilium-complete/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send sequence of8193jumps | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [current canonical PF/AF and packet accounting](undefined-flags/bcc-katran/README.md) |
 | Tracee | 151 resident | 3 | 3 | 2 | 0 | 1: sys_enter_submit invalid read from stack off-288+0/size8 | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
