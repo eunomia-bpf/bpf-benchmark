@@ -1,0 +1,32 @@
+{
+  "utc": "2026-11-08T00:13:00.928467+00:00",
+  "previous_result_commit": "bfaeaf2404ff6965ed0378180b3ee20ae890a037",
+  "previous_qemu_oom": {
+    "killed_process": "clang",
+    "pid": 777,
+    "total_vm_kib": 3900680,
+    "anon_rss_kib": 3679392,
+    "guest_memory_mib": 4096,
+    "archive_member": "run/qemu.log",
+    "scope": "Guest OOM records Clang SIGKILL during actual second service request."
+  },
+  "predecessor_pid": 4001034,
+  "predecessor_state": "helper-guard-runtime/status.json",
+  "cpu_set": "16-19",
+  "guest_memory_mib": 8192,
+  "total_lane_memory_cap_mib": 12288,
+  "transport_sha256": "4f839ef21a1bffa00e3b5a54b3879e823921e2b1253f0a987b335ca332ca103d",
+  "binary_and_manifest_pins": {
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native-loader": "9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-service-client": "ac4e84709efbe5f93b868af4e7ec5696ee4f488d22fdd8248a81989e72f63d50",
+    "kprog/libnativeloader/build-arm64-entry-resources/libnative_loader.so": "b4dfe444fb6e28a7ce82bd65a9e315f537007cdf26de708a8a981f6ac0625082",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources": "e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9",
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_native_lab.ko": "8a57874a0de59e1e1f79751d2dad64c54c6ece1567121b5be6d75862ed856122",
+    "bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so": "dd216d98fba7a826c12e5108df460bdef47513b67e2465b487d3348f6255e329",
+    "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/manifest.json": "f30d80bea5b8a264b52b5218bc16312fb0428fc39dca315dcbe4b2be8c6ad13c"
+  },
+  "result_directory": "corpus/results/kprog_arm64_app_coverage_20261107/otel-memory-replay",
+  "scope": "Complete original OTel two-start workload with paired entry-resource caller/linker and guarded ARM module;8GiB after current scoped and guarded Katran sequence."
+}
