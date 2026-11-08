@@ -93,10 +93,41 @@ def expectation(attrs):
     return None
 
 
+def compile_bpf(source, out, includes, clang):
+    """Compile one selftest to a BPF object, as an application loads it."""
+    # `-c` keeps clang from invoking the host linker, which cannot relink a
+    # BPF object (EM_BPF relocations).
+    cmd = [clang, "-O2", "-g", "-target", "bpf", "-mcpu=v4", "-c",
+           "-D__TARGET_ARCH_x86"]
+    for inc in includes:
+        cmd += ["-I", str(inc)]
+    # libbpf refuses an object with no `license` section; several selftests
+    # omit it because the kernel's own runner supplies one out of band.  One
+    # wrapper includes both, because `-c` with several inputs cannot take a
+    # single -o.
+    stub = pathlib.Path(out).with_suffix(".license.c")
+    # The attribute is written out rather than including bpf_helpers.h,
+    # which would pull the host's /usr/include/bpf before the vendored
+    # headers and fail on `__u64`.
+    stub.write_text(
+        '__attribute__((section("license"), used))\n'
+        'char __only_license[] = "GPL";\n'
+        '#include "%s"\n' % pathlib.Path(source).resolve())
+    cmd += [str(stub), "-o", str(out)]
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    return done.returncode == 0, done.stderr
+
+
 def compile_native(source, out, includes, clang):
     """Compile one selftest to a native x86-64 object; returns (ok, stderr)."""
+    # The kernel calls a native program with the BPF stack, so the native
+    # frame must live inside the red zone's shadow and may not clobber the
+    # FP/SIMD registers the BPF ABI leaves to the JIT: the corpus compiles
+    # its native objects with `-mno-red-zone` and `-mgeneral-regs-only`
+    # for the same reason.
     cmd = [clang, "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE",
            "-D__TARGET_ARCH_x86", "-fms-extensions", "-fomit-frame-pointer",
+           "-mno-red-zone", "-mgeneral-regs-only",
            "-fno-stack-protector", "-fno-asynchronous-unwind-tables",
            "-fno-unwind-tables", "-fno-jump-tables"]
     for inc in includes:
@@ -181,8 +212,14 @@ def main(argv):
             continue
         obj = out / (src.stem + ".native.o")
         ok, err = compile_native(src, obj, includes, clang)
+        bpf = out / (src.stem + ".bpf.o")
+        bpf_ok, bpf_err = (compile_bpf(src, bpf, includes, clang) if ok
+                           else (False, "native compile failed"))
         compiled[src.name] = dict(ok=ok, obj=str(obj) if ok else None,
+                                  bpf=str(bpf) if bpf_ok else None,
                                   error=err[-800:] if not ok else "",
+                                  bpf_error=(bpf_err[-400:]
+                                             if not bpf_ok else ""),
                                   symbols=symbols(obj) if ok else [])
     for name in asm_files:
         compiled.setdefault(name, dict(ok=False, obj=None,
@@ -191,6 +228,7 @@ def main(argv):
     for r in rows:
         info = compiled.get(r["file"], {})
         r["compiled"] = info.get("ok")
+        r["bpf_object"] = info.get("bpf")
         r["entry"] = r["program"] in info.get("symbols", [])
         if not info.get("ok"):
             r["compile_error"] = info.get("error", "")

@@ -5196,6 +5196,32 @@ widths, previously prose, so both statements of it
 are bound (census 445 -> 446).
 
 
+Step 0575 submitted the kernel's own annotated
+programs through the native path and found that most
+of the resulting agreement was not evidence. The
+harness compiles each selftest twice, loads the BPF
+object the way an application does, and compares the
+outcome with the __success/__failure annotation. Of
+the 128 programs that have an entry, 111 sit in an
+object that holds several, and micro_exec runs one
+program per object, so they were skipped; the skip,
+not a rejection, is what limits the sweep. Of the 17
+submitted, one ran, five the native verifier refused,
+and eleven never reached it, because their companion
+BPF object fails to load -- so their apparent
+agreement with __failure is vacuous and is no longer
+counted. The one refusal with a named cause is a
+stack limit: the stub frame and the program's own
+stack share the kernel's 512 bytes, and global_func2
+uses 248 of them before the stub starts, which the
+verifier reports as a write at R10-528. Two harness
+defects were found by doing it: the BPF compile drove
+the host linker without -c, and the native compile
+omitted -mno-red-zone and -mgeneral-regs-only, which
+the corpus uses for the same reason (census 445 ->
+446).
+
+
 Step 0574 guarded the derivation itself. Reverting an
 arm to simp_all moves no published figure, so nothing
 caught it; scan_tree now reports a nonmember theorem
