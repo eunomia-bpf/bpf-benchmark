@@ -7,7 +7,7 @@
   "micro_exit": 0,
   "micro_cases": 30,
   "source_hashes": {
-    "vendor/bpf/native_division.cpp": "6b84742abf82f87d276bbd81484c6cff465b3a98a30f2318ed5cedf4d40f5360",
+    "vendor/bpf/native_division.cpp": "3c65eeb586523a6a03e8192e6e0b51e3a534692328b40e85020a92128252ef87",
     "vendor/bpf/Makefile": "3d2529d3ccd41b39a81b0bb509050d83db31b5aad5ff999399f4aaf695085a50",
     "runner/libs/cilium_native_build.py": "df60464b8015c43b85227a9244e9eb469c494c7db6109f0a2218c69f84c770c6",
     "runner/containers/runner-runtime.Dockerfile": "ef69f5151747d1853e1e7856fd708eb5c1eb947b082b8d56055d7a3ffc7d0af4",
@@ -26,10 +26,11 @@
   "llvm_flag_clobber": "flags",
   "additional_optnone_results": 201058,
   "additional_condition_frame_results": 100529,
-  "total_component_results": 1910051,
+  "total_component_results": 2030051,
   "final_image": {
-    "image": "sha256:e52c0d706cd84a4455e4068bc33225489bea4a77c8f86742c43fec0947c7b864",
+    "image": "sha256:83528d91c15d3d9d2b30cadeface57a8362f91fbfae82058dd9da333ab55b3f4",
     "exit": 0
   },
-  "final_plugin_sha256": "8988b546c3b8ad2079e09d4f44cb48c30b1746ca0fdbdbb2e3fd1dc3410e8d4b"
+  "final_plugin_sha256": "61cfaf9983c1871a7b0fa5e3a35e2fc24a78fdad56fe2146bc06097ba7f7c252",
+  "fixed_vector_lane_results": 120000
 }

@@ -22,8 +22,24 @@ struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
                         op->getOpcode() == llvm::Instruction::URem ||
                         op->getOpcode() == llvm::Instruction::SRem)
                         divisions.push_back(op);
-        for (auto *op : divisions) {
+        for (size_t cursor = 0; cursor < divisions.size(); ++cursor) {
+            auto *op = divisions[cursor];
             auto *type = op->getType();
+            if (auto *vector = llvm::dyn_cast<llvm::FixedVectorType>(type)) {
+                llvm::IRBuilder<> scalarize(op);
+                llvm::Value *result = llvm::PoisonValue::get(type);
+                for (unsigned lane = 0; lane < vector->getNumElements(); ++lane) {
+                    auto *left = scalarize.CreateExtractElement(op->getOperand(0), lane);
+                    auto *right = scalarize.CreateExtractElement(op->getOperand(1), lane);
+                    auto *element = llvm::BinaryOperator::Create(op->getOpcode(),
+                        left, right, "native.div.lane", op);
+                    divisions.push_back(element);
+                    result = scalarize.CreateInsertElement(result, element, lane);
+                }
+                op->replaceAllUsesWith(result);
+                op->eraseFromParent();
+                continue;
+            }
             auto *dividend = op->getOperand(0);
             auto *divisor = op->getOperand(1);
             bool sign = op->getOpcode() == llvm::Instruction::SDiv ||
