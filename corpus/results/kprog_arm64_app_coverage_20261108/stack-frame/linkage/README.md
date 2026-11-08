@@ -1,0 +1,3 @@
+Generic ARM simulator body-call relocation and returns
+
+Tracee09208 reaches stack off-520 in the flat simulator. The candidate places native byte storage in the caller and execution state in an ordinary BPF body function. Existing tail-call bodies retain their flat representation. The loader resolves executable-section calls and preserves ordinary callee EXIT and redirects the outer entry EXIT to the native-stub continuation. Existing142080 host observations,29-micro generation/compile and the existing32-width native control supply actual outcomes: {"loader": 0, "control": 2}. Exact source, commands, compiler and stock-verifier logs accompany the result. Additional runtime admission gates0.
