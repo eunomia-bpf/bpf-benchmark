@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-49 x86 register/control/memory tokens and 70 ARM scalar/immediate/memory tokens; full raw ISA
+49 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
@@ -85,7 +85,11 @@ Fifty-two scalar direct bodies also compose NOP/address/move/keep, register ALU,
 shifts, multiply/unary, extract/reverse/extend/bitfield and flag/conditional
 families through the same observed step and established W/X field domain.
 Nine pair/vector tokens connect pair width, fixed D/Q access, FMOV bank/direction
-and reduction AUX through direct-body equality and the same observed step. ADD_IMM/SUB_IMM/ALU_IMM have W/X numeric
+and reduction AUX through direct-body equality and the same observed step.
+RET_TO also has finite-switch/route/body equality and canonical invocation-step
+composition under the shared code-label and authenticated outer-LR frame.
+Its physical value/CB writes have finite C checks; full exit ABI and compiler
+correspondence retain their explicit interfaces. ADD_IMM/SUB_IMM/ALU_IMM have W/X numeric
 direct-body equality and canonical-step composition under the shared
 field/provenance/platform bindings.
 Safety work is generic per

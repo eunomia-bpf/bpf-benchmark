@@ -4316,4 +4316,76 @@ theorem vector_token_step_refines (token : VectorToken) (flags : Byte) (aux : Bi
   exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
     firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
 
+
+/-- A literal C switch scans the finite source-label cases. Its selected
+route retains the incoming target word. -/
+def specializedReturnSwitch (target : Word) : List Word → Option ReturnRoute
+  | [] => none
+  | label :: rest => if target = label then some (.internal target)
+      else specializedReturnSwitch target rest
+
+theorem return_switch_matches (target : Word) (targets : List Word) :
+    specializedReturnSwitch target targets =
+      if targets.contains target then some (.internal target) else none := by
+  induction targets with
+  | nil => rfl
+  | cons label rest ih =>
+      by_cases hit : target = label
+      · simp [specializedReturnSwitch, hit]
+      · have apart : label ≠ target := Ne.symm hit
+        simp [specializedReturnSwitch, hit, List.contains_cons, beq_iff_eq, apart, ih]
+
+/-- RET_TO first captures raw Rn into its private LR scratch, takes the
+nonzero/tag guard, and then chooses its finite CODE switch or outer return.
+Architectural register cells retain their values; the scratch is private. -/
+def specializedReturnRoute (tags : Reference.AArch64.Gpr → Byte) (src : Register)
+    (targets : List Word) (raw : Reference.AArch64.State) : Option ReturnRoute :=
+  let target := Arm64Move.Fields.read raw (Arm64Register.registerCode src)
+  if target != 0 || returnTag tags src != 10 then
+    if returnTag tags src == 9 then specializedReturnSwitch target targets else none
+  else some .outer
+
+theorem return_token_route_matches (tags : Reference.AArch64.Gpr → Byte) (src : Register)
+    (targets : List Word) (raw : Reference.AArch64.State) :
+    specializedReturnRoute tags src targets raw = returnRoute tags src targets raw := by
+  by_cases zero : Arm64Move.Fields.read raw (Arm64Register.registerCode src) = 0 <;>
+    by_cases ret : returnTag tags src = 10 <;>
+    by_cases code : returnTag tags src = 9 <;>
+    simp_all [specializedReturnRoute, returnRoute, return_switch_matches]
+
+/-- The emitted RET token applies the existing RETURN/CODE observation to
+its independently selected C route. Invocation exit memory and physical ABI
+transport retain their explicit platform relation. -/
+def specializedReturn (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (src : Register) (targets : List Word)
+    (raw : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (specializedReturnRoute tags src targets raw).map
+    (observeReturnRoute nativeAddress outerReturn (returnCodeState outerReturn tags raw))
+
+theorem return_token_body_matches (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (src : Register) (targets : List Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) (raw : Reference.AArch64.State) :
+    specializedReturn nativeAddress outerReturn tags src targets raw =
+      dispatchInvocationEmission nativeAddress outerReturn tags (.inr (src, targets))
+        sourceScalar sourceStack firstScalar secondScalar release failure raw := by
+  simp only [specializedReturn, return_token_route_matches, dispatchInvocationEmission]
+
+/-- Once for the emitted RET token, compose the route/body equality with the
+canonical branch step under the shared source-label and same-invocation LR frame. -/
+theorem return_token_step_refines (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (src : Register) (targets : List Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (raw : Reference.AArch64.State)
+    (binding : InvocationBinding nativeAddress outerReturn tags raw release (.inr (src, targets)) native)
+    (access : scalarMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (environment : exclusiveStoreEnvironment native failure (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (pairAccess : pairMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)))
+    (vectorAccess : vectorMemoryAccess native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw))) :
+    specializedReturn nativeAddress outerReturn tags src targets raw =
+      some (Reference.AArch64.step native (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw))) := by
+  rw [return_token_body_matches nativeAddress outerReturn tags src targets sourceScalar sourceStack
+    firstScalar secondScalar release failure raw]
+  exact invocation_emission_step_refines nativeAddress outerReturn tags (.inr (src, targets))
+    sourceScalar sourceStack firstScalar secondScalar release failure native raw binding access environment pairAccess vectorAccess
+
 end KProgFormal.Refinement.Arm64Dispatcher

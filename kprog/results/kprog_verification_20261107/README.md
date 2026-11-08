@@ -18,7 +18,7 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 70/71 |
+| O2 C-model token-body equality | 49/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -46,7 +46,12 @@ provenance, source-emission and compiled-C interfaces remain explicit.
 Nine pair/vector tokens add the same equality/step composition: LDP/STP,
 LOAD/STORE D0/Q0, FMOV and CNT/UADDLV. Pair width, fixed D/Q width,
 FMOV direction/bank and reduction AUX retain their exact boundaries.
-RET carries the remaining outer-return token obligation.
+RET adds emitted-return route/body equality through the unified invocation
+step. Its source macro captures raw Rn, checks zero-offset RETURN or a finite
+CODE case, and observes the same canonical register branch. The71 ARM
+entries comprise70 numeric body equalities and one emitted-return control
+body equality; complete exit memory/ABI and C/compiler transport remain
+explicit universal interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -3928,3 +3933,23 @@ All175 inputs retain stable hashes and published Git identities. ARM C-model
 O2 reaches70/71; RET's outer-return token relation is the remaining token item.
 Complete raw/compiled closure continues through the explicit native-field,
 memory/profile/effect, provenance, source-emission and invocation ABI interfaces.
+
+ARM emitted-return token composition (`arm64_return_token_body` in the existing
+[integration receipt](arm64-xdp-host-integration.json)) adds literal-switch,
+route/body equality and canonical invocation-step composition for RET_TO.
+Four axiom audits and the default Lean build pass; the prior206 dispatcher
+theorems and module prefix retain exact bytes. Actual production C macros pass
+9,437,184 host UBSan cases:2,976 outer returns,4,960 internal targets and
+9,429,248 explicit refusals. Full GPR/tag/vector/NZCV preservation, private LR
+scratch, whole-context canaries, two skb CB writes, materialized low32 X0 and
+entry-input counts agree. The actual generator passes132 operand/site cases.
+The181 stable inputs have179 root Git and two pinned libbpf Git identities.
+ARM C-model token coverage reaches71/71:70 numeric bodies and one emitted-return
+control body. Complete native code/provenance, physical exit memory/ABI and
+compiled-BPF correspondence continue through the explicit universal interfaces.
+
+The full check at source d2246b5c8 records linker ENOSPC and an interrupted
+CPU-trace finalizer (`failed_full_check_d2246b5c8_resource`). Its1161 source
+hashes match both Git and the retired export; the complete CPU trace and raw
+failure controls are recovered and archived. The latest published source
+continues through the complete check with the existing incremental caches.
