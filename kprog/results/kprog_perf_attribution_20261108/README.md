@@ -395,3 +395,25 @@ A per-site *time* share needs per-site samples, and this environment has no
 compile that reads the cycle counter at each site. The instruction counts
 above are the static bound, and the per-program `run_time_ns` is the total;
 their ratio is the site density, not the site cost.
+
+### PMU counters, which this environment does have
+
+No `perf` binary is installed, but the runner's own `--perf-counters` opens
+the PMU through `perf_event_open` and reports cycles, instructions,
+branches and cache events for a native run. Two micro programs, 10,000
+inner repeats:
+
+| program | instructions | branches | IPC (median of 5) | IPC range |
+| --- | ---: | ---: | ---: | ---: |
+| `katran_lb_consistent_hash_select` | 404,750 | 81,034 | 5.33 | 5.27-5.65 |
+| `tracee_syscall_name_table_lookup` | 274,750 | 81,034 | 4.89 | 4.75-4.90 |
+
+The instruction count is exactly reproducible across the five runs; the
+cycle count is not, so the IPC is a median with the spread given. Both
+programs are 5.0 and 3.4 instructions per branch, which is the density a
+per-site measurement would divide between the sites.
+
+`run-native --perf-counters` is therefore the measurement tool for the
+per-site split, and it needs no new build and no change to any published
+program. What it does not have is a per-site scale, because the counters
+are read around the whole run.
