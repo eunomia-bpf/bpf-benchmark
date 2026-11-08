@@ -1,0 +1,104 @@
+{
+  "created": "2026-11-08T06:36:36.921056+00:00",
+  "source_head": "5d27b2a9b2f23accb08870e7504e22218771f891",
+  "header_sha256": "b71c039d50f0850153f809f27e3867f8ef6c4848630ec51befd18647691d8793",
+  "captured_header_sha256": "b71c039d50f0850153f809f27e3867f8ef6c4848630ec51befd18647691d8793",
+  "safety": {
+    "cases": 38,
+    "counts": {
+      "valid_executed": 9,
+      "verifier_rejected": 27,
+      "specialization_rejected": 2
+    },
+    "exit": 0,
+    "native_sha256_matches": 38,
+    "unsafe_accepted": 0,
+    "unsafe_native_executed": 0
+  },
+  "module_epoch": {
+    "kernel_sha256": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52",
+    "vmlinux_sha256": "1530dcc64c783a950d360e27d3589e0ea26e403391fda25e8395d1230c2e738c",
+    "kernel_time": 1794116077.3149514,
+    "module_time": 1794115285.7271435,
+    "after_kernel_sha256": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52",
+    "after_vmlinux_sha256": "1530dcc64c783a950d360e27d3589e0ea26e403391fda25e8395d1230c2e738c",
+    "installed_modules": 842
+  },
+  "applications": {
+    "cilium": {
+      "application": "cilium/agent",
+      "native_requests": 0,
+      "generated": 0,
+      "compiled": 0,
+      "installed": 0,
+      "failed": 0,
+      "native_sha256_matches": 0,
+      "baseline_census": null,
+      "corpus_metadata": [
+        {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_062235_634817/metadata.json",
+          "status": "error",
+          "error_message": "corpus suite reported errors"
+        }
+      ],
+      "observed_baseline_programs": 0
+    },
+    "tracee": {
+      "application": "tracee/monitor",
+      "native_requests": 1,
+      "generated": 0,
+      "compiled": 0,
+      "installed": 0,
+      "failed": 1,
+      "native_sha256_matches": 1,
+      "baseline_census": 151,
+      "corpus_metadata": [
+        {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_062508_202132/metadata.json",
+          "status": "error",
+          "error_message": "corpus suite reported errors"
+        }
+      ]
+    },
+    "tetragon": {
+      "application": "tetragon/observer",
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "installed": 0,
+      "failed": 1,
+      "native_sha256_matches": 1,
+      "baseline_census": 287,
+      "corpus_metadata": [
+        {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_062919_112097/metadata.json",
+          "status": "error",
+          "error_message": "corpus suite reported errors"
+        }
+      ]
+    },
+    "otel": {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "installed": 0,
+      "failed": 1,
+      "native_sha256_matches": 1,
+      "baseline_census": 13,
+      "corpus_metadata": [
+        {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_063221_800268/metadata.json",
+          "status": "error",
+          "error_message": "corpus suite reported errors"
+        }
+      ]
+    }
+  },
+  "artifact_sha256": {
+    "runtime.tar.gz": "09ee8a967a97edb92e3e813fcbefc6760d600e8e9532940c1002bbacd64ca3cd",
+    "applications.tar.gz": "8e08f2851dfd5f6530464cc4d3780c8c0d04db050a2f83c36ded75b4f1cf5bd3",
+    "safety.tar.gz": "f49977f7721843a6c91abda8b95d8433519425cead3c09f237a03a91156f56a0",
+    "matching-modules.tar.gz": "238775ee06df0af235a5b5795da52021b55199112dd9a0106097dea832b76a0e"
+  }
+}

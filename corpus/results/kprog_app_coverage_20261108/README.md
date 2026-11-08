@@ -1,17 +1,17 @@
 # x86 application coverage, November8 UTC
 
-The table records the latest closed complete-application attempt. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the generation-bound arm and have R timing ownership. The remaining four applications continue through the frontiers below.
+The table records the latest closed whole-application attempt, including setup and compiler-transport outcomes. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the five-step native arm and have R timing ownership. The remaining four applications continue through the frontiers below.
 
-| Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
+| Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 5 | 5 | 4 | 1: 900-second lifecycle timeout, then worker activation refusal | 0 | [035354](otel-host-compile/README.md) |
-| Cilium | 62 resident | 2 | 2 | 1 | 0 | 1: packet access offset18/size2 after373instructions | [053636](cilium-owned-skb-053636/README.md) |
-| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send jump complexity | [035351](tetragon-c-mask/README.md) |
+| OTel | 13 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
+| Cilium | startup error | 0 | 0 | 0 | 1: standard-module split-BTF error22 before native submission | 0 | [five-step replay](five-step-x86-replay/README.md) |
+| Tetragon | 287 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: probe_read helper length range | [042532](tracee-movx-identity/README.md) |
+| Tracee | 151 resident | 0 | 0 | 0 | 1: captured helper declaration resource before generation | 0 | [five-step replay](five-step-x86-replay/README.md) |
 
-Current detached work runs the OTel continuation with fresh host compilation and the existing corpus lifecycle interfaces set to0. The [Cilium successor](cilium-owned-skb-plan.json) follows with cohort-owned skb and ABI includes. Its complete captured TC source compiles successfully; actual terminal loading supplies acceptance. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The completed 38-case pruned-helper suite retains 9 positive executions and 29 unsafe refusals. Complete Tracee with destination-width MOVX reaches the later helper-length frontier recorded above.
+Current detached work runs complete Cilium and Tracee with the final-vmlinux module package, captured sources and a writable shared compiler directory; complete Tetragon and OTel follow with their own compiler lifecycle. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
 
 Recorded frontiers retain their separate entries and candidate epochs:
 
@@ -45,3 +45,5 @@ The [fresh host-compiled OTel cohort](otel-host-compile/README.md) binds perf_un
 The [whole Tracee destination-width cohort](tracee-movx-identity/README.md) carries the checked byte through readonly indexing and reaches probe_read length range at 2,776 instructions and107states. The [Cilium include audit](cilium-skb-data-len/README.md) attributes its measured object to the historical skb header; the selected-header successor preserves that diagnostic epoch and changes the actual compiler include graph. Its collection repair also preserves the prior published driver and archive bytes. The [generic numeric-iterator control](numeric-iterator-call/README.md) completes native/BPF compilation and native proof linking, then identifies typed kernel-call ABI modelling as the next Tetragon mechanism.
 
 The [complete Cilium selected-skb cohort](cilium-owned-skb-053636/README.md) installs `cil_xdp_entry` and reaches `tail_nodeport_nat_ingress_ipv4` packet access offset18/size2 after373instructions. All2terminal native hashes reconcile. Captured inputs retain the pre-five-step module and actual compiler includes; three live source paths advance during the cohort. The successor consumes the published five-step kernel/module/service.
+
+The [five-step x86 replay](five-step-x86-replay/README.md) retains the completed38-case safety outcomes, all four original whole-application setup attempts, captured compiler inputs and842matching standard modules. All38 safety and3 application native hashes match their terminal records. The kernel image/vmlinux hashes stay equal across the incremental module refresh. Historical whole-application receipts retain OTel5generated/4installed, Cilium2generated/1installed, Tetragon4generated/3installed and Tracee6generated/5installed on their captured earlier source epochs. Corrected five-step cohorts supply the ensuing coverage and work receipts.
