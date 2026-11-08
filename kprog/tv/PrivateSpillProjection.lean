@@ -286,3 +286,124 @@ end KProgTV.PrivateSpillProjection
 #print axioms KProgTV.PrivateSpillProjection.spill_public_memory
 
 #print axioms KProgTV.PrivateSpillProjection.spill_reload_projected_block
+
+namespace KProgTV.PrivateSpillProjection
+open KProgFormal.Reference
+
+/-- The reload after an intervening body restores the original saved word,
+without replacing any of the body's memory, other registers or ghost state. -/
+def reloadedAfter (original body : BPF.State) (saved : BPF.Register) : BPF.State :=
+  BPF.setReg { body with pc := body.pc + 1 } saved (original.regs saved)
+
+theorem reload_after_body_matches (env : BPF.Environment) (program : Array Byte)
+    (original body : BPF.State) (saved : BPF.Register) (offset : BitVec 16)
+    (general : saved ≠ 10) (frame : body.regs 10 = original.regs 10)
+    (readable : permitted original.memory.readable (spillAddress original offset) 8 = true)
+    (slot : readMemory body.memory (spillAddress original offset) 8 =
+      readMemory (spilled original saved offset).memory (spillAddress original offset) 8) :
+    BPF.execute env program body (reloadInstruction saved offset) = .ok
+      ⟨reloadedAfter original body saved,
+        [Event.memory .read (spillAddress original offset) (valueBytes (original.regs saved) 8) true], none⟩ := by
+  have read := slot.trans (PrivateSpills.spill_read original.memory
+    (spillAddress original offset) (original.regs saved) readable)
+  have base : body.regs 10 + offset.signExtend 64 = spillAddress original offset := by
+    rw [frame]
+    rfl
+  simp [BPF.execute, reloadInstruction, BPF.load, base, read, general, reloadedAfter, BPF.setReg,
+    Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+/-- The complete inserted prefix/body/suffix consists of actual decoded BPF
+steps at their real PCs. The body can have arbitrary finite control flow and
+observable effects; only the live spill read and frame address must survive. -/
+theorem spill_body_reload_execution (env : BPF.Environment) (program : Array Byte)
+    (original body : BPF.State) (saved : BPF.Register) (offset : BitVec 16)
+    (start finish : Nat) (events : List Event)
+    (general : saved ≠ 10) (active : original.halted = false) (position : original.pc = start)
+    (storeDecoded : BPF.decode program start = .ok (spillInstruction saved offset))
+    (loadDecoded : BPF.decode program finish = .ok (reloadInstruction saved offset))
+    (writable : permitted original.memory.writable (spillAddress original offset) 8 = true)
+    (readable : permitted original.memory.readable (spillAddress original offset) 8 = true)
+    (middle : Execution (BPFPath.instructionStep env program)
+      (spilled original saved offset) events body)
+    (bodyActive : body.halted = false) (bodyPosition : body.pc = finish)
+    (frame : body.regs 10 = original.regs 10)
+    (slot : readMemory body.memory (spillAddress original offset) 8 =
+      readMemory (spilled original saved offset).memory (spillAddress original offset) 8) :
+    Execution (BPFPath.instructionStep env program) original
+      ([Event.memory .write (spillAddress original offset) (valueBytes (original.regs saved) 8) true] ++
+        events ++ [Event.memory .read (spillAddress original offset) (valueBytes (original.regs saved) 8) true])
+      (reloadedAfter original body saved) := by
+  have first : BPFPath.instructionStep env program original
+      [Event.memory .write (spillAddress original offset) (valueBytes (original.regs saved) 8) true]
+      (spilled original saved offset) := by
+    refine ⟨⟨spilled original saved offset, _, none⟩, ?_, rfl, rfl⟩
+    simp [BPF.step, active, position, storeDecoded,
+      spill_instruction_matches env program original saved offset writable]
+  have last : BPFPath.instructionStep env program body
+      [Event.memory .read (spillAddress original offset) (valueBytes (original.regs saved) 8) true]
+      (reloadedAfter original body saved) := by
+    refine ⟨⟨reloadedAfter original body saved, _, none⟩, ?_, rfl, rfl⟩
+    have nonnegative : ¬body.pc < 0 := by rw [bodyPosition]; omega
+    simp [BPF.step, bodyActive, nonnegative, bodyPosition, loadDecoded,
+      reload_after_body_matches env program original body saved offset general frame readable slot]
+  have tail := middle.append (by
+    simpa only [List.append_nil] using Execution.next last (Execution.refl _))
+  have entire := Execution.next first tail
+  simpa only [List.append_assoc] using entire
+
+/-- Private spill/reload projection preserves the entire intervening trace
+in order, apart from the same separately owned ordinary-access projection. -/
+theorem spill_body_reload_projected (privateByte : Word → Bool) (original : BPF.State)
+    (saved : BPF.Register) (offset : BitVec 16) (events : List Event)
+    (owned : ∀ index < 8, privateByte (spillAddress original offset + BitVec.ofNat 64 index) = true) :
+    ([Event.memory .write (spillAddress original offset) (valueBytes (original.regs saved) 8) true] ++
+      events ++ [Event.memory .read (spillAddress original offset) (valueBytes (original.regs saved) 8) true]).filterMap
+        (project privateByte) = events.filterMap (project privateByte) := by
+  have access : privateAccess privateByte (spillAddress original offset)
+      (valueBytes (original.regs saved) 8) = true := by
+    simpa [privateAccess, valueBytes, List.all_eq_true] using owned
+  simp [List.filterMap_append, project, access]
+
+theorem reloaded_after_frame (original body : BPF.State) (saved : BPF.Register) :
+    (reloadedAfter original body saved).regs saved = original.regs saved ∧
+    (reloadedAfter original body saved).memory = body.memory ∧
+    (reloadedAfter original body saved).pc = body.pc + 1 ∧
+    (reloadedAfter original body saved).unspecifiedVisit = body.unspecifiedVisit ∧
+    (reloadedAfter original body saved).exclusiveVisit = body.exclusiveVisit ∧
+    (reloadedAfter original body saved).halted = body.halted ∧
+    ∀ register, register ≠ saved →
+      (reloadedAfter original body saved).regs register = body.regs register := by
+  refine ⟨by simp [reloadedAfter, BPF.setReg], rfl, rfl, rfl, rfl, rfl, ?_⟩
+  intro register different
+  simp [reloadedAfter, BPF.setReg, different]
+/-- The real wrapper supplies the projected-block witness around any finite
+body. This discharges insertion/control composition once the compiler supplies
+private ownership, frame/slot liveness and the body's actual execution. -/
+theorem spill_body_reload_projected_block (env : BPF.Environment) (program : Array Byte)
+    (privateByte : Word → Bool) (original body : BPF.State)
+    (saved : BPF.Register) (offset : BitVec 16) (start finish : Nat) (events : List Event)
+    (general : saved ≠ 10) (active : original.halted = false) (position : original.pc = start)
+    (storeDecoded : BPF.decode program start = .ok (spillInstruction saved offset))
+    (loadDecoded : BPF.decode program finish = .ok (reloadInstruction saved offset))
+    (writable : permitted original.memory.writable (spillAddress original offset) 8 = true)
+    (readable : permitted original.memory.readable (spillAddress original offset) 8 = true)
+    (middle : Execution (BPFPath.instructionStep env program)
+      (spilled original saved offset) events body)
+    (bodyActive : body.halted = false) (bodyPosition : body.pc = finish)
+    (frame : body.regs 10 = original.regs 10)
+    (slot : readMemory body.memory (spillAddress original offset) 8 =
+      readMemory (spilled original saved offset).memory (spillAddress original offset) 8)
+    (owned : ∀ index < 8, privateByte (spillAddress original offset + BitVec.ofNat 64 index) = true) :
+    projectedBlock privateByte (BPFPath.instructionStep env program) original
+      (events.filterMap (project privateByte)) (reloadedAfter original body saved) :=
+  ⟨_, spill_body_reload_execution env program original body saved offset start finish events
+    general active position storeDecoded loadDecoded writable readable middle bodyActive bodyPosition frame slot,
+    spill_body_reload_projected privateByte original saved offset events owned⟩
+
+end KProgTV.PrivateSpillProjection
+#print axioms KProgTV.PrivateSpillProjection.reload_after_body_matches
+#print axioms KProgTV.PrivateSpillProjection.spill_body_reload_execution
+#print axioms KProgTV.PrivateSpillProjection.spill_body_reload_projected
+#print axioms KProgTV.PrivateSpillProjection.reloaded_after_frame
+
+#print axioms KProgTV.PrivateSpillProjection.spill_body_reload_projected_block

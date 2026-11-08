@@ -257,3 +257,26 @@ end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.store_agrees
 
 #print axioms KProgTV.PrivateSpills.read_disjoint_store
+
+namespace KProgTV.PrivateSpills
+open KProgFormal.Reference
+
+/-- Every finite history of disjoint real writes preserves the exact slot
+read, including initialization, permissions and wrapping addresses. -/
+theorem read_disjoint_stores (memory : Memory) (address : Word) (count : Nat)
+    (writes : List (Word × Word × Nat))
+    (apart : ∀ write ∈ writes, ∀ index < count,
+      ¬((address + BitVec.ofNat 64 index) - write.1).toNat < write.2.2) :
+    readMemory (writes.foldl (fun current write =>
+      storeMemory current write.1 write.2.1 write.2.2) memory) address count =
+      readMemory memory address count := by
+  induction writes generalizing memory with
+  | nil => rfl
+  | cons write rest ih =>
+      simp only [List.foldl_cons]
+      rw [ih (storeMemory memory write.1 write.2.1 write.2.2)
+        (fun item inside => apart item (List.mem_cons_of_mem _ inside))]
+      exact read_disjoint_store memory write.1 write.2.1 address write.2.2 count
+        (apart write (by simp))
+end KProgTV.PrivateSpills
+#print axioms KProgTV.PrivateSpills.read_disjoint_stores

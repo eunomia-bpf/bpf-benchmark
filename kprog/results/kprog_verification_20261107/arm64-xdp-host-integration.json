@@ -14202,6 +14202,147 @@
     "source_manifest_sha256": "6fccabf4a0d424c13b78944ddcece6743f37f773f400626aca7e2b2a369b81b0",
     "wrapper_exit_before_fix": 0
   },
+  "private_spill_body_reload": {
+    "actual_existing_private_spill_projection_check_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "a5ffbea6b082ae5700889238b683fe9c363b209a72d92b87d920e455d360fa11",
+    "archive_file": "kprog/results/kprog_verification_20261107/spill-body-reload.log.gz",
+    "archive_marker": "=== PRIVATE SPILL BODY RELOAD V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-integrated.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-integrated.log": {
+        "bytes": 5668,
+        "sha256": "e376f974c216a99b6542c8110890ebb651b0743650fba3398e0e2c2f3300a66d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-integrated.py": {
+        "bytes": 393,
+        "sha256": "86de8fd12d6aff4e4c551ae4122351cad940ca3bc13df802df1a8256741f0dea"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.attempt1.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.attempt1.log": {
+        "bytes": 1608,
+        "sha256": "9261c8c683adac56f4698bb05f3fa368b2ade80b6f55b81cb01e2c489e75f56f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.attempt2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.attempt2.log": {
+        "bytes": 6193,
+        "sha256": "0ec7d6b4deb3c4a5c1c5997fe6764a86fe145c05a36f6b592a7034f08f50340e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.log": {
+        "bytes": 2848,
+        "sha256": "1ffe318e908e64bc0f4d9fb59904ce9e119a20ff622664be1c3f8cf3236ec9ab"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-proof.py": {
+        "bytes": 626,
+        "sha256": "4ecf360f27d152ccd31c826346e1decff25c6406e625356ee88fb3fbb52806b9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpillProjection.addition.lean": {
+        "bytes": 8285,
+        "sha256": "5ea42fae967d5c32d651b236b340676cba9bd4718aaa7d7231c24b5239dd9093"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpillProjection.attempt2.lean": {
+        "bytes": 8183,
+        "sha256": "75f5faba8f4c80f0f9e1b9d1142e4797809ed6110874b9153da712013fef2e3d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpillProjection.base.lean": {
+        "bytes": 16202,
+        "sha256": "149e7fd4325cdf020f67155dd11b3dc6a3d2c24d517832b54114cc43a3d29710"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpillProjection.lean": {
+        "bytes": 24487,
+        "sha256": "b61026e20d712853f57e12f8db8b3114d6410cdee54d818c8935c3f5d8269fdd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpills.addition.lean": {
+        "bytes": 1079,
+        "sha256": "3bedb8b5dc2f5d6fb0dcad2d8f72cfbc3ce7c5851e154db25cda7f00df964865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpills.attempt1.lean": {
+        "bytes": 1022,
+        "sha256": "23ce4a6250b8294e1e90d4387099eabea44d1a59d1f01ca63a631294ddbca654"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpills.base.lean": {
+        "bytes": 12051,
+        "sha256": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpills.lean": {
+        "bytes": 13130,
+        "sha256": "16098311bf48cc25ea4e85ffaee3adf0fbe1b176539e0cb2f95cc7326a75d0a0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPath.lean": {
+        "bytes": 13188,
+        "sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      "/workspaces/repository/kprog/tv/Composition.lean": {
+        "bytes": 18251,
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpillProjection.lean": {
+        "bytes": 24487,
+        "sha256": "b61026e20d712853f57e12f8db8b3114d6410cdee54d818c8935c3f5d8269fdd"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpills.lean": {
+        "bytes": 13130,
+        "sha256": "16098311bf48cc25ea4e85ffaee3adf0fbe1b176539e0cb2f95cc7326a75d0a0"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 1482984,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/spill-body-work/PrivateSpills.olean",
+        "sha256": "a0fee85c8327c68bbafb9e4a29dd8efc96a7273742390e143866c1dd19935edf"
+      }
+    ],
+    "domain": "Any finite decoded BPF body between actual STXDW and LDXDW, any saved register except R10, any signed16-bit displacement, arbitrary original/body state, real instruction PCs and exact body trace. A finite history of byte-disjoint writes preserves the complete saved read, including wrapping addresses/initialization/permissions.",
+    "existing_entry_point": "make -C kprog/tv private-spill-projection-check, already included in full formal make check. Existing root/shared incremental caches retained.",
+    "remaining_interface": "Actual compiler frame ownership/layout; saved-slot read liveness and retained R10 across the body; actual body execution and endpoints/control correspondence; readable/writable private frame; physical invocation ABI and C/compiler transport. These are theorem premises, with no new runtime guard or per-program certificate.",
+    "result": "The actual store, arbitrary finite body Execution and actual reload compose. Original saved word is recovered; body memory, other registers, both ghost indices and halted state remain unchanged; reload advances its actual PC. Owned spill/reload effects erase and the complete intervening projected trace is preserved in order.",
+    "source_sha256": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771",
+      "kprog/tv/PrivateSpillProjection.lean": "b61026e20d712853f57e12f8db8b3114d6410cdee54d818c8935c3f5d8269fdd",
+      "kprog/tv/PrivateSpills.lean": "16098311bf48cc25ea4e85ffaee3adf0fbe1b176539e0cb2f95cc7326a75d0a0"
+    },
+    "theorems": [
+      "KProgTV.PrivateSpills.read_disjoint_stores",
+      "KProgTV.PrivateSpillProjection.reload_after_body_matches",
+      "KProgTV.PrivateSpillProjection.spill_body_reload_execution",
+      "KProgTV.PrivateSpillProjection.spill_body_reload_projected",
+      "KProgTV.PrivateSpillProjection.reloaded_after_frame",
+      "KProgTV.PrivateSpillProjection.spill_body_reload_projected_block"
+    ]
+  },
   "production_replay_1fb_epoch": {
     "all_earlier_central_epoch_rows_retained": true,
     "all_pins_verified_against_published_git": true,

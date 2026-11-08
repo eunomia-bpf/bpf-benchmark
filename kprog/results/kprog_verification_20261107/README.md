@@ -5257,3 +5257,16 @@ alone does not discharge them. The separate global-function/FWD source rule
 and initialized native entry scope also remain distinct. All installed
 annotation counts are retained; this audit performs no native execution and
 adds no runtime check, gate or per-program proof.
+
+### Spill/reload around arbitrary finite bodies
+
+`PrivateSpills.read_disjoint_stores` preserves exact saved-slot reads through
+every finite disjoint-write history. Five `PrivateSpillProjection` laws compose
+actual decoded STXDW, arbitrary finite body Execution and actual LDXDW at the
+real PCs. The saved word is restored while all other body registers, whole
+body memory, halted state and ghost indices remain intact. Owned wrapper
+effects erase; the complete ordered projected body trace remains. Existing
+`private-spill-projection-check` passes. [Original evidence](spill-body-reload.log.gz)
+retains all sources and proof attempts. Actual compiler ownership/layout,
+slot/frame liveness and body control/endpoints, physical ABI and C/compiler
+transport remain explicit interfaces; no runtime gate or per-program proof.

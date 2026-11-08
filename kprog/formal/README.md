@@ -89,8 +89,11 @@ image and its write permissions. Physical symbol/map lifetime, helper/platform
 state effects and C/compiler transport stay explicit.
 The private-spill projection also proves actual decoded STXDW/LDXDW pair execution,
 whole BPF register/input-frame and public-memory preservation, and exact owned
-event erasure for every signed16-bit offset. Compiler layout, intervening-body
-control/liveness and physical frame/ABI correspondence remain explicit.
+event erasure for every signed16-bit offset. Finite disjoint-write histories
+preserve the saved read; actual decoded spill/arbitrary finite body/reload
+composition restores the captured word and preserves the other body state
+and ordered projected trace. Actual compiler ownership/layout, body control
+and slot/frame liveness plus physical frame/ABI correspondence remain explicit.
 [Composition](../tv/Composition.lean) and the
 [artifact work](../tv/README.md) track the generic link/compiler obligations.
 
