@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-08T06:56:36.399035+00:00",
+  "predecessor_pid": 666734,
+  "applications": [
+    "tetragon",
+    "otelcol-ebpf-profiler",
+    "cilium",
+    "tracee"
+  ],
+  "cpus": "16-19",
+  "guest_cpus": 8,
+  "guest_mib": 8192,
+  "runtime_commit": "e2d3a5ee89349608fb79f4d4d397fdfc683ff7a8",
+  "source": "Latest private generic ARM source frozen after corrected BCC/Katran closes",
+  "tracee_native_manifest_sha256": "4eb159e50478c6a4a6d3f4ca1590753eb7c12c0abb673ae26e3375256dbaf528",
+  "scope": "Existing whole two-start workload and native manifests; terminal request/verifier/work counters retained"
+}
