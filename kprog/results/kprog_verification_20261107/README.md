@@ -4804,3 +4804,14 @@ Archive `superseded_full_7081bee34` retains the exact process scope, original
 log/terminal state and all1258 Git-verified root-source hashes. This receipt
 records an interrupted execution; the successor supplies its own complete
 check verdict.
+
+### Raw host profile for register-presence scenes
+
+The immutable full check of `949eb850e1ed026b342044096bfb889c8f152e03` exits2 at compilation
+of the manual-state register-presence oracle. Its memory scenes now declare
+the raw host ABI kind2 required by the current generic memory path. The
+existing891 heap/arena/register checks pass with UBSan; every original case,
+loop and assertion is preserved. Archive `x86_raw_register_presence_fixture`
+retains the original full outcome/all1258 verified root-source hashes and
+the corrected component result. The next full check retains its own source
+epoch.

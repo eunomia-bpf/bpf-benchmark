@@ -43846,6 +43846,25 @@
     "variants": 21,
     "whole_make_check": "not rerun yet; previous immutable full run 900422f7 failed at this check, actual exit2"
   },
+  "x86_raw_register_presence_fixture": {
+    "archive_compressed_prefix_bytes": 95800066,
+    "archive_compressed_prefix_sha256": "0a7cdc591202287779233c443f9e92f25b7a79345b0c54fc558da317eb06949e",
+    "archive_entries": 11,
+    "archive_marker": "X86_RAW_REGISTER_PRESENCE_FIXTURE_V1",
+    "archive_raw_bytes": 1441361,
+    "archive_raw_sha256": "1f2a83ed2a5e3cbf6cccd1bb13db6982d2bbcfa2048cc236f9e99477bb209b79",
+    "component_cases": 891,
+    "component_make_exit": 0,
+    "every_exported_root_source_sha_verified": true,
+    "every_original_case_loop_and_assertion_preserved": true,
+    "fixture_profile": "Raw host ABI kind2 for its existing ordinary heap/arena scenes.",
+    "full_actual_exit": 2,
+    "full_epoch": "949eb850e1ed026b342044096bfb889c8f152e03",
+    "full_root_git_sources": 1258,
+    "full_stop": "Makefile361: manual-state register-presence fixture lacks the ABI-kind variable required by current generic memory paths.",
+    "oracle_source_sha256": "fe756d79579a436f506408264caff28fce6cab19de729f137ced53e4b13b1579",
+    "ubsan": true
+  },
   "x86_register_dispatch": {
     "archive_block_sha256": "c64593924d5c982002aad5bc770ac30cbba627ce9cdc4cacb5f314933fad4ca1",
     "cmov_conditions": 16,

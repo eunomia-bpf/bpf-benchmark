@@ -47,6 +47,9 @@ typedef signed long long __s64;
 static int failures;
 static unsigned long cases;
 
+/* Ordinary heap/arena accesses use the raw host context profile. */
+static const __u8 __x86_sim_abi_kind = 2U;
+
 /* Backing storage for the register-base and absolute-base scenarios. The
  * absolute form names it through a full-width displacement, so one buffer keeps
  * both readings reachable. */
