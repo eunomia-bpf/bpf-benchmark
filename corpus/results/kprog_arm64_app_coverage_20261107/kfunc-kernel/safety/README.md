@@ -1,0 +1,3 @@
+Existing ARM native safety suite on the matched kfunc kernel
+
+The complete34-fixture suite uses the common kernel-owned service, paired caller, e183 linker and30b8c570 ARM kernel/module profile. Named positive controls execute through TEST_RUN; unsafe fixtures use load-only submission. Actual stages {"valid_executed": 4, "verifier_rejected": 16, "loader_rejected": 1, "specialization_rejected": 13}, unsafe accepted 0, unsafe executed 0, guest exit 0. The combined outcome table, complete guest/service archives, compiler commands and exact native fixture hashes retain the epoch. The suite exercises generic mechanisms; universal simulator and binding composition continues with V/C.
