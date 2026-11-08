@@ -9,7 +9,7 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Cilium | 72 resident | 2 | 2 | 1 | 1: original kfunc BTF linkage | 0 | [003807](cilium-kfunc/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [005356](tetragon-typed-read/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [002731](tracee-stack-aligned/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [005903](tracee-typed-read/README.md) |
 
 Current serial trials: whole Tracee uses the generic typed-read/aligned-stack candidate; Cilium follows with the same-snapshot original-BTF loader. Each guest uses12GiB/eightvCPU/20-23. Every completed batch retains commands, native input hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
 
@@ -24,3 +24,5 @@ The [Cilium kfunc batch003807](cilium-kfunc/README.md) freshly generates/compile
 The [whole OTel typed-read batch004333](otel-typed-read/README.md) preserves3fresh generation/compilation and2bound loads and reaches1000001verifier instructions/65666states. The complete fixed-input result continues from control/state exploration. Whole Tetragon is now active, followed by Tracee and then the Cilium original-BTF successor.
 
 The [whole Tetragon typed-read batch005356](tetragon-typed-read/README.md) freshly generates/compiles5requests and binds4; execve_send reaches8193jumps/179285instructions/1930states. All5terminal native hashes and source pins reconcile. Tracee follows in the same serial source epoch.
+
+The [whole Tracee typed-read batch005903](tracee-typed-read/README.md) freshly generates/compiles6requests and binds5; sys_exit_submit reaches helper length checking at3502instructions/151states. All6terminal native hashes and source pins reconcile. Whole Cilium now consumes the captured paired kfunc transport build; generic fixed-RSP-offset successors follow it serially.
