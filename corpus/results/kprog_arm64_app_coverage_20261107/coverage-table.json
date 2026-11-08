@@ -667,6 +667,21 @@
       "host_proof_link_functions": 6,
       "host_proof_link_exit": 0,
       "component_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-native-compile/summary.json"
+    },
+    "Tetragon": {
+      "utc": "2026-11-08T12:17:03.014172+00:00",
+      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout/trusted-arm64-tetragon-result/coverage.json",
+      "baseline_resident": 154,
+      "baseline_bpf_calls": 29967,
+      "service_requests": 5,
+      "proof_generated": 5,
+      "verifier_accepted_installed": 4,
+      "verifier_rejected": 1,
+      "failure_class": "stock_verifier_jump_sequence_8193",
+      "entry": "execve_send",
+      "processed_instructions": 667530,
+      "total_states": 6806,
+      "source_scope": "captured precise-copy/LSE application epoch; canonical source successor2766f65c runs separately"
     }
   }
 }
