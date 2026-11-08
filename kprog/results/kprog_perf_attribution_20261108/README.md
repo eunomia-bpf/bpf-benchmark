@@ -491,3 +491,28 @@ Tail calls are separate: the object ships five sibling
 The one thing this does not give is the *time* each category takes, for the
 same reason as above: the cycles need a per-site instrumented build of the
 application program, and the split here is by instruction and site count.
+
+### Cilium's call sites by the task's four categories
+
+`kprog/perf/helper_ids.py` reads every call site in a native object and
+takes its helper number from the `eax` load that precedes the call, using
+the kernel's own enumeration. Cilium's four archived native objects --
+42,498 instructions, 1,621 call sites:
+
+| category | sites | share |
+| --- | ---: | ---: |
+| map lookups (`bpf_map_lookup_elem`) | 445 | 27.5% |
+| map updates (`bpf_map_update_elem`) | 368 | 22.7% |
+| map deletes | 14 | 0.9% |
+| tail calls (`bpf_tail_call`) | 70 | 4.3% |
+| other helper calls | 724 | 44.7% |
+
+The top helpers: `map_lookup_elem` 445, `map_update_elem` 368,
+`skb_load_bytes` 214, `skb_store_bytes` 141, `tail_call` 70,
+`csum_diff` 50, `l4_csum_replace` 40, `msg_redirect_map` 40.
+
+**Half of cilium's call sites are map operations** (50.2% for lookups
+and updates alone, 51.0% counting deletes),
+and the largest single helper is the lookup. That is the measured basis for
+the candidate ordering: helper and map-lookup lowering covers the two
+biggest single categories, and direct tail-call linking covers another 4.3%.
