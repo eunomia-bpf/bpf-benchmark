@@ -24,7 +24,7 @@ def aio_sync(fd):
         _fields_=[('data',ctypes.c_uint64),('key',ctypes.c_uint32),('rw_flags',ctypes.c_uint32),('opcode',ctypes.c_uint16),('priority',ctypes.c_int16),('fd',ctypes.c_uint32),('buf',ctypes.c_uint64),('nbytes',ctypes.c_uint64),('offset',ctypes.c_int64),('reserved',ctypes.c_uint64),('flags',ctypes.c_uint32),('resfd',ctypes.c_uint32)]
     class Event(ctypes.Structure):
         _fields_=[('data',ctypes.c_uint64),('object',ctypes.c_uint64),('result',ctypes.c_int64),('result2',ctypes.c_int64)]
-    lib=ctypes.CDLL('libaio.so.1');context=ctypes.c_uint64();records=[]
+    lib=ctypes.CDLL('libaio.so.1t64');context=ctypes.c_uint64();records=[]
     result=lib.io_setup(8,ctypes.byref(context))
     if result<0:raise OSError(-result,'io_setup')
     try:
