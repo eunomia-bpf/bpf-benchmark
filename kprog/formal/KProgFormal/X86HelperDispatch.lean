@@ -1,4 +1,5 @@
 import KProgFormal.Generated.GeneratedX86HelperDispatch
+import KProgFormal.X86CallMemHandler
 
 namespace KProgFormal
 
@@ -275,5 +276,190 @@ theorem x86_helper_dispatch_route_body_is_table :
         "X86_SIM_BPF_CALL_bpf_ktime_get_ns" := by
   refine ⟨?_, ?_⟩ <;> native_decide
 
+
+
+namespace X86HelperBody
+abbrev Word := Reference.Word
+open Reference
+open Refinement.X86NumericAddress
+open X86CallMemBody
+
+/-- A returning helper's externally observable effect. Typed argument capture,
+helper identity, physical memory and helper ABI supply this interface. Successful
+tail transfers use the link-step interface instead of this returning path. -/
+structure Effect where
+  value : Word
+  resultTag : Byte
+  memory : Memory
+  events : List Event
+
+/-- The operation receives the complete frame before RAX and caller writes.
+This interface retains every helper-visible memory effect and ordered event. -/
+abbrev Environment := Word → Frame → Effect
+
+structure Observation where
+  frame : Frame
+  events : List Event
+
+/-- Extracted wrapper order: apply the helper memory effect, write the result,
+consume sixteen caller words, then advance the simulated PC. -/
+def generatedReturn (s : Frame) (effect : Effect) (fresh : Fresh)
+    (nextPc : Word) : Observation :=
+  let written := { s with registers := { s.registers with raw :=
+    { s.registers.raw with memory := effect.memory } } }
+  let result := generatedClobbers (rawWrite written 0 effect.value effect.resultTag) fresh
+  ⟨{ result with registers := registerPc result.registers nextPc }, effect.events⟩
+
+/-- Independent ABI observation: helper memory/result, independent caller-frame
+replacement, and the supplied continuation. All other state is retained. -/
+def returnSpec (s : Frame) (effect : Effect) (fresh : Fresh)
+    (nextPc : Word) : Observation :=
+  let written := { s with registers := { s.registers with raw :=
+    { s.registers.raw with memory := effect.memory } } }
+  let result := clobbersSpec (rawWrite written 0 effect.value effect.resultTag) fresh
+  ⟨{ result with registers := registerPc result.registers nextPc }, effect.events⟩
+
+theorem returning_helper_frame (s : Frame) (effect : Effect) (fresh : Fresh)
+    (nextPc : Word) : generatedReturn s effect fresh nextPc =
+      returnSpec s effect fresh nextPc := by
+  simp only [generatedReturn, returnSpec, helper_clobbers_frame]
+
+/-- Every selected slot carries the original full-width Linux ID. -/
+theorem routed_id_identity (id : Word) (slot : Nat)
+    (selected : GeneratedX86HelperDispatch.slotOf id = some slot) :
+    GeneratedX86HelperDispatch.idOfSlot slot = some id.toNat := by
+  change (GeneratedX86HelperDispatch.helperIds.zip
+    (List.range GeneratedX86HelperDispatch.helperCount)).lookup id.toNat = some slot at selected
+  obtain ⟨before, after, equation, _⟩ := List.lookup_eq_some_iff.mp selected
+  have member : (id.toNat, slot) ∈ GeneratedX86HelperDispatch.helperIds.zip
+      (List.range GeneratedX86HelperDispatch.helperCount) := by
+    rw [equation]
+    simp
+  obtain ⟨i, bound, atIndex⟩ := List.mem_iff_getElem.mp member
+  have indexed := List.getElem?_eq_some_iff.mpr ⟨bound, atIndex⟩
+  obtain ⟨identifier, index⟩ := List.getElem?_zip_eq_some.mp indexed
+  obtain ⟨rangeBound, rangeValue⟩ := List.getElem?_eq_some_iff.mp index
+  have same : i = slot := by simpa using rangeValue
+  subst slot
+  exact identifier
+
+/-- A slot selects its Linux helper ID through the generated table. -/
+def generatedCall (helpers : Environment) (s : Frame) (id : Word)
+    (fresh : Fresh) (nextPc : Word) : Option Observation := do
+  let slot ← GeneratedX86HelperDispatch.slotOf id
+  let linuxId ← GeneratedX86HelperDispatch.idOfSlot slot
+  pure (generatedReturn s (helpers (BitVec.ofNat 64 linuxId) s) fresh nextPc)
+
+/-- Argument capture uses the original frame and exact helper ID for every
+64-bit request whose case is selected. Caller replacement happens afterward. -/
+theorem selected_helper_observation (helpers : Environment) (s : Frame) (id : Word)
+    (slot : Nat) (selected : GeneratedX86HelperDispatch.slotOf id = some slot)
+    (fresh : Fresh) (nextPc : Word) :
+    generatedCall helpers s id fresh nextPc =
+      some (returnSpec s (helpers id s) fresh nextPc) := by
+  simp [generatedCall, selected, routed_id_identity id slot selected,
+    returning_helper_frame]
+
+/-- Result, memory, events and continuation survive the caller-frame update. -/
+theorem returning_helper_observations (s : Frame) (effect : Effect) (fresh : Fresh)
+    (nextPc : Word) :
+    (generatedReturn s effect fresh nextPc).frame.registers.raw.gpr 0 = effect.value ∧
+    (generatedReturn s effect fresh nextPc).frame.tags 0 = effect.resultTag ∧
+    (generatedReturn s effect fresh nextPc).frame.registers.raw.memory = effect.memory ∧
+    (generatedReturn s effect fresh nextPc).frame.registers.raw.pc = nextPc ∧
+    (generatedReturn s effect fresh nextPc).events = effect.events := by
+  simp [generatedReturn, generatedClobbers, rawWrite, finishClobbers, registerPc]
+
+/-- Sparse lookup in the independently enumerated Linux table. Each case calls
+the operation at its original ID; a gap describes generation failure. -/
+def callSpec (helpers : Environment) (s : Frame) (id : Word)
+    (fresh : Fresh) (nextPc : Word) : Option Observation := do
+  let slot ← x86HelperDispatchSlotOfSpec id
+  let linuxId ← x86HelperDispatchIdsSpec[slot]?
+  pure (returnSpec s (helpers (BitVec.ofNat 64 linuxId) s) fresh nextPc)
+
+theorem returning_helper_call (helpers : Environment) (s : Frame) (id : Word)
+    (fresh : Fresh) (nextPc : Word) :
+    generatedCall helpers s id fresh nextPc = callSpec helpers s id fresh nextPc := by
+  simp only [generatedCall, callSpec, x86_helper_dispatch_slotof_refines,
+    GeneratedX86HelperDispatch.idOfSlot, x86_helper_dispatch_ids_refine,
+    returning_helper_frame]
+
+/-- Every callee register keeps its value, tag and stack-coordinate relation. -/
+theorem returning_helper_callee (s : Frame) (effect : Effect) (fresh : Fresh)
+    (nextPc : Word) (reg : Reference.X86.Register)
+    (callee : clobberIndex reg = none) (result : reg ≠ 0) :
+    (generatedReturn s effect fresh nextPc).frame.registers.raw.gpr reg =
+        s.registers.raw.gpr reg ∧
+    (generatedReturn s effect fresh nextPc).frame.tags reg = s.tags reg ∧
+    (generatedReturn s effect fresh nextPc).frame.registers.stack reg =
+        s.registers.stack reg := by
+  rw [returning_helper_frame]
+  simp [returnSpec, clobbersSpec, rawWrite, finishClobbers, registerPc, callee, result]
+
+/-- Immediate and register tokens share one returning-helper body. -/
+inductive Token where
+  | immediate | register
+  deriving DecidableEq, Repr
+
+def token : Token → GeneratedX86Specialization.Op
+  | .immediate => .callHelper | .register => .callReg
+
+def opcode : Token → GeneratedX86Opcode.Op
+  | .immediate => .callHelper | .register => .callReg
+
+def generatedToken (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (helpers : Environment) (s : Frame) (kind : Token) (src : Reference.X86.Register)
+    (imm : Word) (fresh : Fresh) (nextPc : Word) : Option Observation :=
+  match kind with
+  | .immediate => generatedCall helpers s imm fresh nextPc
+  | .register => generatedCall helpers s (registerValue env entry arena s.registers src) fresh nextPc
+
+def tokenSpec (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (helpers : Environment) (s : Frame) (kind : Token) (src : Reference.X86.Register)
+    (imm : Word) (fresh : Fresh) (nextPc : Word) : Option Observation :=
+  let id := match kind with
+    | .immediate => imm
+    | .register => (nativeRegisters env entry arena s.registers).gpr src
+  callSpec helpers s id fresh nextPc
+
+theorem returning_helper_token_body (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (helpers : Environment) (s : Frame) (kind : Token) (src : Reference.X86.Register)
+    (imm : Word) (fresh : Fresh) (nextPc : Word) :
+    generatedToken env entry arena helpers s kind src imm fresh nextPc =
+      tokenSpec env entry arena helpers s kind src imm fresh nextPc := by
+  cases kind <;> simpa only [generatedToken, tokenSpec, nativeRegisters] using
+    (returning_helper_call helpers s _ fresh nextPc)
+
+def helperPrefix (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (helpers : Environment) (s : Frame) (code : Nat) (src : Reference.X86.Register)
+    (imm : Word) (fresh : Fresh) (nextPc : Word) : Option Observation :=
+  if code = GeneratedX86Opcode.code .callHelper then
+    generatedToken env entry arena helpers s .immediate src imm fresh nextPc
+  else if code = GeneratedX86Opcode.code .callReg then
+    generatedToken env entry arena helpers s .register src imm fresh nextPc
+  else none
+
+theorem helper_token_identity (kind : Token) :
+    GeneratedX86Specialization.dispatch (token kind) = .directMacro ∧
+    GeneratedX86Specialization.tokenName (token kind) =
+      GeneratedX86Opcode.define (opcode kind) := by
+  cases kind <;> decide
+
+theorem returning_helper_prefix (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (helpers : Environment) (s : Frame) (kind : Token) (src : Reference.X86.Register)
+    (imm : Word) (fresh : Fresh) (nextPc : Word) :
+    helperPrefix env entry arena helpers s (GeneratedX86Opcode.code (opcode kind))
+      src imm fresh nextPc =
+      tokenSpec env entry arena helpers s kind src imm fresh nextPc := by
+  cases kind <;> simp [helperPrefix, opcode, GeneratedX86Opcode.code,
+    returning_helper_token_body]
+
+end X86HelperBody
 
 end KProgFormal

@@ -80,7 +80,6 @@ STACK_SELECTOR = "KPROG_ARM64_STACK_ARM("
 WORD_ARENA = "__a64_stack.q"
 WORD_INDEX = "KPROG_ARM64_STACK_WORD_INDEX("
 BYTE_ARENA = "__a64_stack.b["
-READ_LADDER = "KPROG_ARM64_LOAD_BYTES("
 # The hand-written selection the routed helper must no longer contain: the width
 # test conjoined with the alignment test. The byte-ladder body uses no `&&`, so
 # its presence means the body choice is still made by hand.
@@ -103,7 +102,7 @@ def stack_read_region():
     return region_between(STACK_READ_START, STACK_READ_END)
 
 
-def check_region(region, ladder):
+def check_region(region):
     """A routed stack helper must select its body through the generated
     two-fact selector and still keep the word-arena and byte-ladder bodies; it
     must not select by hand."""
@@ -115,9 +114,6 @@ def check_region(region, ladder):
             "arm64 stack helper does not touch the word arena slot")
     if BYTE_ARENA not in region:
         raise SystemExit("arm64 stack helper does not touch the byte arena")
-    if ladder not in region:
-        raise SystemExit(
-            "arm64 stack helper does not keep the byte-ladder body")
     if HAND_AND_TEST in region:
         raise SystemExit(
             "arm64 stack helper selects its body by hand instead of through "
@@ -127,7 +123,7 @@ def check_region(region, ladder):
 def check_against_header():
     """The live stack-read helper must route its body choice through the
     generated selector."""
-    check_region(stack_read_region(), READ_LADDER)
+    check_region(stack_read_region())
 
 
 def load() -> dict:

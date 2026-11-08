@@ -89,7 +89,7 @@ ACTIVATION_COLUMNS = ("name", "active")
 
 # The live routed stack helpers text, between the write helper's `#define`
 # opcode title and the plain stack-pointer wrapper that follows the read helper.
-STACK_WRITE_START = "#define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)"
+STACK_WRITE_START = "#define X86_SIM_L_PRIVATE_BYTE_STORE(ADDR, WIDTH, VALUE)"
 STACK_WRITE_END = "#define X86_SIM_L_STACK_PTR(OFF)"
 LANE_PREDICATE = "KPROG_X86_STACK_WRITE_LANE_ACTIVE("
 BYTE_LANE = "KPROG_X86_STACK_BYTE("
@@ -138,7 +138,8 @@ def check_region(region):
         raise SystemExit(
             "x86 stack write ladder does not keep the byte-lane extraction")
     for alias in ("__x86_stw_bytes", "__x86_str_bytes"):
-        if (f"volatile __u8 *{alias} = __x86_stack_mem.b;" not in region
+        base = "(ADDR)" if alias == "__x86_stw_bytes" else "__x86_stack_mem.b"
+        if (f"volatile __u8 *{alias} = {base};" not in region
                 or alias + "[" not in region):
             raise SystemExit(
                 "x86 stack ladder does not access its volatile byte arena")

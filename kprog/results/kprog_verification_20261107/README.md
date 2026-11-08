@@ -21,6 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/71 |
 | Memory-call full-frame C body model | 4/75 | 0/71 |
 | O2 C-model token-body equality | 72/75 | 71/71 |
+| Additional returning-helper interface equality | 2/75 | 0/71 |
 | Upstream machine-model sampled register-state agreement | 25/75 | pending ASL build |
 | Upstream model-stopped operation rows | 7/75 | pending ASL build |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
@@ -4666,3 +4667,23 @@ layout assertion now covers the array declaration and both low/high aliases;
 the canonical kind6 entry interface supplies its initial words. Generator
 check exit0. Original full command, source hashes and outcome are retained
 in `vector_layout_initializer_update`.
+
+### Returning helper token interfaces
+
+`X86HelperDispatch.X86HelperBody` proves nine generic laws for the two
+helper tokens: sparse full64-bit IDs retain their identity; invocation sees
+the pre-call frame; helper memory, events and result reach the continuation;
+sixteen fresh words replace caller GPRs/flags/XMM0; callee values/tags/stack
+coordinates survive. Both immediate-ID and register-ID bodies compose this
+returning-helper observation through their numeric token prefix. Typed argument
+capture/helper effects, native target/ABI, physical memory, successful tail
+transfers and compiled-B are explicit interfaces. The72 complete C-model-body
+entries retain their previous scope; these two interface entries are separate.
+
+Lean build and six existing UBSan helper/stack hosts pass5549389observations.
+All140 existing generators pass. Their source comparisons now follow the
+factored x86 PRIVATE_BYTE_STORE body and its ADDR parameter. The ARM stack
+selector/arena comparisons retain their layouts while the historical
+LOAD_BYTES macro-name assumption is retired. The immutable094b9e4c4 full
+check's actual Make exit2, all targeted commands/sources and intermediate
+Lean diagnostics are retained in `returning_helper_token_wrappers`.

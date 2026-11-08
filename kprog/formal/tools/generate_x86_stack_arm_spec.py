@@ -70,7 +70,7 @@ CASE_COLUMNS = ("name", "w64", "aligned", "word")
 
 # The live routed stack-helper text, between each helper's `#define` opcode
 # title and the next helper's.
-STACK_WRITE_START = "#define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)"
+STACK_WRITE_START = "#define X86_SIM_L_PRIVATE_BYTE_STORE(ADDR, WIDTH, VALUE)"
 STACK_WRITE_END = "#define X86_SIM_L_STACK_READ(OFF, WIDTH)"
 STACK_READ_START = "#define X86_SIM_L_STACK_READ(OFF, WIDTH)"
 STACK_READ_END = "#define X86_SIM_L_STACK_PTR(OFF)"
@@ -117,7 +117,8 @@ def check_region(region, ladder, byte_alias):
             "x86 stack helper does not touch the word arena slot")
     # The volatile byte view prevents Clang from coalescing an unaligned
     # native stack access into an illegal wide BPF stack load/store.
-    byte_view = f"volatile __u8 *{byte_alias} = __x86_stack_mem.b;"
+    base = "(ADDR)" if byte_alias == "__x86_stw_bytes" else "__x86_stack_mem.b"
+    byte_view = f"volatile __u8 *{byte_alias} = {base};"
     if byte_view not in region or byte_alias + "[" not in region:
         raise SystemExit("x86 stack helper does not touch its volatile byte arena")
     if ladder not in region:

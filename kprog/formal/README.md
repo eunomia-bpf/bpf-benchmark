@@ -6,7 +6,7 @@ preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
 implementation interface. It currently records 72 x86-64 and 71 AArch64 C-model token
-body equalities. Full ISA and compiled-simulator closure remain active work.
+body equalities, plus two returning-helper interface equalities. Full ISA and compiled-simulator closure remain active work.
 
 ## Specification and proof scope
 
@@ -27,7 +27,10 @@ The x86 pointer bodies share the extended dispatcher and refine resolved moves
 for all sixteen registers, including the RSP coordinate. Native symbol/helper
 address transport remains an explicit interface. Four memory-call token bodies
 include sequential byte effects and the fresh caller-clobber frame; their
-native call/ABI and physical memory relations remain explicit. Internal
+native call/ABI and physical memory relations remain explicit. Two helper token
+wrappers prove full64-bit sparse ID routing, pre-call capture, result/memory/events
+and fresh caller/callee-frame laws over a returning helper-effect interface;
+typed arguments, native ABI and successful tail transfer remain explicit. Internal
 RET includes its finite continuation switch; outer invocation/return-slot,
 physical memory/provenance and C/compiler correspondence remain explicit.
 
