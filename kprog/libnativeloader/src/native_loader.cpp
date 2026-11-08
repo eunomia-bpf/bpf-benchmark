@@ -408,6 +408,8 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_map_pop_elem, "bpf_map_pop_elem"},
     {BPF_FUNC_sk_fullsock, "bpf_sk_fullsock"},
     {BPF_FUNC_override_return, "bpf_override_return"},
+    {BPF_FUNC_strtol, "bpf_strtol"},
+    {BPF_FUNC_check_mtu, "bpf_check_mtu"},
     {BPF_FUNC_send_signal, "bpf_send_signal"},
     {BPF_FUNC_seq_write, "bpf_seq_write"},
     {BPF_FUNC_copy_from_user, "bpf_copy_from_user"},
@@ -447,6 +449,8 @@ constexpr const char *kTypedHelperSymbols[] = {
     "bpf_get_stack_raw_tp",
     "bpf_xdp_fib_lookup",
     "bpf_skb_fib_lookup",
+    "bpf_skb_check_mtu",
+    "bpf_xdp_check_mtu",
     "bpf_xdp_redirect_map",
     "bpf_tc_skc_lookup_tcp",
     "bpf_xdp_skc_lookup_tcp",
@@ -2022,6 +2026,11 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
             return HelperAlias{helper_id, "bpf_fib_lookup", "bpf_skb_fib_lookup"};
         }
         return HelperAlias{helper_id, "bpf_fib_lookup", nullptr};
+    }
+    if (helper_id == BPF_FUNC_check_mtu) {
+        return HelperAlias{helper_id, "bpf_check_mtu",
+                           prog_type == BPF_PROG_TYPE_XDP
+                               ? "bpf_xdp_check_mtu" : "bpf_skb_check_mtu"};
     }
     if (helper_id == BPF_FUNC_redirect_map) {
         if (prog_type == BPF_PROG_TYPE_XDP) {

@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "alias_cases": 8,
+  "alias_differences": 0,
+  "source_sha256": "6ed8f21e92a722c0d3cc53ed76b9e32d895b8f6593c7a72b533b3b3cdd8cd6cf",
+  "kernel_symbols": {
+    "bpf_strtol": "ffffffff814b9e20",
+    "bpf_skb_check_mtu": "ffffffff81d65770",
+    "bpf_xdp_check_mtu": "ffffffff81d69720"
+  },
+  "artifacts": {
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader": "7a39cbba02b7873615791e0852111c5c4f4b11a1535c896188ef07bf1631e1c2",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/libnative_loader.a": "315e08524387d2c0cd0dc3c04e8eb0fbe7e5ad09cc25857b49aae3bb7099d1fd",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/libnative_loader.so": "d45584204a85fba01c5b3322d550ae2a4cd9e52dc6e0e69acc03635063bcaa81"
+  }
+}
