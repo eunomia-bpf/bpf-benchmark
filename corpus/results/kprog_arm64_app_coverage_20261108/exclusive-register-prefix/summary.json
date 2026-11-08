@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-08T04:30:25.544309+00:00",
+  "scope": "Universal finite register-ADD exclusive failure-prefix composition with per-visit platform inputs, complete state, ordered events and first-fault equality.",
+  "new_theorems": 5,
+  "source_files": 98,
+  "build_exit": 0,
+  "axiom_audits": 5,
+  "targets": [
+    "KProgFormal.Refinement.Arm64Exclusive",
+    "KProgFormal.Refinement.Arm64Dispatcher",
+    "KProgFormal.Arm64Stlxr"
+  ],
+  "source_before_sha256": "c12f2a75fafe3cc85e5f70237cdff152d2937c52ea969e5c721f355649105ced",
+  "source_after_sha256": "f2ba9fd7deffaeb5cd989ab35a49e0346bb570b29f4f0dbd13be2e30190245c4",
+  "prior_module_prefix_byte_exact": true,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Lean.ofReduceBool",
+    "Quot.sound"
+  ],
+  "interfaces": "Per-visit alignment, monitor/commit outcome and writable preflight remain explicit. Native code-label/CFG, compiled preservation, platform binding and scoped progress admission continue through the shared universal interface. Actual application and kernel source epochs retain their inputs."
+}
