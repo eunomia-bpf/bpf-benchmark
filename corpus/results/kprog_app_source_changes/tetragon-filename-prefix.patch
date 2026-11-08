@@ -1,0 +1,16 @@
+--- a/vendor/bpf/tetragon/bpf/process/generic_calls.h
++++ b/vendor/bpf/tetragon/bpf/process/generic_calls.h
+@@ -28,11 +28,8 @@
+ 
+ FUNC_INLINE const char *const *filename_name_slot(struct filename *file)
+ {
+-#if defined(__TARGET_ARCH_arm64)
+-	return &((struct __filename_head *)file)->name;
+-#else
+-	return &file->name;
+-#endif
++	/* filename starts with the name pointer in the paired kernel ABI. */
++	return (const char *const *)file;
+ }
+ 
+ FUNC_INLINE int
