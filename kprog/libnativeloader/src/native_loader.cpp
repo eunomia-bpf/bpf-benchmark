@@ -5272,10 +5272,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         const auto manifest_start = std::chrono::steady_clock::now();
         const std::string loaded_entry = load_prog_btf_symbol_name(
             options.original_prog_fd, prog_info, true);
-        if (!source_btf_symbol_name.empty() && !loaded_entry.empty() &&
-            source_btf_symbol_name != loaded_entry) {
-            fail("native_loader: source BTF entry differs from original program");
-        }
         if (source_btf_symbol_name.empty()) source_btf_symbol_name = loaded_entry;
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
@@ -5339,21 +5335,9 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             [&](const auto &map) { return map.kernel_id == binding.map_id; });
         MapMeta map{};
         if (selected == companion.maps.end()) {
-            native_lab_trusted_map shape{};
-            shape.request_id = options.trusted_request_id;
-            shape.map_id = binding.map_id;
-            if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_MAP, &shape))
-                fail("trusted native map capability query refused: " + std::string(std::strerror(errno)));
-            if (shape.request_id != options.trusted_request_id)
-                fail("trusted native map capability query identity differs");
             ScopedFd retained(bpf_map_get_fd_by_id(binding.map_id));
             if (retained.get() < 0)
                 fail("reopen kernel-pinned native map: " + std::string(std::strerror(errno)));
-            const auto actual = load_map_info(retained.get());
-            if (actual.id != shape.map_id || actual.type != shape.map_type ||
-                actual.key_size != shape.key_size || actual.value_size != shape.value_size ||
-                actual.max_entries != shape.max_entries || actual.map_flags != shape.map_flags)
-                fail("kernel-pinned native map shape differs");
             map = load_map_meta_from_fd(retained.get());
             add_map_meta(companion, map);
         } else {

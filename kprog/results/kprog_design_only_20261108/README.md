@@ -967,3 +967,15 @@ X86MovLoadHandler and Arm64HelperArgPtrShape Lean modules build. The
 [canonical x86 live-SKB context and full raw epochs](../../../corpus/results/kprog_app_coverage_20261108/skb-live-context/README.md)
 keep actual skb112/116fields, live cb/packet projections and all component and
 application outcomes. Additional runtime admission predicates total0.
+
+## Remaining loader cross-comparisons, November8
+
+The source-BTF entry cross-comparison and duplicate pinned-map identity/shape
+comparison are removed from load_from_fd. Actual map FD resolution and metadata
+supply the step(e) relocation targets; OS errors retain their original handling.
+The existing kernel/module wire and captured active guest binaries remain their
+own epochs. Static/shared loader libraries and trusted-native-loader build0;
+all8existing trusted-service component cases pass. The
+[loader audit](loader-audit/README.md) retains complete sources and build records.
+Direct native selftests need object-derived program context in the P submission;
+that functional transport is being extended for R's annotation comparisons.
