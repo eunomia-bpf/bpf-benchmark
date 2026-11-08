@@ -483,6 +483,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	X86_SIM_L_DECLARE_STATE();                                       \
 	X86_SIM_L_DECLARE_STACK();                                       \
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
+	__x86_sim_helper_ctx = (void *)(CTX);                            \
+	__x86_sim_helper_abi_base = (void *)(CTX);                        \
 	__x86_rdi.ptr = (void *)(CTX);                                   \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 

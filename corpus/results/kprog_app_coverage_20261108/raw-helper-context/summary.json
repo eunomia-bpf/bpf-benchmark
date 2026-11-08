@@ -1,0 +1,16 @@
+{
+  "host_make_exit": 0,
+  "change": "RAW helper_ctx and helper_abi_base both actual entry CTX",
+  "source_lines": 2,
+  "existing_host_command": [
+    "taskset",
+    "-c",
+    "8-11",
+    "make",
+    "-f",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-selftests/Makefile",
+    "check",
+    "HERE=/workspaces/.agent-state/kprog-lanes/C/design-only/raw-helper-context"
+  ],
+  "kernel_safety": "source-captured original38 follows paired Tracee"
+}
