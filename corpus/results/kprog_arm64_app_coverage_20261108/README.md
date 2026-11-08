@@ -13,3 +13,5 @@ The same exclusive component now includes complete failed-iteration State/GPR/ba
 The [exclusive prefix/backedge interface](exclusive-prefix-composition/backedge-summary.json) also carries four universal PC equations, including exact failed-cycle re-entry for the native-12-byte CBNZ operand and64-bit wrapping PCs. All11axiom audits and the57-source target build exit0.
 
 [Generic ARM fresh compiler profile](host-compile/README.md) adds thirteen passing transport/profile controls and exact allocated-byte/relocation identity for two accepted QEMU fixtures, preserving the existing ARM O2 profile and2270guest header identities. Captured runtime consumption follows original OTel/skb.
+
+The [captured host-compiler application successor](host-compile/queue-plan.json) joins34generic native-only controls with the retained original OTel/skb epoch, then whole Cilium/Tracee/OTel. Exact80source/ARM O2/sysroot and per-cohort broker lifecycle identities accompany the concrete launch sources.
