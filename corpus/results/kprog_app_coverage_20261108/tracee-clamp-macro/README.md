@@ -1,0 +1,3 @@
+# Paired Tracee existing-clamp register lifetime
+
+Source 20096bb3cfa32408956e5f9d2cf82ff496e5fabf keeps the runtime size value through empty read/write register asm before all original update_min operations. Each original limit/guard and earlier checked string-offset operation retains its meaning. This closes the ordinary-C elimination mechanism exposed by the paired-source baseline4d0306168, whose first verifier frontier is bpf_probe_read R2 unbounded. Both native/JIT frontends read the identical selected C tree, and the embedded Tracee binary consumes its JIT BPF. Actual paired Makeexit0. Complete source/compiler output identities accompany compile-inputs.tar.gz. Whole original application/workload follows the current serial chain. Runtime admission additions0.
