@@ -1,0 +1,26 @@
+{
+  "make_exit": 0,
+  "common_source": "be91b11effefce61f88643b85237e21e99f8ec2d",
+  "arm_helper_source": "a97b673c8234726bc0d5eadf7f4ad6248726dc04",
+  "source_sha256": {
+    "kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+    "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+    "kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+    "kinsn/module/include/native_lab_binding.h": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+    "kinsn/module/include/native_lab_trusted_wire.h": "4c1a5b2b86a0f81ee5cb0f33e00e9a2dfe24760497fd1cfaf7f43760657ae9f6",
+    "kprog/test/trusted_service_client.cpp": "2dd95f9ee416c224dd2881282565255d5580ba6e37615e5521d59a6e7567b49a",
+    "kprog/libnativeloader/CMakeLists.txt": "4ae1bb6fa3516a91b0129b3e4b32f618cfd178467cbbeb800631252e08291a80",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+    "kprog/libnativeloader/src/native_loader.cpp": "6ed8f21e92a722c0d3cc53ed76b9e32d895b8f6593c7a72b533b3b3cdd8cd6cf",
+    "kprog/libnativeloader/include/native_loader.hpp": "89f4f112bde0f9332b4dc9a8c997dfc7235c4d17b041151648180ffdf3437573"
+  },
+  "binaries": {
+    "kprog/arm64/build/kernel-selftest-helpers/loader/trusted-service-client": "415c7f55d02b94799c2a2905195a0a9cfc6c62b4e98a256cb7e7d120bc370c63",
+    "kprog/arm64/build/kernel-selftest-helpers/loader/libnative_loader.a": "6692d9239cf90be898435724363313fd2019ec7a6c5de04bf85c20a53cbb2455",
+    "kprog/arm64/build/kernel-selftest-helpers/loader/trusted-native-loader": "61e3d3c8a8a1bdf6f4a0ed3f87d8ee813a537a49a3ab96f4068801ed8dfeca06",
+    "kprog/arm64/build/kernel-selftest-helpers/loader/libnative_loader.so": "d67f6d24c59e31c065ce4ce1862b751604873331b4da7be0f9879787320c36cf"
+  },
+  "runtime_scope": "Paired AArch64 loader/service build with public strtol and skb/XDP MTU resolution; captured application runtime files retain their bytes"
+}
