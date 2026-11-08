@@ -1,0 +1,3 @@
+# Whole paired-source Tracee with checked local string offsets
+
+Source d6d02957 keeps each original save_str_to_buf guard/limit and carries its checked local offset into the write/string helper, retaining the original helper-boundary reload and second check. Both compiler frontends read the complete selected C tree; tracee-paired-c-tree.patch records prior native/upstream ABI/clamp/hot-context differences. Native, JIT BPF and the embedded binary compile0. Canonical87ab source, current kernel/module and original application workload are captured. Actual G/C/I/failed(0, 0, 0, 0); Makeexit0. Complete source/native/B/compiler/verifier/service and work records accompany the cohort. Runtime admission additions0.
