@@ -979,3 +979,15 @@ all8existing trusted-service component cases pass. The
 [loader audit](loader-audit/README.md) retains complete sources and build records.
 Direct native selftests need object-derived program context in the P submission;
 that functional transport is being extended for R's annotation comparisons.
+
+## Direct native object context, November8
+
+The kernel accepts native P with source_prog_id0 and keeps its load_context
+metadata in the same immutable copy. Resource descriptors retain actual maps;
+NEXT and map queries handle the source-program-free capsule. The service and
+worker use that copied context for B and the emitted program. Existing source-ID
+requests keep their original worker argument layout. Static/shared/worker and
+x86 module builds pass; all8existing service cases pass. The
+[direct-context result](native-context/README.md) retains the implementation,
+exact binaries and queued38-case native-only replay. R owns the upstream
+selftest annotation comparison, which can now reach native submission directly.

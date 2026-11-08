@@ -9,8 +9,9 @@
 /* SUBMIT accepts native ELF, an entry symbol (without a terminating NUL),
  * and specialization metadata. B is generated through the service.
  * All three spans are copied into kernel-owned storage before submission
- * returns. request_id is kernel-issued, source_prog_id pins the original
- * kernel program/context. request_id is returned by the kernel.
+ * returns. request_id is kernel-issued. A supplied source_prog_id pins its
+ * program/context; zero selects the load_context in copied P metadata.
+ * Resource map descriptors are retained by SUBMIT_RESOURCES in either form.
  * NEXT uses the sizes as user buffer capacities and returns exact sizes;
  * -EMSGSIZE leaves the request queued and reports required capacities.
  * Pointer fields are user addresses, not data to be retained by the kernel.
@@ -65,7 +66,8 @@ struct native_lab_trusted_result {
 	__u64 reserved;
 };
 
-/* Kernel facts for the pinned source, not assertions copied from the app.
+/* Kernel facts for a pinned source and resource maps. Raw native requests
+ * carry their program load_context in the kernel-copied P metadata.
  * These queries require the registered service capability and active request.
  */
 struct native_lab_trusted_context {

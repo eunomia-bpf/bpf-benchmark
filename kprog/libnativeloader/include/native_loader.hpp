@@ -58,6 +58,9 @@ struct TrustedMapBinding {
 
 struct FdLoadOptions {
     int original_prog_fd = -1;
+    // Raw native P supplies the same program/entry metadata directly.
+    std::optional<bpf_prog_info> native_context;
+    std::optional<bpf_func_info> native_entry_function;
     /* Service-only capability, authenticated by the kernel ACTIVATE ioctl.
      * Application callers leave these empty and never supply a proof. */
     int trusted_service_fd = -1;

@@ -62,13 +62,16 @@ does not alter native instructions. Proof mode rejects the sideband.
 ### Kernel-backed trusted specialization
 
 The verified route submits native ELF bytes, entry and typed context/map metadata
-through the kernel's `native_submit` endpoint. A bootstrap-owned service opens
-`specializer` once, receives the kernel copy and queries its pinned source context
-and map shapes. `trusted_service.py` validates the envelope, calls the ISA worker
-and delegates fresh proof loading to `trusted-native-loader`; the loader completes
-the request before closing its program FD. Applications receive the resulting
-bound program through SUBMIT/WAIT. The service accepts no application proof, source
-C, tool flags or filenames, and reads no application manifest.
+through the kernel's `native_submit` endpoint. The registered service receives
+that kernel copy, generates and compiles B, and passes B to the stock verifier;
+the JIT emits the same native copy with its resolved relocations. A captured
+source program supplies its kernel context and maps. Direct native requests use
+source_prog_id=0 and carry object-derived load_context in the copied metadata;
+SUBMIT_RESOURCES retains their actual map descriptors. The service obtains map
+shapes from those pinned objects. The loader completes the request before closing
+its program FD, and applications obtain the result through SUBMIT/WAIT.
+The [direct-context receipt](results/kprog_design_only_20261108/native-context/README.md)
+records the API, build and native-only replay.
 
 Build/check the shared bridge with `make -C kprog/libnativeloader trusted-service-check`.
 `trusted-worker-check` compiles actual BCC native entries without proof siblings;

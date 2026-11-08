@@ -7,6 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <sys/ioctl.h>
@@ -38,12 +39,14 @@ template<class T> T info(int fd) {
 }
 
 void load(int argc, char **argv) {
-    if (argc < 17 || (argc - 17) % 3) throw std::runtime_error("load requires fixed service fields and map triples");
+    const int fixed = argc > 4 && u32(argv[4]) == 0 ? 21 : 17;
+    if (argc < fixed || (argc - fixed) % 3) throw std::runtime_error("load requires fixed service fields and map triples");
     uint32_t service = u32(argv[2]);
     if (service > std::numeric_limits<int>::max()) throw std::runtime_error("service FD exceeds int");
-    Fd source(bpf_prog_get_fd_by_id(u32(argv[4])));
+    std::unique_ptr<Fd> source;
+    if (const auto id = u32(argv[4])) source = std::make_unique<Fd>(bpf_prog_get_fd_by_id(id));
     native_loader::FdLoadOptions o;
-    o.original_prog_fd = source.value;
+    if (source) o.original_prog_fd = source->value;
     o.trusted_service_fd = service; o.trusted_request_id = number(argv[3]);
     o.native_object_path = argv[5]; o.symbol_name = argv[6];
     o.trusted_native_proof_path = argv[7]; o.proof_object_path = argv[8];
@@ -51,7 +54,15 @@ void load(int argc, char **argv) {
     o.expected_attach_type = u32(argv[11]); o.prog_flags = u32(argv[12]);
     o.attach_btf_id = u32(argv[13]); o.attach_btf_obj_id = u32(argv[14]); o.attach_prog_id = u32(argv[15]);
     u32(argv[16]);
-    for (int i = 17; i < argc; i += 3) {
+    if (!source) {
+        bpf_prog_info context{};
+        context.ifindex = u32(argv[16]); context.type = u32(argv[17]);
+        context.gpl_compatible = u32(argv[18]);
+        std::strncpy(context.name, argv[6], sizeof(context.name) - 1);
+        o.native_context = context; o.source_btf_id = u32(argv[19]);
+        if (const auto type_id = u32(argv[20])) o.native_entry_function = bpf_func_info{0, type_id};
+    }
+    for (int i = fixed; i < argc; i += 3) {
         native_loader::TrustedMapBinding map;
         map.native_symbol = argv[i]; map.map_id = u32(argv[i+1]);
         if (std::string(argv[i+2]) != "null") map.value_offset = u32(argv[i+2]);

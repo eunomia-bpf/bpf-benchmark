@@ -5096,7 +5096,11 @@ native_loader::LoadedProgram submit_trusted_native(
         << ",\"attach_btf_id\":" << (options.attach_btf_id ? options.attach_btf_id : info.attach_btf_id)
         << ",\"attach_btf_obj_id\":" << (options.attach_btf_obj_id ? options.attach_btf_obj_id : info.attach_btf_obj_id)
         << ",\"attach_prog_id\":" << options.attach_prog_id
-        << ",\"prog_ifindex\":" << info.ifindex << "},\"maps\":[";
+        << ",\"prog_ifindex\":" << info.ifindex
+        << ",\"gpl_compatible\":" << info.gpl_compatible
+        << ",\"source_btf_id\":" << options.source_btf_id
+        << ",\"source_func_type_id\":" << (options.native_entry_function ? options.native_entry_function->type_id : 0)
+        << ",\"token_present\":0},\"maps\":[";
     bool first = true;
     std::vector<std::unique_ptr<ScopedFd>> native_resource_fds;
     std::vector<int32_t> native_resource_numbers;
@@ -5218,14 +5222,12 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_ACTIVATE, &activate))
             fail("activate service request: " + std::string(std::strerror(errno)));
     }
-    if (options.original_prog_fd < 0) {
-        fail("native_loader: missing original_prog_fd");
-    }
     if (options.native_object_path.empty() && options.manifest_path.empty()) {
         fail("native_loader: missing native_object_path or manifest_path");
     }
     LoadedProgram out{};
-    const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
+    const bpf_prog_info prog_info = options.original_prog_fd >= 0
+        ? load_prog_info(options.original_prog_fd) : options.native_context.value();
     std::vector<bpf_insn> source_insns;
     if (!options.source_bpf_path.empty() && !options.source_insns.empty()) {
         fail("native_loader: source_bpf_path and source_insns are mutually exclusive");
@@ -5321,13 +5323,15 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
         }
     }
-    CompanionLoad companion =
-        load_from_loaded_program_fd(
+    CompanionLoad companion{};
+    if (options.original_prog_fd >= 0)
+        companion = load_from_loaded_program_fd(
             options.original_prog_fd,
             prog_info,
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
+    companion.prog_type = prog_info.type;
     companion.expected_attach_type = options.expected_attach_type;
     bind_source_map_symbols(companion, source_map_bindings, source_insns);
     for (const auto &binding : options.trusted_maps) {
@@ -5412,7 +5416,10 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     stub_attrs.prog_ifindex = prog_info.ifindex;
     stub_attrs.source_prog_id = prog_info.id;
     stub_attrs.gpl_compatible = prog_info.gpl_compatible;
-    if (prog_info.nr_func_info) {
+    if (options.original_prog_fd < 0 && options.native_entry_function) {
+        stub_attrs.entry_func = *options.native_entry_function;
+        stub_attrs.source_btf_id = options.source_btf_id;
+    } else if (options.original_prog_fd >= 0 && prog_info.nr_func_info) {
         bpf_prog_info detail{};
         detail.nr_func_info = 1;
         detail.func_info_rec_size = sizeof(stub_attrs.entry_func);

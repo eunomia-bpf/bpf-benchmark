@@ -157,11 +157,13 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 		return -ENOMEM;
 	kref_init(&capsule->refs);
 	INIT_LIST_HEAD(&capsule->chunks);
-	capsule->source = bpf_prog_by_id(request.source_prog_id);
-	if (IS_ERR(capsule->source)) {
-		err = PTR_ERR(capsule->source);
-		capsule->source = NULL;
-		goto fail;
+	if (request.source_prog_id) {
+		capsule->source = bpf_prog_by_id(request.source_prog_id);
+		if (IS_ERR(capsule->source)) {
+			err = PTR_ERR(capsule->source);
+			capsule->source = NULL;
+			goto fail;
+		}
 	}
 	capsule->native = vmemdup_user(u64_to_user_ptr(request.native_user), request.native_size);
 	if (IS_ERR(capsule->native)) {
@@ -262,7 +264,7 @@ again:
 	job = list_first_entry(&native_lab_service_pending, struct native_lab_trusted_job, pending);
 	capsule = job->capsule;
 	request.arch = NATIVE_LAB_BINDING_ARCH;
-	request.source_prog_id = capsule->source->aux->id;
+	request.source_prog_id = capsule->source ? capsule->source->aux->id : 0;
 	request.request_id = capsule->id;
 	request.native_size = capsule->native_size;
 	request.entry_size = capsule->entry_size;
@@ -370,20 +372,23 @@ static int native_lab_trusted_context(void __user *argument)
 	if (IS_ERR(capsule))
 		return PTR_ERR(capsule);
 	source = capsule->source;
-	context.prog_type = source->type;
-	context.expected_attach_type = source->expected_attach_type;
-	context.prog_flags = source->aux->native_load_flags;
-	context.prog_ifindex = source->aux->native_load_ifindex;
-	context.attach_btf_id = source->aux->attach_btf_id;
-	context.gpl_compatible = source->gpl_compatible;
-	context.source_btf_id = source->aux->btf ? btf_obj_id(source->aux->btf) : 0;
-	context.token_present = !!source->aux->token;
-	mutex_lock(&source->aux->dst_mutex);
-	target = source->aux->dst_prog;
-	attach = target ? target->aux->btf : source->aux->attach_btf;
-	context.attach_prog_id = target ? target->aux->id : 0;
-	context.attach_btf_obj_id = attach ? btf_obj_id(attach) : 0;
-	mutex_unlock(&source->aux->dst_mutex);
+	context = (struct native_lab_trusted_context){ .request_id = context.request_id };
+	if (source) {
+		context.prog_type = source->type;
+		context.expected_attach_type = source->expected_attach_type;
+		context.prog_flags = source->aux->native_load_flags;
+		context.prog_ifindex = source->aux->native_load_ifindex;
+		context.attach_btf_id = source->aux->attach_btf_id;
+		context.gpl_compatible = source->gpl_compatible;
+		context.source_btf_id = source->aux->btf ? btf_obj_id(source->aux->btf) : 0;
+		context.token_present = !!source->aux->token;
+		mutex_lock(&source->aux->dst_mutex);
+		target = source->aux->dst_prog;
+		attach = target ? target->aux->btf : source->aux->attach_btf;
+		context.attach_prog_id = target ? target->aux->id : 0;
+		context.attach_btf_obj_id = attach ? btf_obj_id(attach) : 0;
+		mutex_unlock(&source->aux->dst_mutex);
+	}
 	if (copy_to_user(argument, &context, sizeof(context)))
 		err = -EFAULT;
 	native_lab_trusted_put(capsule);
@@ -401,7 +406,7 @@ static int native_lab_trusted_map(void __user *argument)
 	capsule = native_lab_active_capsule(shape.request_id);
 	if (IS_ERR(capsule))
 		return PTR_ERR(capsule);
-	for (i = 0; i < capsule->source->aux->used_map_cnt; i++) {
+	for (i = 0; capsule->source && i < capsule->source->aux->used_map_cnt; i++) {
 		struct bpf_map *candidate = capsule->source->aux->used_maps[i];
 		if (candidate->id == shape.map_id) {
 			map = candidate;

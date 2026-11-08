@@ -1,0 +1,20 @@
+{
+  "sha256": {
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/module/bpf_x86_native_lab.ko": "24ff23d66ea996257789fa5e8bd9f6d7b86ccfe5ad926200ef15005cd16f3e91",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader": "171c957e85057b205403a4663c42567efc4400b773f0313481c6925d92aefb0d",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/libnative_loader.a": "d8615621ed2ab56b59fd76307bb1114e032b52e3044490d6f1a3ee1dfc866b37",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/probe": "045dcf9742bfd6bd26996b3370e206c11374a3dd7698196d560a8a5932df7ee1",
+    "/workspaces/repository/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52"
+  },
+  "component_exit": {
+    "module": "0",
+    "loader": "0",
+    "probe": "0"
+  },
+  "wire_sizes": {
+    "Request": 64,
+    "Submission": 80
+  },
+  "replay_queue": 1648093,
+  "module_vermagic": "7.0.0-rc2+ SMP preempt mod_unload modversions"
+}

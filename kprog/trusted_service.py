@@ -80,11 +80,14 @@ GET_MAP = (3 << 30) | (c.sizeof(Map) << 16) | (ord('N') << 8) | 0x76
 
 
 def kernel_facts(fd,request,envelope):
-    context = Context(request_id=request.request_id)
-    ioctl(fd,GET_CONTEXT,context)
-    if context.request_id != request.request_id:
-        raise RuntimeError('kernel context request identity mismatch')
-    actual = {n:getattr(context,n) for n,_ in Context._fields_ if n != 'request_id'}
+    if request.source_prog_id:
+        context = Context(request_id=request.request_id)
+        ioctl(fd,GET_CONTEXT,context)
+        if context.request_id != request.request_id:
+            raise RuntimeError('kernel context request identity mismatch')
+        actual = {n:getattr(context,n) for n,_ in Context._fields_ if n != 'request_id'}
+    else:
+        actual = dict(envelope['load_context'])
     actual.update(id=request.source_prog_id,maps=[])
     for item in envelope['maps']:
         mid = u32(item['map_id'],'map_id')
@@ -194,6 +197,9 @@ def serve(args):
                         artifacts['simulator_object'],artifacts['simulator_program'],args.native_link]
                     argv.extend(context[f] for f in ('expected_attach_type','prog_flags','attach_btf_id',
                         'attach_btf_obj_id','attach_prog_id','prog_ifindex'))
+                    if not request.source_prog_id:
+                        argv.extend([context['prog_type'],context['gpl_compatible'],
+                            context['source_btf_id'],context.get('source_func_type_id',0)])
                     for item in envelope['maps']:
                         argv.extend([item['name'],item['map_id'],'null' if item['value_offset'] is None else item['value_offset']])
                     result = subprocess.run([str(x) for x in argv],pass_fds=(fd,),text=True,capture_output=True)
