@@ -2314,5 +2314,702 @@
   },
   "rep_scope": "Single-element model step differs from the complete canonical REP instruction. The separate three-element probe reaches RCX0 and leaves RIP at the original instruction; the8.5 F3 source retains its counter/ZF/IP branch. Existing canonical CPU1120normal+64restart-fault+1774full-state evidence remains in reference-x86-sail.json.",
   "setup_epochs": "Initial controller syntax and MOVDQU fixture setup boundaries, initial64-mode configuration and LD package-context attempt retained. Current actual MOVUPS/MOVAPS production forms and every original stopped/REP input are archived.",
+  "source_capability_audit_20261108": {
+    "archive": {
+      "block_sha256": "75db1995838ebbeea753eb51c5945dcfd10f6ad209000991f08b3feaf44acbd5",
+      "entries": 15,
+      "file": "kprog/results/kprog_verification_20261107/reference-x86-capabilities.log.gz",
+      "marker": "=== OFFICIAL X86 SOURCE CAPABILITY AUDIT V1 ==="
+    },
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-root/usr/share/acl2-8.5dfsg/books/projects/x86isa/machine/cpuid.lisp": {
+        "bytes": 21332,
+        "sha256": "97b48dff248ee7741195850a5745350162036d05821fed835a10a33531f59de1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-root/usr/share/acl2-8.5dfsg/books/projects/x86isa/machine/inst-listing.lisp": {
+        "bytes": 707044,
+        "sha256": "3d81a69e4767d79f32fb334473375ee695ca791628b5d97a422d734136f83dda"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-download.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-download.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-download.py": {
+        "bytes": 1468,
+        "sha256": "ce0c5ad80ac05d88c755fc8685257d51f74204b4673cec1412b5c14ae864e911"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-work/debian-package-index.html": {
+        "bytes": 28301,
+        "sha256": "44491dd0f0095100c66910d4d5fedb9b55399e177a816de9eab7a972692effc8"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-work/latest-listing-commit.json": {
+        "bytes": 3182,
+        "sha256": "6c7a1eea365d8469b414d09269d5ac76702537c13775a432b55e52561673acfa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-work/source.json": {
+        "bytes": 655,
+        "sha256": "d9c964ee4e543f311f0a601a39b87b8a655a02221ee5a056cde626182a99325b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-work/upstream-inst-listing.lisp": {
+        "bytes": 729751,
+        "sha256": "ccd90ab0a20598ac2580e4cf03f207e6782a43539ae317b0d139018978d69489"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-debian-source.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-debian-source.log": {
+        "bytes": 634,
+        "sha256": "5540eda3f7352310cc5131e224f3dd523e37a38969911ed33a93a81c17ca84d4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-debian-source.py": {
+        "bytes": 841,
+        "sha256": "9e51ef302f6fca0e9060a52129bca30e967d931f25ae9f85ccc2a315f68ffdaf"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-package-index.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-package-index.log": {
+        "bytes": 390,
+        "sha256": "5865c3c38634f52a7624ac38c530b3d47a21f66ebef38585ac89ef4cc2e57337"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-model-package-index.py": {
+        "bytes": 651,
+        "sha256": "ea031aac0f59ee8d8450dd01537be62dec824eb9d3fb4ce15a40374d8a5ccc13"
+      }
+    },
+    "default_cpuid": {
+      "observation": "The model source documents the default CPUID attachment as enabling features. Missing NIL semantic bindings cannot be supplied by changing feature flags.",
+      "path": "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-root/usr/share/acl2-8.5dfsg/books/projects/x86isa/machine/cpuid.lisp",
+      "sha256": "97b48dff248ee7741195850a5745350162036d05821fed835a10a33531f59de1",
+      "source_excerpt": "(define default-cpuid-flag-fn ((eax  :type (unsigned-byte 32))\n                                 (ecx  :type (unsigned-byte 32))\n                                 (reg   (or (equal reg #.*eax*)\n                                            (equal reg #.*ebx*)\n                                            (equal reg #.*ecx*)\n                                            (equal reg #.*edx*)))\n                                 (bit   :type (integer 0 63))\n                                 (width :type (integer 1 32)))\n    :ignore-ok t\n\n    ;; Let's have everything enabled by default, just to see what breaks and when.\n\n    (case eax\n\n      (#ux8000_0008\n       (case reg\n         (#.*eax*\n          (case bit\n            (0 (if (equal width 8)\n                   52 ;; MAXPHYADDR\n                 0))\n            (8 (if (equal width 8)\n                   48 ;; LINEARADDR\n                 0))\n            (t 0)))\n         (t 1))) ;; EAX = #ux8000_0008\n\n      (t 1)))\n\n"
+    },
+    "distribution_package_index": {
+      "archive_entry": "/workspaces/.agent-state/kprog-lanes/V/x86-model-capability-work/debian-package-index.html",
+      "observed": "8.7+dfsg-3 source/cert/runtime packages are listed.",
+      "url": "https://deb.debian.org/debian/pool/main/a/acl2/"
+    },
+    "distribution_source_probe": {
+      "actual_exit": 1,
+      "scope": "Optional HTTP source fetch failed with IncompleteRead; its original traceback is archived and no model inference is drawn from it."
+    },
+    "executed_8_5_inst_listing": {
+      "path": "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-root/usr/share/acl2-8.5dfsg/books/projects/x86isa/machine/inst-listing.lisp",
+      "sha256": "3d81a69e4767d79f32fb334473375ee695ca791628b5d97a422d734136f83dda"
+    },
+    "mnemonic_families": {
+      "ANDN": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 18842,
+            "semantic_ast": "NIL",
+            "source": "(INST \"ANDN\"\n          (OP :OP #xF38F2\n              :VEX '(:0F38 :NDS :LZ :W0)\n              :FEAT '(:BMI1 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(B Y)\n               :OP3 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI1 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 18851,
+            "semantic_ast": "NIL",
+            "source": "(INST \"ANDN\"\n          (OP :OP #xF38F2\n              :VEX '(:0F38 :NDS :LZ :W1)\n              :FEAT '(:BMI1 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(B Y)\n               :OP3 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI1 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_ANDN",
+          "X86_OP_ANDN_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": null,
+            "line": 19892,
+            "semantic_ast": "NIL",
+            "source": "(INST \"ANDN\"\n          (OP :OP #xF38F2\n              :VEX '(:0F38 :NDS :LZ :W0)\n              :FEAT '(:BMI1 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(B Y)\n               :OP3 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI1 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 19901,
+            "semantic_ast": "NIL",
+            "source": "(INST \"ANDN\"\n          (OP :OP #xF38F2\n              :VEX '(:0F38 :NDS :LZ :W1)\n              :FEAT '(:BMI1 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(B Y)\n               :OP3 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI1 :AVX)))))"
+          }
+        ]
+      },
+      "BSWAP": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 9798,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFC8)\n          (ARG :OP1 '(:RAX/EAX/R8/R8D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9802,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFC9)\n          (ARG :OP1 '(:RCX/ECX/R9/R9D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9806,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCA)\n          (ARG :OP1 '(:RDX/EDX/R10/R10D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9810,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCB)\n          (ARG :OP1 '(:RBX/EBX/R11/R11D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9814,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCC)\n          (ARG :OP1 '(:RSP/ESP/R12/R12D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9818,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCD)\n          (ARG :OP1 '(:RBP/EBP/R13/R13D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9822,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCE)\n          (ARG :OP1 '(:RSI/ESI/R14/R14D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 9826,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCF)\n          (ARG :OP1 '(:RDI/EDI/R15/R15D))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_BSWAP"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10788,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFC8)\n          (ARG :OP1 '(:RAX/EAX/R8/R8D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10792,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFC9)\n          (ARG :OP1 '(:RCX/ECX/R9/R9D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10796,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCA)\n          (ARG :OP1 '(:RDX/EDX/R10/R10D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10800,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCB)\n          (ARG :OP1 '(:RBX/EBX/R11/R11D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10804,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCC)\n          (ARG :OP1 '(:RSP/ESP/R12/R12D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10808,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCD)\n          (ARG :OP1 '(:RBP/EBP/R13/R13D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10812,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCE)\n          (ARG :OP1 '(:RSI/ESI/R14/R14D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          },
+          {
+            "declared_handler": "X86-BSWAP",
+            "line": 10816,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-BSWAP"
+              ]
+            ],
+            "source": "(INST \"BSWAP\" (OP :OP #xFCF)\n          (ARG :OP1 '(:RDI/EDI/R15/R15D))\n          '(X86-BSWAP)\n          '((:UD (UD-LOCK-USED))))"
+          }
+        ]
+      },
+      "BZHI": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 18941,
+            "semantic_ast": "NIL",
+            "source": "(INST \"BZHI\"\n          (OP :OP #xF38F5\n              :VEX '(:0F38 :NDS :LZ :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 18950,
+            "semantic_ast": "NIL",
+            "source": "(INST \"BZHI\"\n          (OP :OP #xF38F5\n              :VEX '(:0F38 :NDS :LZ :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_BZHI",
+          "X86_OP_BZHI_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": null,
+            "line": 19991,
+            "semantic_ast": "NIL",
+            "source": "(INST \"BZHI\"\n          (OP :OP #xF38F5\n              :VEX '(:0F38 :NDS :LZ :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 20000,
+            "semantic_ast": "NIL",
+            "source": "(INST \"BZHI\"\n          (OP :OP #xF38F5\n              :VEX '(:0F38 :NDS :LZ :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ]
+      },
+      "MOVBE": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 18792,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F0 :PFX :NO-PREFIX\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(G Y) :OP2 '(M Y))\n          'NIL\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 18800,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F0 :PFX :66\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(G W) :OP2 '(M W))\n          'NIL\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 18821,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F1 :PFX :NO-PREFIX\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(M Y) :OP2 '(G Y))\n          'NIL\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 18829,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F1 :PFX :66\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(M W) :OP2 '(G W))\n          'NIL\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_MOVBE_LOAD",
+          "X86_OP_MOVBE_STORE"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-MOVBE-OP/EN-RM",
+            "line": 19842,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MOVBE-OP/EN-RM"
+              ]
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F0 :PFX :NO-PREFIX\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(G Y) :OP2 '(M Y))\n          '(X86-MOVBE-OP/EN-RM)\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": "X86-MOVBE-OP/EN-RM",
+            "line": 19850,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MOVBE-OP/EN-RM"
+              ]
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F0 :PFX :66\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(G W) :OP2 '(M W))\n          '(X86-MOVBE-OP/EN-RM)\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": "X86-MOVBE-OP/EN-MR",
+            "line": 19871,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MOVBE-OP/EN-MR"
+              ]
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F1 :PFX :NO-PREFIX\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(M Y) :OP2 '(G Y))\n          '(X86-MOVBE-OP/EN-MR)\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          },
+          {
+            "declared_handler": "X86-MOVBE-OP/EN-MR",
+            "line": 19879,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MOVBE-OP/EN-MR"
+              ]
+            ],
+            "source": "(INST \"MOVBE\" (OP :OP #xF38F1 :PFX :66\n                      :FEAT '(:MOVBE))\n          (ARG :OP1 '(M W) :OP2 '(G W))\n          '(X86-MOVBE-OP/EN-MR)\n          '((:UD (UD-LOCK-USED)\n                 (UD-REPNE-F2-V86-CPUID-CASE)\n                 (UD-REP-F3-USED)\n                 (UD-MODR/M.MOD-INDICATES-REGISTER))))"
+          }
+        ]
+      },
+      "MULX": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 19009,
+            "semantic_ast": "NIL",
+            "source": "(INST \"MULX\"\n          (OP :OP #xF38F6\n              :VEX '(:0F38 :NDD :LZ :F2 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(B Y)\n               :OP2 '(G Y)\n               :OP3 '(:RDX)\n               :OP4 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 19019,
+            "semantic_ast": "NIL",
+            "source": "(INST \"MULX\"\n          (OP :OP #xF38F6\n              :VEX '(:0F38 :NDD :LZ :F2 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(B Y)\n               :OP2 '(G Y)\n               :OP3 '(:RDX)\n               :OP4 '(E Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_MULX"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-MULX",
+            "line": 20059,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MULX"
+              ]
+            ],
+            "source": "(INST \"MULX\"\n          (OP :OP #xF38F6\n              :VEX '(:0F38 :NDD :LZ :F2 :W0)\n              :FEAT '(:BMI2))\n          (ARG :OP1 '(B Y)\n               :OP2 '(G Y)\n               :OP3 '(:RDX)\n               :OP4 '(E Y))\n          '(X86-MULX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2)))))"
+          },
+          {
+            "declared_handler": "X86-MULX",
+            "line": 20069,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-MULX"
+              ]
+            ],
+            "source": "(INST \"MULX\"\n          (OP :OP #xF38F6\n              :VEX '(:0F38 :NDD :LZ :F2 :W1)\n              :FEAT '(:BMI2))\n          (ARG :OP1 '(B Y)\n               :OP2 '(G Y)\n               :OP3 '(:RDX)\n               :OP4 '(E Y))\n          '(X86-MULX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2)))))"
+          }
+        ]
+      },
+      "POPCNT": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 9279,
+            "semantic_ast": [
+              "QUOTE",
+              "NIL"
+            ],
+            "source": "(INST \"POPCNT\" (OP :OP #xFB8\n                       :PFX :F3\n                       :FEAT '(:POPCNT))\n          (ARG :OP1 '(G V) :OP2 '(E V))\n          'NIL\n          '((:UD (UD-LOCK-USED))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_POPCNT",
+          "X86_OP_POPCNT_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-POPCNT",
+            "line": 10265,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-POPCNT"
+              ]
+            ],
+            "source": "(INST \"POPCNT\" (OP :OP #xFB8\n                       :PFX :F3\n                       :FEAT '(:POPCNT))\n          (ARG :OP1 '(G V) :OP2 '(E V))\n          '(x86-popcnt)\n          '((:UD (UD-LOCK-USED))))"
+          }
+        ]
+      },
+      "RORX": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 20813,
+            "semantic_ast": "NIL",
+            "source": "(INST \"RORX\"\n          (OP :OP #xF3AF0\n              :VEX '(:0F3A :LZ :F2 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(I B))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 20822,
+            "semantic_ast": "NIL",
+            "source": "(INST \"RORX\"\n          (OP :OP #xF3AF0\n              :VEX '(:0F3A :LZ :F2 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(I B))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_RORX",
+          "X86_OP_RORX_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-RORX",
+            "line": 21867,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-RORX"
+              ]
+            ],
+            "source": "(INST \"RORX\"\n          (OP :OP #xF3AF0\n              :VEX '(:0F3A :LZ :F2 :W0)\n              :FEAT '(:BMI2))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(I B))\n          '(X86-RORX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2)))))"
+          },
+          {
+            "declared_handler": "X86-RORX",
+            "line": 21876,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-RORX"
+              ]
+            ],
+            "source": "(INST \"RORX\"\n          (OP :OP #xF3AF0\n              :VEX '(:0F3A :LZ :F2 :W1)\n              :FEAT '(:BMI2))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(I B))\n          '(X86-RORX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2)))))"
+          }
+        ]
+      },
+      "SARX": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 19047,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SARX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F3 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 19056,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SARX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F3 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_SHIFTX",
+          "X86_OP_SHIFTX_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20097,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SARX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F3 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20106,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SARX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F3 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ]
+      },
+      "SHLX": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 19065,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SHLX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :66 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 19074,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SHLX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :66 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_SHIFTX",
+          "X86_OP_SHIFTX_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20115,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SHLX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :66 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20124,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SHLX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :66 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ]
+      },
+      "SHRX": {
+        "executed_8_5_records": [
+          {
+            "declared_handler": null,
+            "line": 19083,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SHRX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F2 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": null,
+            "line": 19092,
+            "semantic_ast": "NIL",
+            "source": "(INST \"SHRX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F2 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          NIL\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ],
+        "operation_labels": [
+          "X86_OP_SHIFTX",
+          "X86_OP_SHIFTX_MEM"
+        ],
+        "upstream_records": [
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20133,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SHRX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F2 :W0)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          },
+          {
+            "declared_handler": "X86-SARX/SHLX/SHRX",
+            "line": 20142,
+            "semantic_ast": [
+              "QUOTE",
+              [
+                "X86-SARX/SHLX/SHRX"
+              ]
+            ],
+            "source": "(INST \"SHRX\"\n          (OP :OP #xF38F7\n              :VEX '(:0F38 :NDS :LZ :F2 :W1)\n              :FEAT '(:BMI2 :AVX))\n          (ARG :OP1 '(G Y)\n               :OP2 '(E Y)\n               :OP3 '(B Y))\n          '(X86-SARX/SHLX/SHRX)\n          '((:EX (CHK-EXC :TYPE-13 (:BMI2 :AVX)))))"
+          }
+        ]
+      }
+    },
+    "scope": "Source capability audit, not execution of the new model. All original576-input8.5 outcomes,52 combined sampled-agreeing labels,14 stopped labels and REP difference remain unchanged. The newer source declares handlers for10 previously stopped operation labels; ANDN/BZHI register/memory4 labels still have NIL bindings. Newer model execution and certification are separate work.",
+    "upstream": {
+      "bytes": 729751,
+      "checked_at": "2026-11-08T15:38:35.595335+00:00",
+      "commit": "37292996d867d74c30192bc09472e135d70a3595",
+      "commit_date": "2026-11-03T07:21:50Z",
+      "path": "books/projects/x86isa/machine/inst-listing.lisp",
+      "repo": "acl2/acl2",
+      "scope": "Official source capability audit only. This downloaded listing is not substituted into the executable8.5 model, and no new model-execution agreement is claimed.",
+      "sha256": "ccd90ab0a20598ac2580e4cf03f207e6782a43539ae317b0d139018978d69489",
+      "url": "https://raw.githubusercontent.com/acl2/acl2/37292996d867d74c30192bc09472e135d70a3595/books/projects/x86isa/machine/inst-listing.lisp"
+    },
+    "upstream_declared_operation_labels": [
+      "X86_OP_BSWAP",
+      "X86_OP_MOVBE_LOAD",
+      "X86_OP_MOVBE_STORE",
+      "X86_OP_MULX",
+      "X86_OP_POPCNT",
+      "X86_OP_POPCNT_MEM",
+      "X86_OP_RORX",
+      "X86_OP_RORX_MEM",
+      "X86_OP_SHIFTX",
+      "X86_OP_SHIFTX_MEM"
+    ],
+    "upstream_nil_operation_labels": [
+      "X86_OP_ANDN",
+      "X86_OP_ANDN_MEM",
+      "X86_OP_BZHI",
+      "X86_OP_BZHI_MEM"
+    ]
+  },
   "trust_boundary": "Program-mode I/O wrappers, GCL/ACL2 executable and packaged model/compiled objects. Original timestamp-based Uncertified and program-mode invariant-risk warnings retained; finite operational observations and ACL2 certification are separate evidence."
 }

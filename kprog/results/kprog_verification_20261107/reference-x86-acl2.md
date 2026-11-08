@@ -30,3 +30,22 @@ represented. The coverage ledger now has52 sampled-agreeing native operation
 labels across its explicitly identified source epochs,14 model-stopped labels
 and one REP difference. Physical/compiler/link and environment-token interfaces
 retain their existing obligations.
+
+## Current official source capability
+
+The executed8.5 instruction listing binds NIL semantics for the stopped
+BSWAP, POPCNT, MOVBE and BMI instruction families. Its default CPUID attachment
+is documented as enabling features, which cannot supply missing semantics.
+A separate [official source snapshot](https://raw.githubusercontent.com/acl2/acl2/37292996d867d74c30192bc09472e135d70a3595/books/projects/x86isa/machine/inst-listing.lisp) at
+`37292996d867d74c30192bc09472e135d70a3595` declares semantic handlers for10 previously stopped
+operation labels: BSWAP, POPCNT register/memory, MOVBE load/store, MULX,
+RORX register/memory and SHIFTX register/memory. ANDN/BZHI register/memory
+retain NIL bindings for4 labels. This is a source audit; no new model execution
+agreement is claimed and the original14 model-stop rows remain unchanged.
+
+The [source audit archive](reference-x86-capabilities.log.gz) retains both
+listings, CPUID definition, exact line records, upstream commit metadata and
+original distribution lookup outputs. Debian lists8.7 source/cert/runtime
+packages; the optional direct source HTTP probe ended with IncompleteRead,
+whose original traceback is retained. Running a newer executable model is the
+next comparison step. Existing8.5/Sail model sources and binaries stay intact.
