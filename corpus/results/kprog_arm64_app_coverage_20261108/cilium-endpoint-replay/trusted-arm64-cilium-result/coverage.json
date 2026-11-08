@@ -1,0 +1,1397 @@
+{
+  "utc": "2026-11-08T11:31:03.517827+00:00",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T11:31:03.577523+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 0,
+    "distinct_source_prog_ids": 0,
+    "proof_generated": 0,
+    "stages": {},
+    "failure_causes": {},
+    "requests": [],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000100_425469/details/apps/cilium__agent.json",
+        "app": "cilium/agent",
+        "status": "error",
+        "error": "native app exited before BPF programs were tracked by shim\nstdout tail:\ntime=1970-01-01T00:21:35.257784368Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258004928Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.25812752Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258227488Z level=warn msg=\"    8 | #define __uint(name, val) int(*(name))[val]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258302848Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258379024Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:22:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.25845256Z level=warn msg=\"   22 | #define __uint(name, val) int (*name)[val]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258539008Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258611152Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258693968Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258777296Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258879296Z level=warn msg=\"    9 | #define __type(name, val) typeof(val) *(name)\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.258953312Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.25902248Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:25:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259099872Z level=warn msg=\"   25 | #define __type(name, val) typeof(val) *name\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259241728Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259367552Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259477104Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.25956896Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259681392Z level=warn msg=\"   10 | #define __array(name, val) typeof(val) *(name)[]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259755552Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.25983136Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:28:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259907008Z level=warn msg=\"   28 | #define __array(name, val) typeof(val) *name[]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.259978064Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.260047984Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26090464Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nodeport.h:11:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.261113456Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nat.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.261275584Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/conntrack.h:524:19: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26138944Z level=warn msg=\"  524 |                                   CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26146752Z level=warn msg=\"      |                                               ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262163824Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26232136Z level=warn msg=\"  646 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262399664Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262472992Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262567184Z level=warn msg=\"  783 |                                   CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262639296Z level=warn msg=\"      |                                               ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262711072Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262804016Z level=warn msg=\"  904 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.262882336Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263007616Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263153232Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nodeport.h:11:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263259968Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263361168Z level=warn msg=\"  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263443824Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263526832Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263694544Z level=warn msg=\"  946 |                                          CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263801248Z level=warn msg=\"      |                                                      ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.263889152Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264006592Z level=warn msg=\" 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264084192Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264157504Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264251216Z level=warn msg=\" 1159 |                                          CT_INGRESS, &tuple.dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26432536Z level=warn msg=\"      |                                                       ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264397344Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26447992Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264562288Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264657456Z level=warn msg=\" 1674 |                                           CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264747232Z level=warn msg=\"      |                                                       ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.264903024Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26504024Z level=warn msg=\" 2057 |                 if (READ_ONCE(val->last_used) +\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265119632Z level=warn msg=\"      |                               ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26520232Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265292752Z level=warn msg=\"  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265418144Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265496016Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265583696Z level=warn msg=\"   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265654672Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.265725712Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26582504Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26591448Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26600952Z level=warn msg=\" 2068 |                 WRITE_ONCE(val->last_used, now);\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.266080912Z level=warn msg=\"      |                            ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26615816Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.266263104Z level=warn msg=\"  116 |                                    __WRITE_ONCE(X, __val);      \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26634616Z level=warn msg=\"      |                                                 ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.266420288Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000100_425469/details/cilium-native-config/parity/bpf_xdp/bbbac5ad5003a0650221607b391a35253b8950647124664e0bc815db0cf8878a/native-abi-overlay/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.266507664Z level=warn msg=\"  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.26662952Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:21:35.266782592Z level=warn msg=\"14 warnings generated.\" module=agent.datapath.loader\ntime=1970-01-01T00:21:37.269843776Z level=fatal msg=\"Failed to compile XDP program\" module=agent.datapath.loader error=\"attaching XDP program to interface bpfbench0: Failed to compile bpf_xdp.o: signal: killed\"",
+        "phases": {
+          "baseline": {
+            "programs": [
+              {
+                "bytes_jited": 640,
+                "bytes_xlated": 880,
+                "id": 150,
+                "name": "cil_xdp_entry",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "xdp"
+              },
+              {
+                "bytes_jited": 64,
+                "bytes_xlated": 16,
+                "id": 151,
+                "name": "cil_lxc_policy_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1128,
+                "bytes_xlated": 1616,
+                "id": 152,
+                "name": "tail_handle_arp",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6792,
+                "bytes_xlated": 11024,
+                "id": 153,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6944,
+                "bytes_xlated": 11104,
+                "id": 154,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6192,
+                "bytes_xlated": 9224,
+                "id": 155,
+                "name": "tail_ipv4_ct_in",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 7176,
+                "bytes_xlated": 10984,
+                "id": 156,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 64,
+                "bytes_xlated": 16,
+                "id": 157,
+                "name": "cil_lxc_policy_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 3200,
+                "bytes_xlated": 4920,
+                "id": 159,
+                "name": "tail_no_service",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9552,
+                "bytes_xlated": 15112,
+                "id": 160,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1128,
+                "bytes_xlated": 1616,
+                "id": 161,
+                "name": "tail_handle_arp",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 504,
+                "bytes_xlated": 752,
+                "id": 162,
+                "name": "tail_drop_notif",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 64,
+                "bytes_xlated": 16,
+                "id": 163,
+                "name": "cil_host_policy",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 5728,
+                "bytes_xlated": 8912,
+                "id": 164,
+                "name": "cil_to_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4496,
+                "bytes_xlated": 7040,
+                "id": 165,
+                "name": "cil_from_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1544,
+                "bytes_xlated": 2112,
+                "id": 166,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6944,
+                "bytes_xlated": 11104,
+                "id": 167,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 7176,
+                "bytes_xlated": 10984,
+                "id": 168,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6376,
+                "bytes_xlated": 9592,
+                "id": 169,
+                "name": "tail_ipv4_ct_eg",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6424,
+                "bytes_xlated": 10368,
+                "id": 170,
+                "name": "tail_ipv4_to_en",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 472,
+                "bytes_xlated": 696,
+                "id": 171,
+                "name": "tail_drop_notif",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1392,
+                "bytes_xlated": 1720,
+                "id": 172,
+                "name": "cil_from_contai",
+                "run_cnt_delta": 8774,
+                "run_time_ns_delta": 563909264,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6824,
+                "bytes_xlated": 10104,
+                "id": 173,
+                "name": "cil_lxc_policy",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4152,
+                "bytes_xlated": 6368,
+                "id": 174,
+                "name": "tail_nodeport_r",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6080,
+                "bytes_xlated": 9904,
+                "id": 175,
+                "name": "tail_ipv4_polic",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9328,
+                "bytes_xlated": 14392,
+                "id": 176,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6376,
+                "bytes_xlated": 9592,
+                "id": 177,
+                "name": "tail_ipv4_ct_eg",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6424,
+                "bytes_xlated": 10368,
+                "id": 178,
+                "name": "tail_ipv4_to_en",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 3200,
+                "bytes_xlated": 4920,
+                "id": 180,
+                "name": "tail_no_service",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 472,
+                "bytes_xlated": 696,
+                "id": 181,
+                "name": "tail_drop_notif",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6824,
+                "bytes_xlated": 10104,
+                "id": 182,
+                "name": "cil_lxc_policy",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4152,
+                "bytes_xlated": 6368,
+                "id": 183,
+                "name": "tail_nodeport_r",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6080,
+                "bytes_xlated": 9904,
+                "id": 184,
+                "name": "tail_ipv4_polic",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6192,
+                "bytes_xlated": 9224,
+                "id": 185,
+                "name": "tail_ipv4_ct_in",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1392,
+                "bytes_xlated": 1720,
+                "id": 186,
+                "name": "cil_from_contai",
+                "run_cnt_delta": 8766,
+                "run_time_ns_delta": 503491664,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 13376,
+                "bytes_xlated": 21584,
+                "id": 187,
+                "name": "tail_handle_sna",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 984,
+                "bytes_xlated": 1512,
+                "id": 188,
+                "name": "cil_to_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4048,
+                "bytes_xlated": 5936,
+                "id": 189,
+                "name": "cil_from_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4496,
+                "bytes_xlated": 7040,
+                "id": 190,
+                "name": "cil_from_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 5728,
+                "bytes_xlated": 8912,
+                "id": 191,
+                "name": "cil_to_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 13400,
+                "bytes_xlated": 21632,
+                "id": 192,
+                "name": "tail_handle_sna",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 3216,
+                "bytes_xlated": 4952,
+                "id": 193,
+                "name": "tail_no_service",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9368,
+                "bytes_xlated": 14312,
+                "id": 194,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4048,
+                "bytes_xlated": 5936,
+                "id": 195,
+                "name": "cil_from_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 984,
+                "bytes_xlated": 1512,
+                "id": 196,
+                "name": "cil_to_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9552,
+                "bytes_xlated": 15112,
+                "id": 197,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 504,
+                "bytes_xlated": 752,
+                "id": 198,
+                "name": "tail_drop_notif",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 64,
+                "bytes_xlated": 16,
+                "id": 199,
+                "name": "cil_host_policy",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1544,
+                "bytes_xlated": 2112,
+                "id": 200,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6792,
+                "bytes_xlated": 11024,
+                "id": 201,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 504,
+                "bytes_xlated": 752,
+                "id": 202,
+                "name": "tail_drop_notif",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9368,
+                "bytes_xlated": 14312,
+                "id": 203,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 64,
+                "bytes_xlated": 16,
+                "id": 204,
+                "name": "cil_host_policy",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 1544,
+                "bytes_xlated": 2112,
+                "id": 205,
+                "name": "tail_handle_ipv",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 13400,
+                "bytes_xlated": 21632,
+                "id": 206,
+                "name": "tail_handle_sna",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4048,
+                "bytes_xlated": 5936,
+                "id": 207,
+                "name": "cil_from_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 6792,
+                "bytes_xlated": 11024,
+                "id": 208,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 984,
+                "bytes_xlated": 1512,
+                "id": 209,
+                "name": "cil_to_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 4496,
+                "bytes_xlated": 7040,
+                "id": 210,
+                "name": "cil_from_host",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 5728,
+                "bytes_xlated": 8912,
+                "id": 211,
+                "name": "cil_to_netdev",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 3216,
+                "bytes_xlated": 4952,
+                "id": 212,
+                "name": "tail_no_service",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              },
+              {
+                "bytes_jited": 9552,
+                "bytes_xlated": 15112,
+                "id": 213,
+                "name": "tail_nodeport_n",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "sched_cls"
+              }
+            ],
+            "workload": null,
+            "raw_measurement": {
+              "bpf": {
+                "150": {
+                  "bytes_jited": 640,
+                  "bytes_xlated": 880,
+                  "id": 150,
+                  "name": "cil_xdp_entry",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "xdp"
+                },
+                "151": {
+                  "bytes_jited": 64,
+                  "bytes_xlated": 16,
+                  "id": 151,
+                  "name": "cil_lxc_policy_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "152": {
+                  "bytes_jited": 1128,
+                  "bytes_xlated": 1616,
+                  "id": 152,
+                  "name": "tail_handle_arp",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "153": {
+                  "bytes_jited": 6792,
+                  "bytes_xlated": 11024,
+                  "id": 153,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "154": {
+                  "bytes_jited": 6944,
+                  "bytes_xlated": 11104,
+                  "id": 154,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "155": {
+                  "bytes_jited": 6192,
+                  "bytes_xlated": 9224,
+                  "id": 155,
+                  "name": "tail_ipv4_ct_in",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "156": {
+                  "bytes_jited": 7176,
+                  "bytes_xlated": 10984,
+                  "id": 156,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "157": {
+                  "bytes_jited": 64,
+                  "bytes_xlated": 16,
+                  "id": 157,
+                  "name": "cil_lxc_policy_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "159": {
+                  "bytes_jited": 3200,
+                  "bytes_xlated": 4920,
+                  "id": 159,
+                  "name": "tail_no_service",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "160": {
+                  "bytes_jited": 9552,
+                  "bytes_xlated": 15112,
+                  "id": 160,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "161": {
+                  "bytes_jited": 1128,
+                  "bytes_xlated": 1616,
+                  "id": 161,
+                  "name": "tail_handle_arp",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "162": {
+                  "bytes_jited": 504,
+                  "bytes_xlated": 752,
+                  "id": 162,
+                  "name": "tail_drop_notif",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "163": {
+                  "bytes_jited": 64,
+                  "bytes_xlated": 16,
+                  "id": 163,
+                  "name": "cil_host_policy",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "164": {
+                  "bytes_jited": 5728,
+                  "bytes_xlated": 8912,
+                  "id": 164,
+                  "name": "cil_to_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "165": {
+                  "bytes_jited": 4496,
+                  "bytes_xlated": 7040,
+                  "id": 165,
+                  "name": "cil_from_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "166": {
+                  "bytes_jited": 1544,
+                  "bytes_xlated": 2112,
+                  "id": 166,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "167": {
+                  "bytes_jited": 6944,
+                  "bytes_xlated": 11104,
+                  "id": 167,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "168": {
+                  "bytes_jited": 7176,
+                  "bytes_xlated": 10984,
+                  "id": 168,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "169": {
+                  "bytes_jited": 6376,
+                  "bytes_xlated": 9592,
+                  "id": 169,
+                  "name": "tail_ipv4_ct_eg",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "170": {
+                  "bytes_jited": 6424,
+                  "bytes_xlated": 10368,
+                  "id": 170,
+                  "name": "tail_ipv4_to_en",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "171": {
+                  "bytes_jited": 472,
+                  "bytes_xlated": 696,
+                  "id": 171,
+                  "name": "tail_drop_notif",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "172": {
+                  "bytes_jited": 1392,
+                  "bytes_xlated": 1720,
+                  "id": 172,
+                  "name": "cil_from_contai",
+                  "run_cnt_delta": 8774,
+                  "run_time_ns_delta": 563909264,
+                  "type": "sched_cls"
+                },
+                "173": {
+                  "bytes_jited": 6824,
+                  "bytes_xlated": 10104,
+                  "id": 173,
+                  "name": "cil_lxc_policy",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "174": {
+                  "bytes_jited": 4152,
+                  "bytes_xlated": 6368,
+                  "id": 174,
+                  "name": "tail_nodeport_r",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "175": {
+                  "bytes_jited": 6080,
+                  "bytes_xlated": 9904,
+                  "id": 175,
+                  "name": "tail_ipv4_polic",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "176": {
+                  "bytes_jited": 9328,
+                  "bytes_xlated": 14392,
+                  "id": 176,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "177": {
+                  "bytes_jited": 6376,
+                  "bytes_xlated": 9592,
+                  "id": 177,
+                  "name": "tail_ipv4_ct_eg",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "178": {
+                  "bytes_jited": 6424,
+                  "bytes_xlated": 10368,
+                  "id": 178,
+                  "name": "tail_ipv4_to_en",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "180": {
+                  "bytes_jited": 3200,
+                  "bytes_xlated": 4920,
+                  "id": 180,
+                  "name": "tail_no_service",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "181": {
+                  "bytes_jited": 472,
+                  "bytes_xlated": 696,
+                  "id": 181,
+                  "name": "tail_drop_notif",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "182": {
+                  "bytes_jited": 6824,
+                  "bytes_xlated": 10104,
+                  "id": 182,
+                  "name": "cil_lxc_policy",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "183": {
+                  "bytes_jited": 4152,
+                  "bytes_xlated": 6368,
+                  "id": 183,
+                  "name": "tail_nodeport_r",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "184": {
+                  "bytes_jited": 6080,
+                  "bytes_xlated": 9904,
+                  "id": 184,
+                  "name": "tail_ipv4_polic",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "185": {
+                  "bytes_jited": 6192,
+                  "bytes_xlated": 9224,
+                  "id": 185,
+                  "name": "tail_ipv4_ct_in",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "186": {
+                  "bytes_jited": 1392,
+                  "bytes_xlated": 1720,
+                  "id": 186,
+                  "name": "cil_from_contai",
+                  "run_cnt_delta": 8766,
+                  "run_time_ns_delta": 503491664,
+                  "type": "sched_cls"
+                },
+                "187": {
+                  "bytes_jited": 13376,
+                  "bytes_xlated": 21584,
+                  "id": 187,
+                  "name": "tail_handle_sna",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "188": {
+                  "bytes_jited": 984,
+                  "bytes_xlated": 1512,
+                  "id": 188,
+                  "name": "cil_to_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "189": {
+                  "bytes_jited": 4048,
+                  "bytes_xlated": 5936,
+                  "id": 189,
+                  "name": "cil_from_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "190": {
+                  "bytes_jited": 4496,
+                  "bytes_xlated": 7040,
+                  "id": 190,
+                  "name": "cil_from_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "191": {
+                  "bytes_jited": 5728,
+                  "bytes_xlated": 8912,
+                  "id": 191,
+                  "name": "cil_to_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "192": {
+                  "bytes_jited": 13400,
+                  "bytes_xlated": 21632,
+                  "id": 192,
+                  "name": "tail_handle_sna",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "193": {
+                  "bytes_jited": 3216,
+                  "bytes_xlated": 4952,
+                  "id": 193,
+                  "name": "tail_no_service",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "194": {
+                  "bytes_jited": 9368,
+                  "bytes_xlated": 14312,
+                  "id": 194,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "195": {
+                  "bytes_jited": 4048,
+                  "bytes_xlated": 5936,
+                  "id": 195,
+                  "name": "cil_from_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "196": {
+                  "bytes_jited": 984,
+                  "bytes_xlated": 1512,
+                  "id": 196,
+                  "name": "cil_to_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "197": {
+                  "bytes_jited": 9552,
+                  "bytes_xlated": 15112,
+                  "id": 197,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "198": {
+                  "bytes_jited": 504,
+                  "bytes_xlated": 752,
+                  "id": 198,
+                  "name": "tail_drop_notif",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "199": {
+                  "bytes_jited": 64,
+                  "bytes_xlated": 16,
+                  "id": 199,
+                  "name": "cil_host_policy",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "200": {
+                  "bytes_jited": 1544,
+                  "bytes_xlated": 2112,
+                  "id": 200,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "201": {
+                  "bytes_jited": 6792,
+                  "bytes_xlated": 11024,
+                  "id": 201,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "202": {
+                  "bytes_jited": 504,
+                  "bytes_xlated": 752,
+                  "id": 202,
+                  "name": "tail_drop_notif",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "203": {
+                  "bytes_jited": 9368,
+                  "bytes_xlated": 14312,
+                  "id": 203,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "204": {
+                  "bytes_jited": 64,
+                  "bytes_xlated": 16,
+                  "id": 204,
+                  "name": "cil_host_policy",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "205": {
+                  "bytes_jited": 1544,
+                  "bytes_xlated": 2112,
+                  "id": 205,
+                  "name": "tail_handle_ipv",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "206": {
+                  "bytes_jited": 13400,
+                  "bytes_xlated": 21632,
+                  "id": 206,
+                  "name": "tail_handle_sna",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "207": {
+                  "bytes_jited": 4048,
+                  "bytes_xlated": 5936,
+                  "id": 207,
+                  "name": "cil_from_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "208": {
+                  "bytes_jited": 6792,
+                  "bytes_xlated": 11024,
+                  "id": 208,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "209": {
+                  "bytes_jited": 984,
+                  "bytes_xlated": 1512,
+                  "id": 209,
+                  "name": "cil_to_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "210": {
+                  "bytes_jited": 4496,
+                  "bytes_xlated": 7040,
+                  "id": 210,
+                  "name": "cil_from_host",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "211": {
+                  "bytes_jited": 5728,
+                  "bytes_xlated": 8912,
+                  "id": 211,
+                  "name": "cil_to_netdev",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "212": {
+                  "bytes_jited": 3216,
+                  "bytes_xlated": 4952,
+                  "id": 212,
+                  "name": "tail_no_service",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                },
+                "213": {
+                  "bytes_jited": 9552,
+                  "bytes_xlated": 15112,
+                  "id": 213,
+                  "name": "tail_nodeport_n",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "sched_cls"
+                }
+              },
+              "workloads": [
+                {
+                  "components": [
+                    {
+                      "command": [
+                        "ip",
+                        "netns",
+                        "exec",
+                        "bpfbench-cepa",
+                        "sh",
+                        "-c",
+                        "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                      ],
+                      "config": {
+                        "clone_skb": 0,
+                        "dst_ip": "10.244.0.51",
+                        "dst_port": 18081,
+                        "dst_port_range": [
+                          1,
+                          65535
+                        ],
+                        "flows": 65535,
+                        "iface": "eth0",
+                        "namespace": "bpfbench-cepa",
+                        "pkt_size": 64,
+                        "pktgen_cpu": 0,
+                        "pktgen_thread_index": 0,
+                        "src_ip": "10.244.0.207",
+                        "tool": "kernel_pktgen"
+                      },
+                      "duration_s": 2.5777209440000206,
+                      "returncode": 0,
+                      "stderr": "",
+                      "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.51  dst_max: 10.244.0.51\n     src_min: 10.244.0.207  src_max: 10.244.0.207\n     src_mac: d2:3a:01:0f:d4:c2 dst_mac: f2:4b:b5:3a:4c:ef\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 8765  errors: 0\n     started: 930770761us  stopped: 932951190us idle: 0us\n     seq_num: 8766  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.207  cur_daddr: 10.244.0.51\n     cur_udp_dst: 8766  cur_udp_src: 8766\n     cur_queue_map: 0\n     flows: 8197\nResult: OK: 2180429(c2180429+d0) usec, 8765 (64byte,-1frags)\n  4019pps 2Mb/sec (2057728bps) errors: 0",
+                      "workload_name": "cilium_endpoint_pktgen_forward"
+                    },
+                    {
+                      "command": [
+                        "ip",
+                        "netns",
+                        "exec",
+                        "bpfbench-cepb",
+                        "sh",
+                        "-c",
+                        "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                      ],
+                      "config": {
+                        "clone_skb": 0,
+                        "dst_ip": "10.244.0.207",
+                        "dst_port": 18081,
+                        "dst_port_range": [
+                          1,
+                          65535
+                        ],
+                        "flows": 65535,
+                        "iface": "eth0",
+                        "namespace": "bpfbench-cepb",
+                        "pkt_size": 64,
+                        "pktgen_cpu": 1,
+                        "pktgen_thread_index": 1,
+                        "src_ip": "10.244.0.51",
+                        "tool": "kernel_pktgen"
+                      },
+                      "duration_s": 2.5448815039999317,
+                      "returncode": 0,
+                      "stderr": "",
+                      "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.207  dst_max: 10.244.0.207\n     src_min: 10.244.0.51  src_max: 10.244.0.51\n     src_mac: 9e:f6:09:8c:69:1e dst_mac: 76:41:76:15:92:20\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 8757  errors: 0\n     started: 930831342us  stopped: 932950358us idle: 0us\n     seq_num: 8758  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.51  cur_daddr: 10.244.0.207\n     cur_udp_dst: 8758  cur_udp_src: 8758\n     cur_queue_map: 0\n     flows: 8205\nResult: OK: 2119016(c2119016+d0) usec, 8757 (64byte,-1frags)\n  4132pps 2Mb/sec (2115584bps) errors: 0",
+                      "workload_name": "cilium_endpoint_pktgen_reverse"
+                    }
+                  ],
+                  "config": {
+                    "network_softirq_delta_by_cpu": {
+                      "NET_RX": {
+                        "CPU0": 8766,
+                        "CPU1": 8757,
+                        "CPU2": 0,
+                        "CPU3": 0,
+                        "CPU4": 0,
+                        "CPU5": 0,
+                        "CPU6": 0,
+                        "CPU7": 0
+                      },
+                      "NET_TX": {
+                        "CPU0": 0,
+                        "CPU1": 0,
+                        "CPU2": 0,
+                        "CPU3": 0,
+                        "CPU4": 0,
+                        "CPU5": 0,
+                        "CPU6": 0,
+                        "CPU7": 0
+                      }
+                    },
+                    "outcomes": {
+                      "after": {
+                        "cilium_metrics_map_ids": [
+                          8
+                        ],
+                        "receivers": {
+                          "bpfbench-cepa": {
+                            "rx_bytes": 1039256,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 16229,
+                            "tx_bytes": 1039938,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 16240
+                          },
+                          "bpfbench-cepb": {
+                            "rx_bytes": 1039826,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 16238,
+                            "tx_bytes": 1039116,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 16227
+                          }
+                        },
+                        "verdicts": {
+                          "reason=0,direction=1": {
+                            "bytes": 2077056,
+                            "count": 32440
+                          },
+                          "reason=0,direction=2": {
+                            "bytes": 2077126,
+                            "count": 32441
+                          },
+                          "reason=139,direction=2": {
+                            "bytes": 350,
+                            "count": 5
+                          },
+                          "reason=3,direction=1": {
+                            "bytes": 70,
+                            "count": 1
+                          }
+                        }
+                      },
+                      "before": {
+                        "cilium_metrics_map_ids": [
+                          8
+                        ],
+                        "receivers": {
+                          "bpfbench-cepa": {
+                            "rx_bytes": 478072,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 7464,
+                            "tx_bytes": 478200,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 7466
+                          },
+                          "bpfbench-cepb": {
+                            "rx_bytes": 478130,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 7465,
+                            "tx_bytes": 477932,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 7462
+                          }
+                        },
+                        "verdicts": {
+                          "reason=0,direction=1": {
+                            "bytes": 954176,
+                            "count": 14902
+                          },
+                          "reason=0,direction=2": {
+                            "bytes": 954246,
+                            "count": 14903
+                          },
+                          "reason=139,direction=2": {
+                            "bytes": 350,
+                            "count": 5
+                          },
+                          "reason=3,direction=1": {
+                            "bytes": 70,
+                            "count": 1
+                          }
+                        }
+                      },
+                      "delta": {
+                        "cilium_metrics_map_ids": [
+                          8
+                        ],
+                        "receivers": {
+                          "bpfbench-cepa": {
+                            "rx_bytes": 561184,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 8765,
+                            "tx_bytes": 561738,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 8774
+                          },
+                          "bpfbench-cepb": {
+                            "rx_bytes": 561696,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 8773,
+                            "tx_bytes": 561184,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 8765
+                          }
+                        },
+                        "verdicts": {
+                          "reason=0,direction=1": {
+                            "bytes": 1122880,
+                            "count": 17538
+                          },
+                          "reason=0,direction=2": {
+                            "bytes": 1122880,
+                            "count": 17538
+                          },
+                          "reason=139,direction=2": {
+                            "bytes": 0,
+                            "count": 0
+                          },
+                          "reason=3,direction=1": {
+                            "bytes": 0,
+                            "count": 0
+                          }
+                        }
+                      },
+                      "settle_seconds": 1.0
+                    },
+                    "path": "bidirectional-endpoint-to-endpoint",
+                    "pktgen_cpus": [
+                      0,
+                      1
+                    ]
+                  },
+                  "workload_name": "cilium_endpoint_pktgen"
+                }
+              ]
+            }
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
