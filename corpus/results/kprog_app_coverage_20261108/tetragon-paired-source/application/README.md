@@ -1,0 +1,3 @@
+# Whole paired-source x86 Tetragon
+
+The complete original tetragon/observer startup/workload consumes paired native/JIT C sources and current-kernel BTF layouts. Source edits5d15225c7/a9abb84e5/cccd71558 retain existing path bounds and local capped/masked length and record task credential user namespace in user_inum. The source-change ledger records that payload difference and every prior selected/upstream C-tree difference. Current generic RAW context and dynptr named helpers are captured in0818f5677 model source. Actual G/C/I/failed(0, 0, 0, 0); Makeexit0. Original workload, program census, complete native/B/compiler/verifier/service and work records accompany this report. Runtime admission additions0.
