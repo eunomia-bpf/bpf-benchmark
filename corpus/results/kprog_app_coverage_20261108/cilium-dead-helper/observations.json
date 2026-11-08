@@ -1,0 +1,17 @@
+{
+  "application": "Cilium",
+  "entry": "tail_nodeport_nat_egress_ipv4",
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "verifier_rejected": 1,
+  "error_class": "R5 32-bit pointer arithmetic prohibited",
+  "processed_insns": 392,
+  "total_states": 10,
+  "native_sha_matches": 2,
+  "source_drift": [],
+  "run_exit": 0,
+  "app_status": "error",
+  "collector_exit": 1,
+  "collector_outcome": "Complete archives and coverage recorded; final assertion requires full application acceptance"
+}
