@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T07:33:34.111936+00:00",
+    "as_of_utc": "2026-11-08T08:03:19.585492+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -238,8 +238,8 @@
       },
       {
         "application": "Tetragon",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/tetragon-startup-replay/replay/trusted-arm64-tetragon-result/coverage.json",
-        "baseline_resident": 157,
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tetragon-result/coverage.json",
+        "baseline_resident": 163,
         "service_source_ids": 1,
         "generated": 1,
         "compiled": 1,
@@ -252,8 +252,12 @@
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/tetragon-startup-replay/replay/trusted-arm64-tetragon-result/run-20261107T231024944237Z.tar.gz",
-        "raw_archive_sha256": "ec3c5c275cf2c634adf4449f09d7ee8301d86d532db5cd36763bd0ba92a7fe4d"
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tetragon-result/run-20261108T072610331281Z.tar.gz",
+        "raw_archive_sha256": "a4503c8c6e2e2fc32a5faf6179cbde02175b872c9d9e898dc3be4ca5a71dd640",
+        "host_ok": false,
+        "guest_exit": 1,
+        "runtime_epoch": "five_step_e2d3",
+        "baseline_bpf_calls": 29897
       },
       {
         "application": "Katran",
