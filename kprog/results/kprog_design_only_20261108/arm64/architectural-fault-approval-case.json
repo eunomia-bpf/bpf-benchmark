@@ -70,5 +70,13 @@
     "native_executed": false
   },
   "canonical_reference": "kprog/formal/KProgFormal/Reference/AArch64.lean:526",
-  "decision": "Operator approval pending for generic architectural fault predicates in B"
+  "decision": "Operator approved four architectural fault classes; canonical bodies500abe542 and complete34receiptb1cb678b8e7ef05436d40646ccb45f524b4c3065",
+  "approved_utc": "2026-11-08T09:36:00Z",
+  "approved_classes": [
+    "SP alignment",
+    "load-pair destination overlap",
+    "load/store writeback overlap",
+    "exclusive status overlap"
+  ],
+  "results": "corpus/results/kprog_arm64_app_coverage_20261108/architectural-fault/README.md"
 }
