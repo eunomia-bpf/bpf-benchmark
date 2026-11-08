@@ -1,0 +1,39 @@
+{
+  "application": "otelcol-ebpf-profiler,cilium,tetragon/observer,tracee",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-08T17:01:13.206075+00:00",
+    "apps": "otelcol-ebpf-profiler,cilium,tetragon/observer,tracee",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/trusted-g3nmtbr_/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/runtime.image.tar",
+      "SAMPLES=1",
+      "WORKLOAD_DURATION=2"
+    ],
+    "returncode": 2,
+    "error": "Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/runtime.image.tar', 'SAMPLES=1', 'WORKLOAD_DURATION=2']' returned non-zero exit status 2.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/guest.py\", line 33, in <module>\n    summary['returncode']=done.returncode;done.check_returncode()\n                                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/runtime.image.tar', 'SAMPLES=1', 'WORKLOAD_DURATION=2']' returned non-zero exit status 2.\n",
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-08T17:04:08.459731+00:00",
+    "corpus_metadata": [],
+    "archive": "corpus-20261108T170415934897Z.tar.gz",
+    "archive_sha256": "a4d544de4908400d4f79e367670f617bd7be7fc6e5dda4522d888c29418d7877"
+  },
+  "results": []
+}
