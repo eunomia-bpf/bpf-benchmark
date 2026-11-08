@@ -1,0 +1,34 @@
+{
+  "started": "2026-11-08T12:12:30.255370+00:00",
+  "native_sha256": "75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304",
+  "original_artifact": {
+    "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-current-assets/trusted-4lfofnzc/requests/request-knb7s5kr/generated/request.native.o",
+    "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-current-assets/trusted-4lfofnzc/requests/request-knb7s5kr/generated/trusted_x86.proof.o",
+    "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-current-assets/trusted-4lfofnzc/requests/request-knb7s5kr/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "event_execve",
+    "native_sha256": "75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304"
+  },
+  "sources": {
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "dbe7c13982d16c0d5540c3acefbd2e0728c48c9ee3c25b05bcc31eabb9e29ce6",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "cf4eed9dd41f4507501aca329dec50dbd23a3497f05b3721afdb833de1bf1f96",
+    "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076"
+  },
+  "result": {
+    "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/generated/request.native.o",
+    "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/generated/trusted_x86.proof.o",
+    "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "event_execve",
+    "native_sha256": "75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304"
+  },
+  "sections": [
+    {
+      "name": "tracepoint/trusted/trusted",
+      "instructions": 17118,
+      "maximum_fp_minus_offset": 1280
+    }
+  ],
+  "exit": 0,
+  "finished": "2026-11-08T12:18:58.231752+00:00"
+}

@@ -1,0 +1,5 @@
+# Exact native Tetragon input after generic stack geometry updates
+
+same nativeP 75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304, actual compiler exit0, sections [{"instructions": 17118, "maximum_fp_minus_offset": 1280, "name": "tracepoint/trusted/trusted"}].
+
+The input is the original whole-application event_execve native object from the five-request Tetragon current-assets cohort. The current generic ABI analysis includes4d2ae7912 precise memcpy payload geometry and the x86 simulator/generator includesd963788c0 spill representation. Native bytes, entry symbol and original map metadata remain captured in the archive. No native branch, division guard, runtime admission check, limit or per-program proof was added. This is a complete original function compiler measurement; actual stock verification and whole application execution retain separate domains. The original stock-verifier stack-944 log remains in load.stderr. Universal helper/compiler/frame obligations retain V ownership.
