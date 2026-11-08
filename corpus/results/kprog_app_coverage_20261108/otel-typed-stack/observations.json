@@ -1,0 +1,21 @@
+{
+  "generated": 4,
+  "compiled": 3,
+  "accepted_bound": 3,
+  "native_sha_matches": 4,
+  "source_drift": [],
+  "accepted_entries": [
+    "read_task_struct",
+    "perf_unwind_stop",
+    "perf_unwind_native"
+  ],
+  "frontier_entry": "perf_unwind_hotspot",
+  "frontier_class": "compiler guest memory exhaustion",
+  "compiler": "SIGKILL9 confirmed by guest oom-killer",
+  "peak_anon_rss_kib": 10097068,
+  "compiler_virtual_kib": 10936244,
+  "guest_memory": "12GiB",
+  "verifier_rejected": 0,
+  "kernel_log": "Out of memory: Killed process 2130 (clang)",
+  "collector": "relative output path corrected; historical driver.log.gz restored exact HEAD and prior coverage SHA; initial attempt and complete recollection retained"
+}

@@ -5,7 +5,7 @@ The table records the latest closed complete-application attempt. Baseline resid
 | Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: proof stack depth | [012120](otel-fixed-stack/README.md) |
+| OTel | 13 resident | 4 | 3 | 3 | 1: compiler guest OOM | 0 | [typed-stack](otel-typed-stack/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: native relocation binding for pruned map helper | [021801](cilium-matched-runtime/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: event_execve proof stack depth | [014223](tetragon-fixed-stack-retry/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
@@ -31,3 +31,5 @@ The [registered-kfunc native-only suite](kfunc-native-only-safety/README.md) exe
 The [kernel and matching module records](kernel-kfunc-binding/README.md) preserve the registered-kfunc verifier profile, complete build,842module identities and exact runtime-section/BTF/relocation comparisons after standard strip/sign. Runtime image/config/module links remain available after the duplicate private guard build was retired; the shared incremental kernel cache retains its ownership.
 
 Earlier complete attempts preserve the progression through [OTel aligned stack](otel-stack-aligned/README.md), [typed reads](otel-typed-read/README.md), [explicit RSP offsets](stack-fixed-offsets/README.md), [Tracee aligned stack](tracee-stack-aligned/README.md), [Tracee typed reads](tracee-typed-read/README.md), [Cilium original BTF](proof-kfunc-original-btf/README.md), [paired kfunc transport](proof-kfunc-transport/README.md) and the current table's raw cohorts. Universal ISA/token/link laws supply safety; captured component measurements and whole-application outcomes each retain their own evidence domain.
+
+The [whole OTel typed-stack cohort](otel-typed-stack/README.md) freshly binds perf_unwind_native and advances to perf_unwind_hotspot compilation. Its12GiB guest records a Clang OOM kill at9.63GiB anonymous RSS; fresh trusted host compilation is the next resource correction. The [generic typed-stack measurements](typed-private-stack/README.md) preserve exact compiler inputs and completed fidelity controls.
