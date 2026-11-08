@@ -98,6 +98,7 @@ statfunc int save_to_submit_buf(args_buffer_t *buf, void *ptr, u32 size, u8 inde
     // Save argument index (add 1 to offset later)
     buf->args[buf->offset] = index;
 
+    asm volatile("" : "+r"(size));
     update_min(size, MAX_ELEMENT_SIZE);
 
     u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr
@@ -718,6 +719,7 @@ statfunc int events_perf_submit(program_data_t *p)
     // context + argnum + arg buffer size
     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
 
+    asm volatile("" : "+r"(size));
     update_min(size, MAX_EVENT_SIZE);
 
     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
@@ -755,6 +757,7 @@ statfunc int events_perf_submit_cached_task_context(program_data_t *p)
 
     // context + argnum + arg buffer size
     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
+    asm volatile("" : "+r"(size));
     update_min(size, MAX_EVENT_SIZE);
 
     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
@@ -769,6 +772,7 @@ statfunc int signal_perf_submit(void *ctx, controlplane_signal_t *sig)
     // signal id + argnum + arg buffer size
     u32 size = sizeof(u32) + sizeof(u8) + sig->args_buf.offset;
 
+    asm volatile("" : "+r"(size));
     update_min(size, MAX_SIGNAL_SIZE);
 
     long perf_ret = bpf_perf_event_output(ctx, &signals, BPF_F_CURRENT_CPU, sig, size);
