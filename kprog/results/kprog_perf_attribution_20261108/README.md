@@ -268,3 +268,27 @@ per invocation, and a plan carries one program. To turn sites into time, the
 next measurement needs per-site sampling; the per-program
 `run_cnt_delta` and `run_time_ns_delta` the corpus records bound the total
 only.
+## Katran on the verified arm, 2026-11-08
+
+Lane C's recipe (COORDINATION.md, 2026-11-08T16:25), run on host CPUs 0-7
+with the captured image and the original two-start app/workload. Ratios are
+against the JIT arm of the same run.
+
+| stats | JIT pps | native pps | native / JIT | JIT pkts | native pkts | errors |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| off | 1,531,059 | 1,496,823 | **0.978x** | 45,832,500 | 44,796,050 | 0 / 0 |
+| on | 1,374,556 | 1,387,400 | **1.009x** | 41,225,488 | 41,521,658 | 0 / 0 |
+
+Both runs `status ok` with **1 of 1 program bound**: the shim log records
+`native-loader replaced prog=balancer_ingres` in each native arm and no
+failure line, so both arms ran the work the counters report.
+
+| measurement | run |
+| --- | --- |
+| stats off | `corpus/results/x86_kvm_corpus_20261108_224700_596074` |
+| stats on | `corpus/results/x86_kvm_corpus_20261108_225903_195940` |
+
+The two modes disagree in sign (0.978x against 1.009x) on one program with
+three 30 s samples each, so Katran's native arm sits at parity with its JIT
+arm and the run-to-run spread is larger than the difference. This matches
+the reproduction's Katran figure (1.018x) within that spread.
