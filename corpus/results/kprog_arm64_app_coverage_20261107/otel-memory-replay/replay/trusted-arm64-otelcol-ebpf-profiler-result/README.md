@@ -1,0 +1,1 @@
+Complete OTel functional replay through the generic resource/caller epoch. Guest exit 1; host status False; Make exit 2; stages {"bound_accepted": 1, "verifier_rejected": 1}. Complete raw application/workload/service diagnostics and identity joins accompany this result. Universal theorem and six-application closure work continues.
