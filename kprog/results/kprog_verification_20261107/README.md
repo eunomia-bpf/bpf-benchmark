@@ -4049,3 +4049,10 @@ UBSan. The713 existing route cases and actual BPF memory-width checks pass.
 `x86_mov_load_source_fix` and `X86_MOV_LOAD_SOURCE_FIX_V1` retain all83 source
 inputs, original diagnostics and final checks. The existing O1/O2 totals keep
 their domains as the load field/frame/dispatcher proof work continues.
+
+### Published source full check 664370524
+
+`make check` on immutable published664370524 exits0. All1165 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_664370524`. Every check retains its exact published source identity.
