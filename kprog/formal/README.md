@@ -23,8 +23,9 @@ PC, ordered memory effects, faults and defined architectural outputs under
 their stated operand, address, access and platform premises. Undefined outputs
 use the reference step's observation mask; uninitialized memory has arbitrary
 values. The theorem statements and coverage rows give each operation's domain.
-The x86 pointer bodies share the extended dispatcher; their native symbol/helper
-address transport and RSP normalization remain explicit interfaces. Internal
+The x86 pointer bodies share the extended dispatcher and refine resolved moves
+for all sixteen registers, including the RSP coordinate. Native symbol/helper
+address transport remains an explicit interface. Internal
 RET includes its finite continuation switch; outer invocation/return-slot,
 physical memory/provenance and C/compiler correspondence remain explicit.
 

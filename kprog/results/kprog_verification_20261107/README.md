@@ -4518,3 +4518,20 @@ observation yields the resolved value for all16 destinations. Its original
 pins, original diagnostics and complete outcomes appear under
 `memory_oracle_frame_repair`. Generic pointer-coordinate proof composition
 continues in the O1/O2 model.
+
+### Resolved pointer coordinates in O1 and O2
+
+Published a04786538 normalizes resolved map/helper values when writing RSP.
+The generated and specialized pointer-body models now carry that coordinate.
+`pointer_load_resolved_move_refines` proves canonical64-bit immediate moves
+for all16 destination registers; the pointer binding covers RSP alongside
+ordinary GPRs. Both token equalities, tag coherence and the extended dispatcher
+compose that stronger domain. The original raw-cell numeric law and ordinary
+raw-cell move theorem remain available.
+
+Default Lean build, axiom audit and existing proof hygiene/composition checks
+pass. The preceding memory-oracle receipt supplies2,097,152 production frames
+and1342 contract cases from its exact C source epoch. Token totals remain
+68x86/71ARM; native address resolution, ABI/physical memory and compiler
+correspondence remain explicit interfaces. Exact mathematical inputs and
+commands appear under `x86_resolved_pointer_coordinates`.

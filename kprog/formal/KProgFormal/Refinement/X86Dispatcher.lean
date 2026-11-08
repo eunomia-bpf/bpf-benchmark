@@ -4912,9 +4912,8 @@ theorem return_switch_native_matches (env : EntryEnvironment.Environment) (frame
   exact successors_match _ _ nativeAfter _ nativeStep
     (return_label_frame_step_refines env frame arena state nextPc readable canonical)
 
-/-- Pointer-load writes retain the literal raw pointer bits and their selected
-provenance. RSP's raw cell remains an offset in the numeric observation; its
-native-link interpretation is an explicit interface. -/
+/-- Pointer-load bodies preserve the resolved native value and selected
+provenance. RSP stores the value in its native-stack-relative coordinate. -/
 def pointerLoadTag (op : GeneratedX86PtrWrite.Op) (aux : BitVec 32) : Byte :=
   BitVec.ofNat 8 ((GeneratedX86PtrWrite.sourceTagCode
     (op == .movLoadMapPtr) (op == .movLoadHelperId) (aux.getLsbD 0)).getD 255)
@@ -4922,6 +4921,11 @@ def pointerLoadTag (op : GeneratedX86PtrWrite.Op) (aux : BitVec 32) : Byte :=
 def pointerWriteCell (state : RegisterState) (dst : Register) (value : Reference.Word) : RegisterState :=
   ⟨{ state.raw with gpr := fun r => if r = dst then value else state.raw.gpr r },
     fun r => if r = dst then false else state.stack r⟩
+
+/-- Coordinate used by the production pointer writer for a resolved value. -/
+def resolvedPointerValue (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (dst : Register) (value : Reference.Word) : Reference.Word :=
+  value - (if dst = 4 then EntryEnvironment.base env frame .stack else 0)
 
 /-- The helper-ID body performs its scalar64 write before the final pointer
 write; the map-pointer body performs the final write directly. -/
@@ -4931,15 +4935,16 @@ def generatedPointerLoad (env : EntryEnvironment.Environment) (frame : EntryEnvi
     RegisterState × (Register → Byte) :=
   let before := if GeneratedX86PtrWrite.width64 op then
       writeRegister env frame arena state .w64 (.low dst) value else state
-  (registerPc (pointerWriteCell before dst value) nextPc,
+  (registerPc (pointerWriteCell before dst (resolvedPointerValue env frame dst value)) nextPc,
     fun r => if r = dst then pointerLoadTag op aux else tags r)
 
 /-- The final pointer write absorbs the helper-ID scalar preparation, including
 its RSP normalization. Every other raw cell and tag retains its input value. -/
-def specializedPointerLoad (state : RegisterState) (tags : Register → Byte)
+def specializedPointerLoad (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (state : RegisterState) (tags : Register → Byte)
     (op : GeneratedX86PtrWrite.Op) (dst : Register) (aux : BitVec 32) (value nextPc : Reference.Word) :
     RegisterState × (Register → Byte) :=
-  (registerPc (pointerWriteCell state dst value) nextPc,
+  (registerPc (pointerWriteCell state dst (resolvedPointerValue env frame dst value)) nextPc,
     fun r => if r = dst then pointerLoadTag op aux else tags r)
 
 theorem pointer_load_tag_fields (aux : BitVec 32) :
@@ -4952,7 +4957,7 @@ theorem pointer_load_body_matches (env : EntryEnvironment.Environment) (frame : 
     (arena : Reference.Word) (state : RegisterState) (tags : Register → Byte)
     (op : GeneratedX86PtrWrite.Op) (dst : Register) (aux : BitVec 32) (value nextPc : Reference.Word) :
     generatedPointerLoad env frame arena state tags op dst aux value nextPc =
-      specializedPointerLoad state tags op dst aux value nextPc := by
+      specializedPointerLoad env frame state tags op dst aux value nextPc := by
   cases op
   · rfl
   · simp only [generatedPointerLoad, specializedPointerLoad, GeneratedX86PtrWrite.width64, ↓reduceIte,
@@ -5002,6 +5007,26 @@ theorem pointer_load_move_refines (env : EntryEnvironment.Environment) (frame : 
     simp [ordinary, register_write64]
   · simp [selected, nativeRegisters]
 
+/-- The normalized pointer writer implements the canonical resolved move for
+all sixteen destination registers under the native numeric observation. -/
+theorem pointer_load_resolved_move_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (dst : Register) (value nextPc : Reference.Word) :
+    (⟨nativeRegisters env frame arena
+        (registerPc (pointerWriteCell state dst (resolvedPointerValue env frame dst value)) nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.move .w64 (.register (.low dst)) (.immediate value) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [pointer_load_numeric_frame]
+  simp only [Reference.X86.step, Reference.X86.moveStep, Reference.X86.scalarRead,
+    Reference.X86.scalarWrite, Reference.X86.RegisterSlice.reg, List.append_nil]
+  congr 1
+  congr 1
+  funext r
+  by_cases selected : r = dst
+  · subst r
+    by_cases rsp : dst = 4 <;> simp [resolvedPointerValue, rsp, register_write64, BitVec.sub_add_cancel]
+  · simp [selected, nativeRegisters]
+
 def pointerLoadToken : GeneratedX86PtrWrite.Op → GeneratedX86Specialization.Op
   | .movLoadMapPtr => .movLoadMapPtr
   | .movLoadHelperId => .movLoadHelperId
@@ -5032,7 +5057,7 @@ theorem pointer_load_token_body_matches (env : EntryEnvironment.Environment) (fr
     pointerLoadPrefix env frame arena state tags
       (GeneratedX86Opcode.code (match op with | .movLoadMapPtr => .movLoadMapPtr | .movLoadHelperId => .movLoadHelperId))
       flags src (registerByte dst) aux value nextPc =
-      some (specializedPointerLoad state tags op dst aux value nextPc) := by
+      some (specializedPointerLoad env frame state tags op dst aux value nextPc) := by
   cases op <;> simp [pointerLoadPrefix, register_of_byte,
     GeneratedX86Opcode.code, pointer_load_body_matches]
 
@@ -5067,13 +5092,12 @@ def pointerLoadRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
   (pointerLoadPrefix env frame arena state tags code flags src dst aux value nextPc).map
     (fun result => ⟨nativeRegisters env frame arena result.1, [], none⟩)
 
-/-- Resolved immediate coordinate and destination identity describe the
-canonical move domain. RSP retains its published explicit normalization
-interface; this relation introduces a mathematical premise on that domain. -/
+/-- Resolved immediate coordinates and destination identity describe the
+canonical move domain for all sixteen registers. -/
 inductive PointerLoadBinding (dst : Byte) (value nextPc : Reference.Word) :
     Nat → Reference.X86.Instruction → Prop where
   | load (op : GeneratedX86PtrWrite.Op) (destination : Register)
-      (field : dst = registerByte destination) (ordinary : destination ≠ 4) :
+      (field : dst = registerByte destination) :
       PointerLoadBinding dst value nextPc (GeneratedX86Opcode.code (pointerOpcode op))
         (.move .w64 (.register (.low destination)) (.immediate value) nextPc)
 
@@ -5084,17 +5108,17 @@ theorem pointer_load_registers_refine (env : EntryEnvironment.Environment) (fram
     ∃ actual, pointerLoadRegisters env frame arena tags code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
-  | load op destination field ordinary =>
+  | load op destination field =>
       subst dst
       have body := pointer_load_token_body_matches env frame arena state tags op destination flags src aux value nextPc
       change pointerLoadPrefix env frame arena state tags (GeneratedX86Opcode.code (pointerOpcode op))
         flags src (registerByte destination) aux value nextPc = _ at body
-      refine ⟨⟨nativeRegisters env frame arena (registerPc (pointerWriteCell state destination value) nextPc), [], none⟩, ?_, ?_⟩
+      refine ⟨⟨nativeRegisters env frame arena (registerPc (pointerWriteCell state destination (resolvedPointerValue env frame destination value)) nextPc), [], none⟩, ?_, ?_⟩
       · simp only [pointerLoadRegisters, body]
         rfl
       change Reference.X86.Step _ _
-        ⟨nativeRegisters env frame arena (registerPc (pointerWriteCell state destination value) nextPc), [], none⟩
-      rw [pointer_load_move_refines env frame arena state destination value nextPc ordinary]
+        ⟨nativeRegisters env frame arena (registerPc (pointerWriteCell state destination (resolvedPointerValue env frame destination value)) nextPc), [], none⟩
+      rw [pointer_load_resolved_move_refines env frame arena state destination value nextPc]
       exact ⟨rfl, rfl, rfl⟩
 
 /-- The shared numeric dispatcher extends all preceding scalar, memory,
