@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 26/75 | 0/71 |
-| Additional partial-model handler families | 5/75 | 0 |
+| Addressed memory model / composed step | 28/75 | 0/71 |
+| Additional partial-model handler families | 3/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 62/75 | 71/71 |
+| O2 C-model token-body equality | 64/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 62 x86 O2 equalities cover46 direct bodies, fourteen generic calls and two
+The 64 x86 O2 equalities cover46 direct bodies, sixteen generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining5 x86 reference-family handlers have partial model proofs; eight
+The remaining3 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -89,12 +89,13 @@ captured register/address aliases through the unified step. BT retains actual
 CF and its complete numeric frame. ANDN retains actual PF parity and uses
 canonical defined-flag observation with full numeric destination/read/fault
 state under the same physical-memory, native-field and compiler/ABI interfaces.
-The XMM0 numeric frame now composes its two generated lanes, vector/memory
-update and complete preserved GPR/flag/control state under whole16-byte
-permission, MOVAPS alignment and coherent guest-observation witnesses.
-The corrected no-base load includes its resolved index. Source-fixed CPU
-and BPF identity evidence accompanies this component; raw field/dispatcher/
-token composition continues within the current partial-model rows.
+Two generic XMM0 memory tokens also compose their actual generated base
+primitive, optional base/index/scale and full64 displacement through the
+extended unified dispatcher/token step. The absolute load includes its resolved
+index. Fixed128-bit movement, vector/memory update and complete preserved
+GPR/flag/control state retain whole16-byte permission, native MOVAPS alignment
+and coherent guest-observation witnesses. Physical memory, native normalization,
+compiler/invocation/ABI and native-link relations remain explicit interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4263,3 +4264,22 @@ transport retain their surrounding universal interfaces. XMM0 operation/
 token rows retain their partial-model status while their raw field/dispatcher/
 token composition proceeds. Existing O2 C-model totals62x86/71ARM and all
 selected replay/O4 source identities retain their domains.
+
+### XMM0 memory fields, dispatcher and generic tokens
+
+`x86_xmm0_memory_tokens` composes LOAD_XMM0/STORE_XMM0 through the
+actual selected generated base primitive, optional base/index/scale and full64
+displacement into the numeric whole-frame move and extended dispatcher step.
+The two generic tokens retain fixed-opcode interpreter calls. Ten public
+axiom audits, the default Lean build, both generators, macro hygiene and oracle
+composition exit0. Source-pinned direct/interpreter/real-CPU UBSan checks cover
+778240 frames, including40960 MOVAPS, with the original59 route and283
+contract cases retained. Earlier62 token chains retain their complete theorem
+prefix. Current x86 O2 C-model coverage is64/75:46 direct,16 generic,2 branch.
+
+Complete16-byte permission, native MOVAPS alignment and coherent whole-memory
+observation are theorem premises. Physical arena/native memory, native field
+and index normalization, compiler/invocation/ABI and native-link relations retain
+their universal production interfaces. Source snapshots, binaries, original
+proof-type failure and corrected build/audits are archived under
+`X86_XMM0_MEMORY_TOKENS_V1`; each full check retains its exact source epoch.

@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-62 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
+64 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host with BMI1/BMI2 and POPCNT:
@@ -60,7 +60,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Forty-six direct, fourteen generic and two branch token bodies have semantic
+Forty-six direct, sixteen generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -166,4 +166,8 @@ The XMM0 numeric frame joins the two scalar lanes to the existing canonical
 128-bit move under explicit whole16-byte permission, alignment and memory
 observation witnesses. Absolute indexed loads pass the resolved index into
 the existing base primitive. Its original contracts remain reusable with
-that selected argument; raw field/dispatcher/token composition continues.
+that selected argument. The raw field/dispatcher and two generic-token laws
+compose full displacement, optional base/index/scale and the selected generated
+base primitive with the same canonical step. FLAGS and AUX width retain the
+fixed128-bit move; physical-memory, native-normalization and compiler/ABI
+relations remain explicit universal interfaces.
