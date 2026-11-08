@@ -516,3 +516,37 @@ and updates alone, 51.0% counting deletes),
 and the largest single helper is the lookup. That is the measured basis for
 the candidate ordering: helper and map-lookup lowering covers the two
 biggest single categories, and direct tail-call linking covers another 4.3%.
+
+### The candidates, in the share of cilium's BPF time they cover
+
+Cilium's BPF time is carried by two programs whose kernel-truncated names
+are both `cil_from_contai` (52.5% and 47.5%). The archived native config
+does not contain a `cil_from_container` entry, so the two are not among the
+four objects measured above; the aggregate shape stands in for them, and it
+is stable across the objects the config does carry (`bpf_lxc`'s 653 sites:
+lookups 27.9%, updates 22.7%, tail calls 5.4% against the aggregate's
+27.5%, 22.7%, 4.3%).
+
+Multiplying each category's site share by the BPF time those programs
+carry, the candidates rank as:
+
+| candidate | category it acts on | share of cilium BPF time |
+| --- | --- | ---: |
+| helper and map-lookup lowering in the native compile | map lookups, updates, deletes | **51%** |
+| load-time constant specialization (recompiling P from stable map contents) | the lookups that read frozen data | up to **28%** |
+| compiler flags | the whole body | all 100%, on the non-call instructions |
+| direct tail-call linking | tail calls | **5%** |
+| subprogram inlining | inlined-but-called bodies | needs the caller graph |
+| entry and return bridge | fixed per invocation | 1 bridge per invocation |
+
+Read in the order C should implement: map-lookup and helper lowering first
+(51% of the call sites), then constant specialization of the frozen-data
+lookups (up to 28%, and it is a subset of the first), then compiler flags
+across the body, with tail-call linking (5%) last among the call-site work.
+
+**The boundary, stated plainly:** these are site shares weighted by
+per-program BPF time, not cycle counts per site. A site's cost depends on
+its helper — a `map_update_elem` costs more than a `map_lookup_elem` — so
+the ranking of the top two is robust (they are the two largest categories
+by a wide margin) and the tail-call figure is an upper bound on its
+category's share.
