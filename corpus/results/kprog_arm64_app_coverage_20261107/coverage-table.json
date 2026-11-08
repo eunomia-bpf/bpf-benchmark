@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T10:28:30.618598+00:00",
+    "as_of_utc": "2026-11-08T10:59:11.844506+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -571,27 +571,46 @@
       },
       {
         "application": "Tracee",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/tracee/trusted-arm64-tracee-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tracee-result/coverage.json",
         "baseline_resident": 151,
         "service_source_ids": 3,
         "generated": 3,
         "compiled": 3,
         "stages": {
           "verifier_accepted_installed": 2,
-          "verifier_rejected": 1
+          "loader_rejected": 1
         },
         "failure_classes": {
-          "bpf_stack_extent": 1
+          "kernel_native_chunk_enoent": 1
         },
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/tracee/trusted-arm64-tracee-result/run-20261108T051912422205Z.tar.gz",
-        "raw_archive_sha256": "89505167f8476086a1120189bace1eb8ecc042c73531c87c9df494395a2b6515",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tracee-result/run-20261108T083806998210Z.tar.gz",
+        "raw_archive_sha256": "daf2f84fa144104c7296527dc4ba50a9d45752c24186301ad2322291c5cb3c7a",
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "captured_pre_migration_helper_epoch",
-        "baseline_bpf_calls": 94569
+        "runtime_epoch": "five_step_e2d3_captured_arm_source",
+        "baseline_bpf_calls": 94569,
+        "request_timeline_guest_seconds": [
+          {
+            "request": 1,
+            "started": 6840.829516,
+            "finished": 6880.912584
+          },
+          {
+            "request": 2,
+            "started": 6881.848025,
+            "finished": 6943.630648
+          },
+          {
+            "request": 3,
+            "started": 6944.609436,
+            "finished": 7368.327591
+          }
+        ],
+        "application_error": "tracee/monitor app lifecycle timed out after 7200.0s",
+        "diagnosis": "Request 3 spans the recorded application lifecycle deadline; capsule abandonment and map lookup are the two source ENOENT paths."
       }
     ]
   },

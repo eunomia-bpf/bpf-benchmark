@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-08T10:57:35.209316+00:00",
+  "retained_incremental_cache": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache",
+  "retired_duplicate_cache": "/workspaces/.agent-state/kprog-lanes/A/kfunc-kernel/cache",
+  "runtime_pins": {
+    "kprog/arm64/build/design-only/vmlinux": "da221020191306ade27d96c58487e677659915c752564354e6bb40505edd5446",
+    "kprog/arm64/build/design-only/kernel.config": "29ec41dbd9a2c91e46dfd8b2fd5ad649fa0710fcafa80c67593ed406ba64e680",
+    "kprog/arm64/build/design-only/Module.symvers": "480313eea65046c55347960f8c3a82b681a16ba9762025d8f0f088bfab887c68",
+    "kprog/arm64/build/design-only/kernel.release": "8d6235f6ef49b74f5bbf86f7fb40837bfc8ef90a216fe167033c82c178edd6d1"
+  },
+  "build_or_open_file_owners": [],
+  "scope": "Coordinator single ARM warm kernel cache; paired built Images/modules retain their identities"
+}
