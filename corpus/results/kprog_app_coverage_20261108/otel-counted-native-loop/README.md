@@ -1,0 +1,3 @@
+# OTel native unwinder counted source loop
+
+The whole original native-startup frontier is perf_unwind_native B compiler SIGKILL in canonical c1f6. The original unwind_native outer loop handles4frames per call; UNROLL requests up to256 unrolled iterations. The authorized application source edit changes only that loop directive to clang unroll(disable). The4-frame bound, induction, body, early exits, metric updates, unwind state and tail-call selection retain their definitions. Both upstream baseline and native frontends compile the identical edited C bytes. Kernel selftests/safety fixtures retain their published sources. Paired Makeexit0. Actual whole-application verifier/work outcomes follow the canonical Tracee replay. Runtime admission additions0.

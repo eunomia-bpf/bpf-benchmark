@@ -1,0 +1,12 @@
+{
+  "utc": "2026-11-08T18:54:10.151635+00:00",
+  "paired_make_exit": 0,
+  "source_main_sha256": "fd5130c6e1aca273106652b702eff292b8078b160235465f8866b859dffdb55d",
+  "source_scope": "Native frontend uses tracked edited C; upstream baseline frontend privately mounts identical edited C before incremental BPF/link/embedded collector builds.",
+  "files": {
+    "vendor/bpf/otel/support/ebpf/native_stack_trace.ebpf.c": "fd5130c6e1aca273106652b702eff292b8078b160235465f8866b859dffdb55d",
+    "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o": "29274b50d9d12c10ad33e04683d1438105ddd96032f057aafa4e324ab1cc4ac0",
+    "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64": "c977ee7fc191812d39883816e6acb9bb15d929b606842f3a92a461469e30cac2",
+    "vendor/build/x86/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler": "fed909a7347bad233a75dd5c98b7e99a9715fcff68cc0a252169dab75634127e"
+  }
+}

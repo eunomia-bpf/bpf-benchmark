@@ -1,0 +1,12 @@
+--- a/vendor/bpf/otel/support/ebpf/native_stack_trace.ebpf.c
++++ b/vendor/bpf/otel/support/ebpf/native_stack_trace.ebpf.c
+@@ -613,7 +613,8 @@
+   Trace *trace = &record->trace;
+   int unwinder;
+   ErrorCode error;
+-  UNROLL for (int i = 0; i < NATIVE_FRAMES_PER_PROGRAM; i++)
++  #pragma clang loop unroll(disable)
++  for (int i = 0; i < NATIVE_FRAMES_PER_PROGRAM; i++)
+   {
+     unwinder = PROG_UNWIND_STOP;
+ 
