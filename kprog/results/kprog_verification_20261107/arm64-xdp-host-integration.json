@@ -8882,6 +8882,34 @@
     ],
     "unchanged_semantic_source_files": 781
   },
+  "superseded_full_7081bee34": {
+    "archive_compressed_prefix_bytes": 95668384,
+    "archive_compressed_prefix_sha256": "f79b96480d2a93a63761dad6c7624a7c8bcb73bc01a4e9044fec0c3512dd5ed8",
+    "archive_entries": 10,
+    "archive_marker": "SUPERSEDED_FULL_7081BEE34_V1",
+    "archive_raw_bytes": 548983,
+    "archive_raw_sha256": "0a2db3dfc320e2962b5b25691508a70ccfbfe247f37e9ae7d87acb71316a6aa1",
+    "make_returncode": -15,
+    "outcome": "Interrupted execution superseded by the corrected default-opcode source; complete-check verdict remains pending for that successor.",
+    "private_source_export_retired": true,
+    "published_source": "7081bee34d67ecce9d181388c00b508a2fca5f54",
+    "replacement_source": "949eb850e1ed026b342044096bfb889c8f152e03",
+    "root_sources_verified_against_git": 1258,
+    "shared_incremental_cache_preserved": true,
+    "termination_scope": {
+      "controller_preserved": 1679023,
+      "reason": "The immutable value oracle is byte-identical to the observed LDADD/default-probe segmentation-fault source. Replacement changes only its default opcode and carries prior semantic fixes.",
+      "replacement": "949eb850e1ed026b342044096bfb889c8f152e03",
+      "source": "7081bee34d67ecce9d181388c00b508a2fca5f54",
+      "state_before": "running 7081bee34d67ecce9d181388c00b508a2fca5f54\n",
+      "terminated_make_descendants": [
+        1687017,
+        1685855,
+        1681227
+      ],
+      "time": "2026-11-08T10:21:36.713400+00:00"
+    }
+  },
   "typed_helper_oracle_refresh": {
     "added_generated_identities": [
       188,

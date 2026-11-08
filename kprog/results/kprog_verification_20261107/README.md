@@ -4782,3 +4782,15 @@ byte is preserved. Their3078/2089/150 existing checks pass with UBSan.
 The component driver uses the production output `mut_mulroute` for the mul
 execution. Archive `arm_reserved_default_opcode` retains the original full
 outcome/all1258 root-source hashes and original/corrected component outputs.
+
+### Superseded full-check execution
+
+The full check at `7081bee34d67ecce9d181388c00b508a2fca5f54` was interrupted with make
+returncode `-15` after its value oracle was confirmed byte-identical to the
+preceding observed LDADD/default-probe failure. The controller completed
+source-export retirement and preserved the shared incremental cache. Its
+corrected successor is `949eb850e1ed026b342044096bfb889c8f152e03`.
+Archive `superseded_full_7081bee34` retains the exact process scope, original
+log/terminal state and all1258 Git-verified root-source hashes. This receipt
+records an interrupted execution; the successor supplies its own complete
+check verdict.
