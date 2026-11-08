@@ -158,7 +158,7 @@ def compile_bpf(source, out, includes, clang, arch="x86"):
         wrapper = compatibility / header
         wrapper.parent.mkdir(parents=True, exist_ok=True)
         wrapper.write_text(
-            '#include_next <%s>\n#include "%s"\n' %
+            '#include_next <%s>\n#include <stdbool.h>\n#include "%s"\n' %
             (header, DEFAULT_PROGS.parent / "bpf_kfuncs.h"))
     cmd[1:1] = ["-I", str(compatibility)]
     stub = pathlib.Path(out).with_suffix(".license.c")
