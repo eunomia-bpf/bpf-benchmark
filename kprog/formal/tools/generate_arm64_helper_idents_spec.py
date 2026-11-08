@@ -109,6 +109,7 @@ EXPECTED: list[tuple[int, str]] = [
     (190, "bpf_xdp_store_bytes"),
     (191, "bpf_copy_from_user_task"),
     (193, "bpf_ima_file_hash"),
+    (194, "bpf_kptr_xchg"),
     (195, "bpf_map_lookup_percpu_elem"),
 ]
 

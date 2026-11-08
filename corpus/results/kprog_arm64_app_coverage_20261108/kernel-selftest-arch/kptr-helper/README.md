@@ -1,0 +1,5 @@
+ARM kptr exchange helper coverage
+
+The direct ARM kernel catalog reaches finite helper194 calls and records their missing helper handler as generation coverage. The simulator now invokes the real bpf_kptr_xchg with both original pointer arguments, retains the returned verifier pointer through the existing pointer-result mechanism and applies existing AAPCS helper clobbers. Shared native-link resolves194 to its exact kernel helper name. The existing generated/independent ARM identity enumerations carry83helpers and their original host/Lean oracles.
+
+build.json and build-inputs.tar.gz retain actual existing generator/host/Lean commands, the warm incremental ARM linker rebuild, original source and resulting bytes. The original map_kptr_fail catalog component runs load-only after the current34 ISA replay completes; the full380 direct catalog keeps its earlier captured source. Each component row keeps installed, verifier, generation, compiler and resource stages. Runtime admission additions:0.

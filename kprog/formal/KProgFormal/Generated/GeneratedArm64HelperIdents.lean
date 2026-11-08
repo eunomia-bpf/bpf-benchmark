@@ -83,6 +83,7 @@ inductive Helper
   | bpf_xdp_store_bytes
   | bpf_copy_from_user_task
   | bpf_ima_file_hash
+  | bpf_kptr_xchg
   | bpf_map_lookup_percpu_elem
   deriving DecidableEq, Repr
 def id : Helper -> Nat
@@ -167,6 +168,7 @@ def id : Helper -> Nat
   | .bpf_xdp_store_bytes => 190
   | .bpf_copy_from_user_task => 191
   | .bpf_ima_file_hash => 193
+  | .bpf_kptr_xchg => 194
   | .bpf_map_lookup_percpu_elem => 195
 def name : Helper -> String
   | .bpf_map_lookup_elem => "bpf_map_lookup_elem"
@@ -250,5 +252,6 @@ def name : Helper -> String
   | .bpf_xdp_store_bytes => "bpf_xdp_store_bytes"
   | .bpf_copy_from_user_task => "bpf_copy_from_user_task"
   | .bpf_ima_file_hash => "bpf_ima_file_hash"
+  | .bpf_kptr_xchg => "bpf_kptr_xchg"
   | .bpf_map_lookup_percpu_elem => "bpf_map_lookup_percpu_elem"
 end KProgFormal.GeneratedArm64HelperIdents

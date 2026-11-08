@@ -452,6 +452,7 @@ pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         189 => Some("bpf_xdp_load_bytes"),
         190 => Some("bpf_xdp_store_bytes"),
         193 => Some("bpf_ima_file_hash"),
+        194 => Some("bpf_kptr_xchg"),
         195 => Some("bpf_map_lookup_percpu_elem"),
         _ => None,
     }

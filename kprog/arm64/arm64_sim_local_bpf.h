@@ -2095,6 +2095,9 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 #define ARM64_SIM_BPF_CALL_bpf_ima_file_hash() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
+#define ARM64_SIM_BPF_CALL_bpf_kptr_xchg() \
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_kptr_xchg((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
+
 #define ARM64_SIM_BPF_CALL_bpf_map_lookup_percpu_elem() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_map_lookup_percpu_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 

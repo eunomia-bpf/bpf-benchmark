@@ -2,12 +2,12 @@
  * Host cross-check for the AArch64 artifact encoder's BPF helper-ident
  * table contract (`generated/arm64_helper_idents.h`).
  *
- * The module under test fixes the 82 kernel ids the AArch64 simulator
+ * The module under test fixes the 83 kernel ids the AArch64 simulator
  * recognizes (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`,
  * `HELPER_IDENTS`), maps each id to its 1-based position in the id-sorted
  * table. Each helper invokes its actual Linux ID, without aliases.
  *
- * This oracle restates the 82 row ids, names, and ordinals, the out-of-range
+ * This oracle restates the 83 row ids, names, and ordinals, the out-of-range
  * default and count by hand and drives the
  * generated macros and `_Static_assert`s against them. The generated
  * `_Static_assert`s run at compile time; this oracle is the value-level
@@ -26,19 +26,19 @@
 static int failures;
 static unsigned long cases;
 
-/* The 82 row kernel ids, in the specification's id-sorted order. */
-static const int row_ids[82] = {
+/* The 83 row kernel ids, in the specification's id-sorted order. */
+static const int row_ids[83] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 	11, 12, 13, 14, 15, 16, 20, 21, 23, 25, 26,
 	27, 28, 31, 32, 33, 35, 36, 37, 38, 39, 43,
 	44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 105, 109,
 	112, 113, 114, 115, 118, 122, 124, 125, 127, 130, 148, 152,
 	155, 158, 160, 161, 163, 173, 174, 175, 181, 183, 184, 185, 186, 188, 189, 190, 191, 193,
-	195,
+	194, 195,
 };
 
 /* The helper name each row kernel id denotes, in specification order. */
-static const char *const row_names[82] = {
+static const char *const row_names[83] = {
 	"bpf_map_lookup_elem", "bpf_map_update_elem",
 	"bpf_map_delete_elem", "bpf_probe_read",
 	"bpf_ktime_get_ns", "bpf_trace_printk",
@@ -72,10 +72,11 @@ static const char *const row_names[82] = {
 	"bpf_xdp_load_bytes",
 	"bpf_xdp_store_bytes",
 	"bpf_copy_from_user_task", "bpf_ima_file_hash",
+	"bpf_kptr_xchg",
 	"bpf_map_lookup_percpu_elem",
 };
 
-#define ROW_COUNT 82U
+#define ROW_COUNT 83U
 
 /* The generated row selector must return each row kernel id's ordinal. */
 static void check_rows(void)
