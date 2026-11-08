@@ -17,8 +17,11 @@ of the same run. Nothing here is a new instrument.
 4. **Call sites per program** — what each candidate acts on, from the link
    plans.
 5. **Katran on the verified arm, 2026-11-08** — both stats modes.
-6. **Per-program time shares** paired with the site counts, and **the code
-   itself**, which is the measured bound where sampling is unavailable.
+6. **Per-program time shares** paired with the site counts, **the code
+   itself**, and the two per-site measurements that exist: the runner's PMU
+   counters and a per-site instrumented build.
+7. **Cilium's call sites by the task's four categories**, and **the
+   candidates ranked** by the share of cilium's BPF time each covers.
 
 Apps: katran, cilium, tetragon, tracee and bcc. The bcc figures come from
 `corpus/results/x86_kvm_corpus_20261108_064411_793882`, since the earlier
@@ -388,13 +391,15 @@ this entry. The entry's own 17 call instructions are the measured figure;
 `site_weight.py` takes `--plan` explicitly so a caller can pair the two
 from the same submission when the archive keeps them together.
 
-### What is still needed for a per-site time split
+### The route to a per-site time split
 
 A per-site *time* share needs per-site samples, and this environment has no
-`perf` binary and no `bpfperf`, so it needs a measurement build: a native
-compile that reads the cycle counter at each site. The instruction counts
-above are the static bound, and the per-program `run_time_ns` is the total;
-their ratio is the site density, not the site cost.
+`perf` binary and no `bpfperf`, so it takes a measurement build: a private
+native compile that reads the cycle counter at each site, with the published
+program untouched. The instruction counts above are the static bound and
+the per-program `run_time_ns` is the total; their ratio is the site density,
+not the site cost. Two measurements below take that route: the PMU counters
+the runner already exposes, and a per-site instrumented build.
 
 ### PMU counters, which this environment does have
 
