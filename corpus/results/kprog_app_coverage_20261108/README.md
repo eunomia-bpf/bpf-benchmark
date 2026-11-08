@@ -9,7 +9,7 @@ The table records the latest closed whole-application attempt, including setup a
 | Cilium | 72 resident | 5 | 5 | 4 | 0 | 1: tail_ipv4_policy helper9 R3scalar after2899instructions/73states | [prepared packet-end ABI](cilium-prepared-end/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit invalid access to map value, value_size=32536 off=65677 size=4096 | [whole exact readonly values](readonly-values/whole-tracee/README.md) |
+| Tracee | 151 resident | 0 | 0 | 0 | 1 | 0: 0 | [generic C-copy whole cohort](readonly-c-loads/whole-tracee/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
 
@@ -79,3 +79,5 @@ The [corrected canonical scalar replay](skb-scalar-fields/README.md) closes26/26
 The [prepared native packet-end ABI](cilium-prepared-end/README.md) reads kernel cb.data_end at80 and closes5generated/compiled with4installed. This new native P epoch passes the earlier packet boundary frontier and reaches a numeric stack-pointer spill passed to helper9. All5terminal native hashes reconcile; full application work/timing follows complete startup.
 
 The [whole Tracee immutable-byte cohort](readonly-values/whole-tracee/README.md) retains all terminal generation, compiler and installation outcomes together with actual work and error records. Its finite immutable-value representation keeps the original native data bytes and the existing application/native-source epoch.
+
+The [generic C-copy whole Tracee cohort](readonly-c-loads/whole-tracee/README.md) retains every terminal request, the actual native inputs and raw phase work counters. Its generator emits the immutable-object C representation directly.
