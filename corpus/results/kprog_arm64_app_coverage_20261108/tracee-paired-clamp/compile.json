@@ -1,6 +1,6 @@
 {
-  "utc": "2026-11-08T22:53:32.773052+00:00",
-  "make_exit": 2,
+  "utc": "2026-11-08T22:54:26.296661+00:00",
+  "make_exit": 0,
   "source": {
     "utc": "2026-11-08T22:51:05.763829+00:00",
     "application_source_publication": "d920fbca5271543cba020de3631273e3abcb3788",
@@ -43,6 +43,7 @@
     "source_changes_ledger": "corpus/results/kprog_app_source_changes/README.md",
     "scope": "Complete published Tracee C tree for both ARM frontends; existing source edits/limits retained; warm ARM Go/libbpf cache; private embedded-dist namespace"
   },
+  "build_phases": "Original native/BPF phase0; initial Go link2 missing cross-library paths; binary-only retry uses existing vendor ARM64_CROSS_LDFLAGS",
   "output_files": {
     "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/stage/tracee/manifest.json": {
       "bytes": 28614,
@@ -61,8 +62,8 @@
       "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc"
     },
     "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/tracee": {
-      "bytes": 80171688,
-      "sha256": "8c3d72a7b4fb1ec2764623eb5e543ae9901572e493deb0c6d17c732dda513d7b"
+      "bytes": 79712936,
+      "sha256": "3bf4d941330f2ebd3ca64d126483c265416a1bed46f877bd207191950f0747f6"
     },
     "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/tracee.bpf.o": {
       "bytes": 14369072,
