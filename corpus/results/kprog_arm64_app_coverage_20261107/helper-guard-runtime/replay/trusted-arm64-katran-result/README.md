@@ -1,0 +1,1 @@
+Complete Katran two-start functional replay with guarded ARM far-helper emission and paired entry-resource caller/linker. Guest exit 0; host status True; Make exit 0; stages {"bound_accepted": 1}. Raw baseline/native packet/LRU/BPF/receiver counters, service diagnostics and byte identities accompany the result. Universal safety and complete six-application work continues.
