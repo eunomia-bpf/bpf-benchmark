@@ -348,13 +348,17 @@ index 97eb923617a4..fcfede3d4884 100644
  #include <linux/btf.h>
  #include <linux/bpf_verifier.h>
  #include <linux/filter.h>
-@@ -3688,15 +3689,21 @@ static int validate_kinsn_proof_seq(struct bpf_verifier_env *env,
+@@ -3688,15 +3689,25 @@ static int validate_kinsn_proof_seq(struct bpf_verifier_env *env,
  		if (class == BPF_JMP || class == BPF_JMP32) {
  			u8 op = BPF_OP(insn->code);
  
 -			if (op == BPF_CALL || op == BPF_EXIT) {
 -				verbose(env, "kinsn proof sequence cannot contain calls or exits\n");
-+			if (op == BPF_CALL && (!kinsn->native_proof || insn->src_reg)) {
++			if (op == BPF_CALL && (!kinsn->native_proof ||
++			    (insn->src_reg &&
++			     !(insn->code == (BPF_JMP | BPF_CALL) &&
++			       insn->src_reg == BPF_PSEUDO_KFUNC_CALL &&
++			       !insn->dst_reg && !insn->off && insn->imm > 0)))) {
 +				verbose(env, "kinsn proof call requires a resolved helper identity\n");
 +				return -EINVAL;
 +			}
@@ -374,7 +378,7 @@ index 97eb923617a4..fcfede3d4884 100644
  			return -EINVAL;
  		}
  	}
-@@ -3711,6 +3718,26 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+@@ -3711,6 +3722,26 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
  	int err;
  	int i;
  
@@ -401,7 +405,7 @@ index 97eb923617a4..fcfede3d4884 100644
  	kvfree(env->kinsn_regions);
  	env->kinsn_regions = NULL;
  	env->kinsn_region_cnt = 0;
-@@ -3729,7 +3756,7 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+@@ -3729,7 +3760,7 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
  		struct bpf_insn *call;
  		const struct bpf_insn *sidecar = NULL;
  		u64 payload;
@@ -410,7 +414,7 @@ index 97eb923617a4..fcfede3d4884 100644
  
  		proof_buf = NULL;
  		call = &env->prog->insnsi[i];
-@@ -3755,15 +3782,31 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+@@ -3755,15 +3786,31 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
  		err = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, &payload);
  		if (err)
  			return err;
@@ -445,7 +449,7 @@ index 97eb923617a4..fcfede3d4884 100644
  			goto err_free_proof_buf;
  		}
  
-@@ -3778,6 +3821,8 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+@@ -3778,6 +3825,8 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
  		}
  
  		region = &env->kinsn_regions[env->kinsn_region_cnt++];
@@ -454,7 +458,7 @@ index 97eb923617a4..fcfede3d4884 100644
  		region->start = i - 1;
  		region->proof_len = cnt;
  		region->orig[0] = *sidecar;
-@@ -3822,6 +3867,20 @@ static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)
+@@ -3822,6 +3871,20 @@ static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)
  {
  	u32 i;
  
@@ -475,7 +479,7 @@ index 97eb923617a4..fcfede3d4884 100644
  	for (i = 0; i < env->kinsn_region_cnt; i++) {
  		struct bpf_insn_aux_data *aux;
  		struct bpf_prog *new_prog;
-@@ -21358,6 +21417,78 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
+@@ -21358,6 +21421,78 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
  	return 0;
  }
  
@@ -554,7 +558,7 @@ index 97eb923617a4..fcfede3d4884 100644
  static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
  {
  	int err;
-@@ -21366,6 +21497,8 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
+@@ -21366,6 +21501,8 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
  
  	if (bpf_kinsn_is_sidecar_insn(insn))
  		return check_kinsn_sidecar_insn(env, insn);
@@ -563,7 +567,7 @@ index 97eb923617a4..fcfede3d4884 100644
  
  	if (class == BPF_ALU || class == BPF_ALU64) {
  		err = check_alu_op(env, insn);
-@@ -23743,6 +23876,7 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+@@ -23743,6 +23880,7 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
  			const struct bpf_kinsn *kinsn;
  			const struct bpf_insn *call = insn + 1;
  			struct bpf_insn *kinsn_proof;
@@ -571,7 +575,7 @@ index 97eb923617a4..fcfede3d4884 100644
  
  			if (i + 1 >= insn_cnt || !bpf_pseudo_kinsn_call(call))
  				goto next_insn;
-@@ -23751,14 +23885,17 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+@@ -23751,14 +23889,17 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
  			if (ret)
  				return ret;
  
@@ -592,7 +596,7 @@ index 97eb923617a4..fcfede3d4884 100644
  				goto free_kinsn_proof;
  			}
  
-@@ -25987,7 +26124,9 @@ static void compute_insn_live_regs(struct bpf_verifier_env *env,
+@@ -25987,7 +26128,9 @@ static void compute_insn_live_regs(struct bpf_verifier_env *env,
  			break;
  		case BPF_MOV:
  			def = dst;
