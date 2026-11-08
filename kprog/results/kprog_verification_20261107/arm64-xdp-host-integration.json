@@ -34673,6 +34673,57 @@
       "source_drift": []
     }
   },
+  "x86_manual_memory_fixture_environments": {
+    "archive_compressed_prefix_bytes": 95988285,
+    "archive_compressed_prefix_sha256": "cead45c7eaa7df257426e784e0ee8b9907f04952adb5f9274d72c042b7611584",
+    "archive_entries": 25,
+    "archive_marker": "X86_MANUAL_MEMORY_FIXTURE_ENVIRONMENTS_V1",
+    "archive_raw_bytes": 2951847,
+    "archive_raw_sha256": "1125eed10386e058c96500e6190e6002d0f483e057b5beb019314c5d64e66aad",
+    "component_cases": {
+      "test_control_flow_trace_route_host": 3108,
+      "test_x86_mem_dispatch_route_host": 58,
+      "test_x86_movbe_route_host": 1671239,
+      "test_x86_store_route_host": 1292621
+    },
+    "component_make_exit": 0,
+    "every_exported_root_source_sha_verified": true,
+    "every_original_case_loop_and_assertion_preserved": true,
+    "existing_syntax_sources": 62,
+    "fixture_changes": {
+      "kprog/formal/oracles/test_control_flow_trace_route_host.c": {
+        "new_sha256": "80a8dbc1b105b65f92af1fcf0171d435203f5e84d1c1b450b1a01723b31c03b9",
+        "old_sha256": "8574929062005626f6b4eff2beb8623b727978e10f53605c386f9b537b8e138c",
+        "only_change": "distinct host helper spelling for dual-header inclusion; original tables/loops/assertions preserved"
+      },
+      "kprog/formal/oracles/test_x86_mem_dispatch_route_host.c": {
+        "new_sha256": "fe00349d4152c107486f2d52f076e02c44ad351d1bfa3a93db35417c204ef013",
+        "old_sha256": "94dedd2e045c6b505b3f5418c8c2a2a0a5d8e62cb8dd78b273ad6d6de2409343",
+        "only_change": "raw host profile declaration; original tables/loops/assertions preserved"
+      },
+      "kprog/formal/oracles/test_x86_movbe_route_host.c": {
+        "new_sha256": "f20d1a019f939664d46673ae07745fede2b6e8c958f907166fe5fd4c126adf70",
+        "old_sha256": "ffb3d0edf5458c13fe239c367c0c101a7980671241560a70f379efd559dda283",
+        "only_change": "raw host profile declaration; original tables/loops/assertions preserved"
+      },
+      "kprog/formal/oracles/test_x86_store_route_host.c": {
+        "new_sha256": "3d90fb2f92130962d541ab6cf7268f9590d0e9859f4e64527c4055cdc5c2ddf3",
+        "old_sha256": "84e4287954c5869a2d794928f6e5d80b176210eebd3f446a02cf362127f9b1f0",
+        "only_change": "raw host profile declaration; original tables/loops/assertions preserved"
+      }
+    },
+    "full_actual_exit": 2,
+    "full_epoch": "4d5f783e51575c026b03be757e6c34fa65184b3b",
+    "full_root_git_sources": 1258,
+    "full_stop": "Makefile375: memory-dispatch manual-state scenes require the current generic memory path ABI kind.",
+    "initial_syntax_fixture_failures": 4,
+    "initial_syntax_pass": 58,
+    "production_source_sha256": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "34255218ee857bf1d429f81888a379d7630c6b214a66ece8ea592eb6c97dde68",
+      "kprog/x86/x86_sim_local_bpf.h": "4ea969da15d0e77793ade6911dfa7274e148cb42587a013365d77a9d9fcbf9c0"
+    },
+    "ubsan": true
+  },
   "x86_memory_width_fixture_types": {
     "archive_block_sha256": "3e9c18b045774875e0ae6cc8a174a4b4511b103587f96f9da08fa63ce3172799",
     "archived_inputs": {

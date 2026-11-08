@@ -4815,3 +4815,17 @@ loop and assertion is preserved. Archive `x86_raw_register_presence_fixture`
 retains the original full outcome/all1258 verified root-source hashes and
 the corrected component result. The next full check retains its own source
 epoch.
+
+### Manual memory fixture environments
+
+The immutable full check of `4d5f783e51575c026b03be757e6c34fa65184b3b` exits2 at the
+memory-dispatch fixture compilation. A single survey of62 existing manual-state
+x86 recipes records58 compiling fixtures and four environment repairs. Three
+fixtures now declare the raw host ABI profile; their existing local profiles
+retain their precedence. The dual-ISA trace fixture gives the ARM host context
+cast its own function name. Every original case, loop and semantic assertion
+is preserved. UBSan results are58 memory-dispatch,1671239 MOVBE,1292621 store
+and3108 control-flow cases, all passing. Archive `x86_manual_memory_fixture_environments`
+retains the original full result/all1258 verified root-source hashes, complete
+62-source survey and four corrected component logs. The next full check carries
+its own fixed source identity.

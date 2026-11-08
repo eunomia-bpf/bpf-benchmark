@@ -44,6 +44,9 @@ typedef signed long long __s64;
 static int failures;
 static unsigned long cases;
 
+/* Manual memory scenes use the raw host context profile. */
+static const __u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;
+
 /* Backing storage for the memory arm; a fixed pattern distinct from the
  * modeled stack keeps a misroute between the two arms observable. */
 static __u8 heap[64];

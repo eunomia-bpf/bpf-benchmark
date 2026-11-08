@@ -40,6 +40,9 @@ typedef signed long long __s64;
 static int failures;
 static unsigned long cases;
 
+/* Manual memory scenes use the raw host context profile. */
+static const __u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;
+
 /* DECLARE_STATE's tag initializers are written by the register-write path but
  * not read back here, so reference them to keep the build warning-free. */
 #define X86_SIM_TEST_VOID_TAG(REG, NAME) (void)__x86_##NAME##_tag;

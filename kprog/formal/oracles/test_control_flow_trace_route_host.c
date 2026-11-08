@@ -31,7 +31,10 @@ typedef signed int __s32;
 #define __always_inline inline
 
 #include "../x86/x86_sim_local_bpf.h"
+/* Each simulator header keeps its host context-cast identity helper. */
+#define bpf_cast_to_kern_ctx arm64_host_cast_to_kern_ctx
 #include "../arm64/arm64_sim_local_bpf.h"
+#undef bpf_cast_to_kern_ctx
 #include "generated/control_flow_trace.h"
 
 #include <stdio.h>
