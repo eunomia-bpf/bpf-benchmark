@@ -1,0 +1,3 @@
+Generic ARM native-only suite through fresh host compilation
+
+The existing34 fixtures use the matched kernel/module, paired registered worker/caller, native-only submission and O2 compiler profile with the captured guest sysroot. Actual stages {"valid_executed": 4, "verifier_rejected": 16, "loader_rejected": 1, "specialization_rejected": 13}, unsafe accepted 0, unsafe executed 0, guest exit 0. Compiler job receipts retain source/object/compiler hashes and actual wall/CPU/peakRSS. Broker exit 0. Complete native identities, raw kernel/service/compiler outcomes and captured source epoch accompany this result.
