@@ -1,0 +1,19 @@
+{
+  "baseline_resident": 72,
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "loader_errors": 1,
+  "verifier_rejections": 0,
+  "terminal_native_hashes_checked": 2,
+  "source_drift": [],
+  "failure_entry": "tail_nodeport_nat_egress_ipv4",
+  "failure_class": "libbpf-normalized kfunc BTF linkage",
+  "native_sha256": "8e2b50c1b0be7e9b263e419d1e0fe0499bd88f9d085ea548e8add9eaef8395fe",
+  "artifacts": {
+    "driver.log.gz": "1520fe486a231285a87d2f67144722779d50023bc48246775da715a060dcbc23",
+    "service.tar.gz": "a3709a72334ec2f82b207f6cc1e55c302ee306622664e989f0836c7b96622264",
+    "launch.tar.gz": "dea86e8551c01bf03f02406a5d56f30e1f8873f34e373e0f5ae82a405013a1e3",
+    "result.tar.gz": "3b14a49feeb9b1e164937bb95ffe1bb3fb6aba744d1324d2de3aa0d5a6987f75"
+  }
+}

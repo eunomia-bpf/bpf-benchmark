@@ -4,7 +4,7 @@
   "jit_host_byte_differences": 0,
   "memory_changes": 0,
   "shape_exit": 0,
-  "whole_otel_compile": "active detached job4099776; actual exit and object follow completion",
+  "whole_otel_compile": "exit0;40034BPF instructions; whole-otel-compile.json/log/tar carry exact terminal evidence",
   "source_sha256": {
     "read.h": "07252fc34dcadba6f9ac106d3cd65414a2b069ba8f10c4e608e4962e299cc102",
     "candidate.h": "2f2c9314e89bece86b71e97e00e4db64bc13f10a23a0a2e669f2818983dc5a25",
@@ -13,7 +13,11 @@
     "actual-otel.bpf.c": "9a309386f47462e00e68af191a7a9405fc65628d01721d5eef65e1ebac41c22e"
   },
   "artifact_sha256": {
+    "README.md": "a7e6fd9446ffc6f7a4101070f6ab6d8c9e1825dc0d83a49cf93ffa67ce041e5d",
     "inputs.tar.gz": "e2e242ddb63b21aa2f89fd335dc25cc10634713007bd0b4267cc739fceb8cd85",
-    "checks.log.gz": "4f7067dd5f1a63b1eeed21f24b9ea4298dd4f9ac11827a050583a215183b4996"
+    "whole-otel-compile.json": "6e7f27da355faad54809a75c77496b515d063c68cb10a49bd833ed0dfc0f6110",
+    "checks.log.gz": "4f7067dd5f1a63b1eeed21f24b9ea4298dd4f9ac11827a050583a215183b4996",
+    "whole-otel-compile.log.gz": "dcf5b1d1ea94c53f9126a1f2e712a802c6d23772d9dcd150b05a223ebe391a95",
+    "whole-otel-compile.tar.gz": "47a57f4ae97dc910a1707a58f2c146677215630ab95eefb8c422c493851c4c30"
   }
 }
