@@ -1,0 +1,3 @@
+# Existing native38 after native UD2 architectural-terminal support
+
+The original38native P/resource objects retain their bytes and actual DIV-fault cases. The canonical generator sends native UD2 through the existing architectural-fault arm and unmatched subroutine returns through the existing unresolved-indirect path. Exact x86#DE semantics stay in the simulator. Actual stages{"specialization_rejected": 1, "valid_executed": 9, "verifier_rejected": 28}; Makeexit0. Risk native execution count0; the nine original positive controls retain their existing TEST_RUN comparison. Complete native/C/B/verifier/resource/request records are in raw.tar.gz.
