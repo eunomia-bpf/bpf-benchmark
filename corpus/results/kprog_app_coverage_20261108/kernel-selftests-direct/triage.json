@@ -1,0 +1,389 @@
+{
+  "counts": {
+    "catalog_rows": 1917,
+    "attempted": 239,
+    "submitted": 227,
+    "installed": 58,
+    "verifier_rejected": 54,
+    "generation_failed": 115,
+    "compilation_failed": 0,
+    "resource_failed": 12,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 52,
+    "failure_agrees": 45,
+    "failure_installed": 7,
+    "success": 60,
+    "success_agrees": 51,
+    "success_installed": 51
+  },
+  "installed_failure_findings": [
+    {
+      "program": "test_dynptr_reg_type",
+      "file": "dynptr_fail.c",
+      "request_id": 82,
+      "prog_id": 330,
+      "stage": "installed",
+      "native_sha256": "3217480e7d540c5e83bfddd6ffd7f0155f4c6824902b7e2d614af5d6b6c24697",
+      "bpf_sha256": "850bd404d9ddaf9ac7819f1cfc279a0985339b3c19e4f71d426d005e7fc80255",
+      "class_": "global_call_argument_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "size_not_bpf_dw",
+      "file": "map_kptr_fail.c",
+      "request_id": 87,
+      "prog_id": 368,
+      "stage": "installed",
+      "native_sha256": "a5ee1027773a30e5f94139986efab9728b2f29c9a04d589dcc668f21b84180dc",
+      "bpf_sha256": "d990248cb7e86503a2311f91834394eb5034cf8dd5253ef02f631009d062826c",
+      "class_": "typed_map_kptr_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "misaligned_access_write",
+      "file": "map_kptr_fail.c",
+      "request_id": 90,
+      "prog_id": 378,
+      "stage": "installed",
+      "native_sha256": "d3810caadcda7730f584a1e6bcd7ce0f402532ed6b5d2ddf9b8137ef6d28addb",
+      "bpf_sha256": "58077be497ba3263677142de6b950924f8d03ab16fa76d58ff6ce7e369771b80",
+      "class_": "typed_map_kptr_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "misaligned_access_read",
+      "file": "map_kptr_fail.c",
+      "request_id": 91,
+      "prog_id": 382,
+      "stage": "installed",
+      "native_sha256": "1e44517122201807295665f2430d5fa498063fd6a33298e93ecde4a9c72c800d",
+      "bpf_sha256": "137e3e834d8358533968cb45e54edcaa49f244895d89c99d66f1d0ac492823a1",
+      "class_": "typed_map_kptr_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "reject_bad_type_match",
+      "file": "map_kptr_fail.c",
+      "request_id": 93,
+      "prog_id": 389,
+      "stage": "installed",
+      "native_sha256": "5b38dcd5ed8a14f42f13b1c8a8d02708e9374b45b4094a5c1e58834255ffa890",
+      "bpf_sha256": "946883a61730564ec7f4c1a145da989c644b1e779b08a8bcaebd7892ddec1b43",
+      "class_": "typed_map_kptr_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "reject_untrusted_store_to_ref",
+      "file": "map_kptr_fail.c",
+      "request_id": 98,
+      "prog_id": 405,
+      "stage": "installed",
+      "native_sha256": "a5a608d96c6a22425dfba6e31fce80dffa31c5ef757843acca355f6c4a0608e2",
+      "bpf_sha256": "7a139a11763b11123c7b3314190821d6a3a8dfdf459af10ec233a73c647c6523",
+      "class_": "typed_map_kptr_policy",
+      "native_execution_count": 0
+    },
+    {
+      "program": "reject_indirect_global_func_access",
+      "file": "map_kptr_fail.c",
+      "request_id": 101,
+      "prog_id": 419,
+      "stage": "installed",
+      "native_sha256": "17b1104fa32542811a75315952d992c88aef6d0c3dafd2db5ecf93be31557275",
+      "bpf_sha256": "a0d730e48df26365034485ff7f3461d6cdfeffe0511e108a7cdbcf61db738941",
+      "class_": "global_call_argument_policy",
+      "native_execution_count": 0
+    }
+  ],
+  "generation_groups": {
+    "helper_identity_and_model_coverage": 73,
+    "external_call_resolution": 41,
+    "mutable_data_section_representation": 1
+  },
+  "raw_cause_classes": {
+    "counts": {
+      "helper_ID_170": 2,
+      "unsupported unresolved call target in call   4b <crypto_acquire+0x4b>": 1,
+      "helper_ID_198": 32,
+      "helper_ID_199": 1,
+      "unsupported unresolved call target in call   2a <data_slice_out_of_bounds_skb+0x2a>": 1,
+      "unsupported unresolved call target in call   18 <data_slice_out_of_bounds_skb_meta+0x18>": 1,
+      "helper_ID_197": 12,
+      "unsupported unresolved call target in call   2a <skb_invalid_slice_write+0x2a>": 1,
+      "unsupported unresolved call target in call   18 <skb_meta_invalid_slice_write+0x18>": 1,
+      "unsupported unresolved call target in call   31 <skb_invalid_data_slice1+0x31>": 1,
+      "unsupported unresolved call target in call   2e <skb_invalid_data_slice2+0x2e>": 1,
+      "helper_ID_202": 8,
+      "unsupported unresolved call target in call   1b <ro_skb_meta_slice_invalid_after_payload_helper+0x1b>": 1,
+      "unsupported unresolved call target in call   1b <rw_skb_meta_slice_invalid_after_payload_helper+0x1b>": 1,
+      "unsupported unresolved call target in call   32 <xdp_invalid_data_slice1+0x32>": 1,
+      "unsupported unresolved call target in call   2f <xdp_invalid_data_slice2+0x2f>": 1,
+      "unsupported unresolved call target in call   10 <skb_invalid_ctx+0x10>": 1,
+      "unsupported unresolved call target in call   10 <skb_meta_invalid_ctx+0x10>": 1,
+      "unsupported unresolved call target in call   10 <xdp_invalid_ctx+0x10>": 1,
+      "unsupported unresolved call target in call   25 <dynptr_slice_var_len1+0x25>": 1,
+      "unsupported unresolved call target in call   24 <dynptr_slice_var_len2+0x24>": 1,
+      "unsupported unresolved call target in call   26 <invalid_slice_rdwr_rdonly+0x26>": 1,
+      "unsupported unresolved call target in call   2a <dynptr_adjust_invalid+0x2a>": 1,
+      "unsupported unresolved call target in call   20 <dynptr_is_null_invalid+0x20>": 1,
+      "unsupported unresolved call target in call   20 <dynptr_is_rdonly_invalid+0x20>": 1,
+      "unsupported unresolved call target in call   20 <dynptr_size_invalid+0x20>": 1,
+      "unsupported unresolved call target in call   25 <clone_invalid1+0x25>": 1,
+      "unsupported unresolved call target in call   27 <clone_skb_packet_data+0x27>": 1,
+      "unsupported unresolved call target in call   19 <clone_skb_packet_meta+0x19>": 1,
+      "unsupported unresolved call target in call   24 <clone_xdp_packet_data+0x24>": 1,
+      "unsupported unresolved call target in call   18 <test_dynptr_skb_small_buff+0x18>": 1,
+      "resource:[Errno 22] maps/BTF object load: Invalid argument": 12,
+      "unsupported unresolved call target in call   c <test_kfunc_implicit_arg_impl_illegal+0xc>": 1,
+      "helper_ID_194": 3,
+      "helper_ID_154": 3,
+      "unsupported unresolved call target in call   29 <lookup_null_bpf_tuple+0x29>": 1,
+      "unsupported unresolved call target in call   44 <lookup_null_bpf_opts+0x44>": 1,
+      "unsupported unresolved call target in call   29 <xdp_lookup_null_bpf_tuple+0x29>": 1,
+      "unsupported unresolved call target in call   44 <xdp_lookup_null_bpf_opts+0x44>": 1,
+      "Error: PC32 zero-sized target  requires a readonly section or an unnamed bss section": 1,
+      "helper_ID_209": 11,
+      "unsupported unresolved call target in call   21 <null_pointer+0x21>": 1,
+      "unsupported unresolved call target in call   23 <bits_copy+0x23>": 1,
+      "unsupported unresolved call target in call   2e <bits_memalloc+0x2e>": 1,
+      "unsupported unresolved call target in call   24 <bit_index+0x24>": 1,
+      "unsupported unresolved call target in call   3e <bits_too_big+0x3e>": 1,
+      "unsupported unresolved call target in call   2c <fewer_words+0x2c>": 1,
+      "unsupported unresolved call target in call   29 <zero_words+0x29>": 1,
+      "unsupported unresolved call target in call   62 <huge_words+0x62>": 1,
+      "unsupported unresolved call target in call   44 <max_words+0x44>": 1,
+      "unsupported unresolved call target in call   26 <bad_words+0x26>": 1,
+      "helper_ID_53": 1
+    },
+    "samples": {
+      "helper_ID_170": {
+        "program": "pseudo_call_check",
+        "diagnostic": "native-link: entry=pseudo_call_check (112 bytes), 2 reachable symbol(s) total\n  - pseudo_call_check (vaddr 0x0, 112 bytes) [entry]\n  - timer_cb (vaddr 0x0, 127 bytes) [entry]\nError: unknown helper ID 170 in pseudo_call_check at 0x58\n"
+      },
+      "unsupported unresolved call target in call   4b <crypto_acquire+0x4b>": {
+        "program": "crypto_acquire",
+        "diagnostic": "unsupported unresolved call target in call   4b <crypto_acquire+0x4b>"
+      },
+      "helper_ID_198": {
+        "program": "ringbuf_missing_release1",
+        "diagnostic": "native-link: entry=ringbuf_missing_release1 (59 bytes), 1 reachable symbol(s) total\n  - ringbuf_missing_release1 (vaddr 0x0, 59 bytes) [entry]\nError: unknown helper ID 198 in ringbuf_missing_release1 at 0x32\n"
+      },
+      "helper_ID_199": {
+        "program": "ringbuf_release_uninit_dynptr",
+        "diagnostic": "native-link: entry=ringbuf_release_uninit_dynptr (25 bytes), 1 reachable symbol(s) total\n  - ringbuf_release_uninit_dynptr (vaddr 0x0, 25 bytes) [entry]\nError: unknown helper ID 199 in ringbuf_release_uninit_dynptr at 0x10\n"
+      },
+      "unsupported unresolved call target in call   2a <data_slice_out_of_bounds_skb+0x2a>": {
+        "program": "data_slice_out_of_bounds_skb",
+        "diagnostic": "unsupported unresolved call target in call   2a <data_slice_out_of_bounds_skb+0x2a>"
+      },
+      "unsupported unresolved call target in call   18 <data_slice_out_of_bounds_skb_meta+0x18>": {
+        "program": "data_slice_out_of_bounds_skb_meta",
+        "diagnostic": "unsupported unresolved call target in call   18 <data_slice_out_of_bounds_skb_meta+0x18>"
+      },
+      "helper_ID_197": {
+        "program": "data_slice_out_of_bounds_map_value",
+        "diagnostic": "native-link: entry=data_slice_out_of_bounds_map_value (138 bytes), 1 reachable symbol(s) total\n  - data_slice_out_of_bounds_map_value (vaddr 0x0, 138 bytes) [entry]\nError: unknown helper ID 197 in data_slice_out_of_bounds_map_value at 0x5d\n"
+      },
+      "unsupported unresolved call target in call   2a <skb_invalid_slice_write+0x2a>": {
+        "program": "skb_invalid_slice_write",
+        "diagnostic": "unsupported unresolved call target in call   2a <skb_invalid_slice_write+0x2a>"
+      },
+      "unsupported unresolved call target in call   18 <skb_meta_invalid_slice_write+0x18>": {
+        "program": "skb_meta_invalid_slice_write",
+        "diagnostic": "unsupported unresolved call target in call   18 <skb_meta_invalid_slice_write+0x18>"
+      },
+      "unsupported unresolved call target in call   31 <skb_invalid_data_slice1+0x31>": {
+        "program": "skb_invalid_data_slice1",
+        "diagnostic": "unsupported unresolved call target in call   31 <skb_invalid_data_slice1+0x31>"
+      },
+      "unsupported unresolved call target in call   2e <skb_invalid_data_slice2+0x2e>": {
+        "program": "skb_invalid_data_slice2",
+        "diagnostic": "unsupported unresolved call target in call   2e <skb_invalid_data_slice2+0x2e>"
+      },
+      "helper_ID_202": {
+        "program": "skb_invalid_data_slice3",
+        "diagnostic": "native-link: entry=skb_invalid_data_slice3 (215 bytes), 1 reachable symbol(s) total\n  - skb_invalid_data_slice3 (vaddr 0x0, 215 bytes) [entry]\nError: unknown helper ID 202 in skb_invalid_data_slice3 at 0xbe\n"
+      },
+      "unsupported unresolved call target in call   1b <ro_skb_meta_slice_invalid_after_payload_helper+0x1b>": {
+        "program": "ro_skb_meta_slice_invalid_after_payload_helper",
+        "diagnostic": "unsupported unresolved call target in call   1b <ro_skb_meta_slice_invalid_after_payload_helper+0x1b>"
+      },
+      "unsupported unresolved call target in call   1b <rw_skb_meta_slice_invalid_after_payload_helper+0x1b>": {
+        "program": "rw_skb_meta_slice_invalid_after_payload_helper",
+        "diagnostic": "unsupported unresolved call target in call   1b <rw_skb_meta_slice_invalid_after_payload_helper+0x1b>"
+      },
+      "unsupported unresolved call target in call   32 <xdp_invalid_data_slice1+0x32>": {
+        "program": "xdp_invalid_data_slice1",
+        "diagnostic": "unsupported unresolved call target in call   32 <xdp_invalid_data_slice1+0x32>"
+      },
+      "unsupported unresolved call target in call   2f <xdp_invalid_data_slice2+0x2f>": {
+        "program": "xdp_invalid_data_slice2",
+        "diagnostic": "unsupported unresolved call target in call   2f <xdp_invalid_data_slice2+0x2f>"
+      },
+      "unsupported unresolved call target in call   10 <skb_invalid_ctx+0x10>": {
+        "program": "skb_invalid_ctx",
+        "diagnostic": "unsupported unresolved call target in call   10 <skb_invalid_ctx+0x10>"
+      },
+      "unsupported unresolved call target in call   10 <skb_meta_invalid_ctx+0x10>": {
+        "program": "skb_meta_invalid_ctx",
+        "diagnostic": "unsupported unresolved call target in call   10 <skb_meta_invalid_ctx+0x10>"
+      },
+      "unsupported unresolved call target in call   10 <xdp_invalid_ctx+0x10>": {
+        "program": "xdp_invalid_ctx",
+        "diagnostic": "unsupported unresolved call target in call   10 <xdp_invalid_ctx+0x10>"
+      },
+      "unsupported unresolved call target in call   25 <dynptr_slice_var_len1+0x25>": {
+        "program": "dynptr_slice_var_len1",
+        "diagnostic": "unsupported unresolved call target in call   25 <dynptr_slice_var_len1+0x25>"
+      },
+      "unsupported unresolved call target in call   24 <dynptr_slice_var_len2+0x24>": {
+        "program": "dynptr_slice_var_len2",
+        "diagnostic": "unsupported unresolved call target in call   24 <dynptr_slice_var_len2+0x24>"
+      },
+      "unsupported unresolved call target in call   26 <invalid_slice_rdwr_rdonly+0x26>": {
+        "program": "invalid_slice_rdwr_rdonly",
+        "diagnostic": "unsupported unresolved call target in call   26 <invalid_slice_rdwr_rdonly+0x26>"
+      },
+      "unsupported unresolved call target in call   2a <dynptr_adjust_invalid+0x2a>": {
+        "program": "dynptr_adjust_invalid",
+        "diagnostic": "unsupported unresolved call target in call   2a <dynptr_adjust_invalid+0x2a>"
+      },
+      "unsupported unresolved call target in call   20 <dynptr_is_null_invalid+0x20>": {
+        "program": "dynptr_is_null_invalid",
+        "diagnostic": "unsupported unresolved call target in call   20 <dynptr_is_null_invalid+0x20>"
+      },
+      "unsupported unresolved call target in call   20 <dynptr_is_rdonly_invalid+0x20>": {
+        "program": "dynptr_is_rdonly_invalid",
+        "diagnostic": "unsupported unresolved call target in call   20 <dynptr_is_rdonly_invalid+0x20>"
+      },
+      "unsupported unresolved call target in call   20 <dynptr_size_invalid+0x20>": {
+        "program": "dynptr_size_invalid",
+        "diagnostic": "unsupported unresolved call target in call   20 <dynptr_size_invalid+0x20>"
+      },
+      "unsupported unresolved call target in call   25 <clone_invalid1+0x25>": {
+        "program": "clone_invalid1",
+        "diagnostic": "unsupported unresolved call target in call   25 <clone_invalid1+0x25>"
+      },
+      "unsupported unresolved call target in call   27 <clone_skb_packet_data+0x27>": {
+        "program": "clone_skb_packet_data",
+        "diagnostic": "unsupported unresolved call target in call   27 <clone_skb_packet_data+0x27>"
+      },
+      "unsupported unresolved call target in call   19 <clone_skb_packet_meta+0x19>": {
+        "program": "clone_skb_packet_meta",
+        "diagnostic": "unsupported unresolved call target in call   19 <clone_skb_packet_meta+0x19>"
+      },
+      "unsupported unresolved call target in call   24 <clone_xdp_packet_data+0x24>": {
+        "program": "clone_xdp_packet_data",
+        "diagnostic": "unsupported unresolved call target in call   24 <clone_xdp_packet_data+0x24>"
+      },
+      "unsupported unresolved call target in call   18 <test_dynptr_skb_small_buff+0x18>": {
+        "program": "test_dynptr_skb_small_buff",
+        "diagnostic": "unsupported unresolved call target in call   18 <test_dynptr_skb_small_buff+0x18>"
+      },
+      "resource:[Errno 22] maps/BTF object load: Invalid argument": {
+        "program": "testmod_seq_empty",
+        "diagnostic": "libbpf: extern (func ksym) 'bpf_iter_testmod_seq_destroy': not found in kernel or module BTFs\nTraceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object load: Invalid argument\n"
+      },
+      "unsupported unresolved call target in call   c <test_kfunc_implicit_arg_impl_illegal+0xc>": {
+        "program": "test_kfunc_implicit_arg_impl_illegal",
+        "diagnostic": "unsupported unresolved call target in call   c <test_kfunc_implicit_arg_impl_illegal+0xc>"
+      },
+      "helper_ID_194": {
+        "program": "non_const_var_off_kptr_xchg",
+        "diagnostic": "native-link: entry=non_const_var_off_kptr_xchg (74 bytes), 1 reachable symbol(s) total\n  - non_const_var_off_kptr_xchg (vaddr 0x0, 74 bytes) [entry]\nError: unknown helper ID 194 in non_const_var_off_kptr_xchg at 0x40\n"
+      },
+      "helper_ID_154": {
+        "program": "marked_as_untrusted_or_null",
+        "diagnostic": "native-link: entry=marked_as_untrusted_or_null (48 bytes), 1 reachable symbol(s) total\n  - marked_as_untrusted_or_null (vaddr 0x0, 48 bytes) [entry]\nError: unknown helper ID 154 in marked_as_untrusted_or_null at 0x2a\n"
+      },
+      "unsupported unresolved call target in call   29 <lookup_null_bpf_tuple+0x29>": {
+        "program": "lookup_null_bpf_tuple",
+        "diagnostic": "unsupported unresolved call target in call   29 <lookup_null_bpf_tuple+0x29>"
+      },
+      "unsupported unresolved call target in call   44 <lookup_null_bpf_opts+0x44>": {
+        "program": "lookup_null_bpf_opts",
+        "diagnostic": "unsupported unresolved call target in call   44 <lookup_null_bpf_opts+0x44>"
+      },
+      "unsupported unresolved call target in call   29 <xdp_lookup_null_bpf_tuple+0x29>": {
+        "program": "xdp_lookup_null_bpf_tuple",
+        "diagnostic": "unsupported unresolved call target in call   29 <xdp_lookup_null_bpf_tuple+0x29>"
+      },
+      "unsupported unresolved call target in call   44 <xdp_lookup_null_bpf_opts+0x44>": {
+        "program": "xdp_lookup_null_bpf_opts",
+        "diagnostic": "unsupported unresolved call target in call   44 <xdp_lookup_null_bpf_opts+0x44>"
+      },
+      "Error: PC32 zero-sized target  requires a readonly section or an unnamed bss section": {
+        "program": "global_func9",
+        "diagnostic": "native-link: entry=global_func9 (241 bytes), 6 reachable symbol(s) total\n  - global_func9 (vaddr 0x0, 241 bytes) [entry]\n  - foo (vaddr 0x0, 30 bytes) [entry]\n  - bar (vaddr 0x20, 22 bytes)\n  - baz (vaddr 0x40, 22 bytes)\n  - qux (vaddr 0x60, 11 bytes)\n  - quux (vaddr 0x70, 12 bytes)\nError: PC32 zero-sized target  requires a readonly section or an unnamed bss section\n"
+      },
+      "helper_ID_209": {
+        "program": "user_ringbuf_callback_bad_access1",
+        "diagnostic": "native-link: entry=user_ringbuf_callback_bad_access1 (30 bytes), 2 reachable symbol(s) total\n  - user_ringbuf_callback_bad_access1 (vaddr 0x0, 30 bytes) [entry]\n  - bad_access1 (vaddr 0x0, 53 bytes) [entry]\nError: unknown helper ID 209 in user_ringbuf_callback_bad_access1 at 0x18\n"
+      },
+      "unsupported unresolved call target in call   21 <null_pointer+0x21>": {
+        "program": "null_pointer",
+        "diagnostic": "unsupported unresolved call target in call   21 <null_pointer+0x21>"
+      },
+      "unsupported unresolved call target in call   23 <bits_copy+0x23>": {
+        "program": "bits_copy",
+        "diagnostic": "unsupported unresolved call target in call   23 <bits_copy+0x23>"
+      },
+      "unsupported unresolved call target in call   2e <bits_memalloc+0x2e>": {
+        "program": "bits_memalloc",
+        "diagnostic": "unsupported unresolved call target in call   2e <bits_memalloc+0x2e>"
+      },
+      "unsupported unresolved call target in call   24 <bit_index+0x24>": {
+        "program": "bit_index",
+        "diagnostic": "unsupported unresolved call target in call   24 <bit_index+0x24>"
+      },
+      "unsupported unresolved call target in call   3e <bits_too_big+0x3e>": {
+        "program": "bits_too_big",
+        "diagnostic": "unsupported unresolved call target in call   3e <bits_too_big+0x3e>"
+      },
+      "unsupported unresolved call target in call   2c <fewer_words+0x2c>": {
+        "program": "fewer_words",
+        "diagnostic": "unsupported unresolved call target in call   2c <fewer_words+0x2c>"
+      },
+      "unsupported unresolved call target in call   29 <zero_words+0x29>": {
+        "program": "zero_words",
+        "diagnostic": "unsupported unresolved call target in call   29 <zero_words+0x29>"
+      },
+      "unsupported unresolved call target in call   62 <huge_words+0x62>": {
+        "program": "huge_words",
+        "diagnostic": "unsupported unresolved call target in call   62 <huge_words+0x62>"
+      },
+      "unsupported unresolved call target in call   44 <max_words+0x44>": {
+        "program": "max_words",
+        "diagnostic": "unsupported unresolved call target in call   44 <max_words+0x44>"
+      },
+      "unsupported unresolved call target in call   26 <bad_words+0x26>": {
+        "program": "bad_words",
+        "diagnostic": "unsupported unresolved call target in call   26 <bad_words+0x26>"
+      },
+      "helper_ID_53": {
+        "program": "test_sockops_update_dedicated",
+        "diagnostic": "native-link: entry=test_sockops_update_dedicated (68 bytes), 1 reachable symbol(s) total\n  - test_sockops_update_dedicated (vaddr 0x0, 68 bytes) [entry]\nError: unknown helper ID 53 in test_sockops_update_dedicated at 0x1f\n"
+      }
+    }
+  },
+  "bpf_map_btf_observation": {
+    "object": "map_kptr_fail__size_not_bpf_dw.bpf.o",
+    "map_value_type": 7,
+    "map_value_size": 32,
+    "unref_ptr_member_type": 10,
+    "pointer_type10_target": 47,
+    "type47": {
+      "kind": "TYPE_TAG",
+      "name": "kptr_untrusted",
+      "target": 46
+    },
+    "type46": {
+      "kind": "FWD",
+      "name": "prog_test_ref_kfunc"
+    },
+    "observation": "Original resource object retains the kptr type tag; saved generated B retains its u32 map write. Actual kernel map BTF/policy and source annotation context remain triage interfaces."
+  },
+  "runtime_code_changes": 0
+}
