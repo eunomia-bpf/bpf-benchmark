@@ -868,5 +868,22 @@
   "kernel_sha256": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
   "kernel_release": "7.0.0-rc2+",
   "diagnostic": "Fresh shared guest resolves current ip_tunnel hash eb156e022ffa3ae767ec5ccb851a8fe81a9f8c70a7e29c9967054904ec7c98d1 and modprobe exits0; runtime installer copies image /artifacts/lib/modules into guest module root",
-  "whole_application": "original Katran controller retains actual terminal collection/publication"
+  "whole_application": "original Katran controller retains actual terminal collection/publication",
+  "cache_cleanup": {
+    "utc": "2026-11-08T16:38:11.455444+00:00",
+    "coordinator_retired": {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/build",
+      "reported_gib": 8.9,
+      "reported_time": "2026-11-08T16:30:00Z"
+    },
+    "shared_build": "/workspaces/repository/kprog/tv/build-kernel-x86",
+    "canonical_image": "bpf-benchmark/kprog-five-step-tracee:c-runner",
+    "module_install_copy": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-extent/package-runtime/ordinary",
+    "verified_module_files": 842,
+    "retained_image": "sha256:a507d19020a23b703710e831c5002d887fb384d7f80df321d2cf3afe5a74e35e",
+    "open_handles": [],
+    "writers": [],
+    "removed_allocated_bytes": 1568247808,
+    "status": "retired published rebuildable ordinary-module install copy"
+  }
 }
