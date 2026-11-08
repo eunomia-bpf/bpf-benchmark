@@ -3288,7 +3288,7 @@
     20644
   ],
   "component_commit": "570c8c3d852c37aa44cb561a592cff90061fa87a",
-  "utc": "2026-11-08T04:43:36.474416+00:00",
+  "utc": "2026-11-08T04:52:55.433970+00:00",
   "retired_waiting_controllers": [
     {
       "folder": "tracee-core-runtime",
@@ -3365,11 +3365,12 @@
   "host_compile_component_commit": "ec879f7128255a59589a7e4f88809b7aa7feb650",
   "host_compile_safety_commit": "973d773c348d0ffaae27adce4fdbf3829f3555d7",
   "schedule": "Private80-source Cilium and Tracee on8-11 alongside the original OTel16-19; canonical helper adoption and new OTel after originalskb4109581.",
-  "component_predecessor": 364819,
+  "component_predecessor": 385933,
   "application_predecessor": 324219,
   "application": "otelcol-ebpf-profiler/profiling",
   "cpu_set": "16-19",
-  "transport_sha256": "8a88b4f77354deaa14d7bf11e1caa12e3bc98f791c2ab3450300f4303a879ce7",
+  "transport_sha256": "f469dfa5f78478e6fe63efc3aadd602aaddd13c6c884ee1ad9fe0fe4e5074185",
   "script_sha256": "1079fa9bd692ffe1205e14883955db3313d7ad26361e560bded902c53d17ed95",
-  "prior_launch_commit": "6b56478e913c61ad7a8b13de5d3dd53864615a53"
+  "prior_launch_commit": "6cb0659f372cb4bdfe15e202a0217017ca13a576",
+  "startup_repair_commit": "4a84c34feef99decbe1ca621a3c0523e8980dcee"
 }
