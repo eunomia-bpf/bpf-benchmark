@@ -1,0 +1,111 @@
+{
+  "utc": "2026-11-08T15:39:10.119960+00:00",
+  "source_adoption": false,
+  "build_exit": 0,
+  "replay_exit": 2,
+  "initial_guest_records": [
+    {
+      "case": "small",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/small.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+        "started": "2026-11-08T15:07:29.000518+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/1.success.tar.gz",
+        "finished": "2026-11-08T15:07:30.883544+00:00"
+      }
+    },
+    {
+      "case": "wide",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/wide.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 1,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "a6e156e3a797cee54dc032bc3d7f08ee55fe4c54ab9530dd091e0298eb2ce0ec",
+        "started": "2026-11-08T15:07:30.950733+00:00",
+        "status": -5,
+        "error": "Command '['/usr/lib/llvm-18/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/request-v_mooln7/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/request-v_mooln7/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 64, in specialize\n    run([clang, \"-g\", \"-O3\", \"-mcpu=v4\", \"-target\", \"bpf\",\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 41, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/lib/llvm-18/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/request-v_mooln7/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/request-v_mooln7/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/requests/2.failure.tar.gz",
+        "finished": "2026-11-08T15:08:10.760371+00:00"
+      }
+    }
+  ],
+  "records": [
+    {
+      "case": "small",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/small.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+        "started": "2026-11-08T15:36:24.833224+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/1.success.tar.gz",
+        "finished": "2026-11-08T15:36:25.787213+00:00"
+      },
+      "compiled": true,
+      "native_sha256_matches": true
+    },
+    {
+      "case": "wide",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/wide.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 1,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "a6e156e3a797cee54dc032bc3d7f08ee55fe4c54ab9530dd091e0298eb2ce0ec",
+        "started": "2026-11-08T15:36:25.854130+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/request-nzf_nvun/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/request-nzf_nvun/generated/trusted_x86.bpf.o']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 64, in specialize\n    run([clang, \"-g\", \"-O3\", \"-mcpu=v4\", \"-target\", \"bpf\",\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 41, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/request-nzf_nvun/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/request-nzf_nvun/generated/trusted_x86.bpf.o']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/host-retry-serial/requests/2.failure.tar.gz",
+        "finished": "2026-11-08T15:39:08.771740+00:00"
+      },
+      "compiled": false,
+      "native_sha256_matches": true
+    }
+  ],
+  "source_hashes": {
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/bpf_jit_comp.c": "aaf3e6a0a062dc601e0e61f7c994232778ff5e6e524145ca6d8d7be142a0ba80",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/bpf_x86_native_lab.c": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/native-proof-regions.patch": "f08d38c07b9608e2f3d62c8e5b85426a3beb1c583a3fb3ab8be184560146b2e6",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/native_loader.cpp": "3dff6a9a902a2c6a5ff0f30520f641f04c5195c0ecaaacd2687d8b9b91961320",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe": "2bec6da2e4ee13cc4c36ecf394d7a391076ea0ed706405b373fd149569184144",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/trusted-native-loader": "cb19fe9f5ea25ace2ea578112fc770119dca22db9072d8432420baddadd7af9c",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/build/arch/x86/boot/bzImage": "49b955884423be1abc9ada37b5714702ce1573b78bf629fadf3b50a77b2d8c36",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/build/vmlinux": "f0445870b89d71a0c7e138feb794abe832f87c128011960866ac366dc7ca7044",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/module-output/bpf_x86_native_lab.ko": "76fb6b6393df30ff73b75f10ce701f74d0b08fd744a82bd5581ed53d9f4bc218"
+  }
+}
