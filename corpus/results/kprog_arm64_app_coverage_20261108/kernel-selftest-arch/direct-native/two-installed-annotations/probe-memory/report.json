@@ -84,6 +84,21 @@
           50
         ]
       ]
+    },
+    {
+      "name": "paired-native-proof-restoration-order",
+      "path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/verifier.c",
+      "sha256": "8d0803726c9ca48e36b4921ca84cac980d94be805245c787fac767f54ca973ec",
+      "line_ranges": [
+        [
+          3845,
+          3903
+        ],
+        [
+          26565,
+          26609
+        ]
+      ]
     }
   ],
   "runtime": {
@@ -94,12 +109,34 @@
     "The paired verifier converts reads through PTR_TO_BTF_ID and listed untrusted pointer types to BPF_PROBE_MEM/BPF_PROBE_MEMSX and increments num_exentries.",
     "The paired ARM JIT add_exception_handler registers EX_TYPE_BPF for each such BPF load; ex_handler_bpf clears the destination and advances PC by four bytes on a handled fault.",
     "The paired native emitter copies native words then resolves relocation records. Its emission interface carries image/index/payload/program/final_ip; native memory accesses retain their ordinary CPU fault behavior.",
-    "The archived no_null_check native P and compiled B both read ctx[0] then file+32. The stock-verifier treatment of B gives its BTF pointer access a recoverable load semantic, while the copied native LDR retains the architectural data-abort semantic.",
+    "The archived no_null_check P/B both read ctx[0] then file+32. Ordinary standalone BTF loads gain recoverable semantics through convert_ctx_accesses. In the actual paired native path, restore_kinsn_proof_regions runs at26575 before convert_ctx_accesses at26604, and the native emitter retains the architectural data-abort behavior of copied P. The verifier reasons about B before this restoration; ordinary later probe conversion supplies its own semantics boundary.",
     "The design faithfulness obligation includes matching object, boundary and fault behavior. O3 must establish actual physical-entry pointer validity for every plain native access, or faithfully retain the fault in verifier-visible execution. O4 must preserve the selected memory/fault semantics when composing physical entry and emitted P.",
-    "V owns the universal O1/O3/O4 premise statement. C owns the same-kernel stock-BPF LSM baseline. A retains installed-stage accounting and paired ARM source evidence."
+    "V owns the universal O1/O3/O4 premise statement. C owns the same-kernel stock-BPF LSM baseline. A retains installed-stage accounting and paired ARM source evidence.",
+    "The captured paired pipeline order is explicit: proof-region restoration precedes ordinary context conversion, so ordinary BTF-load fixups belong to the standalone BPF JIT path. O3/O4 fault correspondence remains the universal model/physical-entry obligation recorded by V2a891f9ba."
   ],
   "disposition": "Coordinator/operator model decision requested for generic fault qualification; application producers can express probe reads before submission where source semantics require them. Kernel selftest sources and current running captures retain their published bytes.",
   "runtime_admission_additions": 0,
   "native_execution": "Original catalog remains load-only",
-  "source_archive_sha256": "7d5764028e98abc9b041ee57b7e0a6d878d5406b4c69a5608f9d172f6766b80f"
+  "source_archive_sha256": "2bf686785da40c2b27e6bb5db936a2c3ccc16bde32df34aa685d38ac6fa142c0",
+  "metadata_alignment_case": {
+    "status": "Coordinator/operator disposition pending; kernel input bytes retained",
+    "physical_hook": "security_mmap_file permits and forwards a nullable file",
+    "captured_ARM": {
+      "target_btf_id": 70008,
+      "parameter_name": "file",
+      "source": "A d4a23b5b/f55cf2f09 paired runtime BTF"
+    },
+    "matched_x86": {
+      "target_btf_id": 71327,
+      "parameter_name": "file__nullable",
+      "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+      "stock_failure": "no_null_check rejects2instructions trusted_ptr_or_null",
+      "native_failure": "no_null_check rejects29instructions pointer arithmetic on trusted_ptr_or_null"
+    },
+    "proposed_metadata_alignment": "Represent the physical nullable LSM argument as file__nullable in the owning captured ARM kernel hook prototype; existing btf_ctx_access nullability logic then supplies the matching qualification",
+    "scope": "ABI/BTF contract alignment for every invocation of this hook; actual candidate would use the retained warm ARM kernel and paired module build",
+    "operator_approval": "Requested before introducing changed qualification into kernel inputs",
+    "separate_obligation": "Generic fault correspondence for ordinary BTF accesses remains part of faithful simulation independently of this hook metadata"
+  },
+  "updated_utc": "2026-11-08T22:59:13.971501+00:00"
 }
