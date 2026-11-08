@@ -4910,3 +4910,10 @@ labels;224 new logical forms contribute2688 agreeing observations. Hardware
 replay epochs stay separately recorded. Physical atomic/tag and ordering,
 compiler/ABI and native fields remain explicit; A records32/64-bit BPF units
 and Clang18 subword8/16-bit lowering diagnostics.
+
+### Published source full check b3d713f42
+
+`make check` on immutable publishedb3d713f42 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_b3d713f42`. Every check retains its exact published source identity.

@@ -7471,6 +7471,26 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_b3d713f42": {
+    "actual_exit": 0,
+    "archive_block_sha256": "0c913344ca66aceed766c63acb09d04b7002afffae2e77d782f4730bd8ab7a9a",
+    "archive_marker": "=== FULL MAKE CHECK B3D713F42 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.cpu.jsonl.gz": "b0d6e63ba97503598f57341f7b420f2842f705009486f1688d4ad1b84c6619c1",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.head": "1e819ec0ff258b8e87b42e4db95273746ca1be0a0dfc5f22f53838621fcf87b4",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.launch.log": "e09b7a660f6d3ef271ff9b46494b0c9ee6b2844861013fc53229f5176e20f6a0",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.log": "266a4306472cd32db2e9762c414438c75ab4d16e524dcefd741015c9bcefe207",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.py": "83712a00abd0839d650de6c889449c834440bf46a7039a2181f3feb5defc6493",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.sources": "3909d571e161a8b6f34b9b2628cebbd6d16d8c8822d6ea5915ae5e0d42455235",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-cmov-full.state": "c961e7eadce49c7aed5da29e8cec83aa1615e2603737c1997737412d86afc9e1"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "b3d713f422560bc5d6deb5bcee6b297ca4d2b3d3",
+    "scope": "Complete formal make check of the exact published source tree b3d713f422560bc5d6deb5bcee6b297ca4d2b3d3. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1259
+  },
   "full_make_check_c435a1dac": {
     "actual_exit": 0,
     "archive_block_sha256": "b63ea7910daa5c1c3c5df389bca64cabf7d80e2d40f7fcefbdf55cbb3c0c7c80",
