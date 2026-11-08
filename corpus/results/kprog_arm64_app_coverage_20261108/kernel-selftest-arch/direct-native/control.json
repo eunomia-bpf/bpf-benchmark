@@ -1,0 +1,1439 @@
+{
+  "utc": "2026-11-08T16:32:20.642791+00:00",
+  "scope": "BPF-34 native P direct submission; original kernel global_func8 control; map/BTF-only object loading",
+  "control": {
+    "counts": {
+      "catalog_rows": 1917,
+      "attempted": 1,
+      "submitted": 1,
+      "installed": 1,
+      "verifier_rejected": 0,
+      "generation_failed": 0,
+      "compilation_failed": 0,
+      "resource_failed": 0,
+      "transport_failed": 0,
+      "load_failed": 0,
+      "skipped": 0,
+      "failure": 0,
+      "failure_agrees": 0,
+      "failure_installed": 0,
+      "success": 1,
+      "success_agrees": 1,
+      "success_installed": 1
+    },
+    "programs": [
+      {
+        "source_prog_id": 0,
+        "stage": "installed",
+        "native_sha256": "e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7",
+        "context": {
+          "version": 1,
+          "load_context": {
+            "prog_type": 8,
+            "expected_attach_type": 0,
+            "prog_flags": 0,
+            "prog_ifindex": 0,
+            "attach_btf_id": 0,
+            "attach_btf_obj_id": 0,
+            "attach_prog_id": 0,
+            "gpl_compatible": 1,
+            "source_btf_id": 12,
+            "source_func_type_id": 20,
+            "token_present": 0
+          },
+          "maps": []
+        },
+        "resources": {
+          "section": "cgroup_skb/ingress",
+          "maps": [],
+          "pin_root": "/sys/fs/bpf/kprog-selftest-qjh7788g",
+          "attach_target_resolution": null
+        },
+        "request_id": 1,
+        "status": 0,
+        "prog_id": 3,
+        "service": {
+          "request_id": 1,
+          "source_prog_id": 0,
+          "native_sha256": "e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7",
+          "started": "1970-01-01T00:00:29.451124+00:00",
+          "prog_id": 3,
+          "status": 0,
+          "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-mse251mc/service-state/trusted-g6egk1zi/1.success.tar.gz",
+          "finished": "1970-01-01T00:00:37.210159+00:00"
+        },
+        "diagnostic": "",
+        "file": "test_global_func8.c",
+        "program": "global_func8",
+        "section": "cgroup_skb/ingress",
+        "expect": "success",
+        "returncode": 0,
+        "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 8, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 12, \"source_func_type_id\": 20, \"token_present\": 0}, \"maps\": []}, \"resources\": {\"section\": \"cgroup_skb/ingress\", \"maps\": [], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-qjh7788g\", \"attach_target_resolution\": null}, \"request_id\": 1, \"status\": 0, \"prog_id\": 3, \"service\": {\"request_id\": 1, \"source_prog_id\": 0, \"native_sha256\": \"e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7\", \"started\": \"1970-01-01T00:00:29.451124+00:00\", \"prog_id\": 3, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-mse251mc/service-state/trusted-g6egk1zi/1.success.tar.gz\", \"finished\": \"1970-01-01T00:00:37.210159+00:00\"}, \"diagnostic\": \"\"}\n",
+        "stderr": "",
+        "command": [
+          "/usr/bin/python3",
+          "/workspaces/repository/kprog/selftests/submit.py",
+          "direct",
+          "arm64",
+          "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-mse251mc/service-state/trusted-g6egk1zi",
+          "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func8__global_func8.native.o",
+          "{\"file\": \"test_global_func8.c\", \"program\": \"global_func8\", \"section\": \"cgroup_skb/ingress\", \"body\": \"c\", \"expect\": \"success\", \"offset\": 248, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func8.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func8__global_func8.bpf.o\", \"entry\": true}"
+        ]
+      }
+    ],
+    "skipped": [],
+    "invocation": {
+      "table": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current",
+      "arch": "arm64",
+      "out": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-mse251mc/out",
+      "limit": 0,
+      "only": "global_func8",
+      "micro_exec": null
+    },
+    "source_scope": "Direct load-only native P with source_prog_id 0; maps/BTF and installed-stage agreement"
+  },
+  "submit_sha256": "64bc2affc8054c6a7561c259cf35ced7afaf53818fb6d376693b55b4355854ea",
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_exit": 0,
+    "compiler_exit": 0,
+    "archive": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/control-native-submit/trusted-arm64-service-result/run-20261108T162815462361Z.tar.gz",
+    "archive_sha256": "1c31583e8d56b806e8982739594472f5030e69af76a447780d1c767ae3ad503a"
+  },
+  "cleanup": {
+    "utc": "2026-11-08T16:19:27.937112+00:00",
+    "released_bytes": 6672777142,
+    "released": [
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/app-bytecode-capture.index",
+        "bytes": 25499885,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-abi-slot-join-candidate.index",
+        "bytes": 25445868,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-abi-slot-join-source.index",
+        "bytes": 25456653,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-app-indirect-coverage.index",
+        "bytes": 25446630,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-approved-case.index",
+        "bytes": 25655950,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-model.index",
+        "bytes": 25651892,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-outcomes.index",
+        "bytes": 25655018,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-safety-publish.index",
+        "bytes": 25655950,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-b-compiler-os.index",
+        "bytes": 25727939,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-event-launch.index",
+        "bytes": 25646514,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-event-result.index",
+        "bytes": 25652629,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-libaio-startup.index",
+        "bytes": 25671055,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-lse-work-counters.index",
+        "bytes": 25644919,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-queue-input.index",
+        "bytes": 25660641,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-queue-launch.index",
+        "bytes": 25670672,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-queue-result.index",
+        "bytes": 25677179,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-real-input-counters.index",
+        "bytes": 25660300,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-real-input-coverage-table.index",
+        "bytes": 25664373,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bcc-tetragon-terminal-work.index",
+        "bytes": 25678903,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-behavior-bcc-review.index",
+        "bytes": 25358996,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bitwise-lse-forms.index",
+        "bytes": 25688878,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bitwise-lse-safety.index",
+        "bytes": 25703165,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-bitwise-lse.index",
+        "bytes": 25686697,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-byte-tetragon-launch.index",
+        "bytes": 25711134,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-byte-tetragon-result.index",
+        "bytes": 25717914,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-call-guard-kfunc-tc-control.index",
+        "bytes": 25547423,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-call-guard-kfunc-xdp-control.index",
+        "bytes": 25546118,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-call-guard-runtime-inputs.index",
+        "bytes": 25544778,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-five-step.index",
+        "bytes": 25633917,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-ldadd.index",
+        "bytes": 25642594,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-ledger.index",
+        "bytes": 25633917,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-runner-current.index",
+        "bytes": 25731243,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-safety-complete.index",
+        "bytes": 25637140,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-canonical-safety-index.index",
+        "bytes": 25638132,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-chunk-errno-classification.index",
+        "bytes": 25627857,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-byte-access-classification.index",
+        "bytes": 25604911,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-clock-launch.index",
+        "bytes": 25501686,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-endpoint-launch.index",
+        "bytes": 25675074,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-endpoint-result.index",
+        "bytes": 25679683,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-endpoint-startup.index",
+        "bytes": 25644117,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-home-launch.index",
+        "bytes": 25496986,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-home-result.index",
+        "bytes": 25499885,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-native-compile.index",
+        "bytes": 25689676,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-parallel-launch.index",
+        "bytes": 25492006,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-parallel-result.index",
+        "bytes": 25493234,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-registered-launch.index",
+        "bytes": 25559611,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-cilium-source-adoption.index",
+        "bytes": 25499885,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-closed-runtime-increment.index",
+        "bytes": 25568753,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-code-address-bridge.index",
+        "bytes": 25404652,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-continuation-frontiers.index",
+        "bytes": 25672118,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-coverage-five-step.index",
+        "bytes": 25627857,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-coverage-handoff.index",
+        "bytes": 25361512,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-app-katran.index",
+        "bytes": 25614857,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-app-launch.index",
+        "bytes": 25610326,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-app-cilium.index",
+        "bytes": 25642450,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-app-launch.index",
+        "bytes": 25626216,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-app-otelcol-ebpf-profiler.index",
+        "bytes": 25640541,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-app-tetragon.index",
+        "bytes": 25631134,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-app-tracee.index",
+        "bytes": 25667789,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-remaining-queue.index",
+        "bytes": 25617069,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-safety.index",
+        "bytes": 25609874,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-x30-app-bcc.index",
+        "bytes": 25619586,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-x30-app-katran.index",
+        "bytes": 25625760,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-design-x30-app-launch.index",
+        "bytes": 25615338,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-entry-resource-build.index",
+        "bytes": 25507200,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-entry-resource-progress.index",
+        "bytes": 25508152,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-exclusive-branch-law.index",
+        "bytes": 25520415,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-exclusive-cycle-frame.index",
+        "bytes": 25574518,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-exclusive-cycle-laws.index",
+        "bytes": 25571998,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-exclusive-runtime-progress.index",
+        "bytes": 25514911,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-external-copy-layout-fix.index",
+        "bytes": 25683711,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-first-pass-table.index",
+        "bytes": 25386172,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-five-step-tetragon-table.index",
+        "bytes": 25636224,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-frame-link-entry-clobber.index",
+        "bytes": 25665600,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-frame-link-kernel-build.index",
+        "bytes": 25661285,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-frame-link-runtime-retry.index",
+        "bytes": 25663925,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-frame-link-runtime.index",
+        "bytes": 25661749,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-helper-guard-build.index",
+        "bytes": 25510198,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-helper-guard-katran.index",
+        "bytes": 25576969,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-helper-guard-progress.index",
+        "bytes": 25510886,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-helper-guard-transport.index",
+        "bytes": 25563614,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-helper-worker-capsule.index",
+        "bytes": 25690886,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-host-bcc-tetragon-launch.index",
+        "bytes": 25591702,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-host-compile-component.index",
+        "bytes": 25580782,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-host-compile-queue.index",
+        "bytes": 25584099,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-host-compile-safety.index",
+        "bytes": 25603076,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-annotation-current-launch.index",
+        "bytes": 25722664,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-annotation-current-result.index",
+        "bytes": 25729980,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-annotation-launch.index",
+        "bytes": 25713847,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-annotation-result.index",
+        "bytes": 25723605,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-kfunc-build.index",
+        "bytes": 25555375,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-kfunc-tc-control.index",
+        "bytes": 25557793,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-kfunc-transport.index",
+        "bytes": 25558089,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-kfunc-xdp-control.index",
+        "bytes": 25556585,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-native-stage-join.index",
+        "bytes": 25730156,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftest-arch.index",
+        "bytes": 25695672,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftest-full.index",
+        "bytes": 25698476,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftest-helper-runtime.index",
+        "bytes": 25676810,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftest-helper-source.index",
+        "bytes": 25676346,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftests-compile.index",
+        "bytes": 25639490,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftests-headers.index",
+        "bytes": 25641494,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kernel-selftests-index.index",
+        "bytes": 25641494,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-common-registration.index",
+        "bytes": 25559763,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-module-bundle.index",
+        "bytes": 25567405,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-paired-build.index",
+        "bytes": 25533284,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-runtime-inputs.index",
+        "bytes": 25533588,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-safety-join.index",
+        "bytes": 25561971,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-safety.index",
+        "bytes": 25561811,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-tc-control.index",
+        "bytes": 25536798,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kfunc-xdp-control.index",
+        "bytes": 25534990,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-latest-evidence-index.index",
+        "bytes": 25645596,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-layout-cilium-closure.index",
+        "bytes": 25683711,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-layout-initial-retirement.index",
+        "bytes": 25682506,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lse-bcc-launch.index",
+        "bytes": 25638132,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lse-bcc-result.index",
+        "bytes": 25643307,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lse-native-input.index",
+        "bytes": 25636224,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lse-tetragon-launch.index",
+        "bytes": 25668250,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lse-tetragon-result.index",
+        "bytes": 25674571,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-map-helper-build.index",
+        "bytes": 25575621,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-mapless-kfunc-runtime-inputs.index",
+        "bytes": 25540188,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-mapless-kfunc-tc-control.index",
+        "bytes": 25542782,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-mapless-kfunc-xdp-control.index",
+        "bytes": 25541501,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-mapless-kfunc.index",
+        "bytes": 25538868,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-build.index",
+        "bytes": 25657593,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-closure.index",
+        "bytes": 25662697,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-launch.index",
+        "bytes": 25657889,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-paired-rebuild.index",
+        "bytes": 25659629,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-retry-launch.index",
+        "bytes": 25659963,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-retry-safety.index",
+        "bytes": 25662537,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-context-safety.index",
+        "bytes": 25658646,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-native-resources.index",
+        "bytes": 25491357,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-numeric-integration.index",
+        "bytes": 25496682,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-numeric-status.index",
+        "bytes": 25496986,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-ordinary-private-storage.index",
+        "bytes": 25678559,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-five-step-coverage.index",
+        "bytes": 25642450,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-memory-launch.index",
+        "bytes": 25525013,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-memory-result.index",
+        "bytes": 25595646,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-native-o2-input.index",
+        "bytes": 25648622,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-native-os-input.index",
+        "bytes": 25671662,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-resource-launch.index",
+        "bytes": 25500378,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-otel-resource-result.index",
+        "bytes": 25522308,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-pending-epoch-handoff.index",
+        "bytes": 25617397,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-private-ghost-storage.index",
+        "bytes": 25733045,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-readonly-adoption-status.index",
+        "bytes": 25479999,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-readonly-layout-candidate.index",
+        "bytes": 25473771,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-readonly-layout-runtime.index",
+        "bytes": 25475008,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-replay-progress.index",
+        "bytes": 25501686,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-resolved-kfunc-guard.index",
+        "bytes": 25544450,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-resource-runtime-doc.index",
+        "bytes": 25491357,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-runtime-adoption.index",
+        "bytes": 25479495,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-runtime-overview.index",
+        "bytes": 25403673,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-safety-tetragon-index.index",
+        "bytes": 25700599,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-scoped-app-launch.index",
+        "bytes": 25507512,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-scoped-cilium.index",
+        "bytes": 25563302,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-scoped-clock-control.index",
+        "bytes": 25553741,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-scoped-resource-control.index",
+        "bytes": 25514759,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-scoped-tracee.index",
+        "bytes": 25552511,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-selftest-runner-current.index",
+        "bytes": 25722123,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-service-reproduction.index",
+        "bytes": 25481358,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-six-app-successor-table.index",
+        "bytes": 25603076,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-six-dispatch.index",
+        "bytes": 25477445,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-six-failure-classes.index",
+        "bytes": 25477765,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-skb-cb-byte-access.index",
+        "bytes": 25605682,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-skb-cb-byte-offset.index",
+        "bytes": 25605682,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-skb-live-production.index",
+        "bytes": 25595646,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-sparse-isa-legacy-result.index",
+        "bytes": 25734346,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-after.index",
+        "bytes": 25599745,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-application-launch.index",
+        "bytes": 25601848,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-before.index",
+        "bytes": 25598565,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-component.index",
+        "bytes": 25601057,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-index.index",
+        "bytes": 25601177,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-safety-closure.index",
+        "bytes": 25603076,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-startup-index.index",
+        "bytes": 25601848,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-byte-startup-repair.index",
+        "bytes": 25601848,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-frame-component.index",
+        "bytes": 25622413,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stack-frame-linkage.index",
+        "bytes": 25624827,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-storage-profile.index",
+        "bytes": 25629575,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-terminal-drain-publication.index",
+        "bytes": 25358708,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-bitwise-atomic-model.index",
+        "bytes": 25645596,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-byte-table.index",
+        "bytes": 25720049,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-canonical-launch.index",
+        "bytes": 25691561,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-canonical-result.index",
+        "bytes": 25696078,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-layout-launch.index",
+        "bytes": 25682506,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-layout-result.index",
+        "bytes": 25691078,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-lse-input.index",
+        "bytes": 25643917,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-packaged-source.index",
+        "bytes": 25491357,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-closure.index",
+        "bytes": 25489848,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-core-compile.index",
+        "bytes": 25560255,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-core-launch.index",
+        "bytes": 25560751,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-host-affinity.index",
+        "bytes": 25533756,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-terminal-counters.index",
+        "bytes": 25672583,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-app-launch.index",
+        "bytes": 25590076,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-cilium-result.index",
+        "bytes": 25604388,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-formal-join.index",
+        "bytes": 25567565,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-otelcol-ebpf-profiler-result.index",
+        "bytes": 25621067,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-production.index",
+        "bytes": 25618673,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helper-tracee-result.index",
+        "bytes": 25618673,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helpers-bounds.index",
+        "bytes": 25566175,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helpers-component.index",
+        "bytes": 25566607,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-xdp-helpers-valid.index",
+        "bytes": 25564850,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/bcc-compact-preflight-publication.index",
+        "bytes": 25303063,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/canonical-bcc-harness.index",
+        "bytes": 25315886,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/canonical-bcc-modules.index",
+        "bytes": 25316406,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/canonical-checkpoint.index",
+        "bytes": 25316406,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/canonical-context.index",
+        "bytes": 25311602,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/canonical-safety-ledger.index",
+        "bytes": 25637140,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/cilium-writable-diagnosis.index",
+        "bytes": 25371374,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/closed-runs-publication.index",
+        "bytes": 25230479,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-affinity-publication.index",
+        "bytes": 25279807,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-candidate-publication.index",
+        "bytes": 25232305,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-closed-safety-readme.index",
+        "bytes": 25300803,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-kernel-layout-publication.index",
+        "bytes": 25273187,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-bcc-application-review-collector.index",
+        "bytes": 25330484,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-bcc-error-propagation-collector.index",
+        "bytes": 25330836,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-bcc-full-start-collector.index",
+        "bytes": 25356616,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-canonical-bcc-collector.index",
+        "bytes": 25328798,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-exclusive-candidate-build-collector.index",
+        "bytes": 25336138,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-exclusive-candidate-load-only-collector.index",
+        "bytes": 25341565,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-exclusive-constant-cycle-collector.index",
+        "bytes": 25342699,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-exclusive-convergence-compiler-collector.index",
+        "bytes": 25329624,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-exclusive-retry-collector.index",
+        "bytes": 25323715,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-katran-collector.index",
+        "bytes": 25306648,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-publication.index",
+        "bytes": 25262971,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-native-safety-collector.index",
+        "bytes": 25296502,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-parallel-publication.index",
+        "bytes": 25272539,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-projection-publication.index",
+        "bytes": 25224785,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-routing-fix.index",
+        "bytes": 25267392,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/context-routing-publication.index",
+        "bytes": 25266608,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/corrected-closure.index",
+        "bytes": 25245441,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/corrected-readme.index",
+        "bytes": 25246767,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/cross-isa-parser.index",
+        "bytes": 25390877,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/exclusive-register-prefix.index",
+        "bytes": 25593144,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/host-provenance-status.index",
+        "bytes": 25438943,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/katran-two-start-work.index",
+        "bytes": 25437760,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/numeric-contract-complete.index",
+        "bytes": 25431649,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/numeric-contract-sync.index",
+        "bytes": 25422935,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/payload-maxima-publication.index",
+        "bytes": 25213664,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/payload-partial-publication.index",
+        "bytes": 25221506,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/payload-safe-controls.index",
+        "bytes": 25215154,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/payload-safety-publication.index",
+        "bytes": 25214666,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/probe-map-fd.index",
+        "bytes": 25399565,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-candidate.index",
+        "bytes": 25369409,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-otel-replay.index",
+        "bytes": 25498629,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/readonly-byte-source.index",
+        "bytes": 25472596,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/register-prefix-index.index",
+        "bytes": 25593144,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-cilium.index",
+        "bytes": 25363501,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-katran.index",
+        "bytes": 25418078,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-otelcol-ebpf-profiler.index",
+        "bytes": 25360740,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-tetragon.index",
+        "bytes": 25375617,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-tracee.index",
+        "bytes": 25472596,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-app-transport-publication.index",
+        "bytes": 25351438,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/six-firstpass-closed.index",
+        "bytes": 25476545,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/sparse-ghost-publication.index",
+        "bytes": 25201324,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/tetra-mixed-probe.index",
+        "bytes": 25383803,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/tetragon-startup-replay.index",
+        "bytes": 25513529,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/trusted-path-evidence.index",
+        "bytes": 25439954,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/universal-safety-scope.index",
+        "bytes": 25390877,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/xdp-entry-publication.index",
+        "bytes": 25256726,
+        "kind": "published private index"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/runner-current/objects",
+        "bytes": 2626408,
+        "kind": "closed private runner objects; current canonical warm cache retained"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/runner-current/micro_exec",
+        "bytes": 79434744,
+        "kind": "closed private runner artifact; complete d253 archive retained"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/runner-current/libnative_loader.a",
+        "bytes": 720620,
+        "kind": "closed private runner artifact; complete d253 archive retained"
+      }
+    ],
+    "retained": [
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-safety.index",
+        "reason": "staging tree retained"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-app-launch.index",
+        "reason": "active application publisher namespace"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-ordered-app-launch.index",
+        "reason": "active application publisher namespace"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-otelcol-ebpf-profiler-result.index",
+        "reason": "active application publisher namespace"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-tetragon-result.index",
+        "reason": "active application publisher namespace"
+      }
+    ],
+    "remote": "2b49e3155a478ac27e53770655987137fb44e971"
+  },
+  "runtime_admission_additions": 0
+}

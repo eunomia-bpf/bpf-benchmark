@@ -1,45 +1,68 @@
 #!/usr/bin/env python3
-"""Submit the compiled selftest programs through the five-step path.
+"""Submit compiled native selftests with their maps and program context.
 
-`selftests.py` enumerates the kernel's annotated programs and compiles the C
-ones to the selected native ISA.  This script takes those objects, loads the matching
-BPF program the way an application does, and submits it through the trusted
-native path, then compares the outcome with the kernel's own annotation.
+Each object opens with every program's autoload disabled. Libbpf creates the
+maps and BTF; temporary map pins and SUBMIT_RESOURCES retain their capabilities
+through the native outcome. The request carries native P, source_prog_id 0 and
+the object's load context. The common service generates B from the kernel copy.
 
-The comparison is the whole point:
-
-  * a `__failure` program that loads and runs means the native path accepts
-    something the verifier must reject -- a faithfulness defect;
-  * a `__success` program the verifier rejects means the path lost a
-    program the kernel accepts;
-  * a program that never reaches the verifier (compile, generation) is
-    coverage, not agreement.
-
-Each program is run the way an application loads it: the BPF object is
-loaded first (`micro_exec run-native-kernel --program ...`), which is what
-gives the loader an `original_prog_fd` and a source bytecode to bind
-against, with `--native-program` naming the object compiled from the same
-source.
-
-Usage: submit.py [--arch x86|arm64] [--table DIR] [--out DIR] [--limit N] [--only NAME]
+The agreement table uses the installed stage for __success and stock-verifier
+rejection for __failure. Generation, resource and transport outcomes retain
+their coverage stages. Installed __failure rows count as findings.
 """
-
 import argparse
+import ctypes as c
+import errno
 import fcntl
+import hashlib
 import json
 import os
 import pathlib
-import re
 import subprocess
 import sys
+import tarfile
 import tempfile
+import threading
+import traceback
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_TABLE = ROOT / "kprog/selftests/build"
+sys.path.insert(0, str(ROOT / "kprog"))
+from trusted_service import Request, Result, ioctl
+
+
+class Submission(c.Structure):
+    _fields_ = [("request", Request), ("map_count", c.c_uint32),
+                ("reserved", c.c_uint32), ("map_fds_user", c.c_uint64)]
+
+
+class MapInfo(c.Structure):
+    _fields_ = [(name, c.c_uint32) for name in
+                ("map_type", "map_id", "key_size", "value_size",
+                 "max_entries", "map_flags")]
+
+
+class BtfInfo(c.Structure):
+    _fields_ = [("btf", c.c_uint64), ("btf_size", c.c_uint32),
+                ("id", c.c_uint32), ("name", c.c_uint64),
+                ("name_len", c.c_uint32), ("kernel_btf", c.c_uint32)]
+
+
+SUBMIT = (3 << 30) | (c.sizeof(Submission) << 16) | (ord("N") << 8) | 0x77
+WAIT = (2 << 30) | (c.sizeof(Result) << 16) | (ord("N") << 8) | 0x74
+
+
+def tools_for_arch(arch):
+    if arch == "arm64":
+        return (ROOT / "runner/build-arm64-llvmbpf/native_loader",
+                ROOT / "kprog/arm64/build/app-native-link/"
+                       "aarch64-unknown-linux-gnu/release/native-link")
+    return (ROOT / "kprog/libnativeloader/build",
+            ROOT / "kprog/x86/native_lab/native_link/target/release/native-link")
 
 
 def run(cmd, cwd=None, timeout=120):
-    """Run one submission; returns (returncode, stdout, stderr)."""
+    """Keep each direct producer's complete stdout and stderr."""
     try:
         done = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
                               timeout=timeout)
@@ -48,46 +71,18 @@ def run(cmd, cwd=None, timeout=120):
         return 124, "", "timeout after %ds" % timeout
 
 
-# `micro_exec`'s stub type has to match the object's own program type, and
-# it names them as the CLI does rather than by number.
-KIND = {3: "sched_cls", 6: "xdp", 8: "cgroup_skb"}
-
-
-def program_type(micro_exec, obj):
-    """The libbpf program type number of the object's single program."""
-    rc, so, se = run([micro_exec, "list-programs", "--program", str(obj)],
-                     timeout=60)
-    if rc != 0:
-        return None
-    try:
-        return json.loads(so)[0]["prog_type"]
-    except (ValueError, KeyError, IndexError):
-        return None
-
-
 def start_service(arch=1):
-    """Start the trusted service the kernel hands each job to.
-
-    The kernel end queues a submission and waits for a registered service to
-    specialize it, so without one every load ends in ENOTCONN.
-    """
     target = {1: "x86", 2: "arm64"}[arch]
-    endpoint = pathlib.Path("/sys/kernel/debug/bpf_" + target + "_native_lab/specializer")
-    linker = (ROOT / "kprog/x86/native_lab/native_link/target/release/native-link"
-              if arch == 1 else ROOT / "kprog/arm64/build/app-native-link/"
-              "aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources")
-    loader = (ROOT / "kprog/libnativeloader/build/trusted-native-loader"
-              if arch == 1 else ROOT / "kprog/arm64/build/"
-              "kernel-selftest-helpers/loader/trusted-native-loader")
+    loader, linker = tools_for_arch(target)
+    endpoint = pathlib.Path("/sys/kernel/debug/bpf_" + target +
+                            "_native_lab/specializer")
     if not endpoint.exists():
         return None, None
     state = pathlib.Path(tempfile.mkdtemp(prefix="trusted-"))
     proc = subprocess.Popen(
         [sys.executable, str(ROOT / "kprog/trusted_service.py"),
-         "--arch", str(arch), "--endpoint", str(endpoint),
-         "--state", str(state),
-         "--native-link",
-         str(linker), "--loader", str(loader)],
+         "--arch", str(arch), "--endpoint", str(endpoint), "--state", str(state),
+         "--native-link", str(linker), "--loader", str(loader / "trusted-native-loader")],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     line = proc.stdout.readline()
     try:
@@ -98,128 +93,341 @@ def start_service(arch=1):
     return proc, state
 
 
-# A rejection only means something if the native path was reached.  The
-# loader says so in one way when the specializer rejected the native
-# program, and in many ways when it never got that far: the companion BPF
-# object failed to load, its section had no inferable type, the native
-# entry was missing.  Each of those settles the outcome before the native
-# path is involved, so counting them as agreement would claim the path
-# agreed with an annotation it was never compared against.
-REACHED = "trusted specializer refused native program"
+class ObjectResources:
+    """A libbpf object containing maps/BTF and autoload=false programs."""
+    def __init__(self, arch, path, program):
+        directory, _ = tools_for_arch(arch)
+        self.obj = None
+        self.pins = None
+        self.entry_name = program.encode()
+        self.lib = c.CDLL(str(directory / "libnative_loader.so"), use_errno=True)
+        self.pins = pathlib.Path(tempfile.mkdtemp(prefix="kprog-selftest-",
+                                                dir="/sys/fs/bpf"))
+        self.bind("libbpf_get_error", c.c_long, c.c_void_p)
+        self.bind("bpf_object__open_file", c.c_void_p, c.c_char_p, c.c_void_p)
+        self.bind("bpf_object__close", None, c.c_void_p)
+        self.bind("bpf_object__load", c.c_int, c.c_void_p)
+        self.bind("bpf_object__next_program", c.c_void_p, c.c_void_p, c.c_void_p)
+        self.bind("bpf_object__find_program_by_name", c.c_void_p, c.c_void_p, c.c_char_p)
+        self.bind("bpf_program__set_autoload", c.c_int, c.c_void_p, c.c_bool)
+        self.bind("bpf_program__type", c.c_uint32, c.c_void_p)
+        self.bind("bpf_program__expected_attach_type", c.c_uint32, c.c_void_p)
+        self.bind("bpf_program__flags", c.c_uint32, c.c_void_p)
+        self.bind("bpf_program__section_name", c.c_char_p, c.c_void_p)
+        self.bind("bpf_object__next_map", c.c_void_p, c.c_void_p, c.c_void_p)
+        self.bind("bpf_map__name", c.c_char_p, c.c_void_p)
+        self.bind("bpf_map__is_internal", c.c_bool, c.c_void_p)
+        self.bind("bpf_map__set_pin_path", c.c_int, c.c_void_p, c.c_char_p)
+        self.bind("bpf_map__pin", c.c_int, c.c_void_p, c.c_char_p)
+        self.bind("bpf_map__fd", c.c_int, c.c_void_p)
+        self.bind("bpf_obj_get_info_by_fd", c.c_int, c.c_int, c.c_void_p,
+                  c.POINTER(c.c_uint32))
+        self.bind("bpf_object__btf", c.c_void_p, c.c_void_p)
+        self.bind("bpf_object__btf_fd", c.c_int, c.c_void_p)
+        self.bind("btf__type_cnt", c.c_uint32, c.c_void_p)
+        self.bind("btf__type_by_id", c.c_void_p, c.c_void_p, c.c_uint32)
+        self.bind("btf__name_by_offset", c.c_char_p, c.c_void_p, c.c_uint32)
+        self.bind("btf__find_by_name_kind", c.c_int, c.c_void_p, c.c_char_p, c.c_uint32)
+        self.bind("libbpf_find_vmlinux_btf_id", c.c_int, c.c_char_p, c.c_uint32)
+        self.obj = self.lib.bpf_object__open_file(os.fsencode(path), None)
+        error = self.lib.libbpf_get_error(self.obj)
+        if error or not self.obj:
+            self.obj = None
+            raise OSError(-error if error else c.get_errno(), "bpf_object__open_file")
+        prog = None
+        while True:
+            prog = self.lib.bpf_object__next_program(self.obj, prog)
+            if not prog:
+                break
+            self.ok(self.lib.bpf_program__set_autoload(prog, False), "set_autoload")
+        self.program = self.lib.bpf_object__find_program_by_name(
+            self.obj, program.encode())
+        if not self.program:
+            raise OSError(errno.ENOENT, "program context symbol " + program)
+        self.maps = []
+        item = None
+        while True:
+            item = self.lib.bpf_object__next_map(self.obj, item)
+            if not item:
+                break
+            self.ok(self.lib.bpf_map__set_pin_path(
+                item, os.fsencode(self.pins / str(len(self.maps)))), "set_pin_path")
+            self.maps.append(item)
+
+    def bind(self, name, result, *arguments):
+        function = getattr(self.lib, name)
+        function.restype = result
+        function.argtypes = list(arguments)
+
+    @staticmethod
+    def ok(rc, operation):
+        if rc < 0:
+            raise OSError(-rc, operation + ": " + os.strerror(-rc))
+
+    def info(self, fd, output):
+        length = c.c_uint32(c.sizeof(output))
+        self.ok(self.lib.bpf_obj_get_info_by_fd(
+            fd, c.byref(output), c.byref(length)), "get_info_by_fd")
+        return output
+
+    def datasections(self, btf):
+        sections = []
+        if not btf:
+            return sections
+        for index in range(1, self.lib.btf__type_cnt(btf)):
+            address = self.lib.btf__type_by_id(btf, index)
+            fields = (c.c_uint32 * 3).from_address(address)
+            if ((fields[1] >> 24) & 31) != 15:
+                continue
+            name = self.lib.btf__name_by_offset(btf, fields[0]).decode()
+            variables = []
+            for offset in range(fields[1] & 65535):
+                item = (c.c_uint32 * 3).from_address(address + 12 + offset * 12)
+                variable = self.lib.btf__type_by_id(btf, item[0])
+                symbol = self.lib.btf__name_by_offset(
+                    btf, c.c_uint32.from_address(variable).value).decode()
+                variables.append((symbol, item[1]))
+            sections.append((name, variables))
+        return sections
+
+    def load(self, path):
+        self.ok(self.lib.bpf_object__load(self.obj), "maps/BTF object load")
+        btf = self.lib.bpf_object__btf(self.obj)
+        sections = self.datasections(btf)
+        bindings, fds, pins = [], [], []
+        for item in self.maps:
+            fd = self.lib.bpf_map__fd(item)
+            if fd < 0:
+                continue
+            self.ok(self.lib.bpf_map__pin(item, None), "map pin")
+            identity = self.info(fd, MapInfo())
+            name = self.lib.bpf_map__name(item).decode()
+            fds.append(fd)
+            pins.append(dict(name=name, map_id=identity.map_id))
+            bindings.append(dict(name=name, map_id=identity.map_id,
+                                 value_offset=None))
+            if self.lib.bpf_map__is_internal(item):
+                for section, variables in sections:
+                    if name == section or name.endswith(section):
+                        bindings.extend(dict(name=symbol, map_id=identity.map_id,
+                                             value_offset=offset)
+                                        for symbol, offset in variables)
+        program = self.program
+        section = self.lib.bpf_program__section_name(program).decode()
+        flags = self.lib.bpf_program__flags(program)
+        prefix = section.split("/", 1)[0]
+        if "s" in prefix.split("."):
+            flags |= 1 << 4
+        if prefix.startswith("xdp.frags"):
+            flags |= 1 << 5
+        context = dict(prog_type=self.lib.bpf_program__type(program),
+                       expected_attach_type=self.lib.bpf_program__expected_attach_type(program),
+                       prog_flags=flags, prog_ifindex=0, attach_btf_id=0,
+                       attach_btf_obj_id=0, attach_prog_id=0, gpl_compatible=1,
+                       source_btf_id=0, source_func_type_id=0, token_present=0)
+        btf_fd = self.lib.bpf_object__btf_fd(self.obj)
+        if btf_fd >= 0:
+            context["source_btf_id"] = self.info(btf_fd, BtfInfo()).id
+            # Entry function BTF follows the selected program name.
+            identifier = self.lib.btf__find_by_name_kind(btf, self.entry_name, 12)
+            if identifier >= 0:
+                context["source_func_type_id"] = identifier
+        target_error = None
+        if context["prog_type"] in (26, 29) and "/" in section:
+            target = section.split("/", 1)[1]
+            identifier = self.lib.libbpf_find_vmlinux_btf_id(
+                target.encode(), context["expected_attach_type"])
+            if identifier >= 0:
+                context["attach_btf_id"] = identifier
+            else:
+                target_error = dict(target=target, errno=-identifier)
+        from elftools.elf.elffile import ELFFile
+        with pathlib.Path(path).open("rb") as source:
+            elf = ELFFile(source)
+            license = elf.get_section_by_name("license")
+            context["gpl_compatible"] = int(license is not None and
+                                            b"GPL" in license.data().split(b"\0", 1)[0])
+        return dict(version=1, load_context=context, maps=bindings), fds, dict(
+            section=section, maps=pins, pin_root=str(self.pins),
+            attach_target_resolution=target_error)
+
+    def close(self):
+        if self.obj:
+            self.lib.bpf_object__close(self.obj)
+            self.obj = None
+        if self.pins is not None:
+            for pin in self.pins.iterdir():
+                pin.unlink()
+            self.pins.rmdir()
 
 
-def classify(rc, stderr):
-    """What happened to one program, in terms of what the path exercised."""
-    if rc == 0:
-        return "ran"
-    if REACHED in stderr:
-        return "refused"
-    return "not-reached"
+def service_stage(record):
+    if record["status"] == 0:
+        return "installed", ""
+    path = record.get("failure_archive")
+    text = ""
+    if path:
+        with tarfile.open(path) as archive:
+            names = archive.getnames()
+            if "request/load.stderr" in names:
+                text = archive.extractfile("request/load.stderr").read().decode(errors="replace")
+            if "processed " in text:
+                return "verifier_rejected", text
+            if "native-link kernel failed" in text:
+                return "generation_failed", text
+            if not any(name.endswith(".bpf.c") for name in names):
+                return "generation_failed", record.get("error", "") + text
+            if not any(name.endswith(".bpf.o") for name in names):
+                return "compilation_failed", record.get("error", "") + text
+            if "request/commands.jsonl" in names:
+                commands = [json.loads(line) for line in
+                            archive.extractfile("request/commands.jsonl").read().splitlines()]
+                if any(cmd["returncode"] for cmd in commands):
+                    return "compilation_failed", text
+    if "ValueError" in record.get("traceback", ""):
+        return "generation_failed", record.get("error", "") + text
+    return "load_failed", record.get("error", "") + text
 
 
-def program_listing(micro_exec, obj):
-    """The (name, section) pairs one object holds."""
-    rc, so, se = run([micro_exec, "list-programs", "--program", str(obj)],
-                     timeout=60)
-    if rc != 0:
-        return []
+def direct(arch, state, native, row):
+    resources = None
+    descriptor = None
+    result = dict(source_prog_id=0, stage="resource_failed")
     try:
-        return [(p["name"], p["section_name"]) for p in json.loads(so)]
-    except (ValueError, KeyError):
-        return []
+        native_bytes = pathlib.Path(native).read_bytes()
+        result["native_sha256"] = hashlib.sha256(native_bytes).hexdigest()
+        # Allocation before __init__ keeps cleanup available for libbpf errors.
+        resources = ObjectResources.__new__(ObjectResources)
+        resources.__init__(arch, row["bpf_object"], row["program"])
+        metadata, fds, details = resources.load(row["bpf_object"])
+        entry_bytes = row["program"].encode()
+        meta_bytes = json.dumps(metadata, separators=(",", ":")).encode()
+        buffers = [c.create_string_buffer(value) for value in
+                   (native_bytes, entry_bytes, meta_bytes)]
+        handles = (c.c_int32 * len(fds))(*fds)
+        request = Request(version=1, arch={"x86": 1, "arm64": 2}[arch],
+                          source_prog_id=0, native_size=len(native_bytes),
+                          entry_size=len(entry_bytes), metadata_size=len(meta_bytes),
+                          native_user=c.addressof(buffers[0]),
+                          entry_user=c.addressof(buffers[1]),
+                          metadata_user=c.addressof(buffers[2]))
+        submission = Submission(request=request, map_count=len(fds),
+                                map_fds_user=c.addressof(handles))
+        result.update(context=metadata, resources=details,
+                      native_sha256=hashlib.sha256(native_bytes).hexdigest(),
+                      stage="transport_failed")
+        endpoint = pathlib.Path("/sys/kernel/debug/bpf_" + arch + "_native_lab/native_submit")
+        descriptor = os.open(endpoint, os.O_RDWR | os.O_CLOEXEC)
+        ioctl(descriptor, SUBMIT, submission)
+        reply = Result()
+        ioctl(descriptor, WAIT, reply)
+        result.update(request_id=reply.request_id, status=reply.status,
+                      prog_id=reply.prog_id)
+        with (state / "request.lock").open("rb") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            record = next(json.loads(line) for line in
+                          (state / "requests.jsonl").read_text().splitlines()
+                          if json.loads(line)["request_id"] == reply.request_id)
+            result["service"] = record
+            result["stage"], result["diagnostic"] = service_stage(record)
+    except Exception as error:
+        result.update(error=str(error), traceback=traceback.format_exc())
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        if resources is not None:
+            resources.close()
+    print(json.dumps(result), flush=True)
+    return int(result["stage"] in {"resource_failed", "transport_failed"})
+
+
+def agreement(results, total):
+    counts = dict(catalog_rows=total, attempted=len(results),
+                  submitted=sum("request_id" in row for row in results))
+    for stage in ("installed", "verifier_rejected", "generation_failed",
+                  "compilation_failed", "resource_failed", "transport_failed", "load_failed"):
+        counts[stage] = sum(row["stage"] == stage for row in results)
+    counts["skipped"] = 0
+    for expected in ("failure", "success"):
+        reached = [row for row in results if row["expect"] == expected and
+                   row["stage"] in {"installed", "verifier_rejected"}]
+        counts[expected] = len(reached)
+        counts[expected + "_agrees"] = sum(
+            row["stage"] == ("installed" if expected == "success" else "verifier_rejected")
+            for row in reached)
+        counts[expected + "_installed"] = sum(row["stage"] == "installed" for row in reached)
+    return counts
 
 
 def main(argv):
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--table", default=str(DEFAULT_TABLE))
-    ap.add_argument("--arch", default="x86")
-    ap.add_argument("--out", default=str(ROOT / "kprog/selftests/results"))
-    ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--only", default="")
-    ap.add_argument("--micro-exec",
-                    default=None)
-    args = ap.parse_args(argv[1:])
-
-    if args.micro_exec is None:
-        args.micro_exec = str(ROOT / {"x86": "runner/build-llvmbpf/micro_exec",
-                                     "arm64": "runner/build-arm64-llvmbpf/micro_exec"}[args.arch])
-    table = pathlib.Path(args.table) / "programs.json"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--table", default=str(DEFAULT_TABLE))
+    parser.add_argument("--arch", default="x86")
+    parser.add_argument("--out", default=str(ROOT / "kprog/selftests/results"))
+    parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--only", default="")
+    parser.add_argument("--micro-exec", default=None, help=argparse.SUPPRESS)
+    args = parser.parse_args(argv[1:])
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    rows = json.load(open(table))["programs"]
-
-    # Submit only programs whose file compiled and whose entry symbol is
-    # present: a program without a native entry has nothing to bind.
-    work = [r for r in rows
-            if r["body"] == "c" and r.get("compiled") and r.get("entry")]
+    catalog = json.loads((pathlib.Path(args.table) / "programs.json").read_text())["programs"]
+    work = [row for row in catalog if row["body"] == "c" and
+            row.get("compiled") and row.get("entry")]
     if args.only:
-        work = [r for r in work if args.only in r["program"]]
+        work = [row for row in work if args.only in row["program"]]
     if args.limit:
         work = work[:args.limit]
-
     service, state = start_service({"x86": 1, "arm64": 2}[args.arch])
     if service is None:
-        print("no trusted service: the kernel endpoint is absent",
-              file=sys.stderr)
-        return 1
-
+        raise RuntimeError("trusted service endpoint startup failed")
+    readers = []
+    def drain(stream, path):
+        with path.open("w") as output:
+            for line in stream:
+                output.write(line)
+                output.flush()
+    for name, stream in (("stdout", service.stdout), ("stderr", service.stderr)):
+        reader = threading.Thread(target=drain, args=(stream, state / ("service." + name)))
+        reader.start()
+        readers.append(reader)
     results = []
-    skipped = []
-    for r in work:
-        src = pathlib.Path(r["path"])
-        bpf = pathlib.Path(r.get("bpf_object") or "")
-        obj = pathlib.Path(args.table) / (
-            src.stem + "__" + r["program"] + ".native.o")
-        listing = program_listing(args.micro_exec, bpf)
-        if len(listing) != 1 or listing[0][0] != r["program"]:
-            # `selftests.py` compiles each program into its own object, so
-            # an object holding another program means the compile or the
-            # table is stale.
-            skipped.append(dict(file=r["file"], program=r["program"],
-                                expect=r["expect"],
-                                programs=[n for n, _ in listing],
-                                reason="object holds %d programs"
-                                       % len(listing)))
-            continue
-        kind = KIND.get(program_type(args.micro_exec, bpf))
-        if kind is None:
-            # The stub is created for one of three types; another type
-            # would be rejected, so record why instead of guessing.
-            skipped.append(dict(
-                file=r["file"], program=r["program"], expect=r["expect"],
-                programs=[n for n, _ in listing],
-                reason="unsupported type"))
-            continue
-        cmd = [args.micro_exec, "run-native-kernel", "--program", str(bpf),
-               "--native-program", str(obj), "--inner-repeat", "1",
-               "--native-kernel-prog-type", kind]
-        rc, so, se = run(cmd, timeout=120)
-        results.append(dict(file=r["file"], program=r["program"],
-                            section=r["section"], expect=r["expect"],
-                            returncode=rc,
-                            outcome=classify(rc, se),
-                            stdout=so[-600:], stderr=se[-600:]))
-
-    # The service holds this lock through its terminal archive and receipt.
-    with (state / "request.lock").open("rb") as request_lock:
-        fcntl.flock(request_lock, fcntl.LOCK_EX)
-        service.terminate()
-    service.wait()
-    counts = {"submitted": len(results), "skipped": len(skipped)}
-    for outcome in ("ran", "refused", "not-reached"):
-        counts[outcome] = sum(1 for x in results if x["outcome"] == outcome)
-    for want in ("failure", "success"):
-        sel = [x for x in results if x["expect"] == want
-               and x["outcome"] != "not-reached"]
-        counts[want] = len(sel)
-        counts[want + "_agrees"] = sum(
-            1 for x in sel
-            if (want == "failure") == (x["outcome"] == "refused"))
-    json.dump(dict(counts=counts, programs=results, skipped=skipped),
-              open(out / "submissions.json", "w"), indent=1)
-    print(json.dumps(counts, indent=1))
+    def save():
+        payload = dict(counts=agreement(results, len(catalog)), programs=results,
+                       skipped=[], invocation=vars(args),
+                       source_scope="Direct load-only native P with source_prog_id 0; maps/BTF and installed-stage agreement")
+        (out / "submissions.json").write_text(json.dumps(payload, indent=2) + "\n")
+    try:
+        for row in work:
+            native = pathlib.Path(args.table) / (
+                pathlib.Path(row["path"]).stem + "__" + row["program"] + ".native.o")
+            command = [sys.executable, str(pathlib.Path(__file__)), "direct",
+                       args.arch, str(state), str(native), json.dumps(row)]
+            rc, stdout, stderr = run(command, timeout=None)
+            try:
+                outcome = json.loads(stdout)
+            except ValueError:
+                outcome = dict(stage="resource_failed", error="direct producer exited",
+                               source_prog_id=0)
+            outcome.update(file=row["file"], program=row["program"],
+                           section=row["section"], expect=row["expect"],
+                           returncode=rc, stdout=stdout, stderr=stderr, command=command)
+            results.append(outcome)
+            save()
+            print(row["program"], outcome["stage"], flush=True)
+    finally:
+        with (state / "request.lock").open("rb") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            service.terminate()
+        service.wait()
+        for reader in readers:
+            reader.join()
+        save()
+    print(json.dumps(agreement(results, len(catalog)), indent=2))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    if len(sys.argv) > 1 and sys.argv[1] == "direct":
+        raise SystemExit(direct(sys.argv[2], pathlib.Path(sys.argv[3]),
+                                pathlib.Path(sys.argv[4]), json.loads(sys.argv[5])))
+    raise SystemExit(main(sys.argv))
