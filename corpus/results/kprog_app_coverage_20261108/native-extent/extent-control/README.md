@@ -1,6 +1,6 @@
 # Exact native emission extent functional control
 
-The paired candidate kernel/module use the native emit=false extent and request-owned emission storage. This control retains every original native instruction: scalar initialization,64 LEA instructions, retval2 and RET. Its268-byte original text exercises the former128-byte scratch boundary. The private producer uses64KiB transport chunks; original BCC/Katran replays retain their128-byte loader transport. Canonical source/runtime adoption follows the paired shared-build handoff.
+The paired candidate kernel/module use the native emit=false extent and request-owned emission storage. This control retains every original native instruction: scalar initialization,64 LEA instructions, retval2 and RET. Its264-byte original text exercises the former128-byte scratch boundary. The private producer uses64KiB transport chunks; original BCC/Katran replays retain their128-byte loader transport. Canonical source/runtime adoption follows the paired shared-build handoff.
 
 | Native input | Compiled | Kernel status | TEST_RUN producer |
 | --- | ---: | ---: | ---: |
