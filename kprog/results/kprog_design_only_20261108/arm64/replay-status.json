@@ -1,0 +1,68 @@
+{
+  "utc": "2026-11-08T06:42:40.254661+00:00",
+  "module_runtime_commit": "e2d3a5ee89349608fb79f4d4d397fdfc683ff7a8",
+  "x30_model_commit": "5d27b2a9b2f23accb08870e7504e22218771f891",
+  "safety": {
+    "commit": "996430e44d814606577fce76cbdd18e193d422c9",
+    "planned_cases": 34,
+    "closed_cases": 16,
+    "stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 9,
+      "specialization_rejected": 2,
+      "accepted_finding": 1
+    },
+    "accepted_risk_cases": 1,
+    "risk_native_executions": 0,
+    "make_exit": 2
+  },
+  "bcc_first_epoch": {
+    "commit": "043482cfdedcc724dcbe4a7d9324bc753b83b6a9",
+    "baseline_resident_programs": 23,
+    "requests": 5,
+    "generated": 5,
+    "installed": 0,
+    "failure_classes": {
+      "stock_verifier_return_dispatch_default": 4,
+      "chunk_lookup_errno2": 1
+    }
+  },
+  "app_state": {
+    "utc": "2026-11-08T06:36:43.259726+00:00",
+    "phase": "actual_katran",
+    "launch_commit": "06d5a04e72e673bec23979ef448db71d2ca4e0f0",
+    "closed_results": [
+      {
+        "application": "bcc",
+        "publication": {
+          "commit": "043482cfdedcc724dcbe4a7d9324bc753b83b6a9",
+          "paths": [
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/driver.log.gz",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/summary.json",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/run-20261108T062943901680Z.tar.gz",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/coverage.json",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/README.md"
+          ],
+          "sha256": {
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/driver.log.gz": "a4007ac1576263d44b7c004bd4e8e1d0a229e37383817f00bee5311111b8dc55",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/summary.json": "6ba54b5485969755a58870538ed618811e4907d0aa349b67be0739122f76f4cd",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/run-20261108T062943901680Z.tar.gz": "8c97b3c934e3736fc2240a2ece82d2d7869dbc8e604a109ea357475165e0544d",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/coverage.json": "b1365c62a3b796308936e03b90aaeb4d25e55f349c2d43e8beba303e755eb2e8",
+            "corpus/results/kprog_arm64_app_coverage_20261108/design-only/trusted-arm64-bcc-result/README.md": "2314794557013800ab4506830889567b150bc92f427248ee8555be479429b043"
+          },
+          "remote_ancestor_verified": true
+        },
+        "make_exit": 2
+      }
+    ]
+  },
+  "corrected_app_state": {
+    "utc": "2026-11-08T06:32:23.602273+00:00",
+    "phase": "waiting_captured_apps_and_x30_safety",
+    "predecessor_pids": [
+      666302,
+      583910
+    ]
+  },
+  "approval_case": "architectural-fault-approval-case.json"
+}

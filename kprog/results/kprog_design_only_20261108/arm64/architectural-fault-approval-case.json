@@ -1,0 +1,74 @@
+{
+  "utc": "2026-11-08T06:37:36.644638+00:00",
+  "case": "ARM architectural fault modelling approval case: the existing34 fixtures include SP-alignment faults, overlapping LDP destinations, writeback base/data overlap, and exclusive status/data/base overlap. The previous ABI-analysis refusal branches have retired. The proposed generic simulator mechanism evaluates the architectural fault predicate inside the existing memory/pair/exclusive operation bodies and represents its fault through the existing verifier-visible fault arm in B; the stock verifier then decides B. This adds architectural predicate code, so operator approval is requested before implementation. The mechanism applies unchanged to every program and preserves the five-step constructor and removed admission branches. Current x30-corrected suite already records4native positives and stock-verifier packet/map refusals; its actual terminal findings will supply the case receipt. A continues whole BCC/Katran collection and generic representation work while approval is pending.",
+  "stages_observed": [
+    {
+      "name": "valid_control",
+      "stage": "valid_executed"
+    },
+    {
+      "name": "valid_copy_restore",
+      "stage": "valid_executed"
+    },
+    {
+      "name": "valid_alias_load",
+      "stage": "valid_executed"
+    },
+    {
+      "name": "valid_spill_restore",
+      "stage": "valid_executed"
+    },
+    {
+      "name": "past_data_end_read",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "past_data_end_write",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "missing_data_end_check",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "map_value_oob",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "nullable_map_dereference",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "invalid_helper_argument",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "stack_oob",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "uninitialized_stack",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "unbounded_loop",
+      "stage": "verifier_rejected"
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "stage": "specialization_rejected"
+    },
+    {
+      "name": "unsupported_instruction",
+      "stage": "specialization_rejected"
+    }
+  ],
+  "actual_safety_commit": "996430e44d814606577fce76cbdd18e193d422c9",
+  "actual_finding": {
+    "name": "misaligned_sp",
+    "stage": "accepted_finding",
+    "native_executed": false
+  },
+  "canonical_reference": "kprog/formal/KProgFormal/Reference/AArch64.lean:526",
+  "decision": "Operator approval pending for generic architectural fault predicates in B"
+}

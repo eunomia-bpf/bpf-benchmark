@@ -918,3 +918,11 @@ The caller-clobber/unspecified entry model in82f8e9e77 supplies the current
 step(c) state; its per-token ABI/native-link relations continue in O1/O2.
 C's BCC/Katran and38-case safety receipts above are the published runtime
 evidence. A owns the corresponding ARM module/application/safety port.
+
+### AArch64 replay outcomes and operator case
+
+The paired ARM build and module port are published as `e2d3a5ee8`. The x30 return-coordinate correction is captured in `5d27b2a9b`. Its native-only replay `996430e44` closes16 of the existing34 cases:4 native positive executions,9 stock-verifier refusals,2 generation coverage failures and1 accepted SP-alignment finding. Risk-case native executions total0; the accepted case used the existing load-only harness. The suite exits2 at that finding. [Exact replay status](arm64/replay-status.json) and [original raw trial](arm64/safety-x30-replay.json) retain every completed outcome.
+
+The canonical ARM reference already represents `spAlignmentFault` at `Reference/AArch64.lean:526`. A generic B-level fault representation for incoming-SP alignment and architectural register-overlap faults is posted under Notices for operator approval, following the operator rule for added predicates. The proposed operation bodies carry architectural fault effects through B and retain the five-step constructor. [The approval case](arm64/architectural-fault-approval-case.json) records the concrete finding and scope. Whole BCC/Katran collection continues through captured source epochs.
+
+The first five-step BCC epoch `043482cfd` records23 baseline resident programs and5 native requests, each generated and compiled. Four requests reach the stock-verifier return-dispatch default; one records a kernel chunk lookup errno2. The x30-corrected whole BCC/Katran queue follows the retained original epoch and the safety trial. Raw workload and per-program counters remain in the dated corpus result archive.
