@@ -18,7 +18,7 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 3/71 |
+| O2 C-model token-body equality | 49/75 | 9/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -33,6 +33,10 @@ premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
 immediate-body gate through unified ExecBinding, source and invocation emission.
 ADD_IMM/SUB_IMM/ALU_IMM have three C-model W/X direct-body equalities and
 canonical-step composition under the existing field/provenance/platform bindings.
+LOAD/STORE/LDRSB/LDRSH/LDRSW/STLXR add six direct memory-body equalities
+and observed canonical-step composition. Their site-indexed law retains
+each dynamic exclusive outcome and the shared native field, memory, monitor,
+address/materialization and compiled-C interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -57,8 +61,8 @@ ledger. These finite observations support the universal theorem work.
 `partial-model`,
 `conditional-observed`, `conditional-direct-alias`, `proved-C-model`
 and `pending` retain their distinct meanings. V updates the table and these
-totals with each proof/status-changing publication; T supplies token/link-law
-status and F supplies source-pinned replay inputs. Safety evidence follows the
+totals with each proof/status-changing publication. V maintains theorem/token/link-law
+status and replay-ledger joins; C/A supply architecture-specific replay inputs. Safety evidence follows the
 universal simulator, token and transformation laws. Historical individual-program
 proof artifacts remain frozen.
 LEA's complete raw register-field/frame/dispatcher/token chain now uses the
@@ -3864,3 +3868,17 @@ formal check separately passed in `full_make_check_a2fb22739`.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_c68a23e2d`. Every check retains its exact published source identity.
+
+ARM memory-token composition (`arm64_memory_token_bodies` in the existing
+[integration receipt](arm64-xdp-host-integration.json)) adds six generic O2
+body equalities and observed canonical-step laws: LOAD, STORE, LDRSB, LDRSH,
+LDRSW and STLXR. Four axiom audits and the default Lean build pass; the prior
+198 dispatcher theorem statements and module prefix retain their exact bytes.
+The actual generated direct header equals the C dispatcher extraction, and
+53,728 host UBSan cases compare complete register/tag/vector/NZCV snapshots,
+independent store bytes and the exclusive input site/call count. The source set
+contains177 stable inputs. The site-indexed theorem preserves the fresh0/1
+outcome on each invocation under the existing native-field, monitor, memory,
+source-emission and ABI relations. C/compiler and complete simulator closure
+continue through those universal interfaces. Raw source, generated classifier,
+executed binary, initial diagnostics and final checks are archived together.

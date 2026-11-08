@@ -4013,4 +4013,109 @@ theorem invocation_emission_step_refines (nativeAddress : Word → Word) (outerR
       simp only [dispatchInvocationEmission, reached, Option.map_some]
       exact congrArg some (return_route_observed_refines nativeAddress outerReturn tags src targets raw _ reached)
 
+
+/-- Generated direct memory bodies23--26. Signed load selectors retain their
+source byte width and W/X output independently. -/
+inductive MemoryToken where
+  | load | store | signed (op : GeneratedArm64LdrSx.LdrSx) | exclusive
+
+def memoryTokenOpcode : MemoryToken → Nat
+  | .load => GeneratedArm64DispatchSingleton.code .load
+  | .store => GeneratedArm64DispatchSingleton.code .store
+  | .signed op => GeneratedArm64LdrSx.code op
+  | .exclusive => GeneratedArm64Stlxr.code .stlxr
+
+/-- Numeric projection of each selected direct body, preserving pre/read/write/
+post order, signed source width, source capture and the fresh exclusive result.
+Pointer provenance and native memory observations retain the shared frame. -/
+def specializedMemory (token : MemoryToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 : Byte) (value : Word) (tagIsScalar failure : Bool)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  match token with
+  | .load => (decodeMemoryWidth flags).map
+      (fun width => scalarMemoryBody true width aux dst src src2 value tagIsScalar s)
+  | .store => (decodeMemoryWidth flags).map
+      (fun width => scalarMemoryBody false width aux src dst src2 value tagIsScalar s)
+  | .signed op => (decodeDataWidth flags).map
+      (fun width => signedMemoryBody op width aux dst src src2 value s)
+  | .exclusive => (decodeDataWidth flags).map
+      (fun width => exclusiveStoreBody width failure aux dst src src2 s)
+
+/-- Every direct memory body equals its complete numeric L_EXEC arm for all
+fields and incoming states, including the established width domain. -/
+theorem memory_token_body_matches (token : MemoryToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    specializedMemory token flags aux dst src src2 value firstScalar failure s =
+      dispatchExec (memoryTokenOpcode token) flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s := by
+  cases token with
+  | load =>
+      unfold memoryTokenOpcode specializedMemory dispatchExec dispatchThroughQ dispatchThroughD
+        dispatchThroughPair dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned
+      rw [load_reached]
+      cases decoded : decodeMemoryWidth flags <;> rfl
+  | store =>
+      unfold memoryTokenOpcode specializedMemory dispatchExec dispatchThroughQ dispatchThroughD
+        dispatchThroughPair dispatchThroughExclusive
+      rw [store_reached]
+      cases decoded : decodeMemoryWidth flags <;> rfl
+  | signed op =>
+      unfold memoryTokenOpcode specializedMemory dispatchExec dispatchThroughQ dispatchThroughD
+        dispatchThroughPair dispatchThroughExclusive dispatchThroughStore
+      rw [signed_reached]
+      cases decoded : decodeDataWidth flags <;> cases op <;> rfl
+  | exclusive =>
+      unfold memoryTokenOpcode specializedMemory dispatchExec dispatchThroughQ dispatchThroughD
+        dispatchThroughPair
+      rw [exclusive_reached]
+      cases decoded : decodeDataWidth flags <;> rfl
+
+/-- Once per memory token, compose direct-body equality with the canonical
+observed dispatcher step, retaining access, exclusive and ABI premises. -/
+theorem memory_token_step_refines (token : MemoryToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc (memoryTokenOpcode token) flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch (memoryTokenOpcode token) flags release failure src2 s
+      (observeQDispatch (memoryTokenOpcode token) (specializedMemory token flags aux dst src src2 value
+        firstScalar failure s)) = some (Reference.AArch64.step native s) := by
+  rw [memory_token_body_matches token flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar failure s]
+  exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
+
+/-- The environment supplies a fresh word at the same IMM site on this visit.
+Every nonzero word takes the failure arm; zero takes the store arm. -/
+def specializedMemoryAt (outcomeAt : Word → Word) (token : MemoryToken)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 : Byte) (site : Word)
+    (tagIsScalar : Bool) (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  specializedMemory token flags aux dst src src2 site tagIsScalar (outcomeAt site != 0) s
+
+theorem memory_token_at_body_matches (outcomeAt : Word → Word) (token : MemoryToken)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (site : Word)
+    (sourceScalar sourceStack firstScalar secondScalar : Bool) (s : Reference.AArch64.State) :
+    specializedMemoryAt outcomeAt token flags aux dst src src2 site firstScalar s =
+      dispatchExec (memoryTokenOpcode token) flags aux dst src src2 src3 site
+        sourceScalar sourceStack firstScalar secondScalar (outcomeAt site != 0) s :=
+  memory_token_body_matches token flags aux dst src src2 src3 site sourceScalar sourceStack
+    firstScalar secondScalar (outcomeAt site != 0) s
+
+theorem memory_token_at_step_refines (outcomeAt : Word → Word) (token : MemoryToken)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (site : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc (memoryTokenOpcode token) flags aux dst src src2 src3 site release native)
+    (access : scalarMemoryAccess native s)
+    (environment : exclusiveStoreEnvironment native (outcomeAt site != 0) s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch (memoryTokenOpcode token) flags release (outcomeAt site != 0) src2 s
+      (observeQDispatch (memoryTokenOpcode token) (specializedMemoryAt outcomeAt token flags aux dst src src2
+        site firstScalar s)) = some (Reference.AArch64.step native s) :=
+  memory_token_step_refines token flags aux dst src src2 src3 site sourceScalar sourceStack
+    firstScalar secondScalar release (outcomeAt site != 0) native s binding access environment pairAccess vectorAccess
+
 end KProgFormal.Refinement.Arm64Dispatcher

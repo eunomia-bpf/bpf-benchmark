@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-49 x86 register/control/memory tokens and three ARM immediate tokens; full raw ISA
+49 x86 register/control/memory tokens and nine ARM immediate/memory tokens; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
@@ -77,7 +77,10 @@ generated result and flags, observed store and precise fault effects.
 Memory CMP/TEST also compose packed/whole displacement fields, numeric
 register operands and complete six-flag/read/fault effects. ARM numeric3/4
 compose their conditional immediate-alias laws through unified ExecBinding,
-source and invocation emission. ADD_IMM/SUB_IMM/ALU_IMM have W/X numeric
+source and invocation emission.
+LOAD/STORE/LDRSB/LDRSH/LDRSW/STLXR have direct-body equality and canonical
+observed-step composition with the same memory, monitor and platform witnesses.
+The site-indexed interface carries each visit's explicit exclusive outcome. ADD_IMM/SUB_IMM/ALU_IMM have W/X numeric
 direct-body equality and canonical-step composition under the shared
 field/provenance/platform bindings.
 Safety work is generic per

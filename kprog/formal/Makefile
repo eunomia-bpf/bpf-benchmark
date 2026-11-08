@@ -526,6 +526,8 @@ check:
 	./build/test_arm64_cneg_route_host
 	$(CC) -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
 	./build/test_arm64_stlxr_route_host
+	$(CC) -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=all -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_memory_tokens_host.c -o build/test_arm64_memory_tokens_host
+	./build/test_arm64_memory_tokens_host
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
 	./build/test_arm64_reduction_route_host
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_adrp_route_host.c -o build/test_arm64_adrp_route_host
