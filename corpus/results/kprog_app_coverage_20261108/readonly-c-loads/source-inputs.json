@@ -1,0 +1,21 @@
+{
+  "path": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/readonly-c-loads/vendor/libbpf/src/bpf_helper_defs.h",
+  "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+  "helper_count": 211,
+  "helper105": {
+    "result": "long",
+    "arguments": "const char *buf, unsigned long buf_len, __u64 flags, long *res",
+    "number": 105
+  },
+  "helper163": {
+    "result": "long",
+    "arguments": "void *ctx, __u32 ifindex, __u32 *mtu_len, __s32 len_diff, __u64 flags",
+    "number": 163
+  },
+  "controller_pid": 1738533,
+  "source_commit": "7cc5a39c6b8c86107e82c89f9b5ffa68a382c256",
+  "app_native_epoch": "7479850e23454e957f4c5880a18d92a91c27dd282af52f768e4422fe9366a722",
+  "CPUS": "20-23",
+  "VM_CPUS": 8,
+  "VM_MEM": "12G"
+}
