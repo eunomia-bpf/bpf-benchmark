@@ -23,9 +23,9 @@ specialization token also has its own row.
 | O2 C-model token-body equality | 72/75 | 74/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8) | 6/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
-| Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
-| Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
-| Upstream model-differing operation rows | 1/75 | 1/74 explicit monitor profile |
+| Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
+| Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
+| Upstream model-differing operation rows | 2/75 | 1/74 explicit monitor profile |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
 | Additional explicit-monitor-only replay | 0 | 1/74 |
 | Numeric operations awaiting selected replay | 9/75 | 6/74 |
@@ -5132,3 +5132,14 @@ NumericAddress proofs both returned0. [Original evidence](fresh-aux-output-trans
 retains the source epoch and all proof attempts. Every earlier theorem remains
 present. Global incoming-state/other undefined-output transport and physical
 kind6/compiler/ABI embedding remain explicit interfaces.
+
+### ACL28.7 machine-reference replay
+
+[The8.7 report](reference-x86-acl2.md#distribution87-operational-replay) retains
+576 original requests and identical canonical outcomes:288 complete agreements,
+120 state differences and168 model stops. Six newly agreeing labels bring the
+combined external-model total to58; seven labels retain model stops and two
+retain state differences. SHIFTX memory has72 equal register/flag/XMM/memory
+observations and a PC-1 displacement-byte difference; REP retains48
+element/whole-instruction differences. Exact source and certificate diagnostics
+stay in the [original archive](reference-x86-acl2-87.log.gz).
