@@ -1,0 +1,19 @@
+{
+  "baseline_resident": 72,
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "loader_errors": 1,
+  "verifier_rejections": 0,
+  "terminal_native_hashes_verified": 2,
+  "source_drift": [],
+  "failure_entry": "tail_nodeport_nat_ingress_ipv4",
+  "failure_class": "proof kfunc relocation classified as map relocation",
+  "native_sha256": "30b472beef48564f93699272922730360e45e15253e544db95c1ec897f962401",
+  "artifacts": {
+    "driver.log.gz": "caf566b7e993630468d6621b819cedcf408e439f0a4133d01dff5574a7ada73d",
+    "service.tar.gz": "d7ec2356a34af8dd6d33595cd175a16f5675eb486285e10cef9c35d183da7161",
+    "launch.tar.gz": "4d00167bb1a34b32a8d493f8fd480f8cec498e3efffee913b5a128faef16c4ed",
+    "result.tar.gz": "2e4d3aca7d5f41c77764c3c2d1b769abb0cd153c7c0643d785d8358371c45c92"
+  }
+}
