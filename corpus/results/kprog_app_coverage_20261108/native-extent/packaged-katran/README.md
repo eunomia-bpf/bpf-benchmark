@@ -9,3 +9,12 @@ make -f /workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran
 ```
 
 [runtime.tar.gz](runtime.tar.gz) retains commands, captured input hashes, guest source and original terminal records. Timing remains with R. Runtime admission additions0.
+
+### Phase-local work accounting
+
+| Phase | LB RX / BPF / XDP TX / VIP / LRU / real-map packets | LRU miss | Receiver RX | LB TX drop | Receiver drop |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| baseline | 2457811 | 0 | 2405984 | 14675 | 37152 |
+| post_rejit | 2126026 | 0 | 1283310 | 447272 | 395444 |
+
+Every count named in the second column has the displayed phase-local value. Receiver RX plus the two recorded drop reasons accounts for the LB input in each phase. Both original workload commands exit0. The two-second duration-driven phase totals retain their distinct values. [work-accounting.json](work-accounting.json) selects the original fields from [work.json](work.json); all interface/map/workload components remain in that complete raw record. R owns timing on CPUs0-7 with the established counterbalanced protocol.

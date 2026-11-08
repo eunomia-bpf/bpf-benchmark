@@ -10,7 +10,7 @@ The OTel, Tracee and Tetragon rows cite their latest closed whole-application co
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native invalid write to stack R10 off=-528 size=8 | [canonical stack spill whole cohort](stack-spill-values/otel-stack-values/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_netdev R0 invalid mem access 'scalar' | [private stack spill whole cohort](stack-spill-values/whole-cilium-retry/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send branch complexity: sequence of8193jumps | [canonical stack spill whole cohort](stack-spill-values/tetragon-stack-values/README.md) |
-| Katran | 1 | 1 | 1 | 1 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0: 0 | [paired current runtime and packet accounting](native-extent/packaged-katran/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit invalid access to map value, value_size=32536 off=65677 size=4096 | [private initialized ghost whole cohort](stack-ghost-init/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.

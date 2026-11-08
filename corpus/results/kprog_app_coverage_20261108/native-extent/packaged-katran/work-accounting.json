@@ -1,0 +1,34 @@
+{
+  "source_commit": "c551cb1390c98b6bfa40ee448d8e2bc970c0c7e2",
+  "source": "work.json phase-local BPF and config.outcomes.delta raw counters",
+  "rows": [
+    {
+      "phase": "baseline",
+      "bpf_calls": 2457811,
+      "lb_rx": 2457811,
+      "xdp_tx": 2457811,
+      "vip": 2457811,
+      "lru": 2457811,
+      "lru_miss": 0,
+      "real_map": 2457811,
+      "receiver_rx": 2405984,
+      "lb_tx_drop": 14675,
+      "receiver_drop": 37152,
+      "workload_returncode": 0
+    },
+    {
+      "phase": "post_rejit",
+      "bpf_calls": 2126026,
+      "lb_rx": 2126026,
+      "xdp_tx": 2126026,
+      "vip": 2126026,
+      "lru": 2126026,
+      "lru_miss": 0,
+      "real_map": 2126026,
+      "receiver_rx": 1283310,
+      "lb_tx_drop": 447272,
+      "receiver_drop": 395444,
+      "workload_returncode": 0
+    }
+  ]
+}
