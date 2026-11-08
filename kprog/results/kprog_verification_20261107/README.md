@@ -5416,11 +5416,11 @@ remain explicit. These are x86 reference laws, not a completed physical helper
 ABI or an AArch64 result. Coverage statuses and operation totals stay unchanged;
 no runtime check, gate, validation or model change is added.
 
-### Authorized native load-fault recovery: pending
+### Authorized native load-fault recovery: physical correspondence pending
 
 The coordinator authorized exception-table recovery for native P loads while
-retaining submitted bytes. New `LOAD_FAULT_RECOVERY` is pending production and
-a universal platform law on both ISAs. Stock x86 clears the complete saved
+retaining submitted bytes. `LOAD_FAULT_RECOVERY` now has conditional scalar reference components;
+production correspondence and the complete platform law remain pending on both ISAs. Stock x86 clears the complete saved
 register and skips the recorded instruction length; ARM clears the selected
 saved X register and advances PC by4. The
 [source-pinned obligation](arm64-xdp-host-integration.json#load_fault_recovery_obligation)
@@ -5450,3 +5450,27 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_8ed234439`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-8ed234439.log.gz](full-make-check-8ed234439.log.gz).
+
+### Registered scalar read recovery reference components
+
+Eight universal laws in `NativeLinkFinalImage` add an explicit read-recovery
+profile above the unchanged canonical ISA. Successes and non-read faults stay
+unchanged in this isolated profile. A canonical scalar read fault yields the
+whole-GPR clear plus recorded length on x86, or whole-X clear plus PC4 on ARM;
+other state remains. ARM XZR discards the clear, while native X5 is a real
+cleared destination, distinct from stock BPF DONT_CLEAR5. The existing
+`native-link-final-image-check` passes; its recipe builds the newly imported
+canonical ARM dependency. No new target or admission check is introduced.
+[Original evidence](registered-load-recovery.log.gz) includes sources, failed
+attempts, passing proofs and commands. New laws use no axioms or only
+`propext`/`Quot.sound`.
+
+These laws retain the raw diagnostic fault event and clear the terminal fault
+field. They do not invent a successful zero memory read or complete native/B
+trace agreement. Actual registered table/site/frame/exception-class semantics,
+B protected-read behavior and event projection/O3 checked-event predicate must
+be connected. Partial-register, writeback, ALU/implicit/multiple-access,
+vector/pair/exclusive/atomic fault prefixes, final site mapping and table
+lifetime remain explicit. Actual C/A production correspondence and NULL guest
+execution are pending; the O4 row records a partial component, with operation,
+token and replay totals unchanged.

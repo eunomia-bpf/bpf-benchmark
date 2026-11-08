@@ -151,6 +151,10 @@ Native x86 CALL/RET laws account for the actual RSP-8 return-slot write,
 separate caller and return-slot footprints, saved PC and unsigned SP release.
 Selected native helper stack restoration and physical native-to-B ABI remain explicit.
 
+Conditional scalar read-recovery laws above the raw ISA account for stock-frame
+x86/ARM zero-and-resume, including nativeX5/XZR and the raw fault prefix.
+Actual site/table/exception-class/B-observation and O3 correspondence stay open.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.

@@ -814,6 +814,7 @@ simulator-composition-check: bpf-check
 
 .PHONY: native-link-final-image-check
 native-link-final-image-check: native-link-byte-layout-check
+	cd ../formal && lake build KProgFormal.Reference.AArch64
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkFinalImage.olean ../tv/NativeLinkFinalImage.lean
 

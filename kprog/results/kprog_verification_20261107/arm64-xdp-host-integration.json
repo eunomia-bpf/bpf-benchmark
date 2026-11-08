@@ -15604,6 +15604,7 @@
       "C/A actual NULL-BTF native guest execution must stay up, observe zero and retain source/P/B/kernel/module/table/handler identities; installation alone is not this execution evidence."
     ],
     "production_recovery_published": false,
+    "reference_component_followup": "registered_load_recovery_reference",
     "reference_premise": "Use an explicit platform-protected-read execution relation above the raw ISA. At an actually covered fault PC, physical table lookup/exception class/destination/continuation must implement the same recovered state and ordered observation as the verifier-facing B load. Invalid read through a BTF pointer is not assumed impossible from stock acceptance. Raw ISA .read fault and current BPF MEM/MEMSX fault semantics remain unchanged until that platform relation is proved.",
     "runtime_admission_additions": 0,
     "scope": "New O4 load-fault-recovery obligation on both ISAs. Exception metadata at step(e), same submitted P bytes; no per-program proof and no new admission check.",
@@ -17598,6 +17599,170 @@
       "NativeLinkLiteral.ReadOnly.image_store_preserved",
       "NativeLinkLiteral.ReadOnly.image_write_preserved"
     ]
+  },
+  "registered_load_recovery_reference": {
+    "actual_existing_integration_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "a25917ab55b638b638cfc7cf5a3599948e62d0e2266e200214d67a6b9ce1a950",
+    "archive_file": "kprog/results/kprog_verification_20261107/registered-load-recovery.log.gz",
+    "archive_marker": "=== REGISTERED READ RECOVERY REFERENCE V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-integrated-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-integrated.log": {
+        "bytes": 19995,
+        "sha256": "66ac8fdbf6dd346b4e4d75b613adf62bd86089fea40a64535053543a2f2c8f15"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-integrated.sh": {
+        "bytes": 266,
+        "sha256": "ead43f4800ede82943f199a35c5ee266c07c20de874ab4aa346d4b686b621f7e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.exit.attempt2": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.log": {
+        "bytes": 2988,
+        "sha256": "8e86474eb7ae7bf3259cb7c32d0aba419c785c0a143744bb43e768a1d5328b0d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.log.attempt1": {
+        "bytes": 3171,
+        "sha256": "c0a2b1b6a11999a06264cd62c8c4a62b64b5287006a60e65d59b6d8809823cf3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.log.attempt2": {
+        "bytes": 3185,
+        "sha256": "234ef2ae547d77bbbfcc2ad4419335103e4fa30c4aaa5d6d43eca12058252572"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-proof.sh": {
+        "bytes": 435,
+        "sha256": "8965bb7c7e7259662bd49f2ccf149de6293a461056542107fe5cd46695b48690"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-work/NativeLinkFinalImage.lean": {
+        "bytes": 23347,
+        "sha256": "2089378d16067b06cdeaf998eed7de583022802357d90efccd012eae25b5eb87"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-work/NativeLinkFinalImage.lean.attempt1": {
+        "bytes": 22609,
+        "sha256": "af25fbc238d5359383037376cf21a5223ea175fe20037526c8b13474a4ef38f0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-work/NativeLinkFinalImage.lean.attempt2": {
+        "bytes": 23290,
+        "sha256": "100616e6e514bbb1e2107b391c0ca956397161f225dbc5890af7da720a32ca47"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean": {
+        "bytes": 89883,
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPlatform.lean": {
+        "bytes": 13594,
+        "sha256": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48"
+      },
+      "/workspaces/repository/kprog/tv/Composition.lean": {
+        "bytes": 18251,
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45135,
+        "sha256": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 23347,
+        "sha256": "2089378d16067b06cdeaf998eed7de583022802357d90efccd012eae25b5eb87"
+      },
+      "/workspaces/repository/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": {
+        "bytes": 91603,
+        "sha256": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7"
+      },
+      "/workspaces/repository/vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": {
+        "bytes": 120841,
+        "sha256": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 23816928,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/loadrecovery-work/NativeLinkFinalImage.olean",
+        "sha256": "c1d926986c02b5f8741251b5a45043c0202d6f119470f0a5aed950bbcdb909f7"
+      }
+    ],
+    "existing_integration_command": "make -C kprog/tv native-link-final-image-check",
+    "make_change": "Existing native-link-final-image-check builds the newly imported canonical AArch64 dependency; no new target, runtime check or admission gate.",
+    "native_executions": 0,
+    "null_native_guest_execution": "pending C/A, installation is not execution",
+    "original_obligation": "load_fault_recovery_obligation",
+    "premises": [
+      "The site is actually registered and selected by the physical exception table; PC/length/native destination indices and saved-frame mapping match the decoded instruction and final text.",
+      "x86 actual recorded length matches decoded fall-through; full physical GPR zeroing matches the native saved-frame layout.",
+      "ARM scalar non-writeback load has no SP-alignment fault. Native X5 requires a physical native marker distinct from stock BPF DONT_CLEAR5; XZR discards writes.",
+      "An actual canonical scalar read fault is supplied; partial-register/ALU flags/implicit SP/multiple accesses/writeback/vector/pair/exclusive/atomic forms require their own B/native state and fault-prefix laws.",
+      "The isolated read profile leaves non-read faults raw. Whether an actual registered handler catches a different physical exception class must be modeled separately and cannot be inferred from this theorem.",
+      "Actual protected B semantics and a justified raw-to-platform event projection, physical memory/provenance, entry coverage, code/table lifetime, producer metadata completeness and compiler/link transport remain interfaces."
+    ],
+    "production_table_correspondence": "pending C/A published implementation and actual callback/site/frame identities",
+    "raw_trace_boundary": "The raw architectural read-fault event remains an inner diagnostic event after recovery and Transition.fault becomes none. This is not a newly invented successful zero-valued memory read, and not yet the final native/B event projection. Actual protected-B execution, O3 checked-event predicate and physical exception-class behavior must be related before applying Composition.",
+    "result": "The isolated registered-read profile preserves successful effects, preserves all non-read faults and retains the complete raw diagnostic trace. On a canonical scalar read fault, x86 recovery clears the whole selected GPR and advances by the recorded length; all other GPRs, memory, flags and XMM0 remain. ARM non-writeback scalar load recovery clears whole selected X register and advances PC4, with XZR discard and nativeX5 explicitly cleared rather than treated as stock BPF DONT_CLEAR. All other state is retained by the returned record.",
+    "runtime_admission_additions": 0,
+    "scope": "Eight universal conditional read-recovery/stock-frame reference components on both ISAs. No raw ISA or runtime change; final table/B/physical correspondence remains open.",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPlatform.lean": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771",
+      "kprog/tv/Makefile": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146",
+      "kprog/tv/NativeLinkFinalImage.lean": "2089378d16067b06cdeaf998eed7de583022802357d90efccd012eae25b5eb87",
+      "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7",
+      "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1"
+    },
+    "status": "partial-universal-component",
+    "theorems": [
+      "KProgTV.NativeLinkFinalImage.recovery_success",
+      "KProgTV.NativeLinkFinalImage.recovery_nonread",
+      "KProgTV.NativeLinkFinalImage.recovery_raw_trace",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_load",
+      "KProgTV.NativeLinkFinalImage.x86_resume_frame",
+      "KProgTV.NativeLinkFinalImage.arm64_recovered_load",
+      "KProgTV.NativeLinkFinalImage.arm64_resume_xzr",
+      "KProgTV.NativeLinkFinalImage.arm64_resume_x5"
+    ],
+    "trust": "All eight new laws use no axioms or only propext/Quot.sound; existing final-image byte/arithmetic proof trust unchanged. No sorryAx.",
+    "utc": "2026-11-08T23:50:54.913666+00:00"
   },
   "ret_unresolved_default_transport": {
     "archive_block_sha256": "6d0329c1f1c1ce145402447b5c2ba00e398275b0ebbceda91f05dd7ef6985200",

@@ -1,4 +1,5 @@
 import NativeLinkByteLayout
+import KProgFormal.Reference.AArch64
 
 /-! The x86 emitter writes temporary storage and calculates relative targets
 from final_ip. Address translation commutes with the canonical memory writer;
@@ -287,3 +288,132 @@ end KProgTV.NativeLinkFinalImage
 
 #print axioms KProgTV.NativeLinkFinalImage.readonly_image_transfer
 #print axioms KProgTV.NativeLinkFinalImage.readonly_transferred_load
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- Platform handler at an actually registered load site. This is not an
+ISA change or a table-membership check. Raw ordered events are retained as
+an inner diagnostic trace; matching the B platform observation is a separate
+premise. In particular, no successful zero-valued memory read is invented. -/
+def recoverRead {State : Type} (resume : State → State)
+    (effect : Transition State) : Transition State :=
+  match effect.fault with
+  | some (.read _ _) => { effect with state := resume effect.state, fault := none }
+  | _ => effect
+
+/-- Registered exception metadata leaves every successful step untouched. -/
+theorem recovery_success {State : Type} (resume : State → State)
+    (effect : Transition State) (success : effect.fault = none) :
+    recoverRead resume effect = effect := by simp [recoverRead,success]
+
+/-- This isolated read-recovery profile leaves all other faults explicit.
+Whether the physical registered handler catches another exception class must
+be related separately before applying this profile to the real platform. -/
+theorem recovery_nonread {State : Type} (resume : State → State)
+    (effect : Transition State) (reason : Fault)
+    (fault : effect.fault = some reason)
+    (nonread : ∀ address count, reason ≠ .read address count) :
+    recoverRead resume effect = effect := by
+  cases reason <;> simp_all [recoverRead]
+
+/-- Recovery retains the full raw fault prefix. The final platform's event
+projection and O3 checked-event predicate must account for a handled fault. -/
+theorem recovery_raw_trace {State : Type} (resume : State → State)
+    (effect : Transition State) :
+    (recoverRead resume effect).events = effect.events := by
+  unfold recoverRead
+  cases effect.fault with
+  | none => rfl
+  | some reason => cases reason <;> rfl
+
+/-- Stock x86 saved-frame handler: clear an entire physical GPR (or resume
+only), then advance by the actual recorded native instruction length.
+Its application requires physical frame/table/site/extent correspondence. -/
+def x86LoadResume (destination : Option X86.Register) (length : Nat)
+    (state : X86.State) : X86.State :=
+  { state with
+    gpr := fun register => if destination = some register then 0 else state.gpr register
+    pc := state.pc + BitVec.ofNat 64 length }
+
+/-- The stock handler's full-register zeroing is independent of the native
+MOV width. This does not assert equality with partial-register B writeback. -/
+theorem x86_recovered_load (state : X86.State) (width : X86.ScalarWidth)
+    (destination : X86.Register) (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    recoverRead (x86LoadResume (some destination) length)
+      (X86.moveStep width (.register (.low destination)) (.memory address) next state) =
+      ⟨x86LoadResume (some destination) length state,[.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.moveStep,X86.scalarRead,X86.readSource,fault]
+
+/-- The handler leaves memory, flags, SIMD and every other GPR intact. -/
+theorem x86_resume_frame (state : X86.State) (destination : X86.Register) (length : Nat) :
+    (x86LoadResume (some destination) length state).gpr destination = 0 ∧
+    (x86LoadResume (some destination) length state).memory = state.memory ∧
+    (x86LoadResume (some destination) length state).rflags = state.rflags ∧
+    (x86LoadResume (some destination) length state).xmm0 = state.xmm0 ∧
+    (x86LoadResume (some destination) length state).pc = state.pc+BitVec.ofNat 64 length ∧
+    (∀ register, register ≠ destination →
+      (x86LoadResume (some destination) length state).gpr register = state.gpr register) := by
+  refine ⟨by simp [x86LoadResume],rfl,rfl,rfl,rfl,?_⟩
+  intro register different
+  simp [x86LoadResume,Ne.symm different]
+
+/-- ARM saved-frame recovery clears the selected whole X register, with
+field31 discarded as XZR, then advances one instruction. SP is unchanged.
+Physical X5 must not be confused with stock BPF's DONT_CLEAR sentinel. -/
+def arm64LoadResume (destination : Option AArch64.Register)
+    (state : AArch64.State) : AArch64.State :=
+  { (match destination with
+      | some register => AArch64.writeReg state register 0
+      | none => state) with pc := state.pc+4 }
+
+/-- The scalar non-writeback load's raw read fault is handled separately
+from alignment faults. No register, memory or event is borrowed from a
+successful transfer, and the actual full X destination is cleared. -/
+theorem arm64_recovered_load (state : AArch64.State) (width : AArch64.MemoryWidth)
+    (destination base : AArch64.Register) (offset : Word)
+    (signedTo : Option AArch64.Width)
+    (aligned : AArch64.spAlignmentFault state base = none)
+    (fault : readMemory state.memory (AArch64.memoryBase state base+offset) width.bytes =
+      .error (.read (AArch64.memoryBase state base+offset) width.bytes)) :
+    recoverRead (arm64LoadResume (some destination))
+      (AArch64.memoryStep ⟨width,.load destination signedTo,base,offset⟩ state) =
+      ⟨arm64LoadResume (some destination) state,
+        [.fault (.read (AArch64.memoryBase state base+offset) width.bytes)],none⟩ := by
+  simp [recoverRead,AArch64.memoryStep,aligned,fault]
+
+/-- XZR recovery discards the clear and changes only PC. -/
+theorem arm64_resume_xzr (state : AArch64.State) :
+    arm64LoadResume (some 31) state = { state with pc := state.pc+4 } := by
+  simp [arm64LoadResume,AArch64.writeReg]
+  congr 1
+  funext register
+  have different : register.val ≠ 31 := by have := register.isLt; omega
+  change (if register.val = 31 then 0 else state.gpr register) = state.gpr register
+  simp [different]
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.recovery_success
+#print axioms KProgTV.NativeLinkFinalImage.recovery_nonread
+#print axioms KProgTV.NativeLinkFinalImage.recovery_raw_trace
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_load
+#print axioms KProgTV.NativeLinkFinalImage.x86_resume_frame
+#print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_load
+#print axioms KProgTV.NativeLinkFinalImage.arm64_resume_xzr
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- Native X5 really is a destination. A physical ARM encoding must keep it
+separate from stock BPF's DONT_CLEAR value5 when instantiating this model. -/
+theorem arm64_resume_x5 (state : AArch64.State) :
+    (arm64LoadResume (some 5) state).gpr 5 = 0 ∧
+    (arm64LoadResume (some 5) state).sp = state.sp := by
+  constructor
+  · change (if (5 : Nat) = 5 then (0 : Word) else state.gpr 5) = 0
+    rfl
+  · rfl
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.arm64_resume_x5
