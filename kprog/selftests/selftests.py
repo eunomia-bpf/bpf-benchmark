@@ -162,7 +162,11 @@ def compile_bpf(source, out, includes, clang, arch="x86"):
     stub.write_text(
         '__attribute__((section("license"), used))\n'
         'char __only_license[] = "GPL";\n'
-        '#include "%s"\n' % pathlib.Path(source).resolve())
+        '#include <vmlinux.h>\n'
+        '#include <bpf_helpers.h>\n'
+        '#include "%s"\n'
+        '#include "%s"\n' % (DEFAULT_PROGS.parent / "bpf_kfuncs.h",
+                               pathlib.Path(source).resolve()))
     cmd += [str(stub), "-o", str(out)]
     done = subprocess.run(cmd, capture_output=True, text=True)
     return done.returncode == 0, done.stderr
