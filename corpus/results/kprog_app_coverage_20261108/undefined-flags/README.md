@@ -7,7 +7,8 @@ The original source witness compiles and reaches the expected selected-bit misma
 All original29positive plus1negative micro inputs generate and compile with the private source redirect. The initial compile include-path setup error and first unchanged-oracle mismatch remain alongside actual terminal logs. [summary.json](summary.json) records exits, exact adopted source hashes and physical object hashes; [raw.tar.gz](raw.tar.gz) retains source-before/candidate/maintained regression sources, all attempts, compiler/native/BPF artifacts and commands. This cohort supplies C/compiled-input evidence for the recorded forms; complete simulator/compiler closure follows the universal ledger.
 
 ```sh
-make -f /workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/Makefile before host oracles micro
+make -f /workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/Makefile before
+make -f /workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/Makefile host oracles micro
 ```
 
 The before target carries the preserved mismatch witness; the host/oracles/micro targets carry the candidate closure. Original whole-app snapshots retain their captured sources. The following canonical native38 replay supplies its actual runtime receipt independently.

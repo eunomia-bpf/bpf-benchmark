@@ -1,0 +1,1054 @@
+{
+  "utc": "2026-11-08T16:31:36.905863+00:00",
+  "source_adoption": "c1f6b78f4a26c3075d85c50dd3e3d62a16e713bf",
+  "exit": 0,
+  "stages": {
+    "specialization_rejected": 2,
+    "valid_executed": 9,
+    "verifier_rejected": 27
+  },
+  "cases": 38,
+  "inputs": {
+    "kprog/x86/x86_sim_local_bpf.h": "eba653298481574afb053754cd0f4405324a59797da361ac4bfcfe11f6fe7c80",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196",
+    "kprog/libnativeloader/build/trusted-native-loader": "63712baad073627ad6525f03d6905a09e5801fcf2f925869ccd84815ca23eb31"
+  },
+  "records": [
+    {
+      "name": "valid_control",
+      "assembly": "mov eax,2; ret",
+      "negative": false,
+      "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_control.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_control.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+        "started": "2026-11-08T16:30:42.517789+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/1.success.tar.gz",
+        "finished": "2026-11-08T16:30:44.367930+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=4 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_copy_restore",
+      "assembly": "mov rax,rsp; mov rsp,rax; mov eax,2; ret",
+      "negative": false,
+      "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_copy_restore.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_copy_restore.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+        "started": "2026-11-08T16:30:44.427139+00:00",
+        "prog_id": 8,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/2.success.tar.gz",
+        "finished": "2026-11-08T16:30:45.225140+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=8 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_alias_load",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; mov ecx,DWORD PTR [rax]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "negative": false,
+      "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_alias_load.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_alias_load.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 3,
+        "source_prog_id": 0,
+        "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+        "started": "2026-11-08T16:30:45.287665+00:00",
+        "prog_id": 12,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/3.success.tar.gz",
+        "finished": "2026-11-08T16:30:46.288206+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=12 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_cmov_alias",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; xor edx,edx; xor ecx,ecx; cmovz rdx,rax; mov ecx,DWORD PTR [rdx]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "negative": false,
+      "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_cmov_alias.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_cmov_alias.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 4,
+        "source_prog_id": 0,
+        "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+        "started": "2026-11-08T16:30:46.341138+00:00",
+        "prog_id": 16,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/4.success.tar.gz",
+        "finished": "2026-11-08T16:30:47.369553+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=16 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_cmov_from_sp",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; xor eax,eax; xor ecx,ecx; cmovz rax,rsp; mov ecx,DWORD PTR [rax]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "negative": false,
+      "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_cmov_from_sp.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_cmov_from_sp.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 5,
+        "source_prog_id": 0,
+        "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+        "started": "2026-11-08T16:30:47.432107+00:00",
+        "prog_id": 20,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/5.success.tar.gz",
+        "finished": "2026-11-08T16:30:48.545547+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=20 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_cmov_to_sp",
+      "assembly": "mov rdx,rsp; lea rax,[rsp-16]; xor ecx,ecx; cmovz rsp,rax; mov rsp,rdx; mov eax,2; ret",
+      "negative": false,
+      "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_cmov_to_sp.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_cmov_to_sp.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 6,
+        "source_prog_id": 0,
+        "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+        "started": "2026-11-08T16:30:48.606723+00:00",
+        "prog_id": 24,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/6.success.tar.gz",
+        "finished": "2026-11-08T16:30:49.597768+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=24 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_cmov_self_sp",
+      "assembly": "xor ecx,ecx; cmovz rsp,rsp; mov eax,2; ret",
+      "negative": false,
+      "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_cmov_self_sp.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_cmov_self_sp.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 7,
+        "source_prog_id": 0,
+        "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+        "started": "2026-11-08T16:30:49.654920+00:00",
+        "prog_id": 28,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/7.success.tar.gz",
+        "finished": "2026-11-08T16:30:50.486021+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=28 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_xchg_alias",
+      "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; xor ecx,ecx; xchg rax,rcx; mov edx,DWORD PTR [rcx]; add rsp,16; cmp edx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "negative": false,
+      "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_xchg_alias.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_xchg_alias.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 8,
+        "source_prog_id": 0,
+        "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+        "started": "2026-11-08T16:30:50.542211+00:00",
+        "prog_id": 32,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/8.success.tar.gz",
+        "finished": "2026-11-08T16:30:53.103271+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=32 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "valid_spill_restore",
+      "assembly": "sub rsp,32; lea rax,[rsp+16]; mov [rsp],rax; mov rax,[rsp]; mov rsp,rax; add rsp,16; mov eax,2; ret",
+      "negative": false,
+      "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/valid_spill_restore.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/valid_spill_restore.native.o",
+        "0",
+        "2"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 9,
+        "source_prog_id": 0,
+        "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+        "started": "2026-11-08T16:30:53.163748+00:00",
+        "prog_id": 36,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/9.success.tar.gz",
+        "finished": "2026-11-08T16:30:54.212478+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "valid_executed",
+      "message": "native program id=36 source_prog_id=0\nnative_raw_context result=0 retval=2 expected_result=0 expected_retval=2\n"
+    },
+    {
+      "name": "past_data_end_read",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+      "negative": true,
+      "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/past_data_end_read.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/past_data_end_read.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 10,
+        "source_prog_id": 0,
+        "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+        "started": "2026-11-08T16:30:54.275879+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-imwwcrqx/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/10.failure.tar.gz",
+        "finished": "2026-11-08T16:30:55.249443+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1527\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n25: (b7) r2 = 0                       ; R2=0\n26: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=7 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=3d138471ebf51234 word_count=1 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=7 final_size_matches=1\nchunk_bytes=0:7\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/past_data_end_write.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/past_data_end_write.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 11,
+        "source_prog_id": 0,
+        "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+        "started": "2026-11-08T16:30:55.323391+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '11', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '11', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-budhqs2d/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/11.failure.tar.gz",
+        "finished": "2026-11-08T16:30:56.116834+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1527\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n25: (b7) r2 = 0                       ; R2=0\n26: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=5716c056c483c1cc word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+      "negative": true,
+      "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/missing_data_end_check.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/missing_data_end_check.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 12,
+        "source_prog_id": 0,
+        "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+        "started": "2026-11-08T16:30:56.182889+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '12', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '12', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0zf6g9d8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/12.failure.tar.gz",
+        "finished": "2026-11-08T16:30:56.997973+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1651\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (61) r1 = *(u32 *)(r1 +0)         ; R1=pkt(r=0)\n25: (b7) r2 = 0                       ; R2=0\n26: (0f) r2 += r1                     ; R1=pkt(r=0) R2=pkt(r=0)\n27: (71) r0 = *(u8 *)(r2 +0)\ninvalid access to packet, off=0 size=1, R2(id=0,off=0,r=0)\nR2 offset is outside of the packet\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=6 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=28f636c49dc3fd8a word_count=1 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=6 final_size_matches=1\nchunk_bytes=0:6\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+      "negative": true,
+      "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/map_value_oob.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/map_value_oob.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 13,
+        "source_prog_id": 0,
+        "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+        "started": "2026-11-08T16:30:57.069627+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vlios7ba/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/13.failure.tar.gz",
+        "finished": "2026-11-08T16:30:58.901587+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=3221\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (61) r2 = *(u32 *)(r1 +0)         ; R1=ctx() R2=pkt(r=0)\n25: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n26: (b7) r3 = 4                       ; R3=4\n27: (b4) w6 = 0                       ; R6=0\n28: (0f) r3 += r2                     ; R2=pkt(r=0) R3=pkt(off=4,r=0)\n29: (2d) if r3 > r1 goto pc+24        ; R1=pkt_end() R3=pkt(off=4,r=4)\n30: (18) r1 = 0xffff895606ba9c00      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n32: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n33: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (15) if r1 == 0x0 goto pc+3       ; R1=map_value(map=neg_map,ks=4,vs=8)\n51: (b7) r2 = 8                       ; R2=8\n52: (0f) r2 += r1                     ; R1=map_value(map=neg_map,ks=4,vs=8) R2=map_value(map=neg_map,ks=4,vs=8,off=8)\n53: (79) r6 = *(u64 *)(r2 +0)\ninvalid access to map value, value_size=8 off=8 size=8\nR2 min value is outside of the allowed memory range\nprocessed 53 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=59 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nretained_map_info=5:id=13:type=1:name=neg_map\nnative_blob_diag: fnv64=d4ff49278b216fec word_count=14 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=59 final_size_matches=1\nchunk_bytes=0:59\nreloc_targets=26:0xffffffff8d4c77a0,18:0xd\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+      "negative": true,
+      "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/nullable_map_dereference.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/nullable_map_dereference.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 14,
+        "source_prog_id": 0,
+        "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+        "started": "2026-11-08T16:30:58.970268+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0', 'neg_map', '14', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-egapt_f0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0', 'neg_map', '14', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/14.failure.tar.gz",
+        "finished": "2026-11-08T16:31:00.836820+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2983\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (61) r2 = *(u32 *)(r1 +0)         ; R1=ctx() R2=pkt(r=0)\n25: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n26: (b7) r3 = 4                       ; R3=4\n27: (b4) w0 = 0                       ; R0=0\n28: (0f) r3 += r2                     ; R2=pkt(r=0) R3=pkt(off=4,r=0)\n29: (2d) if r3 > r1 goto pc+23        ; R1=pkt_end() R3=pkt(off=4,r=4)\n30: (18) r1 = 0xffff895606baa400      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n32: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n33: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r2 = 0                       ; R2=0\n51: (0f) r2 += r1\nR2 pointer arithmetic on map_value_or_null prohibited, null-check it first\nprocessed 51 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=53 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nretained_map_info=5:id=14:type=1:name=neg_map\nnative_blob_diag: fnv64=c3e09461b1cb1a7e word_count=13 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=53 final_size_matches=1\nchunk_bytes=0:53\nreloc_targets=26:0xffffffff8d4c77a0,18:0xe\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+      "negative": true,
+      "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/invalid_helper_argument.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/invalid_helper_argument.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 15,
+        "source_prog_id": 0,
+        "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+        "started": "2026-11-08T16:31:00.901673+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '15', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '15', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-9y4jc56p/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/15.failure.tar.gz",
+        "finished": "2026-11-08T16:31:02.392166+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1525\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 1                       ; R1=1\n25: (b7) r2 = 0                       ; R2=0\n26: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=19 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=92ef0a7092d57869 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1\nchunk_bytes=0:19\nreloc_targets=14:0xffffffff8d4b97d0\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+      "negative": true,
+      "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/stack_oob.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/stack_oob.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 16,
+        "source_prog_id": 0,
+        "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+        "started": "2026-11-08T16:31:02.460166+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '16', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '16', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-n5rfu0bb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/16.failure.tar.gz",
+        "finished": "2026-11-08T16:31:03.236136+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2023\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = -1024                   ; R1=-1024\n25: (bf) r2 = r1                      ; R1=-1024 R2=-1024\n26: (07) r2 += 1                      ; R2=-1023\n27: (bf) r3 = r2                      ; R2=-1023 R3=-1023\n28: (57) r3 &= 7                      ; R3=1\n29: (55) if r3 != 0x0 goto pc+2       ; R3=1\n32: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n33: (07) r3 += -8                     ; R3=fp-8\n34: (bf) r4 = r3                      ; R3=fp-8 R4=fp-8\n35: (0f) r4 += r1                     ; R1=-1024 R4=fp-1032\n36: (0f) r3 += r2                     ; R2=-1023 R3=fp-1031\n37: (71) r1 = *(u8 *)(r3 +0)\ninvalid read from stack R3 off=-1031 size=1\nprocessed 36 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=8 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=26644872a66eaf68 word_count=2 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=8 final_size_matches=1\nchunk_bytes=0:8\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "negative": true,
+      "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/uninitialized_stack.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/uninitialized_stack.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 17,
+        "source_prog_id": 0,
+        "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+        "started": "2026-11-08T16:31:03.302353+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '17', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '17', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lkvs0if1/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/17.failure.tar.gz",
+        "finished": "2026-11-08T16:31:04.093262+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1993\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = -8                      ; R1=-8\n25: (bf) r2 = r1                      ; R1=-8 R2=-8\n26: (07) r2 += 1                      ; R2=-7\n27: (bf) r3 = r2                      ; R2=-7 R3=-7\n28: (57) r3 &= 7                      ; R3=1\n29: (55) if r3 != 0x0 goto pc+2       ; R3=1\n32: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n33: (07) r3 += -8                     ; R3=fp-8\n34: (bf) r4 = r3                      ; R3=fp-8 R4=fp-8\n35: (0f) r4 += r1                     ; R1=-8 R4=fp-16\n36: (0f) r3 += r2                     ; R2=-7 R3=fp-15\n37: (71) r1 = *(u8 *)(r3 +0)\ninvalid read from stack R3 off=-15 size=1\nprocessed 36 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=5 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=5a9045d6a2ed8ae2 word_count=1 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=5 final_size_matches=1\nchunk_bytes=0:5\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: jmp 1b",
+      "negative": true,
+      "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/unbounded_loop.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/unbounded_loop.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 18,
+        "source_prog_id": 0,
+        "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+        "started": "2026-11-08T16:31:04.163265+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '18', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '18', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-tg7tm_4k/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/18.failure.tar.gz",
+        "finished": "2026-11-08T16:31:04.872435+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=118\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\nunreachable insn 25\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=2 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=9a0cdf00c4fa01f2 word_count=0 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=2 final_size_matches=1\nchunk_bytes=0:2\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+      "negative": true,
+      "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/unbounded_indirect_jump.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/unbounded_indirect_jump.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 19,
+        "source_prog_id": 0,
+        "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+        "started": "2026-11-08T16:31:04.945621+00:00",
+        "status": -22,
+        "error": "unresolved finite indirect target at 0x3: jmp    rax",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 48, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1689, in render_program\n    targets = indirect_targets(all_insns, exit_addr, {\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1314, in indirect_targets\n    raise ValueError(f\"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}\")\nValueError: unresolved finite indirect target at 0x3: jmp    rax\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/19.failure.tar.gz",
+        "finished": "2026-11-08T16:31:05.238420+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "unresolved finite indirect target at 0x3: jmp    rax\n"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "ud2; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/unsupported_instruction.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/unsupported_instruction.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 20,
+        "source_prog_id": 0,
+        "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+        "started": "2026-11-08T16:31:05.301341+00:00",
+        "status": -22,
+        "error": "unsupported mnemonic: ud2",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 48, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1817, in render_program\n    append_branch_or_ret(lines, insn, addrs,\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1510, in append_branch_or_ret\n    append_step(lines, insn, indent, step_macro, rodata_idents)\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1367, in append_step\n    encoded = encode(insn, rodata_idents or {})\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1095, in encode\n    raise ValueError(f\"unsupported mnemonic: {insn.raw}\")\nValueError: unsupported mnemonic: ud2\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/20.failure.tar.gz",
+        "finished": "2026-11-08T16:31:05.576621+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "unsupported mnemonic: ud2\n"
+    },
+    {
+      "name": "immediate_push_branch",
+      "assembly": "mov eax, 2; push 1; pop rcx; test rcx, rcx; jz 1f; xor edx, edx; mov eax, DWORD PTR [rdx]; 1: ret",
+      "negative": true,
+      "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/immediate_push_branch.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/immediate_push_branch.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 21,
+        "source_prog_id": 0,
+        "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+        "started": "2026-11-08T16:31:05.668597+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '21', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '21', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-rru0pflr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/21.failure.tar.gz",
+        "finished": "2026-11-08T16:31:06.527232+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1678\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w1 = 2                        ; R1=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (7a) *(u64 *)(r10 -8) = 1         ; R10=fp0 fp-8=1\n26: (79) r2 = *(u64 *)(r10 -8)        ; R2=1 R10=fp0 fp-8=1\n27: (15) if r2 == 0x0 goto pc+2       ; R2=1\n28: (b7) r1 = 0                       ; R1=0\n29: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 30 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=b243d5fbce0fd1ab word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1\nchunk_bytes=0:17\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "entry_return_slot_overwrite",
+      "assembly": "mov QWORD PTR [rsp], 0; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/entry_return_slot_overwrite.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/entry_return_slot_overwrite.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 22,
+        "source_prog_id": 0,
+        "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+        "started": "2026-11-08T16:31:06.597807+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '22', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '22', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-p_dvtd0t/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/22.failure.tar.gz",
+        "finished": "2026-11-08T16:31:07.306885+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2254\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 0                       ; R1=0\n25: (07) r1 += 1                      ; R1=1\n26: (bf) r2 = r1                      ; R1=1 R2=1\n27: (57) r2 &= 7                      ; R2=1\n28: (55) if r2 != 0x0 goto pc+2       ; R2=1\n31: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n32: (07) r2 += -8                     ; R2=fp-8\n33: (0f) r2 += r1                     ; R1=1 R2=fp-7\n34: (72) *(u8 *)(r2 +0) = 0           ; R2=fp-7 fp-8=??????0?\n35: (72) *(u8 *)(r2 +1) = 0           ; R2=fp-7 fp-8=?????00?\n36: (72) *(u8 *)(r2 +2) = 0           ; R2=fp-7 fp-8=????000?\n37: (72) *(u8 *)(r2 +3) = 0           ; R2=fp-7 fp-8=???0000?\n38: (72) *(u8 *)(r2 +4) = 0           ; R2=fp-7 fp-8=??00000?\n39: (72) *(u8 *)(r2 +5) = 0           ; R2=fp-7 fp-8=?000000?\n40: (72) *(u8 *)(r2 +6) = 0           ; R2=fp-7 fp-8=0000000?\n41: (72) *(u8 *)(r2 +7) = 0\ninvalid write to stack R2 off=0 size=1\nprocessed 40 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=13 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=9d0a360ea3d15c8c word_count=3 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=4 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=13 final_size_matches=1\nchunk_bytes=0:13\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret",
+      "negative": true,
+      "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/stack_base_flags.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/stack_base_flags.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 23,
+        "source_prog_id": 0,
+        "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+        "started": "2026-11-08T16:31:07.375429+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '23', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '23', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-lmm3tg_4/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/23.failure.tar.gz",
+        "finished": "2026-11-08T16:31:08.263003+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1576\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w1 = 2                        ; R1=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (15) if r0 == 0x0 goto pc+2       ; R0=scalar(umin=1)\n26: (b7) r1 = 0                       ; R1=0\n27: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=375f75a3c96d4ae9 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1\nchunk_bytes=0:19\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/undefined_entry_register.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/undefined_entry_register.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 24,
+        "source_prog_id": 0,
+        "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+        "started": "2026-11-08T16:31:08.328217+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '24', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '24', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-td2hbrk5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/24.failure.tar.gz",
+        "finished": "2026-11-08T16:31:09.193653+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1707\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w2 = 2                        ; R2=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (bf) r3 = r0                       ; R0=scalar(id=1) R3=scalar(id=1)\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (b7) r0 = 2                       ; R0=scalar()\n26: (15) if r3 == 0x0 goto pc+5       ; R3=scalar(id=1,umin=1)\n27: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n28: (b7) r2 = 0                       ; R2=0\n29: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 30 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=22 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=312838f238a34515 word_count=5 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=22 final_size_matches=1\nchunk_bytes=0:22\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/undefined_entry_flags.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/undefined_entry_flags.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 25,
+        "source_prog_id": 0,
+        "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+        "started": "2026-11-08T16:31:09.261609+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '25', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '25', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-x_nrj2k0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/25.failure.tar.gz",
+        "finished": "2026-11-08T16:31:10.124026+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1799\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w2 = 2                        ; R2=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (bf) r3 = r0                      ; R0=scalar(id=1) R3=scalar(id=1)\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (57) r3 &= 1                      ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (15) if r3 == 0x0 goto pc+5       ; R3=1\n28: (61) r1 = *(u32 *)(r1 +4)         ; R1=pkt_end()\n29: (b7) r2 = 0                       ; R2=0\n30: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 31 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=786dd8426b0b8c45 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1\nchunk_bytes=0:19\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div8_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cl; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div8_zero.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div8_zero.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 26,
+        "source_prog_id": 0,
+        "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+        "started": "2026-11-08T16:31:10.192627+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '26', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '26', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-zlc6cvg_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/26.failure.tar.gz",
+        "finished": "2026-11-08T16:31:12.591523+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=e1cd8c3a27ebc43a word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1\nchunk_bytes=0:16\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div8_overflow",
+      "assembly": "mov eax, 256; xor edx, edx; mov ecx, 1; div cl; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div8_overflow.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div8_overflow.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 27,
+        "source_prog_id": 0,
+        "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+        "started": "2026-11-08T16:31:12.656256+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '27', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '27', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1w9j95pv/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/27.failure.tar.gz",
+        "finished": "2026-11-08T16:31:15.120577+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=fe4d7f0c07975552 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1\nchunk_bytes=0:19\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div16_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div16_zero.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div16_zero.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 28,
+        "source_prog_id": 0,
+        "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+        "started": "2026-11-08T16:31:15.202931+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '28', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '28', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-1m_eowph/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/28.failure.tar.gz",
+        "finished": "2026-11-08T16:31:17.707310+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=b13b009362b02121 word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1\nchunk_bytes=0:17\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div16_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div cx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div16_overflow.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div16_overflow.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 29,
+        "source_prog_id": 0,
+        "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+        "started": "2026-11-08T16:31:17.779727+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '29', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '29', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0_nay0ec/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/29.failure.tar.gz",
+        "finished": "2026-11-08T16:31:20.179172+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=9cc3013ebcaa2b45 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div32_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div ecx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div32_zero.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div32_zero.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 30,
+        "source_prog_id": 0,
+        "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+        "started": "2026-11-08T16:31:20.263484+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '30', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '30', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-b3yi4uyc/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/30.failure.tar.gz",
+        "finished": "2026-11-08T16:31:22.682117+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=845c6ca284a2783d word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1\nchunk_bytes=0:16\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div32_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div ecx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div32_overflow.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div32_overflow.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 31,
+        "source_prog_id": 0,
+        "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+        "started": "2026-11-08T16:31:22.748148+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '31', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '31', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-0pe7hxrb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/31.failure.tar.gz",
+        "finished": "2026-11-08T16:31:25.123094+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=24cba849e9bcf6c1 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1\nchunk_bytes=0:19\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div64_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div rcx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div64_zero.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div64_zero.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 32,
+        "source_prog_id": 0,
+        "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+        "started": "2026-11-08T16:31:25.195975+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '32', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '32', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-on1d70kn/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/32.failure.tar.gz",
+        "finished": "2026-11-08T16:31:27.621910+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=57fd9fdf36df4e1b word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1\nchunk_bytes=0:17\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "div64_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div rcx; mov eax, 2; ret",
+      "negative": true,
+      "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/div64_overflow.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/div64_overflow.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 33,
+        "source_prog_id": 0,
+        "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+        "started": "2026-11-08T16:31:27.689883+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '33', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '33', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-qop3fdfb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/33.failure.tar.gz",
+        "finished": "2026-11-08T16:31:30.083084+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1473\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 0                       ; R0=0\n25: (7b) *(u64 *)(r0 +0) = r0\nR0 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=deacdeffe54c2987 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret",
+      "negative": true,
+      "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/helper_clobbered_register.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/helper_clobbered_register.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 34,
+        "source_prog_id": 0,
+        "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+        "started": "2026-11-08T16:31:30.153587+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '34', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '34', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-i9nx_2u_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/34.failure.tar.gz",
+        "finished": "2026-11-08T16:31:31.918672+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2820\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=17,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (bf) r1 = r0                       ; R0=scalar(id=1) R1=scalar(id=1)\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (b7) r0 = 2                       ; R0=scalar()\n26: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n27: (85) call bpf_get_current_uid_gid#15      ; R0=scalar()\n28: (b4) w1 = 2                       ; R1=2\n29: (b7) r0 = 2                       ; R0=scalar()\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (b7) r0 = 2                       ; R0=scalar()\n32: (bf) r2 = r0                      ; R0=scalar(id=2) R2=scalar(id=2)\n33: (b7) r0 = 2                       ; R0=scalar()\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (15) if r2 == 0x0 goto pc+5       ; R2=scalar(id=2,umin=1)\n47: (61) r1 = *(u32 *)(r6 +4)         ; R1=pkt_end() R6=ctx()\n48: (b7) r2 = 0                       ; R2=0\n49: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 50 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=31 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=b399e071612d1e33 word_count=7 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=31 final_size_matches=1\nchunk_bytes=0:31\nreloc_targets=6:0xffffffff8d4b9ce0\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "high32_positive_byte",
+      "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; add rsp,rcx; movzx eax,BYTE PTR [rsp]; mov rsp,rdx; ret",
+      "negative": true,
+      "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/high32_positive_byte.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/high32_positive_byte.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 35,
+        "source_prog_id": 0,
+        "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+        "started": "2026-11-08T16:31:31.989680+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '35', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '35', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-uo00gug5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/35.failure.tar.gz",
+        "finished": "2026-11-08T16:31:32.955884+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=2163\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 0                       ; R1=0\n25: (bf) r2 = r1                      ; R1=0 R2=0\n26: (57) r2 &= 7                      ; R2=0\n27: (55) if r2 != 0x0 goto pc+5       ; R2=0\n28: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n29: (07) r2 += -16                    ; R2=fp-16\n30: (0f) r2 += r1                     ; R1=0 R2=fp-16\n31: (7a) *(u64 *)(r2 +0) = 37         ; R2=fp-16 fp-16=37\n32: (05) goto pc+11\n44: (b7) r1 = 0                       ; R1=0\n45: (b7) r2 = 0                       ; R2=0\n46: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n47: (07) r3 += -16                    ; R3=fp-16\n48: (0f) r3 += r2                     ; R2=0 R3=fp-16\n49: (18) r2 = 0x100000000             ; R2=0x100000000\n51: (0f) r3 += r2\nmath between fp pointer and 4294967296 is not allowed\nprocessed 40 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=08ba4b52559dd074 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1\nchunk_bytes=0:34\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    },
+    {
+      "name": "high32_positive_qword",
+      "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; add rsp,rcx; mov rax,QWORD PTR [rsp]; mov rsp,rdx; ret",
+      "negative": true,
+      "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/high32_positive_qword.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/high32_positive_qword.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 36,
+        "source_prog_id": 0,
+        "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+        "started": "2026-11-08T16:31:33.030452+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '36', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '36', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-vvpl9_02/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/36.failure.tar.gz",
+        "finished": "2026-11-08T16:31:34.006441+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=2324\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 0                       ; R1=0\n25: (bf) r2 = r1                      ; R1=0 R2=0\n26: (57) r2 &= 7                      ; R2=0\n27: (55) if r2 != 0x0 goto pc+5       ; R2=0\n28: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n29: (07) r2 += -16                    ; R2=fp-16\n30: (0f) r2 += r1                     ; R1=0 R2=fp-16\n31: (7a) *(u64 *)(r2 +0) = 37         ; R2=fp-16 fp-16=37\n32: (05) goto pc+11\n44: (b7) r2 = 0                       ; R2=0\n45: (18) r3 = 0x100000000             ; R3=0x100000000\n47: (bf) r1 = r2                      ; R1=0 R2=0\n48: (0f) r1 += r3                     ; R1=0x100000000 R3=0x100000000\n49: (bf) r3 = r2                      ; R2=0 R3=0\n50: (57) r3 &= 7                      ; R3=0\n51: (55) if r3 != 0x0 goto pc+5       ; R3=0\n52: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n53: (07) r2 += -16                    ; R2=fp-16\n54: (0f) r2 += r1\nmath between fp pointer and 4294967296 is not allowed\nprocessed 43 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=bdf3132db69dbad0 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1\nchunk_bytes=0:34\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    },
+    {
+      "name": "high32_negative_byte",
+      "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; neg rcx; add rsp,rcx; movzx eax,BYTE PTR [rsp]; mov rsp,rdx; ret",
+      "negative": true,
+      "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/high32_negative_byte.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/high32_negative_byte.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 37,
+        "source_prog_id": 0,
+        "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+        "started": "2026-11-08T16:31:34.073048+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '37', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '37', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-r77g7cq9/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/37.failure.tar.gz",
+        "finished": "2026-11-08T16:31:35.125682+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=2171\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 0                       ; R1=0\n25: (bf) r2 = r1                      ; R1=0 R2=0\n26: (57) r2 &= 7                      ; R2=0\n27: (55) if r2 != 0x0 goto pc+5       ; R2=0\n28: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n29: (07) r2 += -16                    ; R2=fp-16\n30: (0f) r2 += r1                     ; R1=0 R2=fp-16\n31: (7a) *(u64 *)(r2 +0) = 37         ; R2=fp-16 fp-16=37\n32: (05) goto pc+11\n44: (b7) r1 = 0                       ; R1=0\n45: (b7) r2 = 0                       ; R2=0\n46: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n47: (07) r3 += -16                    ; R3=fp-16\n48: (0f) r3 += r2                     ; R2=0 R3=fp-16\n49: (18) r2 = 0xffffffff00000000      ; R2=0xffffffff00000000\n51: (0f) r3 += r2\nmath between fp pointer and -4294967296 is not allowed\nprocessed 40 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=3eb691181c9707da word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1\nchunk_bytes=0:37\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    },
+    {
+      "name": "high32_negative_qword",
+      "assembly": "mov rdx,rsp; sub rsp,16; mov QWORD PTR [rsp],37; mov ecx,1; shl rcx,32; neg rcx; add rsp,rcx; mov rax,QWORD PTR [rsp]; mov rsp,rdx; ret",
+      "negative": true,
+      "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+      "manifest": "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/results/high32_negative_qword.manifest.json",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/high32_negative_qword.native.o"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 38,
+        "source_prog_id": 0,
+        "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+        "started": "2026-11-08T16:31:35.192711+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '38', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '38', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/request-yszkegsm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/undefined-flags/safety/requests/38.failure.tar.gz",
+        "finished": "2026-11-08T16:31:36.224700+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=2346\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r1 = 0                       ; R1=0\n25: (bf) r2 = r1                      ; R1=0 R2=0\n26: (57) r2 &= 7                      ; R2=0\n27: (55) if r2 != 0x0 goto pc+5       ; R2=0\n28: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n29: (07) r2 += -16                    ; R2=fp-16\n30: (0f) r2 += r1                     ; R1=0 R2=fp-16\n31: (7a) *(u64 *)(r2 +0) = 37         ; R2=fp-16 fp-16=37\n32: (05) goto pc+11\n44: (b7) r2 = 0                       ; R2=0\n45: (18) r3 = 0xffffffff00000000      ; R3=0xffffffff00000000\n47: (bf) r1 = r2                      ; R1=0 R2=0\n48: (0f) r1 += r3                     ; R1=0xffffffff00000000 R3=0xffffffff00000000\n49: (bf) r3 = r2                      ; R2=0 R3=0\n50: (57) r3 &= 7                      ; R3=0\n51: (55) if r3 != 0x0 goto pc+5       ; R3=0\n52: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n53: (07) r2 += -16                    ; R2=fp-16\n54: (0f) r2 += r1\nmath between fp pointer and -4294967296 is not allowed\nprocessed 43 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,476,3370172,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129899\nnative_blob_diag: fnv64=10b4ce9a3c14dfc2 word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1\nchunk_bytes=0:37\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    }
+  ]
+}
