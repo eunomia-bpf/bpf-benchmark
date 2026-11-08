@@ -4641,3 +4641,19 @@ These sampled comparisons support the canonical Lean reference. Per-form
 native/refinement, compiled-body and six O4 link premises remain tracked
 separately. C-model body counts stay72x86/71ARM; the operator's remaining-token
 TODO retains its native/compiled completion boundary.
+
+### Helper-route caller frame
+
+The immutable dd6fd2e5d full check returned Make exit2 at the historical
+x86 route oracle's preserved-caller expectation. Its eight supported helper
+scenes now use the published host profile: eight scalar caller registers
+and the observed flags receive zero-valued unspecified words. RAX keeps its
+helper result/tag; typed argument captures and every callee observation
+remain. The two default-arm scenes explicitly retain their original nonzero
+caller inputs, preserving their unchanged-state coverage. UBSan also exposed
+signed overflow in the oracle's indexed-offset expectation; unsigned64
+addition now supplies the same modular result for every original boundary
+value and scale. Original compilation/run exits0/1; the corrected oracle
+passes7057 UBSan observations. Exact source epoch, original full outcome,
+all1263 Git hashes and intermediate diagnostics remain under
+`helper_route_caller_frame`; the full export is retired.

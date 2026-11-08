@@ -94,6 +94,18 @@ static void model_reset(void)
 	mtag[X86_RDI] = X86_SIM_TAG_ABI;
 }
 
+/* The host profile supplies zero for each unspecified helper word. */
+static void model_helper_clobbers(void)
+{
+	static const unsigned callers[] = { X86_RCX, X86_RDX, X86_RSI, X86_RDI,
+		X86_R8, X86_R9, X86_R10, X86_R11 };
+	for (unsigned i = 0; i < sizeof(callers) / sizeof(callers[0]); i++) {
+		mreg[callers[i]] = 0;
+		mtag[callers[i]] = X86_SIM_TAG_SCALAR;
+	}
+	mc = mz = ms = mo = 0;
+}
+
 /* Independent model cond evaluator over the 14 accepted X86_CC_* codes. */
 static int model_cc_take(unsigned cc, unsigned c, unsigned z, unsigned s,
 			 unsigned o)
@@ -730,6 +742,7 @@ static __u64 scene_helper_dispatch(void)
 	}
 	mreg[X86_RDI] = 0x1000ULL;
 	mreg[X86_RSI] = 0x2000ULL;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_id1", 0xDEAD0011ULL);
 
 	/* id 2 update: 4 lanes, scalar ret in rax */
@@ -756,6 +769,7 @@ static __u64 scene_helper_dispatch(void)
 	mreg[X86_RSI] = 0x2000ULL;
 	mreg[X86_RDX] = 0x3000ULL;
 	mreg[X86_RCX] = 0x4000ULL;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_id2", 0xDEAD0013ULL);
 
 	/* id 3 delete: 2 lanes */
@@ -775,6 +789,7 @@ static __u64 scene_helper_dispatch(void)
 	}
 	mreg[X86_RDI] = 0x1000ULL;
 	mreg[X86_RSI] = 0x2000ULL;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_id3", 0xDEAD0015ULL);
 
 	/* UID/PID use Linux IDs 15/14; CPU ID 8 returns a 32-bit value. */
@@ -782,16 +797,19 @@ static __u64 scene_helper_dispatch(void)
 	X86_SIM_BPF_CALL_ID(15ULL);
 	mreg[X86_RAX] = ora_expected_result(15);
 	mtag[X86_RAX] = 0U;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_uid15", 0xDEAD0016ULL);
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
 	X86_SIM_BPF_CALL_ID(14ULL);
 	mreg[X86_RAX] = ora_expected_result(14);
 	mtag[X86_RAX] = 0U;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_pid14", 0xDEAD0017ULL);
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
 	X86_SIM_BPF_CALL_ID(8ULL);
 	mreg[X86_RAX] = ora_expected_result(8);
 	mtag[X86_RAX] = 0U;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_cpu8", 0xDEAD0018ULL);
 	/* ID 5 ktime: native capture, 64-bit rax. */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
@@ -804,15 +822,24 @@ static __u64 scene_helper_dispatch(void)
 		printf("MISMATCH helper id5 ktime capture\n");
 		return 0xDEAD001CULL;
 	}
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_ktime5", 0xDEAD001DULL);
 	/* Gap ID 13 reaches the failure arm and preserves RAX. */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
+	PLANT_REG(X86_RDI, 0x1000ULL, 0U);
+	PLANT_REG(X86_RSI, 0x2000ULL, 0U);
+	PLANT_REG(X86_RDX, 0x3000ULL, 0U);
+	PLANT_REG(X86_RCX, 0x4000ULL, 0U);
 	X86_SIM_BPF_CALL_ID(13ULL);
 	mreg[X86_RAX] = 0x9000ULL;
 	mtag[X86_RAX] = 0U;
 	COMPARE_REGFILE("helper_id13_default", 0xDEAD0019ULL);
 	/* id 0 reaches the default arm too */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
+	PLANT_REG(X86_RDI, 0x1000ULL, 0U);
+	PLANT_REG(X86_RSI, 0x2000ULL, 0U);
+	PLANT_REG(X86_RDX, 0x3000ULL, 0U);
+	PLANT_REG(X86_RCX, 0x4000ULL, 0U);
 	X86_SIM_BPF_CALL_ID(0ULL);
 	mreg[X86_RAX] = 0x9000ULL;
 	mtag[X86_RAX] = 0U;
@@ -825,6 +852,7 @@ static __u64 scene_helper_dispatch(void)
 	mreg[X86_RSI] = 8ULL;
 	mreg[X86_RAX] = ora_expected_result(8);
 	mtag[X86_RAX] = 0U;
+	model_helper_clobbers();
 	COMPARE_REGFILE("helper_call_reg", 0xDEAD001BULL);
 	(void)i;
 	RAX_SET(0x5EULL);
@@ -1129,8 +1157,8 @@ static __u64 scene_off_indexed(void)
 				__u32 aux =
 					KPROG_X86_MEM_AUX(X86_R9, SCALES[si],
 							  0U, 0U);
-				__s64 want = disp +
-					     (__s64)(iv << SCALES[si]);
+				__s64 want = (__s64)((__u64)disp +
+					     (iv << SCALES[si]));
 				__s64 got;
 				PLANT_REG(X86_R9, iv, 0U);
 				got = X86_SIM_L_MEM_OFFSET(aux, disp);
