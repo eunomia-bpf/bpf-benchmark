@@ -1,0 +1,8 @@
+--- a/vendor/bpf/tetragon/bpf/lib/bpf_d_path.h
++++ b/vendor/bpf/tetragon/bpf/lib/bpf_d_path.h
+@@ -236,0 +237,3 @@
++#ifdef __LARGE_BPF_PROG
++#pragma clang loop unroll(disable)
++#else
+@@ -237,0 +241 @@
++#endif

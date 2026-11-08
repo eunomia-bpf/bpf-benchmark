@@ -1,0 +1,11 @@
+Application source changes
+
+Operator2026-11-08 authorizes small application eBPF C changes after hard generic simulator/compiler attempts. Each comparison builds the JIT baseline and native program from the same edited source bytes. Kernel selftests and safety cases retain their published sources.
+
+| Application | Original source / function | Trigger | Edit and preserved behavior | Outcome | Patch |
+| --- | --- | --- | --- | --- | --- |
+| Tetragon | vendor/bpf/tetragon/bpf/lib/bpf_d_path.h: prepend_path, used by read_exe/execve_send | Stock8193-jump sequence,667530instructions/6806states after generic frame/tag/extent epochs c9a653161 and006a97056 | Existing modern large-program counted path loop uses unroll(disable); original bound, iteration order, cwd_read body, break and output/error handling stay exact. Small legacy/V61helper branches retain their form. | Native V511 compile0 and upstream baseline V511 BPF compile0 from identical edited header/main source. Actual verifier and complete application replay continue. | [tetragon-path-loop.patch](tetragon-path-loop.patch) |
+
+Tetragon uses its existing upstream baseline frontend in vendor/repos/tetragon/bpf and native compatibility frontend in vendor/bpf/tetragon/bpf. Both compile the same edited bpf_d_path.h and bpf_execve_event.c bytes with the same V511/large-program definitions; compile.json records their matching source hashes and exact commands. The patch applies at the repository root for the native source copy; git -C vendor/repos/tetragon apply --unidiff-zero -p4 /workspaces/repository/corpus/results/kprog_app_source_changes/tetragon-path-loop.patch applies the identical edit to the upstream baseline source. The experiment uses private mount copies for that upstream tree. [Compiler artifacts and original diagnostics](../kprog_arm64_app_coverage_20261108/tetragon-source-loop/compile.json) retain both initial and completed frontend attempts.
+
+The recorded patch uses zero-context unified hunks. Apply it with git apply --unidiff-zero at the root; the upstream-tree command above also supplies that option.

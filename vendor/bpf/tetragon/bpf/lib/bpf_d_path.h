@@ -234,7 +234,11 @@ prepend_path(const struct path *path, const struct path *root, char *bf,
 		}
 	} else {
 #ifndef __V61_BPF_PROG
+#ifdef __LARGE_BPF_PROG
+#pragma clang loop unroll(disable)
+#else
 #pragma unroll
+#endif
 		for (int i = 0; i < PROBE_CWD_READ_ITERATIONS; ++i) {
 			if (cwd_read(&data))
 				break;

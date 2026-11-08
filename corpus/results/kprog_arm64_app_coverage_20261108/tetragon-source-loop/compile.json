@@ -1,0 +1,156 @@
+{
+  "utc": "2026-11-08T17:54:11.507038+00:00",
+  "source": {
+    "utc": "2026-11-08T17:41:20.363608+00:00",
+    "application": "Tetragon",
+    "file": "vendor/bpf/tetragon/bpf/lib/bpf_d_path.h",
+    "function": "prepend_path, inlined through read_exe into execve_send",
+    "trigger": "Stock verifier: The sequence of 8193 jumps is too complex; processed667530insns/6806states",
+    "change": "Modern large-program path uses the original counted loop with unroll(disable).",
+    "behavior": "Existing PROBE_CWD_READ_ITERATIONS, cwd_read body, iteration order, break condition and output/error handling retain their source text. Legacy small and V61 helper branches retain their directives.",
+    "before_sha256": "f197ba4c4d564969d154f1375542203f2c7b480fcacfc8689ce8f276064527a7",
+    "after_sha256": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+    "patch": "corpus/results/kprog_app_source_changes/tetragon-path-loop.patch"
+  },
+  "native_commands": [
+    {
+      "label": "division-plugin",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-s",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "ARCH=arm64",
+        "BUILD=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/build",
+        "OUT=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/out",
+        "CLANG=/usr/lib/llvm-18/bin/clang",
+        "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/build/arm64/stage/native_division.so"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "label": "native-flags",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-s",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "ARCH=arm64",
+        "BUILD=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/build",
+        "OUT=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/out",
+        "CLANG=/usr/lib/llvm-18/bin/clang",
+        "--eval=print-native:\n\t@echo $(NATIVE_CFLAGS)\n",
+        "print-native"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "label": "native-v511",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-c",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/build/arm64/stage/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=armv8.1-a+lse",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_arm64",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf_execve_event_v511.native.o",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "label": "bpf-v511",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-C",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "CLANG=/usr/lib/llvm-18/bin/clang",
+        "LLC=/usr/lib/llvm-18/bin/llc",
+        "BPF_TARGET_ARCH=arm64",
+        "OBJSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/",
+        "DEPSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/deps/",
+        "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/bpf_execve_event_v511.o",
+        "-j2"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 2
+    }
+  ],
+  "baseline_command": {
+    "command": [
+      "make",
+      "--no-print-directory",
+      "-C",
+      "/workspaces/repository/vendor/repos/tetragon/bpf",
+      "CLANG=/usr/lib/llvm-18/bin/clang",
+      "LLC=/usr/lib/llvm-18/bin/llc",
+      "BPF_TARGET_ARCH=arm64",
+      "OBJSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/",
+      "DEPSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/baseline-deps/",
+      "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/bpf_execve_event_v511.o",
+      "-j2"
+    ],
+    "returncode": 0
+  },
+  "initial_frontend": "The native compatibility header has kernel kfunc enum aliases; its BPF compile attempt recorded missing iterator prototypes. The baseline now uses the actual upstream source frontend, with the identical edited path header.",
+  "source_pair": {
+    "header_sha256": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+    "baseline_header_sha256": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+    "native_source_sha256": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+    "baseline_source_sha256": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6"
+  },
+  "artifacts": {
+    "bpf_execve_event_v511.native.o": "e7fbba5daec9258341e25e91f7d7712b4f960bcb7b82ad052113cd290c44edda",
+    "bpf_execve_event_v511.o": "836b398814f211e5e974dd365720807404e8b402d226b606830dd371d0056af2"
+  },
+  "outcome": "Original upstream JIT baseline BPF compile0 and native compile0 for V511; stock verifier/native installation and complete matched-source application remain next."
+}
