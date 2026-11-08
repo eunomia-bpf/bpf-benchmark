@@ -1,3 +1,4 @@
+import KProgFormal.X86StackIndex
 import KProgFormal.Generated.GeneratedX86HelperDispatch
 import KProgFormal.X86CallMemHandler
 
@@ -462,6 +463,48 @@ theorem returning_helper_prefix (env : Refinement.EntryEnvironment.Environment)
   cases kind <;> simp [helperPrefix, opcode, GeneratedX86Opcode.code,
     returning_helper_token_body]
 
+/-- Allocated metadata cells use the same native stack-index origin as raw
+stack bytes. Their domain describes the existing generated cell layout. -/
+abbrev StackFrameSlot (capacity : Word) :=
+  {slot : BitVec 32 // X86StackCallFrame.slotStart slot ≤ capacity}
+
+/-- Read-only helper return model, retaining its stack metadata component.
+Caller clobbers leave RSP fixed, so selection uses the same native coordinate. -/
+def generatedReadonlyReturn (capacity : Word) (s : Frame) (effect : Effect)
+    (fresh : Fresh) (nextPc : Word) (tags : BitVec 32 → Byte) :
+    Observation × (StackFrameSlot capacity → Byte) :=
+  let returned := generatedReturn s effect fresh nextPc
+  (returned, fun slot => X86StackCallFrame.generatedTag capacity
+    (returned.frame.registers.raw.gpr 4) tags slot.val)
+
+def readonlyReturnSpec (capacity : Word) (s : Frame) (effect : Effect)
+    (fresh : Fresh) (nextPc : Word) (tags : BitVec 32 → Byte) :
+    Observation × (StackFrameSlot capacity → Byte) :=
+  (returnSpec s effect fresh nextPc, fun slot =>
+    X86StackCallFrame.allocatedTag
+      (GeneratedX86StackIndex.index capacity (s.registers.raw.gpr 4)) tags slot.val)
+
+/-- All valid stack cells and the existing complete return observation agree.
+Helper read-only classification, physical memory/provenance and native ABI
+remain interfaces; this theorem discharges the metadata coordinate/policy. -/
+theorem readonly_helper_frame (capacity : Word) (s : Frame) (effect : Effect)
+    (fresh : Fresh) (nextPc : Word) (tags : BitVec 32 → Byte)
+    (capacityPositive : capacity.msb = false)
+    (spInFrame : GeneratedX86StackIndex.index capacity (s.registers.raw.gpr 4) ≤ capacity) :
+    generatedReadonlyReturn capacity s effect fresh nextPc tags =
+      readonlyReturnSpec capacity s effect fresh nextPc tags := by
+  apply Prod.ext
+  · exact returning_helper_frame s effect fresh nextPc
+  · funext slot
+    change X86StackCallFrame.generatedTag capacity
+      ((generatedReturn s effect fresh nextPc).frame.registers.raw.gpr 4) tags slot.val = _
+    have rsp := (returning_helper_callee s effect fresh nextPc 4 rfl (by decide)).1
+    rw [rsp]
+    exact X86StackCallFrame.call_frame_tag_raw_sp capacity (s.registers.raw.gpr 4)
+      slot.val tags capacityPositive slot.property spInFrame
+
 end X86HelperBody
 
 end KProgFormal
+
+#print axioms KProgFormal.X86HelperBody.readonly_helper_frame

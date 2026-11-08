@@ -2771,11 +2771,12 @@
         "sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc"
       }
     },
+    "captured_production_source_commit": "d55bdacc5057943b62c86209a099d9376ddadcb2",
     "command": "cd kprog/formal && lake build",
     "completed_build_jobs": 379,
     "conclusion": "Typed-byte C/kfunc model equals existing complete operation body and canonical ADD/SET/CLR byte step. Captured old byte is zero-extended, exactly one memory byte commits, PC+4, canonical atomic old-byte event, complete numeric state preserved elsewhere. Unified dispatcher selects the same typed-byte model.",
     "premises": "SP alignment and readable/writable one-byte address; byte alignment follows from canonical ISA. Existing AUX/destination ordering profile applies.",
-    "production_commit": "042ae2e505a845f9826bb9373a765736f2d44777",
+    "production_feature_commit": "042ae2e505a845f9826bb9373a765736f2d44777",
     "production_sources": {
       "kinsn/module/arm64/bpf_arm64_native_lab.c": "7032970f989f9e68a70b6e22a37c8ee9f0b843b7ca81847125fc7982fdda6b45",
       "kprog/arm64/arm64_sim_local_bpf.h": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c"
@@ -26262,6 +26263,99 @@
       "BT_IMM",
       "IMUL_IMM"
     ]
+  },
+  "x86_helper_call_frame_metadata": {
+    "actual_lake_build_exit": 0,
+    "actual_private_exit": 0,
+    "archive_block_sha256": "0003498c1f8d8803ccc0898e7c6883308a8d3931d90f4139a56419eb20ef5222",
+    "archive_compressed_prefix_bytes": 100228632,
+    "archive_compressed_prefix_sha256": "3f5d8333e23b07c0b4b4f5925dbd94b78841ea9e0a9decc9692f7f570a9311b8",
+    "archive_marker": "=== X86 HELPER CALL FRAME METADATA ORIGIN V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-main-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-main.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-main.log": {
+        "bytes": 2647,
+        "sha256": "bdd3cf2a9d20eeadf3e1bdaf0fd87cd5550de2ab7d8166232881ca1317778333"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin-u32.lean": {
+        "bytes": 3820,
+        "sha256": "3dfbe7d0c815968515b13b21415d80096fe85a93678ea4243f11ebdcb52e8bb0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin-u32.log": {
+        "bytes": 1420,
+        "sha256": "b38969fe76e0bbeec2d74eb2f5a3e3c69a736e92639e6b57ba4989ea982ed5f9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin.lean": {
+        "bytes": 4271,
+        "sha256": "2485c4e2874faaaa826d1d8fcd8a7b87316fd8efd5156c8f244b741297b80296"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-origin.log": {
+        "bytes": 396,
+        "sha256": "aa5039750baf35c6e1f70fc88c733e59580f4c3ecb4f45f33d748af4af9b500d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-call-frame-source.json": {
+        "bytes": 724,
+        "sha256": "54069650e4f29abf8116387e4f30a126957450f92ccacef76a6deced048216de"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Generated/GeneratedX86StackIndex.lean": {
+        "bytes": 442,
+        "sha256": "c82b8c553b5950856d113e09aa3a63ea55d851b26ac86d831f0bd885a85eca44"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86CallMemHandler.lean": {
+        "bytes": 18124,
+        "sha256": "646fe26c570e02296e2e9e6c378a2be68fc5a895a54ce9ea96368d3c89c85c1f"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86HelperDispatch.lean": {
+        "bytes": 23172,
+        "sha256": "a878a84c2b64d0018663c9f211b21e47aade6431eeffd8d5f3e094589a650f8f"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86StackIndex.lean": {
+        "bytes": 5474,
+        "sha256": "0508a4acc8cb5578bb3813ff171734cd1d9a06d10bdb169547f3ac108a410c4b"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 183228,
+        "sha256": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a"
+      }
+    },
+    "command": "cd kprog/formal && lake build",
+    "completed_build_jobs": 379,
+    "conclusion": "slot*8-capacity is the exact inverse generated index origin; signed subtraction has no overflow; signed below-SP equals unsigned index classification; the SP cell and allocated cells keep tags, older cells clear. The entire valid-cell tag map composes with the existing complete returning-helper observation and callee RSP preservation.",
+    "premises": "Nonnegative signed capacity and existing allocated cell/SP-index interval. These are frame correspondence premises, rather than runtime admission predicates.",
+    "production_feature_commit": "75d2c8813740e139dc57ec0b77189de6e0a1297a",
+    "production_sources": {
+      "kprog/x86/x86_sim_local_bpf.h": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a"
+    },
+    "proof_sources": {
+      "kprog/formal/KProgFormal/X86HelperDispatch.lean": "a878a84c2b64d0018663c9f211b21e47aade6431eeffd8d5f3e094589a650f8f",
+      "kprog/formal/KProgFormal/X86StackIndex.lean": "0508a4acc8cb5578bb3813ff171734cd1d9a06d10bdb169547f3ac108a410c4b"
+    },
+    "remaining": "Helper read-only classification and typed effects, physical memory/provenance, pointer payload representation, native target/ABI, successful tail transfer and compiled-B transport remain explicit interfaces.",
+    "theorems": [
+      "X86StackCallFrame.slot_index_inverse",
+      "X86StackCallFrame.slot_address",
+      "X86StackCallFrame.signed_offset_exact",
+      "X86StackCallFrame.below_sp_index",
+      "X86StackCallFrame.call_frame_tag_raw_sp",
+      "X86StackCallFrame.at_sp_preserved",
+      "X86HelperBody.readonly_helper_frame"
+    ],
+    "universal_domain": "All uint32 cell counters, full64-bit capacity/raw SP/arena addresses, arbitrary cell tags, returning helper effects and caller fresh words."
   },
   "x86_imul_memory_token": {
     "c_domain": "38 legal native raw-width/immediate combinations: default64/16/32/64 fields; eight independent literal immediates for16 and ten for32/64 including signed extrema. Explicit and absent memory-width forms, all16 GPR destinations, heap/RSP/STACK-alias bases, all64 flag seeds,19 memory boundaries, optional index/four scales and +/-16 displacements. Actual direct/interpreter bodies retain the same complete512B heap/private stack and all GPR numeric/raw/tag cells. Independent real three-operand IMUL instructions check result and CF/OF; the other C flags keep their planted values. Destination/address/index overlaps are captured before writes. Unused AUX op bytes vary independently of immediate/memory width. Host red zone is disabled for flag-stack assembly.",

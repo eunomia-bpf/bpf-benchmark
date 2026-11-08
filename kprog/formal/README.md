@@ -54,6 +54,10 @@ The typed byte atomic kfunc C model now composes ADD/SET/CLR operand truncation,
 old-value return and one-byte state commit through the unified dispatcher.
 Primitive ordering, kfunc identity/call ABI and compiler transport remain explicit.
 
+The read-only helper return also composes its valid-cell stack-tag map with the
+full return observation. Its index origin and signed below-SP policy are proved;
+physical frame ownership, helper effects/provenance and ABI remain explicit.
+
 ## Trusted boundary
 
 The boundary includes Lean's kernel/toolchain and executable reduction bridge
