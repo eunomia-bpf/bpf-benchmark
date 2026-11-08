@@ -1,0 +1,25 @@
+{
+  "O3": [
+    {
+      "name": "perf_event",
+      "instructions": 12803,
+      "max_direct_frame_displacement": 560
+    }
+  ],
+  "O2": [
+    {
+      "name": "perf_event",
+      "instructions": 12803,
+      "max_direct_frame_displacement": 560
+    }
+  ],
+  "instruction_section_sha256": {
+    "O3": {
+      "perf_event": "94a033b3fe8200bd16d11a0aaa3984ec1bfbc427d26b1214c67c46ec6d9c7334"
+    },
+    "O2": {
+      "perf_event": "94a033b3fe8200bd16d11a0aaa3984ec1bfbc427d26b1214c67c46ec6d9c7334"
+    }
+  },
+  "instruction_bytes_equal": true
+}
