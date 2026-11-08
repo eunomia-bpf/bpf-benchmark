@@ -84,7 +84,7 @@ for code, path, message in [
     ([0x90] * 16, [(0, 16)], 'native path instruction extent must be in [1,15]'),
     ([0x90], [(0, 2)], 'native path instruction extent outside artifact'),
     ([0x48, 0x89, 0xd8], [(0, 2)], 'truncated native encoding'),
-    ([0x0f, 0x0b, 0xc0], [(0, 3)], 'unrecognized native opcode'),
+    ([0x0f, 0x0c, 0xc0], [(0, 3)], 'unrecognized native opcode'),
 ]:
     rejects.append((request(code, path), message))
 bad = request([0x90], [(0, 1)]); bad.pop('native_base')
