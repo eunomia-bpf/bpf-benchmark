@@ -9,7 +9,7 @@ The OTel and Tetragon rows below cite the completed 07:00 whole-application coho
 | BCC | 25 | 25 | 25 | 25 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native 2427: (07) r9 += 6                    ; R9=map_value(map=stack_delta_pag,ks=16,vs=8,off=6) | [canonical stack spill whole cohort](stack-spill-values/otel-stack-values/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_netdev R0 invalid mem access 'scalar' | [private stack spill whole cohort](stack-spill-values/whole-cilium-retry/README.md) |
-| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
+| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader', 'load', '4', '4', '339', '/workspaces/.age | [canonical stack spill whole cohort](stack-spill-values/tetragon-stack-values/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
 | Tracee | 151 resident | 3 | 3 | 2 | 0 | 1: sys_enter_submit invalid read from stack off -288+0 size 8 | [canonical stack spill whole cohort](stack-spill-values/tracee-stack-values/README.md) |
 
