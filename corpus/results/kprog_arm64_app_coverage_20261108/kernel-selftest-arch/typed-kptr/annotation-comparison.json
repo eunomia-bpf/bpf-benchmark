@@ -1,0 +1,179 @@
+{
+  "utc": "2026-11-08T18:44:13.200761+00:00",
+  "publication": "3b9511df2bae6ee9151041223d70713da2b38adc",
+  "counts": {
+    "catalog_rows": 20,
+    "attempted": 19,
+    "submitted": 19,
+    "installed": 1,
+    "verifier_rejected": 11,
+    "generation_failed": 7,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 12,
+    "failure_agrees": 11,
+    "failure_installed": 1,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  },
+  "historical_six": [
+    {
+      "program": "size_not_bpf_dw",
+      "previous_stage": "installed",
+      "actual_stage": "verifier_rejected",
+      "source_prog_id": 0,
+      "old_request_id": 1,
+      "new_request_id": 1,
+      "old_native_sha256": "577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23",
+      "new_native_sha256": "ff5b7266d0f47a5aa97f272a6359e77551521d1827cba2ae3aeb3cd9ee44cd52",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/1.failure.tar.gz",
+      "request_archive_sha256": "eefccd12b9287056b44bd251396164102137648fa5ea1d2d9d8fa788d7170ac2",
+      "verifier_excerpt": [
+        "212: (b7) r2 = 0                      ; R2=0",
+        "213: (63) *(u32 *)(r1 +0) = r2",
+        "kptr access size must be BPF_DW",
+        "processed 213 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "interpretation": "Original typed-map rule now reaches the stock verifier with complete pointee BTF and upstream destructor registration."
+    },
+    {
+      "program": "misaligned_access_write",
+      "previous_stage": "installed",
+      "actual_stage": "verifier_rejected",
+      "source_prog_id": 0,
+      "old_request_id": 3,
+      "new_request_id": 4,
+      "old_native_sha256": "857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126",
+      "new_native_sha256": "0ae72b5b3aa17bac4c860c24c1d608b9fb9d22c7ffc1e935e613a465dcc375f9",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/4.failure.tar.gz",
+      "request_archive_sha256": "5d992aee3baae58d6e34fadaa2f92f41423b81df21130adcffadd9b59a0f5ed8",
+      "verifier_excerpt": [
+        "212: (b7) r2 = 0                      ; R2=0",
+        "213: (7b) *(u64 *)(r1 +0) = r2",
+        "kptr access misaligned expected=8 off=7",
+        "processed 213 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "interpretation": "Original typed-map rule now reaches the stock verifier with complete pointee BTF and upstream destructor registration."
+    },
+    {
+      "program": "misaligned_access_read",
+      "previous_stage": "installed",
+      "actual_stage": "installed",
+      "source_prog_id": 0,
+      "old_request_id": 4,
+      "new_request_id": 5,
+      "old_native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b",
+      "new_native_sha256": "791f1926ce73303bec51a89f154e9dd3b49a9bce65c194749565977dbfbaeeb3",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/5.success.tar.gz",
+      "request_archive_sha256": "a6782a9d5b27b41a9512f1132697f21a4fe5d7065ba9b262ea682eac63927321",
+      "verifier_excerpt": [],
+      "interpretation": "Native P/B read32 at offset1, inside buf[8]; the original BPF annotation describes read64 at offset1 touching the kptr byte8."
+    },
+    {
+      "program": "reject_bad_type_match",
+      "previous_stage": "installed",
+      "actual_stage": "verifier_rejected",
+      "source_prog_id": 0,
+      "old_request_id": 6,
+      "new_request_id": 7,
+      "old_native_sha256": "7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9",
+      "new_native_sha256": "3356d9cbf52ee36d7f03cb6584ca4647485ee5fb10e7dd4112f0778f2a12eca2",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/7.failure.tar.gz",
+      "request_archive_sha256": "05ced7abed5af56d0476d30ca3d65445e7b0b16bb2d89205b6ee91c80c391283",
+      "verifier_excerpt": [
+        "214: (07) r2 += 4                     ; R2=untrusted_ptr_prog_test_ref_kfunc(off=4)",
+        "215: (7b) *(u64 *)(r1 +0) = r2",
+        "invalid kptr access, R2 type=untrusted_ptr_prog_test_ref_kfunc expected=ptr_prog_test_ref_kfunc or untrusted_ptr_prog_test_ref_kfunc",
+        "processed 215 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "interpretation": "Original typed-map rule now reaches the stock verifier with complete pointee BTF and upstream destructor registration."
+    },
+    {
+      "program": "reject_untrusted_store_to_ref",
+      "previous_stage": "installed",
+      "actual_stage": "verifier_rejected",
+      "source_prog_id": 0,
+      "old_request_id": 7,
+      "new_request_id": 12,
+      "old_native_sha256": "77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0",
+      "new_native_sha256": "61c1a512579f1038d03515ded7d8ca6ebb8de47c813105d3901c1efda50319b1",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/12.failure.tar.gz",
+      "request_archive_sha256": "38200e668d15873382e6fc8a84e20c20305b245ef7b003dac8320b50bbe87fd9",
+      "verifier_excerpt": [
+        "213: (07) r1 += 16                    ; R1=map_value(map=array_map,ks=4,vs=32,off=16)",
+        "214: (7b) *(u64 *)(r1 +0) = r2",
+        "store to referenced kptr disallowed",
+        "processed 214 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "interpretation": "Original typed-map rule now reaches the stock verifier with complete pointee BTF and upstream destructor registration."
+    },
+    {
+      "program": "reject_indirect_global_func_access",
+      "previous_stage": "installed",
+      "actual_stage": "verifier_rejected",
+      "source_prog_id": 0,
+      "old_request_id": 8,
+      "new_request_id": 17,
+      "old_native_sha256": "e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2",
+      "new_native_sha256": "65c476b5bf77d96e309293bbe905376870eeacb884820a0af3ec59af270e76cf",
+      "allocated_native_sections_equal": true,
+      "request_archive": "run/service-state/trusted-3bgq3fes/17.failure.tar.gz",
+      "request_archive_sha256": "afb4ee2836e790c79a2672d92b9d7961f8e0b10564c832cd0131931a7d3d61e0",
+      "verifier_excerpt": [
+        "225: (b7) r2 = 42                     ; R2=42",
+        "226: (63) *(u32 *)(r1 +0) = r2",
+        "kptr access misaligned expected=8 off=5",
+        "processed 215 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "interpretation": "Original typed-map rule now reaches the stock verifier with complete pointee BTF and upstream destructor registration."
+    }
+  ],
+  "coverage_generation": [
+    {
+      "program": "marked_as_untrusted_or_null",
+      "error": "invalid indirect target scalar:0x9a at 0x28",
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x28"
+    },
+    {
+      "program": "inherit_untrusted_on_walk",
+      "error": "invalid indirect target scalar:0x9a at 0x30",
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x30"
+    },
+    {
+      "program": "mark_ref_as_untrusted_or_null",
+      "error": "invalid indirect target scalar:0x9a at 0x28",
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x28"
+    },
+    {
+      "program": "reject_bad_type_xchg",
+      "error": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>",
+      "diagnostic": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>"
+    },
+    {
+      "program": "reject_member_of_ref_xchg",
+      "error": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>",
+      "diagnostic": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>"
+    },
+    {
+      "program": "kptr_xchg_ref_state",
+      "error": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>",
+      "diagnostic": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>"
+    },
+    {
+      "program": "kptr_xchg_possibly_null",
+      "error": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>",
+      "diagnostic": "unresolved native ABI external call bpf_kfunc_call_test_acquire at 0x30: bl 0 <bpf_kfunc_call_test_acquire>"
+    }
+  ],
+  "scope": "Original kernel C annotations and native memory operations retain their bytes; complete original BPF resource context and upstream module restore typed-map semantics.",
+  "runtime_admission_additions": 0
+}
