@@ -49,3 +49,37 @@ original distribution lookup outputs. Debian lists8.7 source/cert/runtime
 packages; the optional direct source HTTP probe ended with IncompleteRead,
 whose original traceback is retained. Running a newer executable model is the
 next comparison step. Existing8.5/Sail model sources and binaries stay intact.
+
+## Distribution8.7 operational replay
+
+The same576 inputs run against the unchanged8.7 core and machine books using
+the retained SBCL runtime. The frozen canonical executable has SHA256
+`3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173`; all576 canonical results match the previous epoch.
+
+| Outcome | Cases |
+| --- | ---: |
+| Complete observed state agreement | 288 |
+| State difference | 120 |
+| Model stopped | 168 |
+
+BSWAP24, POPCNT register36/memory36, MOVBE load36/store36 and SHIFTX register72
+now agree completely. The two SIMD labels retain their48 agreeing observations.
+Combined with the existing Sail line, current evidence covers58 agreeing labels,
+seven model-stopped labels and two state-difference labels among67 enumerated
+canonical forms. Every model/ISA/compiler trust interface retains its stated scope.
+
+Memory SHIFTX has72 observations with equal GPRs, flags, XMM0 and memory;
+its PC advances one displacement byte less than the canonical instruction.
+The upstream `x86-sarx/shlx/shrx` source430-541 discards the operand helper
+returned RIP increment and finally writes `temp-rip`; this matches the observed
+PC difference. Complete step equality stays open for this form. REP retains48
+one-element versus whole-instruction PC/counter/memory differences. ANDN/BZHI
+register/memory, MULX and RORX register/memory retain168 model-stopped cases.
+
+[Original8.7 records](reference-x86-acl2-87.log.gz) retain each request, outcome,
+Lisp chunk, command, failed setup attempt, exact key model source and package
+identity. The loader uses official `init.lisp` plus the upstream local
+`dispatch-creator` dependency. Every Uncertified/Compiled-file warning stays
+in the raw logs; these are operational model comparisons and ACL2 certification
+remains a separate trust item. The November source capability audit above
+continues to describe its own source epoch.

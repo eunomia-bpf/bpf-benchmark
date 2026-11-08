@@ -3011,5 +3011,146 @@
       "X86_OP_BZHI_MEM"
     ]
   },
-  "trust_boundary": "Program-mode I/O wrappers, GCL/ACL2 executable and packaged model/compiled objects. Original timestamp-based Uncertified and program-mode invariant-risk warnings retained; finite operational observations and ACL2 certification are separate evidence."
+  "trust_boundary": "Program-mode I/O wrappers, GCL/ACL2 executable and packaged model/compiled objects. Original timestamp-based Uncertified and program-mode invariant-risk warnings retained; finite operational observations and ACL2 certification are separate evidence.",
+  "version87_operational_replay": {
+    "all_agreeing_operation_labels": [
+      "X86_OP_BSWAP",
+      "X86_OP_LOAD_XMM0",
+      "X86_OP_MOVBE_LOAD",
+      "X86_OP_MOVBE_STORE",
+      "X86_OP_POPCNT",
+      "X86_OP_POPCNT_MEM",
+      "X86_OP_SHIFTX",
+      "X86_OP_STORE_XMM0"
+    ],
+    "archive": {
+      "block_sha256": "ef1323386e21676e09e7f52e4ac37d437df82ce7d50c99f10b033b18d4b58f9f",
+      "entries": 256,
+      "file": "kprog/results/kprog_verification_20261107/reference-x86-acl2-87.log.gz"
+    },
+    "combined_current_isa_labels": {
+      "agree": 58,
+      "model_stopped": 7,
+      "state_difference": 2,
+      "total": 67
+    },
+    "model_scope": "Seven previously stopped labels still stop: ANDN/BZHI register+memory, MULX and RORX register+memory. Version8.7 supplies seven stopped labels at source level; six fully agree and memory SHIFTX retains its PC difference. The separate November source capability audit supplies10 source declarations and keeps source/execution evidence distinct.",
+    "new_agreeing_operation_labels": [
+      "X86_OP_BSWAP",
+      "X86_OP_MOVBE_LOAD",
+      "X86_OP_MOVBE_STORE",
+      "X86_OP_POPCNT",
+      "X86_OP_POPCNT_MEM",
+      "X86_OP_SHIFTX"
+    ],
+    "rep_scope": "48 one-element operational-model versus whole-instruction canonical observations retain PC/counter/memory differences.",
+    "reused_reference_binary": {
+      "existing_archive": "reference-arm-asl.log.gz",
+      "receipt": "reference-arm-asl.json#logical_atomic_current_reference",
+      "sha256": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173"
+    },
+    "runtime_admission_additions": 0,
+    "shiftx_memory_difference": {
+      "cases": 72,
+      "classification": "state-difference retained; complete step equality remains open",
+      "pc_delta": -1,
+      "registers_flags_xmm_memory_equal": true,
+      "source": "projects/x86isa/machine/instructions/rotate-and-shift.lisp:430-541",
+      "source_read": "Handler discards the increment-rip-by result from x86-operand-from-modr/m-and-sib-bytes and finally writes temp-rip. This source path agrees with the observed single displacement-byte PC difference."
+    },
+    "summary": {
+      "by_operation": {
+        "X86_OP_ANDN": {
+          "model-stopped": 24
+        },
+        "X86_OP_ANDN_MEM": {
+          "model-stopped": 24
+        },
+        "X86_OP_BSWAP": {
+          "agree": 24
+        },
+        "X86_OP_BZHI": {
+          "model-stopped": 24
+        },
+        "X86_OP_BZHI_MEM": {
+          "model-stopped": 24
+        },
+        "X86_OP_LOAD_XMM0": {
+          "agree": 24
+        },
+        "X86_OP_MOVBE_LOAD": {
+          "agree": 36
+        },
+        "X86_OP_MOVBE_STORE": {
+          "agree": 36
+        },
+        "X86_OP_MULX": {
+          "model-stopped": 24
+        },
+        "X86_OP_POPCNT": {
+          "agree": 36
+        },
+        "X86_OP_POPCNT_MEM": {
+          "agree": 36
+        },
+        "X86_OP_REP_MOVS": {
+          "state-difference": 48
+        },
+        "X86_OP_RORX": {
+          "model-stopped": 24
+        },
+        "X86_OP_RORX_MEM": {
+          "model-stopped": 24
+        },
+        "X86_OP_SHIFTX": {
+          "agree": 72
+        },
+        "X86_OP_SHIFTX_MEM": {
+          "state-difference": 72
+        },
+        "X86_OP_STORE_XMM0": {
+          "agree": 24
+        }
+      },
+      "canonical_original_drift_cases": 0,
+      "cases": 576,
+      "input_command": {
+        "books": "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-8.7-root/usr/share/acl2-8.7+dfsg/books",
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-root/usr/bin/sbcl",
+          "--dynamic-space-size",
+          "4096",
+          "--noinform",
+          "--no-userinit",
+          "--no-sysinit",
+          "--disable-debugger",
+          "--non-interactive",
+          "--load",
+          "init.lisp",
+          "--eval",
+          "(acl2::load-acl2)",
+          "--eval",
+          "(acl2::initialize-acl2 'acl2::include-book acl2::*acl2-pass-2-files*)",
+          "--eval",
+          "(acl2::lp)",
+          "--eval",
+          "(format t \"~%KPROG-ACL2-87-LOADER-BINDINGS ~S~%\" (mapcar (lambda (name) (let* ((p (find-package \"X86ISA\")) (s (and p (find-symbol name p)))) (list name s (and s (fboundp s))))) (quote (\"X86-FETCH-DECODE-EXECUTE\" \"X86-RUN\" \"X86-BSWAP\" \"X86-POPCNT\" \"X86-MOVBE-OP/EN-RM\" \"X86-SARX/SHLX/SHRX\"))))"
+        ],
+        "core_status": ":INITIALIZED",
+        "scope": "Book-loading preflight only. Source compile command0 has upstream statusCOMPILE-SKIPPED; this process loads ACL2 itself and attempts official x86isa top. Printed bindings and every certificate/source/Lisp-image diagnostic require inspection before instruction comparison; no new agreement or local certification claimed.",
+        "stdin": "(include-book \"projects/x86isa/portcullis/sharp-dot-constants\" :dir :system)\n(include-book \"projects/x86isa/machine/dispatch-creator\" :dir :system :ttags :all)\n(include-book \"projects/x86isa/machine/x86\" :dir :system :ttags :all)\n:q\n"
+      },
+      "loaded_book_sha256": "e73251b5ea07fdb524d3530006ed268be9ebe1756d9e85abb29d34d08c006f85",
+      "model_profile": "Unmodified distribution8.7 core and model; application view EFER.LMA/CS.L and CR4=512; complete16 GPRs, defined flags/register masks, PC/XMM0 and supplied memory; one model step. Certification and operational comparison remain separate evidence.",
+      "process_exit": 0,
+      "reference_sha256": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173",
+      "source_head": "4a332bbebfc6ec142d0e512e4b2f3a71e1063430",
+      "statuses": {
+        "agree": 288,
+        "model-stopped": 168,
+        "state-difference": 120
+      }
+    },
+    "trust_boundary": "Unmodified Debian8.7 core/books and packaged certificates, existing SBCL runtime, official standard init, explicit upstream dispatch-creator dependency and program-mode I/O wrappers. Original Uncertified/Compiled-file warnings stay archived; operational observations and ACL2 certification remain separate. Every original576 request and canonical outcome is retained; executable hash matches the prior frozen reference and drift count0."
+  }
 }
