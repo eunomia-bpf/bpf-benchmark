@@ -137,3 +137,12 @@ The prior byte-source event_execve FP-672 and precise-copy execve_send jump-sequ
 ## Complete numeric-tag OTel terminal cohort
 
 [Whole OTel47b210682](../kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json) retains12baseline resident programs and164,002BPF calls. Two fresh requests generate and compile: read_task_struct installs, and perf_unwind_stop reaches stock invalid func unknown#-1 after2486instructions/41states. The original complete application records its startup error; all compiler, verifier and workload streams remain in its archive. Earlier OTel source epochs stay in terminal_history and their original reports. Complete ordered-tag source5c7a/paired exact-extent88a Tetragon, OTel and Tracee replays are queued behind the active captured Tracee cohort.
+
+## Ordered-tag Tetragon and captured Tracee terminal cohorts, 2026-11-08T17:02:45.734640+00:00
+
+| Application / publication | Baseline resident / BPF calls | Generated / compiled / installed | Verifier boundary | Whole app |
+| --- | ---: | ---: | --- | --- |
+| Tetragon / 006a97056 | 174 / 22115 | 4 / 4 / 3 | execve_send jump sequence8193, processed667530/states6806 | error |
+| Tracee / c3e0b3178 | 151 / 92419 | 2 / 2 / 1 | sys_enter_init context-loaded scalar used as memory base | error |
+
+Each work-summary.json retains every baseline per-program counter and workload stream. Native startup reaches the listed verifier refusal before the post-rejit workload phase. Installed service outcomes and whole-application completion retain separate stages. Earlier cohorts remain in terminal_history. Ordered OTel/Tracee successors continue through the serial captured queue.
