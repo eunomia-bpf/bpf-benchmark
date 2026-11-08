@@ -1,0 +1,18 @@
+{
+  "header_sha256": "b71c039d50f0850153f809f27e3867f8ef6c4848630ec51befd18647691d8793",
+  "production_delta": {
+    "added": 5,
+    "removed": 2
+  },
+  "host_cases": 483,
+  "host_before_differences": 115,
+  "host_after_differences": 0,
+  "ubsan": true,
+  "micro_compile_exit": 0,
+  "micro_compile_receipts": 29,
+  "negative_compile_receipts": 1,
+  "safety_initial_exit": 2,
+  "safety_initial_cause": "original make recursion selected retained request directory",
+  "safety_retry": "queued after four-app process",
+  "component_sha256": "f35178d6b4380427f9ab5b82beae5f5978a9b1bb756725b67335d8f9e914a13c"
+}

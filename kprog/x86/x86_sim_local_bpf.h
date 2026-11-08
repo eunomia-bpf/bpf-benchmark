@@ -2214,7 +2214,10 @@ extern void x86_sim_unmapped_xdp_read(void)
 				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
 							  X86_WIDTH_64);\
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
-				(void *)(long)(IMM), __x86_l_pw_tag);     \
+				(void *)(long)((__u64)(IMM) -              \
+					((DST) == X86_RSP ?                \
+					 __x86_native_stack_base : 0)),     \
+				__x86_l_pw_tag);                          \
 	} while (0)
 
 /* A native #DE path must remain verifier-rejectable, rather than inherit
@@ -3017,7 +3020,7 @@ extern void __x86_sim_unsupported_helper(void)
 			__x86_sim_skb_ctx->cb[0] = __x86_sim_abi.cb[0];    \
 			__x86_sim_skb_ctx->cb[1] = __x86_sim_abi.cb[1];    \
 		}                                                          \
-		return (__u32)(long)__x86_rax.ptr;                         \
+		return (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \
 	} while (0)
 
 #define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \
