@@ -1,4 +1,4 @@
-import KProgFormal.Reference.Memory
+import KProgFormal.Reference.X86
 import Std.Tactic.BVDecide
 
 namespace KProgTV.PrivateSpills
@@ -369,3 +369,105 @@ end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.frame_on_read
 #print axioms KProgTV.PrivateSpills.frame_on_store
 #print axioms KProgTV.PrivateSpills.frame_on_stores
+
+namespace KProgTV.PrivateSpills
+open KProgFormal.Reference
+
+/-- Actual native near CALL writes its complete fall-through at RSP-8.
+The source may itself read memory: those reads precede the stack write. -/
+theorem x86_call_stack_write (state : X86.State) (source : X86.ScalarSource)
+    (target next : Word) (reads : List Event)
+    (sampled : X86.scalarRead state .w64 source = .ok (target,reads))
+    (writable : permitted state.memory.writable (state.gpr 4-8) 8 = true)
+    (canonical : X86.canonicalTarget state.addressWidth target = true) :
+    X86.step (.call source next) state =
+      ⟨{ state with
+          gpr := (fun r => if r=4 then state.gpr 4-8 else state.gpr r),
+          memory := storeMemory state.memory (state.gpr 4-8) next 8, pc := target },
+        reads ++ [.memory .write (state.gpr 4-8) (valueBytes next 8) true],none⟩ := by
+  simp only [BitVec.ofNat_eq_ofNat] at *
+  simp_all [X86.step,X86.callStep,X86.pushTransfer,X86.StackWidth.bytes,writeMemory,BitVec.ofNat_eq_ofNat]
+
+/-- A CALL can preserve allocated caller bytes without preserving its own
+return slot. Disjointness is stated at wrapping architectural addresses. -/
+theorem x86_call_owned_frame (state : X86.State) (source : X86.ScalarSource)
+    (target next : Word) (reads : List Event)
+    (sampled : X86.scalarRead state .w64 source = .ok (target,reads))
+    (writable : permitted state.memory.writable (state.gpr 4-8) 8 = true)
+    (canonical : X86.canonicalTarget state.addressWidth target = true)
+    (owned : Word → Bool)
+    (apart : ∀ address, owned address = true → ¬(address-(state.gpr 4-8)).toNat < 8) :
+    FrameOn owned state.memory (X86.step (.call source next) state).state.memory := by
+  rw [x86_call_stack_write state source target next reads sampled writable canonical]
+  exact frame_on_store owned state.memory (state.gpr 4-8) next 8 apart
+
+/-- An arbitrary returning helper body keeps the real saved return address
+when its footprint preserves every byte of that separate slot. No premise
+requires memory outside the slot to be unchanged. -/
+theorem x86_helper_return_slot (state body : X86.State)
+    (source : X86.ScalarSource) (target next : Word) (reads : List Event)
+    (sampled : X86.scalarRead state .w64 source = .ok (target,reads))
+    (writable : permitted state.memory.writable (state.gpr 4-8) 8 = true)
+    (canonical : X86.canonicalTarget state.addressWidth target = true)
+    (readable : permitted state.memory.readable (state.gpr 4-8) 8 = true)
+    (slot : Word → Bool)
+    (inside : ∀ index < 8, slot (state.gpr 4-8+BitVec.ofNat 64 index) = true)
+    (bodyFrame : FrameOn slot (X86.step (.call source next) state).state.memory body.memory) :
+    readMemory body.memory (state.gpr 4-8) 8 =
+      .ok (next,.memory .read (state.gpr 4-8) (valueBytes next 8) true) := by
+  have preserved := frame_on_read slot _ body.memory bodyFrame (state.gpr 4-8) 8 inside
+  rw [x86_call_stack_write state source target next reads sampled writable canonical] at preserved
+  exact preserved.trans (spill_read state.memory (state.gpr 4-8) next readable)
+
+/-- Actual RET restores the original RSP plus its unsigned imm16 release
+and returns to the CALL fall-through. All helper results, memory and other
+registers remain exactly those of the real returning body. -/
+theorem x86_helper_return_step (state body : X86.State)
+    (source : X86.ScalarSource) (target next ignored : Word) (reads : List Event)
+    (sampled : X86.scalarRead state .w64 source = .ok (target,reads))
+    (writable : permitted state.memory.writable (state.gpr 4-8) 8 = true)
+    (canonical : X86.canonicalTarget state.addressWidth target = true)
+    (readable : permitted state.memory.readable (state.gpr 4-8) 8 = true)
+    (slot : Word → Bool)
+    (inside : ∀ index < 8, slot (state.gpr 4-8+BitVec.ofNat 64 index) = true)
+    (bodyFrame : FrameOn slot (X86.step (.call source next) state).state.memory body.memory)
+    (stack : body.gpr 4 = state.gpr 4-8)
+    (returnCanonical : X86.canonicalTarget body.addressWidth next = true)
+    (release : BitVec 16) :
+    X86.step (.returnNear release ignored) body =
+      ⟨{ body with
+          gpr := (fun r => if r=4 then state.gpr 4+release.setWidth 64 else body.gpr r),
+          pc := next },[.memory .read (state.gpr 4-8) (valueBytes next 8) true],none⟩ := by
+  have saved := x86_helper_return_slot state body source target next reads sampled writable
+    canonical readable slot inside bodyFrame
+  have restored : state.gpr 4-8+8 = state.gpr 4 := BitVec.sub_add_cancel _ _
+  simp only [BitVec.ofNat_eq_ofNat] at *
+  simp_all [X86.step,X86.returnStep,BitVec.ofNat_eq_ofNat]
+
+end KProgTV.PrivateSpills
+#print axioms KProgTV.PrivateSpills.x86_call_stack_write
+#print axioms KProgTV.PrivateSpills.x86_call_owned_frame
+#print axioms KProgTV.PrivateSpills.x86_helper_return_slot
+#print axioms KProgTV.PrivateSpills.x86_helper_return_step
+
+namespace KProgTV.PrivateSpills
+open KProgFormal.Reference
+
+/-- Compose actual CALL stack mutation and the selected helper's local
+footprint. Caller allocation and return-slot preservation are separate:
+the caller region must exclude the slot that CALL actually overwrites. -/
+theorem x86_helper_owned_frame (state body : X86.State) (source : X86.ScalarSource)
+    (target next : Word) (reads : List Event)
+    (sampled : X86.scalarRead state .w64 source = .ok (target,reads))
+    (writable : permitted state.memory.writable (state.gpr 4-8) 8 = true)
+    (canonical : X86.canonicalTarget state.addressWidth target = true)
+    (owned : Word → Bool)
+    (apart : ∀ address, owned address = true → ¬(address-(state.gpr 4-8)).toNat < 8)
+    (bodyFrame : FrameOn owned (X86.step (.call source next) state).state.memory body.memory) :
+    FrameOn owned state.memory body.memory :=
+  frame_on_trans owned state.memory _ body.memory
+    (x86_call_owned_frame state source target next reads sampled writable canonical owned apart)
+    bodyFrame
+
+end KProgTV.PrivateSpills
+#print axioms KProgTV.PrivateSpills.x86_helper_owned_frame

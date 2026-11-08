@@ -15982,6 +15982,164 @@
     "x86_contract_cases": 1342,
     "x86_production_frames": 2097152
   },
+  "native_helper_call_return_frame": {
+    "actual_existing_integration_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "e9c37b2e23dbb7263f815cd834938494a9f0acc13b2b3c15da0adec0e690cc79",
+    "archive_file": "kprog/results/kprog_verification_20261107/native-helper-return-frame.log.gz",
+    "archive_marker": "=== NATIVE HELPER CALL RETURN FRAME V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-integrated-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-integrated.log": {
+        "bytes": 6857,
+        "sha256": "2d64c3f764cf6ef67cb0a72187d35847eafa12d423e71f7547a7481c4ea12fce"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-integrated.sh": {
+        "bytes": 265,
+        "sha256": "ad5cc4a36d087c940b5f3207c3ff1353f001b436ccd5e8c8cd1bfe1efcb27cfd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.exit.attempt2": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.exit.attempt3": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.exit.attempt4": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.log": {
+        "bytes": 1771,
+        "sha256": "198cc695c2ffdd892695fcb98491783aa1051fc2fa989da58d5fc46637d07ce7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.log.attempt1": {
+        "bytes": 2518,
+        "sha256": "ba1424864622f9c3d5628b4ca31fcb0b2662a72aa542538231f23e1a5a999f97"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.log.attempt2": {
+        "bytes": 2518,
+        "sha256": "cb7e07bb5372d7ea70a83ea597ad3892ab94421a38a1ab60beeec6bed6435d4d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.log.attempt3": {
+        "bytes": 6852,
+        "sha256": "d857851b02fe562c5399b5aa49c19e5f59d48b2cfc3eb7fa5903353b9463f888"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.log.attempt4": {
+        "bytes": 1683,
+        "sha256": "3edf11f3055d564b8c2b970a4fd7f9e6d0f1c3cac48914a9dfb504103ff00da2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-proof.sh": {
+        "bytes": 415,
+        "sha256": "a543da2695866beebf0a05f67dd19c3ecc48f678af93ed38bdbfadd350a699f5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.lean": {
+        "bytes": 23524,
+        "sha256": "76b19113e8ab5ddfe556caf98f37ef6ac80c2e56cc70ef4b037ee470a0d645bf"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.lean.attempt1": {
+        "bytes": 22287,
+        "sha256": "a94a39c2798cb15a598146251cd454f17021852736157cdaeccd6c3de745ccce"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.lean.attempt2": {
+        "bytes": 22291,
+        "sha256": "17819f4f0004c9f1994fa76b876aa7590e3b30113b37b64af15b5f1211280b75"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.lean.attempt3": {
+        "bytes": 22311,
+        "sha256": "a36bad1a18bcc10700361d5434edb405161213b8fd9442f785eab3b4a15776cd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.lean.attempt4": {
+        "bytes": 22394,
+        "sha256": "8cb3807202ba5d642a34bbb8dc254813b6dd117898f9b7b267897d34b35c7022"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean": {
+        "bytes": 89883,
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPFPlatform.lean": {
+        "bytes": 13594,
+        "sha256": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45077,
+        "sha256": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpillProjection.lean": {
+        "bytes": 31656,
+        "sha256": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpills.lean": {
+        "bytes": 23524,
+        "sha256": "76b19113e8ab5ddfe556caf98f37ef6ac80c2e56cc70ef4b037ee470a0d645bf"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 1612360,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/nativeframe-work/PrivateSpills.olean",
+        "sha256": "d0e72e662c785a0e332a31b6442a8ca528d011ead60a163d5f9879d22df90907"
+      }
+    ],
+    "existing_integration_command": "make -C kprog/tv private-spill-projection-check",
+    "native_executions": 0,
+    "premises": [
+      "Actual source read, writable return slot, canonical call target, readable saved return slot and canonical return address in the returning body profile.",
+      "Complete caller-owned allocation excludes every actual CALL-written return-slot byte, using wrapping64-bit addresses.",
+      "Selected native helper body retains every return-slot byte and its permissions/initialization; caller allocation uses a separate actual helper footprint.",
+      "Actual native returning body restores RSP to the post-CALL RSP before RET. Concrete selected helper code/kernel ABI must discharge stack restoration and both local footprints.",
+      "Canonical flat long-mode/CET-disabled reference profile; physical memory, interrupts/callee writes below SP, pointer provenance/lifetime, physical native-to-B ABI, event projection and compiler/link/entry remain implementation interfaces."
+    ],
+    "result": "Actual canonical CALL samples its source, retains all source-read events and writes the complete fall-through at RSP-8. Disjoint caller-owned bytes retain values/permissions/initialization. A separate helper-local frame on every return-slot byte transports the actual saved return address through arbitrary memory changes elsewhere. Actual RET reads that value, checks canonicality, restores original RSP plus unsigned imm16 release and returns to the saved fall-through; all other body registers, memory, flags, XMM0 and address profile remain exactly the body state. Actual CALL and the selected helper footprint also compose into the caller-owned frame.",
+    "runtime_admission_additions": 0,
+    "scope": "Five universal O4 native x86 CALL/helper-local-memory/RET laws, once for all programs. No runtime or ISA-model change.",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/BPFPlatform.lean": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48",
+      "kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+      "kprog/tv/PrivateSpillProjection.lean": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037",
+      "kprog/tv/PrivateSpills.lean": "76b19113e8ab5ddfe556caf98f37ef6ac80c2e56cc70ef4b037ee470a0d645bf"
+    },
+    "theorems": [
+      "KProgTV.PrivateSpills.x86_call_stack_write",
+      "KProgTV.PrivateSpills.x86_call_owned_frame",
+      "KProgTV.PrivateSpills.x86_helper_return_slot",
+      "KProgTV.PrivateSpills.x86_helper_return_step",
+      "KProgTV.PrivateSpills.x86_helper_owned_frame"
+    ],
+    "trust": "CALL and caller-frame laws use propext/Quot.sound. Saved-word/RET laws reuse existing spill_read/spill_word and inherit Classical.choice/Lean.ofReduceBool in addition; no sorryAx or new axioms.",
+    "utc": "2026-11-08T23:30:21.557690+00:00"
+  },
   "pair_focused": {
     "commands": [
       {

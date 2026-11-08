@@ -147,6 +147,10 @@ Caller-owned helper frames preserve exact saved reads through disjoint memory
 effects; actual returning BPF CALL/LDXDW Execution retains the full helper/read
 trace. Selected helper footprint, pointer lifetime and native ABI stay explicit.
 
+Native x86 CALL/RET laws account for the actual RSP-8 return-slot write,
+separate caller and return-slot footprints, saved PC and unsigned SP release.
+Selected native helper stack restoration and physical native-to-B ABI remain explicit.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.

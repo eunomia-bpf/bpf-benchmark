@@ -5394,3 +5394,24 @@ relation. Pointer representative provenance/lifetime and compiler/link
 transport remain explicit. Current below-SP ghost erasure alone does not
 establish raw-byte preservation there. Output-buffer helpers retain their
 actual allocated-frame writes. No runtime check, gate or model change is added.
+
+### Native x86 helper CALL and return slot
+
+Five universal `PrivateSpills.x86_*` laws cover the actual canonical CALL
+write at RSP-8, its ordered source-read/write effects, preservation of disjoint
+caller-owned bytes, and an arbitrary returning helper body's separate local
+return-slot footprint. The saved address follows from the real CALL write;
+actual RET reads it and restores the original RSP plus unsigned imm16 release,
+with every other helper-body field retained. Existing
+`make -C kprog/tv private-spill-projection-check` passes.
+[Original evidence](native-helper-return-frame.log.gz) retains failed attempts,
+passing proofs, commands and exact source pins. Saved-word/RET laws reuse the
+existing spill-word reduction bridge (`Lean.ofReduceBool`); no new axioms.
+
+The selected native helper must discharge both local footprints and actual
+post-CALL SP restoration. Allocated caller bytes exclude the overwritten return
+slot; callee/interrupt writes below SP remain real. Physical memory/profile,
+pointer lifetime, native-to-B ABI and event projection, compiler/link and entry
+remain explicit. These are x86 reference laws, not a completed physical helper
+ABI or an AArch64 result. Coverage statuses and operation totals stay unchanged;
+no runtime check, gate, validation or model change is added.
