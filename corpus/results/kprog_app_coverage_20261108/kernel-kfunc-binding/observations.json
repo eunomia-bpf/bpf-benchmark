@@ -4,6 +4,16 @@
   "asan_ubsan_exit": 0,
   "patch_format_exit": 0,
   "archive_sha256": "0f15088211adda370d9c3baf9af06c9636e26968e13adc245e59cc9c933ab943",
-  "kernel_build_pid": 4162642,
-  "kernel_build_phase": "running"
+  "kernel_build_pid": 4184136,
+  "kernel_build_phase": "complete",
+  "kernel_build_exit": 0,
+  "profile": "A strict canonical-vmlinux registration and per-call GPL/BTF/JIT admission",
+  "profile_sha256": "dd2001e91fbeb0e1bf15d2723ad9246d4b60723330acc2982c39f97cba19569f",
+  "registered_build_archive_sha256": "28c0783c83519cd7bcb1c25199c2844be0975056d218bdd56e7844b223647b54",
+  "kernel_btf_sha256": "3d6e206dcd892a81fbb19ab857138ba6e562d1d81e227672b9b5f7cd5bc6f49e",
+  "image_sha256": "9883d5c3af53325bfccc303a3da01ef1e11c19847a7353bee153b025aabd7427",
+  "module_sha256": "34a916b858eef9417821d211ff26d650824f18e1784da1b0e169b12cc69f88f6",
+  "prior_cohort_error": "ENOSPC",
+  "prior_exit_receipt": "empty",
+  "retained_shared_kernel": true
 }

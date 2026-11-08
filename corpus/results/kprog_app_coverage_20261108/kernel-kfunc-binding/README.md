@@ -10,3 +10,7 @@ bash /workspaces/.agent-state/kprog-lanes/C/kernel-kfunc-binding/build.sh
 ```
 
 The classifier archive captures exact before/candidate patch, extracted predicate, controls/binary/output, original/candidate verifier source, input identities and private build scripts. A detached warm source/output copy builds the x86 kernel and module at20-23/j4. Existing shared source/output trees and active guest images retain their captured bytes. Kernel build and whole Cilium runtime outcomes receive their completed receipts.
+
+The completed x86 build consumes lane A's exact registered-kfunc verifier profile: canonical-field admission, ordinary add_kfunc_desc registration, and GPL/BTF/JIT admission on every ordinary kfunc even with an existing kinsn table. Kernel bzImage and the external module build return0. The private mount namespace keeps canonical compiler paths and binds the private output/source file; the shared kernel image matches its original hash.
+
+The initial duplicated-output build records ENOSPC and an empty exit receipt. Its failed private output/source duplicates were retired. The successful retry preserves sparse files/hardlinks and excludes duplicated installer/final-link artifacts. `registered-kernel-build.tar.gz` captures the exact registered verifier/A patch, configuration, compiler command record, kernel image/BTF, module, hashes, build output and prior resource diagnostic. Whole Cilium runs after current OTel/Tracee and the affected Tetragon retry. Lane A retains common registration-source publication ownership.
