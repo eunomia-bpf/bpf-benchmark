@@ -1,0 +1,3 @@
+# Original38 on canonical inactive-ghost source
+
+Actual stages{"specialization_rejected": 1, "valid_executed": 9, "verifier_rejected": 28}, Makeexit0. Original native fixtures/annotations retain bytes. Positive controls execute their existing TEST_RUN comparison; risky inputs use load-only submission. Native risky executions0. Historical source comes directly from publishedc5a4b117b runtime archive. Current canonical source carries the later nativeUD2 handler; its existing unsupported_instruction fixture consequently reaches stock verifier rejection. Complete inputs/native/C/B/compiler/verifier/request records accompany raw.tar.gz.
