@@ -1,0 +1,3582 @@
+{
+ "counts": {
+  "submitted": 77,
+  "skipped": 303,
+  "ran": 0,
+  "refused": 0,
+  "not-reached": 77,
+  "failure": 0,
+  "failure_agrees": 0,
+  "success": 0,
+  "success_agrees": 0
+ },
+ "programs": [
+  {
+   "file": "async_stack_depth.c",
+   "program": "async_call_root_check",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: prog 'async_call_root_check': BPF program load failed: -EACCES\nlibbpf: prog 'async_call_root_check': -- BEGIN PROG LOAD LOG --\ncombined stack size of 2 calls is 576. Too large\nprocessed 131 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'async_call_root_check': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/async_stack_depth__async_call_root_check.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_skb",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "dr + 1) = 1; @ dynptr_fail__data_slice_out_of_bounds_skb.c:285\n17: (72) *(u8 *)(r1 +14) = 1\ninvalid access to memory, mem_size=14 off=14 size=1\nR1 min value is outside of the allowed memory range\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'data_slice_out_of_bounds_skb': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__data_slice_out_of_bounds_skb.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_skb_meta",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "@ dynptr_fail__data_slice_out_of_bounds_skb_meta.c:307\n13: (72) *(u8 *)(r1 +1) = 42\ninvalid access to memory, mem_size=1 off=1 size=1\nR1 min value is outside of the allowed memory range\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'data_slice_out_of_bounds_skb_meta': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__data_slice_out_of_bounds_skb_meta.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_slice_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "lice_write.c:1189\n15: (15) if r0 == 0x0 goto pc+3       ; R0=rdonly_mem(sz=14)\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_slice_write.c:1193\n16: (72) *(u8 *)(r0 +13) = 0\nR0 cannot write into rdonly_mem\nprocessed 17 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_slice_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_slice_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_meta_invalid_slice_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "rite.c:1211\n12: (15) if r1 == 0x0 goto pc+2       ; R1=rdonly_mem(sz=1)\n; *md = 42; @ dynptr_fail__skb_meta_invalid_slice_write.c:1215\n13: (72) *(u8 *)(r1 +0) = 42\nR1 cannot write into rdonly_mem\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_meta_invalid_slice_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_meta_invalid_slice_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice1",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "b_pull_data#39    ; R0=scalar()\n28: (55) if r0 != 0x0 goto pc+6       ; R0=0\n; val = hdr->h_proto; @ dynptr_fail__skb_invalid_data_slice1.c:1243\n29: (71) r1 = *(u8 *)(r8 +12)\nR8 invalid mem access 'scalar'\nprocessed 29 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_data_slice1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice2",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_skb_pull_data#39    ; R0=scalar()\n23: (55) if r0 != 0x0 goto pc+3       ; R0=0\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_data_slice2.c:1271\n24: (72) *(u8 *)(r8 +13) = 0\nR8 invalid mem access 'scalar'\nprocessed 25 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice2': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_data_slice2.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice3",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "all bpf_dynptr_write#202    ; R0=scalar() fp-80=dynptr_skb(id=1,dynptr_id=1)\n; val = hdr->h_proto; @ dynptr_fail__skb_invalid_data_slice3.c:1299\n44: (71) r1 = *(u8 *)(r7 +12)\nR7 invalid mem access 'scalar'\nprocessed 42 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice3': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_data_slice3.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice4",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": ") call bpf_dynptr_write#202    ; R0=scalar() fp-80=dynptr_skb(id=1,dynptr_id=1)\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_data_slice4.c:1326\n39: (72) *(u8 *)(r6 +13) = 0\nR6 invalid mem access 'scalar'\nprocessed 38 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice4': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_data_slice4.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "dynptr_skb_meta(id=2,dynptr_id=1)\n; val = *d; @ dynptr_fail__ro_skb_slice_invalid_after_metadata_write.c:1351\n28: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__ro_skb_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "=dynptr_skb_meta(id=2,dynptr_id=1)\n; *d = 42; @ dynptr_fail__rw_skb_slice_invalid_after_metadata_write.c:1376\n28: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__rw_skb_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_payload_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "kb(id=1,dynptr_id=1)\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_payload_write.c:1401\n28: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_payload_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_payload_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "skb(id=1,dynptr_id=1)\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_payload_write.c:1426\n28: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_payload_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_payload_helper",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "pc+5       ; R0=0\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_payload_helper.c:1451\n18: (71) r1 = *(u8 *)(r8 +0)\nR8 invalid mem access 'scalar'\nprocessed 19 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_payload_helper': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_helper.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_payload_helper",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " pc+2       ; R0=0\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_payload_helper.c:1476\n18: (72) *(u8 *)(r8 +0) = 42\nR8 invalid mem access 'scalar'\nprocessed 19 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_payload_helper': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_helper.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "id=1,dynptr_id=1)\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_metadata_write.c:1500\n22: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 22 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__ro_skb_meta_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "(id=1,dynptr_id=1)\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_metadata_write.c:1524\n22: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 22 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__rw_skb_meta_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_data_slice1",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " 1                       ; R0=1\n30: (55) if r1 != 0x0 goto pc+6       ; R1=0\n; val = hdr->h_proto; @ dynptr_fail__xdp_invalid_data_slice1.c:1551\n31: (71) r1 = *(u8 *)(r7 +12)\nR7 invalid mem access 'scalar'\nprocessed 31 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_invalid_data_slice1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__xdp_invalid_data_slice1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_data_slice2",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "0 = 1                       ; R0=1\n25: (55) if r1 != 0x0 goto pc+3       ; R1=0\n; hdr->h_proto = 1; @ dynptr_fail__xdp_invalid_data_slice2.c:1578\n26: (72) *(u8 *)(r7 +13) = 0\nR7 invalid mem access 'scalar'\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_invalid_data_slice2': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__xdp_invalid_data_slice2.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_ctx",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "p-16\n; bpf_dynptr_from_skb(ctx, 0, &ptr); @ dynptr_fail__skb_invalid_ctx.c:1593\n2: (b7) r2 = 0                        ; R2=0\n3: (85) call bpf_dynptr_from_skb#69319\ncalling kernel function bpf_dynptr_from_skb is not allowed\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_ctx': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__skb_invalid_ctx.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_slice_var_len1",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "4: (b7) r2 = 0                       ; R2=0\n15: (85) call bpf_dynptr_slice#69332\nR4 unbounded memory access, use 'var &= const' or 'if (var < const)'\narg#2 arg#3 memory, len pair leads to invalid memory access\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'dynptr_slice_var_len1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__dynptr_slice_var_len1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_slice_var_len2",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " r3 = r10                     ; R3=fp0 R10=fp0\n15: (07) r3 += -16                    ; R3=fp-16\n16: (b7) r2 = 0                       ; R2=0\n17: (85) call bpf_dynptr_slice_rdwr#69333\nR4 must be a known constant\nprocessed 17 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'dynptr_slice_var_len2': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__dynptr_slice_var_len2.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_slice_rdwr_rdonly",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "    ; R1=fp-32 R6=fp-32\n11: (b7) r2 = 0                       ; R2=0\n12: (b7) r4 = 14                      ; R4=14\n13: (85) call bpf_dynptr_slice_rdwr#69333\nthe prog does not allow writes to packet data\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'invalid_slice_rdwr_rdonly': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__invalid_slice_rdwr_rdonly.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalid2",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_clone_invalid2.c:1870\n13: (bf) r1 = r6                      ; R1=fp-16 R6=fp-16 refs=3\n14: (bf) r2 = r7                      ; R2=fp-32 R7=fp-32 refs=3\n15: (85) call bpf_dynptr_clone#69311\ncannot overwrite referenced dynptr\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_invalid2': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__clone_invalid2.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_skb_packet_data",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "5: (b4) w0 = 0                       ; R0=0\n26: (55) if r1 != 0x0 goto pc+1       ; R1=0\n; *data = 123; @ dynptr_fail__clone_skb_packet_data.c:2060\n27: (62) *(u32 *)(r7 +0) = 123\nR7 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_skb_packet_data': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__clone_skb_packet_data.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_skb_packet_meta",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " (85) call bpf_skb_pull_data#39    ; R0=scalar()\n21: (55) if r0 != 0x0 goto pc+1       ; R0=0\n; *md = 42; @ dynptr_fail__clone_skb_packet_meta.c:2085\n22: (72) *(u8 *)(r7 +0) = 42\nR7 invalid mem access 'scalar'\nprocessed 23 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_skb_packet_meta': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__clone_skb_packet_meta.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_xdp_packet_data",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "f_xdp_adjust_head#44          ; R0=scalar()\n24: (55) if r0 != 0x0 goto pc+2       ; R0=0\n; *data = 123; @ dynptr_fail__clone_xdp_packet_data.c:2114\n25: (62) *(u32 *)(r8 +0) = 123\nR8 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_xdp_packet_data': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__clone_xdp_packet_data.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "test_dynptr_skb_small_buff",
+   "section": "?cgroup_skb/egress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "       ; R2=0\n16: (b7) r4 = 9                       ; R4=9\n17: (85) call bpf_dynptr_slice#69332\ninvalid read from stack R3 off -24+8 size 9\narg#2 arg#3 memory, len pair leads to invalid memory access\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'test_dynptr_skb_small_buff': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/dynptr_fail__test_dynptr_skb_small_buff.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "size_not_bpf_dw",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "non_const_var_off",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "non_const_var_off_kptr_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "4,smax=umax=smax32=umax32=12,var_off=(0x0; 0xf))\n14: (b7) r2 = 0                       ; R2=0\n15: (85) call bpf_kptr_xchg#194\nR1 doesn't have constant offset. kptr has to be at the constant offset\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'non_const_var_off_kptr_xchg': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__non_const_var_off_kptr_xchg.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "misaligned_access_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "misaligned_access_read",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_var_off_store",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_bad_type_match",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "marked_as_untrusted_or_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " (79) r1 = *(u64 *)(r0 +8)          ; R0=map_value(map=array_map,ks=4,vs=32) R1=scalar()\n8: (85) call bpf_this_cpu_ptr#154\nR1 type=scalar expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'marked_as_untrusted_or_null': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__marked_as_untrusted_or_null.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "inherit_untrusted_on_walk",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "()\n; bpf_this_cpu_ptr(unref_ptr); @ map_kptr_fail__inherit_untrusted_on_walk.c:218\n10: (85) call bpf_this_cpu_ptr#154\nR1 type=untrusted_ptr_ expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'inherit_untrusted_on_walk': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__inherit_untrusted_on_walk.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_kptr_xchg_on_unref",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "           ; R0=map_value(map=array_map,ks=4,vs=32,off=8) R1=map_value(map=array_map,ks=4,vs=32,off=8)\n9: (b7) r2 = 0                        ; R2=0\n10: (85) call bpf_kptr_xchg#194\nR1 has no valid kptr\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'reject_kptr_xchg_on_unref': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_kptr_xchg_on_unref.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "mark_ref_as_untrusted_or_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": ") r1 = *(u64 *)(r0 +16)         ; R0=map_value(map=array_map,ks=4,vs=32) R1=scalar()\n8: (85) call bpf_this_cpu_ptr#154\nR1 type=scalar expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'mark_ref_as_untrusted_or_null': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__mark_ref_as_untrusted_or_null.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_untrusted_store_to_ref",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_untrusted_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "ct_untrusted_xchg.c:295\n10: (bf) r1 = r0                      ; R0=map_value(map=array_map,ks=4,vs=32,off=16) R1=map_value(map=array_map,ks=4,vs=32,off=16)\n11: (85) call bpf_kptr_xchg#194\nR1 has no valid kptr\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'reject_untrusted_xchg': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_untrusted_xchg.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_bad_type_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_member_of_ref_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_indirect_global_func_access",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "kptr_xchg_ref_state",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "kptr_xchg_possibly_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_bpf_nf_fail.c",
+   "program": "lookup_null_bpf_tuple",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_ct_release': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_bpf_nf_fail.c",
+   "program": "lookup_null_bpf_opts",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_ct_release': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_bpf_nf_fail.c",
+   "program": "xdp_lookup_null_bpf_tuple",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_ct_release': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_bpf_nf_fail.c",
+   "program": "xdp_lookup_null_bpf_opts",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_ct_release': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func1.c",
+   "program": "global_func1",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "f: prog 'global_func1': BPF program load failed: -EACCES\nlibbpf: prog 'global_func1': -- BEGIN PROG LOAD LOG --\nFunc#4 ('f3') is safe for any args that match its prototype\ncombined stack size of 3 calls is 544. Too large\nprocessed 150 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func1__global_func1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "test_global_func10.c",
+   "program": "global_func10",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "                   ; R1=fp-8\n; return foo((struct Big *)&small) ? 1 : 0; @ test_global_func10__global_func10.c:34\n4: (85) call pc+1\ninvalid read from stack R1 off=-8 size=16\nCaller passes invalid args into func#1 ('foo')\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func10': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func10__global_func10.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func11.c",
+   "program": "global_func11",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "al_func11': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; return foo((const void *)skb); @ test_global_func11__global_func11.c:20\n0: (85) call pc+1\nR1 type=ctx expected=fp\nCaller passes invalid args into func#1 ('foo')\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func11': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func11__global_func11.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func12.c",
+   "program": "global_func12",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_get_prandom_u32#7    ; R0=scalar()\n9: (bc) w1 = w0                       ; R0=scalar() R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n10: (61) r2 = *(u32 *)(r6 +0)\nR6 invalid mem access 'mem_or_null'\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func12': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func12__global_func12.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "test_global_func13.c",
+   "program": "global_func13",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "R1=ctx() R10=fp0\n; return foo(s); @ test_global_func13__global_func13.c:25\n0: (18) r1 = 0xbedabeda               ; R1=0xbedabeda\n2: (85) call pc+1\nR1 type=scalar expected=fp\nCaller passes invalid args into func#1 ('foo')\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func13': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func13__global_func13.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func14.c",
+   "program": "global_func14",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "o(NULL); @ test_global_func14__global_func14.c:22\n0: (b7) r1 = 0                        ; R1=0\n1: (85) call pc+1\narg#0 reference type('FWD S') size cannot be determined: -22\nCaller passes invalid args into func#1 ('foo')\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func14': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func14__global_func14.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func16.c",
+   "program": "global_func16",
+   "section": "cgroup_skb/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "test_global_func17.c",
+   "program": "global_func17",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_global_func17.c:18\n0: (18) r1 = 0xffff800084b3b000       ; R1=map_value(map=test_glo.rodata,ks=4,vs=4)\n2: (85) call pc+1\nwrite into map forbidden, value_size=4 off=0 size=4\nCaller passes invalid args into func#1 ('foo')\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func17': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func17__global_func17.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func2.c",
+   "program": "global_func2",
+   "section": "tc",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "test_global_func3.c",
+   "program": "global_func3",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: prog 'global_func3': BPF program load failed: -E2BIG\nlibbpf: prog 'global_func3': -- BEGIN PROG LOAD LOG --\nFunc#8 ('f1') is safe for any args that match its prototype\nthe call stack of 8 frames is too deep !\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func3': failed to load: -E2BIG\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func3__global_func3.bpf.o'\nnative_kernel companion bpf_object__load failed: Argument list too long\n"
+  },
+  {
+   "file": "test_global_func4.c",
+   "program": "global_func4",
+   "section": "tc",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "test_global_func5.c",
+   "program": "global_func5",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "d=2,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=scalar(id=2,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n24: (85) call pc+2\narg#1 expects pointer to ctx\nCaller passes invalid args into func#3 ('f3')\nprocessed 25 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func5': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func5__global_func5.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func6.c",
+   "program": "global_func6",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "fff,var_off=(0x0; 0xffffffff))\n23: (bf) r2 = r6                      ; R2=ctx(off=192) R6=ctx(off=192)\n24: (85) call pc+2\ndereference of modified ctx ptr R2 off=192 disallowed\nCaller passes invalid args into func#3 ('f3')\nprocessed 25 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func6': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func6__global_func6.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "test_global_func7.c",
+   "program": "global_func7",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; foo(skb); @ test_global_func7__global_func7.c:18\n0: (85) call pc+2\nGlobal function foo() doesn't return scalar. Only those are supported.\nCaller passes invalid args into func#1 ('foo')\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func7': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/test_global_func7__global_func7.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "test_global_func8.c",
+   "program": "global_func8",
+   "section": "cgroup_skb/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "test_global_func9.c",
+   "program": "global_func9",
+   "section": "cgroup_skb/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "test_kfunc_param_nullable.c",
+   "program": "kfunc_dynptr_nullable_test3",
+   "section": "tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_dynptr_test': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx1",
+   "section": "tc/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " 3                        ; R2=3\n5: (b7) r3 = 0                        ; R3=0\n6: (18) r4 = 0xffff800084e1e000       ; R4=map_value(map=verifier.rodata,ks=4,vs=8)\n8: (85) call bpf_strtol#105\nwrite into map forbidden, value_size=8 off=0 size=8\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/verifier_const__tcx1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx2",
+   "section": "tc/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx3",
+   "section": "tc/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx4",
+   "section": "tc/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "ffff800084faf000       ; R3=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (b4) w4 = 0                        ; R4=0\n4: (b7) r5 = 0                        ; R5=0\n5: (85) call bpf_check_mtu#163\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx4': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/verifier_const__tcx4.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx5",
+   "section": "tc/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx6",
+   "section": "tc/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "tcx7",
+   "section": "tc/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "(0x0; 0xffffffff))\n; *(volatile __u32 *)p = val; @ verifier_const__tcx7.c:84\n1: (18) r2 = 0xffff800085087000       ; R2=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (63) *(u32 *)(r2 +0) = r1\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx7': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/verifier_const__tcx7.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "verifier_mtu.c",
+   "program": "tc_uninit_mtu",
+   "section": "tc/ingress",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sched_cls",
+   "section": "classifier",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_xdp",
+   "section": "xdp",
+   "expect": "success",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR\n"
+  }
+ ],
+ "skipped": [
+  {
+   "file": "async_stack_depth.c",
+   "program": "pseudo_call_check",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_untrusted",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_untrusted"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_fp",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_fp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_unsafe_kretprobe",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_unsafe_kretprobe"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_trusted_walked",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_trusted_walked"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_null",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_acquire_unreleased",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_acquire_unreleased"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_xchg_unreleased",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_xchg_unreleased"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_rcu_get_release",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_rcu_get_release"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_release_untrusted",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_release_untrusted"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_release_fp",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_release_fp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_release_null",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_release_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cgrp_kfunc_failure.c",
+   "program": "cgrp_kfunc_release_unacquired",
+   "expect": "failure",
+   "programs": [
+    "cgrp_kfunc_release_unacquired"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_alloc_no_release",
+   "expect": "failure",
+   "programs": [
+    "test_alloc_no_release"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_alloc_double_release",
+   "expect": "failure",
+   "programs": [
+    "test_alloc_double_release"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_acquire_wrong_cpumask",
+   "expect": "failure",
+   "programs": [
+    "test_acquire_wrong_cpumask"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_mutate_cpumask",
+   "expect": "failure",
+   "programs": [
+    "test_mutate_cpumask"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_insert_remove_no_release",
+   "expect": "failure",
+   "programs": [
+    "test_insert_remove_no_release"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_cpumask_null",
+   "expect": "failure",
+   "programs": [
+    "test_cpumask_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_global_mask_out_of_rcu",
+   "expect": "failure",
+   "programs": [
+    "test_global_mask_out_of_rcu"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_global_mask_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "test_global_mask_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_global_mask_rcu_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "test_global_mask_rcu_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_invalid_nested_array",
+   "expect": "failure",
+   "programs": [
+    "test_invalid_nested_array"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_populate_invalid_destination",
+   "expect": "failure",
+   "programs": [
+    "test_populate_invalid_destination"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "cpumask_failure.c",
+   "program": "test_populate_invalid_source",
+   "expect": "failure",
+   "programs": [
+    "test_populate_invalid_source"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "crypto_basic.c",
+   "program": "crypto_acquire",
+   "expect": "failure",
+   "programs": [
+    "crypto_acquire"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dummy_st_ops_fail.c",
+   "program": "test_unsupported_field_sleepable",
+   "expect": "failure",
+   "programs": [
+    "test_unsupported_field_sleepable"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release1",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release2",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release_callback",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release_callback"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_release_uninit_dynptr",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_release_uninit_dynptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "use_after_invalid",
+   "expect": "failure",
+   "programs": [
+    "use_after_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_invalid_api",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_invalid_api"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "add_dynptr_to_map1",
+   "expect": "failure",
+   "programs": [
+    "add_dynptr_to_map1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "add_dynptr_to_map2",
+   "expect": "failure",
+   "programs": [
+    "add_dynptr_to_map2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_ringbuf",
+   "expect": "failure",
+   "programs": [
+    "data_slice_out_of_bounds_ringbuf"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_map_value",
+   "expect": "failure",
+   "programs": [
+    "data_slice_out_of_bounds_map_value"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_use_after_release1",
+   "expect": "failure",
+   "programs": [
+    "data_slice_use_after_release1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_use_after_release2",
+   "expect": "failure",
+   "programs": [
+    "data_slice_use_after_release2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_missing_null_check1",
+   "expect": "failure",
+   "programs": [
+    "data_slice_missing_null_check1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_missing_null_check2",
+   "expect": "failure",
+   "programs": [
+    "data_slice_missing_null_check2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_helper1",
+   "expect": "failure",
+   "programs": [
+    "invalid_helper1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_helper2",
+   "expect": "failure",
+   "programs": [
+    "invalid_helper2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write1",
+   "expect": "failure",
+   "programs": [
+    "invalid_write1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write2",
+   "expect": "failure",
+   "programs": [
+    "invalid_write2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write3",
+   "expect": "failure",
+   "programs": [
+    "invalid_write3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write4",
+   "expect": "failure",
+   "programs": [
+    "invalid_write4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "global",
+   "expect": "failure",
+   "programs": [
+    "global"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read1",
+   "expect": "failure",
+   "programs": [
+    "invalid_read1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read2",
+   "expect": "failure",
+   "programs": [
+    "invalid_read2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read3",
+   "expect": "failure",
+   "programs": [
+    "invalid_read3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read4",
+   "expect": "failure",
+   "programs": [
+    "invalid_read4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_offset",
+   "expect": "failure",
+   "programs": [
+    "invalid_offset"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "release_twice",
+   "expect": "failure",
+   "programs": [
+    "release_twice"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "release_twice_callback",
+   "expect": "failure",
+   "programs": [
+    "release_twice_callback"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_from_mem_invalid_api",
+   "expect": "failure",
+   "programs": [
+    "dynptr_from_mem_invalid_api"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_overwrite_unref",
+   "expect": "success",
+   "programs": [
+    "dynptr_overwrite_unref"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_reinit",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_reinit"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_or_null",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_or_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_failure",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_failure"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_success",
+   "expect": "success",
+   "programs": [
+    "dynptr_invalidate_slice_success"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_overwrite_ref",
+   "expect": "failure",
+   "programs": [
+    "dynptr_overwrite_ref"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_read_into_slot",
+   "expect": "failure",
+   "programs": [
+    "dynptr_read_into_slot"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_meta_invalid_ctx",
+   "expect": "failure",
+   "programs": [
+    "skb_meta_invalid_ctx"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_ctx_fentry",
+   "expect": "failure",
+   "programs": [
+    "skb_invalid_ctx_fentry"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_ctx_fexit",
+   "expect": "failure",
+   "programs": [
+    "skb_invalid_ctx_fexit"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "uninit_write_into_slot",
+   "expect": "failure",
+   "programs": [
+    "uninit_write_into_slot"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_ctx",
+   "expect": "failure",
+   "programs": [
+    "xdp_invalid_ctx"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_data_slices",
+   "expect": "failure",
+   "programs": [
+    "invalid_data_slices"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_adjust_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_adjust_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_is_null_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_is_null_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_is_rdonly_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_is_rdonly_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_size_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_size_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalid1",
+   "expect": "failure",
+   "programs": [
+    "clone_invalid1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate1",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate2",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate3",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate4",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate5",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate5"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate6",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate6"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "test_dynptr_reg_type",
+   "expect": "failure",
+   "programs": [
+    "test_dynptr_reg_type"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_save_bad_arg",
+   "expect": "failure",
+   "programs": [
+    "irq_save_bad_arg",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_bad_arg",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_bad_arg",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_2",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_2",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_3",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_3",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_3_minus_2",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_3_minus_2",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_1_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_1_subprog",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_2_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_2_subprog",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_3_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_3_subprog",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_missing_3_minus_2_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_restore_missing_3_minus_2_subprog",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_balance",
+   "expect": "success",
+   "programs": [
+    "irq_balance",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_balance_n",
+   "expect": "success",
+   "programs": [
+    "irq_balance_n",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_balance_subprog",
+   "expect": "success",
+   "programs": [
+    "irq_balance_subprog",
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_global_subprog",
+   "expect": "success",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_global_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_ooo",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_ooo"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_ooo_3",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_ooo_3"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_3_subprog",
+   "expect": "success",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_3_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_4_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_4_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_ooo_3_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_ooo_3_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_invalid",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_invalid"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_save_invalid",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_save_invalid"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_restore_iter",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_restore_iter"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_save_iter",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_save_iter"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_flag_overwrite",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_flag_overwrite"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_flag_overwrite_partial",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_flag_overwrite_partial"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_non_sleepable_global_subprog",
+   "expect": "success",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_non_sleepable_global_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_sleepable_helper_global_subprog",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_sleepable_helper_global_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "irq.c",
+   "program": "irq_sleepable_global_subprog_indirect",
+   "expect": "failure",
+   "programs": [
+    "irq_sleepable_helper",
+    "irq_sleepable_kfunc",
+    "irq_sleepable_global_subprog_indirect"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_empty",
+   "expect": "success",
+   "programs": [
+    "testmod_seq_empty"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_full",
+   "expect": "success",
+   "programs": [
+    "testmod_seq_full"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_truncated",
+   "expect": "success",
+   "programs": [
+    "testmod_seq_truncated"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_getter_before_bad",
+   "expect": "failure",
+   "programs": [
+    "testmod_seq_getter_before_bad"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_getter_after_bad",
+   "expect": "failure",
+   "programs": [
+    "testmod_seq_getter_after_bad"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "iters_testmod_seq.c",
+   "program": "testmod_seq_getter_good",
+   "expect": "success",
+   "programs": [
+    "testmod_seq_getter_good"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "kfunc_implicit_args.c",
+   "program": "test_kfunc_implicit_arg_impl_illegal",
+   "expect": "failure",
+   "programs": [
+    "test_kfunc_implicit_arg_impl_illegal"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "kprobe_multi_verifier.c",
+   "program": "kprobe_session_return_0",
+   "expect": "success",
+   "programs": [
+    "kprobe_session_return_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "kprobe_multi_verifier.c",
+   "program": "kprobe_session_return_1",
+   "expect": "success",
+   "programs": [
+    "kprobe_session_return_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "kprobe_multi_verifier.c",
+   "program": "kprobe_session_return_2",
+   "expect": "failure",
+   "programs": [
+    "kprobe_session_return_2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_indirect_helper_access",
+   "expect": "failure",
+   "programs": [
+    "reject_indirect_helper_access"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_acquire.c",
+   "program": "test_nested_acquire_nonzero",
+   "expect": "success",
+   "programs": [
+    "test_nested_acquire_nonzero"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_acquire.c",
+   "program": "test_nested_acquire_zero",
+   "expect": "success",
+   "programs": [
+    "test_nested_acquire_zero"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_trust_failure.c",
+   "program": "test_invalid_nested_user_cpus",
+   "expect": "failure",
+   "programs": [
+    "test_invalid_nested_user_cpus"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_trust_failure.c",
+   "program": "test_invalid_skb_field",
+   "expect": "failure",
+   "programs": [
+    "test_invalid_skb_field"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_trust_success.c",
+   "program": "test_read_cpumask",
+   "expect": "success",
+   "programs": [
+    "test_read_cpumask"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_trust_success.c",
+   "program": "test_skb_field",
+   "expect": "success",
+   "programs": [
+    "test_skb_field"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "nested_trust_success.c",
+   "program": "test_nested_offset",
+   "expect": "success",
+   "programs": [
+    "test_nested_offset"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_1",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_1",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_2",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_2",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_3",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_3",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_3_minus_2",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_3_minus_2",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_1_subprog",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_1_subprog",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_2_subprog",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_2_subprog",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_lock_missing_2_minus_1_subprog",
+   "expect": "failure",
+   "programs": [
+    "preempt_lock_missing_2_minus_1_subprog",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_balance",
+   "expect": "success",
+   "programs": [
+    "preempt_balance",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_balance_subprog_test",
+   "expect": "success",
+   "programs": [
+    "preempt_balance_subprog_test",
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_global_subprog_test",
+   "expect": "success",
+   "programs": [
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc",
+    "preempt_global_subprog_test"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_global_sleepable_helper_subprog",
+   "expect": "failure",
+   "programs": [
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc",
+    "preempt_global_sleepable_helper_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_global_sleepable_kfunc_subprog",
+   "expect": "failure",
+   "programs": [
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc",
+    "preempt_global_sleepable_kfunc_subprog"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "preempt_lock.c",
+   "program": "preempt_global_sleepable_subprog_indirect",
+   "expect": "failure",
+   "programs": [
+    "preempt_sleepable_helper",
+    "preempt_sleepable_kfunc",
+    "preempt_global_sleepable_subprog_indirect"
+   ],
+   "reason": "object holds 3 programs"
+  },
+  {
+   "file": "sock_destroy_prog_fail.c",
+   "program": "trace_tcp_destroy_sock",
+   "expect": "failure",
+   "programs": [
+    "trace_tcp_destroy_sock"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_untrusted",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_untrusted"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_fp",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_fp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_unsafe_kretprobe",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_unsafe_kretprobe"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_unsafe_kretprobe_rcu",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_unsafe_kretprobe_rcu"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_null",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_unreleased",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_unreleased"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_xchg_unreleased",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_xchg_unreleased"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_acquire_release_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_acquire_release_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_release_untrusted",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_release_untrusted"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_release_fp",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_release_fp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_release_null",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_release_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_release_unacquired",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_release_unacquired"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_from_pid_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_from_pid_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_from_vpid_no_null_check",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_from_vpid_no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_from_lsm_task_free",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_from_lsm_task_free"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_access_comm1",
+   "expect": "failure",
+   "programs": [
+    "task_access_comm1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_access_comm2",
+   "expect": "failure",
+   "programs": [
+    "task_access_comm2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_access_comm3",
+   "expect": "failure",
+   "programs": [
+    "task_access_comm3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_access_comm4",
+   "expect": "failure",
+   "programs": [
+    "task_access_comm4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "task_kfunc_failure.c",
+   "program": "task_kfunc_release_in_map",
+   "expect": "failure",
+   "programs": [
+    "task_kfunc_release_in_map"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "test_kfunc_dynptr_param.c",
+   "program": "not_valid_dynptr",
+   "expect": "failure",
+   "programs": [
+    "not_valid_dynptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "test_kfunc_dynptr_param.c",
+   "program": "not_ptr_to_stack",
+   "expect": "failure",
+   "programs": [
+    "not_ptr_to_stack"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "uprobe_multi_verifier.c",
+   "program": "uprobe_sesison_return_0",
+   "expect": "success",
+   "programs": [
+    "uprobe_sesison_return_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "uprobe_multi_verifier.c",
+   "program": "uprobe_sesison_return_1",
+   "expect": "success",
+   "programs": [
+    "uprobe_sesison_return_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "uprobe_multi_verifier.c",
+   "program": "uprobe_sesison_return_2",
+   "expect": "failure",
+   "programs": [
+    "uprobe_sesison_return_2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "uptr_failure.c",
+   "program": "uptr_write",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "uptr_failure.c",
+   "program": "uptr_write_nested",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "uptr_failure.c",
+   "program": "uptr_no_null_check",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "uptr_failure.c",
+   "program": "uptr_kptr_xchg",
+   "expect": "failure",
+   "programs": [],
+   "reason": "object holds 0 programs"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_bad_access1",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_bad_access1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_bad_access2",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_bad_access2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_write_forbidden",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_write_forbidden"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_null_context_write",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_null_context_write"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_null_context_read",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_null_context_read"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_discard_dynptr",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_discard_dynptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_submit_dynptr",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_submit_dynptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_invalid_return",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_invalid_return"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_reinit_dynptr_mem",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_reinit_dynptr_mem"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_reinit_dynptr_ringbuf",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_reinit_dynptr_ringbuf"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "user_ringbuf_fail.c",
+   "program": "user_ringbuf_callback_const_ptr_to_dynptr_reg_off",
+   "expect": "failure",
+   "programs": [
+    "user_ringbuf_callback_const_ptr_to_dynptr_reg_off"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "an_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "multiple_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "multiple_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_32bit_constant_0_no_nullness",
+   "expect": "success",
+   "programs": [
+    "an_array_with_a_32bit_constant_0_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "a_pcpu_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "a_pcpu_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_no_nullness_out_of_bounds",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_no_nullness_out_of_bounds"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_too_small",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_too_small"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_too_big",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_too_big"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "non_stack_key_lookup",
+   "expect": "failure",
+   "programs": [
+    "non_stack_key_lookup"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "doesnt_reject_irrelevant_maps",
+   "expect": "success",
+   "programs": [
+    "doesnt_reject_irrelevant_maps"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_async_cb_context.c",
+   "program": "timer_non_sleepable_prog",
+   "expect": "failure",
+   "programs": [
+    "timer_non_sleepable_prog"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_async_cb_context.c",
+   "program": "timer_sleepable_prog",
+   "expect": "failure",
+   "programs": [
+    "timer_sleepable_prog"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "no_destroy",
+   "expect": "failure",
+   "programs": [
+    "no_destroy"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "next_uninit",
+   "expect": "failure",
+   "programs": [
+    "next_uninit"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "destroy_uninit",
+   "expect": "failure",
+   "programs": [
+    "destroy_uninit"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "null_pointer",
+   "expect": "success",
+   "programs": [
+    "null_pointer"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "bits_copy",
+   "expect": "success",
+   "programs": [
+    "bits_copy"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "bits_memalloc",
+   "expect": "success",
+   "programs": [
+    "bits_memalloc"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "bit_index",
+   "expect": "success",
+   "programs": [
+    "bit_index"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "bits_too_big",
+   "expect": "success",
+   "programs": [
+    "bits_too_big"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "fewer_words",
+   "expect": "success",
+   "programs": [
+    "fewer_words"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "zero_words",
+   "expect": "success",
+   "programs": [
+    "zero_words"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "huge_words",
+   "expect": "success",
+   "programs": [
+    "huge_words"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "max_words",
+   "expect": "success",
+   "programs": [
+    "max_words"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_bits_iter.c",
+   "program": "bad_words",
+   "expect": "success",
+   "programs": [
+    "bad_words"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_const.c",
+   "program": "bprm",
+   "expect": "failure",
+   "programs": [
+    "bprm"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_default_trusted_ptr.c",
+   "program": "test_default_trusted_ptr",
+   "expect": "success",
+   "programs": [
+    "test_default_trusted_ptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_jit_inline.c",
+   "program": "inline_bpf_get_current_task",
+   "expect": "success",
+   "programs": [
+    "inline_bpf_get_current_task"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "task_kfunc_raw_tp",
+   "expect": "success",
+   "programs": [
+    "task_kfunc_raw_tp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "task_kfunc_syscall",
+   "expect": "success",
+   "programs": [
+    "task_kfunc_syscall"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "task_kfunc_tracepoint",
+   "expect": "success",
+   "programs": [
+    "task_kfunc_tracepoint"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "task_kfunc_perf_event",
+   "expect": "success",
+   "programs": [
+    "task_kfunc_perf_event"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cgrp_kfunc_raw_tp",
+   "expect": "success",
+   "programs": [
+    "cgrp_kfunc_raw_tp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cgrp_kfunc_syscall",
+   "expect": "success",
+   "programs": [
+    "cgrp_kfunc_syscall"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cgrp_kfunc_tracepoint",
+   "expect": "success",
+   "programs": [
+    "cgrp_kfunc_tracepoint"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cgrp_kfunc_perf_event",
+   "expect": "success",
+   "programs": [
+    "cgrp_kfunc_perf_event"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cpumask_kfunc_raw_tp",
+   "expect": "success",
+   "programs": [
+    "cpumask_kfunc_raw_tp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cpumask_kfunc_syscall",
+   "expect": "success",
+   "programs": [
+    "cpumask_kfunc_syscall"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cpumask_kfunc_tracepoint",
+   "expect": "success",
+   "programs": [
+    "cpumask_kfunc_tracepoint"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_kfunc_prog_types.c",
+   "program": "cpumask_kfunc_perf_event",
+   "expect": "success",
+   "programs": [
+    "cpumask_kfunc_perf_event"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_linked_scalars.c",
+   "program": "alu32_negative_offset",
+   "expect": "success",
+   "programs": [
+    "alu32_negative_offset"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_load_acquire.c",
+   "program": "dummy_test",
+   "expect": "success",
+   "programs": [
+    "dummy_test"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_lsm.c",
+   "program": "no_null_check",
+   "expect": "failure",
+   "programs": [
+    "no_null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_lsm.c",
+   "program": "null_check",
+   "expect": "success",
+   "programs": [
+    "null_check"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_may_goto_2.c",
+   "program": "may_goto_c_code",
+   "expect": "success",
+   "programs": [
+    "may_goto_c_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_netfilter_ctx.c",
+   "program": "with_invalid_ctx_access_test5",
+   "expect": "failure",
+   "programs": [
+    "with_invalid_ctx_access_test5"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg4_good_return_code",
+   "expect": "success",
+   "programs": [
+    "recvmsg4_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "recvmsg4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg6_good_return_code",
+   "expect": "success",
+   "programs": [
+    "recvmsg6_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "recvmsg6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg_unix_good_return_code",
+   "expect": "success",
+   "programs": [
+    "recvmsg_unix_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "recvmsg_unix_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "recvmsg_unix_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg4_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "sendmsg4_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg4_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "sendmsg4_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "sendmsg4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg6_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "sendmsg6_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg6_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "sendmsg6_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "sendmsg6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg_unix_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "sendmsg_unix_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg_unix_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "sendmsg_unix_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "sendmsg_unix_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "sendmsg_unix_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername4_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getpeername4_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getpeername4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername6_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getpeername6_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getpeername6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername_unix_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getpeername_unix_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getpeername_unix_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getpeername_unix_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname4_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getsockname4_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getsockname4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname6_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getsockname6_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getsockname6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname_unix_good_return_code",
+   "expect": "success",
+   "programs": [
+    "getsockname_unix_good_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "getsockname_unix_unix_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "getsockname_unix_unix_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind4_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "bind4_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind4_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "bind4_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind4_good_return_code_2",
+   "expect": "success",
+   "programs": [
+    "bind4_good_return_code_2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind4_good_return_code_3",
+   "expect": "success",
+   "programs": [
+    "bind4_good_return_code_3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "bind4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind6_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "bind6_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind6_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "bind6_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind6_good_return_code_2",
+   "expect": "success",
+   "programs": [
+    "bind6_good_return_code_2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind6_good_return_code_3",
+   "expect": "success",
+   "programs": [
+    "bind6_good_return_code_3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "bind6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "bind6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect4_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "connect4_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect4_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "connect4_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect4_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "connect4_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect6_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "connect6_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect6_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "connect6_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect6_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "connect6_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect_unix_good_return_code_0",
+   "expect": "success",
+   "programs": [
+    "connect_unix_good_return_code_0"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect_unix_good_return_code_1",
+   "expect": "success",
+   "programs": [
+    "connect_unix_good_return_code_1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sock_addr.c",
+   "program": "connect_unix_bad_return_code",
+   "expect": "failure",
+   "programs": [
+    "connect_unix_bad_return_code"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sched_act",
+   "expect": "success",
+   "programs": [
+    "test_sched_act"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_flow_dissector_delete",
+   "expect": "success",
+   "programs": [
+    "test_flow_dissector_delete"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_flow_dissector_update",
+   "expect": "failure",
+   "programs": [
+    "test_flow_dissector_update"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_trace_iter",
+   "expect": "success",
+   "programs": [
+    "test_trace_iter"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_raw_tp_delete",
+   "expect": "failure",
+   "programs": [
+    "test_raw_tp_delete"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_raw_tp_update",
+   "expect": "failure",
+   "programs": [
+    "test_raw_tp_update"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sk_lookup",
+   "expect": "success",
+   "programs": [
+    "test_sk_lookup"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sk_reuseport",
+   "expect": "success",
+   "programs": [
+    "test_sk_reuseport"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_socket_filter",
+   "expect": "success",
+   "programs": [
+    "test_socket_filter"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sockops_delete",
+   "expect": "success",
+   "programs": [
+    "test_sockops_delete"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sockops_update",
+   "expect": "failure",
+   "programs": [
+    "test_sockops_update"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_sockmap_mutate.c",
+   "program": "test_sockops_update_dedicated",
+   "expect": "success",
+   "programs": [
+    "test_sockops_update_dedicated"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_store_release.c",
+   "program": "dummy_test",
+   "expect": "success",
+   "programs": [
+    "dummy_test"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "get_task_exe_file_and_put_kfunc_from_current_sleepable",
+   "expect": "success",
+   "programs": [
+    "get_task_exe_file_and_put_kfunc_from_current_sleepable"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "get_task_exe_file_and_put_kfunc_from_current_non_sleepable",
+   "expect": "success",
+   "programs": [
+    "get_task_exe_file_and_put_kfunc_from_current_non_sleepable"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "get_task_exe_file_and_put_kfunc_from_argument",
+   "expect": "success",
+   "programs": [
+    "get_task_exe_file_and_put_kfunc_from_argument"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "path_d_path_from_path_argument",
+   "expect": "success",
+   "programs": [
+    "path_d_path_from_path_argument"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "path_d_path_from_file_argument",
+   "expect": "success",
+   "programs": [
+    "path_d_path_from_file_argument"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_accept.c",
+   "program": "inode_rename",
+   "expect": "success",
+   "programs": [
+    "inode_rename"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "get_task_exe_file_kfunc_null",
+   "expect": "failure",
+   "programs": [
+    "get_task_exe_file_kfunc_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "get_task_exe_file_kfunc_fp",
+   "expect": "failure",
+   "programs": [
+    "get_task_exe_file_kfunc_fp"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "get_task_exe_file_kfunc_untrusted",
+   "expect": "failure",
+   "programs": [
+    "get_task_exe_file_kfunc_untrusted"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "get_task_exe_file_kfunc_unreleased",
+   "expect": "failure",
+   "programs": [
+    "get_task_exe_file_kfunc_unreleased"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "put_file_kfunc_unacquired",
+   "expect": "failure",
+   "programs": [
+    "put_file_kfunc_unacquired"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_null",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_untrusted_from_argument",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_untrusted_from_argument"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_untrusted_from_current",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_untrusted_from_current"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_type_mismatch",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_type_mismatch"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_invalid_buf_sz",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_invalid_buf_sz"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "path_d_path_kfunc_non_lsm",
+   "expect": "failure",
+   "programs": [
+    "path_d_path_kfunc_non_lsm"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_vfs_reject.c",
+   "program": "inode_rename",
+   "expect": "failure",
+   "programs": [
+    "inode_rename"
+   ],
+   "reason": "unsupported type"
+  }
+ ]
+}

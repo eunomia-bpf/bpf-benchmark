@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-08T14:34:09.049515+00:00",
+  "make_exit": 0,
+  "runtime": {
+    "ok": true,
+    "guest": {
+      "ok": true,
+      "scope": "Existing complete shared ARM kernel annotation sweep",
+      "runner_returncode": 0,
+      "counts": {
+        "submitted": 77,
+        "skipped": 303,
+        "ran": 0,
+        "refused": 0,
+        "not-reached": 77,
+        "failure": 0,
+        "failure_agrees": 0,
+        "success": 0,
+        "success_agrees": 0
+      }
+    },
+    "guest_exit": 0,
+    "compiler_exit": 0,
+    "qemu_exit": 0
+  },
+  "counts": {
+    "submitted": 77,
+    "skipped": 303,
+    "ran": 0,
+    "refused": 0,
+    "not-reached": 77,
+    "failure": 0,
+    "failure_agrees": 0,
+    "success": 0,
+    "success_agrees": 0
+  }
+}
