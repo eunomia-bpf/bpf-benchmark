@@ -29,24 +29,44 @@ def helper_names():
     return out
 
 
-def disassemble(obj):
-    """`{symbol: [instruction text]}` for every function in an object."""
-    done = subprocess.run(["objdump", "-d", str(obj)],
+def is_bpf(obj):
+    """Whether the object is a BPF ELF rather than a host one."""
+    done = subprocess.run(["readelf", "-hW", str(obj)],
                           capture_output=True, text=True)
+    return "BPF" in done.stdout
+
+
+def disassemble(obj):
+    """`{symbol: [instruction text]}` for every function in an object.
+
+    A BPF object carries the helper id as the call's own immediate, so the
+    sites are read from that; a host object carries it in `eax` before an
+    indirect call, which `sites` reads instead.
+    """
+    tool = (["llvm-objdump-18", "-d"] if is_bpf(obj) else ["objdump", "-d"])
+    done = subprocess.run(tool + [str(obj)], capture_output=True, text=True)
     bodies, current = collections.defaultdict(list), None
     for line in done.stdout.splitlines():
         header = re.match(r"^[0-9a-f]+ <(\w+)>:", line)
         if header:
             current = header.group(1)
             continue
-        if current and re.match(r"^\s+[0-9a-f]+:", line):
+        if current and re.match(r"^\s*[0-9a-f]+:\s", line):
             bodies[current].append(line)
     return bodies
 
 
 def sites(lines, names):
     """`Counter` of helper names called in one function's body."""
-    counts, pending = collections.Counter(), None
+    counts = collections.Counter()
+    # A BPF object names the helper in the call itself.
+    direct = [re.search(r"call\s+0x([0-9a-f]+)", line) for line in lines]
+    direct = [int(m.group(1), 16) for m in direct if m]
+    if direct:
+        for helper in direct:
+            counts[names.get(helper, "helper_%d" % helper)] += 1
+        return counts
+    pending = None
     for line in lines:
         load = re.search(r"mov\s+\$0x([0-9a-f]+),%eax", line)
         if load:
@@ -69,7 +89,8 @@ def main(argv):
     per_object = {}
     totals = collections.Counter()
     instructions = 0
-    for obj in sorted(pathlib.Path(args.objects).rglob("*.native.o")):
+    for obj in sorted(list(pathlib.Path(args.objects).rglob("*.native.o")) +
+                      list(pathlib.Path(args.objects).rglob("*.bpf.o"))):
         bodies = disassemble(obj)
         if not bodies:
             continue

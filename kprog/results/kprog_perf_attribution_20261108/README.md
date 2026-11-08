@@ -555,3 +555,77 @@ its helper — a `map_update_elem` costs more than a `map_lookup_elem` — so
 the ranking of the top two is robust (they are the two largest categories
 by a wide margin) and the tail-call figure is an upper bound on its
 category's share.
+
+### Katran's call sites, from its own source
+
+Katran archives no native object, so `balancer_ingress` was rebuilt from the
+published BPF source (`vendor/repos/katran/katran/lib/bpf/balancer.c`) with
+the corpus's native flags -- the published program and kernel are unchanged,
+which is the private measurement build the task allows. 2,000 instructions,
+69 call sites:
+
+| helper | sites | share |
+| --- | ---: | ---: |
+| `bpf_map_lookup_elem` | 51 | **73.9%** |
+| `bpf_ktime_get_ns` | 8 | 11.6% |
+| `bpf_xdp_adjust_head` | 4 | 5.8% |
+| `bpf_map_update_elem` | 4 | 5.8% |
+| `bpf_get_smp_processor_id` | 2 | 2.9% |
+
+**79.7% of Katran's call sites are map operations, and 73.9% are lookups.**
+No tail calls.
+
+That changes the ordering for Katran relative to cilium: map-lookup lowering
+covers nearly three quarters of its call sites, constant specialization
+covers the lookups that read frozen data, and compiler flags act on the
+remaining 1,931 non-call instructions. The two helpers the task did not name
+are worth recording because they are not map work at all:
+`ktime_get_ns` (11.6%) and `smp_processor_id` (2.9%) are cheap per call but
+they sit inside the hash and the per-CPU selection, so they bound how much
+of the program the map work can be.
+
+### BCC's call sites, from its eight tools
+
+BCC archives no native objects either. Its eight tools
+(`runner/libs/app_runners/bcc_set.py:31-40`: capable, biosnoop, vfsstat,
+opensnoop, syscount, tcpconnect, tcplife, runqlat) were compiled to BPF with
+the corpus toolchain; a BPF object carries the helper id as the call's own
+immediate, which `helper_ids.py` reads. 1,980 instructions, 196 call sites:
+
+| helper | sites | share |
+| --- | ---: | ---: |
+| `bpf_probe_read_kernel` | 59 | **30.1%** |
+| `bpf_map_update_elem` | 23 | 11.7% |
+| `bpf_map_lookup_elem` | 23 | 11.7% |
+| `bpf_get_current_pid_tgid` | 18 | 9.2% |
+| `bpf_ktime_get_ns` | 16 | 8.2% |
+| `bpf_current_task_under_cgroup` | 12 | 6.1% |
+
+`vfsstat` carries no helper calls at all, so seven of the eight objects
+contribute sites.
+
+### The three applications, side by side
+
+The same measurement on the three applications the task names, so the
+candidate order can be read per application rather than assumed shared:
+
+| category | cilium | katran | bcc |
+| --- | ---: | ---: | ---: |
+| map lookups | 27.5% | **73.9%** | 11.7% |
+| map updates and deletes | 23.6% | 5.8% | 16.8% |
+| tail calls | 4.3% | 0% | 0% |
+| packet reads (`skb`/`xdp_load_bytes`) | 14.8% | 0% | 0% |
+| packet stores (`skb_store_bytes`) | 8.7% | 0% | 0% |
+| probe reads (`probe_read_*`) | 0.2% | 0% | **32.1%** |
+| other helpers | 21.0% | 20.3% | 39.3% |
+
+**The order is not the same for all three.** Katran is a map-lookup program
+(73.9%), so lookup lowering dominates there. BCC is a probe-read program
+(32.1%), so the map work is under a third of its sites and `probe_read_kernel`
+leads. Cilium is the balanced case, where map operations are half the sites
+and tail calls are the only ones with a dedicated linker candidate.
+
+That is the finding the table exists to give: C should lower map lookups
+first for Katran, and for BCC the same change covers 28.6% of its sites
+while the probe reads -- which no candidate in the list addresses -- are a
+larger share.
