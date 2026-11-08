@@ -1,0 +1,47 @@
+{
+  "utc": "2026-11-08T17:32:40.192124+00:00",
+  "paired_build": {
+    "utc": "2026-11-08T17:31:04.921657+00:00",
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "sh",
+      "/workspaces/.agent-state/kprog-lanes/A/bpf34/testmod/paired-build.sh"
+    ],
+    "returncode": 0
+  },
+  "cache_restore": {
+    "utc": "2026-11-08T17:31:00.253389+00:00",
+    "initial_build_publication": "effad0458",
+    "cause": "The cached generated Makefile exports canonical vendor KBUILD_OUTPUT; direct make -C cache selected the shared base and placed external outputs in cache. The prior successful paired build bind-mounts cache over that canonical path.",
+    "kernel_config_equal": true,
+    "restorations": {
+      "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/Makefile": {
+        "from_path": "/workspaces/repository/vendor/build/arm64/linux/Makefile",
+        "sha256": "cdc438a9c6ed1313cf3f9e6a8bf700504c3f0c29b030efb088a1d458ddd047d0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/Module.symvers": {
+        "from_path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/vmlinux.symvers",
+        "sha256": "95a17395e299ee5461ac3cc9e36becfd36c01bb466ce400383213b523dd7769d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/modules.order": {
+        "from_path": "/workspaces/repository/vendor/build/arm64/linux/modules.order",
+        "sha256": "b1be9ec421139f84b6dabd8b8163cbeed02a4445514bed9eeb5ed9a6e88d4b0e"
+      }
+    }
+  },
+  "modules": {
+    "bpf_testmod.ko": "87b7d1651fdff71cee43a0f133f6866e79e68cf7866402d9a7becf3a5ce95be1",
+    "bpf_test_no_cfi.ko": "f2832e5f6feb74470fc751929b7989a1449492e9e17a10159ace969683421b00",
+    "bpf_test_modorder_y.ko": "fbdc083fe078b1884f397763d99dd43122493e982f6725b403251da64d9f99cd",
+    "bpf_test_rqspinlock.ko": "cc4f7dbf0dfd69f250e0df6ac50ec041c5e0e9ecb8e8dfc64ef3d1313f11793d",
+    "bpf_test_modorder_x.ko": "b1abe79a4c562abe85733e729ca8fb4642ef32c491e8ad4173185b165378ad17"
+  },
+  "kernel_image_sha256": "5dda73cc12cf58ff3a9dcc24dc98ee9867a5cdc92515e233cfc182226570c86e",
+  "scope": "Exact preceding88a source mounts and sole warm kernel cache; external module output has its explicit MO directory."
+}
