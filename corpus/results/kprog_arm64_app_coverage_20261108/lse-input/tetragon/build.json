@@ -1,0 +1,459 @@
+{
+  "utc": "2026-11-08T08:48:35.947405+00:00",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/vendor/bpf",
+    "-o",
+    "tetragon/bpf/include/vmlinux_generated_arm64.h",
+    "ARCH=arm64",
+    "NATIVE_OUT=/workspaces/repository/kprog/arm64/build/lse-native",
+    "NATIVE_STAGE_ROOT=/workspaces/repository/kprog/arm64/build/lse-stage",
+    "NATIVE_LINK=/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "NATIVE_ARCH_CFLAGS=-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x18 -ffixed-x26 -ffixed-x27 -ffixed-x28 -march=armv8.1-a+lse",
+    "NATIVE_SYS_INCLUDE_FLAGS=--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root -I/workspaces/repository/vendor/build/.bcc-libbpf/none/arm64/output -I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+    "native-tetragon"
+  ],
+  "make_exit": 0,
+  "scope": "Complete existing upstream native-tetragon recipe; current ARM ABI plus Armv8.1 LSE; original247 application rows remain the submission manifest",
+  "native_objects": [
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "sha256": "c9098be6447678e376c2178be96ccce5817589bcf8e0d752efb3eb7a57b7349a",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_cgroup_release_v511.native.o",
+      "sha256": "6e0eb4a75ea71f835290e9eb4c8297b0a7fe92c980b7f8a8830983fa4730e15c",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "sha256": "c5dfd0c023ae6d78eb921cc71caf8c4633ca9b7468b4d875c2679952ac04ed95",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_event_v310.native.o",
+      "sha256": "4d1bc2adff08536c92220430b35f0928da5c900faad13e73bf5cd911913939b5",
+      "atomics": {
+        "ldaddal": 5
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_event_v511.native.o",
+      "sha256": "01ef3376c198649ef3dcc6a421f86b7eb34ea072f5d977b957a22e17228612f7",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_event_v53.native.o",
+      "sha256": "d317a791ab181364fc0f475c07b2d8e6c4fffc95fce3cdef0628182208d992c3",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_event_v61.native.o",
+      "sha256": "2de9f398b896a9a34e2a4c07f0abe5f498c3ef27f9c202f408906fae7b9fc607",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_map_update_v511.native.o",
+      "sha256": "0f1053a80531031c168b858dfa73ab1129a58e5423dd99c7f25d26d8d297d5b7",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_map_update_v53.native.o",
+      "sha256": "dc5f7a750ba0822b400bb942cec6949e70da7a299f45bea22b4053dad66f6369",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_execve_map_update_v61.native.o",
+      "sha256": "f45e98da6d2da156d68fe1c5b956941820297418648cc3c4344cd56eb9a88cac",
+      "atomics": {
+        "ldclral": 2
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_exit_v310.native.o",
+      "sha256": "7189782079be8b1af691e4cd701e8c03c582289d837f44444fa99511bac718c0",
+      "atomics": {
+        "ldaddal": 2
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_exit_v511.native.o",
+      "sha256": "a587db8b3e5fb8651d4e0a9a5a0060bebc184e99c8db338addacb6dbc8893b73",
+      "atomics": {
+        "ldaddal": 2
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_fork_v310.native.o",
+      "sha256": "eee134daac779d287c2f7a2bc7c569930cdd1076c0c4eb96eb0de4ab566f1ba7",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_fork_v511.native.o",
+      "sha256": "49ca30f2f87a7c4219088767b6fbb583fa304e55f78d3b5ef8bcfbfb3cf4cf9b",
+      "atomics": {
+        "ldaddal": 2
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fentry_v511.native.o",
+      "sha256": "69868529c0def4a74d0ed926f2d9c40a87e07c41a8c6fe68b2c9bd5e7d967b45",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fentry_v53.native.o",
+      "sha256": "6e8f5449b4a570206adc31fbf41919c507f252fd8c02aef9bcb9519a4f857723",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fentry_v61.native.o",
+      "sha256": "321d4312716dba95fc22e826bf647c2e55f9c8157e3fa0dd501acd05cdbc744a",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fexit_v511.native.o",
+      "sha256": "01ad36d62ed0dafdfe37f915d0a74c450cda4a090a3c0c218b03089687d3143a",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fexit_v53.native.o",
+      "sha256": "58ecd89b74c619ca449f424d5dde325349f445db6b9139c60063721cfce58270",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_fexit_v61.native.o",
+      "sha256": "41bf960afb26bef66cb6ecb6433facdf8d75ed55345bca2670729ea7b02aec8b",
+      "atomics": {
+        "ldaddal": 3
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_kprobe_v511.native.o",
+      "sha256": "3194595324ee90bf068ab427d2dbd0fe44116acecde7da41cb5efcd93023b180",
+      "atomics": {
+        "ldaddal": 8
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_kprobe_v53.native.o",
+      "sha256": "2758a98549181ce046cce7e145cc77d8b31d7650abbfb63831a131987c7f74f8",
+      "atomics": {
+        "ldaddal": 8
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_kprobe_v61.native.o",
+      "sha256": "ed4bbbee037aaf88569b1518f4dd7c546ee5a146f60ddeffb24c69de975fd646",
+      "atomics": {
+        "ldaddal": 5,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_core_v511.native.o",
+      "sha256": "7b8aaa8b9308a1967f5d25bd15ce58c00e5d31c3169d4c97a59b075555e83819",
+      "atomics": {
+        "ldaddal": 5
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "sha256": "283fcbd32a7bd484735a9d24aa37eacce7d0e71151e257c6e5f8984f58bfbec1",
+      "atomics": {
+        "ldaddal": 3,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+      "sha256": "be88404710171fd03295255262f4bb0c5cfece9d7dae91be0dc06cc96c99b922",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+      "sha256": "33c183e887b7c6eef3ff406d1b29202ece84b63a9869617967996a48d261d9ba",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+      "sha256": "15795c47eb773ced4c267f05f87aa8da8bbd6e96c9c8128f4f1300d99b81cfa8",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+      "sha256": "ee75a2f3d78797500527e42714c101c78ec4126b9201625968a6ac538d0fbe03",
+      "atomics": {}
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_output_v511.native.o",
+      "sha256": "6c385fc48a5b3786ec04e4569eeeb637ee27cd5be73ec69c587d4f0a233fc618",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_lsm_output_v61.native.o",
+      "sha256": "a15a5f24aaba8ffb99dd80959596665552a758611eb2892f64abc5f20202cc97",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_rawtp_v511.native.o",
+      "sha256": "31f78a5120fd6373a7efb210b6821d881e622ad4783f17844dd4b052f62de6ce",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_rawtp_v53.native.o",
+      "sha256": "9305c432345425604dee7e66540ed7aa2da32abdb6136003b7a5cb86ec294910",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_rawtp_v61.native.o",
+      "sha256": "0145b119739ba2abfae9646f8904f5f795d218603842c756341e99385a0dc68c",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retkprobe_v511.native.o",
+      "sha256": "0ab24300f31457b2145f8cc06ff179547bb7bc613d8b965b97d6a027dfe54d52",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retkprobe_v53.native.o",
+      "sha256": "b66e6e886e1370b930e38b6d760495a9d21f6204fe1bd03dec156a37bf56154a",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retkprobe_v61.native.o",
+      "sha256": "cec22672d6a6c10cc2069b0fb13094bb72e30d19ddda9d5fd6bb8ff24eb09b70",
+      "atomics": {
+        "ldaddal": 3
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retuprobe_v511.native.o",
+      "sha256": "d1009e3caa2d629b742c93bcd154346626e1bc5dae453b0bad7a63e0a1611c20",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retuprobe_v53.native.o",
+      "sha256": "87f1b8caa5c9cbc321d432af387cbba5cb60c37ea5a7d0541420399bc4816f0f",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_retuprobe_v61.native.o",
+      "sha256": "791c77d3b566c4d3b13ac4470401f607624d5ea48b93f05ab885b8b036746bac",
+      "atomics": {
+        "ldaddal": 3
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_tracepoint_v511.native.o",
+      "sha256": "8b8c9a5d6e6f7376afd4a7f5a67256f4a2128d8e63482b77860a21a18abade64",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_tracepoint_v53.native.o",
+      "sha256": "7a4a6df876dfaecb218f73fc6671f40f08b87fdf778db1898c7e69a7f9c520d4",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_tracepoint_v61.native.o",
+      "sha256": "0f583c0b58e5220bea791059bb9cddf0f9647937a7586a0d010e5bfe80216e51",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_uprobe_v511.native.o",
+      "sha256": "cb2ca3f39cdde6ccb2e8c7da50a2af38c19a9eb47922f8ec80828c688a7dc0ed",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_uprobe_v53.native.o",
+      "sha256": "e7b5a1df69f8e51dde9c018227960177a2cd72c95b8e3a2e921b341bcddb804d",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_uprobe_v61.native.o",
+      "sha256": "0c5ae8522d8fa3cb0f9c01ca510c79e6447ac7279512308ef3260cb0d5cd60a4",
+      "atomics": {
+        "ldaddal": 3,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_usdt_v511.native.o",
+      "sha256": "6278d3b22434bec1f7c89f67f2c07039d6ae5a1a88a94a69557137962fe6b3be",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_usdt_v53.native.o",
+      "sha256": "bedfb8c368f01b1c108e11fe88e02d9d6a3db849e7b3d8c6acfdc190f621499f",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_generic_usdt_v61.native.o",
+      "sha256": "f5cd0725b757cee2ebcc81975d1c3b60619a048cae066cf42398f49d7dd69579",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_loader_v511.native.o",
+      "sha256": "144d0abb8369d6113f3f7edb047a76b43c3e661a801d4b8473cd70ba67b537cb",
+      "atomics": {
+        "ldaddal": 1
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_kprobe_v511.native.o",
+      "sha256": "e2b39abebdb237f93b40342221b779e2d4f58d5b88dbcbd3b0e20425a5ffcedf",
+      "atomics": {
+        "ldaddal": 8
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_kprobe_v53.native.o",
+      "sha256": "3222cc539a1d81b497ab27e88f439e4fa24eebc084dbea501ea1b4f8f22c70ed",
+      "atomics": {
+        "ldaddal": 8
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_kprobe_v61.native.o",
+      "sha256": "e21dadd1a29da2daa597eef84d5100b71003bc98df48ebc747badeae3cfb6e72",
+      "atomics": {
+        "ldaddal": 5,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_retkprobe_v511.native.o",
+      "sha256": "19c7dfb89b562323dcdea6d74de34ca16735688a984efcfb0380bbc0bd0967f4",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_retkprobe_v53.native.o",
+      "sha256": "7553aa59ce9c8e7c92fbfdc58fe045aab6b99b87216be82d18cd5d3862247ae8",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_retkprobe_v61.native.o",
+      "sha256": "a385e77065335cdcee15d89641b0b4e6df0671a7054b61871abc641874f8b96a",
+      "atomics": {
+        "ldaddal": 3
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_retuprobe_v511.native.o",
+      "sha256": "614e8e9e10af57d705bbf9c953a482139a24954f6e2883962c43047d98be49f8",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_retuprobe_v61.native.o",
+      "sha256": "65aa32928415f07512f1410ddf2dd234faa738dfa731dd1959e921bfb3a318ff",
+      "atomics": {
+        "ldaddal": 3
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_uprobe_v511.native.o",
+      "sha256": "9f4d6d79a1abd6be933e8ba1928c075a7596c4e2f491ea08f7af8d45600c4624",
+      "atomics": {
+        "ldaddal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_uprobe_v61.native.o",
+      "sha256": "5ae319646402c1d8743f9822516bca2c65da09106e065f3fdcde2efa443d65a5",
+      "atomics": {
+        "ldaddal": 3,
+        "ldsetal": 4
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_usdt_v511.native.o",
+      "sha256": "83ec9e7132257954085dff301265c3e6cbd667b457cc63222aa3f623c4463427",
+      "atomics": {
+        "ldaddal": 6
+      }
+    },
+    {
+      "path": "kprog/arm64/build/lse-native/tetragon/bpf_multi_usdt_v61.native.o",
+      "sha256": "a154ad66e67dbee7f07e37f7ef2b5c6f0a1b6cd4f847bd52a43907e9ab4963b5",
+      "atomics": {
+        "ldaddal": 4,
+        "ldsetal": 4
+      }
+    }
+  ],
+  "atomic_counts": {
+    "ldaddal": 227,
+    "ldsetal": 44,
+    "ldclral": 2
+  }
+}
