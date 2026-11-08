@@ -164,6 +164,7 @@ static void drive_write(__s64 off, __u32 width, __u64 value)
 	__u64 got;
 	unsigned long i;
 
+	X86_SIM_L_DECLARE_STACK_VALUES();
 	X86_SIM_L_DECLARE_STACK();
 
 	fill_pattern(__x86_stack_mem.b, (unsigned long)X86_SIM_STACK_BYTES);
@@ -202,6 +203,7 @@ static void drive_leaves_tail(__s64 off, __u32 width, __u64 value)
 	unsigned n = width_bytes(width);
 	unsigned k;
 
+	X86_SIM_L_DECLARE_STACK_VALUES();
 	X86_SIM_L_DECLARE_STACK();
 
 	fill_pattern(__x86_stack_mem.b, (unsigned long)X86_SIM_STACK_BYTES);

@@ -1742,6 +1742,9 @@ def render_program(name: str, insns: list[NativeInsn],
     if has_stack:
         lines.append('#define X86_SIM_ENABLE_STACK 1')
         lines.append(f'#define X86_SIM_STACK_BYTES {max(1,(stack_bytes+7)//8*8)}U')
+    stack_storage = max(1, (stack_bytes + 7) // 8 * 8) if has_stack else 1
+    lines.append('#define X86_SIM_STACK_VALUE_WORDS(M) ' +
+                 ' '.join(f'M({i})' for i in range((stack_storage + 7) // 8)))
     if original_source is not None:
         lines.extend(['#define LICENSE __x86_original_license',
                       f'#include {json.dumps(str(original_source.resolve()))}',

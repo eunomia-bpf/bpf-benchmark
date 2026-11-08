@@ -106,6 +106,7 @@ static void check_stack(__s64 off, unsigned width, __u64 value)
 	if (index + bytes > X86_SIM_STACK_BYTES)
 		return;
 
+	X86_SIM_L_DECLARE_STACK_VALUES();
 	X86_SIM_L_DECLARE_STACK();
 	(void)__x86_stack_mem;
 

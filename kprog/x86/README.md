@@ -423,3 +423,22 @@ from the exact object offset. The compile-time base choice preserves the
 object identity; every remaining address uses the ordinary raw memory read.
 The [readonly-value measurements](../../corpus/results/kprog_app_coverage_20261108/readonly-values/README.md)
 retain byte observations, compiled artifacts and the whole-application frontier.
+
+Native stack pointer spills keep the architectural numeric bytes in the raw
+arena and a separate verifier-shaped pointer representative. Full-width MOV
+stores record a representative; overlapping stores discard its ghost fact.
+Full-width MOV loads still read the raw bytes, then recover the corresponding
+pointer representation when that saved fact remains valid. Numeric register
+reads translate stack representatives back to the original native address.
+The generator declares one named ghost cell per actual stack storage word so
+clang can remove unused cells before BPF stack allocation. Metadata offsets
+retain their value before the existing architectural address-opacity barrier;
+the actual memory access keeps the original address and barrier.
+
+Opaque helpers discard all stack ghost facts. Readonly map lookup and skb
+store-bytes calls retain facts in the caller's allocated frame and discard
+facts below its current SP; their original helper calls and raw bytes remain.
+These auxiliary representation facts follow native stores and lifetimes.
+The universal erasure/compiler and helper-frame obligations remain part of
+O2/O4; measured compiler, native CPU and verifier results retain their own
+domains in `corpus/results/kprog_app_coverage_20261108/stack-spill-values/`.
