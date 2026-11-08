@@ -110,5 +110,25 @@
     }
   },
   "production_status": "Candidate promotion follows the active H canonical helper epoch; private whole OTel consumes this frozen byte-arm profile.",
-  "interfaces": "Aligned word/pointer spill arm, provenance selector and raw context loads retain their existing contracts."
+  "interfaces": "Aligned word/pointer spill arm, provenance selector and raw context loads retain their existing contracts.",
+  "captured_native_only_safety": {
+    "publication": "94c23b60fa5a2a50a3055199b25f6b9a6b5735b9",
+    "runtime_epoch": "Captured module9a and kernel-kfunc runtime before design-only migration.",
+    "cases": 34,
+    "stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 16,
+      "loader_rejected": 1,
+      "specialization_rejected": 13
+    },
+    "unsafe_accepted": 0,
+    "unsafe_executed": 0,
+    "make_exit": 0,
+    "guest_exit": 0,
+    "compiler_exit": {
+      "pid": 386070,
+      "returncode": 0
+    },
+    "fresh_compiler_jobs": 21
+  }
 }
