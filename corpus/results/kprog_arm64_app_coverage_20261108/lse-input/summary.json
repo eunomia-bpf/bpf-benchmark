@@ -1,0 +1,114 @@
+{
+  "utc": "2026-11-08T08:00:13.318814+00:00",
+  "scope": "Existing complete upstream BCC vfsstat source; baseline compiler target compared with Armv8.1 LSE target on QEMU max / later hardware route",
+  "results": [
+    {
+      "label": "baseline",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "-o",
+        "bcc/libbpf-tools/arm64/vmlinux.h",
+        "ARCH=arm64",
+        "NATIVE_OUT=/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/baseline",
+        "NATIVE_ARCH_CFLAGS=-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x18 -ffixed-x26 -ffixed-x27 -ffixed-x28",
+        "NATIVE_SYS_INCLUDE_FLAGS=--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root -I/workspaces/repository/vendor/build/.bcc-libbpf/none/arm64/output -I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/baseline/bcc/vfsstat.native.o"
+      ],
+      "returncode": 0,
+      "object_sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+      "atomic_lines": [
+        "   8:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  10:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   8:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  10:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]",
+        "   c:\tc85f7d09 \tldxr\tx9, [x8]",
+        "  14:\tc80a7d09 \tstxr\tw10, x9, [x8]"
+      ],
+      "functions": [
+        "kprobe_vfs_read",
+        "kprobe_vfs_write",
+        "kprobe_vfs_fsync",
+        "kprobe_vfs_open",
+        "kprobe_vfs_create",
+        "fentry_vfs_read",
+        "fentry_vfs_write",
+        "fentry_vfs_fsync",
+        "fentry_vfs_open",
+        "fentry_vfs_create"
+      ],
+      "atomic_mnemonics": {
+        "ldxr": 10,
+        "stxr": 10
+      }
+    },
+    {
+      "label": "lse",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "-o",
+        "bcc/libbpf-tools/arm64/vmlinux.h",
+        "ARCH=arm64",
+        "NATIVE_OUT=/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/lse",
+        "NATIVE_ARCH_CFLAGS=-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x18 -ffixed-x26 -ffixed-x27 -ffixed-x28 -march=armv8.1-a+lse",
+        "NATIVE_SYS_INCLUDE_FLAGS=--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root -I/workspaces/repository/vendor/build/.bcc-libbpf/none/arm64/output -I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/lse/bcc/vfsstat.native.o"
+      ],
+      "returncode": 0,
+      "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+      "atomic_lines": [
+        "  10:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  10:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]",
+        "  14:\tf8290108 \tldadd\tx9, x8, [x8]"
+      ],
+      "functions": [
+        "kprobe_vfs_read",
+        "kprobe_vfs_write",
+        "kprobe_vfs_fsync",
+        "kprobe_vfs_open",
+        "kprobe_vfs_create",
+        "fentry_vfs_read",
+        "fentry_vfs_write",
+        "fentry_vfs_fsync",
+        "fentry_vfs_open",
+        "fentry_vfs_create"
+      ],
+      "atomic_mnemonics": {
+        "ldadd": 10
+      }
+    }
+  ],
+  "inputs": {
+    "vendor/bpf/bcc/libbpf-tools/vfsstat.bpf.c": "906a49977073624ce798f8a8195baec36845c0e4707dc2b253ec6c7177b04d3d",
+    "vendor/bpf/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+    "vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h": "542114e2d5d456ba323322a26c95b2a7e03160825baff790c6b9ba768d985f01"
+  },
+  "compiler_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+  "canonical_compiler_profile": "current baseline profile retained",
+  "runtime_acceptance": "generation, stock-verifier, native execution and whole-application outcomes follow LSE simulator coverage",
+  "runtime_admission_checks_added": 0
+}
