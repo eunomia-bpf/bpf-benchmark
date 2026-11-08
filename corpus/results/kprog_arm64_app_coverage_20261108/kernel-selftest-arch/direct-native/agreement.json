@@ -1,0 +1,155 @@
+{
+  "utc": "2026-11-08T21:58:09.506419+00:00",
+  "scope": "Complete direct ARM original native catalog; installed is a load-only stage; native execution records retain their own outcomes",
+  "epochs": [
+    {
+      "epoch": "full",
+      "publication": "d7acf79de08640c4e12441c2d2699036a61b24c4",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/full/summary.json",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 380,
+        "submitted": 357,
+        "installed": 61,
+        "verifier_rejected": 59,
+        "generation_failed": 237,
+        "compilation_failed": 0,
+        "resource_failed": 23,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 57,
+        "failure_agrees": 48,
+        "failure_installed": 9,
+        "success": 63,
+        "success_agrees": 52,
+        "success_installed": 52
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 57,
+          "installed": 9,
+          "verifier_rejected": 48,
+          "agrees": 48
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 63,
+          "installed": 52,
+          "verifier_rejected": 11,
+          "agrees": 52
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "size_not_bpf_dw",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_write",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_read",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_bad_type_match",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_untrusted_store_to_ref",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_indirect_global_func_access",
+          "stage": "installed"
+        },
+        {
+          "file": "test_global_func14.c",
+          "program": "global_func14",
+          "stage": "installed"
+        },
+        {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "stage": "installed"
+        }
+      ]
+    },
+    {
+      "epoch": "full-whole-resources",
+      "publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/full-whole-resources/summary.json",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 380,
+        "submitted": 342,
+        "installed": 56,
+        "verifier_rejected": 67,
+        "generation_failed": 219,
+        "compilation_failed": 0,
+        "resource_failed": 38,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 60,
+        "failure_agrees": 56,
+        "failure_installed": 4,
+        "success": 63,
+        "success_agrees": 52,
+        "success_installed": 52
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 60,
+          "installed": 4,
+          "verifier_rejected": 56,
+          "agrees": 56
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 63,
+          "installed": 52,
+          "verifier_rejected": 11,
+          "agrees": 52
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_read",
+          "stage": "installed"
+        },
+        {
+          "file": "test_global_func14.c",
+          "program": "global_func14",
+          "stage": "installed"
+        },
+        {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "stage": "installed"
+        }
+      ]
+    }
+  ]
+}

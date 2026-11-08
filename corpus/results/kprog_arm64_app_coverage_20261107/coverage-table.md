@@ -155,3 +155,7 @@ Each row retains the complete original two-start recipe, source epoch, raw servi
 | --- | ---: | ---: | ---: | --- |
 | OTel / ca76dc674 | 12 / 200310 | 3 / 3 / 2 | 1 | perf_unwind_native bpf_stack_extent |
 | Tracee / f77510715 | 151 / 79963 | 2 / 2 / 1 | 1 | sys_enter_init verifier_diagnostic |
+
+## Actual selected Tetragon V61 cohort
+
+Complete f3c999a715 records151baseline residents/30020BPF calls and5generated/compiled requests,4installed, followed by execve_send8193jumps/667530instructions6806states. The actual kernel nativeSHA2de9f398 selects original V61. Prepared paired V511 source objects and their component outcomes retain separate rows; paired V61 compilation follows the actual selected variant. [Variant accounting](../kprog_arm64_app_coverage_20261108/tetragon-source-length/application/actual-variant.json) and adjacent work-summary.json retain actual inputs/work counters.
