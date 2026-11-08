@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-08T03:25:10.918130+00:00",
+  "prior_prefix_commit": "75d635bea43f7725ecaef8005447529455c2587a",
+  "scope": "Universal PC routing for the actual exclusive load/nonflagADD/store/WstatusCBNZ sequence; failed four-instruction -12-byte branch returns the exact incoming PC with64-bit wrap.",
+  "new_theorems": [
+    "retry_suffix_core_pc",
+    "retry_prefix_core_pc",
+    "retry_cycle_failed_backedge",
+    "retry_cycle_canonical_failed_backedge"
+  ],
+  "source_files": 57,
+  "build_exit": 0,
+  "axiom_audits": 11,
+  "source_before_sha256": "64ed0586b3fd51a7d120276638a642a100ed6af5a2bd494edfa6c5ac7ed044c7",
+  "source_after_sha256": "8028b476b3df4e5aecf41b00eb2419fe18959b0ed94d0a091f587078e9030d25",
+  "prior_body_prefix_byte_exact": true,
+  "domain": "Arbitrary W/X width, registers, base, increment and full state; completed prefix load. Canonical transfer uses the established per-visit alignment, monitor/commit outcome and writable preflight domain.",
+  "production_interfaces": "Actual native decoding, code-label/CFG/source-PC binding, physical environment correspondence and scoped progress admission continue alongside the universal prefix laws."
+}

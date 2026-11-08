@@ -541,4 +541,66 @@ theorem retry_failure_prefix_fault (cycle : State → Transition State)
     retryFailurePrefix cycle (input :: rest) s = cycle { s with exclusiveInputs := input } := by
   simp only [retryFailurePrefix, continueWith, failed]
 
+/-- The real W-status branch selects the incoming native displacement on
+failure and advances by one instruction on success. -/
+theorem retry_suffix_core_pc (width : Width) (release failure : Bool)
+    (status : Gpr) (src base : Register) (displacement : Word) (s : State) :
+    (retrySuffixCore width release failure status src base displacement s).state.pc =
+      s.pc + 4 + (if failure then displacement else 4) := by
+  have statusValue := retry_status_refines width release failure status src base s
+  have faultNone : (storeCore width release failure status.castSucc src base s).fault = none := rfl
+  unfold retrySuffixCore
+  simp only [continueWith, faultNone, step, branchStep, statusValue, zeroBranch]
+  cases failure <;> simp [storeCore, narrow, Width.bits]
+
+/-- A successful load and the actual non-flag ADD advance by two instructions. -/
+theorem retry_prefix_core_pc (width : Width) (acquire sourceScalar sourceStack : Bool)
+    (value : Gpr) (base : Register) (increment : Word) (s : State)
+    (loadedValue : Word) (event : Event)
+    (loaded : Arm64Memory.read (accessWidth width) s.memory
+      (Arm64Memory.baseValue s base) = .ok (loadedValue, event)) :
+    (retryPrefixCore width acquire sourceScalar sourceStack value base increment s).fault = none ∧
+      (retryPrefixCore width acquire sourceScalar sourceStack value base increment s).state.pc =
+        s.pc + 4 + 4 := by
+  simp [retryPrefixCore, loadCore, loaded, continueWith,
+    Arm64Arithmetic.AluDispatch.raw_step_refines, arithmeticImmediateStep, writeData,
+    Arm64Register.write_refines]
+
+/-- The encoded four-instruction retry displacement returns a failed visit
+to its exact original PC, including64-bit wrapping addresses. -/
+theorem retry_cycle_failed_backedge (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment : Word) (s : State)
+    (loadedValue : Word) (event : Event)
+    (loaded : Arm64Memory.read (accessWidth width) s.memory
+      (Arm64Memory.baseValue s base) = .ok (loadedValue, event)) :
+    (retryCycleCore width acquire release true sourceScalar sourceStack status value
+      base increment (0xfffffffffffffff4 : Word) s).state.pc = s.pc := by
+  have prefixFacts := retry_prefix_core_pc width acquire sourceScalar sourceStack
+    value base increment s loadedValue event loaded
+  unfold retryCycleCore
+  simp only [continueWith, prefixFacts.1]
+  rw [retry_suffix_core_pc, prefixFacts.2]
+  simp only [if_true]
+  bv_decide
+
+/-- Existing per-visit platform witnesses transfer the exact backedge PC
+equality to the canonical load/ADD/store/W-status branch sequence. -/
+theorem retry_cycle_canonical_failed_backedge (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment : Word) (s : State)
+    (loadedValue : Word) (event : Event)
+    (loaded : Arm64Memory.read (accessWidth width) s.memory
+      (Arm64Memory.baseValue s base) = .ok (loadedValue, event))
+    (admitted : RetryFailureDomain width acquire value base increment s) :
+    (retryCycle width acquire release status value base increment
+      (0xfffffffffffffff4 : Word) s).state.pc = s.pc := by
+  have refined := retry_cycle_refines width acquire release true sourceScalar sourceStack
+    status value base increment (0xfffffffffffffff4 : Word) s
+    admitted.loadSp admitted.loadAligned (by simp only [admitted.failed]; rfl)
+    admitted.storeSp admitted.storeAligned admitted.preflight
+  rw [← refined]
+  exact retry_cycle_failed_backedge width acquire release sourceScalar sourceStack
+    status value base increment s loadedValue event loaded
+
 end KProgFormal.Refinement.Arm64Exclusive
