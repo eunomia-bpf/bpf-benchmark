@@ -24,8 +24,8 @@ of the same run. Nothing here is a new instrument.
    candidates ranked** by the share of cilium's BPF time each covers.
 
 Apps: katran, cilium, tetragon, tracee and bcc. The bcc figures come from
-`corpus/results/x86_kvm_corpus_20261108_064411_793882`, since the earlier
-bcc runs were cleaned up.
+`corpus/results/x86_kvm_corpus_20261108_232046_843736`, the latest run with
+a `bcc__set` result (`verified_native_loader`, `status ok`).
 
 ## Per-app totals, both arms
 
@@ -35,7 +35,7 @@ bcc runs were cleaned up.
 | cilium | 56 / 709,171,424 / 486.08 s | 62 / 871,897,274 / **362.42 s** |
 | tetragon | 287 / 2,879,686,552 / 2154.86 s | 287 / 2,922,788,905 / 2149.11 s |
 | tracee | 151 / 6,882,600,114 / 2516.27 s | 151 / 10,649,242,958 / **2158.43 s** |
-| bcc | 17 / 15,350,615 / 2.40 s | 17 / 15,196,843 / 2.42 s |
+| bcc | 17 / 15,427,359 / 2.44 s | 17 / 16,131,704 / 2.35 s |
 
 Read with the workload ratios in `kprog_reproduction_20261106/`:
 
@@ -634,6 +634,16 @@ way: 417,660 instructions, 34,119 call sites.
 
 The same measurement on the four applications the task names, so the
 candidate order can be read per application rather than assumed shared:
+
+Each column is the arm the task names for it, read from the run's own
+`rejit_result.mode`:
+
+| app | arm | run |
+| --- | --- | --- |
+| katran | verified (`verified_native_loader`) | `x86_kvm_corpus_20261108_225903_195940` |
+| bcc | verified | `x86_kvm_corpus_20261108_232046_843736` |
+| cilium | direct (`native_loader`) | `x86_kvm_corpus_20261107_020659_029387` |
+| tracee | direct (`native_loader`) | `x86_kvm_corpus_20261107_041920_105442` |
 
 | category | cilium | katran | bcc | tracee |
 | --- | ---: | ---: | ---: | ---: |
