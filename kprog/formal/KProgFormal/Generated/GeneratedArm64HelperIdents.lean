@@ -51,6 +51,7 @@ inductive Helper
   | bpf_map_pop_elem
   | bpf_sk_fullsock
   | bpf_skc_lookup_tcp
+  | bpf_strtol
   | bpf_send_signal
   | bpf_probe_read_user
   | bpf_probe_read_kernel
@@ -68,6 +69,7 @@ inductive Helper
   | bpf_get_current_task_btf
   | bpf_ktime_get_coarse_ns
   | bpf_ima_inode_hash
+  | bpf_check_mtu
   | bpf_get_func_ip
   | bpf_get_attach_cookie
   | bpf_task_pt_regs
@@ -133,6 +135,7 @@ def id : Helper -> Nat
   | .bpf_map_pop_elem => 88
   | .bpf_sk_fullsock => 95
   | .bpf_skc_lookup_tcp => 99
+  | .bpf_strtol => 105
   | .bpf_send_signal => 109
   | .bpf_probe_read_user => 112
   | .bpf_probe_read_kernel => 113
@@ -150,6 +153,7 @@ def id : Helper -> Nat
   | .bpf_get_current_task_btf => 158
   | .bpf_ktime_get_coarse_ns => 160
   | .bpf_ima_inode_hash => 161
+  | .bpf_check_mtu => 163
   | .bpf_get_func_ip => 173
   | .bpf_get_attach_cookie => 174
   | .bpf_task_pt_regs => 175
@@ -214,6 +218,7 @@ def name : Helper -> String
   | .bpf_map_pop_elem => "bpf_map_pop_elem"
   | .bpf_sk_fullsock => "bpf_sk_fullsock"
   | .bpf_skc_lookup_tcp => "bpf_skc_lookup_tcp"
+  | .bpf_strtol => "bpf_strtol"
   | .bpf_send_signal => "bpf_send_signal"
   | .bpf_probe_read_user => "bpf_probe_read_user"
   | .bpf_probe_read_kernel => "bpf_probe_read_kernel"
@@ -231,6 +236,7 @@ def name : Helper -> String
   | .bpf_get_current_task_btf => "bpf_get_current_task_btf"
   | .bpf_ktime_get_coarse_ns => "bpf_ktime_get_coarse_ns"
   | .bpf_ima_inode_hash => "bpf_ima_inode_hash"
+  | .bpf_check_mtu => "bpf_check_mtu"
   | .bpf_get_func_ip => "bpf_get_func_ip"
   | .bpf_get_attach_cookie => "bpf_get_attach_cookie"
   | .bpf_task_pt_regs => "bpf_task_pt_regs"

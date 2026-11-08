@@ -1,6 +1,9 @@
 #define ARM64_SIM_ENABLE_STACK 1
 #define ARM64_SIM_STACK_BIAS 64LL
 #define ARM64_SIM_STACK_BYTES 64U
+#define ARM64_SIM_STACK_PAYLOAD_WORDS 1U
+#define ARM64_SIM_L_STACK_PAYLOAD_LOAD(INDEX) (__a64_stack_payload[(0ULL)])
+#define ARM64_SIM_L_STACK_PAYLOAD_STORE(INDEX, VALUE) do { __a64_stack_payload[(0ULL)] = (VALUE); } while (0)
 #include "../arm64_sim_local_bpf.h"
 
 SEC("xdp")

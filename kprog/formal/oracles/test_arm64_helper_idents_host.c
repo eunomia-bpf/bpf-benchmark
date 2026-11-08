@@ -2,12 +2,12 @@
  * Host cross-check for the AArch64 artifact encoder's BPF helper-ident
  * table contract (`generated/arm64_helper_idents.h`).
  *
- * The module under test fixes the 75 kernel ids the AArch64 simulator
+ * The module under test fixes the 82 kernel ids the AArch64 simulator
  * recognizes (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`,
  * `HELPER_IDENTS`), maps each id to its 1-based position in the id-sorted
  * table. Each helper invokes its actual Linux ID, without aliases.
  *
- * This oracle restates the 75 row ids, names, and ordinals, the out-of-range
+ * This oracle restates the 82 row ids, names, and ordinals, the out-of-range
  * default and count by hand and drives the
  * generated macros and `_Static_assert`s against them. The generated
  * `_Static_assert`s run at compile time; this oracle is the value-level
@@ -26,19 +26,19 @@
 static int failures;
 static unsigned long cases;
 
-/* The 77 row kernel ids, in the specification's id-sorted order. */
-static const int row_ids[80] = {
+/* The 82 row kernel ids, in the specification's id-sorted order. */
+static const int row_ids[82] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 	11, 12, 13, 14, 15, 16, 20, 21, 23, 25, 26,
 	27, 28, 31, 32, 33, 35, 36, 37, 38, 39, 43,
-	44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109,
+	44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 105, 109,
 	112, 113, 114, 115, 118, 122, 124, 125, 127, 130, 148, 152,
-	155, 158, 160, 161, 173, 174, 175, 181, 183, 184, 185, 186, 188, 189, 190, 191, 193,
+	155, 158, 160, 161, 163, 173, 174, 175, 181, 183, 184, 185, 186, 188, 189, 190, 191, 193,
 	195,
 };
 
 /* The helper name each row kernel id denotes, in specification order. */
-static const char *const row_names[80] = {
+static const char *const row_names[82] = {
 	"bpf_map_lookup_elem", "bpf_map_update_elem",
 	"bpf_map_delete_elem", "bpf_probe_read",
 	"bpf_ktime_get_ns", "bpf_trace_printk",
@@ -58,13 +58,13 @@ static const char *const row_names[80] = {
 	"bpf_get_socket_cookie", "bpf_skb_adjust_room", "bpf_xdp_adjust_meta", "bpf_override_return",
 	"bpf_xdp_adjust_tail", "bpf_get_stack",
 	"bpf_skb_load_bytes_relative", "bpf_fib_lookup",
-	"bpf_get_current_cgroup_id", "bpf_sk_lookup_udp", "bpf_sk_release", "bpf_map_push_elem", "bpf_map_pop_elem", "bpf_sk_fullsock", "bpf_skc_lookup_tcp", "bpf_send_signal",
+	"bpf_get_current_cgroup_id", "bpf_sk_lookup_udp", "bpf_sk_release", "bpf_map_push_elem", "bpf_map_pop_elem", "bpf_sk_fullsock", "bpf_skc_lookup_tcp", "bpf_strtol", "bpf_send_signal",
 	"bpf_probe_read_user", "bpf_probe_read_kernel",
 	"bpf_probe_read_user_str", "bpf_probe_read_kernel_str",
 	"bpf_jiffies64", "bpf_get_netns_cookie",
 	"bpf_sk_assign", "bpf_ktime_get_boot_ns", "bpf_seq_write", "bpf_ringbuf_output",
 	"bpf_copy_from_user", "bpf_redirect_neigh",
-	"bpf_redirect_peer", "bpf_get_current_task_btf", "bpf_ktime_get_coarse_ns", "bpf_ima_inode_hash", "bpf_get_func_ip",
+	"bpf_redirect_peer", "bpf_get_current_task_btf", "bpf_ktime_get_coarse_ns", "bpf_ima_inode_hash", "bpf_check_mtu", "bpf_get_func_ip",
 	"bpf_get_attach_cookie", "bpf_task_pt_regs", "bpf_loop",
 	"bpf_get_func_arg", "bpf_get_func_ret",
 	"bpf_get_func_arg_cnt", "bpf_get_retval",
@@ -75,7 +75,7 @@ static const char *const row_names[80] = {
 	"bpf_map_lookup_percpu_elem",
 };
 
-#define ROW_COUNT 80U
+#define ROW_COUNT 82U
 
 /* The generated row selector must return each row kernel id's ordinal. */
 static void check_rows(void)

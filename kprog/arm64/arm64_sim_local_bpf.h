@@ -1975,6 +1975,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define ARM64_SIM_BPF_CALL_bpf_skc_lookup_tcp() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
+#define ARM64_SIM_BPF_CALL_bpf_strtol() \
+    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_strtol((const char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (unsigned long)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (long *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(long), 0); } while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_send_signal() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)ARM64_SIM_L_READ_REG(ARM64_X0)))
 
@@ -2025,6 +2028,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define ARM64_SIM_BPF_CALL_bpf_ima_inode_hash() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_inode_hash((struct inode *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+
+#define ARM64_SIM_BPF_CALL_bpf_check_mtu() \
+    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_check_mtu((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u32 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__s32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); if ((__s64)ARM64_SIM_L_READ_REG(ARM64_X0) >= 0) ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(__u32), 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ip() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))

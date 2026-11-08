@@ -1,0 +1,183 @@
+{
+  "utc": "2026-11-08T11:13:27.062601+00:00",
+  "scope": "AArch64 helper105/163 source and compilation coverage",
+  "helper_ids": [
+    105,
+    163
+  ],
+  "helper_table_rows": 82,
+  "identity_host_cases": 84,
+  "typed_abi_and_output_cases": 164,
+  "ubsan_exit": 0,
+  "lean_components": [
+    "KProgFormal.Generated.GeneratedArm64HelperIdents",
+    "KProgFormal.Arm64HelperIdents"
+  ],
+  "component_make_exit": 0,
+  "micro_make_exit": 0,
+  "micro_programs": 29,
+  "negative_programs": 1,
+  "upstream_programs": [
+    {
+      "file": "verifier_const.c",
+      "program": "tcx1",
+      "annotation": "failure",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx1/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx1/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx1/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx1",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx2",
+      "annotation": "success",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx2/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx2/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx2/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx2",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx3",
+      "annotation": "success",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx3/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx3/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx3/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx3",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx4",
+      "annotation": "failure",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx4/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx4/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx4/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx4",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx5",
+      "annotation": "success",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx5/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx5/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx5/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx5",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx6",
+      "annotation": "success",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx6/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx6/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx6/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx6",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "tcx7",
+      "annotation": "failure",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx7/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx7/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tcx7/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tcx7",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    },
+    {
+      "file": "verifier_mtu.c",
+      "program": "tc_uninit_mtu",
+      "annotation": "success",
+      "section": "tc/ingress",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tc_uninit_mtu/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tc_uninit_mtu/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/tc_uninit_mtu/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tc_uninit_mtu",
+        "native_sha256": "0194167ae946ff9d0c68019c23bbb99e0a707a991c4246c4c46f6f2aba440ebc"
+      }
+    },
+    {
+      "file": "verifier_const.c",
+      "program": "BPF_PROG",
+      "annotation": "failure",
+      "section": "lsm.s/bprm_committed_creds",
+      "entry": "bprm",
+      "stage": "generated_compiled",
+      "artifact": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/BPF_PROG/generated/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/BPF_PROG/generated/trusted_arm64.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-helpers/upstream/BPF_PROG/generated/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "bprm",
+        "native_sha256": "abbe84ef7f4353291566caa397cd081b611a5beb2b1a2a19c0022011345381c4"
+      }
+    }
+  ],
+  "source_sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "26c6606d10ab603092339c1595f243ce7cdc2566459842308c737f3e886942b4",
+    "kprog/formal/contracts/arm64_helper_idents_spec.json": "0e691a1d7644eb3e257652c8fa3b48b19fc701eb942541d0d4f38942e79d613a",
+    "kprog/formal/tools/generate_arm64_helper_idents_spec.py": "16cd4fafdd756f27cafff1e44f2fdea4a5c7005ecd14c4d978943f75fd6e76af",
+    "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "5b07d12dbe2121de121155147fd3693236aad2d6684499fe73f5c36d8e4ae7c6",
+    "kprog/formal/oracles/test_arm64_helper_idents_host.c": "89ae539553b4790d37643dca0650f4ac344f32643ee21bf2c1a50b4dfee94163",
+    "kprog/formal/oracles/test_arm64_helper_call_host.c": "6b4fd46d28f5d6331f8f88af04865e39c0115e07c8be47d820a38c5b35e9156a",
+    "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "ecc46fa0cd9a497ee9c2e2c3fb1159c437f2cab5e5952c507fb7e8c215ee8552",
+    "kprog/formal/generated/arm64_helper_idents.h": "e305e214862ba09776aee13b4b5465c38c5949f3f2d55b6181f57e45a3c9fdd8",
+    "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "31d474cb358b5a4dc4053b9b1d4d13e26a2443a7807870b77b11ff3c13541316",
+    "kprog/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c": "66cc054672a39ff5335f550421e11226f4f5e42b3216897bb8a962c6179c9281",
+    "kprog/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c": "233b928b2cf264df271575f8408ecb6eef69b809e9092cf1eb4cb17cd08ae812",
+    "kprog/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c": "ea713df443ce69aa8243e315f20650e730670f434430a114c028084755c5a3cb",
+    "kprog/arm64/micro-prog/packed_header_bitfield_decode.bpf.c": "4719d2bf5928a0b3db67b4cb3fe3cf5dbd7ca63e4e8a03c7ef2e49e21b9f024c",
+    "kprog/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c": "e22d04d6c57a8a865cb4027007d0cf3ce64db4f2ef766fe0a77ff0fba0ca6002",
+    "kprog/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c": "aeb32a63acfe1ceb5bc313a56f10e460ae98c07ba815c95defb4c4b30361328c",
+    "kprog/arm64/README.md": "7d8489d134e9df3068b0e5d0769d53d804aaf3ac4e9dfd21f388bc5fa86a6b5f"
+  },
+  "formal_full": {
+    "owner": "V",
+    "latest_closed_source": "a8b58dfae75a8b8827c5189711c4599a59070704",
+    "make_exit": 2,
+    "frontier": "Existing x86 MOV_LOAD SKB fixture ABI-base setup; V owns the collected suffix and next full run"
+  },
+  "runtime_scope": "Existing application snapshots retain their captured helper epoch; actual kernel annotation comparison belongs to R direct-submission sweep"
+}

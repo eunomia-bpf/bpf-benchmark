@@ -57,6 +57,7 @@ typedef signed int __s32;
 #define bpf_map_pop_elem bpf_map_pop_elem_defs
 #define bpf_sk_fullsock bpf_sk_fullsock_defs
 #define bpf_skc_lookup_tcp bpf_skc_lookup_tcp_defs
+#define bpf_strtol bpf_strtol_defs
 #define bpf_send_signal bpf_send_signal_defs
 #define bpf_probe_read_user bpf_probe_read_user_defs
 #define bpf_probe_read_kernel bpf_probe_read_kernel_defs
@@ -74,6 +75,7 @@ typedef signed int __s32;
 #define bpf_get_current_task_btf bpf_get_current_task_btf_defs
 #define bpf_ktime_get_coarse_ns bpf_ktime_get_coarse_ns_defs
 #define bpf_ima_inode_hash bpf_ima_inode_hash_defs
+#define bpf_check_mtu bpf_check_mtu_defs
 #define bpf_get_func_ip bpf_get_func_ip_defs
 #define bpf_get_attach_cookie bpf_get_attach_cookie_defs
 #define bpf_task_pt_regs bpf_task_pt_regs_defs
@@ -135,6 +137,7 @@ typedef signed int __s32;
 #undef bpf_map_pop_elem
 #undef bpf_sk_fullsock
 #undef bpf_skc_lookup_tcp
+#undef bpf_strtol
 #undef bpf_send_signal
 #undef bpf_probe_read_user
 #undef bpf_probe_read_kernel
@@ -152,6 +155,7 @@ typedef signed int __s32;
 #undef bpf_get_current_task_btf
 #undef bpf_ktime_get_coarse_ns
 #undef bpf_ima_inode_hash
+#undef bpf_check_mtu
 #undef bpf_get_func_ip
 #undef bpf_get_attach_cookie
 #undef bpf_task_pt_regs
@@ -168,6 +172,8 @@ typedef signed int __s32;
 #define RETURN_BITS 0xfedcba9876543210ULL
 static unsigned failures, calls, seen_id, cases, helper_id;
 static __u64 expected[5];
+static long output_result = (long)RETURN_BITS;
+static int output_memory;
 static __u64 value_for(unsigned i) { return 0x98765432fedcba00ULL + i; }
 static void check_arg(unsigned index, __u64 got) {
     if (got != expected[index]) {
@@ -624,6 +630,17 @@ static struct bpf_sock * bpf_skc_lookup_tcp(void * arg0, struct bpf_sock_tuple *
     return (struct bpf_sock *)(unsigned long)RETURN_BITS;
 }
 
+static long bpf_strtol(const char * arg0, unsigned long arg1, __u64 arg2, long * arg3)
+{
+    seen_id = 105; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    check_arg(1, (__u64)arg1);
+    check_arg(2, arg2);
+    check_arg(3, (__u64)(unsigned long)arg3);
+    if (output_memory) *arg3 = output_result < 0 ? 0 : 42;
+    return output_result;
+}
+
 static long bpf_send_signal(__u32 arg0)
 {
     seen_id = 109; calls++;
@@ -764,6 +781,18 @@ static long bpf_ima_inode_hash(struct inode * arg0, void * arg1, __u32 arg2)
     check_arg(1, (__u64)(unsigned long)arg1);
     check_arg(2, (__u64)(unsigned long)arg2);
     return (long)(unsigned long)RETURN_BITS;
+}
+
+static long bpf_check_mtu(void * arg0, __u32 arg1, __u32 * arg2, __s32 arg3, __u64 arg4)
+{
+    seen_id = 163; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    check_arg(1, (__u64)arg1);
+    check_arg(2, (__u64)(unsigned long)arg2);
+    check_arg(3, (__u64)(unsigned long)arg3);
+    check_arg(4, arg4);
+    if (output_memory && output_result >= 0) *arg2 = 1500;
+    return output_result;
 }
 
 static __u64 bpf_get_func_ip(void * arg0)
@@ -1079,6 +1108,11 @@ static void run(unsigned stack_mode) {
         expected[2] = (__u64)(unsigned long)(__u32)value_for(2);
         expected[3] = (__u64)(unsigned long)(__u64)value_for(3);
         expected[4] = (__u64)(unsigned long)(__u64)value_for(4););
+    helper_id=105; CHECK_HELPER(bpf_strtol, long, 9, ARM64_SIM_TAG_SCALAR, -1,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
+        expected[1] = (unsigned long)value_for(1);
+        expected[2] = value_for(2);
+        expected[3] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(3););
     helper_id=109; CHECK_HELPER(bpf_send_signal, long, 0, ARM64_SIM_TAG_SCALAR, -1,
         expected[0] = (__u64)(unsigned long)(__u32)value_for(0););
     helper_id=112; CHECK_HELPER(bpf_probe_read_user, long, 5, ARM64_SIM_TAG_SCALAR, 1,
@@ -1141,6 +1175,12 @@ static void run(unsigned stack_mode) {
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
         expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
         expected[2] = (__u64)(unsigned long)(__u32)value_for(2););
+    helper_id=163; CHECK_HELPER(bpf_check_mtu, long, 5, ARM64_SIM_TAG_SCALAR, -1,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
+        expected[1] = (__u32)value_for(1);
+        expected[2] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(2);
+        expected[3] = (__u64)(unsigned long)(__s32)value_for(3);
+        expected[4] = value_for(4););
     helper_id=173; CHECK_HELPER(bpf_get_func_ip, __u64, 1, ARM64_SIM_TAG_SCALAR, -1,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
     helper_id=174; CHECK_HELPER(bpf_get_attach_cookie, __u64, 1, ARM64_SIM_TAG_SCALAR, -1,
@@ -1178,8 +1218,43 @@ static void run(unsigned stack_mode) {
         expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
         expected[2] = (__u64)(unsigned long)(__u32)value_for(2););
 }
+/* Kernel helpers.c clears strtol output on errors; filter.c writes MTU
+ * on nonnegative returns. Preserve adjacent bytes and private pointer tags. */
+static void run_output_effects(void) {
+    struct xdp_md ctx={0};
+    const long returns[]={-22,0,2};
+    output_memory=1;
+    for (unsigned id=105; id<=163; id+=58) {
+        for (unsigned r=0; r<3; r++) {
+            ARM64_SIM_ENTRY_XDP(&ctx);
+            const unsigned slot=(ARM64_SIM_STACK_BIAS-16)/8;
+            for (unsigned i=0;i<16;i++) __a64_stack.b[slot*8+i]=0xa5;
+            ARM64_SIM_L_TAG_SET(slot,ARM64_SIM_TAG_STACK);
+            ARM64_SIM_L_TAG_SET(slot+1,ARM64_SIM_TAG_RETURN);
+            ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0,1,ARM64_WIDTH_64);
+            ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1,8,ARM64_WIDTH_64);
+            ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X2,0,ARM64_WIDTH_64);
+            ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X3,0,ARM64_WIDTH_64);
+            ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X4,0,ARM64_WIDTH_64);
+            ARM64_SIM_L_WRITE_REG_PTR_TAG(id==105?ARM64_X3:ARM64_X2,(void *)-16L,ARM64_SIM_TAG_STACK);
+            expected[0]=1; expected[1]=8; expected[2]=0; expected[3]=0; expected[4]=0;
+            expected[id==105?3:2]=(__u64)(unsigned long)&__a64_stack.b[slot*8];
+            calls=0; output_result=returns[r];
+            if (id==105) { ARM64_SIM_BPF_CALL_bpf_strtol(); }
+            else { ARM64_SIM_BPF_CALL_bpf_check_mtu(); }
+            const unsigned written=id==105?8:(output_result>=0?4:0);
+            const __u64 value=id==105?(output_result<0?0:42):1500;
+            for (unsigned i=0;i<16;i++)
+                if (__a64_stack.b[slot*8+i]!=(i<written?(__u8)(value>>(i*8)):0xa5)) failures++;
+            if (calls!=1 || seen_id!=id || ARM64_SIM_L_READ_REG(ARM64_X0)!=(__u64)output_result ||
+                ARM64_SIM_L_TAG_GET(slot)!=(written?ARM64_SIM_TAG_SCALAR:ARM64_SIM_TAG_STACK) ||
+                ARM64_SIM_L_TAG_GET(slot+1)!=ARM64_SIM_TAG_RETURN) failures++;
+            cases++;
+        }
+    }
+}
 int main(void) {
-    run(0); run(1);
+    run(0); run(1); run_output_effects();
     printf("arm64 real helper ABI: %u cases, %u failures\n", cases, failures);
     return failures != 0;
 }

@@ -5,6 +5,9 @@
 #define ARM64_SIM_ENABLE_STACK 1
 #define ARM64_SIM_STACK_BIAS 80LL
 #define ARM64_SIM_STACK_BYTES 80U
+#define ARM64_SIM_STACK_PAYLOAD_WORDS 1U
+#define ARM64_SIM_L_STACK_PAYLOAD_LOAD(INDEX) (__a64_stack_payload[(((__u64)(INDEX) > 0ULL))])
+#define ARM64_SIM_L_STACK_PAYLOAD_STORE(INDEX, VALUE) do { __a64_stack_payload[(((__u64)(INDEX) > 0ULL))] = (VALUE); } while (0)
 #define ARM64_SIM_RETURN_CASES \
 	case 0x8cULL: goto arm64_l_8c; \
 	case 0xe8ULL: goto arm64_l_e8; \
