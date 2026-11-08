@@ -18,7 +18,7 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 3/75 | 0/71 |
-| Pointer-load body model / prefix equality | 2/75 | 0/71 |
+| Pointer-load body model / composed step (ordinary GPRs) | 2/75 | 0/71 |
 | O2 C-model token-body equality | 68/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
@@ -34,7 +34,9 @@ remains partial while the outer invocation, low32RAX/context copy and linked
 continuation relations are connected. Eight pseudo operations require
 environment/native-link binding. Two pointer-load direct bodies additionally
 have complete raw-frame/tag equality through their production prefix; the
-ordinary extended dispatcher retains its66-token scope. ARM conditional
+extended dispatcher now composes all68 C-model token bodies and the partial
+internal RET body. The full tag map and numeric STACK predicate preserve
+their agreement through both pointer loads. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
 immediate-body gate through unified ExecBinding, source and invocation emission.
@@ -4443,3 +4445,31 @@ retained under `full_make_check_cdca2680d_failure`. The fixture now seeds its
 existing helper ABI base from the same declared ABI pointer: captured old1
 and fixed0 retain all15 values/tags and expected results. The successor full
 check keeps its own source identity and actual outcome.
+
+### Pointer bodies through the shared dispatcher
+
+Eight universal laws connect map-pointer/helper-ID bodies to the extended
+numeric dispatcher and token step, preserving every preceding scalar, memory,
+control and internal-return arm. The new provenance law preserves agreement
+between the complete tag map and the numeric STACK predicate. Arbitrary AUX,
+FLAGS, ignored fields, current labels and initial frames retain their stated
+domains. The canonical pointer move uses ordinary destination GPRs and the
+supplied resolved coordinate; native symbol/helper address transport, RSP
+normalization and physical memory/compiler/ABI interfaces remain explicit.
+C-model body coverage stays68 x86 and71 ARM, with68 complete x86 body routes
+now composed through the extended dispatcher and a separate partial RET route.
+
+The default Lean build, eight public axiom audits and existing proof/macro
+hygiene and oracle-composition checks exit0. This mathematical composition
+reuses the source-pinned2097152 production pointer frames and1342 retained
+contract cases from `x86_pointer_load_tokens`; their C source remains the
+published d816e27e8 oracle and db581dd6d production dependencies. The formal
+README is reduced from1602 to459 words, linking detailed scopes and source
+receipts in this ledger and the theorem statements.
+
+The immutable db581dd6d full check exited2 at its earlier ARM entry-context
+fixture's missing helper ABI base, preserving two SKB tag diagnostics and all
+1171 Git source hashes. Its full log, exit and retired-export receipt remain
+under `full_make_check_db581dd6d_failure`; the corrected d816e27e8 full check
+continues with its own source identity. Exact new sources, commands and
+original elaboration diagnostics are archived under `x86_pointer_dispatcher`.
