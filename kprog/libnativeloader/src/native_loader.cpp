@@ -1065,8 +1065,11 @@ std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
             fail("native_kernel bound proof contains a kinsn sidecar at instruction " +
                  std::to_string(i));
         }
+        const bool vmlinux_kfunc = insn.code == (BPF_JMP | BPF_CALL) &&
+            insn.src_reg == BPF_PSEUDO_KFUNC_CALL && !insn.dst_reg &&
+            !insn.off && insn.imm > 0;
         if ((cls == BPF_JMP || cls == BPF_JMP32) &&
-            BPF_OP(insn.code) == BPF_CALL && insn.src_reg) {
+            BPF_OP(insn.code) == BPF_CALL && insn.src_reg && !vmlinux_kfunc) {
             fail("native proof call has an unresolved function identity at instruction " +
                  std::to_string(i));
         }

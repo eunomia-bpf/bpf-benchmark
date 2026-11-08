@@ -1,0 +1,44 @@
+{
+  "cases": 12002,
+  "pseudo_call_field_cases": 12000,
+  "helpers": 2,
+  "scope": "Builder call-field classification and exact byte/exit transport; kernel BTF/type admission remains the actual load boundary.",
+  "results": {
+    "before": {
+      "command": [
+        "c++",
+        "-std=c++20",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "/workspaces/.agent-state/kprog-lanes/A/kfunc-arm-build/guard-before.cpp",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/kfunc-arm-build/guard-before"
+      ],
+      "returncode": 1,
+      "stdout": "field mismatch 133/0/2/0/1\n",
+      "stderr": "",
+      "source_sha256": "30c23f3541454e5672d36f16fd5c532ca02c67a01631daa0096f7ba5e77928ca",
+      "extracted_function_sha256": "0133f3aa7bc2970451d7565503210d38948b63f900c6338a635e7eefe8bf79ef"
+    },
+    "current": {
+      "command": [
+        "c++",
+        "-std=c++20",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "/workspaces/.agent-state/kprog-lanes/A/kfunc-arm-build/guard-current.cpp",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/kfunc-arm-build/guard-current"
+      ],
+      "returncode": 0,
+      "stdout": "bound-call field checks=12002 canonical-or-helper=4 refused=11998\n",
+      "stderr": "",
+      "source_sha256": "11a97581cfda0d34847093c8a1db55dd934898d7ee1b8b3f1f3a9fccbd338a54",
+      "extracted_function_sha256": "1799f415dcdc27c12376137722858c088387ad1d388c0f9db7ccf6da8d980148"
+    }
+  }
+}

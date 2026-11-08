@@ -1,0 +1,54 @@
+{
+  "utc": "2026-11-08T00:42:54.171959+00:00",
+  "generic_kfunc_source": "8cf05d44d",
+  "old_prefix": "kprog/libnativeloader/build-arm64-entry-resources",
+  "output_prefix": "kprog/libnativeloader/build-arm64-kfunc-resources",
+  "source_pins": {
+    "kprog/libnativeloader/src/native_data_layout.hpp": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
+    "kprog/libnativeloader/src/native_environment_binding.hpp": "e0e8bbc32b1df870b7620ee9dc0c09f7a5adfbd43879d9ff8086ca47d3b961ee",
+    "kprog/libnativeloader/src/native_loader.cpp": "11a97581cfda0d34847093c8a1db55dd934898d7ee1b8b3f1f3a9fccbd338a54",
+    "kprog/libnativeloader/src/native_loader_bytecode.hpp": "f7e0184d400aad9ba981f03be14644677c61473b5ba022e54175099827dc68e1",
+    "kprog/libnativeloader/src/native_loader_cache.hpp": "39d7c8ed55f3107fac778dc8f5ffdf4f65eef23383c72b94972f61d1ed90f14d",
+    "kprog/libnativeloader/src/native_loader_fd_scan.hpp": "545c2cdbc6bec151250c95729d28acd4e3dbb72e416eb589c087df7597e32027",
+    "kprog/libnativeloader/src/native_loader_link_plan.hpp": "b1024931b2b97d698620856b2222dedcf2115f146eaeb573dcc67429eda95f9d",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "4b811749b020d99ec78c1a8b428de4c00a7a796a952c7dc5e038afb4c8fe645f",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "61718ae4af723319cbd478387930fada3cb5bedcae165ff3ad0a31b3f59759f5",
+    "kprog/libnativeloader/src/native_rodata_binding.hpp": "4d7323ff590b1c46080fc35a4b651daf5a0a4442453bcb5ea1673f8a609d21cb",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+    "kprog/libnativeloader/src/native_tv_capture.hpp": "84b0597ac279a40f293451c05273dbd7b57c83289f9380b8fe92ac075d5fe2b6",
+    "kprog/libnativeloader/include/native_loader.hpp": "9bb3e6f903c4037618f69827dbe76463ad554fdc5b714b880933f3bf7a0c7f93",
+    "kprog/libnativeloader/CMakeLists.txt": "4ae1bb6fa3516a91b0129b3e4b32f618cfd178467cbbeb800631252e08291a80",
+    "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+    "kprog/test/trusted_service_client.cpp": "2dd95f9ee416c224dd2881282565255d5580ba6e37615e5521d59a6e7567b49a"
+  },
+  "retained_input_pins": {
+    "kprog/libnativeloader/build-arm64-entry-resources/libnative_loader.so": "b4dfe444fb6e28a7ce82bd65a9e315f537007cdf26de708a8a981f6ac0625082",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native-loader": "9b328444f14d4e4db613a47938903d239b4d7378260df3e69e5054435b247aab",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-service-client": "ac4e84709efbe5f93b868af4e7ec5696ee4f488d22fdd8248a81989e72f63d50",
+    "kprog/libnativeloader/build-arm64-entry-resources/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources": "e183a7ea880f06e9584b27f41ff2ed51bd9d606e6cdc9f740a9f80da6f7758f9",
+    "kinsn/module/arm64/build-native-resource-guard/bpf_arm64_native_lab.ko": "8a57874a0de59e1e1f79751d2dad64c54c6ece1567121b5be6d75862ed856122",
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac"
+  },
+  "compiler": "aarch64-linux-gnu-g++",
+  "cpu_set": "16-19",
+  "scope": "Incremental paired ARM DSO/worker/client with the shared vmlinux kfunc relocation mechanism; generic XDP and TC native-only service controls follow.",
+  "new_binary_pins": {
+    "kprog/libnativeloader/build-arm64-kfunc-resources/trusted-native-loader": "93b43c8d119d660b88e81b6538d7757ef2e8647ea337e476a2ba3ef0ac9853ca",
+    "kprog/libnativeloader/build-arm64-kfunc-resources/trusted-service-client": "4695e1b16a4ec9edc86537ba8b9d9e8ddb5ccaeba45e54bcb688a65692143013",
+    "kprog/libnativeloader/build-arm64-kfunc-resources/libnative_loader.so": "a39eedf3f97bdc860b29948a65ab70215a5878b1668a61391205e3c9528ad1f0",
+    "kprog/libnativeloader/build-arm64-kfunc-resources/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c"
+  },
+  "control_source_pins": {
+    "transport.py": "c2189494e2b3e00547f9e398dd63d36b8115de66c0f30be187a319cbee974793",
+    "xdp-control.sh": "f0f07c4ca46cc373c2aa505415e12b7abbf838f70378ced2d7696aa70534df47",
+    "tc-control.sh": "b8916fb3fe4101903538c50ce83d506a0d9499d5673a5e7e8eb9750155169003"
+  },
+  "simulator_candidate_sha256": "e8d735c58eb59a3c1e31fa3bd4793a7f9949aee5ea81a9e6882398b6e986a9fe",
+  "build_publication": "0e1d196b566ba9e86e65eedbadd8c5c5b31889c6",
+  "generic_mapless_parent": "0b003bf73b7a356ced712d18226c878c8e095e75",
+  "mapless_selector_before_sha256": "50ad279853ef0120f0956f68173460a4172a11d7e665e81b094c09fc5fa30a96",
+  "mapless_rejection_commit": "d3276ca0f017dbcda7cde3ec8cc4bbb4b2a2bd3f",
+  "canonical_kfunc_guard_parent": "62de286fe6144e24a11e2125358f5fa9baaef153",
+  "canonical_kfunc_guard_before_sha256": "30c23f3541454e5672d36f16fd5c532ca02c67a01631daa0096f7ba5e77928ca"
+}

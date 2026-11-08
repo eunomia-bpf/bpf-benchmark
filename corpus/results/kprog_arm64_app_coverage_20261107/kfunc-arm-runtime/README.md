@@ -3,3 +3,7 @@ ARM incremental paired build of the shared8cf05d44d vmlinux proof-kfunc relocati
 Mapless registered-worker relocation
 
 The initial paired XDP control635880d52 binds and executes native return2. The TC control d3276ca0f captures type3/maps[] and a bpf_cast_to_kern_ctx R_BPF_64_32 relocation at instruction0, with fresh generation/compilation followed by a function-identity loader refusal. Registered workers now select authenticated proof extern relocation for every actual map-vector size. Existing source-map capability checks, readonly extent binding and vmlinux kfunc/prototype guards retain their bodies. mapless-build.json and its archive pin the incremental16-source revision and paired binaries. Fresh XDP/TC service replays follow this source epoch.
+
+Resolved vmlinux call transport
+
+The bound-proof sequence now preserves resolved vmlinux kfunc calls with exact code0x85, source2, destination0, offset0 and positive BTF identity. Source1/other pseudo-call refusals retain their behavior; the resolver and actual kernel verifier supply name/prototype/program-type admission. The source-extracted original builder fails the positive kfunc case and the repaired builder passes12,002 ASan/UBSan field/byte/exit controls. The field matrix observes11,998 refusals plus two canonical kfunc and two helper transports. These are builder classifications; actual kernel loads retain their separate outcome. call-guard-build.json records the coherent warm ARM rebuild, and the raw original TC guard refusal remains in the mapless cohort.
