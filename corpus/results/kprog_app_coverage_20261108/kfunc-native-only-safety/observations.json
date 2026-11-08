@@ -1,0 +1,18 @@
+{
+  "cases": 38,
+  "counts": {
+    "valid_executed": 9,
+    "verifier_rejected": 22,
+    "loader_rejected": 1,
+    "specialization_rejected": 6
+  },
+  "native_archive_sha_matches": 38,
+  "unsafe_native_accepted": 0,
+  "unsafe_native_executed": 0,
+  "negative_command_mode": "load only",
+  "positive_mode": "bound TEST_RUN data0 retval2",
+  "archive_sha256": "2ed62b3dcc628e64510407876ee5cfbe5b64f4e94bd7cba56ed928bf70356e27",
+  "kernel_verifier_sha256": "dd2001e91fbeb0e1bf15d2723ad9246d4b60723330acc2982c39f97cba19569f",
+  "module_profile": "registered ordinary kfunc admission and matched standard modules",
+  "surrounding_driver": "second service startup/readiness parser failed before app; full exception cause remains open; fresh dedicated application cohort cilium-matched-runtime records its independent result"
+}
