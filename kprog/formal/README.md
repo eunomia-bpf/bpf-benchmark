@@ -5,8 +5,8 @@ P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
-implementation interface. It currently records 72 x86-64 and 71 AArch64 C-model token
-body equalities, plus two returning-helper interface equalities. Full ISA and compiled-simulator closure remain active work.
+implementation interface. It currently records72 x86-64 C-model token-body equalities and71 of72
+AArch64 operation bodies, plus two returning-helper interface equalities. LDADD/STADD0x46 has explicit pending reference and token rows. Full ISA and compiled-simulator closure remain active work.
 
 ## Specification and proof scope
 

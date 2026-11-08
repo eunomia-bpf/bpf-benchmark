@@ -8,25 +8,25 @@ specialization token also has its own row.
 | Coverage obligation | x86-64 | AArch64 |
 | --- | ---: | ---: |
 | Requested operation domain | 77 | 72 |
-| Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
-| Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 32/75 | 0/71 |
-| Raw register dispatcher arm composition | 32/75 | 0/71 |
-| Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 29/75 | 0/71 |
+| Production numeric operations / specialization tokens | 75 / 75 | 72 / 72 |
+| Reference step family defined | 67/75 | 71/72 |
+| Raw register handler refinement | 32/75 | 0/72 |
+| Raw register dispatcher arm composition | 32/75 | 0/72 |
+| Stack register/immediate/memory model / composed step | 2/75 | 0/72 |
+| Addressed memory model / composed step | 29/75 | 0/72 |
 | Additional partial-model handler families | 1/75 | 0 |
-| Conditional modeled handler / observed dispatcher | 0 | 71/71 |
-| Immediate-alias source-emission binding composed | 0 | 2/71 |
-| Control handler model / composed step | 3/75 | 0/71 |
-| Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/71 |
-| Memory-call full-frame C body model | 4/75 | 0/71 |
-| O2 C-model token-body equality | 72/75 | 71/71 |
-| Additional returning-helper interface equality | 2/75 | 0/71 |
-| Upstream machine-model sampled register-state agreement | 25/75 | pending ASL build |
-| Upstream model-stopped operation rows | 7/75 | pending ASL build |
-| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
-| Additional explicit-monitor-only replay | 0 | 1/71 |
-| Numeric operations awaiting selected replay | 9/75 | 3/71 |
+| Conditional modeled handler / observed dispatcher | 0 | 71/72 |
+| Immediate-alias source-emission binding composed | 0 | 2/72 |
+| Control handler model / composed step | 3/75 | 0/72 |
+| Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/72 |
+| Memory-call full-frame C body model | 4/75 | 0/72 |
+| O2 C-model token-body equality | 72/75 | 71/72 |
+| Additional returning-helper interface equality | 2/75 | 0/72 |
+| Upstream machine-model sampled register-state agreement | 25/75 | ASL comparison pending |
+| Upstream model-stopped operation rows | 7/75 | ASL comparison pending |
+| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/72 |
+| Additional explicit-monitor-only replay | 0 | 1/72 |
+| Numeric operations awaiting selected replay | 9/75 | 4/72 |
 
 The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
@@ -63,9 +63,8 @@ LOAD/STORE D0/Q0, FMOV and CNT/UADDLV. Pair width, fixed D/Q width,
 FMOV direction/bank and reduction AUX retain their exact boundaries.
 RET adds emitted-return route/body equality through the unified invocation
 step. Its source macro captures raw Rn, checks zero-offset RETURN or a finite
-CODE case, and observes the same canonical register branch. The71 ARM
-entries comprise70 numeric body equalities and one emitted-return control
-body equality; complete exit memory/ABI and C/compiler transport remain
+CODE case, and observes the same canonical register branch. The71 ARM C-model equalities cover71 of72 production operations:70 numeric
+bodies and one emitted-return control body; complete exit memory/ABI and C/compiler transport remain
 explicit universal interfaces.
 Two memory ALU tokens also compose ADD/ADC/SUB/SBB/AND/OR/XOR and
 SHL/SHR/SAR/ROL through full-frame read/modify/write, six defined flags,
@@ -129,7 +128,7 @@ ABI/definedness and native-link preservation remain universal obligations.
 Inventory is pinned to the production headers in each row's `catalog_source`
 and `catalog_sha256`. The requested 77/72 domain requires identification of two
 additional x86 operation names and one additional ARM operation name against
-the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
+the current 75/72 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
@@ -172,6 +171,17 @@ main6b3f3173/tagged-writecf27e323/executable5188ecde identities retain
 the actual initial283,136 cases and9,728 control-completion cases. The source
 ledger now carries16 epochs/222 operation-source rows/163 artifact pins;
 62 additional source rows extend124 central operation/token rows.
+
+
+The current published AArch64 catalog includes LDADD/STADD0x46, giving72
+operations and72 tokens. Its two ledger rows carry pending reference,
+handler/dispatcher and O2 status; the existing71 conditional model equalities
+retain their domains. Approved fault model500abe542 has separate memory/
+pair/exclusive fault evidence, including109 QEMU8.2.2 SP-profile differences.
+The earlier selected replay epochs and success/profile theorem premises keep
+their exact identities. Runtime/compiler and fault-domain closure remain
+explicit work. RET0xff uses source-return emission; the raw EXEC fallback
+probe at255 exercises the separate raw dispatcher default.
 
 <!-- COVERAGE END -->
 
