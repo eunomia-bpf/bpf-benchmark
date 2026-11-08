@@ -3779,3 +3779,10 @@ The central table now records71/71 conditional ARM modeled dispatcher rows and
 3/71 ARM C-model O2 tokens; x86 stays49/75. The prior published `518d33529`
 full `make check` separately passed with all1,140 source identities verified in
 `full_make_check_518d33529`.
+
+### Published source full check fe6049ac8
+
+`make check` on immutable publishedfe6049ac8 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_fe6049ac8`. Every check retains its exact published source identity.

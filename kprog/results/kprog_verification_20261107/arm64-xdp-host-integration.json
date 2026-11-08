@@ -3362,6 +3362,26 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_fe6049ac8": {
+    "actual_exit": 0,
+    "archive_block_sha256": "ae7fbf95a3428a2f16667cd64482db4c2475f1c23bcccbe95f8662f6d961c906",
+    "archive_marker": "=== FULL MAKE CHECK FE6049AC8 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.cpu.jsonl.gz": "be46dd22f70867f4fa2e3fa1a4b942847251515d95127c77c5757b84370e6854",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.head": "2abd8986774c4545fb3f99b6ee7ee075a55633e4038c21928ce501431692e8bd",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.launch.log": "b58860da74d80baf88d19d6576dd733deb58f0ff0974ecdc560394e0d4f68e1e",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.log": "e503eee80b84af3b80536425b092b9d3d56cedae9687d60509d9d761382f5c08",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.py": "f22ef20b4301d06d76d034dd3bf59e113da1052067d5577a4edb0a9a91d153cf",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.sources": "8042b440aa38272fb7efc5b12f7e33d5739a1a753d6668c3912202f0d62851c1",
+      "/workspaces/.agent-state/kprog-lanes/V/arm-alias-full.state": "31c524d9112901a7ca970385f1c4535a476c4ee14de6b65a9ca9ef43ed6c96d8"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "scope": "Complete formal make check of the exact published source tree fe6049ac8dc2964a16a99976fe2e4c22424f7395. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_runner_marker_correction": {
     "archive_marker": "=== MOVBE ADDRESSED FRAME TOKENS AND FULL MARKER CORRECTION ===",
     "replacement_has_explicit_source_assertion": true,
