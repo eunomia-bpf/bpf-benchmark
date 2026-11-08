@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7) | 4/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8) | 6/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
@@ -5104,3 +5104,18 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_3057f2dd0`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-3057f2dd0.log.gz](full-make-check-3057f2dd0.log.gz).
+
+### Compiled register extension scalar units
+
+`ExtensionCertificate.compiled_all_variants` and `compiled_execution` cover
+seven MOVZX and eight MOVSX source-lane/width forms: byte low to16/32/64,
+byte high to16/32, word to32/64, and signed dword to64.
+The actual production-dispatch clang units return canonical scalar read,
+extension and write values for arbitrary old RAX/source RDX, complete memory,
+fresh input stream and both ghost indices. Memory and exclusive state are
+preserved, visit advances23, and the return has empty events and an absent fault.
+The combined107 certificate retains every original92 and standalone15 function
+byte. [Original evidence](compiled-movx.log.gz) retains preprocessing, ELF,
+arrays, scripts and proof logs. Architectural register mapping, complete
+register/tag frame, physical invocation ABI and compiler embedding remain
+explicit interfaces. The scalar family total records6/75.

@@ -107,6 +107,9 @@ BSWAP adds both32/64-bit widths with complete arbitrary BPF register/memory/ghos
 preservation and actual decoded executions. Their scalar-register mapping,
 initial scratch state and invocation interface remain explicit. MOV_REG adds7 scalar byte-lane/width units with arbitrary whole memory and both
 ghost indices; pointer/RSP frame and physical ABI embedding remain explicit.
+MOVZX/MOVSX add15 scalar source-lane/width units with canonical extension,
+whole memory and both ghost indices; register/tag frame and ABI embedding
+remain explicit.
 Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.
