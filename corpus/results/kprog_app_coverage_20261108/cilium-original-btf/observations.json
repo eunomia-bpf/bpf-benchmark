@@ -1,0 +1,20 @@
+{
+  "baseline_resident": 72,
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "verifier_rejections": 1,
+  "verifier_class": "bound native-region kfunc call identity",
+  "processed_instructions": 0,
+  "total_states": 0,
+  "peak_states": 0,
+  "max_states_per_insn": 0,
+  "terminal_native_hashes_checked": 2,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "fee201545068a98c7d810937a90afb29cc7092b963cfcb43669d3fc60c8033ab",
+    "service.tar.gz": "78627750f4124bc14a32633ad13758e20c83fe81e59b62b60de02ceacac6f740",
+    "launch.tar.gz": "557a902d16943d75fc19378815a11de724f2f3c296f550bce0b52fc2a18dd8ea",
+    "result.tar.gz": "785c5939c6b93b2a372637289a0fc1556f4c3a1b16cb65d3bb4191e60ac6c0c7"
+  }
+}
