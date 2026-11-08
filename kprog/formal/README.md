@@ -2,10 +2,10 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-60 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
+62 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
-Run the complete verification entry point on an x86-64 Linux host with BMI2 and POPCNT:
+Run the complete verification entry point on an x86-64 Linux host with BMI1/BMI2 and POPCNT:
 
 ```sh
 make -C kprog/formal check
@@ -60,7 +60,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Forty-four direct, fourteen generic and two branch token bodies have semantic
+Forty-six direct, fourteen generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -97,6 +97,12 @@ Memory BZHI/POPCNT also compose full displacement, AUX high-byte BZHI count,
 native16/32/64 POPCNT width, FLAGS fallback, captured aliases, generated
 result/flags and full numeric destination through two generic token calls
 and the same extended dispatcher step.
+Memory BT/ANDN also compose signed high32 displacement, low immediate bit
+selection, AUX high-byte ANDN base, memory width/default and input aliases
+through two direct tokens and the same extended dispatcher. BT retains its
+actual CF update and full numeric frame; ANDN retains actual PF parity and
+uses the canonical defined-flag observation together with complete read/fault
+and destination state.
 Their field binding carries packed-immediate/full-register displacement,
 low source lanes and CL counting; source-lane normalization and physical
 arena/permission correspondence remain explicit production interfaces. ARM numeric3/4

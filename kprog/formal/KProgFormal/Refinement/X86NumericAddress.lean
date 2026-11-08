@@ -2733,4 +2733,100 @@ theorem population_count_memory_frame_refines (env : Environment) (frame : Frame
           GeneratedX86RegWrite.bits, X86Scalar.handlerWidth, X86Scalar.lane, multiplyScalarWidth])
       · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
 
+
+/-- BT's packed immediate supplies its selected bit while the memory source
+retains the complete numeric frame, ordered read and precise fault state. -/
+def bitTestMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (raw address nextPc : NativeWord) : Transition Reference.X86.State :=
+  flagsMemoryFrame env frame arena state (multiplyScalarWidth width)
+    (fun source old => Reference.X86.setFlag old 0
+      (generatedX86BtCf source (generatedX86BtIndex .btMemImm 0 raw) (X86Cmov.handlerWidth width))) address nextPc
+
+theorem bit_test_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (raw address nextPc : NativeWord) :
+    bitTestMemoryFrame env frame arena state width raw address nextPc =
+      Reference.X86.step (.bt width (.memory address) (.immediate (raw.setWidth 8)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  simp only [bitTestMemoryFrame, flagsMemoryFrame, Reference.X86.step,
+    Reference.X86.bitBaseSource, Reference.X86.bitIndexValue,
+    X86Scalar.read_refines, Reference.X86.scalarRead]
+  have bytes : (multiplyScalarWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, X86Bt.carry_refines,
+        reduceCtorEq, ↓reduceIte]
+      rfl
+
+/-- ANDN retains its actual PF parity write and independently decoded memory
+width. The native binding selects the same read and write width. -/
+def andnMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (sourceWidth : Reference.X86.ScalarWidth) (width : Reference.X86.BzhiWidth)
+    (dst first : Reference.X86.Register) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Scalar.read (nativeRegisters env frame arena state) sourceWidth (.memory address) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (second, reads) =>
+      let result := generatedX86AndnResult (registerValue env frame arena state first) second
+      ⟨nativeRegisters env frame arena
+        (registerPc (registerFlags (writeRegister env frame arena state
+          (multiplyScalarWidth (X86Bzhi.readWidth width)) (.low dst) result)
+          (andnFlags width result state.raw.rflags)) nextPc), reads, none⟩
+
+theorem andn_memory_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst first : Reference.X86.Register) (address nextPc : NativeWord) :
+    andnMemoryFrame env frame arena state (multiplyScalarWidth (X86Bzhi.readWidth width)) width dst first address nextPc =
+      match Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+      | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+      | .ok (second, _) =>
+          let expected := X86Andn.handlerStep width dst first (.memory address) nextPc
+            (nativeRegisters env frame arena state) .scalar
+          { expected with state := { expected.state with rflags := (andnFlags width
+            (generatedX86AndnResult (registerValue env frame arena state first) second) state.raw.rflags) } } := by
+  simp only [andnMemoryFrame, X86Scalar.read_refines, Reference.X86.scalarRead,
+    X86Andn.handlerStep, X86Bt.read_refines]
+  have bytes : (multiplyScalarWidth (X86Bzhi.readWidth width)).bytes = width.bytes := by cases width <;> rfl
+  have readBytes : (X86Bzhi.readWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes, readBytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, native_register_write]
+      simp only [nativeRegisters]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = dst
+      · subst reg
+        simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+        rw [← X86Scalar.register_write_refines]
+        cases width <;> rfl
+      · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+theorem andn_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst first : Reference.X86.Register) (address nextPc : NativeWord) :
+    Reference.X86.Step (.andn width dst first (.memory address) nextPc) (nativeRegisters env frame arena state)
+      (andnMemoryFrame env frame arena state (multiplyScalarWidth (X86Bzhi.readWidth width)) width dst first address nextPc) := by
+  rw [andn_memory_frame_matches]
+  unfold Reference.X86.Step
+  rw [← X86Andn.step_refines width dst first (.memory address) nextPc
+    (nativeRegisters env frame arena state) .scalar]
+  simp only [X86Andn.handlerStep, X86Bt.read_refines]
+  have readBytes : (X86Bzhi.readWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [readBytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => exact ⟨rfl, rfl, rfl⟩
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [Reference.X86.matchesTransition, Reference.X86.definedFlags,
+        Reference.X86.observedRegisters, Option.isSome_none, Bool.false_eq_true, ↓reduceIte]
+      refine ⟨trivial, trivial, ?_⟩
+      congr 1
+      exact (andn_flags_observed width _ _).symm
+
 end KProgFormal.Refinement.X86NumericAddress

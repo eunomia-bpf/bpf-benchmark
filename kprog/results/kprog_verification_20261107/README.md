@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 24/75 | 0/71 |
-| Additional partial-model handler families | 7/75 | 0 |
+| Addressed memory model / composed step | 26/75 | 0/71 |
+| Additional partial-model handler families | 5/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 60/75 | 71/71 |
+| O2 C-model token-body equality | 62/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 60 x86 O2 equalities cover44 direct bodies, fourteen generic calls and two
+The 62 x86 O2 equalities cover46 direct bodies, fourteen generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining7 x86 reference-family handlers have partial model proofs; eight
+The remaining5 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -83,6 +83,12 @@ AUX high-byte count, native width and FLAGS fallback through the unified
 step. Generated result/flag writes and numeric partial destination retain
 RSP/STACK materialization, captured aliases, full read/fault effects and
 the shared native-field, physical-memory/provenance and compiler/ABI interfaces.
+Two direct BT/ANDN memory tokens also compose signed high32 displacement,
+BT low immediate bit selection, ANDN AUX base/read-width fallback and
+captured register/address aliases through the unified step. BT retains actual
+CF and its complete numeric frame. ANDN retains actual PF parity and uses
+canonical defined-flag observation with full numeric destination/read/fault
+state under the same physical-memory, native-field and compiler/ABI interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4181,3 +4187,31 @@ source epochs retain their domains. x86 C-model O2 totals60/75
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_1262fbdab`. Every check retains its exact published source identity.
+
+### Memory BT and ANDN dispatcher and direct-token composition
+
+`x86_andn_bt_memory_tokens` composes canonical `Instruction.bt` and
+`Instruction.andn` with complete numeric frames, packed production fields,
+the extended universal dispatcher and two direct token bodies. BT binds
+native16/32/64, signed high32 displacement and low32 immediate bit selection
+to the native immediate byte. ANDN binds native32/64, its SRC first GPR,
+AUX high-byte base, memory-width fallback and signed high32 displacement.
+Both retain optional base/index/scale and FLAGS0-to64. Captured aliases,
+RSP/former STACK values, full state, ordered reads and read faults compose
+through the same step. BT retains actual CF; ANDN retains the C parity write
+and derives the canonical defined-flag observation. The previous125 numeric
+and126 dispatcher theorem/module prefixes remain byte-exact. Eleven public
+axiom audits, default Lean build, generators and semantic/source checks pass
+with `sorryAx_count=0`.
+
+The permanent UBSan oracle compares actual direct/interpreter bodies with
+real BMI1 ANDN and BT instructions over3,891,200 cases: all16 destination
+seeds, heap/RSP/STACK/ABI sources,64 flags, width/default/read-width modes,
+source boundaries, immediate bit boundaries and incoming address/source/
+destination aliases. Full numeric/raw/tag files and both512-byte memory
+images persist. ANDN PF is checked against an independent low-byte parity
+calculation, alongside the CPU-defined CF/ZF/SF/OF outputs. Native field/lane/
+code normalization, physical memory/provenance, C/Lean, compiler/entry/exit
+ABI and native-link transport retain explicit universal production interfaces.
+Existing replay and O4 source epochs retain their domains. x86 C-model O2
+covers62/75 (46direct/14generic/2branch); ARM C-model O2 covers71/71.
