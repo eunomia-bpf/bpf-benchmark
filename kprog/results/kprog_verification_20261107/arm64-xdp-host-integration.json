@@ -1,4 +1,120 @@
 {
+  "actual_bpf_spill_reload": {
+    "actual_existing_target_exit": 0,
+    "actual_private_exit": 0,
+    "archive_block_sha256": "f2a43f65260df7ed3057839b75065f217cacc02cbedd4adf9c68242d190aacc2",
+    "archive_compressed_prefix_bytes": 100011325,
+    "archive_compressed_prefix_sha256": "46a90fa04a25c93321e1dd293e581c137070e6711a82885f99b275909b2baedf",
+    "archive_marker": "=== ACTUAL BPF GENERIC SPILL RELOAD EXECUTION V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt1.lean": {
+        "bytes": 6291,
+        "sha256": "572279172586cb78883ddf2ed56ecfe9ecb8983a31a3718a7ce9f35ab4579d4e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt1.log": {
+        "bytes": 14538,
+        "sha256": "09796c6a48fdcf75418b3b67f2ce3e30ecdcf54354c4f0087c87b9d12dcc0141"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt2.lean": {
+        "bytes": 7033,
+        "sha256": "1186233449a0e0f3e96d32b74e1506c43eb2eab22c52077dd2ef68c2ed8d7e42"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt2.log": {
+        "bytes": 3741,
+        "sha256": "2435d730b4f91494f33edf308027d4ccded1f778c7eb4a62bff99411418de679"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt3.lean": {
+        "bytes": 7146,
+        "sha256": "fa9b020700fc44a8f1e0ff6dcac16696f38b22a09569be6f11f520896d8f3448"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-attempt3.log": {
+        "bytes": 1504,
+        "sha256": "e9e1b7e5448f0cbe3dc77091c67df9ab2006736405bfeeffb468857d27e0686c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-main-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-main.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-main.log": {
+        "bytes": 4501,
+        "sha256": "bb81bc4a7e698ae2c4fef8f3e3f5268f544bc3b2d1c08d71a204d732e2615832"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution-source.json": {
+        "bytes": 446,
+        "sha256": "32e0d8b8b99c70f6a4f440ed09136b1262160e81f9424dd3c403becf4211dcc6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution.lean": {
+        "bytes": 8408,
+        "sha256": "c48b0ec5f81ebd6a7641e7582fbc6292883c3fdb86dec58de381cea097decdcf"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/spill-execution.log": {
+        "bytes": 748,
+        "sha256": "0324ea922a8427d36cb0bb52dcc46bd0b27792888857b93f0f3dff1d2a5cb2f5"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3722,
+        "sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPath.lean": {
+        "bytes": 13188,
+        "sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      "/workspaces/repository/kprog/tv/Composition.lean": {
+        "bytes": 18251,
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45077,
+        "sha256": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpillProjection.lean": {
+        "bytes": 16202,
+        "sha256": "149e7fd4325cdf020f67155dd11b3dc6a3d2c24d517832b54114cc43a3d29710"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpills.lean": {
+        "bytes": 12051,
+        "sha256": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+      }
+    },
+    "command": "make -C kprog/tv private-spill-projection-check",
+    "conclusion": "Actual two-step BPF execution stores and reloads captured64-bit source; preserves every BPF register, halt and both input indices; PC+2; exact ordered write/read byte events project to []; public memory values/initialization unchanged, permissions unchanged.",
+    "premises": "STXDW and LDXDW decode at adjacent positions; active entry and current PC; all8bytes readable/writable and owned by compiler-private region.",
+    "remaining": "Discharge actual compiler layout and public/private separation, saved-register liveness and intervening-body writes/control, arbitrary compiled-site decode and native/physical invocation ABI. Adjacent pair is a universal component of spill insertion/reload preservation.",
+    "sources": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771",
+      "kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+      "kprog/tv/PrivateSpillProjection.lean": "149e7fd4325cdf020f67155dd11b3dc6a3d2c24d517832b54114cc43a3d29710",
+      "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+    },
+    "theorems": [
+      "spill_instruction_matches",
+      "reload_spilled_matches",
+      "spill_reload_execution",
+      "spill_reload_projected",
+      "spill_public_memory",
+      "spill_reload_projected_block"
+    ],
+    "universal_domain": "Every BPF program byte array and decoded instruction position, saved r0-r9, every16-bit signed frame offset, arbitrary complete BPF state/environment."
+  },
   "arm64_entry_abi_base_fixture": {
     "archive_marker": "X86_POINTER_LOAD_TOKENS_V1",
     "fixed_exit": 0,

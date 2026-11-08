@@ -4959,3 +4959,20 @@ separate evidence.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_463098bad`. Every check retains its exact published source identity.
+
+### Actual BPF spill/reload component
+
+The existing private-spill projection now contains actual byte-decoded STXDW/LDXDW
+execution for every adjacent instruction site and every signed16-bit frame offset.
+For arbitrary BPF state/environment and a saved r0-r9 word, the pair preserves
+all BPF registers, halt state and both input indices; PC advances two instructions.
+Its exact ordinary write/read events contain the captured source bytes and erase
+under the shared private-byte ownership projection. Public memory values and
+initialization bits, and all memory permissions, remain unchanged. Premises state
+the local decodes, active PC and physical frame readability/writability/ownership.
+`spill_reload_projected_block` supplies the actual execution witness to the
+existing projected-block relation. The existing `private-spill-projection-check`
+target passes with its explicit memory-lemma build dependency. Compiler layout,
+public/private separation, register liveness, intervening-body writes/control and
+physical/native invocation ABI remain the complete O4 interfaces. Original
+attempts and source identities are in `actual_bpf_spill_reload`.

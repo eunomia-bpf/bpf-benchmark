@@ -63,6 +63,10 @@ aliases with canonical memory reads; final byte transfer transports its frozen
 image premise. Every permitted canonical guest write preserves the frozen
 image and its write permissions. Physical symbol/map lifetime, helper/platform
 state effects and C/compiler transport stay explicit.
+The private-spill projection also proves actual decoded STXDW/LDXDW pair execution,
+whole BPF register/input-frame and public-memory preservation, and exact owned
+event erasure for every signed16-bit offset. Compiler layout, intervening-body
+control/liveness and physical frame/ABI correspondence remain explicit.
 [Composition](../tv/Composition.lean) and the
 [artifact work](../tv/README.md) track the generic link/compiler obligations.
 
