@@ -1,0 +1,87 @@
+{
+  "width_lane_forms": 10,
+  "bpf_jit_host_byte_observations": 655360,
+  "differences": 0,
+  "whole_tracee_compile_exit": 0,
+  "insns": 3171,
+  "deepest_direct_frame_offset": -304,
+  "compiler_files": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/narrow-c-mask/tracee.bpf.c",
+      "md5": "ae25ba83abd06505166f3c6ab6d854cd",
+      "sha256": "cb0be0107daf08d9cf5ac03b712e8eab0f05ae9953c246ee45a47f80b97efc73",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/asm-generic/int-ll64.h",
+      "md5": "b810f270733e106319b67ef512c6246e",
+      "sha256": "eb8b891e775ebb50af0353fdcbc625854fd98780399b3a57a404d36af6c29749",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/narrow-c-mask/tracee.bpf.c",
+      "md5": "ae25ba83abd06505166f3c6ab6d854cd",
+      "sha256": "cb0be0107daf08d9cf5ac03b712e8eab0f05ae9953c246ee45a47f80b97efc73",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h",
+      "md5": "1a4f9d7387ea7d9b92f499307bdf712e",
+      "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h",
+      "md5": "af3577c2b1c2566ad76f1bd2c69dbe37",
+      "sha256": "d116a84a62207260a394206e2b1f0811ac72f3563b88d4f49b8dce7377c08ab4",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/linux/types.h",
+      "md5": "bf9fbc0e8f60927fef9d8917535375a6",
+      "sha256": "89de4736e44cf154844fad3d6c40c435f3d15200801046becb1876030db247ce",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_mem_access.h",
+      "md5": "642fcb4f054d60386fcd37ded524589c",
+      "sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_shift_result.h",
+      "md5": "5fe3ccb6b79d41b1697e6028053391d1",
+      "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim.h",
+      "md5": "cedba0dfb15f459a1fb61860887ac4b4",
+      "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_signed.h",
+      "md5": "54e02d4b7a02a40c0cb8724ce2f2626f",
+      "sha256": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_bitops.h",
+      "md5": "10b83a65d7d01bc15a626712d3efe769",
+      "sha256": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/narrow-c-mask/candidate.h",
+      "md5": "1ad00d7660fa714f7535e12d58d8012f",
+      "sha256": "a46abc8b460350c4e0e248982b66d5bfc90e55f432e7db0078cc033cc262f1f0",
+      "recovered_from": null
+    }
+  ],
+  "source_sha256": "cb0be0107daf08d9cf5ac03b712e8eab0f05ae9953c246ee45a47f80b97efc73",
+  "object_sha256": "7d95c3f5fd9baab9a9e8fd845c5e34046bcc0d44c20c8839b47b8645e919fd0c",
+  "previous_insns": 3208,
+  "previous_frame": -312,
+  "archive_sha256": "f8da8ed8f5a357e8c33c55d466b3a863089d1bc15805edf782418247c4894cf7"
+}
