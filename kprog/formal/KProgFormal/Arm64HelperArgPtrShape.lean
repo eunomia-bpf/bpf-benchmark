@@ -122,16 +122,16 @@ theorem arm64_helper_arg_ptr_stack_index (off : BitVec 64) :
 
 /-- Apply the shared ABI context relation only to an ABI-tagged argument.
 The argument has already passed through the existing stack/raw space mapping. -/
-theorem arm64_helper_context_refines (isAbi available : Bool) (value base kernel : Nat) :
-    (if isAbi then GeneratedAbiLoad.helperContext available value base kernel else value) =
-      (if isAbi then abiHelperContextSpec available value base kernel else value) := by
+theorem arm64_helper_context_refines (isAbi : Bool) (value base kernel : Nat) :
+    (if isAbi then GeneratedAbiLoad.helperContext value base kernel else value) =
+      (if isAbi then abiHelperContextSpec value base kernel else value) := by
   cases isAbi <;> simp [abi_helper_context_refines]
 
 /-- The relation composes with arbitrary helper return, memory and fault effects. -/
 theorem arm64_helper_context_call_refines {α : Type} (externalCall : Nat → α)
-    (isAbi available : Bool) (value base kernel : Nat) :
-    externalCall (if isAbi then GeneratedAbiLoad.helperContext available value base kernel else value) =
-      externalCall (if isAbi then abiHelperContextSpec available value base kernel else value) := by
+    (isAbi : Bool) (value base kernel : Nat) :
+    externalCall (if isAbi then GeneratedAbiLoad.helperContext value base kernel else value) =
+      externalCall (if isAbi then abiHelperContextSpec value base kernel else value) := by
   rw [arm64_helper_context_refines]
 
 end KProgFormal

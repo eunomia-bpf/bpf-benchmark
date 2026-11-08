@@ -18,7 +18,7 @@ def tag {α : Type} (scalar packet packetEnd : α) : Kind -> Int -> α
       else if offset == 80 then packetEnd
       else scalar
 
-def helperContext (available : Bool) (value base kernel : Nat) : Nat :=
-  if available && value == base then kernel else value
+def helperContext (value base kernel : Nat) : Nat :=
+  if value == base then kernel else value
 
 end KProgFormal.GeneratedAbiLoad

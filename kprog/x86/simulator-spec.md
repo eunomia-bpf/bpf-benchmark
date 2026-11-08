@@ -55,6 +55,13 @@ not native architectural state. A complete refinement proof must therefore
 show that the tag follows from architectural values and the entry ABI and
 cannot introduce a safety fact that native execution lacks.
 
+The skb entry value keeps the actual kernel object through the existing
+`bpf_cast_to_kern_ctx` identity. Packet and qdisc-cb accesses select the live
+BPF context fields at the corresponding native offsets. Ordinary fields,
+including len and data_len, read the actual kernel skb bytes. Helper arguments
+translate the exact native context base to its original BPF-context view,
+and all other addresses keep their original value.
+
 The stack array is a byte model of the native stack region used by the proof
 artifact. There is no runtime bounds check. If a generated proof expression
 accesses outside the modeled extent, the compiler/verifier/load path should

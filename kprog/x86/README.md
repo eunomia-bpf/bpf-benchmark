@@ -85,29 +85,17 @@ ordinary native stores and memory intrinsics therefore reach that context,
 instead of a writable private copy. Native 64-bit `data`/`data_end`/`data_meta` reads at
 offsets 0/8/16 use the corresponding live typed BPF fields, including offset
 aliases; unmapped reads fail specialization. XDP helpers need no cached-field
-refresh. For skb programs the local guest object still mirrors the
-kernel/eBPF runtime ABI used by the linked native micro code: BPF-visible `__sk_buff.cb[]` scratch
-storage starts at `sk_buff->cb + offsetof(struct qdisc_skb_cb, data)`, the
-BPF `data_end` value is loaded from `sk_buff->cb + offsetof(struct
-bpf_skb_data_end, data_end)`, and packet `data` is loaded from
-`sk_buff->data`. On the current x86 kernel those offsets are `0x30`, `0x50`,
-and `0xd0`.
+refresh. For skb programs, `bpf_cast_to_kern_ctx` supplies the actual kernel skb object
+for native memory accesses. Its len/data_len and other ordinary fields keep
+their real values and widths. Native packet fields at0xd0/0x50 select the live
+typed BPF data/data_end fields; qdisc cb storage at0x30 selects live cb bytes.
+Register aliases use the same actual kernel address. Helpers translate its
+exact base to the original BPF context; every other address retains its bits.
+The shared context relation performs exact-base translation directly.
 
-The simulator does not model `skb->len` as packet end. The previous
-`len = ctx->data_end - ctx->data` experiment was removed because it was only a
-linear test-input premise and did not match the kernel BPF ctx ABI. This
-replaces the earlier ctx-field special cases: `[rdi+0x30]`, `[rdi+0x50]`, and
-`[rdi+0xd0]` are ordinary loads/stores to guest ABI memory, not hidden register
-tags or branch-dependent verifier facts.
-
-For skb proof programs, `X86_SIM_X86_RET()` projects guest ABI `cb[0..1]` back
-to the typed `struct __sk_buff` test-run output context. That projection is the
-proof-side representation of the same kernel scratch storage that native x86
-writes. It is not a fallback result path: the x86 return value remains `RAX`.
-For `cgroup_skb`, that return value is only the kernel action
-(`CGROUP_SKB_OK`/`CGROUP_SKB_DROP`); the 64-bit benchmark result must stay in
-`__sk_buff.cb[]`. Packet writes are not a valid result channel for cgroup_skb
-because the verifier rejects packet writes for that program type.
+Scratch writes update the live context before subsequent helpers and tail
+calls. `X86_SIM_X86_RET()` returns architectural RAX. The BCC result carried in
+cb[0..1] stays in that live scratch storage.
 
 MOVZX/MOVSX keeps compiler value identity in the architectural destination
 lane: a32-bit identity for32-bit writes and a full-width identity for the

@@ -950,3 +950,20 @@ Runtime admission additions total0. The existing architectural SP-alignment/over
 Commit `9be6649cfa3053bd02ee7faa815514287d9fa6f1` captures all34 existing native ISA cases on the paired five-step runtime. Four normal programs execute with matching results;20 cases reach stock-verifier rejection; two cases reach generation failures (unbounded indirect jump and the existing instruction fixture); eight load-only cases expose architecture-model findings. The eight cases cover SP alignment, load-pair register overlap, load/store writeback overlap and exclusive status overlap with source/base. Risk native executions:0. The full cohort retains the existing finding verdict after collecting every case.
 
 The architecture predicates described in the06:37/06:43 Notices await operator approval. Raw outcomes, native bytes, generated B, verifier output and compiler/service/guest logs are in [the canonical safety result](../../../corpus/results/kprog_arm64_app_coverage_20261108/canonical-adoption/safety-complete.json).
+
+## Shared exact-base helper context, November8 UTC
+
+The shared ABI context operation translates its exact expanded/native base to
+the original BPF-context pointer. Its runtime KERNEL-nonnull conjunct is
+removed. Actual whole-Cilium B eliminated VALUE==BASE and retained that extra
+ctx-null branch; its alternate passed trusted_ptr_sk_buff to helper25, which
+the stock verifier required asCTX. The current exact-base operation keeps the
+actual address conversion and every other pointer value. The stock verifier's
+helper argument checks remain step(d); the conversion serves step(c)'s faithful
+ABI representation. C and both universal Lean helper relations share this rule.
+
+Existing18946typed-ABI/4100ID host cases pass underUBSan; existing
+X86MovLoadHandler and Arm64HelperArgPtrShape Lean modules build. The
+[canonical x86 live-SKB context and full raw epochs](../../../corpus/results/kprog_app_coverage_20261108/skb-live-context/README.md)
+keep actual skb112/116fields, live cb/packet projections and all component and
+application outcomes. Additional runtime admission predicates total0.

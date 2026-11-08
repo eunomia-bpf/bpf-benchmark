@@ -68,8 +68,8 @@ def tag {{α : Type}} (scalar packet packetEnd : α) : Kind -> Int -> α
       else if offset == {skb['data_end_offset']} then packetEnd
       else scalar
 
-def helperContext (available : Bool) (value base kernel : Nat) : Nat :=
-  if available && value == base then kernel else value
+def helperContext (value base kernel : Nat) : Nat :=
+  if value == base then kernel else value
 
 end KProgFormal.GeneratedAbiLoad
 """
@@ -86,7 +86,7 @@ def render_c(spec: dict[str, object]) -> str:
 #define KPROG_FORMAL_GENERATED_ABI_LOAD_H
 
 #define KPROG_ABI_HELPER_CONTEXT(VALUE, BASE, KERNEL) \\
-\t(((KERNEL) && (VALUE) == (BASE)) ? (KERNEL) : (VALUE))
+\t(((VALUE) == (BASE)) ? (KERNEL) : (VALUE))
 
 #define KPROG_ABI_KIND_XDP 0U
 #define KPROG_ABI_KIND_SKB 1U
