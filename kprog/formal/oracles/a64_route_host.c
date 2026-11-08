@@ -1009,8 +1009,8 @@ static __u64 scene_reg_glue(void)
 	ARM64_SIM_RET();
 }
 
-/* SKB entry + RET() writeback scene: enter via ENTRY_SKB, paint the ABI cb
- * lanes, assert (u32)x0 exit and that RET() copied cb[0]/cb[1] to the ctx. */
+/* Live SKB entry/read/write and RET scene: access packet/cb fields through
+ * the production native-offset projection, then observe the u32 x0 exit. */
 static __u64 scene_skb_ret(void)
 {
 	unsigned i;
@@ -1049,14 +1049,14 @@ static __u64 scene_skb_ret(void)
 		return 0xDEAD0009ULL;
 	}
 	cases = cases + 2U;
-	if (__a64_sim_abi.data != (void *)(long)skb_ctx.data ||
-	    __a64_sim_abi.data_end != (void *)(long)skb_ctx.data_end) {
+	if (ARM64_SIM_L_SKB_READ(ARM64_X0, ARM64_SKB_DATA_OFF, ARM64_WIDTH_64) != skb_ctx.data ||
+	    ARM64_SIM_L_SKB_READ(ARM64_X0, ARM64_SKB_DATA_END_OFF, ARM64_WIDTH_64) != skb_ctx.data_end) {
 		printf("MISMATCH skb entry abi fields\n");
 		return 0xDEAD000AULL;
 	}
-	/* exit paint: x0 mirrors ABI content bytes through x0.x */
-	__a64_sim_abi.cb[0] = 0x0BADF00DU;
-	__a64_sim_abi.cb[1] = 0x0FEEDFACU;
+	/* Live cb writes use native qdisc offsets and the original context. */
+	ARM64_SIM_L_SKB_WRITE(ARM64_X0, ARM64_SKB_CB_OFF, ARM64_WIDTH_32, 0x0BADF00DU);
+	ARM64_SIM_L_SKB_WRITE(ARM64_X0, ARM64_SKB_CB_OFF + 4, ARM64_WIDTH_32, 0x0FEEDFACU);
 	X0_SET(0x12ULL);
 	for (i = 0; i < 31U; i++) {
 		__u64 __c_got = 0;

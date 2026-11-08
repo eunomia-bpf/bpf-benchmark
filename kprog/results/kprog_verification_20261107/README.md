@@ -4348,3 +4348,16 @@ The frozen captured C epoch also exits0; its CALL primitive matches the current
 primitive. Original fixture bounds, proof simplification and source-epoch
 transition diagnostics, corrected checks, binaries and
 source snapshots are archived under `X86_CALL_LABEL_TOKEN_V1`.
+
+### ARM live skb route fixture
+
+The immutable77b1727d3 full check exits2 at the existing ARM skb route scene,
+whose packet-field and cb observations used the former shadow ABI. The scene
+now reads through the production native-offset skb projection and writes cb
+through its live context before the same u32 RET. A captured-source replay
+reproduces original exit1 and corrected exit0 with4471 retained route cases.
+The simulator, ISA and runtime policies retain their existing definitions.
+Original full log,1171 Git-verified source pins, actual exits, both oracle
+binaries and captured sources are archived under
+`ARM64_LIVE_SKB_ROUTE_FIXTURE_V1`. The private source exports are retired;
+complete checks keep their individual source identities.
