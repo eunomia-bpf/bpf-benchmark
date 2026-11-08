@@ -1,15 +1,13 @@
-"""AArch64 generation worker for the kernel-backed trusted specializer.
+"""Generate and compile B from the immutable AArch64 request copy.
 
-The common service supplies kernel-copied native bytes and normalized metadata
-whose program/map identities it checked against the pinned source program.
-Transport, capability registration, proof upload and request binding belong to
-that service. This module only generates fresh artifacts in its private job dir.
+The shared service owns request transport and map/helper resolution.
 """
 from __future__ import annotations
 
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -29,12 +27,7 @@ _SPEC.loader.exec_module(gen)
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                output_dir: Path, native_link: Path) -> dict:
-    """Generate from one immutable native request, without any proof/source input.
-
-    ``metadata`` is the generation view, normalized by the common trusted
-    service from the pinned program/maps. It has no paths, C or compiler flags.
-    The returned paths are freshly created worker outputs, never producer paths.
-    """
+    """Generate fresh simulator source and objects in the worker job directory."""
     validate_native(native_bytes, entry_symbol, "EM_AARCH64")
     declarations(metadata)
     output_dir = Path(output_dir).resolve()
@@ -64,11 +57,16 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                         '#include ' + json.dumps(str(ROOT / "kprog/arm64/arm64_sim_local_bpf.h")))
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
-    run(["clang", "-g", "-O2", "-mcpu=v4", "-target", "bpf",
-         "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_arm64",
-         "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
-         "-I", Path("/usr/include") / sysconfig.get_config_var("MULTIARCH"),
-         "-c", source, "-o", obj])
+    compiler_state = os.environ.get("KPROG_TRUSTED_COMPILE_STATE")
+    if compiler_state is None:
+        run(["clang", "-g", "-O2", "-mcpu=v4", "-target", "bpf",
+             "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_arm64",
+             "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
+             "-I", Path("/usr/include") / sysconfig.get_config_var("MULTIARCH"),
+             "-c", source, "-o", obj])
+    else:
+        run([sys.executable, ROOT / "kprog/trusted_compile.py", "submit",
+             "--state", compiler_state, "--source", source, "--output", obj, "--arch", "arm64"])
     result = dict(native_object=str(native), native_proof_object=str(native_proof),
         simulator_object=str(obj), simulator_program=name + "_arm64_sim_xdp",
         symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())

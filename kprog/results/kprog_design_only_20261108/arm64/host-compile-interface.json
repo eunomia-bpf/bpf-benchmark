@@ -1,0 +1,25 @@
+{
+  "utc": "2026-11-08T06:46:17.439801+00:00",
+  "source_sha256": {
+    "kprog/trusted_compile.py": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
+    "kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751"
+  },
+  "request_fields": [
+    "source",
+    "output",
+    "source_sha256",
+    "arch"
+  ],
+  "arm_profile": {
+    "optimization": "O2",
+    "target": "bpf",
+    "cpu": "v4",
+    "frame_bytes": 4096,
+    "sysroot_option": "--arm64-sysroot"
+  },
+  "existing_service_tests": 8,
+  "existing_service_test_exit": 0,
+  "qemu_interface_receipt": "996430e44d814606577fce76cbdd18e193d422c9",
+  "native_positive_executions_using_profile": 4,
+  "new_admission_checks": 0
+}

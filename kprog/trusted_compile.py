@@ -29,7 +29,15 @@ def atomic_json(path: Path, value: dict) -> None:
     os.replace(temporary, path)
 
 
-def compile_command(source: Path, output: Path, arch: str, clang: str) -> list[str]:
+def compile_command(source: Path, output: Path, arch: str, clang: str, arm64_sysroot: Path | None = None) -> list[str]:
+    if arch == 'arm64' and arm64_sysroot is not None:
+        return [clang, '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm',
+                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',
+                '--sysroot=' + str(arm64_sysroot),
+                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),
+                '-I', str(ROOT / 'vendor/libbpf/src'),
+                '-I', str(arm64_sysroot / 'usr/include/aarch64-linux-gnu'),
+                '-c', str(source), '-o', str(output)]
     return [clang, '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm',
             '-bpf-stack-size=4096', '-D__TARGET_ARCH_' + arch,
             '-I', str(ROOT / 'kprog' / arch),
@@ -39,9 +47,9 @@ def compile_command(source: Path, output: Path, arch: str, clang: str) -> list[s
             '-I', '/usr/include/x86_64-linux-gnu', '-c', str(source), '-o', str(output)]
 
 
-def execute(job: dict, scope: Path, clang: str) -> dict:
+def execute(job: dict, scope: Path, clang: str, arm64_sysroot: Path | None = None) -> dict:
     source, output, arch = Path(job['source']), Path(job['output']), job['arch']
-    command = compile_command(source, output, arch, clang)
+    command = compile_command(source, output, arch, clang, arm64_sysroot)
     start = time.monotonic()
     with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
         child = subprocess.Popen(command, stdout=stdout, stderr=stderr)
@@ -62,7 +70,7 @@ def execute(job: dict, scope: Path, clang: str) -> dict:
     return result
 
 
-def serve(scope: Path, state: Path, clang: str) -> None:
+def serve(scope: Path, state: Path, clang: str, arm64_sysroot: Path | None = None) -> None:
     scope = scope.resolve(strict=True)
     state = state.resolve()
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -83,7 +91,7 @@ def serve(scope: Path, state: Path, clang: str) -> None:
                 continue
             try:
                 job = json.loads(request.read_text())
-                result = execute(job, scope, compiler)
+                result = execute(job, scope, compiler, arm64_sysroot)
             except Exception as error:
                 result = dict(returncode=1, stdout='', stderr=str(error) + '\n')
             atomic_json(state / (identity + '.result.json'), result)
@@ -125,6 +133,7 @@ def main() -> int:
     server.add_argument('--scope', type=Path, required=True)
     server.add_argument('--state', type=Path, required=True)
     server.add_argument('--clang', default='clang-18')
+    server.add_argument('--arm64-sysroot', type=Path)
     client = commands.add_parser('submit')
     client.add_argument('--state', type=Path, required=True)
     client.add_argument('--source', type=Path, required=True)
@@ -132,7 +141,7 @@ def main() -> int:
     client.add_argument('--arch', choices=['x86', 'arm64'], required=True)
     arguments = parser.parse_args()
     if arguments.mode == 'serve':
-        serve(arguments.scope, arguments.state, arguments.clang)
+        serve(arguments.scope, arguments.state, arguments.clang, arguments.arm64_sysroot)
         return 0
     return submit(arguments.state, arguments.source, arguments.output, arguments.arch)
 
