@@ -1,0 +1,3 @@
+Whole ARM Tracee native CORE input refresh
+
+The existing native-object Make rules compile all three unchanged Tracee source units with the published48ff82cfb generic CORE probe-helper semantics and canonical build flags. Build exit0; each unit retains its complete defined-function and map-symbol inventory. compile.json and compile-inputs.tar.gz preserve before/current native hashes, helper relocation inventories, exact source/header/command bytes and the corrected initial Make target setup. The existing whole-app manifest retains its selectors and points to this native-input epoch. Fresh service generation, verifier/binding outcomes and work counters follow the current whole-app queue. QEMU observations carry functional scope.
