@@ -1712,6 +1712,8 @@ def render_program(name: str, insns: list[NativeInsn],
         declare = "X86_SIM_ENTRY_XDP(ctx);"
     else:
         raise ValueError(f"unknown native entry ABI: {kind}")
+    if program_section:
+        section = f'SEC({json.dumps(program_section)})'
     addrs = {insn.addr for insn in all_insns}
     return_targets = {exit_addr} if exit_addr is not None else set()
     if exit_addr is not None:
