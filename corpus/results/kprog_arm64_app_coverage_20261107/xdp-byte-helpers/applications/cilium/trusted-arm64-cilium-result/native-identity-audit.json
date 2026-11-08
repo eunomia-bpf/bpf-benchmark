@@ -1,0 +1,68 @@
+{
+  "utc": "2026-11-08T05:19:08.340722+00:00",
+  "kind": "cilium",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261108T041032941967Z.tar.gz",
+  "archive_sha256": "693688e43f222456440aae8263200d9c00bbd7515fdf442ddbaef773b2f78a62",
+  "host_reported_ok": false,
+  "hashes_unchanged": false,
+  "completed_counts": {
+    "service_accepted": 1,
+    "service_refused": 2
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 3,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "cil_xdp_entry",
+      "native_sha256": "50333e90abf1dec4d72ce929a5a63767632b5ed85035362db31269cfa1569017",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "93edf02b5c50e6909645da8b3b101d45304169905b80ad043892376a35dc22ad",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "ff85313d4c8a090bbcf62fa9c85db1007b1857be0ada6b54b3c6c83d6222e1ae",
+        "request/generated/trusted_arm64.bpf.o": "962c31bc1e476c6e768a3ba1eea75c5a4a4543f80ceae8db6f227118cf3f4d01",
+        "request/generated/trusted_arm64.bpf.c": "eb0cceb917c66f0db90981387c350e31c895b0956e604f0d37cc37dbe0551bbc",
+        "request/generation.metadata.json": "28737afd8c5036df88585d49a4971915356b8eeed49f21dce51a14bf795e614a",
+        "request/kernel.facts.json": "042e56a6780e98570b4a325fc1b6fe68fc100f3e431facbbfc0cc5214afdd30e",
+        "request/source-identities.json": "c3249242134eb3473148f85d8fd3ec284bdf884df99159463a29b9c7de289d23"
+      }
+    },
+    {
+      "request_id": 2,
+      "status": -5,
+      "entry": "tail_handle_ipv4_from_netdev",
+      "native_sha256": "b3c4849f05a0d29be887f9865f02e9c455e0eb66316b2a2c1ff1bb14602c5663",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "9052953b33a8fda87454a245d6c0aed6b89ff05a25d0036a6dc1a9347f5e6f6e",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "75c47b7fc1876d0fbb1b38c92547b7fba48cb58ae76259b6f70e345d656ba85e",
+        "request/generated/trusted_arm64.bpf.o": "172af27c1ff8d3bf71b1d9531494bd0bcc93a0f7697725b5163cadeed1c846c6",
+        "request/generated/trusted_arm64.bpf.c": "43eba897c297d9303fb44ed65e19099d5e5f40e463a55df91bb28696c5827f46",
+        "request/generation.metadata.json": "d96511b002e526c4ac288fff0cde9e57e10bfe7cd66ca4cb555f065ef7a954c3",
+        "request/kernel.facts.json": "a229eb6721c08cf75fe151efeb290de2f41594d2f381965ed338bc620c96be51",
+        "request/source-identities.json": "f0c8654e820d16ab4c06cca265a782c4fc3ae981e983824d60acef675e0a4b1a"
+      }
+    },
+    {
+      "request_id": 3,
+      "status": -5,
+      "entry": "tail_handle_ipv4_cont",
+      "native_sha256": "039e3a6f0a241c4287344ad7a9c955549d6df8ca16d470503e8695445d4ba0a7",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": false,
+      "generated_native_matches_kernel": null,
+      "request_archive_sha256": "3ab384ebe6480b02c1396f28637a25738f30ba9587d0cbc378b445cf97e97ed9",
+      "artifacts": {}
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "fb4f1d998334396a288e679a5a2ddf698aa15d5fac39b8c829d4d452a07bccbf"
+}
