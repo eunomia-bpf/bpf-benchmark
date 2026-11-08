@@ -4283,3 +4283,10 @@ and index normalization, compiler/invocation/ABI and native-link relations retai
 their universal production interfaces. Source snapshots, binaries, original
 proof-type failure and corrected build/audits are archived under
 `X86_XMM0_MEMORY_TOKENS_V1`; each full check retains its exact source epoch.
+
+### Published source full check 9db407602
+
+`make check` on immutable published9db407602 exits0. All1170 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_9db407602`. Every check retains its exact published source identity.
