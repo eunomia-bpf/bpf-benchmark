@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-08T23:53:18.188590+00:00",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T23:53:18.196260+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 0,
+    "distinct_source_prog_ids": 0,
+    "proof_generated": 0,
+    "stages": {},
+    "failure_causes": {},
+    "requests": [],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000048_572708/details/apps/tracee__monitor.json",
+        "app": "tracee/monitor",
+        "status": "error",
+        "error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/86ddf06c/tracee/signatures --capabilities bypass=true: command exited with code 1: 2265: (85) call bpf_probe_read#4      ; R0=scalar()\n2266: (c5) if r0 s< 0x0 goto pc+158   ; R0=scalar(smin=0,umax=0x7fffffffffffffff,var_off=(0x0; 0x7fffffffffffffff))\n; buf->argnum++; @ buffer.h:117\n2267: (71) r1 = *(u8 *)(r9 +136)      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R9=map_value(map=event_data_map,ks=4,vs=32536)\n2268: (07) r1 += 1                    ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=256,var_off=(0x0; 0x1ff))\n2269: (73) *(u8 *)(r9 +136) = r1      ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=256,var_off=(0x0; 0x1ff)) R9=map_value(map=event_data_map,ks=4,vs=32536)\n; buf->offset = buffer_arg_offset; @ buffer.h:116\n2270: (6b) *(u16 *)(r9 +32138) = r7   ; R7=scalar(smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=32000,var_off=(0x0; 0x7fff)) R9=map_value(map=event_data_map,ks=4,vs=32536)\n2271: (05) goto pc+154\n; if (offset > ARGS_BUF_SIZE - 1) @ buffer.h:282\n2426: (bf) r1 = r7                    ; R1=scalar(id=167,smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=32000,var_off=(0x0; 0x7fff)) R7=scalar(id=167,smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=32000,var_off=(0x0; 0x7fff))\n2427: (57) r1 &= 65535                ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=32000,var_off=(0x0; 0x7fff))\n2428: (25) if r1 > 0x7cff goto pc+45          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=31999,var_off=(0x0; 0x7fff))\n; save_str_to_buf(&p.event->args_buf, (void *) sys->args.args[1] /*pathname*/, 1); @ tracee.bpf.c:437\n2429: (79) r2 = *(u64 *)(r10 -88)     ; R2=map_value(map=task_info_map,ks=4,vs=200) R10=fp0 fp-88=map_value(map=task_info_map,ks=4,vs=200)\n2430: (79) r3 = *(u64 *)(r2 +120)     ; R2=map_value(map=task_info_map,ks=4,vs=200) R3=scalar()\n; buf->args[offset] = index; @ buffer.h:286\n2431: (79) r2 = *(u64 *)(r10 -96)     ; R2=map_value(map=event_data_map,ks=4,vs=32536) R10=fp0 fp-96=map_value(map=event_data_map,ks=4,vs=32536)\n2432: (0f) r2 += r1                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=31999,var_off=(0x0; 0x7fff)) R2=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=31999,var_off=(0x0; 0x7fff))\n2433: (b7) r4 = 1                     ; R4=1\n2434: (73) *(u8 *)(r2 +137) = r4      ; R2=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=31999,var_off=(0x0; 0x7fff)) R4=1\n; buf->args_offset[index] = offset; @ buffer.h:289\n2435: (6b) *(u16 *)(r9 +32142) = r7   ; R7=scalar(smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=32000,var_off=(0x0; 0x7fff)) R9=map_value(map=event_data_map,ks=4,vs=32536)\n; if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int))) @ buffer.h:292\n2436: (25) if r1 > 0x6cfb goto pc+37          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=27899,var_off=(0x0; 0x7fff))\n; int sz = bpf_probe_read_str(&(buf->args[offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr); @ buffer.h:296\n2437: (07) r7 += 5                    ; R7=scalar(smin=umin=smin32=umin32=9,smax=umax=smax32=umax32=32005,var_off=(0x0; 0x7fff))\n2438: (57) r7 &= 65535                ; R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=32005,var_off=(0x0; 0x7fff))\n2439: (79) r1 = *(u64 *)(r10 -96)     ; R1=map_value(map=event_data_map,ks=4,vs=32536) R10=fp0 fp-96=map_value(map=event_data_map,ks=4,vs=32536)\n2440: (0f) r1 += r7                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=32005,var_off=(0x0; 0x7fff)) R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=32005,var_off=(0x0; 0x7fff))\n2441: (07) r1 += 137                  ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=32005,var_off=(0x0; 0x7fff))\n2442: (b7) r2 = 4096                  ; R2=4096\n2443: (85) call bpf_probe_read_str#45\ninvalid access to map value, value_size=32536 off=32142 size=4096\nR1 max value is outside of the allowed memory range\nprocessed 2940 insns (limit 1000000) max_states_per_insn 1 total_states 199 peak_states 199 mark_read 0\n-- END PROG LOAD LOG --\n{\"level\":\"warn\",\"ts\":104.366239808,\"msg\":\"libbpf: prog 'syscall__execveat_enter': failed to load: -13\"}\n{\"level\":\"warn\",\"ts\":104.377855888,\"msg\":\"libbpf: failed to load object ''\"}\n{\"level\":\"fatal\",\"ts\":104.486636384,\"msg\":\"Tracee runner failed\",\"error\":\"cmd.Runner.Run: error initializing Tracee: ebpf.(*Tracee).Init: ebpf.(*Tracee).initBPF: failed to load BPF object: permission denied\"}",
+        "phases": {
+          "baseline": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
