@@ -1,0 +1,16 @@
+{
+  "stage": "compiled",
+  "artifacts": {
+    "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/map-caller-frame/generated/request.native.o",
+    "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/map-caller-frame/generated/trusted_x86.proof.o",
+    "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/map-caller-frame/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "tail_ipv4_policy",
+    "native_sha256": "8b8d4c8326c984668d392c9f68946642055acf9550b19a25669e36cb3b2bfa19"
+  },
+  "host_slot_cases": 4100,
+  "host_route_cases": 19458,
+  "scope": "private generic map helper caller-frame effect candidate",
+  "native_executions": 0,
+  "kernel_loads": 0
+}

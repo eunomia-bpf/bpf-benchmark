@@ -1,0 +1,7 @@
+# Map helper caller-frame representation
+
+This private generic candidate represents map_update_elem and map_delete_elem through the existing caller-private-frame-preserving scalar-result primitive. Both helpers read their caller key/value and update kernel map storage; existing call-frame erasure, map/result effects and caller register/flag clobbers retain their definitions. The canonical model keeps its current header while the original38 and whole-application successors run.
+
+Existing4100 helper-slot and19458 helper-route host cases pass. The unchanged actual Cilium tail_ipv4_policy native input8b8d4c83 generates and compiles through the current trusted specializer. Kernel loads0/native executions0 in this compiler observation. Complete source/native/generated C/B and compiler records accompany raw.tar.gz. The initial freshness diagnostics belong to the moving shared generated-helper snapshot and are retained beside the successful host/component run.
+
+The earlier Cilium verifier reload at B instruction7389 reads a scalar address. BTF source mapping points into a later optimized native store, and compiler motion/merging permits several source associations. The saved stack-slot causal origin remains an investigation. This candidate measures the generic helper footprint independently of that causal hypothesis. The below-SP raw-memory/return-slot effect remains an explicit helper ABI refinement interface shared with V. Runtime admission additions0.
