@@ -1,0 +1,54 @@
+{
+  "applications": {
+    "tetragon-final-modules": {
+      "application": "tetragon/observer",
+      "native_requests": 3,
+      "generated": 3,
+      "compiled": 3,
+      "installed": 3,
+      "failed": 0
+    },
+    "tetragon-current-assets": {
+      "application": "tetragon/observer",
+      "native_requests": 5,
+      "generated": 5,
+      "compiled": 5,
+      "installed": 4,
+      "failed": 1
+    },
+    "otel-final-modules": {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "native_requests": 3,
+      "generated": 3,
+      "compiled": 3,
+      "installed": 2,
+      "failed": 1
+    }
+  },
+  "native_hash_matches": {
+    "tetragon-final-modules": 3,
+    "tetragon-current-assets": 5,
+    "otel-final-modules": 3
+  },
+  "tetragon_asset_inputs": {
+    "source": "/workspaces/.agent-state/kprog-lanes/C/tetragon-manifest-replay/manifest.json",
+    "source_sha256": "67344103cf8ba074567ba1e4581376b6dee0434406ae5f411b80beb182136d57",
+    "old_count": 235,
+    "current_count": 237,
+    "actual_event_execve_bytecode_length": 22448,
+    "event_execve_matches": [
+      {
+        "native_object": "bpf_execve_event_v61.native.o",
+        "program": "event_execve",
+        "source_bytecode_len": 22448,
+        "source_lacks_helper": 174,
+        "symbol": "event_execve"
+      }
+    ]
+  },
+  "image": "sha256:61077624ab8e63a5692e4f4d4a2796783adbcd0d4971e020041eb4876e85c121",
+  "artifact_sha256": {
+    "runtime.tar.gz": "5eb18ba1505745093b005b736129b2c9a2e8218938f720dad9c79ab30cb468df",
+    "applications.tar.gz": "fec25c6e502f70b9bf58a0f92fda9cd206ad12ab9cb90d7de3b5d63f27193302"
+  }
+}

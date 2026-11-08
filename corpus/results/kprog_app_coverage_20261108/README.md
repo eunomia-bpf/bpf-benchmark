@@ -5,9 +5,9 @@ The table records the latest closed whole-application attempt, including setup a
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
-| OTel | 13 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
+| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Cilium | 62 resident | 1 | 0 | 0 | 1: missing C body for helper189, bpf_xdp_load_bytes | 0 | [matched-module cohort](xdp-load-helper/README.md) |
-| Tetragon | 287 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
+| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
 | Tracee | 151 resident | 2 | 2 | 1 | 0 | 1: R2 scalar memory access after242instructions | [matched-module cohort](xdp-load-helper/README.md) |
 
@@ -51,3 +51,5 @@ The [five-step x86 replay](five-step-x86-replay/README.md) retains the completed
 The [XDP byte-load helper extension](xdp-load-helper/README.md) adds Linux189 to the existing68-row C/JSON/Lean dispatcher. Existing4100ID/18946typed-ABI observations, both helper Lean modules and29+1micro compile controls pass. Complete matched-module Cilium reaches that missing-body frontier; Tracee installs its first program and reaches the later R2 scalar read. The successor runs the entire original Cilium application with the extended snapshot.
 
 The [final BCC/Katran five-step cohort](bcc-katran-five-step/README.md) completes26/26 actual native loads and both original workloads. BCC syscall work is514in each arm. Katran processes2523084JIT/2455449native packets with matching per-arm BPF/VIP/LRU/TX counts and0LRU misses; native delivery accounts for2452337received+2550TX-interface+562RX-interface packets. All26native request-object hashes match the prior five-step cohort. R retains the existing timing snapshots and native-source decision.
+
+The [whole Tetragon/OTel five-step cohorts](whole-five-step-0700/README.md) retain11terminal native hash joins. Restoring the current237-row Tetragon asset inventory advances its entire startup to5generated/4installed and the event_execve stack-write frontier. OTel reaches3generated/2installed and the perf_unwind_native exploration frontier. Original startup errors, native objects and work counters retain their full logs.
