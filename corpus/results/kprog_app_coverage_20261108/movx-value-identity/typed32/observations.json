@@ -1,0 +1,98 @@
+{
+  "host_complete_state_cases": 23761,
+  "host_ubsan_exit": 0,
+  "complete_original_tracee_compile_exit": 0,
+  "bpf_insns": 3160,
+  "deepest_direct_frame_offset": -304,
+  "compiler_files": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/typed32/tracee.bpf.c",
+      "md5": "a0bb894045816453c22d8b9bc81421a0",
+      "sha256": "d90a28f3fc54d38cf96bccca22673678bb26125a80f2621270b28daab0ff892b",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/asm-generic/int-ll64.h",
+      "md5": "b810f270733e106319b67ef512c6246e",
+      "sha256": "eb8b891e775ebb50af0353fdcbc625854fd98780399b3a57a404d36af6c29749",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/typed32/tracee.bpf.c",
+      "md5": "a0bb894045816453c22d8b9bc81421a0",
+      "sha256": "d90a28f3fc54d38cf96bccca22673678bb26125a80f2621270b28daab0ff892b",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h",
+      "md5": "1a4f9d7387ea7d9b92f499307bdf712e",
+      "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h",
+      "md5": "af3577c2b1c2566ad76f1bd2c69dbe37",
+      "sha256": "d116a84a62207260a394206e2b1f0811ac72f3563b88d4f49b8dce7377c08ab4",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/linux/types.h",
+      "md5": "bf9fbc0e8f60927fef9d8917535375a6",
+      "sha256": "89de4736e44cf154844fad3d6c40c435f3d15200801046becb1876030db247ce",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_mem_access.h",
+      "md5": "642fcb4f054d60386fcd37ded524589c",
+      "sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_shift_result.h",
+      "md5": "5fe3ccb6b79d41b1697e6028053391d1",
+      "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim.h",
+      "md5": "cedba0dfb15f459a1fb61860887ac4b4",
+      "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_signed.h",
+      "md5": "54e02d4b7a02a40c0cb8724ce2f2626f",
+      "sha256": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_bitops.h",
+      "md5": "10b83a65d7d01bc15a626712d3efe769",
+      "sha256": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/typed32/candidate.h",
+      "md5": "a1be2ff234d9ce70193fa039544d81d3",
+      "sha256": "f981925d28acd989ca3319673914d4f639f4309cc7cf91c8a64218c8f1d76812",
+      "recovered_from": null
+    }
+  ],
+  "source_sha256": "d90a28f3fc54d38cf96bccca22673678bb26125a80f2621270b28daab0ff892b",
+  "object_sha256": "edcf26bc0060251e9fd18f17a9d74f8d2beb7eba9e3bd66afda09a540aa531c8",
+  "candidate_sha256": "f981925d28acd989ca3319673914d4f639f4309cc7cf91c8a64218c8f1d76812",
+  "runtime_adoption": {
+    "updated": "2026-11-08T04:17:51.526863+00:00",
+    "component_exit": 0,
+    "route_ubsan_cases": 23761,
+    "whole_tracee_bpf_compile": 0,
+    "whole_tracee_insns": 3160,
+    "whole_tracee_frame": -304,
+    "previous_candidate_sha256": "13d30f4c4dbbf5a15f9c3992602c09cb00260aec49c452866c717cbd9fa944ef",
+    "candidate_sha256": "f981925d28acd989ca3319673914d4f639f4309cc7cf91c8a64218c8f1d76812",
+    "native_sha256": "7479850e23454e957f4c5880a18d92a91c27dd282af52f768e4422fe9366a722",
+    "cohort_state": "queued on actual preceding Cilium; source capture occurs at application startup"
+  },
+  "code_change": "Four additional lines in one generic operation-result representation; existing whole-state oracle reused",
+  "archive_sha256": "050759b884e6c846d063a5640025d0a8be6d70f8c033652e21c0266e08100d32"
+}
