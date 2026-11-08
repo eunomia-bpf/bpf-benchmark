@@ -83,9 +83,11 @@ NativeLinkArgs::UpdateSite make_link_update_site(
 NativeLinkArgs build_native_link_args(
     const std::filesystem::path &native_link_path,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
-    const CompanionLoad &companion)
+    const CompanionLoad &companion,
+    const std::filesystem::path &trusted_native_proof)
 {
     NativeLinkArgs out{};
+    const bool optimize_helpers = trusted_native_proof.empty();
     out.linker = native_link_binary(native_link_path);
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -98,7 +100,7 @@ NativeLinkArgs build_native_link_args(
     uint64_t this_cpu_off_addr = 0;
 #if defined(__x86_64__)
     {
-        if (companion.needs_kernel_symbols) {
+        if (optimize_helpers && companion.needs_kernel_symbols) {
             uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
             this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
             if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
@@ -117,8 +119,10 @@ NativeLinkArgs build_native_link_args(
     }
 #elif defined(__aarch64__)
     {
-        uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
-        add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
+        if (optimize_helpers) {
+            uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
+            add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
+        }
         add_name_addr(out.helpers, kArm64BpfMapMaxEntriesOffsetKey,
                       K_BPF_MAP_MAX_ENTRIES_OFFSET);
         add_name_addr(out.helpers, kArm64BpfArrayPtrsOffsetKey,
@@ -187,44 +191,48 @@ NativeLinkArgs build_native_link_args(
         std::unique(out.tail_call_maps.begin(), out.tail_call_maps.end()),
         out.tail_call_maps.end());
 
-    for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
-        out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
-    }
-    std::vector<std::pair<std::string, std::string>> native_map_symbols(
-        companion.native_map_symbols.begin(), companion.native_map_symbols.end());
-    std::sort(native_map_symbols.begin(), native_map_symbols.end(),
-              [](const auto &a, const auto &b) { return a.first < b.first; });
-    for (const auto &kv : native_map_symbols) {
-        const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
-        if (!meta) {
-            fail("native map symbol " + kv.first +
-                 " references unknown loaded map " + kv.second);
+    // A trusted worker resolves the submitted helper calls through their ABI.
+    // Optimized helper bodies enter P during native compilation before submit.
+    if (optimize_helpers) {
+        for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
+            out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
         }
-        CompanionLoad::LookupSite site =
-            lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
-        site.map_name = kv.first;
-        out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
-            kv.first,
-            make_link_lookup_site(site),
-        });
-    }
-    for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        auto site = make_link_update_site(companion.update_sites[i]);
-        // Native templates carry zero map pointers. Bind full aliases while
-        // the source FD identity and real native map addresses are available.
-        for (const auto &map : maps) {
-            if (site.map_addr && map.second == site.map_addr &&
-                companion.native_map_symbols.count(map.first))
-                site.map_names.push_back(map.first);
+        std::vector<std::pair<std::string, std::string>> native_map_symbols(
+            companion.native_map_symbols.begin(), companion.native_map_symbols.end());
+        std::sort(native_map_symbols.begin(), native_map_symbols.end(),
+                  [](const auto &a, const auto &b) { return a.first < b.first; });
+        for (const auto &kv : native_map_symbols) {
+            const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
+            if (!meta) {
+                fail("native map symbol " + kv.first +
+                     " references unknown loaded map " + kv.second);
+            }
+            CompanionLoad::LookupSite site =
+                lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
+            site.map_name = kv.first;
+            out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
+                kv.first,
+                make_link_lookup_site(site),
+            });
         }
-        // LLVM can merge proof calls from different maps. The verifier then
-        // poisons map_ptr_state, so bind the public helper identity rather than
-        // a map-specific ops function on the required-bound path.
-        if (site.kind == "call" &&
-            native_loader_env_truthy("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
-            site.target_addr = helper_kernel_addr(BPF_FUNC_map_update_elem);
+        for (size_t i = 0; i < companion.update_sites.size(); i++) {
+            auto site = make_link_update_site(companion.update_sites[i]);
+            // Native templates carry zero map pointers. Bind full aliases while
+            // the source FD identity and real native map addresses are available.
+            for (const auto &map : maps) {
+                if (site.map_addr && map.second == site.map_addr &&
+                    companion.native_map_symbols.count(map.first))
+                    site.map_names.push_back(map.first);
+            }
+            // LLVM can merge proof calls from different maps. The verifier then
+            // poisons map_ptr_state, so bind the public helper identity rather than
+            // a map-specific ops function on the required-bound path.
+            if (site.kind == "call" &&
+                native_loader_env_truthy("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
+                site.target_addr = helper_kernel_addr(BPF_FUNC_map_update_elem);
+            }
+            out.update_sites.push_back(site);
         }
-        out.update_sites.push_back(site);
     }
 #if defined(__aarch64__)
     /*

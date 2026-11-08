@@ -1,0 +1,13 @@
+{
+  "build_exit": 0,
+  "service_tests": 9,
+  "worker_compile_exit": 0,
+  "production_paths": [
+    "kprog/libnativeloader/src/native_loader.cpp",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp"
+  ],
+  "artifacts": {
+    "kprog/libnativeloader/build/trusted-native-loader": "b64e7e6333167b4af3d93019ea54fbd3f7cc8d4106fc8a030699aac4c3a2a87d",
+    "kprog/libnativeloader/build/libnative_loader.so": "ff644dc0ead8bfddc3239a4a70d6361add0d4620fba36e3cae1489d4f9412011"
+  }
+}

@@ -4256,7 +4256,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
-        build_native_link_args(native_link_path, companion.map_addrs, companion);
+        build_native_link_args(native_link_path, companion.map_addrs, companion,
+                               trusted_native_proof);
     link_args.trusted_native_proof = trusted_native_proof;
     // Fresh service outputs live in the broker's private per-request directory.
     // They cannot reuse the application's old shared template/prebuilt cache.
