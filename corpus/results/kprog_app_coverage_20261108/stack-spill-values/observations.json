@@ -1,0 +1,40 @@
+{
+  "created": "2026-11-08T11:50:41.765994+00:00",
+  "production_source_changed": false,
+  "representation": "separate native numeric stack bytes and verifier-shaped ghost pointer cells; full raw accesses retained",
+  "component": {
+    "instructions": 10475,
+    "maximum_fp_minus_offset": 736,
+    "make_exit": 0
+  },
+  "host": {
+    "observations": 52992,
+    "differences": 0,
+    "address_sanitizer": true,
+    "undefined_sanitizer": true
+  },
+  "lifecycle": {
+    "observations": 552,
+    "differences": 0
+  },
+  "safety": {
+    "positive_executed": 9,
+    "negative_stock_verifier_rejected": 27,
+    "negative_specialization_rejected": 2,
+    "unsafe_load_accepted": 0
+  },
+  "files": {
+    "native-safety.tar.gz": {
+      "bytes": 404204,
+      "sha256": "6b48f68463e11e6e099ff3b1864d176c82eef2a2068f532c34357523ca82d827"
+    },
+    "named-candidate.tar.gz": {
+      "bytes": 406453,
+      "sha256": "6eee1e21746d4503729eb4df312ff9acee35243fd047502cb18d8ccc1654415b"
+    },
+    "outcomes.json": {
+      "bytes": 13409,
+      "sha256": "d3a7b4698d1ae91d23af626f46eee130f76b7f6c61afa678e8d0b8d8fb17de9a"
+    }
+  }
+}
