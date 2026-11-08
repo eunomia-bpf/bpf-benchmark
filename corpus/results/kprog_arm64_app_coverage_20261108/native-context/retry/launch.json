@@ -1,0 +1,27 @@
+{
+  "utc": "2026-11-08T10:09:35.132024+00:00",
+  "runtime_build": {
+    "commit": "fb9a581c60aec140ce00b14f3997dc00941d7fd0",
+    "paths": [
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/build.json",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/build.log.gz",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/inputs.tar.gz",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/module-diagnostic/trusted-arm64-service-result/run-20261108T100707130997Z.tar.gz",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/module-diagnostic/trusted-arm64-service-result/summary.json"
+    ],
+    "sha256": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/build.json": "c34c592af2564a13f2183947d80e7a6be8549c391347a46fc2b38968bf92370d",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/build.log.gz": "df8d5a424c1f696afa5c3c79f89073141eabfec948511529150be41e27b6cc09",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/rebuild/inputs.tar.gz": "59ea68858e1047bf8f424fa03c01106d5214fd74e369ed38d9a21b4668b896f8",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/module-diagnostic/trusted-arm64-service-result/run-20261108T100707130997Z.tar.gz": "516b1e6a112584752c044454509599d6d7f5b77b337c6cefafd32a51ac1a3359",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/module-diagnostic/trusted-arm64-service-result/summary.json": "089cc692f6cad202fd916c4856baf001a6b91be9dd8a089165e32dddf8470ef8"
+    },
+    "remote_ancestor_verified": true
+  },
+  "cases": 34,
+  "source_prog_id": 0,
+  "source_programs_loaded": 0,
+  "resource_context": "Original companion objects autoloadfalse; actual resource maps stay pinned",
+  "programs_executed": 4,
+  "risk_cases_load_only": 30
+}
