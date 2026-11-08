@@ -5815,7 +5815,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         return submitted;
     }
     const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
-    const bool trusted_externs = trusted_worker && !options.trusted_maps.empty();
+    const bool trusted_externs = trusted_worker;
 
     // Native data resolution supplies full ELF map names for truncated kernel
     // names. Resolve those identities before deciding which proof maps to reuse.
