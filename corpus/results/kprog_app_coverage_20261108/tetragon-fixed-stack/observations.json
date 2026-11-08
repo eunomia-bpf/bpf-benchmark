@@ -1,0 +1,12 @@
+{
+  "driver_exit": 2,
+  "collector_exit": 1,
+  "guest_return": 255,
+  "unique_guest_archive_receipt": false,
+  "application_coverage_applicable": false,
+  "observed_interval": "concurrent filesystem ENOSPC from kernel build raw log",
+  "cause_relation": "guest failure occurred in the ENOSPC interval; guest-side application outcome awaits a complete rerun",
+  "archive_sha256": "d9337521e60e3b1b692d76158dc87d851828a817e4f3c3ded289b2f6b93fe499",
+  "retry_queue": 4185781,
+  "prior_valid_batch": "tetragon-typed-read/README.md"
+}
