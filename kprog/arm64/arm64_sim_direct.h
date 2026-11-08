@@ -277,7 +277,8 @@ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
+ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
+			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width); \
 			__u8 __a64_l_value_tag = ARM64_SIM_L_MEM_READ_TAG( \
 				(SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width); \
@@ -294,7 +295,8 @@ ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
+ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
+			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP))); \
 			__u64 __a64_l_sxop = ARM64_SIM_L_LDRSX_SXOP((OP)); \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(__a64_l_sxop, __a64_l_value, __a64_l_width), __a64_l_width); \
@@ -304,7 +306,8 @@ ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM)); \
+ARM64_SIM_L_WRITEBACK_OVERLAP((DST), (SRC), (AUX)); \
+			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM)); \
 			ARM64_SIM_L_MEM_WRITE((DST), (SRC2), (AUX), (IMM), 0, \
 				__a64_l_width, ARM64_SIM_L_READ_REG(SRC), \
 				ARM64_SIM_L_REG_TAG(SRC)); \
@@ -320,7 +323,11 @@ ARM64_SIM_L_LDADD((DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-__u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
+/* Arm DATAOVERLAP and BASEOVERLAP for STXR/STLXR. */ \
+            if ((DST) == (SRC) || ((SRC2) != ARM64_SP && (DST) == (SRC2))) \
+                ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+            ARM64_SIM_L_SP_ALIGNMENT(SRC2); \
+            __u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
 			if (!__a64_l_failure) \
 				ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE, \
 				(AUX), 0, 0, __a64_l_width, \

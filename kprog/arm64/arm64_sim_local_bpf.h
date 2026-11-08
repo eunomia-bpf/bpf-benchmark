@@ -825,9 +825,32 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 		}                                                         \
 	} while (0)
 
-#define ARM64_SIM_L_MEM_PRE(BASE, AUX, IMM)                                 \
-	ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                                \
-		KPROG_ARM64_MEM_PREPOST_PRE_DELTA((AUX), (IMM)))
+/* Arm DDI0487 CheckSPAlignment: test incoming SP before offset/writeback.
+ * The Linux EL1 native-entry stack base is 16-byte aligned, so its simulator
+ * coordinate has the same low four bits. GPR aliases retain ordinary addressing.
+ * Arm WBOVERLAPLD/WBOVERLAPST select constrained-unpredictable behavior when
+ * writeback aliases an integer transfer register (base field31 denotes SP).
+ * Approved architectural faults use the existing verifier-visible fault arm.
+ */
+#define ARM64_SIM_L_SP_ALIGNMENT(BASE)                                    \
+    do {                                                                 \
+        if ((BASE) == ARM64_SP && ((__u64)__a64_sp & 15U))                 \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE();                            \
+    } while (0)
+
+#define ARM64_SIM_L_WRITEBACK_OVERLAP(BASE, DATA, AUX)                     \
+    do {                                                                 \
+        if ((ARM64_SIM_L_MEM_FLAGS(AUX) & (ARM64_MEM_PRE | ARM64_MEM_POST)) && \
+            (BASE) != ARM64_SP && (BASE) == (DATA))                       \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE();                            \
+    } while (0)
+
+#define ARM64_SIM_L_MEM_PRE(BASE, AUX, IMM)                                \
+    do {                                                                 \
+        ARM64_SIM_L_SP_ALIGNMENT(BASE);                                   \
+        ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                               \
+            KPROG_ARM64_MEM_PREPOST_PRE_DELTA((AUX), (IMM)));              \
+    } while (0)
 
 #define ARM64_SIM_L_MEM_POST(BASE, AUX, IMM)                                \
 	ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                                \
@@ -1189,6 +1212,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			KPROG_ARM64_PAIR_MEM_ACCESS_LOAD;                  \
 		unsigned __a64_pm_slots = KPROG_ARM64_PAIR_MEM_SLOT_COUNT;\
 		unsigned __a64_pm_hi = (WIDTH);                        \
+        /* Arm LDPOVERLAP; pair writeback compares both data fields. */    \
+        if (__a64_pm_load && (DST) == (SRC))                              \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE();                            \
+        ARM64_SIM_L_WRITEBACK_OVERLAP((BASE),                             \
+            (__a64_pm_load ? (DST) : (SRC)), (AUX));                      \
+        ARM64_SIM_L_WRITEBACK_OVERLAP((BASE),                             \
+            (__a64_pm_load ? (SRC) : (SRC2)), (AUX));                     \
 		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));             \
 		if (__a64_pm_load) {                                   \
 			__u64 __a64_pm_v0 = ARM64_SIM_L_MEM_READ((BASE),\
@@ -1316,6 +1346,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * Arm Instruction Set Reference 100076, section D3.6. */
 #define ARM64_SIM_L_LDADD(DST, SRC, BASE, WIDTH, AUX) \
  do { \
+        ARM64_SIM_L_SP_ALIGNMENT(BASE); \
     void *__a64_la_addr = ARM64_SIM_L_HELPER_ARG_PTR(BASE); \
     __u64 __a64_la_add = ARM64_SIM_L_READ_REG(SRC); \
     __u32 __a64_la_mem_aux = ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0); \
@@ -1523,6 +1554,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			}                                                 \
 		} else if (KPROG_ARM64_DISP_LOAD_HANDLED(OP)) {                \
+			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
 			__u8 __a64_l_value_tag = ARM64_SIM_L_MEM_READ_TAG( \
@@ -1536,12 +1568,14 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_LDRSX_HANDLED(OP)) {                \
+			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP)));\
 			__u64 __a64_l_sxop = ARM64_SIM_L_LDRSX_SXOP((OP));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(__a64_l_sxop, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_DISP_STORE_HANDLED(OP)) {               \
+			ARM64_SIM_L_WRITEBACK_OVERLAP((DST), (SRC), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \
 			ARM64_SIM_L_MEM_WRITE((DST), (SRC2), (AUX), (IMM), 0,\
 				__a64_l_width, ARM64_SIM_L_READ_REG(SRC),   \
@@ -1550,7 +1584,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		} else if ((OP) == ARM64_OP_LDADD) {                         \
 			ARM64_SIM_L_LDADD((DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 		} else if (KPROG_ARM64_STLXR_HANDLED(OP)) {                \
-			__u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
+			/* Arm DATAOVERLAP and BASEOVERLAP for STXR/STLXR. */ \
+            if ((DST) == (SRC) || ((SRC2) != ARM64_SP && (DST) == (SRC2))) \
+                ARM64_SIM_L_UNSUPPORTED_OPCODE();                        \
+            ARM64_SIM_L_SP_ALIGNMENT(SRC2);                              \
+            __u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
 			if (!__a64_l_failure)                              \
 				ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE, \
 				(AUX), 0, 0, __a64_l_width,                 \
