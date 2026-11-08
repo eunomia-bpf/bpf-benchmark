@@ -1,0 +1,154 @@
+{
+  "utc": "2026-11-08T22:10:46.744477+00:00",
+  "source_publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+  "scope": "Read-only comparison of existing installed load-only outcomes; original native/B/compiler/kernel sources and execution state retained.",
+  "cases": [
+    {
+      "program": "global_func14",
+      "file": "test_global_func14.c",
+      "request_id": 186,
+      "installed_prog_id": 739,
+      "stage": "installed",
+      "native_sha256": "73acd2144dc795197c51829ce5b393fc5114745bdee7c24fdf3c9afab493ed6c",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 8,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 1897,
+          "source_func_type_id": 23,
+          "token_present": 0
+        },
+        "maps": []
+      },
+      "native_object_sha256": "73acd2144dc795197c51829ce5b393fc5114745bdee7c24fdf3c9afab493ed6c",
+      "proof_object_sha256": "95f14be37975a702b3a0f88e55f8f00f72d22bf121c06968f0e8623af8b1e636",
+      "compiled_b_sha256": "5dfad3dedceebecfafece24983fb5530a6528d7ca8cb7124eefaa187398b571a",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "/workspaces/repository/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "e3b4e64e0fd4b0e44e24f124a0794bee46e6466be5c11c636a72e71909f24d3f",
+        "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "eac996ae9329debcc39f3db00960a7df2fd390156348d90e89243dd2ed60b207",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "4c1a5b2b86a0f81ee5cb0f33e00e9a2dfe24760497fd1cfaf7f43760657ae9f6",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "543d99b72977cf30cf0ed264680808936494ed92387f5aecb355c853f6c42136",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "3b892c842242e87897e914bc2a17188a87f8c7c52a1e589b82c11a4214037ecc"
+      },
+      "rule": "A globally checked BPF function pointer parameter has a known pointee extent; struct S remains FWD.",
+      "native_access": {
+        "entry": "global_func14 assigns X0=0 and calls foo",
+        "conditional_access": "foo contains a conditional 32-bit load through s; its zero-input branch returns directly",
+        "reachable_access": "Fixed entry supplies zero, and the CBZ path reaches RET with X0=0"
+      },
+      "b_access": {
+        "compiled": "Reachable B returns W0=0; remaining loads/stores address private stack spill/tag cells",
+        "conditional_fault_arm": "Existing token/return fault arm remains verifier-visible and is pruned on this initialized entry",
+        "public_global_btf": "The specialized entry body carries its RAW/SKB simulator signature; source global foo FWD parameter admissibility is a separate BPF source rule"
+      },
+      "classification": "Global-function BTF contract versus initialized native entry reachability. Native P retains its conditional load; the submitted entry takes the zero path.",
+      "x86_comparison": {
+        "source": "corpus/results/kprog_app_coverage_20261108/kernel-selftests-complete-resources/submissions.json",
+        "request_id": 121,
+        "stage": "verifier_rejected",
+        "native_sha256": "1bb11d933097174feea4a37f101b3bcbedc5229129b9baadb983bda61ce8481c",
+        "diagnostic_class": "invalid func unknown#-1 after bpf_cast_to_kern_ctx; processed26instructions",
+        "scope": "The archived x86 rejection has a helper/fault-arm resolution frontier distinct from the original FWD-S annotation."
+      }
+    },
+    {
+      "program": "no_null_check",
+      "file": "verifier_lsm.c",
+      "request_id": 260,
+      "installed_prog_id": 1036,
+      "stage": "installed",
+      "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 29,
+          "expected_attach_type": 27,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 70008,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 0,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": []
+      },
+      "native_object_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+      "proof_object_sha256": "ff3dafad2ba86286fa0ca02ab3a802feccb584b1f38d05b9caf021ccde9931f3",
+      "compiled_b_sha256": "ae14e807ccf97873e070c9815c623d82653ceecec56f643cf667067dd154fc91",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "/workspaces/repository/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "e3b4e64e0fd4b0e44e24f124a0794bee46e6466be5c11c636a72e71909f24d3f",
+        "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "eac996ae9329debcc39f3db00960a7df2fd390156348d90e89243dd2ed60b207",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "4c1a5b2b86a0f81ee5cb0f33e00e9a2dfe24760497fd1cfaf7f43760657ae9f6",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "543d99b72977cf30cf0ed264680808936494ed92387f5aecb355c853f6c42136",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "3b892c842242e87897e914bc2a17188a87f8c7c52a1e589b82c11a4214037ecc"
+      },
+      "rule": "The nullable mmap_file file argument is narrowed by a file!=NULL branch before reading f_inode.",
+      "native_access": {
+        "first": "64-bit ctx[0] load obtains file",
+        "second": "64-bit load at file+32 reads f_inode",
+        "sink": "The loaded pointer is stored to a native private stack slot; return value is zero"
+      },
+      "b_access": {
+        "first": "Compiled B instruction100 loads u64 from ctx+0",
+        "second": "Compiled B instruction101 loads u64 from the returned file+32",
+        "sink": "Instruction102 stores the pointer in the private stack; instruction107 returns zero"
+      },
+      "classification": "P/B preserve the same access chain. Paired kernel LSM argument nullability/context qualification is the active alignment finding.",
+      "paired_btf": {
+        "path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/vmlinux",
+        "attach_btf_id": 70008,
+        "func": "bpf_lsm_mmap_file",
+        "prototype_id": 16926,
+        "arguments": [
+          {
+            "index": 0,
+            "name": "file",
+            "type_id": 276
+          },
+          {
+            "index": 1,
+            "name": "reqprot",
+            "type_id": 94830
+          },
+          {
+            "index": 2,
+            "name": "prot",
+            "type_id": 94830
+          },
+          {
+            "index": 3,
+            "name": "flags",
+            "type_id": 94830
+          }
+        ]
+      },
+      "source_btf_note": "The resource stderr records optional BTF load EINVAL, so source_btf_id/source_func_type_id are0. The target hook remains independently identified by attach_btf_id70008."
+    }
+  ],
+  "compiled_b_access_preservation": "Both cases retain their original native access behavior in the inspected B paths.",
+  "kernel_context_evidence": {
+    "nullable_rule": "kernel/bpf/btf.c6957 adds PTR_MAYBE_NULL for an argument name ending __nullable",
+    "hook_definition": "include/linux/lsm_hook_defs.h199 declares mmap_file first parameter struct file *file",
+    "paired_btf_argument_name": "file"
+  },
+  "next_owner": "Coordinator/C/V compare the paired kernel context qualification and matched x86 LSM request; the installed annotation disagreements remain in the coverage table.",
+  "runtime_admission_additions": 0
+}
