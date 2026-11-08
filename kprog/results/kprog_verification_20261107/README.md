@@ -9,34 +9,33 @@ specialization token also has its own row.
 | --- | ---: | ---: |
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 72 / 72 |
-| Reference step family defined | 67/75 | 71/72 |
+| Reference step family defined | 67/75 | 72/72 |
 | Raw register handler refinement | 32/75 | 0/72 |
 | Raw register dispatcher arm composition | 32/75 | 0/72 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/72 |
 | Addressed memory model / composed step | 29/75 | 0/72 |
 | Additional partial-model handler families | 1/75 | 0 |
-| Conditional modeled handler / observed dispatcher | 0 | 71/72 |
+| Conditional modeled handler / observed dispatcher | 0 | 72/72 |
 | Immediate-alias source-emission binding composed | 0 | 2/72 |
 | Control handler model / composed step | 3/75 | 0/72 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/72 |
 | Memory-call full-frame C body model | 4/75 | 0/72 |
-| O2 C-model token-body equality | 72/75 | 71/72 |
+| O2 C-model token-body equality | 72/75 | 72/72 |
 | Additional returning-helper interface equality | 2/75 | 0/72 |
-| Upstream machine-model sampled architectural-state agreement | 25/75 | 71/72 selected profiles |
+| Upstream machine-model sampled architectural-state agreement | 25/75 | 72/72 selected profiles |
 | Upstream model-stopped operation rows | 7/75 | 0/72 selected forms |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/72 |
 | Additional explicit-monitor-only replay | 0 | 1/72 |
 | Numeric operations awaiting selected replay | 9/75 | 4/72 |
 
-The [Arm ASL comparison](reference-arm-asl.md) records996 instruction-state
-comparisons across82 native forms and all72 current operation labels:
-972 agree across71 labels. Twelve LDADD inputs reach the Lean decode boundary.
-Twelve STLXR inputs record the explicit empty-monitor/fixed-success profile
-difference; twelve matching-success-monitor inputs agree. The observed domain
-covers X0..X30, SP, PC, NZCV, V0 and32 supplied memory bytes. Events, translation,
-access permissions, complete native-field coverage and link premises remain
-explicit interfaces. These machine-model observations preserve the separate
-hardware replay source epochs and every theorem's existing scope.
+The [current Arm ASL comparison](reference-arm-asl.md) records2340 comparisons:
+2328 state observations agree across all72 labels, and12 STLXR inputs retain
+the explicit empty-monitor/fixed-success profile difference. The current82-form
+sample adds112 LDADD/STADD forms with1344 agreeing cases over four widths,
+order bits, aliases, SP and ZR. The original996-case reference epoch retains
+its own decode boundary and monitor profiles in the archive. Observations cover
+X0..X30, SP, PC, NZCV, V0 and32 memory bytes. Events, translation, access permissions,
+interthread ordering and compiler/link premises retain their stated interfaces.
 
 The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
@@ -73,7 +72,7 @@ LOAD/STORE D0/Q0, FMOV and CNT/UADDLV. Pair width, fixed D/Q width,
 FMOV direction/bank and reduction AUX retain their exact boundaries.
 RET adds emitted-return route/body equality through the unified invocation
 step. Its source macro captures raw Rn, checks zero-offset RETURN or a finite
-CODE case, and observes the same canonical register branch. The71 ARM C-model equalities cover71 of72 production operations:70 numeric
+CODE case, and observes the same canonical register branch. The72 ARM C-model equalities cover72 production operations:71 numeric
 bodies and one emitted-return control body; complete exit memory/ABI and C/compiler transport remain
 explicit universal interfaces.
 Two memory ALU tokens also compose ADD/ADC/SUB/SBB/AND/OR/XOR and
@@ -192,6 +191,13 @@ The earlier selected replay epochs and success/profile theorem premises keep
 their exact identities. Runtime/compiler and fault-domain closure remain
 explicit work. RET0xff uses source-return emission; the raw EXEC fallback
 probe at255 exercises the separate raw dispatcher default.
+
+
+LDADD/STADD adds a canonical atomic step and8/16/32/64-bit numeric success law.
+Its AUX order-bit identity, direct token and unified dispatcher/invocation step
+compose under encoded-field, SP/atomic alignment, successful read/write, physical
+atomic primitive, pointer/tag and compiler/ABI premises. Its hardware replay
+row retains its recorded source status.
 
 <!-- COVERAGE END -->
 

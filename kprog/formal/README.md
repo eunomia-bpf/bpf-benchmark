@@ -5,8 +5,8 @@ P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
-implementation interface. It currently records72 x86-64 C-model token-body equalities and71 of72
-AArch64 operation bodies, plus two returning-helper interface equalities. LDADD/STADD0x46 has explicit pending reference and token rows. Full ISA and compiled-simulator closure remain active work.
+implementation interface. It currently records72 x86-64 C-model token-body equalities and72 of72
+AArch64 operation bodies, plus two returning-helper interface equalities. LDADD/STADD0x46 adds a canonical atomic step, typed success law and unified token binding. Full ISA and compiled-simulator closure remain active work.
 
 ## Specification and proof scope
 
@@ -18,8 +18,8 @@ These definitions cite Intel/Arm sources and are independent of generated
 implementation contracts. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.
 The [Arm ASL state comparison](../results/kprog_verification_20261107/reference-arm-asl.md)
-records972 agreeing observations across71 operation labels, plus the LDADD decode
-boundary and explicit STLXR monitor profiles. It retains its source/binary
+records2328 agreeing observations across72 operation labels and explicit STLXR
+monitor profiles. LDADD adds1344 agreeing cases and stated atomic/compiler premises. It retains its source/binary
 identities and platform premises alongside the existing x86 Sail comparison.
 
 Handler/dispatcher and specialized-token laws compose modeled registers,

@@ -76,7 +76,7 @@ structure State where
   pc : Word
   /-- Effective SCTLR.SA/SA0 for the executing exception level. Linux enables it. -/
   spAlignmentCheck : Bool := true
-  /-- FEAT_LSE2 makes a pair one architectural memory access. Cortex-A72 has none. -/
+  /-- FEAT_LSE2 selects pair single accesses and atomic16-byte alignment quantities. -/
   pairSingleAccess : Bool := false
   exclusiveMonitor : Option ExclusiveMonitor := none
   /-- A default only preserves ordinary-instruction constructor compatibility.
@@ -551,6 +551,55 @@ def memoryStep (i : MemoryInstruction) (s : State) : Transition State :=
           | .error fault => ⟨s, [.fault fault], some fault⟩
           | .ok (memory, event) => ⟨{ s with memory := memory, pc := s.pc + 4 }, [event], none⟩
 
+/-- LDADD/STADD, including the byte/halfword variants. The selected platform
+supplies FEAT_LSE, flat little-endian translation and the existing LSE2 profile.
+Arm ASL2023-03 execute_aarch64_instrs_memory_atomicops_ld and MemAtomic ADD:
+https://github.com/rems-project/sail-arm/tree/7d0581642d0e3aaca367bbc5650aca7c53057543/arm-v9.4-a/src
+The atomic trace carries the captured old bytes; the state carries the committed
+new bytes. The decoded acquire/release fields supply the platform ordering
+interface, including STADD's destination-dependent acquire behavior. -/
+structure AtomicAddInstruction where
+  width : MemoryWidth
+  acquire : Bool
+  release : Bool
+  dst : Register
+  src : Register
+  base : Register
+  deriving DecidableEq, Repr
+
+/-- Arm's LSE2 profile permits an unaligned atomic access contained in one
+aligned16-byte quantity. The base LSE profile uses natural alignment. -/
+def atomicAlignmentFault (s : State) (address : Word) (bytes : Nat) : Option Fault :=
+  if address.toNat % bytes = 0 ∨
+      (s.pairSingleAccess = true ∧ address.toNat % 16 + bytes ≤ 16) then none
+  else some (.alignment address bytes)
+
+def AtomicAddInstruction.ordering (i : AtomicAddInstruction) : Bool × Bool :=
+  (i.acquire && (i.dst.val != 31), i.release)
+
+/-- Address and addend come from the incoming state, so aliases among Rt, Rs
+and Rn preserve the architectural capture order. All faults precede state commit.
+The atomic event records its old byte values and their initialization status. -/
+def atomicAddStep (i : AtomicAddInstruction) (s : State) : Transition State :=
+  let address := memoryBase s i.base
+  let addend := readReg s i.src
+  match spAlignmentFault s i.base with
+  | some fault => ⟨s, [.fault fault], some fault⟩
+  | none =>
+      match atomicAlignmentFault s address i.width.bytes with
+      | some fault => ⟨s, [.fault fault], some fault⟩
+      | none =>
+          match readMemory s.memory address i.width.bytes with
+          | .error fault => ⟨s, [.fault fault], some fault⟩
+          | .ok (old, _) =>
+              match writeMemory s.memory address (old + addend) i.width.bytes with
+              | .error fault => ⟨s, [.fault fault], some fault⟩
+              | .ok (memory, _) =>
+                  let loaded := memoryLoadValue i.width none old
+                  ⟨{ writeReg s i.dst loaded with memory := memory, pc := s.pc + 4 },
+                    [.memory .atomic address (bytesAt s.memory address i.width.bytes)
+                      (initializedAt s.memory address i.width.bytes)], none⟩
+
 inductive MemoryExtend | uxtw | lsl | sxtw | sxtx
   deriving DecidableEq, Repr
 
@@ -873,6 +922,7 @@ inductive Instruction
   | exclusive (instruction : ExclusiveInstruction)
   | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
+  | atomicAdd (instruction : AtomicAddInstruction)
   | addressedMemory (instruction : AddressedMemoryInstruction)
   | vectorMemory (instruction : VectorMemoryInstruction)
   | pairMemory (instruction : PairMemoryInstruction)
@@ -912,6 +962,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .exclusive instruction => exclusiveStep instruction s
   | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
+  | .atomicAdd instruction => atomicAddStep instruction s
   | .addressedMemory instruction => addressedMemoryStep instruction s
   | .vectorMemory instruction => vectorMemoryStep instruction s
   | .pairMemory instruction => pairMemoryStep instruction s
@@ -1214,6 +1265,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   if word &&& 0x7fe0fc00 = 0x1ac00800 then return .mul (.unsignedDivide width dst lhs rhs)
   if word &&& 0xffffffe0 = 0xd538d080 then return .readThreadPointer .el1 dst
   if word &&& 0xffffffe0 = 0xd53cd040 then return .readThreadPointer .el2 dst
+  -- LSE atomic ADD: size selects8/16/32/64 bits; A/R select ordering.
+  if word &&& 0x3f20fc00 = 0x38200000 then
+    let atomicWidth := match word / 2^30 with
+      | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
+    return .atomicAdd ⟨atomicWidth, (word / 2^23) % 2 == 1,
+      (word / 2^22) % 2 == 1, dst, rhs, lhs⟩
   throw "unrecognized AArch64 native opcode"
 
 end KProgFormal.Reference.AArch64

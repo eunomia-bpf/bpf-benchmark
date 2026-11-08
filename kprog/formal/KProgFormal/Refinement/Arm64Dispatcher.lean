@@ -1,4 +1,5 @@
 import KProgFormal.Refinement.Arm64Move
+import KProgFormal.Refinement.Arm64Atomic
 import KProgFormal.Refinement.Arm64Reduction
 import KProgFormal.Refinement.Arm64Exclusive
 import KProgFormal.Refinement.Arm64Arithmetic
@@ -2194,6 +2195,11 @@ def scalarMemoryAccess (native : Reference.AArch64.Instruction) (s : Reference.A
         permitted (match i.transfer with | .load _ _ => s.memory.readable | .store _ => s.memory.writable)
           (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else
             Reference.AArch64.memoryOffset s i.width.scale i.offset)) i.width.bytes = true
+  | .atomicAdd i =>
+      Reference.AArch64.spAlignmentFault s i.base = none ∧
+      Reference.AArch64.atomicAlignmentFault s (Reference.AArch64.memoryBase s i.base) i.width.bytes = none ∧
+      permitted s.memory.readable (Reference.AArch64.memoryBase s i.base) i.width.bytes = true ∧
+      permitted s.memory.writable (Reference.AArch64.memoryBase s i.base) i.width.bytes = true
   | _ => True
 
 theorem step_through_load_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
@@ -3275,9 +3281,34 @@ theorem fmov_byte_width (direction : GeneratedArm64Fmov.Fmov) (flags : Byte)
     simp only [decodeFmovWidth, fmovByteWidth, vector, Bool.false_eq_true, ↓reduceIte,
       decode_data_width flags (Arm64Fmov.operandWidth direction) integer]
 
-/-- Complete production L_EXEC branch order. Unknown/uncertified fields
-remain absent from this numeric slice; None is not a successful no-op. Native
-control/entry/return/helper dispatch outside L_EXEC remains separate. -/
+/-- Public LDADD opcode0x46 and its direct atomic body. C's typed fetch-add
+captures the incoming base and addend before its target write. The scalar
+projection retains the complete numeric state and atomic old-byte event. -/
+def atomicOpcode : Nat := 0x46
+
+def atomicByteBody (width : Reference.AArch64.MemoryWidth) (dst src base : Byte)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let address := Arm64Move.Fields.read s base
+  let addend := Arm64Move.Fields.read s src
+  let old := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth width)
+    (wordAt s.memory address 8)
+  let memory := Arm64Memory.store width s.memory address (old + addend)
+  let loaded := Arm64Memory.loadResult width none old
+  ⟨{ Arm64Move.Fields.write s dst loaded (Arm64Atomic.destinationWidth width) with
+      memory := memory, pc := s.pc + 4 },
+    [.memory .atomic address (bytesAt s.memory address width.bytes)
+      (initializedAt s.memory address width.bytes)], none⟩
+
+theorem atomic_body_typed (width : Reference.AArch64.MemoryWidth) (dst src base : Register)
+    (s : Reference.AArch64.State) :
+    atomicByteBody width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (memoryBaseCode base) s = Arm64Atomic.body width dst src base s := by
+  simp only [atomicByteBody, Arm64Atomic.body, memory_base_read, Arm64Memory.base_refines,
+    Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+/-- Complete numeric L_EXEC dispatcher. Source fields, native memory,
+provenance, control/ABI and compiler/platform relations retain their explicit
+interfaces alongside the operation-body step laws. -/
 def dispatchExec (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
     (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
     Option (Transition Reference.AArch64.State) :=
@@ -3287,7 +3318,41 @@ def dispatchExec (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src
       (Arm64Fmov.decodeDirection aux.toNat).bind (fun direction =>
         (Arm64Fmov.vectorIndex src2.toNat).bind (fun bank =>
           (decodeFmovWidth direction flags).map (fun width => fmovByteBody bank direction width dst src s)))
+    else if code = atomicOpcode then
+      (decodeMemoryWidth flags).map (fun width => atomicByteBody width dst src src2 s)
     else Arm64Reduction.dispatch code aux.toNat s
+
+theorem atomic_before_none (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughQ atomicOpcode flags aux dst src src2 src3 value sourceScalar sourceStack
+      firstScalar secondScalar failure s = none := by
+  unfold dispatchThroughQ dispatchThroughD dispatchThroughPair dispatchThroughExclusive
+    dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix atomicOpcode
+  cases decoded : decodeDataWidth flags <;> rfl
+
+theorem atomic_reached (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchExec atomicOpcode flags aux dst src src2 src3 value sourceScalar sourceStack
+      firstScalar secondScalar failure s =
+      (decodeMemoryWidth flags).map (fun width => atomicByteBody width dst src src2 s) := by
+  unfold dispatchExec
+  rw [atomic_before_none]
+  rfl
+
+theorem exec_atomic_refines (i : Reference.AArch64.AtomicAddInstruction)
+    (flags : Byte) (aux : BitVec 32) (src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State)
+    (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+    (access : scalarMemoryAccess (.atomicAdd i) s) :
+    dispatchExec atomicOpcode flags aux (Arm64Register.registerCode i.dst)
+      (Arm64Register.registerCode i.src) (memoryBaseCode i.base) src3 value sourceScalar sourceStack
+      firstScalar secondScalar failure s = some (Reference.AArch64.step (.atomicAdd i) s) := by
+  rw [atomic_reached, decode_memory_width flags i.width encoded]
+  change some (atomicByteBody i.width _ _ _ s) = _
+  rw [atomic_body_typed]
+  exact congrArg some (Arm64Atomic.body_refines i s access.1 access.2.1 access.2.2.1 access.2.2.2)
 
 theorem exec_tail_before_none (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
     (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State)
@@ -3339,7 +3404,9 @@ theorem exec_reduction_refines (op : Reference.AArch64.ReductionOp) (flags : Byt
   have separate : GeneratedArm64Reduction.code (Arm64Reduction.operation op) ≠ GeneratedArm64DispatchSingleton.code .fmov := by
     cases op <;> decide
   unfold dispatchExec
-  rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s tailCode, if_neg separate]
+  have atomicSeparate : GeneratedArm64Reduction.code (Arm64Reduction.operation op) ≠ atomicOpcode := by
+    cases op <;> decide
+  rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s tailCode, if_neg separate, if_neg atomicSeparate]
   exact Arm64Reduction.dispatch_refines op aux.toNat s
 
 /-- The three generated DIRECT_BODY_4 tokens retain their literal opcode.
@@ -3457,6 +3524,14 @@ inductive ExecBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte
       ExecBinding pc (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) flags aux dst src src2 src3 value release
         (.reduction op (aux.toNat == 16))
 
+  | atomicAdd (i : Reference.AArch64.AtomicAddInstruction) (flags : Byte) (aux : BitVec 32)
+      (src3 : Byte) (value : Word) (release : Bool)
+      (encoded : GeneratedArm64Width.effective flags.toNat = i.width.bytes)
+      (acquireCode : i.acquire = (aux &&& 1 != 0))
+      (releaseCode : i.release = (aux &&& 2 != 0)) :
+      ExecBinding pc atomicOpcode flags aux (Arm64Register.registerCode i.dst)
+        (Arm64Register.registerCode i.src) (memoryBaseCode i.base) src3 value release (.atomicAdd i)
+
 /-- One step through all actual L_EXEC branch families, with explicit Q-byte
 observation and exclusive ghost/environment. Field bindings do not assume any
 handler semantic equality. This is not the outside control/helper dispatcher
@@ -3492,6 +3567,13 @@ theorem exec_observed_step_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
       simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
       exact exec_reduction_refines op flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s
 
+
+  | atomicAdd i flags aux src3 value release encoded acquireCode releaseCode =>
+      have exclusiveSeparate : atomicOpcode ≠ GeneratedArm64Stlxr.code .stlxr := by decide
+      have qSeparate : ¬(atomicOpcode = qCode true ∨ atomicOpcode = qCode false) := by decide
+      simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
+      exact exec_atomic_refines i flags aux src3 value sourceScalar sourceStack firstScalar
+        secondScalar failure s encoded access
 
 /-- Once per generated immediate token: combine its direct-body identity with
 the unified canonical step theorem under the same field and platform binding. -/
@@ -4017,13 +4099,14 @@ theorem invocation_emission_step_refines (nativeAddress : Word → Word) (outerR
 /-- Generated direct memory bodies23--26. Signed load selectors retain their
 source byte width and W/X output independently. -/
 inductive MemoryToken where
-  | load | store | signed (op : GeneratedArm64LdrSx.LdrSx) | exclusive
+  | load | store | signed (op : GeneratedArm64LdrSx.LdrSx) | exclusive | atomicAdd
 
 def memoryTokenOpcode : MemoryToken → Nat
   | .load => GeneratedArm64DispatchSingleton.code .load
   | .store => GeneratedArm64DispatchSingleton.code .store
   | .signed op => GeneratedArm64LdrSx.code op
   | .exclusive => GeneratedArm64Stlxr.code .stlxr
+  | .atomicAdd => atomicOpcode
 
 /-- Numeric projection of each selected direct body, preserving pre/read/write/
 post order, signed source width, source capture and the fresh exclusive result.
@@ -4040,6 +4123,8 @@ def specializedMemory (token : MemoryToken) (flags : Byte) (aux : BitVec 32)
       (fun width => signedMemoryBody op width aux dst src src2 value s)
   | .exclusive => (decodeDataWidth flags).map
       (fun width => exclusiveStoreBody width failure aux dst src src2 s)
+  | .atomicAdd => (decodeMemoryWidth flags).map
+      (fun width => atomicByteBody width dst src src2 s)
 
 /-- Every direct memory body equals its complete numeric L_EXEC arm for all
 fields and incoming states, including the established width domain. -/
@@ -4070,6 +4155,10 @@ theorem memory_token_body_matches (token : MemoryToken) (flags : Byte) (aux : Bi
         dispatchThroughPair
       rw [exclusive_reached]
       cases decoded : decodeDataWidth flags <;> rfl
+
+  | atomicAdd =>
+      unfold memoryTokenOpcode specializedMemory
+      rw [atomic_reached]
 
 /-- Once per memory token, compose direct-body equality with the canonical
 observed dispatcher step, retaining access, exclusive and ABI premises. -/
