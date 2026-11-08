@@ -1,0 +1,3 @@
+Original ARM resource objects with upstream kfunc declarations
+
+The common resource compiler60e37d894 preserves each original source type/header order and supplies upstream bpf_kfuncs declarations immediately after real helper declarations. All59 original ARM resource sources are compiled through that common path using the retained paired ARM vmlinux/header input and clang18. Original selftest sources, annotations and native P bytes retain their published identities. summary.json records actual compilation outcomes against the previous55/59 source epoch; raw.tar.gz contains compiler inputs, every original diagnostic and generated resource object. Complete-catalog runtime adoption follows the current immutable original-resource guest. Runtime admission additions0.
