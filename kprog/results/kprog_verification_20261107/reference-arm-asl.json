@@ -665,6 +665,544 @@
     ],
     "timestamp": "2026-11-08T11:31:54.671551+00:00"
   },
+  "logical_atomic_current_reference": {
+    "all_lean_build_and_arm_link_exit": 0,
+    "archive": {
+      "block_sha256": "a5ca3364f205d649e547841a8bda4f20649d603504bcb95032bebe884f644d30",
+      "compressed_prefix_bytes": 7415527,
+      "compressed_prefix_sha256": "1617250093a45922352c09cc4247c1ceab44970cdbf88862afed2a517927fd7e",
+      "entries": {
+        "/workspaces/repository/kprog/arm64/arm64_sim.h": {
+          "bytes": 5173,
+          "sha256": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+        },
+        "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": {
+          "bytes": 137953,
+          "sha256": "967e3bac164dcb4d0e38edc91a90de4acf669a2548385c42ea77ec987639480e"
+        },
+        "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": {
+          "bytes": 56071,
+          "sha256": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6"
+        },
+        "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+          "bytes": 66804,
+          "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+        },
+        "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64Atomic.lean": {
+          "bytes": 6200,
+          "sha256": "c071c58502f754892b808a9bdbda05b18230bde9cdf119e03b30436627f18677"
+        },
+        "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": {
+          "bytes": 329312,
+          "sha256": "9bb800198948b9159c778c871563a352a81c6bd8942ad4bd90cc5b95d411c73b"
+        },
+        "atomic-add-current-asl.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-add-current-asl.py": {
+          "bytes": 4105,
+          "sha256": "23f486a86c6f643adfed5082a7874b38451c801084dfdd3f62fe5bde495efa60"
+        },
+        "atomic-add-current-asl/cases.jsonl": {
+          "bytes": 18704680,
+          "sha256": "117e1b96d737edead57fc0cc47b3bd6ee3ccc7db6f846a98a8824846812d2326"
+        },
+        "atomic-add-current-asl/pins.json": {
+          "bytes": 17483,
+          "sha256": "36e0bb78f70f427c2d939e2e09040789a24be5c365e9d5321f1bb3f845568a26"
+        },
+        "atomic-add-current-asl/summary.json": {
+          "bytes": 19599,
+          "sha256": "8f929c32be7cff4169422423b17a53cba699d743f3994316424f320f156dface"
+        },
+        "atomic-add-current-asl/words.dis": {
+          "bytes": 5658,
+          "sha256": "7fc2d6b6561e4e55f3bf44009380ab2600a0f1c7d3af16899e3fa8f8b27fe8a0"
+        },
+        "atomic-add-current-asl/words.o": {
+          "bytes": 848,
+          "sha256": "c3c0f9ffcc50693131baa1efacb2bad78760384041e285d825e686c6350e14ed"
+        },
+        "atomic-add-current-asl/words.s": {
+          "bytes": 1930,
+          "sha256": "6dd1afa43f3254c30ee6b6e1e0756d565222dbe1cba37dff06aff5e518a6ecf0"
+        },
+        "atomic-logical-all.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-all.launch.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "atomic-logical-all.log": {
+          "bytes": 28218,
+          "sha256": "bc9ebf5eb3aa8c0b6e3fd198c8bd4c88ec114676b160f34d5b26f1c7db9c772b"
+        },
+        "atomic-logical-all.mk": {
+          "bytes": 134,
+          "sha256": "85511da588f57c8af6560a39e0097528d75a5a9620e3ae46c0487815bee09757"
+        },
+        "atomic-logical-asl-template.py": {
+          "bytes": 4089,
+          "sha256": "40903263dcdc51954a1decd3fdfd4b22094f32e3c5a4da0742b1bfdf90f38e21"
+        },
+        "atomic-logical-asl.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-asl.log": {
+          "bytes": 8511,
+          "sha256": "b1be58fb913b8249d7c3a0dbb4958854a72a2060b4eac4e9a699a7ab51c18e44"
+        },
+        "atomic-logical-asl.mk": {
+          "bytes": 82,
+          "sha256": "eccb5771197f199eca4e63c56f21eb0cbbdb7e54404638951423b60ccc969cd1"
+        },
+        "atomic-logical-asl.py": {
+          "bytes": 4317,
+          "sha256": "cdd8ded8bdf388ed1c342ed6af1c0437ef76e5302aae1fc302742712321ab612"
+        },
+        "atomic-logical-asl/cases.jsonl": {
+          "bytes": 37471160,
+          "sha256": "a7a2ebbe0cf8b7fefe35534e0c7493d731d817282ce1d910942769441b898907"
+        },
+        "atomic-logical-asl/pins.json": {
+          "bytes": 40891,
+          "sha256": "925cd61d7dbabfb41feffc612dc34a444022d7a11b2c51960b384b3621ea7a97"
+        },
+        "atomic-logical-asl/summary.json": {
+          "bytes": 45579,
+          "sha256": "65fd186264fe716a3c5665ca839a346b10828616d6ba1bef76260c55417522c6"
+        },
+        "atomic-logical-asl/words.dis": {
+          "bytes": 11150,
+          "sha256": "b4937b6479cf2e081fe212f0854d749aeac4c5a8a05ddee0e4e9cd4a969af088"
+        },
+        "atomic-logical-asl/words.o": {
+          "bytes": 1296,
+          "sha256": "4f7bb1bc88e8490e8feeaeababbad8ec633e5f00aed10ecc71adf9ea9b972420"
+        },
+        "atomic-logical-asl/words.s": {
+          "bytes": 3834,
+          "sha256": "5c64be71e151e36120aaad9393c43f1e532bbd330bc2209e1a4cc10d7db7f908"
+        },
+        "atomic-logical-before-AArch64.lean": {
+          "bytes": 65745,
+          "sha256": "1a559516dbc98a2a64ca6e5f4da1d669bd882be482767d860d79992cfa591af2"
+        },
+        "atomic-logical-before-Arm64Atomic.lean": {
+          "bytes": 4128,
+          "sha256": "0c82c85902da76939bf876373ebd93c0a5569f523b301dd0861df573b777fffe"
+        },
+        "atomic-logical-before-Arm64Dispatcher.lean": {
+          "bytes": 323643,
+          "sha256": "d8ec4c2058e7b81766745dd49065d2a84eaa82ffbb2bc656c28576bafd15264f"
+        },
+        "atomic-logical-broad-asl.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-broad-asl.py": {
+          "bytes": 7368,
+          "sha256": "e837d10bc6d04b457e4a78bcef9502064a2dac8b9b7a3fe601e779c8be387c78"
+        },
+        "atomic-logical-broad-asl/cases.jsonl": {
+          "bytes": 14574090,
+          "sha256": "ac788a4f921c8ab3f290e25597121e7e6eb5ed090c2c5db266c7706726d468a1"
+        },
+        "atomic-logical-broad-asl/forms.bin": {
+          "bytes": 328,
+          "sha256": "d2c94175a4a9dd4f2f4a4b6b01a7e731019152ec8090f8ea8c8becb5498a791b"
+        },
+        "atomic-logical-broad-asl/forms.o": {
+          "bytes": 728,
+          "sha256": "0662cfae2133797bfde7617b49564277f3bafb9957411bf18a8984e0b25a4f5a"
+        },
+        "atomic-logical-broad-asl/forms.s": {
+          "bytes": 1167,
+          "sha256": "66947c2e84f5907ab1681da56eb8156328b70054e57a8d80e6e572fe60f921f0"
+        },
+        "atomic-logical-broad-asl/pins.json": {
+          "bytes": 5276,
+          "sha256": "7878de89ea98ef7ddd373d3ce494c9c62abbef6a9c33bf5b5d546028bdaf7fc7"
+        },
+        "atomic-logical-broad-asl/summary.json": {
+          "bytes": 9137,
+          "sha256": "72750b4b9cbc37f079aa2cb6a005ece2c8ba4cc25b9cbf21196a76dca84c3327"
+        },
+        "atomic-logical-build.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-build.launch.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "atomic-logical-build.log": {
+          "bytes": 2117,
+          "sha256": "ee49281c34d2ccedf92f1f185d736dd362bc2314fda27be2140381a31e5de079"
+        },
+        "atomic-logical-build.mk": {
+          "bytes": 145,
+          "sha256": "9ab34340b036081c3bc3980cec03c075a167fdd646045c29dc42cd429d275444"
+        },
+        "atomic-logical-build.sh": {
+          "bytes": 307,
+          "sha256": "773b9a2725bf2920b811cba571e8a66d7eafed5ad8386155bce5d14e1abf852f"
+        },
+        "atomic-logical-current-cohort.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-current-cohort.launch.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "atomic-logical-current-cohort.log": {
+          "bytes": 7531,
+          "sha256": "03f62b1943dadd5b715bb4b9e7ac87a68ad197ca57ea29513ee54e46a3e6eb03"
+        },
+        "atomic-logical-current-cohort.mk": {
+          "bytes": 240,
+          "sha256": "fd6a448afafffbd58562200cc7bdfa2012b0a04e0dfc7d4b12b1b3a9d2c4c133"
+        },
+        "atomic-logical-dispatch.py": {
+          "bytes": 7158,
+          "sha256": "431f9f796bf2acdf0c132989b35eddc2b1f16a27774d66f1a111d48bd6b00cda"
+        },
+        "atomic-logical-monitor-asl.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "atomic-logical-monitor-asl.py": {
+          "bytes": 7464,
+          "sha256": "8f1ad30251408de3e808e975b7af1e6bfed4d78d99c90525dff3e71f0143f394"
+        },
+        "atomic-logical-monitor-asl/cases.jsonl": {
+          "bytes": 185938,
+          "sha256": "d08a659516406a36809151d278376d0e016f9f54f7a93e3dbdc0df130e4f0e24"
+        },
+        "atomic-logical-monitor-asl/forms.bin": {
+          "bytes": 328,
+          "sha256": "d2c94175a4a9dd4f2f4a4b6b01a7e731019152ec8090f8ea8c8becb5498a791b"
+        },
+        "atomic-logical-monitor-asl/forms.o": {
+          "bytes": 728,
+          "sha256": "0662cfae2133797bfde7617b49564277f3bafb9957411bf18a8984e0b25a4f5a"
+        },
+        "atomic-logical-monitor-asl/forms.s": {
+          "bytes": 1167,
+          "sha256": "66947c2e84f5907ab1681da56eb8156328b70054e57a8d80e6e572fe60f921f0"
+        },
+        "atomic-logical-monitor-asl/pins.json": {
+          "bytes": 5276,
+          "sha256": "7878de89ea98ef7ddd373d3ce494c9c62abbef6a9c33bf5b5d546028bdaf7fc7"
+        },
+        "atomic-logical-monitor-asl/summary.json": {
+          "bytes": 5570,
+          "sha256": "94166ba3d63216a045298d9f995ebd3ff8b2d85545d599e3cd625e1d95fce45b"
+        },
+        "atomic-logical-prepare.py": {
+          "bytes": 5203,
+          "sha256": "abcf410aad3e6ee51d49fb402b1b9735f492860f5a751ae44ade40256920926f"
+        },
+        "reference-x86-memory-current-reference": {
+          "bytes": 144203632,
+          "sha256": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173"
+        }
+      },
+      "marker": "ARM_ASL_LOGICAL_ATOMIC_AND_CURRENT_REFERENCE_V1"
+    },
+    "by_operation": {
+      "ARM64_OP_ADDS_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_ADDS_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_ADD_IMM": {
+        "agree": 24
+      },
+      "ARM64_OP_ADRP_GOT": {
+        "agree": 12
+      },
+      "ARM64_OP_ADRP_RODATA": {
+        "agree": 12
+      },
+      "ARM64_OP_ALU_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_ALU_REG": {
+        "agree": 24
+      },
+      "ARM64_OP_ANDS_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_ANDS_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_BICS_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_BITFIELD": {
+        "agree": 36
+      },
+      "ARM64_OP_CCMP_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_CCMP_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_CINC": {
+        "agree": 12
+      },
+      "ARM64_OP_CINV": {
+        "agree": 12
+      },
+      "ARM64_OP_CMN_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_CMN_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_CMP_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_CMP_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_CNEG": {
+        "agree": 12
+      },
+      "ARM64_OP_CNT": {
+        "agree": 24
+      },
+      "ARM64_OP_CSEL": {
+        "agree": 12
+      },
+      "ARM64_OP_CSET": {
+        "agree": 12
+      },
+      "ARM64_OP_CSETM": {
+        "agree": 12
+      },
+      "ARM64_OP_CSINC": {
+        "agree": 12
+      },
+      "ARM64_OP_CSINV": {
+        "agree": 12
+      },
+      "ARM64_OP_CSNEG": {
+        "agree": 12
+      },
+      "ARM64_OP_EXTR": {
+        "agree": 12
+      },
+      "ARM64_OP_FMOV": {
+        "agree": 24
+      },
+      "ARM64_OP_LDADD": {
+        "agree": 1356
+      },
+      "ARM64_OP_LDCLR": {
+        "agree": 1344
+      },
+      "ARM64_OP_LDP": {
+        "agree": 12
+      },
+      "ARM64_OP_LDRSB": {
+        "agree": 12
+      },
+      "ARM64_OP_LDRSH": {
+        "agree": 12
+      },
+      "ARM64_OP_LDRSW": {
+        "agree": 12
+      },
+      "ARM64_OP_LDSET": {
+        "agree": 1344
+      },
+      "ARM64_OP_LOAD": {
+        "agree": 12
+      },
+      "ARM64_OP_LOAD_D0": {
+        "agree": 12
+      },
+      "ARM64_OP_LOAD_Q0": {
+        "agree": 12
+      },
+      "ARM64_OP_MADD": {
+        "agree": 12
+      },
+      "ARM64_OP_MOVK": {
+        "agree": 12
+      },
+      "ARM64_OP_MOV_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_MOV_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_MSUB": {
+        "agree": 12
+      },
+      "ARM64_OP_MUL": {
+        "agree": 12
+      },
+      "ARM64_OP_MVN": {
+        "agree": 12
+      },
+      "ARM64_OP_NEG": {
+        "agree": 12
+      },
+      "ARM64_OP_NOP": {
+        "agree": 12
+      },
+      "ARM64_OP_ORN_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_RET": {
+        "agree": 12
+      },
+      "ARM64_OP_REV": {
+        "agree": 12
+      },
+      "ARM64_OP_REV16": {
+        "agree": 12
+      },
+      "ARM64_OP_SHIFT_IMM": {
+        "agree": 24
+      },
+      "ARM64_OP_SHIFT_REG": {
+        "agree": 24
+      },
+      "ARM64_OP_SMADDL": {
+        "agree": 12
+      },
+      "ARM64_OP_STLXR": {
+        "agree": 12,
+        "difference": 12
+      },
+      "ARM64_OP_STORE": {
+        "agree": 12
+      },
+      "ARM64_OP_STORE_D0": {
+        "agree": 12
+      },
+      "ARM64_OP_STORE_Q0": {
+        "agree": 12
+      },
+      "ARM64_OP_STP": {
+        "agree": 12
+      },
+      "ARM64_OP_SUBS_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_SUBS_REG": {
+        "agree": 24
+      },
+      "ARM64_OP_SUB_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_SXTB": {
+        "agree": 12
+      },
+      "ARM64_OP_SXTH": {
+        "agree": 12
+      },
+      "ARM64_OP_SXTW": {
+        "agree": 12
+      },
+      "ARM64_OP_TST_BIC_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_TST_IMM": {
+        "agree": 12
+      },
+      "ARM64_OP_TST_REG": {
+        "agree": 12
+      },
+      "ARM64_OP_UADDLV": {
+        "agree": 24
+      },
+      "ARM64_OP_UDIV": {
+        "agree": 12
+      },
+      "ARM64_OP_UMADDL": {
+        "agree": 12
+      },
+      "ARM64_OP_UMULH": {
+        "agree": 12
+      },
+      "ARM64_OP_UMULL": {
+        "agree": 12
+      }
+    },
+    "cohorts": {
+      "atomic-add-current-asl": {
+        "cases": 1344,
+        "forms": 112,
+        "statuses": {
+          "agree": 1344
+        }
+      },
+      "atomic-logical-asl": {
+        "cases": 2688,
+        "forms": 224,
+        "statuses": {
+          "agree": 2688
+        }
+      },
+      "atomic-logical-broad-asl": {
+        "cases": 984,
+        "forms": 82,
+        "statuses": {
+          "agree": 972,
+          "difference": 12
+        }
+      },
+      "atomic-logical-monitor-asl": {
+        "cases": 12,
+        "forms": 82,
+        "statuses": {
+          "agree": 12
+        }
+      }
+    },
+    "compilation": "A a8d17004cf8e3208ca9330d9ac6d1820ae8ba83f publishes11520C-model UBSan scenes and32/64-bit BPF compilations. Clang18 subword8/16-bit lowering diagnostics remain explicit implementation coverage.",
+    "current_agree": 5016,
+    "current_cases": 5028,
+    "explicit_monitor_profile_differences": 12,
+    "focused_build_exit": 0,
+    "logical_atomic_agree": 2688,
+    "logical_atomic_cases": 2688,
+    "logical_atomic_forms": 224,
+    "model_binary_sha256": "452db57e889d9a85393b88913a30e229b14e1a9cf36281e154f15adecf4fc8a4",
+    "operation_labels": 74,
+    "proof_source_sha256": {
+      "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+      "kprog/arm64/arm64_sim_local_bpf.h": "967e3bac164dcb4d0e38edc91a90de4acf669a2548385c42ea77ec987639480e",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "kprog/formal/KProgFormal/Refinement/Arm64Atomic.lean": "c071c58502f754892b808a9bdbda05b18230bde9cdf119e03b30436627f18677",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "9bb800198948b9159c778c871563a352a81c6bd8942ad4bd90cc5b95d411c73b"
+    },
+    "reference_binary_archive_path": "reference-x86-memory-current-reference",
+    "reference_binary_sha256": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173",
+    "scope": "LSE LDSET/STSET and LDCLR/STCLR use the canonical shared atomic access/commit function; four widths/order bits/SP/ZR/operand-base-destination aliases. Entire architectural sampled state matches ASL. C numeric full-state law retains native fields, physical atomic/tag, permission/alignment, compiler/ABI and interthread-order premises.",
+    "theorems": [
+      "Arm64Atomic.logical_body_refines",
+      "Arm64Atomic.logical_stack_fault",
+      "Arm64Atomic.logical_alignment_fault",
+      "Arm64Dispatcher.exec_logical_atomic_refines",
+      "Arm64Dispatcher.exec_observed_step_refines",
+      "Arm64Dispatcher.memory_token_body_matches",
+      "Arm64Dispatcher.memory_token_step_refines",
+      "Arm64Dispatcher.invocation_step_refines"
+    ]
+  },
   "pins": {
     "model_sha256": "452db57e889d9a85393b88913a30e229b14e1a9cf36281e154f15adecf4fc8a4",
     "profile": {

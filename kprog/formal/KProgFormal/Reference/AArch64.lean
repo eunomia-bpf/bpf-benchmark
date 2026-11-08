@@ -580,7 +580,7 @@ def AtomicAddInstruction.ordering (i : AtomicAddInstruction) : Bool × Bool :=
 /-- Address and addend come from the incoming state, so aliases among Rt, Rs
 and Rn preserve the architectural capture order. All faults precede state commit.
 The atomic event records its old byte values and their initialization status. -/
-def atomicAddStep (i : AtomicAddInstruction) (s : State) : Transition State :=
+def atomicRmwStep (combine : Word → Word → Word) (i : AtomicAddInstruction) (s : State) : Transition State :=
   let address := memoryBase s i.base
   let addend := readReg s i.src
   match spAlignmentFault s i.base with
@@ -592,13 +592,23 @@ def atomicAddStep (i : AtomicAddInstruction) (s : State) : Transition State :=
           match readMemory s.memory address i.width.bytes with
           | .error fault => ⟨s, [.fault fault], some fault⟩
           | .ok (old, _) =>
-              match writeMemory s.memory address (old + addend) i.width.bytes with
+              match writeMemory s.memory address (combine old addend) i.width.bytes with
               | .error fault => ⟨s, [.fault fault], some fault⟩
               | .ok (memory, _) =>
                   let loaded := memoryLoadValue i.width none old
                   ⟨{ writeReg s i.dst loaded with memory := memory, pc := s.pc + 4 },
                     [.memory .atomic address (bytesAt s.memory address i.width.bytes)
                       (initializedAt s.memory address i.width.bytes)], none⟩
+
+/-- ADD, SET and CLR share one canonical atomic access and commit sequence. -/
+def atomicAddStep (i : AtomicAddInstruction) (s : State) : Transition State :=
+  atomicRmwStep (· + ·) i s
+
+def atomicLogicalValue (set : Bool) (old operand : Word) : Word :=
+  if set then old ||| operand else old &&& ~~~operand
+
+def atomicLogicalStep (set : Bool) (i : AtomicAddInstruction) (s : State) : Transition State :=
+  atomicRmwStep (atomicLogicalValue set) i s
 
 inductive MemoryExtend | uxtw | lsl | sxtw | sxtx
   deriving DecidableEq, Repr
@@ -923,6 +933,7 @@ inductive Instruction
   | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
   | atomicAdd (instruction : AtomicAddInstruction)
+  | atomicLogical (set : Bool) (instruction : AtomicAddInstruction)
   | addressedMemory (instruction : AddressedMemoryInstruction)
   | vectorMemory (instruction : VectorMemoryInstruction)
   | pairMemory (instruction : PairMemoryInstruction)
@@ -963,6 +974,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
   | .atomicAdd instruction => atomicAddStep instruction s
+  | .atomicLogical set instruction => atomicLogicalStep set instruction s
   | .addressedMemory instruction => addressedMemoryStep instruction s
   | .vectorMemory instruction => vectorMemoryStep instruction s
   | .pairMemory instruction => pairMemoryStep instruction s
@@ -1271,6 +1283,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
       | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
     return .atomicAdd ⟨atomicWidth, (word / 2^23) % 2 == 1,
       (word / 2^22) % 2 == 1, dst, rhs, lhs⟩
+  -- LSE logical RMW: LDCLR/STCLR and LDSET/STSET share A/R and size fields.
+  if word &&& 0x3f20fc00 = 0x38201000 ∨ word &&& 0x3f20fc00 = 0x38203000 then
+    let atomicWidth := match word / 2^30 with
+      | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
+    return .atomicLogical (word &&& 0x3f20fc00 == 0x38203000)
+      ⟨atomicWidth, (word / 2^23) % 2 == 1, (word / 2^22) % 2 == 1, dst, rhs, lhs⟩
   throw "unrecognized AArch64 native opcode"
 
 end KProgFormal.Reference.AArch64

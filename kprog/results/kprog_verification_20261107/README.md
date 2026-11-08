@@ -8,29 +8,29 @@ specialization token also has its own row.
 | Coverage obligation | x86-64 | AArch64 |
 | --- | ---: | ---: |
 | Requested operation domain | 77 | 72 |
-| Production numeric operations / specialization tokens | 75 / 75 | 72 / 72 |
-| Reference step family defined | 67/75 | 72/72 |
-| Raw register handler refinement | 32/75 | 0/72 |
-| Raw register dispatcher arm composition | 32/75 | 0/72 |
-| Stack register/immediate/memory model / composed step | 2/75 | 0/72 |
-| Addressed memory model / composed step | 29/75 | 0/72 |
+| Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
+| Reference step family defined | 67/75 | 74/74 |
+| Raw register handler refinement | 32/75 | 0/74 |
+| Raw register dispatcher arm composition | 32/75 | 0/74 |
+| Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
+| Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
-| Conditional modeled handler / observed dispatcher | 0 | 72/72 |
-| Immediate-alias source-emission binding composed | 0 | 2/72 |
-| Control handler model / composed step | 3/75 | 0/72 |
-| Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/72 |
-| Memory-call full-frame C body model | 4/75 | 0/72 |
-| O2 C-model token-body equality | 72/75 | 72/72 |
-| Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/72 |
-| Additional returning-helper interface equality | 2/75 | 0/72 |
-| Upstream machine-model sampled architectural-state agreement | 25/75 | 72/72 selected profiles |
-| Upstream model-stopped operation rows | 7/75 | 0/72 selected forms |
-| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/72 |
-| Additional explicit-monitor-only replay | 0 | 1/72 |
-| Numeric operations awaiting selected replay | 9/75 | 4/72 |
+| Conditional modeled handler / observed dispatcher | 0 | 74/74 |
+| Immediate-alias source-emission binding composed | 0 | 2/74 |
+| Control handler model / composed step | 3/75 | 0/74 |
+| Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
+| Memory-call full-frame C body model | 4/75 | 0/74 |
+| O2 C-model token-body equality | 72/75 | 74/74 |
+| Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/74 |
+| Additional returning-helper interface equality | 2/75 | 0/74 |
+| Upstream machine-model sampled architectural-state agreement | 25/75 | 74/74 selected profiles |
+| Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
+| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
+| Additional explicit-monitor-only replay | 0 | 1/74 |
+| Numeric operations awaiting selected replay | 9/75 | 6/74 |
 
-The [current Arm ASL comparison](reference-arm-asl.md) records2340 comparisons:
-2328 state observations agree across all72 labels, and12 STLXR inputs retain
+The [current Arm ASL comparison](reference-arm-asl.md) records5028 comparisons:
+5016 state observations agree across all74 labels, and12 STLXR inputs retain
 the explicit empty-monitor/fixed-success profile difference. The current82-form
 sample adds112 LDADD/STADD forms with1344 agreeing cases over four widths,
 order bits, aliases, SP and ZR. The original996-case reference epoch retains
@@ -73,7 +73,7 @@ LOAD/STORE D0/Q0, FMOV and CNT/UADDLV. Pair width, fixed D/Q width,
 FMOV direction/bank and reduction AUX retain their exact boundaries.
 RET adds emitted-return route/body equality through the unified invocation
 step. Its source macro captures raw Rn, checks zero-offset RETURN or a finite
-CODE case, and observes the same canonical register branch. The72 ARM C-model equalities cover72 production operations:71 numeric
+CODE case, and observes the same canonical register branch. The74 ARM C-model equalities cover74 production operations:73 numeric
 bodies and one emitted-return control body; complete exit memory/ABI and C/compiler transport remain
 explicit universal interfaces.
 Two memory ALU tokens also compose ADD/ADC/SUB/SBB/AND/OR/XOR and
@@ -136,9 +136,9 @@ Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
 Inventory is pinned to the production headers in each row's `catalog_source`
-and `catalog_sha256`. The requested 77/72 domain requires identification of two
+and `catalog_sha256`. The requested 77/74 domain requires identification of two
 additional x86 operation names and one additional ARM operation name against
-the current 75/72 numeric catalogs. Five x86 compatibility aliases have separate
+the current 75/74 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
@@ -4898,3 +4898,15 @@ passes, and the new laws use `propext` and `Quot.sound`. The receipt
 production source epoch. Generator/C compilation, native/proof symbol-map
 transport, permissions/lifetime and persistence of frozen images remain the
 interfaces needed for the complete O4 block relation.
+
+### Logical LSE atomic tokens
+
+LDSET/STSET0x47 and LDCLR/STCLR0x48 join the same canonical atomic
+access/commit function as LDADD. Generic typed full-state laws compose through
+the dispatcher, invocation and direct memory-token equality for every field
+binding under the established access/platform interfaces. The379-module build
+and existing ARM link target pass. The current ASL5028-case epoch covers74
+labels;224 new logical forms contribute2688 agreeing observations. Hardware
+replay epochs stay separately recorded. Physical atomic/tag and ordering,
+compiler/ABI and native fields remain explicit; A records32/64-bit BPF units
+and Clang18 subword8/16-bit lowering diagnostics.

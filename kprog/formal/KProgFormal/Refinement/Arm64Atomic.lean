@@ -23,17 +23,24 @@ theorem loaded_value (width : MemoryWidth) (value : Word) :
 are captured before storing or destination writeback; base/data/target aliases
 retain the same incoming address and operand. Pointer tags and the physical
 atomic primitive remain the explicit compiler/platform relation. -/
-def body (width : MemoryWidth) (dst src base : Register) (s : State) : Transition State :=
+def bodyWith (combine : Word → Word → Word) (width : MemoryWidth) (dst src base : Register) (s : State) : Transition State :=
   let address := Arm64Memory.baseValue s base
   let addend := Arm64Register.readReg s src
   let old := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth width)
     (wordAt s.memory address 8)
-  let memory := Arm64Memory.store width s.memory address (old + addend)
+  let memory := Arm64Memory.store width s.memory address (combine old addend)
   let loaded := Arm64Memory.loadResult width none old
   ⟨{ Arm64Register.writeReg s dst loaded (destinationWidth width) with
       memory := memory, pc := s.pc + 4 },
     [.memory .atomic address (bytesAt s.memory address width.bytes)
       (initializedAt s.memory address width.bytes)], none⟩
+
+def body (width : MemoryWidth) (dst src base : Register) (s : State) : Transition State :=
+  bodyWith (· + ·) width dst src base s
+
+def logicalBody (set : Bool) (width : MemoryWidth) (dst src base : Register)
+    (s : State) : Transition State :=
+  bodyWith (atomicLogicalValue set) width dst src base s
 
 /-- Success has the canonical complete state and atomic old-byte observation.
 Alignment and read/write permissions describe the native platform access;
@@ -44,7 +51,7 @@ theorem body_refines (i : AtomicAddInstruction) (s : State)
     (readable : permitted s.memory.readable (memoryBase s i.base) i.width.bytes = true)
     (writable : permitted s.memory.writable (memoryBase s i.base) i.width.bytes = true) :
     body i.width i.dst i.src i.base s = step (.atomicAdd i) s := by
-  simp only [body, step, atomicAddStep, stackAlignment, atomicAlignment,
+  simp only [body, bodyWith, step, atomicAddStep, atomicRmwStep, stackAlignment, atomicAlignment,
     Arm64Memory.base_refines, Arm64Memory.load_value, Arm64Register.read_refines,
     Arm64Memory.store_refines, Arm64Register.write_refines, loaded_value,
     readMemory, writeMemory, readable, writable, ↓reduceIte]
@@ -62,7 +69,7 @@ theorem ordering_refines (aux : BitVec 32) (dst src base : Register) (width : Me
 theorem stack_fault (i : AtomicAddInstruction) (s : State) (fault : Fault)
     (failed : spAlignmentFault s i.base = some fault) :
     step (.atomicAdd i) s = ⟨s, [.fault fault], some fault⟩ := by
-  simp only [step, atomicAddStep, failed]
+  simp only [step, atomicAddStep, atomicRmwStep, failed]
 
 /-- Architectural atomic alignment faults also precede every register/memory
 commit. The current LSE/LSE2 profile supplies the resolved alignment predicate. -/
@@ -70,6 +77,30 @@ theorem alignment_fault (i : AtomicAddInstruction) (s : State) (fault : Fault)
     (stackAlignment : spAlignmentFault s i.base = none)
     (failed : atomicAlignmentFault s (memoryBase s i.base) i.width.bytes = some fault) :
     step (.atomicAdd i) s = ⟨s, [.fault fault], some fault⟩ := by
-  simp only [step, atomicAddStep, stackAlignment, failed]
+  simp only [step, atomicAddStep, atomicRmwStep, stackAlignment, failed]
+
+/-- OR and AND-with-complement implement LDSET and LDCLR over the same
+captured address/source, zero-extended old result and complete atomic state. -/
+theorem logical_body_refines (set : Bool) (i : AtomicAddInstruction) (s : State)
+    (stackAlignment : spAlignmentFault s i.base = none)
+    (atomicAlignment : atomicAlignmentFault s (memoryBase s i.base) i.width.bytes = none)
+    (readable : permitted s.memory.readable (memoryBase s i.base) i.width.bytes = true)
+    (writable : permitted s.memory.writable (memoryBase s i.base) i.width.bytes = true) :
+    logicalBody set i.width i.dst i.src i.base s = step (.atomicLogical set i) s := by
+  simp only [logicalBody, bodyWith, step, atomicLogicalStep, atomicRmwStep,
+    stackAlignment, atomicAlignment, Arm64Memory.base_refines, Arm64Memory.load_value,
+    Arm64Register.read_refines, Arm64Memory.store_refines, Arm64Register.write_refines,
+    loaded_value, readMemory, writeMemory, readable, writable, ↓reduceIte]
+
+theorem logical_stack_fault (set : Bool) (i : AtomicAddInstruction) (s : State) (fault : Fault)
+    (failed : spAlignmentFault s i.base = some fault) :
+    step (.atomicLogical set i) s = ⟨s, [.fault fault], some fault⟩ := by
+  simp only [step, atomicLogicalStep, atomicRmwStep, failed]
+
+theorem logical_alignment_fault (set : Bool) (i : AtomicAddInstruction) (s : State) (fault : Fault)
+    (stackAlignment : spAlignmentFault s i.base = none)
+    (failed : atomicAlignmentFault s (memoryBase s i.base) i.width.bytes = some fault) :
+    step (.atomicLogical set i) s = ⟨s, [.fault fault], some fault⟩ := by
+  simp only [step, atomicLogicalStep, atomicRmwStep, stackAlignment, failed]
 
 end KProgFormal.Refinement.Arm64Atomic

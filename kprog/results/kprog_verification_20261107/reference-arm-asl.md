@@ -48,3 +48,21 @@ ADRP observation; O4 supplies their symbol/load relation.
 assembly and object bytes, driver source, build receipts and every observation from both source epochs.
 Each archive entry carries its length and SHA256. The existing full make check
 retains its own fixed source and receipt.
+
+## Current logical atomic reference epoch
+
+The current frozen reference binary records5028 state comparisons across74
+operation labels:5016 agree;12 original STLXR inputs retain the explicit
+empty-monitor/fixed-success profile difference. The matched monitor cohort
+agrees. LDSET/STSET and LDCLR/STCLR add224 forms and2688 agreeing cases, covering
+8/16/32/64 bits, acquire/release combinations, SP/ZR and source/base/destination
+aliases. LDADD's112-form1344-case grid and the complete82-form cohort were
+repeated against this same binary. The source/model/binary SHA256 values and
+raw observations are under `logical_atomic_current_reference` in the JSON.
+
+The canonical atomic access/commit function is shared by ADD, OR and
+AND-with-complement. Typed full-state handler laws and the unified dispatcher,
+invocation and direct-token laws pass the379-module Lean build and existing ARM
+link target. Atomic physical/tag mapping, access/alignment, compiler/ABI and
+interthread ordering remain explicit premises. A's11520-scene C receipt includes
+32/64-bit BPF units and Clang18 subword8/16-bit lowering diagnostics.
