@@ -7,7 +7,7 @@ The table records the latest closed complete-application attempt. Baseline resid
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 4 | 3 | 3 | 1: compiler guest OOM | 0 | [typed-stack](otel-typed-stack/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: native relocation binding for pruned map helper | [021801](cilium-matched-runtime/README.md) |
-| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: event_execve proof stack depth | [014223](tetragon-fixed-stack-retry/README.md) |
+| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send jump complexity | [typed-stack](tetragon-typed-stack/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly table index range | [typed-stack](tracee-typed-stack/README.md) |
 
@@ -35,3 +35,5 @@ Earlier complete attempts preserve the progression through [OTel aligned stack](
 The [whole OTel typed-stack cohort](otel-typed-stack/README.md) freshly binds perf_unwind_native and advances to perf_unwind_hotspot compilation. Its12GiB guest records a Clang OOM kill at9.63GiB anonymous RSS; fresh trusted host compilation is the next resource correction. The [generic typed-stack measurements](typed-private-stack/README.md) preserve exact compiler inputs and completed fidelity controls.
 
 The [whole Tracee typed-stack cohort](tracee-typed-stack/README.md) retains6fresh generation/compilation and5bound loads. Its readonly80-byte table frontier exposes a redundant mask on a comparison copy; a generic C-cast width representation is being checked against BPF-JIT/host/byte observations before the complete-app successor. Prior fixed-RSP helper-length logs preserve their own source epoch.
+
+The [whole Tetragon typed-stack cohort](tetragon-typed-stack/README.md) closes4fresh generation/compilation and3bound loads, reaching execve_send8193jumps after63411instructions/707states. Its current complexity frontier and event_execve frame measurements retain their separate entry domains.
