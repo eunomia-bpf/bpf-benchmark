@@ -5161,6 +5161,31 @@ SimulatorObject open_simulator_proof(
     return object;
 }
 
+// libbpf normalizes .ksyms extern linkage while opening the object. Read
+// the declaration from the same original ELF snapshot as its relocations.
+std::unique_ptr<btf, decltype(&btf__free)> source_proof_btf(Elf *elf)
+{
+    size_t names = 0;
+    if (elf_getshdrstrndx(elf, &names)) fail("read source proof BTF section names");
+    std::unique_ptr<btf, decltype(&btf__free)> result(nullptr, btf__free);
+    Elf_Scn *section = nullptr;
+    while ((section = elf_nextscn(elf, section))) {
+        GElf_Shdr header{};
+        if (!gelf_getshdr(section, &header)) fail("read source proof BTF section");
+        const char *name = elf_strptr(elf, names, header.sh_name);
+        if (!name || std::strcmp(name, ".BTF")) continue;
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (result || header.sh_type != SHT_PROGBITS || !data || data->d_off ||
+            !data->d_buf || data->d_size != header.sh_size || data->d_size > UINT32_MAX)
+            fail("invalid source proof BTF extent");
+        btf *raw = btf__new(data->d_buf, static_cast<uint32_t>(data->d_size));
+        if (libbpf_get_error(raw) || !raw) fail("parse original source proof BTF");
+        result.reset(raw);
+    }
+    if (!result) fail("source proof BTF section absent");
+    return result;
+}
+
 // Use the pinned libbpf prototype matcher for proof-side vmlinux kfuncs.
 // Module calls retain their FD-array binding through the ordinary object path.
 void relocate_vmlinux_proof_call(const btf *local, const btf *kernel,
@@ -5235,6 +5260,7 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
         fail("source proof entry bytes differ from selected BPF program");
     std::set<uint64_t> patched;
     std::unique_ptr<btf, decltype(&btf__free)> kernel_btf(nullptr, btf__free);
+    std::unique_ptr<btf, decltype(&btf__free)> declaration_btf(nullptr, btf__free);
     std::unordered_map<uint32_t, int> map_fds, readonly_fds;
     section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
@@ -5272,7 +5298,8 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
                     if (err || !loaded) fail("load proof kfunc vmlinux BTF");
                     kernel_btf.reset(loaded);
                 }
-                relocate_vmlinux_proof_call(bpf_object__btf(object), kernel_btf.get(), name,
+                if (!declaration_btf) declaration_btf = source_proof_btf(elf.get());
+                relocate_vmlinux_proof_call(declaration_btf.get(), kernel_btf.get(), name,
                     symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)]);
                 continue;
             }

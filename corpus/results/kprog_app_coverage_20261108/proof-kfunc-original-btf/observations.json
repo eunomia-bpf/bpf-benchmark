@@ -1,0 +1,22 @@
+{
+  "build_exit": 0,
+  "service_checks": 12,
+  "btf_checks_per_elf": 21,
+  "actual_elf_patterns": 2,
+  "actual_call_offsets": [
+    16,
+    24
+  ],
+  "original_linkage": "BTF_FUNC_EXTERN",
+  "opened_linkage": "BTF_FUNC_GLOBAL",
+  "source_sha256": "50ad279853ef0120f0956f68173460a4172a11d7e665e81b094c09fc5fa30a96",
+  "binary_sha256": {
+    "libnative_loader.so": "8ad4edcc8748d6c857e7be3e6cb41b24d18fab5c3c00488c24f6a76df3111bfe",
+    "trusted-native-loader": "69c7c15980a2c033b48dc8a422b1e088455bbc6410fa66c338c33564cd04b2a6"
+  },
+  "artifact_sha256": {
+    "build.log.gz": "1f9c875ec79e95fc9ed05a8a78de5572ca2131a672f77f70359061cd7f68b374",
+    "check.log.gz": "9e82a8b67734b8758f61f255904f5ce9abb92cc5377f4a1a5d4b55b4afe10d60",
+    "inputs.tar.gz": "ab643fbd8a8d7847e2c85e41cb07d33ef59d253641473a0671fb2699c2e5a29a"
+  }
+}
