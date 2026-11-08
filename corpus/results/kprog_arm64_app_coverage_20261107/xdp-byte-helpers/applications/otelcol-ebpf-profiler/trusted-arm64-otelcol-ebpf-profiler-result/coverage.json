@@ -1,0 +1,535 @@
+{
+  "utc": "2026-11-08T07:10:12.889344+00:00",
+  "host_ok": false,
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_request_attempts": 2,
+  "distinct_source_prog_ids": 2,
+  "proof_generated": 2,
+  "stages": {
+    "bound_accepted": 1,
+    "verifier_rejected": 1
+  },
+  "failure_causes": {
+    "verifier_diagnostic": 1
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 20,
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "entry": "read_task_struct",
+      "status": 0,
+      "stage": "bound_accepted",
+      "cause": null,
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": 23,
+      "request_archive": "run/requests/1.success.tar.gz",
+      "request_archive_sha256": "ed4604a11f8d44d5b68b26134ba540d16fba0e5f29570d42c16914f3f1744968",
+      "failed_commands": [],
+      "error": null,
+      "load_stderr": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\n"
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 24,
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "entry": "perf_unwind_stop",
+      "status": -5,
+      "stage": "verifier_rejected",
+      "cause": "verifier_diagnostic",
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": null,
+      "request_archive": "run/requests/2.failure.tar.gz",
+      "request_archive_sha256": "86aab7fd18b97d017b91d0ca3ea35f90e7222c9ffa556688defab6702deccd74",
+      "failed_commands": [],
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-kfunc-resources/trusted-native-loader', 'load', '4', '2', '24', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-oobro2p7/requests/request-1pr26ltz/generated/request.native.o', 'perf_unwind_stop', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-oobro2p7/requests/request-1pr26ltz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-oobro2p7/requests/request-1pr26ltz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '0', '0', '0', '0', '0', '0', 'apm_int_procs', '222', 'null', 'filter_error_frames', '218', '0', 'go_labels_procs', '194', 'null', 'inhibit_events', '178', 'null', 'metrics', '211', 'null', 'per_cpu_records', '205', 'null', 'perf_progs', '181', 'null', 'pid_events', '195', 'null', 'report_events', '174', 'null', 'reported_pids', '172', 'null', 'tpbase_offset', '218', '8', 'trace_events', '173', 'null', 'with_debug_output', '218', '32']' returned non-zero exit status 1.",
+      "load_stderr": "libbpf: elf: skipping unrecognized data section(30) .native_lab.rodata\ntrusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=49328\nstub fd_array_cnt=38 fd_array=0:129,1:129,2:92,3:93,4:94,5:95,6:96,7:97,8:98,9:99,10:100,11:101,12:102,13:103,14:104,15:105,16:106,17:107,18:108,19:109,20:110,21:111,22:112,23:113,24:114,25:115,26:116,27:117,28:118,29:119,30:120,31:121,32:122,33:123,34:124,35:125,36:126,37:127\nstub insns=0:code=183,dst=0,src=3,off=15,imm=8;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=183,dst=0,src=3,off=31,imm=4;3:code=133,dst=0,src=4,off=1,imm=126402;4:code=183,dst=0,src=3,off=47,imm=4;5:code=133,dst=0,src=4,off=1,imm=126402;6:code=183,dst=0,src=3,off=63,imm=4;7:code=133,dst=0,src=4,off=1,imm=126402;8:code=183,dst=0,src=3,off=79,imm=4;9:code=133,dst=0,src=4,off=1,imm=126402;10:code=183,dst=0,src=3,off=95,imm=4;11:code=133,dst=0,src=4,off=1,imm=126402;12:code=183,dst=0,src=3,off=111,imm=4;13:code=133,dst=0,src=4,off=1,imm=126402;14:code=183,dst=0,src=3,off=127,imm=4;15:code=133,dst=0,src=4,off=1,imm=126402;16:code=183,dst=0,src=3,off=143,imm=4;17:code=133,dst=0,src=4,off=1,imm=126402;18:code=183,dst=0,src=3,off=159,imm=4;19:code=133,dst=0,src=4,off=1,imm=126402;20:code=183,dst=0,src=3,off=175,imm=4;21:code=133,dst=0,src=4,off=1,imm=126402;22:code=183,dst=0,src=3,off=191,imm=4;23:code=133,dst=0,src=4,off=1,imm=126402;24:code=183,dst=0,src=3,off=207,imm=4;25:code=133,dst=0,src=4,off=1,imm=126402;26:code=183,dst=0,src=3,off=223,imm=4;27:code=133,dst=0,src=4,off=1,imm=126402;28:code=183,dst=0,src=3,off=239,imm=4;29:code=133,dst=0,src=4,off=1,imm=126402;30:code=183,dst=0,src=3,off=255,imm=4;31:code=133,dst=0,src=4,off=1,imm=126402;32:code=183,dst=0,src=3,off=271,imm=4;33:code=133,dst=0,src=4,off=1,imm=126402;34:code=183,dst=0,src=3,off=287,imm=4;35:code=133,dst=0,src=4,off=1,imm=126402;36:code=183,dst=0,src=3,off=303,imm=4;37:code=133,dst=0,src=4,off=1,imm=126402;38:code=183,dst=0,src=3,off=319,imm=4;39:code=133,dst=0,src=4,off=1,imm=126402;40:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (bf) r6 = r0                       ; R0=0 R6=0\n2: (bf) r7 = r0                       ; R0=0 R7=0\n3: (bf) r8 = r0                       ; R0=0 R8=0\n4: (bf) r9 = r0                       ; R0=0 R9=0\n5: (b7) r0 = 0                        ; R0=0\n6: (bf) r6 = r0                       ; R0=0 R6=0\n7: (bf) r7 = r0                       ; R0=0 R7=0\n8: (bf) r8 = r0                       ; R0=0 R8=0\n9: (bf) r9 = r0                       ; R0=0 R9=0\n10: (b7) r0 = 0                       ; R0=0\n11: (bf) r6 = r0                      ; R0=0 R6=0\n12: (bf) r7 = r0                      ; R0=0 R7=0\n13: (bf) r8 = r0                      ; R0=0 R8=0\n14: (bf) r9 = r0                      ; R0=0 R9=0\n15: (b7) r0 = 0                       ; R0=0\n16: (bf) r6 = r0                      ; R0=0 R6=0\n17: (bf) r7 = r0                      ; R0=0 R7=0\n18: (bf) r8 = r0                      ; R0=0 R8=0\n19: (bf) r9 = r0                      ; R0=0 R9=0\n20: (b7) r0 = 0                       ; R0=0\n21: (bf) r6 = r0                      ; R0=0 R6=0\n22: (bf) r7 = r0                      ; R0=0 R7=0\n23: (bf) r8 = r0                      ; R0=0 R8=0\n24: (bf) r9 = r0                      ; R0=0 R9=0\n25: (b7) r0 = 0                       ; R0=0\n26: (bf) r6 = r0                      ; R0=0 R6=0\n27: (bf) r7 = r0                      ; R0=0 R7=0\n28: (bf) r8 = r0                      ; R0=0 R8=0\n29: (bf) r9 = r0                      ; R0=0 R9=0\n30: (b7) r0 = 0                       ; R0=0\n31: (bf) r6 = r0                      ; R0=0 R6=0\n32: (bf) r7 = r0                      ; R0=0 R7=0\n33: (bf) r8 = r0                      ; R0=0 R8=0\n34: (bf) r9 = r0                      ; R0=0 R9=0\n35: (b7) r0 = 0                       ; R0=0\n36: (bf) r6 = r0                      ; R0=0 R6=0\n37: (bf) r7 = r0                      ; R0=0 R7=0\n38: (bf) r8 = r0                      ; R0=0 R8=0\n39: (bf) r9 = r0                      ; R0=0 R9=0\n40: (b7) r0 = 0                       ; R0=0\n41: (bf) r6 = r0                      ; R0=0 R6=0\n42: (bf) r7 = r0                      ; R0=0 R7=0\n43: (bf) r8 = r0                      ; R0=0 R8=0\n44: (bf) r9 = r0                      ; R0=0 R9=0\n45: (b7) r0 = 0                       ; R0=0\n46: (bf) r6 = r0                      ; R0=0 R6=0\n47: (bf) r7 = r0                      ; R0=0 R7=0\n48: (bf) r8 = r0                      ; R0=0 R8=0\n49: (bf) r9 = r0                      ; R0=0 R9=0\n50: (b7) r0 = 0                       ; R0=0\n51: (bf) r6 = r0                      ; R0=0 R6=0\n52: (bf) r7 = r0                      ; R0=0 R7=0\n53: (bf) r8 = r0                      ; R0=0 R8=0\n54: (bf) r9 = r0                      ; R0=0 R9=0\n55: (b7) r0 = 0                       ; R0=0\n56: (bf) r6 = r0                      ; R0=0 R6=0\n57: (bf) r7 = r0                      ; R0=0 R7=0\n58: (bf) r8 = r0                      ; R0=0 R8=0\n59: (bf) r9 = r0                      ; R0=0 R9=0\n60: (b7) r0 = 0                       ; R0=0\n61: (bf) r6 = r0                      ; R0=0 R6=0\n62: (bf) r7 = r0                      ; R0=0 R7=0\n63: (bf) r8 = r0                      ; R0=0 R8=0\n64: (bf) r9 = r0                      ; R0=0 R9=0\n65: (b7) r0 = 0                       ; R0=0\n66: (bf) r6 = r0                      ; R0=0 R6=0\n67: (bf) r7 = r0                      ; R0=0 R7=0\n68: (bf) r8 = r0                      ; R0=0 R8=0\n69: (bf) r9 = r0                      ; R0=0 R9=0\n70: (b7) r0 = 0                       ; R0=0\n71: (bf) r6 = r0                      ; R0=0 R6=0\n72: (bf) r7 = r0                      ; R0=0 R7=0\n73: (bf) r8 = r0                      ; R0=0 R8=0\n74: (bf) r9 = r0                      ; R0=0 R9=0\n75: (b7) r0 = 0                       ; R0=0\n76: (bf) r6 = r0                      ; R0=0 R6=0\n77: (bf) r7 = r0                      ; R0=0 R7=0\n78: (bf) r8 = r0                      ; R0=0 R8=0\n79: (bf) r9 = r0                      ; R0=0 R9=0\n80: (b7) r0 = 0                       ; R0=0\n81: (bf) r6 = r0                      ; R0=0 R6=0\n82: (bf) r7 = r0                      ; R0=0 R7=0\n83: (bf) r8 = r0                      ; R0=0 R8=0\n84: (bf) r9 = r0                      ; R0=0 R9=0\n85: (b7) r0 = 0                       ; R0=0\n86: (bf) r6 = r0                      ; R0=0 R6=0\n87: (bf) r7 = r0                      ; R0=0 R7=0\n88: (bf) r8 = r0                      ; R0=0 R8=0\n89: (bf) r9 = r0                      ; R0=0 R9=0\n90: (b7) r0 = 0                       ; R0=0\n91: (bf) r6 = r0                      ; R0=0 R6=0\n92: (bf) r7 = r0                      ; R0=0 R7=0\n93: (bf) r8 = r0                      ; R0=0 R8=0\n94: (bf) r9 = r0                      ; R0=0 R9=0\n95: (7b) *(u64 *)(r10 -304) = r1      ; R1=ctx() R10=fp0 fp-304=ctx()\n96: (7a) *(u64 *)(r10 -240) = 0       ; R10=fp0 fp-240=0\n97: (7a) *(u64 *)(r10 -248) = 0       ; R10=fp0 fp-248=0\n98: (7a) *(u64 *)(r10 -256) = 0       ; R10=fp0 fp-256=0\n99: (7a) *(u64 *)(r10 -264) = 0       ; R10=fp0 fp-264=0\n100: (b7) r0 = 2                      ; R0=scalar()\n101: (7b) *(u64 *)(r10 -272) = r0     ; R0=scalar(id=1) R10=fp0 fp-272=scalar(id=1)\n102: (7a) *(u64 *)(r10 -80) = 0       ; R10=fp0 fp-80=0\n103: (79) r1 = *(u64 *)(r10 -248)     ; R1=0 R10=fp0 fp-248=0\n104: (57) r1 &= -16711681             ; R1=0\n105: (7b) *(u64 *)(r10 -248) = r1     ; R1=0 R10=fp0 fp-248=0\n106: (b7) r0 = 2                      ; R0=scalar()\n107: (7b) *(u64 *)(r10 -320) = r0     ; R0=scalar(id=2) R10=fp0 fp-320=scalar(id=2)\n108: (7b) *(u64 *)(r10 -64) = r0      ; R0=scalar(id=2) R10=fp0 fp-64=scalar(id=2)\n109: (7a) *(u64 *)(r10 -232) = 0      ; R10=fp0 fp-232=0\n110: (18) r1 = 0xffffff00ffffffff     ; R1=0xffffff00ffffffff\n112: (79) r2 = *(u64 *)(r10 -248)     ; R2=0 R10=fp0 fp-248=0\n113: (5f) r2 &= r1                    ; R1=0xffffff00ffffffff R2=0\n114: (18) r1 = 0xa00000000            ; R1=0xa00000000\n116: (4f) r2 |= r1                    ; R1=0xa00000000 R2=0xa00000000\n117: (7b) *(u64 *)(r10 -248) = r2     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n118: (7a) *(u64 *)(r10 -56) = 0       ; R10=fp0 fp-56=0\n119: (18) r1 = 0xffff00ffffffffff     ; R1=0xffff00ffffffffff\n121: (79) r2 = *(u64 *)(r10 -248)     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n122: (5f) r2 &= r1                    ; R1=0xffff00ffffffffff R2=0xa00000000\n123: (7b) *(u64 *)(r10 -248) = r2     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n124: (7a) *(u64 *)(r10 -48) = 0       ; R10=fp0 fp-48=0\n125: (18) r1 = 0xff00ffffffffffff     ; R1=0xff00ffffffffffff\n127: (79) r2 = *(u64 *)(r10 -248)     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n128: (5f) r2 &= r1                    ; R1=0xff00ffffffffffff R2=0xa00000000\n129: (7b) *(u64 *)(r10 -248) = r2     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n130: (7a) *(u64 *)(r10 -40) = 0       ; R10=fp0 fp-40=0\n131: (18) r7 = 0xffffffffffffff       ; R7=0xffffffffffffff\n133: (79) r1 = *(u64 *)(r10 -248)     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n134: (5f) r1 &= r7                    ; R1=0xa00000000 R7=0xffffffffffffff\n135: (7b) *(u64 *)(r10 -248) = r1     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n136: (7a) *(u64 *)(r10 -32) = 0       ; R10=fp0 fp-32=0\n137: (79) r1 = *(u64 *)(r10 -240)     ; R1=0 R10=fp0 fp-240=0\n138: (57) r1 &= -256                  ; R1=0\n139: (7b) *(u64 *)(r10 -240) = r1     ; R1=0 R10=fp0 fp-240=0\n140: (7a) *(u64 *)(r10 -24) = 0       ; R10=fp0 fp-24=0\n141: (79) r1 = *(u64 *)(r10 -240)     ; R1=0 R10=fp0 fp-240=0\n142: (57) r1 &= -65281                ; R1=0\n143: (7b) *(u64 *)(r10 -240) = r1     ; R1=0 R10=fp0 fp-240=0\n144: (7a) *(u64 *)(r10 -16) = 0       ; R10=fp0 fp-16=0\n145: (79) r1 = *(u64 *)(r10 -240)     ; R1=0 R10=fp0 fp-240=0\n146: (57) r1 &= -16711681             ; R1=0\n147: (7b) *(u64 *)(r10 -240) = r1     ; R1=0 R10=fp0 fp-240=0\n148: (7a) *(u64 *)(r10 -8) = 0        ; R10=fp0 fp-8=0\n149: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n151: (79) r2 = *(u64 *)(r10 -240)     ; R2=0 R10=fp0 fp-240=0\n152: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0\n153: (7b) *(u64 *)(r10 -240) = r2     ; R2=0 R10=fp0 fp-240=0\n154: (79) r1 = *(u64 *)(r10 -256)     ; R1=0 R10=fp0 fp-256=0\n155: (57) r1 &= -256                  ; R1=0\n156: (7b) *(u64 *)(r10 -256) = r1     ; R1=0 R10=fp0 fp-256=0\n157: (72) *(u8 *)(r10 -160) = 0       ; R10=fp0 fp-160=???????0\n158: (72) *(u8 *)(r10 -159) = 0       ; R10=fp0 fp-160=??????0m\n159: (72) *(u8 *)(r10 -158) = 0       ; R10=fp0 fp-160=?????00m\n160: (72) *(u8 *)(r10 -157) = 0       ; R10=fp0 fp-160=????000m\n161: (b7) r2 = -160                   ; R2=-160\n162: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n163: (07) r1 += -224                  ; R1=fp-224\n164: (0f) r2 += r1                    ; R1=fp-224 R2=fp-384\n165: (07) r2 += 224                   ; R2=fp-160\n166: (18) r1 = 0xffff0000c1a9fa00     ; R1=map_ptr(map=per_cpu_records,ks=4,vs=4984)\n168: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=3,map=per_cpu_records,ks=4,vs=4984)\n169: (b4) w6 = -1                     ; R6=0xffffffff\n170: (7b) *(u64 *)(r10 -280) = r0     ; R0=map_value_or_null(id=3,map=per_cpu_records,ks=4,vs=4984) R10=fp0 fp-280=map_value_or_null(id=3,map=per_cpu_records,ks=4,vs=4984)\n171: (15) if r0 == 0x0 goto pc+2937   ; R0=map_value(map=per_cpu_records,ks=4,vs=4984)\n172: (79) r1 = *(u64 *)(r10 -280)     ; R1=map_value(map=per_cpu_records,ks=4,vs=4984) R10=fp0 fp-280=map_value(map=per_cpu_records,ks=4,vs=4984)\n173: (7b) *(u64 *)(r10 -288) = r1     ; R1=map_value(map=per_cpu_records,ks=4,vs=4984) R10=fp0 fp-288=map_value(map=per_cpu_records,ks=4,vs=4984)\n174: (61) r1 = *(u32 *)(r1 +0)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n175: (79) r2 = *(u64 *)(r10 -264)     ; R2=0 R10=fp0 fp-264=0\n176: (5f) r2 &= r7                    ; R2=0 R7=0xffffffffffffff\n177: (7b) *(u64 *)(r10 -264) = r2     ; R2=0 R10=fp0 fp-264=0\n178: (73) *(u8 *)(r10 -164) = r1      ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-168=???m????\n179: (bf) r2 = r1                     ; R1=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n180: (77) r2 >>= 8                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))\n181: (73) *(u8 *)(r10 -163) = r2      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R10=fp0 fp-168=??mm????\n182: (bf) r2 = r1                     ; R1=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n183: (77) r2 >>= 16                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n184: (73) *(u8 *)(r10 -162) = r2      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-168=?mmm????\n185: (77) r1 >>= 24                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n186: (73) *(u8 *)(r10 -161) = r1      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-168=mmmm????\n187: (b7) r2 = -164                   ; R2=-164\n188: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n189: (07) r1 += -224                  ; R1=fp-224\n190: (0f) r2 += r1                    ; R1=fp-224 R2=fp-388\n191: (07) r2 += 224                   ; R2=fp-164\n192: (18) r1 = 0xffff0000c2940000     ; R1=map_ptr(map=apm_int_procs,ks=4,vs=8)\n194: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=5,map=apm_int_procs,ks=4,vs=8)\n195: (bf) r6 = r0                     ; R0=map_value_or_null(id=5,map=apm_int_procs,ks=4,vs=8) R6=map_value_or_null(id=5,map=apm_int_procs,ks=4,vs=8)\n196: (b7) r8 = 0                      ; R8=0\n197: (b7) r9 = 0                      ; R9=0\n198: (b4) w5 = 0                      ; R5=0\n199: (15) if r6 == 0x0 goto pc+1081   ; R6=map_value(map=apm_int_procs,ks=4,vs=8)\n200: (18) r7 = 0xffff0000c30c0350     ; R7=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n202: (61) r1 = *(u32 *)(r7 +0)        ; R1=0 R7=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n203: (56) if w1 != 0x0 goto pc+45     ; R1=0\n204: (85) call bpf_get_current_task#35        ; R0=scalar()\n205: (18) r1 = 0xffff0000c30c0338     ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=8)\n207: (79) r9 = *(u64 *)(r1 +0)        ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=8) R9=0\n208: (0f) r9 += r0                    ; R0=scalar() R9=scalar()\n209: (b7) r1 = -72                    ; R1=-72\n210: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n211: (07) r2 += -224                  ; R2=fp-224\n212: (0f) r1 += r2                    ; R1=fp-296 R2=fp-224\n213: (07) r1 += 224                   ; R1=fp-72\n214: (b4) w2 = 8                      ; R2=8\n215: (bf) r3 = r9                     ; R3=scalar(id=6) R9=scalar(id=6)\n216: (85) call bpf_probe_read_kernel#113      ; R0=scalar() fp-72=mmmmmmmm\n217: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n219: (79) r2 = *(u64 *)(r10 -248)     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n220: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa00000000\n221: (7b) *(u64 *)(r10 -248) = r2     ; R2=0xa00000000 R10=fp0 fp-248=0xa00000000\n222: (61) r1 = *(u32 *)(r7 +0)        ; R1=0 R7=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n223: (67) r1 <<= 32                   ; R1=0\n224: (77) r1 >>= 32                   ; R1=0\n225: (15) if r0 == 0x0 goto pc+139 365: R0=0 R1=0 R2=0xa00000000 R6=map_value(map=apm_int_procs,ks=4,vs=8) R7=map_value(map=.rodata.var,ks=4,vs=36,off=32) R8=0 R9=scalar() R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=scalar(id=2) fp-72=mmmmmmmm fp-80=0 fp-160=????000m fp-168=mmmm???? fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-304=ctx() fp-320=scalar(id=2)\n365: (55) if r1 != 0x0 goto pc+9      ; R1=0\n366: (79) r1 = *(u64 *)(r10 -72)      ; R1=scalar() R10=fp0 fp-72=mmmmmmmm\n367: (79) r1 = *(u64 *)(r10 -248)     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n368: (74) w1 >>= 24                   ; R1=0\n369: (16) if w1 == 0x0 goto pc+52     ; R1=0\n422: (79) r1 = *(u64 *)(r6 +0)        ; R1=scalar() R6=map_value(map=apm_int_procs,ks=4,vs=8)\n423: (79) r9 = *(u64 *)(r10 -72)      ; R9=scalar() R10=fp0 fp-72=mmmmmmmm\n424: (79) r1 = *(u64 *)(r10 -248)     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n425: (77) r1 >>= 24                   ; R1=2560\n426: (bc) w2 = w1                     ; R1=2560 R2=2560\n427: (54) w2 &= 255                   ; R2=0\n428: (16) if w2 == 0x0 goto pc+12     ; R2=0\n441: (79) r2 = *(u64 *)(r6 +0)        ; R2=scalar() R6=map_value(map=apm_int_procs,ks=4,vs=8)\n442: (0f) r9 += r2                    ; R2=scalar() R9=scalar()\n443: (b7) r1 = -88                    ; R1=-88\n444: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n445: (07) r2 += -224                  ; R2=fp-224\n446: (0f) r1 += r2                    ; R1=fp-312 R2=fp-224\n447: (07) r1 += 224                   ; R1=fp-88\n448: (b4) w2 = 8                      ; R2=8\n449: (bf) r3 = r9                     ; R3=scalar(id=78) R9=scalar(id=78)\n450: (85) call bpf_probe_read_user#112        ; R0=scalar() fp-88=mmmmmmmm\n451: (79) r1 = *(u64 *)(r10 -248)     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n452: (57) r1 &= -65281                ; R1=0xa00000000\n453: (7b) *(u64 *)(r10 -248) = r1     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n454: (15) if r0 == 0x0 goto pc+93 548: R0=0 R1=0xa00000000 R6=map_value(map=apm_int_procs,ks=4,vs=8) R7=map_value(map=.rodata.var,ks=4,vs=36,off=32) R8=0 R9=scalar(id=78) R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=scalar(id=2) fp-72=mmmmmmmm fp-80=0 fp-88=mmmmmmmm fp-160=????000m fp-168=mmmm???? fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-304=ctx() fp-320=scalar(id=2)\n548: (79) r1 = *(u64 *)(r10 -88)      ; R1=scalar() R10=fp0 fp-88=mmmmmmmm\n549: (79) r1 = *(u64 *)(r10 -248)     ; R1=0xa00000000 R10=fp0 fp-248=0xa00000000\n550: (74) w1 >>= 8                    ; R1=0\n551: (54) w1 &= 255                   ; R1=0\n552: (16) if w1 == 0xa goto pc+1      ; R1=0\n553: (56) if w1 != 0x4 goto pc+1      ; R1=0\n555: (79) r9 = *(u64 *)(r10 -88)      ; R9=scalar() R10=fp0 fp-88=mmmmmmmm\n556: (79) r3 = *(u64 *)(r10 -248)     ; R3=0xa00000000 R10=fp0 fp-248=0xa00000000\n557: (77) r3 >>= 8                    ; R3=0xa000000\n558: (bc) w1 = w3                     ; R1=0xa000000 R3=0xa000000\n559: (54) w1 &= 255                   ; R1=0\n560: (16) if w1 == 0xa goto pc+1      ; R1=0\n561: (56) if w1 != 0x4 goto pc+1      ; R1=0\n563: (b7) r1 = -208                   ; R1=-208\n564: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n565: (07) r2 += -224                  ; R2=fp-224\n566: (0f) r1 += r2                    ; R1=fp-432 R2=fp-224\n567: (07) r1 += 224                   ; R1=fp-208\n568: (7b) *(u64 *)(r10 -296) = r3     ; R3=0xa000000 R10=fp0 fp-296=0xa000000\n569: (bc) w2 = w3                     ; R2=0xa000000 R3=0xa000000\n570: (54) w2 &= 255                   ; R2=0\n571: (bf) r3 = r9                     ; R3=scalar(id=80) R9=scalar(id=80)\n572: (56) if w2 != 0x4 goto pc+5      ; R2=0\n578: (b4) w2 = 37                     ; R2=37\n579: (85) call bpf_probe_read_user#112        ; R0=scalar() fp-176=???mmmmm fp-184=mmmmmmmm fp-192=mmmmmmmm fp-200=mmmmmmmm fp-208=mmmmmmmm\n580: (b7) r1 = 0                      ; R1=0\n581: (bf) r2 = r9                     ; R2=scalar(id=81) R9=scalar(id=81)\n582: (07) r2 += 224                   ; R2=scalar(id=81+224)\n583: (bf) r3 = r9                     ; R3=scalar(id=81) R9=scalar(id=81)\n584: (57) r3 &= 7                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))\n585: (bf) r5 = r1                     ; R1=0 R5=0\n586: (57) r5 &= 7                     ; R5=0\n587: (55) if r5 != 0x0 goto pc+45     ; R5=0\n588: (b7) r5 = 0                      ; R5=0\n589: (55) if r0 != 0x0 goto pc+25     ; R0=0\n590: (25) if r1 > 0x1d goto pc+24     ; R1=0\n591: (79) r4 = *(u64 *)(r10 -296)     ; R4=0xa000000 R10=fp0 fp-296=0xa000000\n592: (bc) w6 = w4                     ; R4=0xa000000 R6=0xa000000\n593: (54) w6 &= 255                   ; R6=0\n594: (56) if w6 != 0x4 goto pc+20     ; R6=0\n615: (bf) r6 = r1                     ; R1=0 R6=0\n616: (07) r6 += 16                    ; R6=16\n617: (bf) r7 = r6                     ; R6=16 R7=16\n618: (77) r7 >>= 3                    ; R7=2\n619: (57) r7 &= 8                     ; R7=0\n620: (bf) r4 = r10                    ; R4=fp0 R10=fp0\n621: (07) r4 += -264                  ; R4=fp-264\n622: (0f) r4 += r7                    ; R4=fp-264 R7=0\n623: (57) r6 &= 56                    ; R6=16\n624: (b7) r7 = 255                    ; R7=255\n625: (6f) r7 <<= r6                   ; R6=16 R7=0xff0000\n626: (a7) r7 ^= -1                    ; R7=0xffffffffff00ffff\n627: (79) r8 = *(u64 *)(r4 +0)        ; R4=fp-264 R8=0 fp-264=0\n628: (5f) r8 &= r7                    ; R7=0xffffffffff00ffff R8=0\n629: (57) r5 &= 255                   ; R5=0\n630: (6f) r5 <<= r6                   ; R5=0 R6=16\n631: (4f) r8 |= r5                    ; R5=0 R8=0\n632: (7b) *(u64 *)(r4 +0) = r8        ; R4=fp-264 R8=0 fp-264=0\n633: (07) r1 += 1                     ; R1=1\n634: (55) if r1 != 0x25 goto pc-50    ; R1=1\n585: (bf) r5 = r1                     ; R1=1 R5=1\n586: (57) r5 &= 7                     ; R5=1\n587: (55) if r5 != 0x0 goto pc+45     ; R5=1\n633: (07) r1 += 1                     ; R1=2\n634: (55) if r1 != 0x25 goto pc-50    ; R1=2\n585: (bf) r5 = r1                     ; R1=2 R5=2\n586: (57) r5 &= 7                     ; R5=2\n587: (55) if r5 != 0x0 goto pc+45     ; R5=2\n633: (07) r1 += 1                     ; R1=3\n634: (55) if r1 != 0x25 goto pc-50    ; R1=3\n585: (bf) r5 = r1                     ; R1=3 R5=3\n586: (57) r5 &= 7                     ; R5=3\n587: (55) if r5 != 0x0 goto pc+45     ; R5=3\n633: (07) r1 += 1                     ; R1=4\n634: (55) if r1 != 0x25 goto pc-50    ; R1=4\n585: (bf) r5 = r1                     ; R1=4 R5=4\n586: (57) r5 &= 7                     ; R5=4\n587: (55) if r5 != 0x0 goto pc+45     ; R5=4\n633: (07) r1 += 1                     ; R1=5\n634: (55) if r1 != 0x25 goto pc-50    ; R1=5\n585: (bf) r5 = r1                     ; R1=5 R5=5\n586: (57) r5 &= 7                     ; R5=5\n587: (55) if r5 != 0x0 goto pc+45     ; R5=5\n633: (07) r1 += 1                     ; R1=6\n634: (55) if r1 != 0x25 goto pc-50    ; R1=6\n585: (bf) r5 = r1                     ; R1=6 R5=6\n586: (57) r5 &= 7                     ; R5=6\n587: (55) if r5 != 0x0 goto pc+45     ; R5=6\n633: (07) r1 += 1                     ; R1=7\n634: (55) if r1 != 0x25 goto pc-50    ; R1=7\n585: (bf) r5 = r1                     ; R1=7 R5=7\n586: (57) r5 &= 7                     ; R5=7\n587: (55) if r5 != 0x0 goto pc+45     ; R5=7\n633: (07) r1 += 1                     ; R1=8\n634: (55) if r1 != 0x25 goto pc-50    ; R1=8\n585: (bf) r5 = r1                     ; R1=8 R5=8\n586: (57) r5 &= 7                     ; R5=0\n587: (55) if r5 != 0x0 goto pc+45     ; R5=0\n588: (b7) r5 = 0                      ; R5=0\n589: (55) if r0 != 0x0 goto pc+25     ; R0=0\n590: (25) if r1 > 0x1d goto pc+24     ; R1=8\n591: (79) r4 = *(u64 *)(r10 -296)     ; R4=0xa000000 R10=fp0 fp-296=0xa000000\n592: (bc) w6 = w4                     ; R4=0xa000000 R6=0xa000000\n593: (54) w6 &= 255                   ; R6=0\n594: (56) if w6 != 0x4 goto pc+20     ; R6=0\n615: (bf) r6 = r1                     ; R1=8 R6=8\n616: (07) r6 += 16                    ; R6=24\n617: (bf) r7 = r6                     ; R6=24 R7=24\n618: (77) r7 >>= 3                    ; R7=3\n619: (57) r7 &= 8                     ; R7=0\n620: (bf) r4 = r10                    ; R4=fp0 R10=fp0\n621: (07) r4 += -264                  ; R4=fp-264\n622: (0f) r4 += r7                    ; R4=fp-264 R7=0\n623: (57) r6 &= 56                    ; R6=24\n624: (b7) r7 = 255                    ; R7=255\n625: (6f) r7 <<= r6                   ; R6=24 R7=0xff000000\n626: (a7) r7 ^= -1                    ; R7=0xffffffff00ffffff\n627: (79) r8 = *(u64 *)(r4 +0)        ; R4=fp-264 R8=0 fp-264=0\n628: (5f) r8 &= r7                    ; R7=0xffffffff00ffffff R8=0\n629: (57) r5 &= 255                   ; R5=0\n630: (6f) r5 <<= r6                   ; R5=0 R6=24\n631: (4f) r8 |= r5                    ; R5=0 R8=0\n632: (7b) *(u64 *)(r4 +0) = r8        ; R4=fp-264 R8=0 fp-264=0\n633: (07) r1 += 1                     ; R1=9\n634: (55) if r1 != 0x25 goto pc-50    ; R1=9\n585: (bf) r5 = r1                     ; R1=9 R5=9\n586: (57) r5 &= 7                     ; R5=1\n587: (55) if r5 != 0x0 goto pc+45     ; R5=1\n633: (07) r1 += 1                     ; R1=10\n634: (55) if r1 != 0x25 goto pc-50    ; R1=10\n585: (bf) r5 = r1                     ; R1=10 R5=10\n586: (57) r5 &= 7                     ; R5=2\n587: (55) if r5 != 0x0 goto pc+45     ; R5=2\n633: (07) r1 += 1                     ; R1=11\n634: (55) if r1 != 0x25 goto pc-50    ; R1=11\n585: (bf) r5 = r1                     ; R1=11 R5=11\n586: (57) r5 &= 7                     ; R5=3\n587: (55) if r5 != 0x0 goto pc+45     ; R5=3\n633: (07) r1 += 1                     ; R1=12\n634: (55) if r1 != 0x25 goto pc-50    ; R1=12\n585: (bf) r5 = r1                     ; R1=12 R5=12\n586: (57) r5 &= 7                     ; R5=4\n587: (55) if r5 != 0x0 goto pc+45     ; R5=4\n633: (07) r1 += 1                     ; R1=13\n634: (55) if r1 != 0x25 goto pc-50    ; R1=13\n585: (bf) r5 = r1                     ; R1=13 R5=13\n586: (57) r5 &= 7                     ; R5=5\n587: (55) if r5 != 0x0 goto pc+45     ; R5=5\n633: (07) r1 += 1                     ; R1=14\n634: (55) if r1 != 0x25 goto pc-50    ; R1=14\n585: (bf) r5 = r1                     ; R1=14 R5=14\n586: (57) r5 &= 7                     ; R5=6\n587: (55) if r5 != 0x0 goto pc+45     ; R5=6\n633: (07) r1 += 1                     ; R1=15\n634: (55) if r1 != 0x25 goto pc-50    ; R1=15\n585: (bf) r5 = r1                     ; R1=15 R5=15\n586: (57) r5 &= 7                     ; R5=7\n587: (55) if r5 != 0x0 goto pc+45     ; R5=7\n633: (07) r1 += 1                     ; R1=16\n634: (55) if r1 != 0x25 goto pc-50    ; R1=16\n585: (bf) r5 = r1                     ; R1=16 R5=16\n586: (57) r5 &= 7                     ; R5=0\n587: (55) if r5 != 0x0 goto pc+45     ; R5=0\n588: (b7) r5 = 0                      ; R5=0\n589: (55) if r0 != 0x0 goto pc+25     ; R0=0\n590: (25) if r1 > 0x1d goto pc+24     ; R1=16\n591: (79) r4 = *(u64 *)(r10 -296)     ; R4=0xa000000 R10=fp0 fp-296=0xa000000\n592: (bc) w6 = w4                     ; R4=0xa000000 R6=0xa000000\n593: (54) w6 &= 255                   ; R6=0\n594: (56) if w6 != 0x4 goto pc+20     ; R6=0\n615: (bf) r6 = r1                     ; R1=16 R6=16\n616: (07) r6 += 16                    ; R6=32\n617: (bf) r7 = r6                     ; R6=32 R7=32\n618: (77) r7 >>= 3                    ; R7=4\n619: (57) r7 &= 8                     ; R7=0\n620: (bf) r4 = r10                    ; R4=fp0 R10=fp0\n621: (07) r4 += -264                  ; R4=fp-264\n622: (0f) r4 += r7                    ; R4=fp-264 R7=0\n623: (57) r6 &= 56                    ; R6=32\n624: (b7) r7 = 255                    ; R7=255\n625: (6f) r7 <<= r6                   ; R6=32 R7=0xff00000000\n626: (a7) r7 ^= -1                    ; R7=0xffffff00ffffffff\n627: (79) r8 = *(u64 *)(r4 +0)        ; R4=fp-264 R8=0 fp-264=0\n628: (5f) r8 &= r7                    ; R7=0xffffff00ffffffff R8=0\n629: (57) r5 &= 255                   ; R5=0\n630: (6f) r5 <<= r6                   ; R5=0 R6=32\n631: (4f) r8 |= r5                    ; R5=0 R8=0\n632: (7b) *(u64 *)(r4 +0) = r8        ; R4=fp-264 R8=0 fp-264=0\n633: (07) r1 += 1                     ; R1=17\n634: (55) if r1 != 0x25 goto pc-50    ; R1=17\n585: (bf) r5 = r1                     ; R1=17 R5=17\n586: (57) r5 &= 7                     ; R5=1\n587: (55) if r5 != 0x0 goto pc+45     ; R5=1\n633: (07) r1 += 1                     ; R1=18\n634: (55) if r1 != 0x25 goto pc-50    ; R1=18\n585: (bf) r5 = r1                     ; R1=18 R5=18\n586: (57) r5 &= 7                     ; R5=2\n587: (55) if r5 != 0x0 goto pc+45     ; R5=2\n633: (07) r1 += 1                     ; R1=19\n634: (55) if r1 != 0x25 goto pc-50    ; R1=19\n585: (bf) r5 = r1                     ; R1=19 R5=19\n586: (57) r5 &= 7                     ; R5=3\n587: (55) if r5 != 0x0 goto pc+45     ; R5=3\n633: (07) r1 += 1                     ; R1=20\n634: (55) if r1 != 0x25 goto pc-50    ; R1=20\n585: (bf) r5 = r1                     ; R1=20 R5=20\n586: (57) r5 &= 7                     ; R5=4\n587: (55) if r5 != 0x0 goto pc+45     ; R5=4\n633: (07) r1 += 1                     ; R1=21\n634: (55) if r1 != 0x25 goto pc-50    ; R1=21\n585: (bf) r5 = r1                     ; R1=21 R5=21\n586: (57) r5 &= 7                     ; R5=5\n587: (55) if r5 != 0x0 goto pc+45     ; R5=5\n633: (07) r1 += 1                     ; R1=22\n634: (55) if r1 != 0x25 goto pc-50    ; R1=22\n585: (bf) r5 = r1                     ; R1=22 R5=22\n586: (57) r5 &= 7                     ; R5=6\n587: (55) if r5 != 0x0 goto pc+45     ; R5=6\n633: (07) r1 += 1                     ; R1=23\n634: (55) if r1 != 0x25 goto pc-50    ; R1=23\n585: (bf) r5 = r1                     ; R1=23 R5=23\n586: (57) r5 &= 7                     ; R5=7\n587: (55) if r5 != 0x0 goto pc+45     ; R5=7\n633: (07) r1 += 1                     ; R1=24\n634: (55) if r1 != 0x25 goto pc-50    ; R1=24\n585: (bf) r5 = r1                     ; R1=24 R5=24\n586: (57) r5 &= 7                     ; R5=0\n587: (55) if r5 != 0x0 goto pc+45     ; R5=0\n588: (b7) r5 = 0                      ; R5=0\n589: (55) if r0 != 0x0 goto pc+25     ; R0=0\n590: (25) if r1 > 0x1d goto pc+24     ; R1=24\n591: (79) r4 = *(u64 *)(r10 -296)     ; R4=0xa000000 R10=fp0 fp-296=0xa000000\n592: (bc) w6 = w4                     ; R4=0xa000000 R6=0xa000000\n593: (54) w6 &= 255                   ; R6=0\n594: (56) if w6 != 0x4 goto pc+20     ; R6=0\n615: (bf) r6 = r1                     ; R1=24 R6=24\n616: (07) r6 += 16                    ; R6=40\n617: (bf) r7 = r6                     ; R6=40 R7=40\n618: (77) r7 >>= 3                    ; R7=5\n619: (57) r7 &= 8                     ; R7=0\n620: (bf) r4 = r10                    ; R4=fp0 R10=fp0\n621: (07) r4 += -264                  ; R4=fp-264\n622: (0f) r4 += r7                    ; R4=fp-264 R7=0\n623: (57) r6 &= 56                    ; R6=40\n624: (b7) r7 = 255                    ; R7=255\n625: (6f) r7 <<= r6                   ; R6=40 R7=0xff0000000000\n626: (a7) r7 ^= -1                    ; R7=0xffff00ffffffffff\n627: (79) r8 = *(u64 *)(r4 +0)        ; R4=fp-264 R8=0 fp-264=0\n628: (5f) r8 &= r7                    ; R7=0xffff00ffffffffff R8=0\n629: (57) r5 &= 255                   ; R5=0\n630: (6f) r5 <<= r6                   ; R5=0 R6=40\n631: (4f) r8 |= r5                    ; R5=0 R8=0\n632: (7b) *(u64 *)(r4 +0) = r8        ; R4=fp-264 R8=0 fp-264=0\n633: (07) r1 += 1                     ; R1=25\n634: (55) if r1 != 0x25 goto pc-50    ; R1=25\n585: (bf) r5 = r1                     ; R1=25 R5=25\n586: (57) r5 &= 7                     ; R5=1\n587: (55) if r5 != 0x0 goto pc+45     ; R5=1\n633: (07) r1 += 1                     ; R1=26\n634: (55) if r1 != 0x25 goto pc-50    ; R1=26\n585: (bf) r5 = r1                     ; R1=26 R5=26\n586: (57) r5 &= 7                     ; R5=2\n587: (55) if r5 != 0x0 goto pc+45     ; R5=2\n633: (07) r1 += 1                     ; R1=27\n634: (55) if r1 != 0x25 goto pc-50    ; R1=27\n585: (bf) r5 = r1                     ; R1=27 R5=27\n586: (57) r5 &= 7                     ; R5=3\n587: (55) if r5 != 0x0 goto pc+45     ; R5=3\n633: (07) r1 += 1                     ; R1=28\n634: (55) if r1 != 0x25 goto pc-50    ; R1=28\n585: (bf) r5 = r1                     ; R1=28 R5=28\n586: (57) r5 &= 7                     ; R5=4\n587: (55) if r5 != 0x0 goto pc+45     ; R5=4\n633: (07) r1 += 1                     ; R1=29\n634: (55) if r1 != 0x25 goto pc-50    ; R1=29\n585: (bf) r5 = r1                     ; R1=29 R5=29\n586: (57) r5 &= 7                     ; R5=5\n587: (55) if r5 != 0x0 goto pc+45     ; R5=5\n633: (07) r1 += 1                     ; R1=30\n634: (55) if r1 != 0x25 goto pc-50    ; R1=30\n585: (bf) r5 = r1                     ; R1=30 R5=30\n586: (57) r5 &= 7                     ; R5=6\n587: (55) if r5 != 0x0 goto pc+45     ; R5=6\n633: (07) r1 += 1                     ; R1=31\n634: (55) if r1 != 0x25 goto pc-50    ; R1=31\n585: (bf) r5 = r1                     ; R1=31 R5=31\n586: (57) r5 &= 7                     ; R5=7\n587: (55) if r5 != 0x0 goto pc+45     ; R5=7\n633: (07) r1 += 1                     ; R1=32\n634: (55) if r1 != 0x25 goto pc-50    ; R1=32\n585: (bf) r5 = r1                     ; R1=32 R5=32\n586: (57) r5 &= 7                     ; R5=0\n587: (55) if r5 != 0x0 goto pc+45     ; R5=0\n588: (b7) r5 = 0                      ; R5=0\n589: (55) if r0 != 0x0 goto pc+25     ; R0=0\n590: (25) if r1 > 0x1d goto pc+24     ; R1=32\n615: (bf) r6 = r1                     ; R1=32 R6=32\n616: (07) r6 += 16                    ; R6=48\n617: (bf) r7 = r6                     ; R6=48 R7=48\n618: (77) r7 >>= 3                    ; R7=6\n619: (57) r7 &= 8                     ; R7=0\n620: (bf) r4 = r10                    ; R4=fp0 R10=fp0\n621: (07) r4 += -264                  ; R4=fp-264\n622: (0f) r4 += r7                    ; R4=fp-264 R7=0\n623: (57) r6 &= 56                    ; R6=48\n624: (b7) r7 = 255                    ; R7=255\n625: (6f) r7 <<= r6                   ; R6=48 R7=0xff000000000000\n626: (a7) r7 ^= -1                    ; R7=0xff00ffffffffffff\n627: (79) r8 = *(u64 *)(r4 +0)        ; R4=fp-264 R8=0 fp-264=0\n628: (5f) r8 &= r7                    ; R7=0xff00ffffffffffff R8=0\n629: (57) r5 &= 255                   ; R5=0\n630: (6f) r5 <<= r6                   ; R5=0 R6=48\n631: (4f) r8 |= r5                    ; R5=0 R8=0\n632: (7b) *(u64 *)(r4 +0) = r8        ; R4=fp-264 R8=0 fp-264=0\n633: (07) r1 += 1                     ; R1=33\n634: (55) if r1 != 0x25 goto pc-50    ; R1=33\n585: (bf) r5 = r1                     ; R1=33 R5=33\n586: (57) r5 &= 7                     ; R5=1\n587: (55) if r5 != 0x0 goto pc+45     ; R5=1\n633: (07) r1 += 1                     ; R1=34\n634: (55) if r1 != 0x25 goto pc-50    ; R1=34\n585: (bf) r5 = r1                     ; R1=34 R5=34\n586: (57) r5 &= 7                     ; R5=2\n587: (55) if r5 != 0x0 goto pc+45     ; R5=2\n633: (07) r1 += 1                     ; R1=35\n634: (55) if r1 != 0x25 goto pc-50    ; R1=35\n585: (bf) r5 = r1                     ; R1=35 R5=35\n586: (57) r5 &= 7                     ; R5=3\n587: (55) if r5 != 0x0 goto pc+45     ; R5=3\n633: (07) r1 += 1                     ; R1=36\n634: (55) if r1 != 0x25 goto pc-50    ; R1=36\n585: (bf) r5 = r1                     ; R1=36 R5=36\n586: (57) r5 &= 7                     ; R5=4\n587: (55) if r5 != 0x0 goto pc+45     ; R5=4\n633: (07) r1 += 1                     ; R1=37\n634: (55) if r1 != 0x25 goto pc-50    ; R1=37\n635: (15) if r0 == 0x0 goto pc+194    ; R0=0\n830: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n831: (07) r1 += -205                  ; R1=fp-205\n832: (71) r1 = *(u8 *)(r1 +0)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-208=mmmmmmmm\n833: (57) r1 &= 255                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n834: (15) if r1 == 0x0 goto pc+24     ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n835: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n836: (07) r1 += -206                  ; R1=fp-206\n837: (71) r1 = *(u8 *)(r1 +0)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-208=mmmmmmmm\n838: (57) r1 &= 255                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n839: (15) if r1 == 0x0 goto pc+19     ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n840: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n841: (07) r1 += -195                  ; R1=fp-195\n842: (79) r1 = *(u64 *)(r1 +0)\nmisaligned stack access off 0+-195+0 size 8\nprocessed 2208 insns (limit 1000000) max_states_per_insn 2 total_states 107 peak_states 107 mark_read 0\n\n8 *)(r10 -207) = 0      ; R10=fp0 fp-208=????mm0m\n2568: (72) *(u8 *)(r10 -206) = 0      ; R10=fp0 fp-208=????m00m\n2569: (72) *(u8 *)(r10 -205) = 0      ; R10=fp0 fp-208=????000m\n2570: (b7) r2 = -208                  ; R2=-208\n2571: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2572: (07) r1 += -224                 ; R1=fp-224\n2573: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n2574: (07) r2 += 224                  ; R2=fp-208\n2575: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n2577: (85) call bpf_map_lookup_elem#1\n\nfrom 2577 to 2578: safe\n\n168=mmmm???1 fp-208=????000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=-208 fp-304=ctx() fp-320=scalar(id=2)\n2583: (18) r1 = 0xffff0000c30c0350    ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n2585: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n2586: (16) if w1 == 0x0 goto pc+81    ; R1=0\n2668: (61) r1 = *(u32 *)(r7 +3864)    ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=map_value(map=per_cpu_records,ks=4,vs=4984)\n2669: (79) r2 = *(u64 *)(r10 -264)    ; R2=0 R10=fp0 fp-264=0\n2670: (57) r2 &= -16711681            ; R2=0\n2671: (7b) *(u64 *)(r10 -264) = r2    ; R2=0 R10=fp0 fp-264=0\n2672: (73) *(u8 *)(r10 -208) = r1     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-208=????000scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2673: (bf) r2 = r1                    ; R1=scalar(id=64,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=64,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2674: (77) r2 >>= 8                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))\n2675: (73) *(u8 *)(r10 -207) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R10=fp0 fp-208=????mmmm\n2676: (bf) r2 = r1                    ; R1=scalar(id=64,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=64,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2677: (77) r2 >>= 16                  ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n2678: (73) *(u8 *)(r10 -206) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-208=????mmmm\n2679: (77) r1 >>= 24                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2680: (73) *(u8 *)(r10 -205) = r1     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-208=????mmmm\n2681: (b7) r2 = -208                  ; R2=-208\n2682: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2683: (07) r1 += -224                 ; R1=fp-224\n2684: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n2685: (07) r2 += 224                  ; R2=fp-208\n2686: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n2688: (85) call bpf_map_lookup_elem#1\n\nfrom 2688 to 2689: safe\n\n fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=scalar(id=2) fp-72=scalar() fp-80=0 fp-88=????000m fp-96=mmmm???? fp-160=????000m fp-168=mmmm???1 fp-208=scalar(smin=0x8000000000000010,umin=umin32=16,smin32=0x80000010,var_off=(0x10; 0xffffffffffffffef)) fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=0 fp-304=ctx() fp-320=scalar(id=2)\n2486: (b7) r1 = 1                     ; R1=1\n2487: (7b) *(u64 *)(r10 -296) = r1    ; R1=1 R10=fp0 fp-296=1\n2488: (18) r1 = 0xffff0000c30c0350    ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n2490: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n2491: (b4) w8 = 0                     ; R8=0\n2492: (b7) r9 = 0                     ; R9=0\n2493: (16) if w1 == 0x0 goto pc+69    ; R1=0\n2563: (79) r1 = *(u64 *)(r10 -264)    ; R1=0 R10=fp0 fp-264=0\n2564: (57) r1 &= -16711681            ; R1=0\n2565: (7b) *(u64 *)(r10 -264) = r1    ; R1=0 R10=fp0 fp-264=0\n2566: (72) *(u8 *)(r10 -208) = 65     ; R10=fp0 fp-208=mmmmmmm65\n2567: (72) *(u8 *)(r10 -207) = 0      ; R10=fp0 fp-208=mmmmmm0m\n2568: (72) *(u8 *)(r10 -206) = 0      ; R10=fp0 fp-208=mmmmm00m\n2569: (72) *(u8 *)(r10 -205) = 0      ; R10=fp0 fp-208=mmmm000m\n2570: (b7) r2 = -208                  ; R2=-208\n2571: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2572: (07) r1 += -224                 ; R1=fp-224\n2573: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n2574: (07) r2 += 224                  ; R2=fp-208\n2575: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n2577: (85) call bpf_map_lookup_elem#1\n\nfrom 2577 to 2578: safe\n\n\n2539: (72) *(u8 *)(r10 -207) = 0      ; R10=fp0 fp-208=mmmmmm0m\n2540: (72) *(u8 *)(r10 -206) = 0      ; R10=fp0 fp-208=mmmmm00m\n2541: (72) *(u8 *)(r10 -205) = 0      ; R10=fp0 fp-208=mmmm000m\n2542: (b7) r1 = -208                  ; R1=-208\n2543: (7b) *(u64 *)(r10 -296) = r1    ; R1=-208 R10=fp0 fp-296=-208\n2544: (b7) r4 = -208                  ; R4=-208\n2545: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2546: (07) r1 += -224                 ; R1=fp-224\n2547: (0f) r4 += r1                   ; R1=fp-224 R4=fp-432\n2548: (07) r4 += 224                  ; R4=fp-208\n2549: (b7) r9 = 4                     ; R9=4\n2550: (79) r1 = *(u64 *)(r10 -304)    ; R1=ctx() R10=fp0 fp-304=ctx()\n2551: (18) r2 = 0xffff0000c1a9d200    ; R2=map_ptr(map=report_events,ks=4,vs=4)\n2553: (18) r3 = 0xffffffff            ; R3=0xffffffff\n2555: (b7) r5 = 4                     ; R5=4\n2556: (85) call bpf_perf_event_output#25\n\nfrom 2556 to 2557: safe\n\nmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=-208 fp-304=ctx() fp-320=scalar(id=2)\n2563: (79) r1 = *(u64 *)(r10 -264)    ; R1=0 R10=fp0 fp-264=0\n2564: (57) r1 &= -16711681            ; R1=0\n2565: (7b) *(u64 *)(r10 -264) = r1    ; R1=0 R10=fp0 fp-264=0\n2566: (72) *(u8 *)(r10 -208) = 65     ; R10=fp0 fp-208=mmmm00065\n2567: (72) *(u8 *)(r10 -207) = 0      ; R10=fp0 fp-208=mmmmmm0m\n2568: (72) *(u8 *)(r10 -206) = 0      ; R10=fp0 fp-208=mmmmm00m\n2569: (72) *(u8 *)(r10 -205) = 0      ; R10=fp0 fp-208=mmmm000m\n2570: (b7) r2 = -208                  ; R2=-208\n2571: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2572: (07) r1 += -224                 ; R1=fp-224\n2573: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n2574: (07) r2 += 224                  ; R2=fp-208\n2575: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n2577: (85) call bpf_map_lookup_elem#1\n\nfrom 2577 to 2578: safe\n\n168=mmmm???1 fp-208=mmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=-208 fp-304=ctx() fp-320=scalar(id=2)\n2583: (18) r1 = 0xffff0000c30c0350    ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n2585: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n2586: (16) if w1 == 0x0 goto pc+81    ; R1=0\n2668: (61) r1 = *(u32 *)(r7 +3864)    ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=map_value(map=per_cpu_records,ks=4,vs=4984)\n2669: (79) r2 = *(u64 *)(r10 -264)    ; R2=0 R10=fp0 fp-264=0\n2670: (57) r2 &= -16711681            ; R2=0\n2671: (7b) *(u64 *)(r10 -264) = r2    ; R2=0 R10=fp0 fp-264=0\n2672: (73) *(u8 *)(r10 -208) = r1     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-208=mmmm000scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2673: (bf) r2 = r1                    ; R1=scalar(id=51,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=51,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2674: (77) r2 >>= 8                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))\n2675: (73) *(u8 *)(r10 -207) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R10=fp0 fp-208=mmmmmmmm\n2676: (bf) r2 = r1                    ; R1=scalar(id=51,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=51,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2677: (77) r2 >>= 16                  ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n2678: (73) *(u8 *)(r10 -206) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-208=mmmmmmmm\n2679: (77) r1 >>= 24                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2680: (73) *(u8 *)(r10 -205) = r1     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-208=mmmmmmmm\n2681: (b7) r2 = -208                  ; R2=-208\n2682: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n2683: (07) r1 += -224                 ; R1=fp-224\n2684: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n2685: (07) r2 += 224                  ; R2=fp-208\n2686: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n2688: (85) call bpf_map_lookup_elem#1\n\nfrom 2688 to 2689: safe\n\n4,vs=36,off=32)\n3996: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n3997: (56) if w1 != 0x0 goto pc+23    ; R1=0\n3998: (bf) r6 = r10                   ; R6=fp0 R10=fp0\n3999: (07) r6 += -208                 ; R6=fp-208\n4000: (79) r1 = *(u64 *)(r10 -264)    ; R1=0 R10=fp0 fp-264=0\n4001: (57) r1 &= -16711681            ; R1=0\n4002: (7b) *(u64 *)(r10 -264) = r1    ; R1=0 R10=fp0 fp-264=0\n4003: (72) *(u8 *)(r10 -208) = 96     ; R10=fp0 fp-208=mmmmmmm96\n4004: (72) *(u8 *)(r10 -207) = 0      ; R10=fp0 fp-208=mmmmmm0m\n4005: (72) *(u8 *)(r10 -206) = 0      ; R10=fp0 fp-208=mmmmm00m\n4006: (72) *(u8 *)(r10 -205) = 0      ; R10=fp0 fp-208=mmmm000m\n4007: (b7) r2 = -208                  ; R2=-208\n4008: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n4009: (07) r1 += -224                 ; R1=fp-224\n4010: (0f) r2 += r1                   ; R1=fp-224 R2=fp-432\n4011: (07) r2 += 224                  ; R2=fp-208\n4012: (18) r1 = 0xffff0000c3386800    ; R1=map_ptr(map=metrics,ks=4,vs=8)\n4014: (85) call bpf_map_lookup_elem#1         ; R0=map_value_or_null(id=24,map=metrics,ks=4,vs=8)\n4015: (15) if r0 == 0x0 goto pc+103 4119: R0=0 R6=fp-208 R7=map_value(map=per_cpu_records,ks=4,vs=4984) R8=0 R9=0 R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=scalar(id=2) fp-72=mmmmmmmm fp-80=0 fp-88=mmmmmmmm fp-96=mmmm???? fp-160=????000m fp-168=mmmm???? fp-208=mmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984,off=3944) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=0 fp-304=ctx() fp-312=0 fp-320=scalar(id=2)\n4119: (18) r1 = 0xffff0000c30c0350    ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n4121: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n4122: (79) r9 = *(u64 *)(r10 -312)    ; R9=0 R10=fp0 fp-312=0\n4123: (56) if w1 != 0x0 goto pc+46    ; R1=0\n4124: (79) r1 = *(u64 *)(r10 -256)    ; R1=0 R10=fp0 fp-256=0\n4125: (57) r1 &= -256                 ; R1=0\n4126: (7b) *(u64 *)(r10 -256) = r1    ; R1=0 R10=fp0 fp-256=0\n4127: (72) *(u8 *)(r10 -160) = 0      ; R10=fp0 fp-160=????0000\n4128: (72) *(u8 *)(r10 -159) = 0      ; R10=fp0 fp-160=????mm0m\n4129: (72) *(u8 *)(r10 -158) = 0      ; R10=fp0 fp-160=????m00m\n4130: (72) *(u8 *)(r10 -157) = 0      ; R10=fp0 fp-160=????000m\n4131: (b7) r2 = -160                  ; R2=-160\n4132: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n4133: (07) r1 += -224                 ; R1=fp-224\n4134: (0f) r2 += r1                   ; R1=fp-224 R2=fp-384\n4135: (07) r2 += 224                  ; R2=fp-160\n4136: (18) r1 = 0xffff0000c1a9fa00    ; R1=map_ptr(map=per_cpu_records,ks=4,vs=4984)\n4138: (85) call bpf_map_lookup_elem#1\n\nfrom 4138 to 4139: safe\n\n8=mmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984,off=3944) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=0 fp-304=ctx() fp-312=0 fp-320=scalar(id=2)\n4262: (79) r1 = *(u64 *)(r10 -304)    ; R1=ctx() R10=fp0 fp-304=ctx()\n4263: (18) r2 = 0xffff0000c30b9200    ; R2=map_ptr(map=perf_progs,ks=4,vs=4)\n4265: (85) call bpf_tail_call#12\n\nfrom 4265 to 4266: safe\n\n0 fp-88=mmmmmmmm fp-96=mmmm???? fp-160=????000m fp-168=mmmm???? fp-208=mmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984,off=3944) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=0 fp-304=ctx() fp-312=0 fp-320=scalar(id=2)\n4258: (04) w1 += 1                    ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=29,var_off=(0x0; 0x1f))\n4259: (57) r1 &= 255                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=29,var_off=(0x0; 0x1f))\n4260: (07) r0 += 4980                 ; R0=map_value(map=per_cpu_records,ks=4,vs=4984,off=4980)\n4261: (73) *(u8 *)(r0 +0) = r1        ; R0=map_value(map=per_cpu_records,ks=4,vs=4984,off=4980) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=29,var_off=(0x0; 0x1f))\n4262: (79) r1 = *(u64 *)(r10 -304)    ; R1=ctx() R10=fp0 fp-304=ctx()\n4263: (18) r2 = 0xffff0000c30b9200    ; R2=map_ptr(map=perf_progs,ks=4,vs=4)\n4265: (85) call bpf_tail_call#12      ;\n4266: (05) goto pc-1172\n\nfrom 4266 to 3095: safe\n\ns,ks=4,vs=8)\n4164: (85) call bpf_map_lookup_elem#1         ; R0=map_value_or_null(id=26,map=metrics,ks=4,vs=8)\n4165: (15) if r0 == 0x0 goto pc+83 4249: R0=0 R6=fp-208 R7=map_value(map=per_cpu_records,ks=4,vs=4984) R8=0 R9=0 R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=scalar(id=2) fp-72=mmmmmmmm fp-80=0 fp-88=mmmmmmmm fp-96=mmmm???? fp-160=????000m fp-168=mmmm???? fp-208=mmmm000m fp-232=0 fp-240=0 fp-248=0xa00000000 fp-256=0 fp-264=0 fp-272=scalar() fp-280=map_value(map=per_cpu_records,ks=4,vs=4984,off=3944) fp-288=map_value(map=per_cpu_records,ks=4,vs=4984) fp-296=0 fp-304=ctx() fp-312=0 fp-320=scalar(id=2)\n4249: (18) r1 = 0xffff0000c30c0350    ; R1=map_value(map=.rodata.var,ks=4,vs=36,off=32)\n4251: (61) r1 = *(u32 *)(r1 +0)       ; R1=0\n4252: (56) if w1 != 0x0 goto pc+14    ; R1=0\n4253: (bf) r0 = r7                    ; R0=map_value(map=per_cpu_records,ks=4,vs=4984) R7=map_value(map=per_cpu_records,ks=4,vs=4984)\n4254: (71) r1 = *(u8 *)(r0 +4980)     ; R0=map_value(map=per_cpu_records,ks=4,vs=4984) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n4255: (b4) w3 = 0                     ; R3=0\n4256: (57) r1 &= 255                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n4257: (79) r7 = *(u64 *)(r10 -288)\n\nfrom 4257 to 4258: safe\n\nper_cpu_records,ks=4,vs=4984,off=4980)\n4261: (73) *(u8 *)(r0 +0) = r1        ; R0=map_value(map=per_cpu_records,ks=4,vs=4984,off=4980) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n4262: (79) r1 = *(u64 *)(r10 -304)    ; R1=ctx() R10=fp0 fp-304=ctx()\n4263: (18) r2 = 0xffff0000c30b9200    ; R2=map_ptr(map=perf_progs,ks=4,vs=4)\n4265: (85) call bpf_tail_call#12      ;\n4266: (05) goto pc-1172\n\nfrom 4266 to 3095: safe\n\nkernel log tail:\n4,244,6907977,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,245,6908371,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=7 blob_bytes=326820 reloc_records=109 reloc_bytes=1744 chunks=20 proof_bound=1 callee_saved_mask=15 tail_call_reachable=1 retained_map_fds=36 relocated_map_ids=36 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nretained_map_info=92:id=205:type=6:name=per_cpu_records,93:id=222:type=1:name=apm_int_procs,94:id=218:type=2:name=.rodata.var,95:id=211:type=6:name=metrics,96:id=172:type=9:name=reported_pids,97:id=195:type=1:name=pid_events,98:id=178:type=1:name=inhibit_events,99:id=174:type=4:name=report_events,100:id=194:type=1:name=go_labels_procs,101:id=181:type=3:name=perf_progs,102:id=173:type=4:name=trace_events,103:id=230:type=2:name=.rodata.native.,104:id=231:type=2:name=.rodata.native.,105:id=232:type=2:name=.rodata.native.,106:id=233:type=2:name=.rodata.native.,107:id=234:type=2:name=.rodata.native.,108:id=235:type=2:name=.rodata.native.,109:id=236:type=2:name=.rodata.native.,110:id=237:type=2:name=.rodata.native.,111:id=238:type=2:name=.rodata.native.,112:id=239:type=2:name=.rodata.native.,113:id=240:type=2:name=.rodata.native.,114:id=241:type=2:name=.rodata.native.,115:id=242:type=2:name=.rodata.native.,116:id=243:type=2:name=.rodata.native.,117:id=244:type=2:name=.rodata.native.,118:id=245:type=2:name=.rodata.native.,119:id=246:type=2:name=.rodata.native.,120:id=247:type=2:name=.rodata.native.,121:id=248:type=2:name=.rodata.native.,122:id=249:type=2:name=.rodata.native.,123:id=250:type=2:name=.rodata.native.,124:id=251:type=2:name=.rodata.native.,125:id=252:type=2:name=.rodata.native.,126:id=253:type=2:name=.rodata.native.,127:id=254:type=2:name=.rodata.native.\nnative_blob_diag: fnv64=231c4e922c279d47 word_count=81705 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=26 first_zero_offset=6712 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=326820 final_size_matches=1\nchunk_bytes=0:16384,16384:16384,32768:16384,49152:16384,65536:16384,81920:16384,98304:16384,114688:16384,131072:16384,147456:16384,163840:16384,180224:16384,196608:16384,212992:16384,229376:16384,245760:16384,262144:16384,278528:16384,294912:16384,311296:15524\nreloc_targets=80:0x0,132:0xffff800080301d70,232:0xffff8000802970c8,308:0x0,400:0xffff800080296fd8,468:0x0,568:0xffff80008029b9e8,644:0x0,748:0xffff80008029b9e8,840:0xffff80008029b9e8,896:0xffff800080296fd8,964:0x0,1056:0xffff80008029b9e8,1148:0xffff80008029b9e8,1260:0x0,1372:0xffff80008029b9e8,1464:0xffff80008029b9e8,1576:0x0,1728:0x0,1836:0xffff80008029b9e8,1916:0xffff80008029b9e8,1996:0xffff80008029b9e8,2160:0xffff800080301d70,2208:0xffff8000802f1568,2440:0xffff8000802f12e0,2528:0x0,2668:0xffff8000802f12e0,2760:0x0,2864:0xffff8000802f1318,2924:0xffff8000802f12e0,2996:0x0,3108:0xffff80008029b9e8,3184:0xffff8000802992e0,3264:0x0,3344:0x0,3452:0xffff800080301d70,3528:0xffff8000802970c8,3604:0x0,3704:0xffff80008029b9e8,3796:0xffff80008029b9e8,3868:0xffff800080296fd8,3960:0xffff80008029b9e8,4080:0xffff80008029b9e8,4180:0xffff80008029b9e8,4252:0xffff80008029b9e8,4324:0xffff80008029b9e8,4396:0xffff80008029b9e8,4480:0xffff80008029b9e8,4576:0xffff80008029b9e8,4664:0xffff80008029b9e8,4752:0xffff800080296fd8,4824:0xffff80008029b9e8,4916:0x0,5004:0x0,5100:0x0,5400:0xffff8000802992e0,5512:0xffff80008029b9e8,5596:0xffff80008029b9e8,5684:0xffff80008029b9e8,5776:0xffff80008029b9e8,5856:0xffff80008029b9e8,5936:0xffff80008029b9e8,6004:0xffff80008029b9e8,6088:0xffff80008029b9e8,6164:0xffff80008029b9e8,6260:0xffff80008029b9e8,6348:0xffff80008029b9e8,6432:0xffff80008029b9e8,6516:0xffff80008029b9e8,6608:0xffff80008029b9e8,6692:0xffff80008029b9e8,6712:0xcd,6720:0xde,6728:0x20000000da,6736:0xd3,6744:0x8000000da,326752:0xac,326760:0xc3,326768:0xb2,326776:0xae,326784:0xc2,326792:0xda,326800:0xb5,326808:0xad,0:0x11460000000e6,0:0x24060000000e7,0:0x2a460000000e8,0:0x1a60000000e9,0:0xb060000000ea,0:0x7e60000000eb,0:0xe260000000ec,0:0x4c60000000ed,0:0x36c60000000ee,0:0x14660000000ef,0:0x43460000000f0,0:0x27260000000f1,0:0x33a60000000f2,0:0x40260000000f3,0:0x39e60000000f4,0:0x17860000000f5,0:0x4ca60000000f6,0:0x1aa60000000f7,0:0x1dc60000000f8,0:0x2d660000000f9,0:0x20e60000000fa,0:0x3d060000000fb,0:0x30860000000fc,0:0x46660000000fd,0:0x49860000000fe\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n"
+    }
+  ],
+  "applications": [
+    {
+      "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000050_654704/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "status": "error",
+      "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n1970-01-01T00:05:43.472Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:05:43.644Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:05:44.100Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n1970-01-01T00:05:44.106Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:05:44.166Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:05:49.679Z\tinfo\tDetermined PAC mask to be 0x007F000000000000\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:06:23.085Z\tinfo\tFound offsets: task stack 0x28, pt_regs 0x3ec0, tpbase 0x1ed0\t{\"resource\": {\"service.instance.id\": \"5783fb3a-0a35-4d36-bd77-893072a74150\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+      "phases": {
+        "baseline": {
+          "programs": [
+            {
+              "bytes_jited": 15168,
+              "bytes_xlated": 24768,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18776,
+              "bytes_xlated": 33192,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18496,
+              "bytes_xlated": 30264,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 20496,
+              "bytes_xlated": 34040,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 1640,
+              "bytes_xlated": 2504,
+              "id": 14,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 928,
+              "bytes_xlated": 1320,
+              "id": 15,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 29,
+              "run_time_ns_delta": 936208,
+              "type": "tracepoint"
+            },
+            {
+              "bytes_jited": 4112,
+              "bytes_xlated": 6000,
+              "id": 16,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 194572,
+              "run_time_ns_delta": 23214038752,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 3928,
+              "bytes_xlated": 5848,
+              "id": 17,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            {
+              "bytes_jited": 3880,
+              "bytes_xlated": 6136,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 21936,
+              "bytes_xlated": 36624,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 14888,
+              "bytes_xlated": 24472,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18272,
+              "bytes_xlated": 29624,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          ],
+          "workload": null,
+          "raw_measurement": {
+            "bpf": {
+              "10": {
+                "bytes_jited": 15168,
+                "bytes_xlated": 24768,
+                "id": 10,
+                "name": "perf_unwind_php",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "11": {
+                "bytes_jited": 18776,
+                "bytes_xlated": 33192,
+                "id": 11,
+                "name": "perf_unwind_pyt",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "12": {
+                "bytes_jited": 18496,
+                "bytes_xlated": 30264,
+                "id": 12,
+                "name": "perf_unwind_rub",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "13": {
+                "bytes_jited": 20496,
+                "bytes_xlated": 34040,
+                "id": 13,
+                "name": "perf_unwind_v8",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "14": {
+                "bytes_jited": 1640,
+                "bytes_xlated": 2504,
+                "id": 14,
+                "name": "perf_go_labels",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "15": {
+                "bytes_jited": 928,
+                "bytes_xlated": 1320,
+                "id": 15,
+                "name": "tracepoint__sch",
+                "run_cnt_delta": 29,
+                "run_time_ns_delta": 936208,
+                "type": "tracepoint"
+              },
+              "16": {
+                "bytes_jited": 4112,
+                "bytes_xlated": 6000,
+                "id": 16,
+                "name": "native_tracer_e",
+                "run_cnt_delta": 194572,
+                "run_time_ns_delta": 23214038752,
+                "type": "perf_event"
+              },
+              "17": {
+                "bytes_jited": 3928,
+                "bytes_xlated": 5848,
+                "id": 17,
+                "name": "custom__generic",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              "6": {
+                "bytes_jited": 3880,
+                "bytes_xlated": 6136,
+                "id": 6,
+                "name": "perf_unwind_sto",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "7": {
+                "bytes_jited": 21936,
+                "bytes_xlated": 36624,
+                "id": 7,
+                "name": "perf_unwind_nat",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "8": {
+                "bytes_jited": 14888,
+                "bytes_xlated": 24472,
+                "id": 8,
+                "name": "perf_unwind_hot",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "9": {
+                "bytes_jited": 18272,
+                "bytes_xlated": 29624,
+                "id": 9,
+                "name": "perf_unwind_per",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              }
+            },
+            "workloads": [
+              {
+                "components": [
+                  {
+                    "command": [
+                      "/usr/bin/python3",
+                      "-u",
+                      "-c",
+                      "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "python3",
+                      "loop": "integer_lcg",
+                      "tool": "python3",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 11.295935375999989,
+                    "returncode": 0,
+                    "stderr": "python3 int_loop ops=9227 elapsed_s=2.000175 worker=0 sink=4189003308",
+                    "stdout": "",
+                    "workload_name": "otel_python3_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/python3",
+                      "-u",
+                      "-c",
+                      "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "python3",
+                      "loop": "integer_lcg",
+                      "tool": "python3",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 12.871885952000014,
+                    "returncode": 0,
+                    "stderr": "python3 int_loop ops=8749 elapsed_s=2.000261 worker=1 sink=517345607",
+                    "stdout": "",
+                    "workload_name": "otel_python3_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/ruby",
+                      "-e",
+                      "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "ruby",
+                      "loop": "integer_lcg",
+                      "tool": "ruby",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 62.37621304000004,
+                    "returncode": 0,
+                    "stderr": "ruby int_loop ops=27948 elapsed_s=2.002882 worker=0 sink=3403427029",
+                    "stdout": "",
+                    "workload_name": "otel_ruby_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/ruby",
+                      "-e",
+                      "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "ruby",
+                      "loop": "integer_lcg",
+                      "tool": "ruby",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 62.38709780800002,
+                    "returncode": 0,
+                    "stderr": "ruby int_loop ops=25280 elapsed_s=2.001292 worker=1 sink=2733822530",
+                    "stdout": "",
+                    "workload_name": "otel_ruby_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/nodejs",
+                      "-e",
+                      "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "nodejs",
+                      "loop": "integer_lcg",
+                      "tool": "nodejs",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.29389428799999,
+                    "returncode": 0,
+                    "stderr": "nodejs int_loop ops=11701 elapsed_s=3.505380 worker=0 sink=3001435648",
+                    "stdout": "",
+                    "workload_name": "otel_nodejs_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/nodejs",
+                      "-e",
+                      "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "nodejs",
+                      "loop": "integer_lcg",
+                      "tool": "nodejs",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.305935551999994,
+                    "returncode": 0,
+                    "stderr": "nodejs int_loop ops=11701 elapsed_s=3.522912 worker=1 sink=357225472",
+                    "stdout": "",
+                    "workload_name": "otel_nodejs_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/perl",
+                      "-e",
+                      "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "perl",
+                      "loop": "integer_lcg",
+                      "tool": "perl",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.31802788800002,
+                    "returncode": 0,
+                    "stderr": "perl int_loop ops=18841 elapsed_s=2.001113 worker=0 sink=991156654",
+                    "stdout": "",
+                    "workload_name": "otel_perl_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/perl",
+                      "-e",
+                      "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "perl",
+                      "loop": "integer_lcg",
+                      "tool": "perl",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.328003104000004,
+                    "returncode": 0,
+                    "stderr": "perl int_loop ops=17266 elapsed_s=2.000074 worker=1 sink=260394144",
+                    "stdout": "",
+                    "workload_name": "otel_perl_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/php",
+                      "-r",
+                      "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "php",
+                      "loop": "integer_lcg",
+                      "tool": "php",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.34271340800001,
+                    "returncode": 0,
+                    "stderr": "php int_loop ops=151530 elapsed_s=2.000675 worker=0 sink=2507021311",
+                    "stdout": "",
+                    "workload_name": "otel_php_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/php",
+                      "-r",
+                      "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "php",
+                      "loop": "integer_lcg",
+                      "tool": "php",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 63.362813872000004,
+                    "returncode": 0,
+                    "stderr": "php int_loop ops=137059 elapsed_s=2.000259 worker=1 sink=2820646633",
+                    "stdout": "",
+                    "workload_name": "otel_php_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/stress-ng",
+                      "--cpu",
+                      "1",
+                      "--timeout",
+                      "2s",
+                      "--metrics-brief",
+                      "--temp-path",
+                      "/var/tmp/bpfrejit-runtime/86ddf06c"
+                    ],
+                    "config": {
+                      "stressors": [
+                        "cpu"
+                      ],
+                      "tool": "stress-ng"
+                    },
+                    "duration_s": 63.37900563200003,
+                    "returncode": 0,
+                    "stderr": "",
+                    "stdout": "stress-ng: info:  [744] setting to a 2 secs run per stressor\nstress-ng: info:  [744] dispatching hogs: 1 cpu\nstress-ng: info:  [744] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [744] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [744]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [744] cpu                   4      2.28      2.13      0.10         1.75           1.79\nstress-ng: info:  [744] skipped: 0\nstress-ng: info:  [744] passed: 1: cpu (1)\nstress-ng: info:  [744] failed: 0\nstress-ng: info:  [744] metrics untrustworthy: 0\nstress-ng: info:  [744] successful run completed in 2.44 secs",
+                    "workload_name": "otel_stress_ng_cpu"
+                  }
+                ],
+                "workload_name": "otel_mixed_workload"
+              }
+            ]
+          }
+        },
+        "post_rejit": {
+          "programs": [],
+          "workload": null,
+          "raw_measurement": {}
+        }
+      }
+    }
+  ],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}
