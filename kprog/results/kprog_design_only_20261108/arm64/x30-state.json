@@ -1,0 +1,9 @@
+{
+  "utc": "2026-11-08T06:30:39.327050+00:00",
+  "cause": "Entry x30 has RETURN tag with outer-return coordinate0; unspecified initial payload exposed the existing reject-PC arm in B",
+  "change": "Initialize x30 symbolic return coordinate0; numeric LR observation continues through the existing native return input; other entry GPR/flag/vector state remains kind6",
+  "before_sha256": "9254ff9e9a8cb79049dbd17e0312ced3b22b412083615a323ef4e354df379c5e",
+  "after_sha256": "f68e19f82e74478c251a36f1ba8a97f2b0793d3a14e9890b1b2fefdd4949456b",
+  "first_replay_commit": "98a66afa18bd8562ae53c36643c01737257e381c",
+  "runtime_commit": "e2d3a5ee89349608fb79f4d4d397fdfc683ff7a8"
+}
