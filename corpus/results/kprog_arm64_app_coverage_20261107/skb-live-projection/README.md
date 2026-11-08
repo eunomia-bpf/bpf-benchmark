@@ -32,3 +32,5 @@ A private header overlay reuses the existing ARM differential warm build.
 The807-form/826,368-state native-QEMU/C phase has zero differences; canonical
 replay continues in the detached fidelity job identified by summary.json.
 Current application guests retain their source epoch while that review runs.
+
+Completed differential collection: Make exit0, 807 forms/826368 canonical cases. Exact compiled sources/static ELF, every result row, diagnostics and trace identity accompany the fidelity archives. The current source epoch remains captured through adoption.

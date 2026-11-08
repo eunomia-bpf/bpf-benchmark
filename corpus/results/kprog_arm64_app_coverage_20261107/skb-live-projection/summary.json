@@ -121,7 +121,7 @@
     "cpu_simulator_forms": 807,
     "cpu_simulator_observations": 826368,
     "cpu_simulator_mismatches": 0,
-    "canonical_phase": "running",
+    "canonical_phase": "closed",
     "launch": {
       "utc": "2026-11-08T00:29:28.090174+00:00",
       "actual_header_sha256": "e8d735c58eb59a3c1e31fa3bd4793a7f9949aee5ea81a9e6882398b6e986a9fe",
@@ -134,6 +134,21 @@
         "/workspaces/.agent-state/kprog-lanes/F/reference-control-frozen": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
       },
       "scope": "Private header overlay with existing warm ARM build and canonical reference executable; physical production header and active app views retained."
+    },
+    "completed": {
+      "returncode": 0,
+      "forms": 807,
+      "cpu_cases": 826368,
+      "cpu_mismatches": 0,
+      "reference_cases": 826368,
+      "cpu_reference_mismatches": 0,
+      "simulator_reference_mismatches": 0,
+      "awaiting_reference": 0,
+      "trace_bytes": 1500684312,
+      "trace_sha256": "f6fd53074bf8c14eb85e0c20d5a2ff1a9af23465996764acc548b5ab645f2b9a",
+      "binary_sha256": "b8a56754521710b507e844305d93f5b40af2cdd04a5587a743f6f03e1c8ba497",
+      "frozen_header_path": "kprog/fidelity/build-arm64/snapshot/kprog/arm64/arm64_sim_local_bpf.h",
+      "compiled_source_files": 81
     }
   },
   "artifacts": {
