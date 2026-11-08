@@ -5347,3 +5347,14 @@ freshness also passes. Original failed full and first compiler diagnostics,
 source hashes and commands are retained in `helper88-oracle-refresh.log.gz`
 and `helper88_generated_oracle_refresh`. No production behavior, runtime gate
 or new check is added. A distinct immutable-source full retry follows.
+
+### Official-model download cache retirement
+
+The disk-pressure cleanup retired14 downloaded ACL2/dependency `.deb` copies
+(952933674 bytes). Every one of their54889 regular payload files matched
+a retained installed file byte-for-byte before deletion. Official ACL2
+8.5/8.7 and SBCL model engines, sources and certificates remain; source pins
+and every replay outcome are unchanged. `reference-x86-acl2.json` records
+the package hashes, per-package counts and original cleanup code/log/exit
+under `download_cache_retirement`. Shared incremental caches and active proof
+inputs remain intact. No simulator change or new check is introduced.
