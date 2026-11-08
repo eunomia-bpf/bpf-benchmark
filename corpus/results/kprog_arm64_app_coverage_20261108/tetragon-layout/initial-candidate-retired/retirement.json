@@ -1,0 +1,35 @@
+{
+  "utc": "2026-11-08T11:41:58.120815+00:00",
+  "reason": "Supplementary geometry regression identifies SP-derived dynamic destinations that retain the complete payload layout",
+  "controller": 1801180,
+  "group": 1801180,
+  "processes": [
+    {
+      "pid": 1801180,
+      "command": "python3 /workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/tetragon-layout/app-controller.py "
+    },
+    {
+      "pid": 1801476,
+      "command": "make -f /workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/tetragon-layout/Makefile application "
+    },
+    {
+      "pid": 1801663,
+      "command": "make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-service-arm64-run TRUSTED_APP=tetragon TRUSTED_RESULTS=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout "
+    },
+    {
+      "pid": 1801664,
+      "command": "python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py host tetragon /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout "
+    },
+    {
+      "pid": 1801665,
+      "command": "/opt/virtme-ng/bin/python3 /workspaces/repository/kprog/trusted_compile.py serve --scope /workspaces/repository/kprog/arm64/build/trusted-transport --state /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-gw9dm6fh/compiler-broker --arm64-sysroot /workspaces/repository/kprog/arm64/build/app-runtime-v35/root --clang /usr/lib/llvm-18/bin/clang "
+    },
+    {
+      "pid": 1801667,
+      "command": "qemu-system-aarch64 -M virt -cpu max -smp 8 -m 8192 -nographic -no-reboot -kernel /workspaces/repository/kprog/arm64/build/design-only/Image -fsdev local,id=rootfs,path=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root,security_model=none,readonly=on -device virtio-9p-device,fsdev=rootfs,mount_tag=rootfs -fsdev local,id=repo,path=/workspaces/repository,security_model=none -device virtio-9p-device,fsdev=repo,mount_tag=repo -append console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=-1 oops=panic "
+    }
+  ],
+  "interrupted_qemu": [
+    1801667
+  ]
+}
