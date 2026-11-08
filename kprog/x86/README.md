@@ -152,6 +152,11 @@ Fault-like x86 behavior is also not hidden by simulator checks. Raw invalid
 loads/stores, stack OOB, division faults, and unsupported verifier pointer
 arithmetic are allowed to surface as compiler/verifier/load failures.
 
+UD2 emits its native invalid-opcode fault through the existing verifier-visible
+architectural-fault arm. It terminates that native path. Division uses the
+same proof-side fault representation while retaining its exact native #DE
+predicates; integer-input zero-result branches live in compiled native P.
+
 ## Issues And Attempts
 
 | Issue | Attempted solution | Current status |

@@ -2496,16 +2496,19 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_pw_tag);                          \
 	} while (0)
 
-/* A native #DE path must remain verifier-rejectable, rather than inherit
- * eBPF's defined division-by-zero result. It never reaches a native run. */
+/* Native architectural faults reach the existing verifier-visible memory
+ * fault arm. Native #DE and UD2/#UD retain their faulting control paths. */
 #if defined(__bpf__)
-#define X86_SIM_L_DIVIDE_FAULT() do {                                    \
+#define X86_SIM_L_ARCHITECTURAL_FAULT() do {                                    \
     __asm__ volatile("r0 = 0; *(u64 *)(r0 + 0) = r0; exit;" ::: "r0", "memory"); \
     __builtin_unreachable();                                             \
 } while (0)
 #else
-#define X86_SIM_L_DIVIDE_FAULT() __builtin_trap()
+#define X86_SIM_L_ARCHITECTURAL_FAULT() __builtin_trap()
 #endif
+
+#define X86_SIM_L_DIVIDE_FAULT() X86_SIM_L_ARCHITECTURAL_FAULT()
+#define X86_SIM_L_INVALID_OPCODE_FAULT() X86_SIM_L_ARCHITECTURAL_FAULT()
 
 struct x86_sim_divmod64 {
     __u64 quotient;

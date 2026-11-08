@@ -1,0 +1,5 @@
+# x86 UD2 architectural terminal
+
+The actual first Cilium native request under the approved native-division compiler is cil_xdp_entry/P8bf36e13. Its native0x412 and linked0x41a instructions are UD2. The mechanical generator emits one invalid-opcode-fault statement for each native UD2, terminating exactly that path through the existing verifier-visible architectural-fault arm. Native division retains its exact #DE predicates and shares the existing proof-side fault representation. Runtime predicates/checks/gates/limits added0.
+
+The captured original request replays through the established private canonical-root mount recipe; the native-link and generated B compiler commands each exit0. Complete native/linked/C/B, compiler outputs, exact request metadata and source are archived. Actual native executions0. Original38 safety and whole original Cilium follow through the same full canonical-root recipe and83528 compiler image. Earlier adapter and renderer-loader-source import diagnostics retain5b4a77e6a/d7daae448. Universal UD2 terminal/O2/O4 interfaces retain V ownership.

@@ -1,0 +1,50 @@
+{
+  "utc": "2026-11-08T18:44:18.665822+00:00",
+  "native_sha256": "8bf36e1366b041e9c31976762d6d3a4912cd3671e9ed786338a087642167fbc3",
+  "entry": "cil_xdp_entry",
+  "native_ud2_offset": "0x412",
+  "linked_ud2_offset": "0x41a",
+  "commands": [
+    {
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division-complete/first-request/generated-ud2/request.native.o",
+        "--symbol",
+        "cil_xdp_entry",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division-complete/first-request/generated-ud2/trusted_x86.proof.o"
+      ]
+    },
+    {
+      "returncode": 0,
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division-complete/first-request/generated-ud2/trusted_x86.bpf.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division-complete/first-request/generated-ud2/trusted_x86.bpf.o"
+      ]
+    }
+  ],
+  "native_execution_count": 0,
+  "simulator_sha256": "57f505e291f7503f11fb8e4bddfa35519487feae22215f484230b3b31180fcae"
+}

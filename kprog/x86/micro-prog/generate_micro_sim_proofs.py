@@ -1503,6 +1503,10 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             return
         raise ValueError(f"unsupported unresolved call target in {insn.raw}")
         return
+    if insn.mnemonic == "ud2":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        lines.append(f"{indent}X86_SIM_L_INVALID_OPCODE_FAULT();")
+        return
     if insn.mnemonic == "ret":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         lines.append(f"{indent}{ret_statement}")
