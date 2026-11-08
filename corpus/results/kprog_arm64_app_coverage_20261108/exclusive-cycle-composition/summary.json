@@ -1,0 +1,310 @@
+{
+  "utc": "2026-11-08T02:50:25.092225+00:00",
+  "module": "kprog/formal/KProgFormal/Refinement/Arm64Exclusive.lean",
+  "source_before_sha256": "3b046e8882352f257dd1ca99f950a8cc1a005aa547e9bfc6afda3791c0ea36c0",
+  "source_after_sha256": "64bdba25c81c9dfa5f9453ea2127b46ac7afced05259399fb9a56673a90198a8",
+  "prior_module_body_preserved": true,
+  "source_files": 57,
+  "make_exit": 0,
+  "axiom_audits": [
+    "retry_prefix_refines",
+    "retry_suffix_core_refines",
+    "retry_cycle_refines",
+    "retry_cycle_prefix_fault"
+  ],
+  "source_pins": {
+    "KProgFormal/Refinement/Arm64Exclusive.lean": {
+      "sha256": "64bdba25c81c9dfa5f9453ea2127b46ac7afced05259399fb9a56673a90198a8",
+      "root_git_blob_sha256": "3b046e8882352f257dd1ca99f950a8cc1a005aa547e9bfc6afda3791c0ea36c0"
+    },
+    "KProgFormal/Refinement/Arm64Memory.lean": {
+      "sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc",
+      "root_git_blob_sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc"
+    },
+    "KProgFormal/Refinement/Arm64Register.lean": {
+      "sha256": "d822382129f2eb6a04ce7430c9553073bebebb3655bad1d9287c77bcd55919fc",
+      "root_git_blob_sha256": "d822382129f2eb6a04ce7430c9553073bebebb3655bad1d9287c77bcd55919fc"
+    },
+    "KProgFormal/Reference/AArch64.lean": {
+      "sha256": "082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56",
+      "root_git_blob_sha256": "082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56"
+    },
+    "KProgFormal/Reference/Memory.lean": {
+      "sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0",
+      "root_git_blob_sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0"
+    },
+    "KProgFormal/Arm64RegDispatch.lean": {
+      "sha256": "cf32a3e23b0386574ec9b2b728c760a7dfcd4521fd46d92075959e1438d9fccf",
+      "root_git_blob_sha256": "cf32a3e23b0386574ec9b2b728c760a7dfcd4521fd46d92075959e1438d9fccf"
+    },
+    "KProgFormal/Generated/GeneratedArm64RegDispatch.lean": {
+      "sha256": "cdf1723df5504058c7849c8682f854f392a871d1eaf896ba3e9f33095575a6b7",
+      "root_git_blob_sha256": "cdf1723df5504058c7849c8682f854f392a871d1eaf896ba3e9f33095575a6b7"
+    },
+    "KProgFormal/Generated/GeneratedArm64RegPresence.lean": {
+      "sha256": "1bb899b1bcd79a7506af7cd70668c7fed768f393d126c5b21b70b761a130c57b",
+      "root_git_blob_sha256": "1bb899b1bcd79a7506af7cd70668c7fed768f393d126c5b21b70b761a130c57b"
+    },
+    "KProgFormal/Generated/GeneratedArm64MemIndex.lean": {
+      "sha256": "48267724ffe31c8665d0516ee97dc22beff95d4bfb20ee692d825cc9d7524e0a",
+      "root_git_blob_sha256": "48267724ffe31c8665d0516ee97dc22beff95d4bfb20ee692d825cc9d7524e0a"
+    },
+    "KProgFormal/Arm64WriteArmShape.lean": {
+      "sha256": "073efe56aaac06a58e48b4ca7c027711d4f9e523e9ff4ce135810e6c7692ed12",
+      "root_git_blob_sha256": "073efe56aaac06a58e48b4ca7c027711d4f9e523e9ff4ce135810e6c7692ed12"
+    },
+    "KProgFormal/Generated/GeneratedArm64WriteArm.lean": {
+      "sha256": "76384a625fbb7281f8cf189537b998fbb586b35d91735cd50fc1f36bfde1e6d7",
+      "root_git_blob_sha256": "76384a625fbb7281f8cf189537b998fbb586b35d91735cd50fc1f36bfde1e6d7"
+    },
+    "KProgFormal/Arm64Width.lean": {
+      "sha256": "b2a6b8c133b109d4a1f6c4b461b2320940237d6bf8900d5cbd5b753fae3be695",
+      "root_git_blob_sha256": "b2a6b8c133b109d4a1f6c4b461b2320940237d6bf8900d5cbd5b753fae3be695"
+    },
+    "KProgFormal/Generated/GeneratedArm64Width.lean": {
+      "sha256": "b33d060173bc3a3cc588876731338c3ea4ccefaf1d0ec62b4a027eb306ab767f",
+      "root_git_blob_sha256": "b33d060173bc3a3cc588876731338c3ea4ccefaf1d0ec62b4a027eb306ab767f"
+    },
+    "KProgFormal/Generated/GeneratedArm64LoadBytes.lean": {
+      "sha256": "7398acfa56c32687773d525e48c695b60eeecefbfa2ab8fef85f9f98d2988b12",
+      "root_git_blob_sha256": "7398acfa56c32687773d525e48c695b60eeecefbfa2ab8fef85f9f98d2988b12"
+    },
+    "KProgFormal/Generated/GeneratedArm64StoreBytes.lean": {
+      "sha256": "76aad1d9007e42f25adf6d2611733bc94b67866572d6f28fe463acdf0ea728c0",
+      "root_git_blob_sha256": "76aad1d9007e42f25adf6d2611733bc94b67866572d6f28fe463acdf0ea728c0"
+    },
+    "KProgFormal/Generated/GeneratedArm64MemBaseSrc.lean": {
+      "sha256": "27016cedc6c8da160295482c9f735e896bdf5ece5f9d4d3e3bb9ff3ec95acf59",
+      "root_git_blob_sha256": "27016cedc6c8da160295482c9f735e896bdf5ece5f9d4d3e3bb9ff3ec95acf59"
+    },
+    "KProgFormal/Generated/GeneratedArm64MemOffset.lean": {
+      "sha256": "ca3bfd6c14b225fbe4827f8767be6ba984e42268c4a5ab93d3cdf60020394941",
+      "root_git_blob_sha256": "ca3bfd6c14b225fbe4827f8767be6ba984e42268c4a5ab93d3cdf60020394941"
+    },
+    "KProgFormal/Generated/GeneratedArm64Extrev.lean": {
+      "sha256": "870cb3079e4824e148665fc4e2a70b72d6183eb8e95353f60be90d6722641c8f",
+      "root_git_blob_sha256": "870cb3079e4824e148665fc4e2a70b72d6183eb8e95353f60be90d6722641c8f"
+    },
+    "KProgFormal/Refinement/Arm64Arithmetic.lean": {
+      "sha256": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac",
+      "root_git_blob_sha256": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac"
+    },
+    "KProgFormal/Refinement/Arm64Logic.lean": {
+      "sha256": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56",
+      "root_git_blob_sha256": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
+    },
+    "KProgFormal/Refinement/Arm64Shift.lean": {
+      "sha256": "f9468a04f9b1686311679ca43f96089ccf76b00a6ca4a52cb424fa8fb721945a",
+      "root_git_blob_sha256": "f9468a04f9b1686311679ca43f96089ccf76b00a6ca4a52cb424fa8fb721945a"
+    },
+    "KProgFormal/Arm64Mod.lean": {
+      "sha256": "5c1eb6edac3b72bf6e4c922e1044f4e47fecfecca3fd4d6ce8b5239482adf01f",
+      "root_git_blob_sha256": "5c1eb6edac3b72bf6e4c922e1044f4e47fecfecca3fd4d6ce8b5239482adf01f"
+    },
+    "KProgFormal/Generated/GeneratedArm64Mod.lean": {
+      "sha256": "f8286628e6bbd9d8f48c9f82f660aa4b93292f1cf453de1e44008412eb60706c",
+      "root_git_blob_sha256": "f8286628e6bbd9d8f48c9f82f660aa4b93292f1cf453de1e44008412eb60706c"
+    },
+    "KProgFormal/Generated/GeneratedArm64Decode.lean": {
+      "sha256": "f68b90bb8916a67dc561e393a1e5dc25685bb9dc964c62d6b546fb7cee219fee",
+      "root_git_blob_sha256": "f68b90bb8916a67dc561e393a1e5dc25685bb9dc964c62d6b546fb7cee219fee"
+    },
+    "KProgFormal/Generated/GeneratedArm64AluResult.lean": {
+      "sha256": "dda41ca0e634a25848f43735c062cd5b00ca0a5eb6ee2a6923daf55cc1bcc3d8",
+      "root_git_blob_sha256": "dda41ca0e634a25848f43735c062cd5b00ca0a5eb6ee2a6923daf55cc1bcc3d8"
+    },
+    "KProgFormal/Arm64AluResult.lean": {
+      "sha256": "ed00b80ba7b9454bb564dd06667521e4dc1194f36a7bf2020dba13a8678baeaf",
+      "root_git_blob_sha256": "ed00b80ba7b9454bb564dd06667521e4dc1194f36a7bf2020dba13a8678baeaf"
+    },
+    "KProgFormal/Generated/GeneratedArm64Flags.lean": {
+      "sha256": "2b977e51adcfab7b513d996b524d132606cf1601deb22cdd5b06cb73712e19db",
+      "root_git_blob_sha256": "2b977e51adcfab7b513d996b524d132606cf1601deb22cdd5b06cb73712e19db"
+    },
+    "KProgFormal/Arm64Flags.lean": {
+      "sha256": "6d646833f4963eae85291c2ed5e23fbda5ce24ef2433c42509506f33427bf959",
+      "root_git_blob_sha256": "6d646833f4963eae85291c2ed5e23fbda5ce24ef2433c42509506f33427bf959"
+    },
+    "KProgFormal/Arm64Unary.lean": {
+      "sha256": "20ce062ad610fe75a505e364a3613e30b8708ca87e3856666cfef4bda85a1821",
+      "root_git_blob_sha256": "20ce062ad610fe75a505e364a3613e30b8708ca87e3856666cfef4bda85a1821"
+    },
+    "KProgFormal/Generated/GeneratedArm64Unary.lean": {
+      "sha256": "4f22b41f090999f16e5ec91d13ccd5a7aa84866ce492c03fbeb6825ad1d28f0c",
+      "root_git_blob_sha256": "4f22b41f090999f16e5ec91d13ccd5a7aa84866ce492c03fbeb6825ad1d28f0c"
+    },
+    "KProgFormal/Arm64Shift.lean": {
+      "sha256": "bf3e460a6b94e569c16e45c44c5a599defe653639e96edc097862c33ee648506",
+      "root_git_blob_sha256": "bf3e460a6b94e569c16e45c44c5a599defe653639e96edc097862c33ee648506"
+    },
+    "KProgFormal/Generated/GeneratedArm64Shift.lean": {
+      "sha256": "fe692f6d679ffc7793efc0f0d6272967218341df6d8ffe000ff7390ef8cb0c08",
+      "root_git_blob_sha256": "fe692f6d679ffc7793efc0f0d6272967218341df6d8ffe000ff7390ef8cb0c08"
+    },
+    "KProgFormal/Arm64Aux.lean": {
+      "sha256": "cacfd2726c941863639da5f8c19749799bc1513aa80eed663d8cea4dc4da49a6",
+      "root_git_blob_sha256": "cacfd2726c941863639da5f8c19749799bc1513aa80eed663d8cea4dc4da49a6"
+    },
+    "KProgFormal/Generated/GeneratedArm64Aux.lean": {
+      "sha256": "155d006abd50d5091ca26f9fd0339e367020b89563a747007d46e70291fe9f92",
+      "root_git_blob_sha256": "155d006abd50d5091ca26f9fd0339e367020b89563a747007d46e70291fe9f92"
+    },
+    "KProgFormal/Generated/GeneratedArm64ImmOperand.lean": {
+      "sha256": "26d5df984dd5c1236f8fc2b5eeddb553b4cd030364e4941d0e0d61fa5cc6eebf",
+      "root_git_blob_sha256": "26d5df984dd5c1236f8fc2b5eeddb553b4cd030364e4941d0e0d61fa5cc6eebf"
+    },
+    "KProgFormal/Generated/GeneratedArm64DispatchFamily.lean": {
+      "sha256": "e9d7e6be7f9400b41b3872f08155444f28a431eae6e9827fe87f70538335cbe3",
+      "root_git_blob_sha256": "e9d7e6be7f9400b41b3872f08155444f28a431eae6e9827fe87f70538335cbe3"
+    },
+    "KProgFormal/Refinement/Arm64Move.lean": {
+      "sha256": "b40c5d0e25ff16400849f5a688afd0babf9a4f09d6441d7aea235bd56f915590",
+      "root_git_blob_sha256": "b40c5d0e25ff16400849f5a688afd0babf9a4f09d6441d7aea235bd56f915590"
+    },
+    "KProgFormal/Arm64Mov.lean": {
+      "sha256": "a697703ddf6e9ddda4a276fef8758342cba21228ca09fea1e435ab601d514e7f",
+      "root_git_blob_sha256": "a697703ddf6e9ddda4a276fef8758342cba21228ca09fea1e435ab601d514e7f"
+    },
+    "KProgFormal/Generated/GeneratedArm64Mov.lean": {
+      "sha256": "efb7d9926d7f44bd6258631d047ca1f5c49fd91173c5b64f2fe4627013c06295",
+      "root_git_blob_sha256": "efb7d9926d7f44bd6258631d047ca1f5c49fd91173c5b64f2fe4627013c06295"
+    },
+    "KProgFormal/Arm64ImmOperand.lean": {
+      "sha256": "d6ed1f9d0539ca6592b4e40716e41cbde10304eec14887fd26137d314a60c08f",
+      "root_git_blob_sha256": "d6ed1f9d0539ca6592b4e40716e41cbde10304eec14887fd26137d314a60c08f"
+    },
+    "KProgFormal/Generated/GeneratedArm64LogicFlagHandler.lean": {
+      "sha256": "596a50be5f01c42a02a65c6a8e617025e624c3e95f3557748a72a63b680afc06",
+      "root_git_blob_sha256": "596a50be5f01c42a02a65c6a8e617025e624c3e95f3557748a72a63b680afc06"
+    },
+    "KProgFormal/Generated/GeneratedArm64Orn.lean": {
+      "sha256": "93b50a818ea9f9ce6fb41966bcd356489f6f85e15050948bef71080aa5c285dd",
+      "root_git_blob_sha256": "93b50a818ea9f9ce6fb41966bcd356489f6f85e15050948bef71080aa5c285dd"
+    },
+    "KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean": {
+      "sha256": "cd512684d5c5524b9d85002974028672d9c59f0376a5a813cf9e3cce1d92f9a2",
+      "root_git_blob_sha256": "cd512684d5c5524b9d85002974028672d9c59f0376a5a813cf9e3cce1d92f9a2"
+    },
+    "KProgFormal/Generated/GeneratedArm64AluOperand.lean": {
+      "sha256": "49d544b443aa0b0f16461c4a16fce623d887bc5e20f825cf5d3d3c9330f2ec37",
+      "root_git_blob_sha256": "49d544b443aa0b0f16461c4a16fce623d887bc5e20f825cf5d3d3c9330f2ec37"
+    },
+    "KProgFormal/Generated/GeneratedArm64AluHandler.lean": {
+      "sha256": "748d190a454c51e7444c57e717ef1b1082a876ce606e263c8c5f83957ec47be3",
+      "root_git_blob_sha256": "748d190a454c51e7444c57e717ef1b1082a876ce606e263c8c5f83957ec47be3"
+    },
+    "KProgFormal/Generated/GeneratedArm64FlagOperand.lean": {
+      "sha256": "52bde4a588fe8205e61c1c557f4c729e17e6d21b48c885df15a3fb04fcdfc9dc",
+      "root_git_blob_sha256": "52bde4a588fe8205e61c1c557f4c729e17e6d21b48c885df15a3fb04fcdfc9dc"
+    },
+    "KProgFormal/Generated/GeneratedArm64DispatchSingleton.lean": {
+      "sha256": "122a28560a5a45730f900729b70264164de651273e3de4d54401922ce05ae420",
+      "root_git_blob_sha256": "122a28560a5a45730f900729b70264164de651273e3de4d54401922ce05ae420"
+    },
+    "KProgFormal/Generated/GeneratedPtrAdd.lean": {
+      "sha256": "a53a0a24c113f03619720a695fe74d437499150e333962e20b94728dcc3f195c",
+      "root_git_blob_sha256": "a53a0a24c113f03619720a695fe74d437499150e333962e20b94728dcc3f195c"
+    },
+    "KProgFormal/Refinement/Arm64Condition.lean": {
+      "sha256": "cfb849fd6dcb166848b5c9d18b940b84012df60fe91a29568a4a031328ea8d4d",
+      "root_git_blob_sha256": "cfb849fd6dcb166848b5c9d18b940b84012df60fe91a29568a4a031328ea8d4d"
+    },
+    "KProgFormal/Arm64Cond.lean": {
+      "sha256": "81f22ac7c4f5131cbf71642f561c58877c99573bcb7fc19487b9e22022741894",
+      "root_git_blob_sha256": "81f22ac7c4f5131cbf71642f561c58877c99573bcb7fc19487b9e22022741894"
+    },
+    "KProgFormal/Generated/GeneratedArm64Cond.lean": {
+      "sha256": "1271f76f7319b062559c6f626e828cb053f77431cab526f6fe581aedfc788477",
+      "root_git_blob_sha256": "1271f76f7319b062559c6f626e828cb053f77431cab526f6fe581aedfc788477"
+    },
+    "KProgFormal/Generated/GeneratedArm64CcDecode.lean": {
+      "sha256": "7990afb5da57c4f1f6da7e29b40f5f646479d211c66a8971dd72c02fab8982bc",
+      "root_git_blob_sha256": "7990afb5da57c4f1f6da7e29b40f5f646479d211c66a8971dd72c02fab8982bc"
+    },
+    "KProgFormal/Generated/GeneratedArm64FlagHandler.lean": {
+      "sha256": "6f60c1113a69ee1ed00a140969e5966671c2df467bf2c8ce3a0413693f4082e4",
+      "root_git_blob_sha256": "6f60c1113a69ee1ed00a140969e5966671c2df467bf2c8ce3a0413693f4082e4"
+    },
+    "KProgFormal/Generated/GeneratedArm64CcmpHandler.lean": {
+      "sha256": "1cc06fe6a63cb93278e715374b91e2ef5453b69826f4e3d51e356db90fc784cb",
+      "root_git_blob_sha256": "1cc06fe6a63cb93278e715374b91e2ef5453b69826f4e3d51e356db90fc784cb"
+    },
+    "KProgFormal/Arm64CcmpDecode.lean": {
+      "sha256": "b4388f1b88224ea9d96f082a4481e2b1435e43e0dfa79ae995593f1a2ce7c37c",
+      "root_git_blob_sha256": "b4388f1b88224ea9d96f082a4481e2b1435e43e0dfa79ae995593f1a2ce7c37c"
+    },
+    "KProgFormal/Generated/GeneratedArm64CcmpDecode.lean": {
+      "sha256": "4f9b7c7efa67e1ad5b756e1eed6f46f9268cad64374cdb87737cf9c64c2235bd",
+      "root_git_blob_sha256": "4f9b7c7efa67e1ad5b756e1eed6f46f9268cad64374cdb87737cf9c64c2235bd"
+    },
+    "KProgFormal/Generated/GeneratedArm64Stlxr.lean": {
+      "sha256": "3ba8a62ff9fd3284b17e5b0716ac848b6b7c1c122c371e57aab7da57eb107e8a",
+      "root_git_blob_sha256": "3ba8a62ff9fd3284b17e5b0716ac848b6b7c1c122c371e57aab7da57eb107e8a"
+    }
+  },
+  "import_artifacts": {
+    "lib/lean/KProgFormal/Arm64AluResult.olean": "be032e8fdf9911ccb7c7f240b5fcf96ed4c88dd566fffc6d07184e8616c923c9",
+    "lib/lean/KProgFormal/Arm64Aux.olean": "480ab1e40101b67de87eb1b9e533fe55ef29cf444c9b7fda8df5c13b7c0ade57",
+    "lib/lean/KProgFormal/Arm64CcmpDecode.olean": "11f0f02ae7e214411e6759d1e54349639bf145de761f72be547f86f5abdfbcb2",
+    "lib/lean/KProgFormal/Arm64Unary.olean": "f78a7cc7f2cd569563148554c23b64295f9001826e60c5533b2106796c4f82b1",
+    "lib/lean/KProgFormal/Arm64Width.olean": "1d48d47f70ad996baf78d676631ba8e4548b8041b8c327c6a43117b9496b87b4",
+    "lib/lean/KProgFormal/Arm64Cond.olean": "d997ee4075ac3c7f3b375008a5fcee4cb6141cd6b1bf343d682de54ecc776852",
+    "lib/lean/KProgFormal/Arm64Mod.olean": "50df4984220a7a6e1e24db4e10da8f71c9c2e25263fc63af50a6ca907a5fcc48",
+    "lib/lean/KProgFormal/Arm64WriteArmShape.olean": "7dc3f693743e1daca266500af9075c41a575cfec51acc75247a654dfcaca813e",
+    "lib/lean/KProgFormal/Arm64RegDispatch.olean": "0e4904a0cf83825b98e2a17a5d416c7981294b42da91063ce6eb79857848ed70",
+    "lib/lean/KProgFormal/Arm64Shift.olean": "1e65d050f64d80f7c66b40aed2a1fef3a00da4c9965aa80e8b7815114d9057a6",
+    "lib/lean/KProgFormal/Arm64Flags.olean": "d541ea488055f6bef68d9a71a0dc580d3335f6f03bb1d8cf82a7ba1405bf8064",
+    "lib/lean/KProgFormal/Arm64ImmOperand.olean": "95dead109ae23ac610c5d0caf7ca8e0a5759d1c286c5adccc977c474ef2c0605",
+    "lib/lean/KProgFormal/Arm64Mov.olean": "4c42f01619e31bab4f91ec876eaa250f637f2b53aa18c8b1644aa73b73b3face",
+    "lib/lean/KProgFormal/Reference/AArch64.olean": "01cce2e0e7394bc554f998b64c16a59165e2ae30f9234e27c970e4121ba3126e",
+    "lib/lean/KProgFormal/Reference/Memory.olean": "3d664253da7f9823532f75c3a42a3bdf10965ce69644254bd22df44603f0c2e8",
+    "lib/lean/KProgFormal/Refinement/Arm64Condition.olean": "0c4c9de232db6bceae28fa7871b834f2ac2f0e6e81044ec7978d32bebe0f3a34",
+    "lib/lean/KProgFormal/Refinement/Arm64Memory.olean": "fea372c9be4a03777126bd9ffec392d54e6cd47faabe8f6649ac69facc53e70d",
+    "lib/lean/KProgFormal/Refinement/Arm64Logic.olean": "7ad73d2f406d7d8e55a6c9be48be1ba0d6656ac6a6518d253a4207c448c3e1b7",
+    "lib/lean/KProgFormal/Refinement/Arm64Shift.olean": "7de92dc2189480014d939fecc3a00286de9f0058a0c64793ea5e03bd72ae4dd3",
+    "lib/lean/KProgFormal/Refinement/Arm64Register.olean": "7e363a0f6102c70f04b2d777560c5e2cf2e52af3ac1139e5af590d2b5532b670",
+    "lib/lean/KProgFormal/Refinement/Arm64Exclusive.olean": "bc00b23106e5c548abda07abef352e0eab5d10b2a28feff5ac4cb2481120042b",
+    "lib/lean/KProgFormal/Refinement/Arm64Move.olean": "a9360f115e9caa29f77f91e43d8d1df291e17298820cdf4d811966a1a5f1c0a2",
+    "lib/lean/KProgFormal/Refinement/Arm64Arithmetic.olean": "1621d49a1ed66536b3edd7c7407c003bd7e74fb57bb26d8b8998a6c314289947",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64StoreBytes.olean": "9578be5a64d28849e73ced9ff4fe91b916e6cef4c3779f42ea174a407ae463eb",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64MemIndex.olean": "3c71cc10e3bc95a8c38a88ed35eae30cd402067db942e4c88178ae05900292f0",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Aux.olean": "fd09a1686058d4391f5faa59ed767c5a79bf470f547607e4b86caa2d8b21aa4b",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Width.olean": "203e90e87bfe1c78d0c3645174b4b4c509717ac1b0331b6cf26771585846240f",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64DispatchFamily.olean": "36efe3a937a4726d4c39ab49d8579eaf57b4d75b237e12df7e4cb1d954d0054c",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64FlagHandler.olean": "2084f64b34339c4a6970c3cfa22419024ab408907a65b2de83a5a62e313eab80",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64AluResult.olean": "0e2b92b4c3249e2a36b3d2fa7e0b2f6b3bab7f902e5f3ed81eff8b027f31284b",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64CcDecode.olean": "a484a57ec303205f7d14667cd82962ca7d1d61f3c5ca5727d3a336d212951dc8",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64AluHandler.olean": "6effdb4f0b024fa3cc74d924ee4a37fabdba1fdd37b62abb417d079e4dac1b85",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Flags.olean": "4ae7a372e907e2fad565473bf5e95a592f1443e21ba06bb6d179cc1e337506b6",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64AluOperandSelect.olean": "9b5427a8bbbf49abe78759a1382386a1072d2643cbb67dec21f1cbe1a9536fc8",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Mov.olean": "48b79ab9af4e839c02641863e6621273bf49c558ca6c1ba16e886cd826ace4e2",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64MemOffset.olean": "a425e0db1acfd4be5c18b800377e5077c44153e0f91d9b719af23f0c843eba5d",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Orn.olean": "6d98e121b5f6fbecb10258d150638dac724fe4af98dd3068fcf5f51f5920cb6b",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Unary.olean": "53d8f56e91d347e56f310aa45a991ee5c359ba79c55d90d7b997319758aeb38f",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64RegDispatch.olean": "a03a7d864d4e0436ecc793ce57e3393032eab4fb6093ae2f2c486a87adec12d4",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64LogicFlagHandler.olean": "bff3b60e3acc06bb478a10fc78c384710521ca2aa059381ed8cd68238efef4a6",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64AluOperand.olean": "f2a990516cff86ad4119d6f693f99eccf840012997d528bce58769ba1144b5d4",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Mod.olean": "396e773187355c18ba5f27ef1b16d4070830ecafe64c198199979a5bdaade4ae",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64CcmpHandler.olean": "3701ad7c08edf3e4b08cb867f5e8cd99cdf5164a69ea0862d1783dd09fa4af49",
+    "lib/lean/KProgFormal/Generated/GeneratedPtrAdd.olean": "124734aaf4c56e82e9b545d07c9db1ee56c00cc2fc06ae84bbb45ae29e1d0f8d",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64RegPresence.olean": "4f1354e128491e667e69a9e904fd74150283830b3a7f14d1c67769e355465964",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Shift.olean": "4d77e344c3edab2bdafab48f566dcab2fb6666bf829b5f37d457bccce77c9016",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64WriteArm.olean": "21744b4ba502dc640e5f462bce7765bf2c9eeea42068a0722315aca51844b1dc",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64DispatchSingleton.olean": "e48fc7d10ccd142257cdd03f5b418ffb5d9ce2668cf5d5e8f5dbdb33b7c97e6a",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64LoadBytes.olean": "d89266aae0c1c42339b0bdbd6f9e2c11543733a7c39de8d975439151526ee472",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64ImmOperand.olean": "56200a7c020d20704c35c03b57fc11b46279f8d5d4bd8c1968fe634f554236dd",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Extrev.olean": "d2410bf7cba3eb17b8aed851e0ce55c2a8a0361e7d299dfdd19445bf875cc11a",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Stlxr.olean": "2e2f18611291391d6cfce5bdf9e261b4505de237b7d632a021e9f89e8718fbc8",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64FlagOperand.olean": "27aa06b8275d004833d6ff2708a726ebdc697856d50c253027a05c611e0277bb",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64CcmpDecode.olean": "bc7d9f1a021bbd3597d6c0e0e76182c51ece15f5d1ac1816d6253eb4f2b00ec6",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Decode.olean": "12652412d5bf1a33980b8b4b570c2a64c04081a8406d1bf504856da130df412b",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64MemBaseSrc.olean": "6065e1fac8fddac74cc780fb0957a9a9510d9a19e957455e5c08c5ca0b45a90f",
+    "lib/lean/KProgFormal/Generated/GeneratedArm64Cond.olean": "6b64dafda406f38d44e55c5228ac9cd90f046e346c45336b9db1fcd20e8d3690"
+  },
+  "cache_retirement": {
+    "utc": "2026-11-08T02:46:46.050502+00:00",
+    "retired_private_cache": true,
+    "scope": "/workspaces/.agent-state/kprog-lanes/A/exclusive-cycle-composition/warm-build"
+  },
+  "scope": "Universal exclusive load/ADD/store/status-branch composition with complete state, ordered events, both outcomes and prefix fault termination; alignment/monitor/commit/writable premises retain their stated domains."
+}

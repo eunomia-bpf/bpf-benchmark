@@ -1,4 +1,5 @@
 import KProgFormal.Refinement.Arm64Memory
+import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Generated.GeneratedArm64Stlxr
 
 namespace KProgFormal.Refinement.Arm64Exclusive
@@ -200,5 +201,106 @@ theorem retry_suffix_fault (width : Width) (release : Bool) (status : Gpr)
     retrySuffix width release status src base displacement s =
       step (.exclusive (.store width release status.castSucc src base)) s := by
   simp [retrySuffix, failed]
+
+/-- Sequential native steps stop at the first fault and retain ordered effects. -/
+def continueWith (first : Transition State) (next : State → Transition State) : Transition State :=
+  match first.fault with
+  | some _ => first
+  | none =>
+      let second := next first.state
+      ⟨second.state, first.events ++ second.events, second.fault⟩
+
+/-- The canonical exclusive load and non-flag ADD prefix. -/
+def retryPrefix (width : Width) (acquire : Bool) (value : Gpr) (base : Register)
+    (increment : Word) (s : State) : Transition State :=
+  continueWith (step (.exclusive (.load width acquire value.castSucc base)) s)
+    (step (.arithmeticImmediate width false false (.general value) (.general value) increment))
+
+/-- Existing C load and generated immediate/ALU bodies, with their original state domains. -/
+def retryPrefixCore (width : Width) (acquire sourceScalar sourceStack : Bool)
+    (value : Gpr) (base : Register) (increment : Word) (s : State) : Transition State :=
+  continueWith (loadCore width acquire value.castSucc base s)
+    (Arm64Arithmetic.AluDispatch.rawStep false true sourceScalar sourceStack
+      (Arm64Arithmetic.AluDispatch.immediateAux false 0 0 0) width
+      (.general value) (.general value) value.castSucc increment)
+
+theorem retry_prefix_refines (width : Width) (acquire sourceScalar sourceStack : Bool)
+    (value : Gpr) (base : Register) (increment : Word) (s : State)
+    (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none) :
+    retryPrefixCore width acquire sourceScalar sourceStack value base increment s =
+      retryPrefix width acquire value base increment s := by
+  unfold retryPrefixCore retryPrefix
+  rw [load_core_refines width acquire value.castSucc base s spAligned aligned]
+  congr 1
+  funext loaded
+  simpa only [step, if_true] using
+    Arm64Arithmetic.AluDispatch.raw_step_refines false true sourceScalar sourceStack
+      (Arm64Arithmetic.AluDispatch.immediateAux false 0 0 0) width
+      (.general value) (.general value) value.castSucc increment loaded
+
+/-- The C exclusive-store body followed by its canonical status branch. -/
+def retrySuffixCore (width : Width) (release failure : Bool) (status : Gpr)
+    (src base : Register) (displacement : Word) (s : State) : Transition State :=
+  continueWith (storeCore width release failure status.castSucc src base s)
+    (step (.branchZero .w32 true status.castSucc displacement))
+
+theorem retry_suffix_core_refines (width : Width) (release failure : Bool)
+    (status : Gpr) (src base : Register) (displacement : Word) (s : State)
+    (outcome : failure = !exclusiveStorePass s width.bytes)
+    (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none)
+    (preflight : (exclusiveMonitorPass s width.bytes || s.exclusiveInputs.abortOnFailure) = true →
+      permitted s.memory.writable (memoryBase s base) width.bytes = true) :
+    retrySuffixCore width release failure status src base displacement s =
+      retrySuffix width release status src base displacement s := by
+  unfold retrySuffixCore
+  rw [store_core_refines width release failure status.castSucc src base s
+    outcome spAligned aligned preflight]
+  rfl
+
+/-- One complete native load/ADD/store/status-branch iteration. -/
+def retryCycle (width : Width) (acquire release : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word) (s : State) : Transition State :=
+  continueWith (retryPrefix width acquire value base increment s)
+    (retrySuffix width release status value.castSucc base displacement)
+
+def retryCycleCore (width : Width) (acquire release failure sourceScalar sourceStack : Bool)
+    (status value : Gpr) (base : Register) (increment displacement : Word)
+    (s : State) : Transition State :=
+  continueWith (retryPrefixCore width acquire sourceScalar sourceStack value base increment s)
+    (retrySuffixCore width release failure status value.castSucc base displacement)
+
+/-- Both store outcomes compose with the load/add prefix and preserve the complete transition. -/
+theorem retry_cycle_refines (width : Width) (acquire release failure sourceScalar sourceStack : Bool)
+    (status value : Gpr) (base : Register) (increment displacement : Word) (s : State)
+    (loadSp : spAlignmentFault s base = none)
+    (loadAligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none)
+    (outcome : failure = !exclusiveStorePass
+      (retryPrefix width acquire value base increment s).state width.bytes)
+    (storeSp : spAlignmentFault (retryPrefix width acquire value base increment s).state base = none)
+    (storeAligned : exclusiveNaturalFault
+      (memoryBase (retryPrefix width acquire value base increment s).state base) width.bytes = none)
+    (preflight : (exclusiveMonitorPass (retryPrefix width acquire value base increment s).state width.bytes ||
+      (retryPrefix width acquire value base increment s).state.exclusiveInputs.abortOnFailure) = true →
+      permitted (retryPrefix width acquire value base increment s).state.memory.writable
+        (memoryBase (retryPrefix width acquire value base increment s).state base) width.bytes = true) :
+    retryCycleCore width acquire release failure sourceScalar sourceStack status value base increment displacement s =
+      retryCycle width acquire release status value base increment displacement s := by
+  unfold retryCycleCore retryCycle
+  rw [retry_prefix_refines width acquire sourceScalar sourceStack value base increment s loadSp loadAligned]
+  have suffix := retry_suffix_core_refines width release failure status value.castSucc base displacement
+    (retryPrefix width acquire value base increment s).state outcome storeSp storeAligned preflight
+  cases h : (retryPrefix width acquire value base increment s).fault with
+  | none => simp only [continueWith, h, suffix]
+  | some fault => simp only [continueWith, h]
+
+/-- Prefix faults end the complete iteration with the original state and ordered events. -/
+theorem retry_cycle_prefix_fault (width : Width) (acquire release : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word) (s : State) (fault : Fault)
+    (failed : (retryPrefix width acquire value base increment s).fault = some fault) :
+    retryCycle width acquire release status value base increment displacement s =
+      retryPrefix width acquire value base increment s := by
+  simp only [retryCycle, continueWith, failed]
 
 end KProgFormal.Refinement.Arm64Exclusive
