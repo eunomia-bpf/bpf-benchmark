@@ -603,6 +603,45 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_STACK_INDEX(OFF)                                         \
 	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
 
+#define X86_SIM_L_PRIVATE_BYTE_STORE(ADDR, WIDTH, VALUE)                  \
+	do {                                                               \
+			volatile __u8 *__x86_stw_bytes = (ADDR); \
+			__u8 __x86_stw_width =                            \
+				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
+			__u64 __x86_stw_narrowed = (VALUE) &              \
+				x86_width_mask(__x86_stw_width);          \
+			__x86_stw_bytes[0] =              \
+				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
+				__x86_stw_bytes[1] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 1);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 2))\
+				__x86_stw_bytes[2] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 2);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 3))\
+				__x86_stw_bytes[3] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 3);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 4))\
+				__x86_stw_bytes[4] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 4);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 5))\
+				__x86_stw_bytes[5] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 5);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 6))\
+				__x86_stw_bytes[6] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 6);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 7))\
+				__x86_stw_bytes[7] =  \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 7);   \
+	} while (0)
+
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u64 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
@@ -615,41 +654,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
 		} else {                                                  \
-			volatile __u8 *__x86_stw_bytes = __x86_stack_mem.b; \
-			__u8 __x86_stw_width =                            \
-				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
-			__u64 __x86_stw_narrowed = (VALUE) &              \
-				x86_width_mask(__x86_stw_width);          \
-			__x86_stw_bytes[__x86_stw_index] =              \
-				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
-				__x86_stw_bytes[__x86_stw_index + 1] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 1);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 2))\
-				__x86_stw_bytes[__x86_stw_index + 2] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 2);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 3))\
-				__x86_stw_bytes[__x86_stw_index + 3] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 3);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 4))\
-				__x86_stw_bytes[__x86_stw_index + 4] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 4);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 5))\
-				__x86_stw_bytes[__x86_stw_index + 5] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 5);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 6))\
-				__x86_stw_bytes[__x86_stw_index + 6] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 6);   \
-			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 7))\
-				__x86_stw_bytes[__x86_stw_index + 7] =  \
-					KPROG_X86_STACK_BYTE(             \
-						__x86_stw_narrowed, 7);   \
+			X86_SIM_L_PRIVATE_BYTE_STORE(                    \
+				&__x86_stack_mem.b[__x86_stw_index],       \
+				(WIDTH), (VALUE));                        \
 		}                                                         \
 	} while (0)
 
@@ -1123,8 +1130,15 @@ extern void x86_sim_unmapped_xdp_read(void)
 			break;                                           \
 		default:                                                 \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
-			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
-					     __x86_l_width, __x86_l_value);\
+			if (X86_SIM_L_REG_TAG(DST) == X86_SIM_TAG_STACK && \
+			    ((OP) == X86_OP_MOV_STORE_IMM ||             \
+			     X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_SCALAR)) \
+				X86_SIM_L_PRIVATE_BYTE_STORE(             \
+					__x86_l_addr, __x86_l_width,      \
+					__x86_l_value);                   \
+			else                                             \
+				X86_SIM_L_STORE_ADDR(__x86_l_addr,         \
+					__x86_l_width, __x86_l_value);     \
 			break;                                           \
 		}                                                         \
 		} while (0)

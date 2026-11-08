@@ -82,8 +82,8 @@ packet-plus-length to packet-end propagation must remain absent.
 The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
 `X86_SIM_ENTRY_SKB(ctx)`. XDP retains the actual verifier context in `RDI`:
 ordinary native stores and memory intrinsics therefore reach that context,
-instead of a writable private copy. Native 64-bit `data`/`data_end` reads at
-offsets 0/8 use the corresponding live typed BPF fields, including offset
+instead of a writable private copy. Native 64-bit `data`/`data_end`/`data_meta` reads at
+offsets 0/8/16 use the corresponding live typed BPF fields, including offset
 aliases; unmapped reads fail specialization. XDP helpers need no cached-field
 refresh. For skb programs the local guest object still mirrors the
 kernel/eBPF runtime ABI used by the linked native micro code: BPF-visible `__sk_buff.cb[]` scratch
@@ -108,6 +108,12 @@ For `cgroup_skb`, that return value is only the kernel action
 (`CGROUP_SKB_OK`/`CGROUP_SKB_DROP`); the 64-bit benchmark result must stay in
 `__sk_buff.cb[]`. Packet writes are not a valid result channel for cgroup_skb
 because the verifier rejects packet writes for that program type.
+
+Private-stack scalar MOV stores through stack-tagged register aliases use the
+same little-endian byte ladder as direct RSP stores. Each byte keeps its
+original value and address, including unaligned offsets. Pointer-valued stores
+retain the native-width operation and its verifier pointer provenance; public
+memory accesses retain the existing native-width operation.
 
 Shared benchmark logic should remain shared. Conditional compilation is limited
 to the minimum ABI shim needed to expose the same kernel fields to native x86
