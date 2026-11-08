@@ -4118,4 +4118,125 @@ theorem memory_token_at_step_refines (outcomeAt : Word → Word) (token : Memory
   memory_token_step_refines token flags aux dst src src2 src3 site sourceScalar sourceStack
     firstScalar secondScalar release (outcomeAt site != 0) native s binding access environment pairAccess vectorAccess
 
+
+/-- Generated scalar-body selectors. The logical flag family carries the
+native register-only field condition for inverted operands. -/
+inductive ScalarToken where
+  | nop | address (op : GeneratedArm64Adrp.Op) | move (op : GeneratedArm64Mov.Mov) | keep
+  | aluRegister | shift (immediate : Bool) | multiply (op : GeneratedArm64Mul.Mul)
+  | unary (op : GeneratedArm64Unary.Unary) | conditionalNegate
+  | extrev (op : GeneratedArm64Extrev.Extrev) | bitfield
+  | flagArithmetic (subtract writeback immediate : Bool)
+  | flagLogic (invert writeback immediate : Bool) (valid : invert = true → immediate = false)
+  | orn | compare (immediate : Bool) | select (op : GeneratedArm64Csel.Csel)
+
+def scalarTokenOpcode : ScalarToken → Nat
+  | .nop => GeneratedArm64DispatchSingleton.code .nop
+  | .address op => GeneratedArm64Adrp.code op
+  | .move op => GeneratedArm64Mov.code op
+  | .keep => GeneratedArm64DispatchSingleton.code .movk
+  | .aluRegister => aluCode false
+  | .shift immediate => shiftOpcode immediate
+  | .multiply op => GeneratedArm64Mul.code op
+  | .unary op => GeneratedArm64Unary.code op
+  | .conditionalNegate => GeneratedArm64Cneg.code .cneg
+  | .extrev op => GeneratedArm64Extrev.code op
+  | .bitfield => GeneratedArm64DispatchSingleton.code .bitfield
+  | .flagArithmetic sub wb imm => Arm64Arithmetic.FlagArithmetic.operationCode sub wb imm
+  | .flagLogic inv wb imm _ => Arm64Logic.FlagDispatch.operationCode inv wb imm
+  | .orn => GeneratedArm64Orn.code .orn_reg
+  | .compare imm => GeneratedArm64DispatchFamily.code (if imm then .ccmpImm else .ccmpReg)
+  | .select op => GeneratedArm64Csel.code op
+
+/-- Independent numeric projection of each selected direct scalar body. The
+shared FLAGS normalization precedes its exact AUX/source/result/writeback path. -/
+def specializedScalar (token : ScalarToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeDataWidth flags).bind (fun width =>
+    match token with
+    | .nop => some (Arm64Branch.nopStep s)
+    | .address _ => some (addressBody dst value s)
+    | .move op => some (moveBody op width dst src value s)
+    | .keep => (Arm64Movk.decodeShift (GeneratedArm64Aux.b2 aux).toNat).map
+        (fun column => keepBody column width dst value s)
+    | .aluRegister => (decodeAlu (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun op => aluBody op false sourceScalar sourceStack aux width dst src src2 value s)
+    | .shift imm => (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => shiftBody (if imm then .shiftImm else .shiftReg) kind width dst src src2 value s)
+    | .multiply op => some (multiplyBody op width dst src src2 src3 s)
+    | .unary op => some (unaryBody op aux width dst src s)
+    | .conditionalNegate => (Arm64Condition.decode aux.toNat).map
+        (fun predicate => conditionalNegateBody predicate width dst src s)
+    | .extrev op => some (extrevBody op width dst src src2 value s)
+    | .bitfield => (Arm64Bitfield.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => bitfieldBody kind aux width dst src s)
+    | .flagArithmetic sub wb imm => some (flagArithmeticBody sub wb imm aux width dst src src2 value s)
+    | .flagLogic inv wb imm _ => some (flagLogicBody inv wb imm aux width dst src src2 value s)
+    | .orn => some (ornBody aux width dst src src2 s)
+    | .compare imm => (Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat).map
+        (fun predicate => compareBody (if imm then .ccmpImm else .ccmpReg) predicate
+          ((GeneratedArm64CcmpDecode.ccmpNzcv aux).setWidth 8) width dst src value s)
+    | .select op => (Arm64Condition.decode aux.toNat).map
+        (fun predicate => selectBody op predicate width dst src src2 s))
+
+/-- Every selected scalar direct body equals the complete L_EXEC numeric
+transition, retaining all input fields and its established width/AUX domain. -/
+theorem scalar_token_body_matches (token : ScalarToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    specializedScalar token flags aux dst src src2 src3 value sourceScalar sourceStack s =
+      dispatchExec (scalarTokenOpcode token) flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s := by
+  unfold specializedScalar dispatchExec dispatchThroughQ dispatchThroughD dispatchThroughPair
+    dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix
+    dispatchThroughSelect dispatchThroughCompare dispatchThroughOrn dispatchThroughFlagLogic
+    dispatchThroughFlagArithmetic dispatchThroughBitfield dispatchThroughExtrev dispatchThroughUnary
+    dispatchThroughMultiply dispatchThroughShift dispatch dispatchPrefix
+  cases token with
+  | nop => cases w : (decodeDataWidth flags) <;> rfl
+  | address op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
+  | move op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
+  | keep => cases w : (decodeDataWidth flags) <;>
+      cases column : Arm64Movk.decodeShift (GeneratedArm64Aux.b2 aux).toNat <;> rfl
+  | aluRegister => cases w : (decodeDataWidth flags) <;>
+      cases op : decodeAlu (GeneratedArm64Aux.b0 aux).toNat <;> rfl
+  | shift imm => cases imm <;> cases w : (decodeDataWidth flags) <;>
+      cases kind : Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat <;> rfl
+  | multiply op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
+  | unary op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
+  | conditionalNegate => cases w : (decodeDataWidth flags) <;>
+      cases predicate : Arm64Condition.decode aux.toNat <;> rfl
+  | extrev op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
+  | bitfield => cases w : (decodeDataWidth flags) <;>
+      cases kind : Arm64Bitfield.decodeKind (GeneratedArm64Aux.b0 aux).toNat <;> rfl
+  | flagArithmetic sub wb imm => cases sub <;> cases wb <;> cases imm <;>
+      cases w : (decodeDataWidth flags) <;> rfl
+  | flagLogic inv wb imm valid =>
+      cases inv <;> cases wb <;> cases imm
+      all_goals try { cases (valid rfl) }
+      all_goals cases w : (decodeDataWidth flags) <;> rfl
+  | orn => cases w : (decodeDataWidth flags) <;> rfl
+  | compare imm => cases imm <;> cases w : (decodeDataWidth flags) <;>
+      cases predicate : Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat <;> rfl
+  | select op => cases op <;> cases w : (decodeDataWidth flags) <;>
+      cases predicate : Arm64Condition.decode aux.toNat <;> rfl
+
+/-- Per scalar token, specialize the existing complete canonical observed step
+under the same source-field, native memory, monitor and platform relations. -/
+theorem scalar_token_step_refines (token : ScalarToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc (scalarTokenOpcode token) flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch (scalarTokenOpcode token) flags release failure src2 s
+      (observeQDispatch (scalarTokenOpcode token) (specializedScalar token flags aux dst src src2 src3 value
+        sourceScalar sourceStack s)) = some (Reference.AArch64.step native s) := by
+  rw [scalar_token_body_matches token flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar failure s]
+  exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
+
 end KProgFormal.Refinement.Arm64Dispatcher

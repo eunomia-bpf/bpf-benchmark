@@ -18,7 +18,7 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 9/71 |
+| O2 C-model token-body equality | 49/75 | 61/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -37,6 +37,12 @@ LOAD/STORE/LDRSB/LDRSH/LDRSW/STLXR add six direct memory-body equalities
 and observed canonical-step composition. Their site-indexed law retains
 each dynamic exclusive outcome and the shared native field, memory, monitor,
 address/materialization and compiled-C interfaces.
+Fifty-two scalar tokens add direct-body equality and canonical observed-step
+composition: NOP, address/move/keep, register ALU, shifts, multiply/unary,
+conditional negation, extract/reverse/extend/bitfield, arithmetic/logical flags,
+ORN, conditional compare and select. The six logical flag selectors retain
+their native inverted-register field condition. The same code/address,
+provenance, source-emission and compiled-C interfaces remain explicit.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -3882,3 +3888,18 @@ outcome on each invocation under the existing native-field, monitor, memory,
 source-emission and ABI relations. C/compiler and complete simulator closure
 continue through those universal interfaces. Raw source, generated classifier,
 executed binary, initial diagnostics and final checks are archived together.
+
+ARM scalar-token composition (`arm64_scalar_token_bodies` in the existing
+[integration receipt](arm64-xdp-host-integration.json)) adds52 generic O2
+body equalities and canonical observed-step composition. The complete scalar
+families retain their actual opcode/AUX/source/result/writeback choices and
+established W/X domain. Two axiom audits and the default Lean build pass;
+the prior202 dispatcher theorems and module prefix retain exact bytes.
+Actual generated direct macros and L_EXEC agree on2,885,376 host UBSan cases,
+with all16 NZCV inputs, all34 destination/first-source fields and full
+register/tag/vector/memory snapshots. The prior53,728 memory checks also pass.
+All175 inputs are stable:173 root Git blobs and two headers from the pinned
+libbpf Git revision. Actual binaries/proof output use lossless XZ inside the
+raw receipt; each compressed and original hash is verified. ARM C-model O2
+coverage reaches61/71; complete raw/compiled, native field/address/provenance,
+source-emission and invocation ABI interfaces continue through universal laws.
