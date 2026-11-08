@@ -231802,23 +231802,20 @@
  		return;
 --- a/vendor/repos/tetragon/bpf/process/generic_calls.h
 +++ b/vendor/repos/tetragon/bpf/process/generic_calls.h
-@@ -25,6 +25,15 @@
+@@ -25,6 +25,12 @@
  #endif
  
  #define MAX_TOTAL 9000
 +
 +FUNC_INLINE const char *const *filename_name_slot(struct filename *file)
 +{
-+#if defined(__TARGET_ARCH_arm64)
-+	return &((struct __filename_head *)file)->name;
-+#else
-+	return &file->name;
-+#endif
++	/* filename starts with the name pointer in the paired kernel ABI. */
++	return (const char *const *)file;
 +}
  
  FUNC_INLINE int
  generic_start_process_filter(void *ctx, struct bpf_map_def *calls)
-@@ -106,8 +115,7 @@
+@@ -106,8 +112,7 @@
  
  	/* Bound bytes <4095 to ensure bytes does not read past end of buffer */
  	rd_bytes = bytes < 0x1000 ? bytes : 0xfff;
@@ -231828,7 +231825,7 @@
  	err = probe_read(&s[2], rd_bytes, (char *)arg);
  	if (err < 0)
  		return return_error(s, char_buf_pagefault);
-@@ -267,9 +275,7 @@
+@@ -267,9 +272,7 @@
  			__u32 bytes = *((__u32 *)&val->file[0]);
  
  			probe_read(&args[0], sizeof(__u32), &fd);
@@ -231839,7 +231836,7 @@
  			probe_read(&args[4], bytes + 4, (char *)&val->file[0]);
  			size = bytes + 4 + 4;
  
-@@ -288,7 +294,7 @@
+@@ -288,7 +291,7 @@
  		struct filename *file;
  
  		probe_read(&file, sizeof(file), &arg);
@@ -231848,7 +231845,7 @@
  	}
  		fallthrough;
  	case string_type:
-@@ -525,9 +531,7 @@
+@@ -525,9 +528,7 @@
  	struct config_reg_arg *reg;
  	__u8 shift;
  
@@ -231859,7 +231856,7 @@
  	reg = &config->reg_arg[index];
  	shift = 64 - reg->size * 8;
  
-@@ -595,9 +599,7 @@
+@@ -595,9 +596,7 @@
  	if (index >= MAX_POSSIBLE_ARGS)
  		return 0;
  
@@ -231870,7 +231867,7 @@
  
  	ty = config->arg[index];
  	am = config->arm[index];
-@@ -611,9 +613,7 @@
+@@ -611,9 +610,7 @@
  #endif
  
  #if defined(GENERIC_TRACEPOINT) || defined(GENERIC_USDT)
@@ -231881,7 +231878,7 @@
  
  	a = (&e->a0)[index];
  	if (am & ARGM_PRELOAD)
-@@ -633,9 +633,7 @@
+@@ -633,9 +630,7 @@
  	if (am & ARGM_PRELOAD) {
  		a = get_preload_arg(ctx, ty, &e->arg_status[index & MAX_POSSIBLE_ARGS_MASK]);
  	} else {
@@ -231892,7 +231889,7 @@
  		if (am & ARGM_PT_REGS) {
  			a = get_pt_regs_arg(ctx, config, index);
  		} else if (am & ARGM_CURRENT_TASK) {
-@@ -1145,15 +1143,11 @@
+@@ -1145,15 +1140,11 @@
  	if (!f)
  		return 0;
  
@@ -231910,7 +231907,7 @@
  	actions = (struct selector_action *)&f[actoff];
  
  	postit = do_actions(ctx, actions);
-@@ -1203,10 +1197,9 @@
+@@ -1203,10 +1194,9 @@
  
  	total = e->common.size + generic_kprobe_common_size();
  	/* Code movement from clang forces us to inline bounds checks here */
@@ -231924,7 +231921,7 @@
  	event_output_metric(ctx, op, e, total);
  	return 0;
  }
-@@ -1275,8 +1268,7 @@
+@@ -1275,8 +1265,7 @@
  	 * 0x1000 should be maximum argument length, so masking
  	 * with 0x1fff is safe and verifier will be happy.
  	 */
@@ -231934,7 +231931,7 @@
  
  	switch (do_copy) {
  	case char_buf:
-@@ -1377,8 +1369,7 @@
+@@ -1377,8 +1366,7 @@
  		/* Verify lost that msg is not null here so recheck */
  		int curr = sel->curr;
  
