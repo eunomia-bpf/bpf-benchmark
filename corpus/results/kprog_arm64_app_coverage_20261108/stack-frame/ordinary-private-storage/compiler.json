@@ -1,0 +1,14 @@
+{
+  "scope": "Captured complete Tetragon event_wake_up_new_task body; original native P and instruction bodies, private raw arena qualifier comparison",
+  "source_epoch": "a74c904fd82dd31c7b480a5a5b6b310061a06d4d",
+  "variants": {
+    "baseline": {
+      "make_exit": 2,
+      "source_sha256": "181a0d46c3aa7f5118c0e5b39ea97e24508b4a4ed8ed8f95fd17cca75dddb902"
+    },
+    "ordinary": {
+      "make_exit": 2,
+      "source_sha256": "25902394f42d8cb415f71bb98f099e11f6e3341b93d73d886ec670465876dfc4"
+    }
+  }
+}
