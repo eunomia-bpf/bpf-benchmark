@@ -1,0 +1,26 @@
+{
+  "application": "cilium/agent",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-08T17:43:04.371717+00:00",
+    "apps": "cilium/agent",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/trusted-5km5i4r0/requests",
+    "service_state_mode": "0o700",
+    "error": "trusted service exited during registration; captured startup log: Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 331, in <module>\n    main()\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 328, in main\n    serve(args)\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 163, in serve\n    worker = adapter(args.arch)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 151, in adapter\n    spec.loader.exec_module(worker)\n  File \"<frozen importlib._bootstrap_external>\", line 991, in exec_module\n  File \"<frozen importlib._bootstrap_external>\", line 1128, in get_code\n  File \"<frozen importlib._bootstrap_external>\", line 1186, in get_data\nFileNotFoundError: [Errno 2] No such file or directory: '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/x86/trusted_specializer.py'\n",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/guest.py\", line 18, in <module>\n    if not line:raise RuntimeError('trusted service exited during registration; captured startup log: '+(live/'service.log').read_text())\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: trusted service exited during registration; captured startup log: Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 331, in <module>\n    main()\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 328, in main\n    serve(args)\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 163, in serve\n    worker = adapter(args.arch)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/trusted_service.py\", line 151, in adapter\n    spec.loader.exec_module(worker)\n  File \"<frozen importlib._bootstrap_external>\", line 991, in exec_module\n  File \"<frozen importlib._bootstrap_external>\", line 1128, in get_code\n  File \"<frozen importlib._bootstrap_external>\", line 1186, in get_data\nFileNotFoundError: [Errno 2] No such file or directory: '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-native-division/source/kprog/x86/trusted_specializer.py'\n\n",
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-08T17:43:04.941099+00:00",
+    "corpus_metadata": [],
+    "archive": "corpus-20261108T174312287881Z.tar.gz",
+    "archive_sha256": "17232f378baed0b8bcad2f2b649214f99299ae91ac5217148fbbc956c4035339"
+  },
+  "results": []
+}
