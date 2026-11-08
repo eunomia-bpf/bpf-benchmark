@@ -724,36 +724,59 @@ no measurable cost for this workload.
 
 ## katran, timed through the trusted path
 
-Lane C posted the whole-application binding handoff (`1/1 fresh
-generated/compiled/accepted/bound`, app ok), so this is measured the same
-way as bcc: `CPUS=0-7 VM_CPUS=8 VM_MEM=64G SAMPLES=3 WORKLOAD_DURATION=180`,
-both stats modes, ratio against the JIT arm of the same run.
+Lane C posted the whole-application binding handoff (1/1 bound, app ok), so
+this is measured as bcc is: `CPUS=0-7 VM_CPUS=8 VM_MEM=64G
+SAMPLES=3 WORKLOAD_DURATION=180`, both stats modes, ratio against the JIT
+arm of the same run.
 
-| stats | JIT (M pkts) | verified native (M pkts) | median ratio |
+### The two doubled samples are pktgen over-rate, not native speed
+
+Two native samples carried about twice the packets of their neighbours.
+The cause is in the generator's own report line, which every sample
+prints:
+
+| run | arm | sample | rate | errors |
+| --- | --- | ---: | ---: | ---: |
+| on | JIT | 0/1/2 | 1.31M, 1.33M, 1.35M pps | 0 |
+| on | native | 0/1/2 | 1.32M, **1.80M**, 1.32M pps | 0, **46,167,162**, 0 |
+| off | JIT | 0/1/2 | 1.50M, 1.49M, 1.48M pps | 0 |
+| off | native | 0/1/2 | **2.96M**, 1.50M, 1.49M pps | **26,349,628**, 0, 0 |
+
+The two doubled samples are exactly the two where pktgen reports
+**non-zero `errors`** and a rate above every other sample (1.80M and 2.96M
+pps against ~1.3-1.5M, i.e. 923 and 1,514 Mb/s against 669-766). It is
+configured `count 0` at a fixed rate, so a sample that exceeds that rate is
+the generator breaking its own cap; the XDP/TX counters count what it
+emitted, so the sample is invalid rather than faster.
+
+**Confirmed by the rerun**, where the third sample's `errors` appear in
+**both** arms (JIT 12.0M, native 19.1M) — same generator fault, and
+independent of which code ran:
+
+| run | stats | clean samples JIT/native | ratio on clean samples |
 | --- | --- | --- | ---: |
-| on | 235.4, 239.1, 243.6 | 238.4, **324.6**, 237.4 | **0.997x** |
-| off | 269.6, 268.5, 267.0 | **532.3**, 269.4, 268.4 | **1.003x** |
+| 1 | on | 3 / 2 | 0.995x |
+| 1 | off | 3 / 2 | 1.001x |
+| 2 | on | 2 / 2 | 0.994x |
+| 2 | off | 2 / 1 | 0.960x |
 
-Both runs `status ok`, **1 of 1 program replaced with `bound_required=1`**.
-Artifacts `corpus/results/x86_kvm_corpus_20261107_225322_874390` and
-`..._232256_081248`.
-
-**The outlier problem again, in the other direction.** Each native arm has
-one sample far above the rest — 324.6M against ~238M, and 532.3M against
-~268M (1.98x the neighbours). The medians are 0.997x and 1.003x, i.e.
-parity; the means would be 1.115x and 1.329x, and quoting a mean would
-invent a 33% speedup that no sample pair supports. This is the same
-three-sample fragility that made tetragon read 0.805x, and it is why the
-median is the stated statistic.
-
-A sample twice the median is not a program change — katran's only program
-is unchanged between arms — so it is generator behaviour (pktgen is
-started with `count 0` and reports `pkts-sofar` on an interval). Worth
-noting for whoever owns the katran workload: the 1.98x sample is the one
-to explain.
+All four runs plot clean at 0.96-1.00. Artifacts: run 1
+`..._225322_874390` / `..._232256_081248`, run 2 `..._003528_315409` /
+`..._010800_685186`; every run `status ok`, **1 of 1 program replaced
+with `bound_required=1`**.
 
 **Reading: the verified path is at parity with JIT on katran, both stats
 modes**, consistent with the unbound arm (1.018x stats on, 1.001x off).
+The published figure excludes samples where pktgen reports errors, and the
+exclusion rule is the generator's own `errors` field rather than a rate
+threshold chosen by hand.
+
+### Work done, both arms
+
+The XDP action counters agree in kind across arms: every sample shows
+`tx` equal to `total`, all through `fallback_lru`, with `drop`,
+`encap_fail`, `lru_miss` and `consistent_hash_drop` at 0 and `pass` at
+0 or 1 — the same forwarding behaviour, so the ratio compares equal work.
 
 ## Other apps on the verified arm
 
