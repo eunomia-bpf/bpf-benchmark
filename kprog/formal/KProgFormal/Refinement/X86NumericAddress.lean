@@ -1125,8 +1125,8 @@ theorem bmi_shift_register_frame_refines (env : Environment) (frame : Frame) (ar
         (nativeRegisters env frame arena state) :=
   bmi_register_frame_refines env frame arena state width kind dst src (.register count) nextPc
 
-/-- ANDN's actual shared logic macro writes PF as well as CF/ZF/SF/OF.
-The ISA leaves PF undefined; the raw model must still retain the real write. -/
+/-- ANDN's shared logic intermediate supplies a deterministic representative.
+FreshAux below composes both production fresh flag assignments. -/
 def andnFlags (width : Reference.X86.BzhiWidth) (result old : NativeWord) : NativeWord :=
   Reference.X86.setFlag (X86Bzhi.liftFlags old (generatedX86AndnFlags result (X86Bzhi.handlerWidth width)))
     2 (GeneratedX86AuxFlags.parity result)
@@ -1150,9 +1150,8 @@ def andnRegister (env : Environment) (frame : Frame) (arena : NativeWord)
   registerPc (registerFlags (writeRegister env frame arena state scalar (.low dst) result)
     (andnFlags width result state.raw.rflags)) nextPc
 
-/-- Exact raw writeback, with the production PF assignment explicitly retained.
-The following refinement uses the canonical defined-output mask, not equality
-with a selected value of an architecturally undefined flag. -/
+/-- Exact intermediate writeback for the deterministic representative.
+The defined-output relation composes with FreshAux production choices below. -/
 theorem andn_register_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.BzhiWidth)
     (dst first second : Reference.X86.Register) (nextPc : NativeWord) :
@@ -1192,8 +1191,8 @@ theorem andn_register_frame_refines (env : Environment) (frame : Frame) (arena :
   congr 1
   exact (andn_flags_observed width _ _).symm
 
-/-- BZHI samples the low count byte before the destination writer and writes
-exactly CF/ZF/SF/OF; unlike the shared ANDN macro it leaves PF untouched. -/
+/-- BZHI samples its low count byte before writeback. The deterministic
+representative composes with both fresh PF/AF assignments in FreshAux. -/
 def bzhiRegister (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.BzhiWidth)
     (dst src count : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
@@ -2764,8 +2763,8 @@ theorem bit_test_memory_frame_refines (env : Environment) (frame : Frame) (arena
         reduceCtorEq, ↓reduceIte]
       rfl
 
-/-- ANDN retains its actual PF parity write and independently decoded memory
-width. The native binding selects the same read and write width. -/
+/-- ANDN retains its shared logic intermediate and independent memory width.
+FreshAux composes the production PF/AF choices after a successful read. -/
 def andnMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (sourceWidth : Reference.X86.ScalarWidth) (width : Reference.X86.BzhiWidth)
     (dst first : Reference.X86.Register) (address nextPc : NativeWord) : Transition Reference.X86.State :=
@@ -3076,3 +3075,205 @@ theorem return_label_frame_step_refines (env : Environment) (frame : Frame) (are
   exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86NumericAddress
+
+namespace KProgFormal.Refinement.X86NumericAddress.FreshAux
+open Reference
+
+def flags (pf af : Bool) (old : Reference.Word) : Reference.Word :=
+  X86.setFlag (X86.setFlag old 2 pf) 4 af
+
+theorem flags_mask (pf af : Bool) (old : Reference.Word) :
+    flags pf af old &&& 0xffffffffffffffeb = old &&& 0xffffffffffffffeb := by
+  unfold flags X86.setFlag Reference.Word
+  bv_decide
+
+theorem flags_realize (old target : Reference.Word)
+    (same : old &&& 0xffffffffffffffeb = target &&& 0xffffffffffffffeb) :
+    flags (target.getLsbD 2) (target.getLsbD 4) old = target := by
+  unfold flags X86.setFlag Reference.Word at *
+  bv_decide
+
+/-- Each successful production ANDN/BZHI body reads fresh PF then fresh AF.
+Faulting memory access retains its complete preceding state and effects. -/
+def apply (pf af : Bool) (effect : Transition X86.State) : Transition X86.State :=
+  if effect.fault.isSome then effect
+  else { effect with state := { effect.state with rflags := flags pf af effect.state.rflags } }
+
+theorem matches_preserved (instruction : X86.Instruction)
+    (mask : X86.definedFlags instruction = 0xffffffffffffffeb)
+    (expected actual : Transition X86.State)
+    (matching : X86.matchesTransition instruction expected actual) (pf af : Bool) :
+    X86.matchesTransition instruction expected (apply pf af actual) := by
+  rcases matching with ⟨events, fault, state⟩
+  unfold apply
+  cases present : actual.fault with
+  | some error =>
+    simp only [present, Option.isSome_some, ↓reduceIte]
+    exact ⟨events, fault, state⟩
+  | none =>
+    have expectedFault : expected.fault = none := fault.trans present
+    unfold X86.matchesTransition
+    simp only [present, Option.isSome_none, Bool.false_eq_true, ↓reduceIte]
+    refine ⟨events, expectedFault, ?_⟩
+    dsimp only at state
+    simpa only [expectedFault, Option.isSome_none, Bool.false_eq_true, ↓reduceIte,
+      mask, flags_mask] using state
+
+/-- Every complete state with the same defined outputs is realized by the two
+independent production choices. This supplies a local output-transport law. -/
+theorem realizes (instruction : X86.Instruction)
+    (mask : X86.definedFlags instruction = 0xffffffffffffffeb)
+    (registers : ∀ state, X86.observedRegisters instruction state = state.gpr)
+    (expected representative target : Transition X86.State)
+    (first : X86.matchesTransition instruction expected representative)
+    (second : X86.matchesTransition instruction expected target) :
+    apply (target.state.rflags.getLsbD 2) (target.state.rflags.getLsbD 4) representative = target := by
+  rcases first with ⟨events1, fault1, state1⟩
+  rcases second with ⟨events2, fault2, state2⟩
+  have events : representative.events = target.events := events1.symm.trans events2
+  have fault : representative.fault = target.fault := fault1.symm.trans fault2
+  cases expectedFault : expected.fault with
+  | some error =>
+    have repFault := fault1.symm.trans expectedFault
+    have ones : (0xffffffffffffffff : Reference.Word) = BitVec.allOnes 64 := by decide
+    simp only [expectedFault, Option.isSome_some, ↓reduceIte, ones, BitVec.and_allOnes] at state1 state2
+    have states : representative.state = target.state := state1.symm.trans state2
+    simp only [apply, repFault, Option.isSome_some, ↓reduceIte]
+    cases representative; cases target
+    simp_all
+  | none =>
+    have repFault := fault1.symm.trans expectedFault
+    simp only [expectedFault, Option.isSome_none, Bool.false_eq_true, ↓reduceIte, mask, registers] at state1 state2
+    have observed := state1.symm.trans state2
+    have same := congrArg X86.State.rflags observed
+    have bits := flags_realize representative.state.rflags target.state.rflags same
+    have states := congrArg (fun s : X86.State => { s with rflags := target.state.rflags }) observed
+    change { representative.state with rflags := target.state.rflags } = target.state at states
+    simp only [apply, repFault, Option.isSome_none, Bool.false_eq_true, ↓reduceIte, bits]
+    cases representative; cases target
+    simp_all
+
+
+def word (bit : Bool) : Reference.Word := if bit then 1 else 0
+@[simp] theorem word_bit (bit : Bool) : (word bit).getLsbD 0 = bit := by cases bit <;> rfl
+
+def inputFlags (choices : Nat → Reference.Word) (visit : Nat) (effect : Transition X86.State) :=
+  apply ((choices visit).getLsbD 0) ((choices (visit+1)).getLsbD 0) effect
+
+def choose (original : Nat → Reference.Word) (visit : Nat) (pf af : Bool) : Nat → Reference.Word :=
+  fun n => if n = visit then word pf else if n = visit+1 then word af else original n
+
+theorem realizes_stream (instruction : X86.Instruction)
+    (mask : X86.definedFlags instruction = 0xffffffffffffffeb)
+    (registers : ∀ state, X86.observedRegisters instruction state = state.gpr)
+    (expected representative target : Transition X86.State)
+    (first : X86.matchesTransition instruction expected representative)
+    (second : X86.matchesTransition instruction expected target)
+    (original : Nat → Reference.Word) (visit : Nat) :
+    ∃ choices : Nat → Reference.Word,
+      (∀ n, n ≠ visit → n ≠ visit+1 → choices n = original n) ∧
+      inputFlags choices visit representative = target := by
+  refine ⟨choose original visit (target.state.rflags.getLsbD 2) (target.state.rflags.getLsbD 4), ?_, ?_⟩
+  · intro n first second
+    simp only [choose, first, second, ↓reduceIte]
+  · have distinct : visit+1 ≠ visit := by omega
+    simp only [inputFlags, choose, ↓reduceIte, distinct, word_bit]
+    exact realizes instruction mask registers expected representative target first second
+
+def andnRegisterBody (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first second : X86.Register) (nextPc : NativeWord) : Transition X86.State :=
+  apply pf af (⟨nativeRegisters env frame arena (X86NumericAddress.andnRegister env frame arena state width dst first second nextPc), [], none⟩)
+
+theorem andn_register_body_refines (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first second : X86.Register) (nextPc : NativeWord) :
+    X86.Step (.andn width dst first (.register second) nextPc) (nativeRegisters env frame arena state) (andnRegisterBody pf af env frame arena state width dst first second nextPc) := by
+  exact matches_preserved _ rfl _ _ (andn_register_frame_refines env frame arena state width dst first second nextPc) pf af
+
+theorem andn_register_body_realizes (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first second : X86.Register) (nextPc : NativeWord)
+    (target : Transition X86.State) (admitted : X86.Step (.andn width dst first (.register second) nextPc) (nativeRegisters env frame arena state) target) :
+    ∃ pf af, andnRegisterBody pf af env frame arena state width dst first second nextPc = target := by
+  refine ⟨target.state.rflags.getLsbD 2, target.state.rflags.getLsbD 4, ?_⟩
+  exact realizes _ rfl (fun _ => rfl) _ _ target (andn_register_frame_refines env frame arena state width dst first second nextPc) admitted
+
+def bzhiRegisterBody (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst src count : X86.Register) (nextPc : NativeWord) : Transition X86.State :=
+  apply pf af (⟨nativeRegisters env frame arena (X86NumericAddress.bzhiRegister env frame arena state width dst src count nextPc), [], none⟩)
+
+theorem bzhi_register_body_refines (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst src count : X86.Register) (nextPc : NativeWord) :
+    X86.Step (.bzhi width dst (.register src) count nextPc) (nativeRegisters env frame arena state) (bzhiRegisterBody pf af env frame arena state width dst src count nextPc) := by
+  exact matches_preserved _ rfl _ _ (by
+      rw [bzhi_register_frame_refines]
+      exact ⟨rfl, rfl, rfl⟩) pf af
+
+theorem bzhi_register_body_realizes (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst src count : X86.Register) (nextPc : NativeWord)
+    (target : Transition X86.State) (admitted : X86.Step (.bzhi width dst (.register src) count nextPc) (nativeRegisters env frame arena state) target) :
+    ∃ pf af, bzhiRegisterBody pf af env frame arena state width dst src count nextPc = target := by
+  refine ⟨target.state.rflags.getLsbD 2, target.state.rflags.getLsbD 4, ?_⟩
+  exact realizes _ rfl (fun _ => rfl) _ _ target (by
+      rw [bzhi_register_frame_refines]
+      exact ⟨rfl, rfl, rfl⟩) admitted
+
+def andnMemoryBody (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first : X86.Register) (address nextPc : NativeWord) : Transition X86.State :=
+  apply pf af (andnMemoryFrame env frame arena state (multiplyScalarWidth (X86Bzhi.readWidth width)) width dst first address nextPc)
+
+theorem andn_memory_body_refines (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first : X86.Register) (address nextPc : NativeWord) :
+    X86.Step (.andn width dst first (.memory address) nextPc) (nativeRegisters env frame arena state) (andnMemoryBody pf af env frame arena state width dst first address nextPc) := by
+  exact matches_preserved _ rfl _ _ (andn_memory_frame_refines env frame arena state width dst first address nextPc) pf af
+
+theorem andn_memory_body_realizes (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst first : X86.Register) (address nextPc : NativeWord)
+    (target : Transition X86.State) (admitted : X86.Step (.andn width dst first (.memory address) nextPc) (nativeRegisters env frame arena state) target) :
+    ∃ pf af, andnMemoryBody pf af env frame arena state width dst first address nextPc = target := by
+  refine ⟨target.state.rflags.getLsbD 2, target.state.rflags.getLsbD 4, ?_⟩
+  exact realizes _ rfl (fun _ => rfl) _ _ target (andn_memory_frame_refines env frame arena state width dst first address nextPc) admitted
+
+def bzhiMemoryBody (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst count : X86.Register) (address nextPc : NativeWord) : Transition X86.State :=
+  apply pf af (bzhiMemoryFrame env frame arena state width dst count address nextPc)
+
+theorem bzhi_memory_body_refines (pf af : Bool) (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst count : X86.Register) (address nextPc : NativeWord) :
+    X86.Step (.bzhi width dst (.memory address) count nextPc) (nativeRegisters env frame arena state) (bzhiMemoryBody pf af env frame arena state width dst count address nextPc) := by
+  exact matches_preserved _ rfl _ _ (by
+      rw [bzhi_memory_frame_refines]
+      exact ⟨rfl, rfl, rfl⟩) pf af
+
+theorem bzhi_memory_body_realizes (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame) (arena : NativeWord)
+    (state : RegisterState) (width : X86.BzhiWidth)
+    (dst count : X86.Register) (address nextPc : NativeWord)
+    (target : Transition X86.State) (admitted : X86.Step (.bzhi width dst (.memory address) count nextPc) (nativeRegisters env frame arena state) target) :
+    ∃ pf af, bzhiMemoryBody pf af env frame arena state width dst count address nextPc = target := by
+  refine ⟨target.state.rflags.getLsbD 2, target.state.rflags.getLsbD 4, ?_⟩
+  exact realizes _ rfl (fun _ => rfl) _ _ target (by
+      rw [bzhi_memory_frame_refines]
+      exact ⟨rfl, rfl, rfl⟩) admitted
+
+end KProgFormal.Refinement.X86NumericAddress.FreshAux
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.flags_realize
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.matches_preserved
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.realizes
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.realizes_stream
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_register_body_refines
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_register_body_realizes
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_register_body_refines
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_register_body_realizes
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_memory_body_refines
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_memory_body_realizes
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_refines
+#print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_realizes
