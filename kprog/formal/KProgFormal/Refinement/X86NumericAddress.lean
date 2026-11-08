@@ -2900,7 +2900,7 @@ theorem project_address_advance (env : Environment) (frame : Frame) (arena point
   unfold projectAddress
   generalize base env frame .stack = origin
   clear env frame
-  bv_decide
+  rw [BitVec.add_sub_comm, BitVec.add_assoc, BitVec.add_comm delta origin, ← BitVec.add_assoc]
 
 theorem native_rep_finish (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) :
