@@ -1,0 +1,1 @@
+Complete tracee functional replay with paired scoped-resource caller/linker. Guest exit 1; host status False; Make exit 2; stages {"bound_accepted": 1, "verifier_rejected": 1}. Raw app/request/work/clock records retain exact input epochs. Universal theorem and complete six-application work continues.
