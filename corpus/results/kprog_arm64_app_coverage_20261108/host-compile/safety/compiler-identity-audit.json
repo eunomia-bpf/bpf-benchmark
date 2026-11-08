@@ -304,5 +304,10 @@
     "all_prior_native_request_audits_equal": true
   },
   "reader_sha256": "fb4f1d998334396a288e679a5a2ddf698aa15d5fac39b8c829d4d452a07bccbf",
-  "archive_sha256": "34a30e313b724473c13123ce244c5911ed50092a657d6d48909be79e0a654d99"
+  "archive_sha256": "34a30e313b724473c13123ce244c5911ed50092a657d6d48909be79e0a654d99",
+  "replay_inventory_binding": {
+    "source_member": "current-replay/full-run.py",
+    "source_sha256": "03b4d1c1ed452e8b82c1cbd9a1b94d3586ff3aaa5a9e91a3ad7486cccfc93008",
+    "method": "Capture fixture inventory before guest launch and supply it explicitly to the generic reader."
+  }
 }
