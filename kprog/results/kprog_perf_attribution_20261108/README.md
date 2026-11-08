@@ -317,3 +317,41 @@ A change to those programs is what moves the application ratio, which is why
 the candidate ordering follows the programs: an optimization in the two
 cilium container programs covers all of its measurable BPF time, and one in
 the three tracee syscall programs covers 74%.
+
+### The code itself, for one program
+
+`kprog/perf/site_weight.py` disassembles the published native object and
+counts the call instructions in it, which is the part of the site
+inventory that is actually in the executed path:
+
+| quantity | `cil_xdp_entry` |
+| --- | ---: |
+| instructions in the entry | 245 |
+| call instructions | 17 |
+| helper names the plan reaches | 89 |
+| lookup sites | 3 |
+| update sites | 4 |
+| tail-call maps | 4 |
+
+The gap between 17 call instructions and 89 reachable helper names is the
+important one: a plan lists every helper name the program can reach through
+its call graph, and the entry itself calls 17 times. So a candidate's site
+share must be counted from the entry's own instructions, not from the
+plan's name lists, or it overstates what the hot path executes.
+
+The instruction mix of the entry: 70 `mov`, 23 `lea`, 21 `test`, 18 `cmp`,
+17 `je`, 17 `call`, 8 `movl`, 7 `movzbl`.
+
+The plan used here is one archived plan, not this object's own, so its
+helper and lookup counts describe a program of the same family rather than
+this entry. The entry's own 17 call instructions are the measured figure;
+`site_weight.py` takes `--plan` explicitly so a caller can pair the two
+from the same submission when the archive keeps them together.
+
+### What is still needed for a per-site time split
+
+A per-site *time* share needs per-site samples, and this environment has no
+`perf` binary and no `bpfperf`, so it needs a measurement build: a native
+compile that reads the cycle counter at each site. The instruction counts
+above are the static bound, and the per-program `run_time_ns` is the total;
+their ratio is the site density, not the site cost.
