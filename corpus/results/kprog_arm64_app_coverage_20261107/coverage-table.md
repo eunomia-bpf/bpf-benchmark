@@ -121,3 +121,9 @@ Cilium async-endpoint successor closes with62JIT-baseline rows and17540BPF calls
 Cilium wrapper follow-up: captured native ELF complete, six text functions; host configuration compile0 with allocated sections byte-identical, all six proof-link commands0. The terminal QEMU epoch contains0service requests. Detailed source/context observations and the frozen-runner operator case are in ../kprog_arm64_app_coverage_20261108/cilium-native-compile/.
 
 Tetragon precise-copy application terminal c9a653161: baseline154 resident rows,5proofs generated/compiled,4installed, execve_send reaches the stock8193jump-sequence frontier after667530instructions/6806states. event_wake_up_new_task crosses its former compiled-stack frontier and installs. Canonical successor2766f65c retains its own source/work receipts.
+
+## Complete byte-source Tetragon terminal cohort
+
+[Whole Tetragon6e072973b](../kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/coverage.json) retains153baseline resident programs and30,809BPF calls. All four submitted native requests generate and compile; three pass the stock verifier and install. event_execve reaches the stock stack write at offset-672. Its original native input has a480-byte modeled stack and three pointer-payload words. The existing two-start recipe records the native startup error and preserves the complete source/kernel/compiler/verifier archive.
+
+The earlier precise-copy execve_send jump-sequence cohort stays in terminal_history and its original report. The current generic tag-source Tetragon/OTel/Tracee serial successor consumes its own captured inputs. Each phase uses its own actual program IDs and counters.
