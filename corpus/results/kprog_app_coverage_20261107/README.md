@@ -112,7 +112,7 @@ measurement continue from the reported failure classes.
 | Application | Baseline census | Generated | Compiled | Accepted/bound | Submission / specialization errors | Verifier rejections | Runtime evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [233455 batch](otel-cmp-identity/README.md) |
+| OTel | 13 resident | 2 | 2 | 1 | 0 | 1: unaligned candidate stack read | [000433 batch](otel-stack-identity/README.md) |
 | Cilium | 60 resident | 1 | 1 | 1 | 1: BMI2 count ABI dependency | 0 | [000058 batch](cilium-live-tc/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541 batch](tetragon-stack-width/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
@@ -265,3 +265,6 @@ The [Tetragon native-width stack batch234541](tetragon-stack-width/README.md) fr
 
 
 The [Tracee narrow-value identity batch235054](tracee-narrow-identity/README.md) passes the indexed readonly-table frontier and reaches the probe-read length identity,3411processed instructions/141states. All6terminal native hashes and captured sources reconcile;5bind. The [Cilium live-TC batch000058](cilium-live-tc/README.md) binds its XDP entry and reaches cil_to_host BMI2 count-definedness. The generic count repair retains low8BZHI and low5/6variable-shift dependencies, with the complete operand-width value dependency.
+
+
+The [OTel coherent stack/value batch000433](otel-stack-identity/README.md) generates/compiles2requests and binds1. perf_unwind_stop reaches an8-byte read at private-stack offset-91,2884processed instructions/144states. The aligned-width successor keeps canonical byte assembly at unaligned private addresses and uses equivalent native-width reads at aligned addresses; its component and whole-application results follow their actual completion. Earlier233455 retains the separate2-bound/verifier-complexity epoch.

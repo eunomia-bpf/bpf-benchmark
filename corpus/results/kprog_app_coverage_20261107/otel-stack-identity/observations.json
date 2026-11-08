@@ -1,0 +1,20 @@
+{
+  "baseline_resident": 13,
+  "generated": 2,
+  "compiled": 2,
+  "bound": 1,
+  "failed": 1,
+  "source_drift": [],
+  "terminal_native_hashes_checked": 2,
+  "artifact_sha256": {
+    "driver.log.gz": "4fb51f67020b869e6760ecbb36783970ad9fb857a42c29b63a45081d720a2263",
+    "service.tar.gz": "58e1b02928aab3f8bffb9addbca6aafb0ef971422c5dd4441b905ab60a3470f4",
+    "launch.tar.gz": "bbb2338209ffa91b7492fcbf38211bfe647b11902e6accf13fb26495d1698337",
+    "result.tar.gz": "3dfccc4f9c2a0cb6a690437896ecb2cfaf0027d7a3049bf7c641ca70509c4d65"
+  },
+  "failure_class": "unaligned private-stack wide read",
+  "verifier_offset": -91,
+  "verifier_width": 8,
+  "processed_instructions": 2884,
+  "total_states": 144
+}
