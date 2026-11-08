@@ -1,108 +1,120 @@
-# Kernel BPF selftests on the five-step path, 2026-11-08
+# Kernel BPF selftests through the five-step path, 2026-11-08
 
-The kernel selftests are the upstream corpus of verifier programs. Each
-program carries a BTF decl_tag in `progs/bpf_misc.h` saying whether the
-verifier must accept or reject it:
+The kernel's own `__success` and `__failure` annotations are the expected
+outcome for each program.  This run compiles every C-written annotated
+program to native x86-64 with the corpus toolchain, submits it through the
+five-step path in the guest that boots the vendored kernel, and compares the
+outcome with the annotation.
 
-```c
-#define __failure  __attribute__((btf_decl_tag("comment:test_expect_failure")))
-#define __success  __attribute__((btf_decl_tag("comment:test_expect_success")))
-```
+Reproduce with `kprog/selftests/run.sh` (one guest boot, host CPUs 0-7).
 
-Those annotations are the ground truth this harness checks the native path
-against, in place of programs built for the purpose.
+## Program population
 
-Harness: `kprog/selftests/selftests.py`. Compile: `kprog/selftests/include/
-vmlinux.h`, dumped from the same kernel with
-`bpftool btf dump file vendor/build/x86/linux/vmlinux format c` (136,896
-lines) because the vendored bcc header predates `bpf_rb_root`,
-`bpf_res_spin_lock` and the arena helpers.
+The scan reads `vendor/linux-framework/tools/testing/selftests/bpf/progs` and
+counts every `SEC("...")` program carrying `__success` or `__failure`:
 
-## Why these counts differ from the 453/298 in the task
+| | count |
+| --- | --- |
+| annotated programs | 1,917 |
+| written in C | 657 |
+| BPF inline assembly (`__naked` or an `asm` body) | 1,260 |
+| `__failure` | 916 |
+| `__success` | 1,001 |
 
-The task quotes 453 `__failure` and 298 `__success` C programs on the
-2026-11-07 tree. This harness measures **424 and 262** under the task's
-`__naked` rule, and 686 annotated C programs against the 751 implied by
-those figures. The residual 17-per-class difference is reported rather
-than smoothed: the rule is now the task's, so the gap is in how a
-borderline body is classified, not in the tree.
+The inline-assembly programs stay with the kernel's `test_progs`, as the task
+says.  Of the 657 C programs, 128 are in a file that compiles and whose entry
+symbol the native compiler emits; those 128 are the sweep.
 
-What this harness counts, using the task's own rule: one row per
-`SEC("...")` declaration that is **not** marked `__naked`, carrying
-`__failure` or `__success` as an exact marker in the annotation run
-between `SEC(...)` and the declaration. The body is inspected as well,
-because a handful of `asm volatile` programs declare an ordinary C
-signature, so a body opening with `asm` or carrying a `__clobber` list
-inside its first 1200 characters is also `asm`.
+Each program is compiled into its own BPF object, because the kernel groups
+several programs into one section and libbpf reads a program's type off that
+section.  `selftests.py` comments the sibling programs out of the translation
+unit, so all 126 generated objects hold exactly one program.
 
-Checked and ruled out as explanations: subdirectories under `progs/`
-(none), annotations placed after the signature (160 such programs, all
-`__naked`-only and unannotated), `__failure_unpriv`-only programs, and
-counting files rather than programs (146 / 129).
+## Totals
 
-## Counts on the 2026-11-08 tree
+| outcome | count |
+| --- | --- |
+| submitted | 33 |
+| ran (native path executed) | 1 |
+| refused by the specializer | 10 |
+| native path not reached | 22 |
+| skipped before submission | 95 |
 
-| quantity | count |
-| --- | ---: |
-| `SEC(...)` declarations in `progs/*.c` | 5,000+ scanned, **1,917** annotated |
-| annotated programs whose body is BPF inline asm (`__naked`) | **1260** |
-| annotated programs whose body is ordinary C | **657** |
-| of which `__failure` | 916 (all bodies) |
-| of which `__success` | 1,001 (all bodies) |
+Of the programs whose native path ran, `success` agrees **1**; `failure`
+agrees **0** and disagrees **0**, because no `__failure` program reached the
+specializer in this run.
 
-Counted per program, not per file: a program is a `SEC("...")` declaration
-followed by its own run of `__annotation(...)` attributes, so one program's
-annotations cannot bleed into the next. The markers are matched exactly —
-`__failure` must not match `__failure_unpriv`, and **77 upstream programs
-carry `__success __failure_unpriv`**: they load privileged and fail
-unprivileged, so reading the prefix would file them under failure.
+The 10 refusals are all `__success` programs, so they are the case the task
+calls a rejection to triage between the native compile and the simulator.  No
+`__failure` program ran, so this run reports no faithfulness defect.
 
-## What compiles to native x86-64
+## Why 95 programs were skipped
 
-| quantity | count |
-| --- | ---: |
-| files with no BPF-asm program | 180 total, **42 compile** |
-| C programs inside compiling files | **200** |
-| of those, a GLOBAL FUNC entry found | **128** |
-| `__failure` / `__success` among them | 114 / 86 |
+Every one of the 95 carries a program type the five-step stub does not
+create.  The runner's stub supports three types
+(`runner/src/native_lab_runner.cpp:47-52`): `xdp`, `sched_cls` and
+`cgroup_skb`.  The rest are `sock_addr`, `sk_msg`, `iter`, `kprobe`,
+`crypto`, `struct_ops` and others.  This is a bound of the stub, so
+widening it is `runner` work for lane C.
 
-A file that contains any inline-asm program is excluded as a unit, because
-one `asm volatile("r1 = 0; ...")` body makes the whole translation unit
-uncompilable by the native compiler; in-clause the file's C programs share
-that obstacle.
+The 13 objects that a previous run could not build now build: a program
+was being removed together with a following sibling's global declarations,
+and the removal now ends at the program's own closing brace.
 
-## The residue, and why it is inherent
+## Why 22 programs did not reach the native path
 
-291 C programs still fail to compile, in four causes:
+The loader decides these before submitting:
 
-| cause | count | nature |
-| --- | ---: | --- |
-| `use of unknown builtin '__builtin_preserve_field_info'` | 41 | BPF-target CO-RE builtin, not expressible in x86-64 C |
-| `call to undeclared function 'bpf_res_spin_lock_irqsave'` | 31 | BPF kfunc, no x86-64 declaration |
-| `redefinition of 'arena' with a different type` | 24 | BPF arena map type |
-| `expected ')'` and other parse errors | 81+ | selftest-specific macros |
+| cause | count |
+| --- | --- |
+| companion BPF object failed to load (`EPERM`) | 8 |
+| companion BPF object failed to load (`EINVAL`) | 8 |
+| companion BPF object failed to load (`E2BIG`) | 1 |
+| section has no type libbpf can infer (`?tc`, `?xdp`) | 4 |
+| companion object loaded, its own run failed | 1 |
 
-These are BPF-only constructs, so a native x86-64 compile cannot express
-them however the includes are arranged. They are a coverage boundary of
-*compiling* selftests natively, and the kernel's own `test_progs` remains
-the runner for them.
+A `?`-prefixed section marks a section libbpf may see repeated; the companion
+object opened from a single re-emitted `?tc` section has no type, so it fails
+to load.  Each of these settles the outcome before the native path runs.
 
-## Per-program table
+## The 10 refusals the specializer made
 
-`kprog/selftests/build/programs.json` holds one row per annotated
-program — file, program name, section, body kind, expectation, whether it
-compiled, whether its entry symbol is present, and the compile error when
-not.
+The specializer's rejection is a native-path verdict, so it is real evidence.
+The named mechanism is the kernel's 512-byte stack: the native stub's frame
+and the program's own stack share those bytes.  `global_func2` uses 248 bytes,
+and the verifier reports `invalid write to stack R10 off=-528`.
 
-## Status
+## The one agreement
 
-Programs are enumerated and compiled; the submission half is pending the
-five-step runtime that lane C is rewriting (`TRUSTED_CHUNK` immutable
-chunks), since the corpus guest harness is being changed underneath it.
-When that settles, each of the 128 compiled entries is submitted and its
-outcome compared with the annotation: a `__failure` program that runs is a
-faithfulness defect and goes to C with its source and B; a `__success`
-program the verifier rejects is triaged between the native compile and the
-simulator; a generation failure is coverage and goes to C.
+`global_func8` (`test_global_func8.c`) is a `__success` program: the whole
+object holds one program, the companion BPF object loads, the specializer
+accepts the native program, and it runs.  This is the first program that
+exercises the complete five-step path end to end and agrees with the kernel's
+annotation.
 
-AArch64 follows lane A's five-step port.
+## Harness defects found by running it
+
+Each of these was found by executing the path, and each is fixed:
+
+- The BPF compile drove the host linker without `-c`, which cannot relink a
+  BPF object (`Relocations in generic ELF (EM: 247)`).
+- libbpf refuses an object with no `license` section, which several selftests
+  omit; the harness supplies one.
+- The native compile omitted `-mno-red-zone` and `-mgeneral-regs-only`, so
+  the frame landed outside the stack the verifier models (`R10-1312`).
+- The agreement count included programs whose companion BPF object failed to
+  load.  Those settle before the native path runs, so their apparent
+  agreement was vacuous; only a program the specializer accepted or rejected
+  counts, and `ran` for the rest.
+
+## Environment
+
+The lab module is built for `kprog/tv/build-kernel-x86`, so it only loads in a
+guest booted from that tree's image; the host kernel differs and rejects the
+module on vermagic.  The module must be built with
+`KDIR=kprog/tv/build-kernel-x86`, because the default points at a different
+output directory and yields a symbol-version mismatch.
+
+`trusted-native-loader` must be rebuilt from `kprog/trusted_loader.cpp` when
+`native_loader.cpp` changes; a stale binary looks for a `blob%u` interface the
+current module does not create.

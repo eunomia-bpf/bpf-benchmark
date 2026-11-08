@@ -40,7 +40,7 @@ DEFAULT_PROGS = (ROOT / "vendor/linux-framework/tools/testing/selftests/bpf/prog
 
 
 def annotations(text):
-    """`[(section, name, annotations, body_kind)]` for one source file.
+    """`[(section, name, annotations, body_kind, offset)]` per file.
 
     A program is a `SEC("...")` declaration followed by a run of
     `__annotation(...)` attributes and then the C declaration.  Everything
@@ -71,7 +71,9 @@ def annotations(text):
         naked = re.search(r"__naked(?![\w])", attrs) is not None
         kind = ("asm" if naked or body.startswith("asm")
                 or "__clobber" in body[:1200] else "c")
-        out.append((section, am.group(3), attrs, kind))
+        # A program runs from its own `SEC(` to the next one's, which is
+        # what a per-program compile comments out exactly.
+        out.append((section, am.group(3), attrs, kind, m.start()))
     return out
 
 
@@ -91,6 +93,35 @@ def expectation(attrs):
     if marker(attrs, "__success"):
         return "success"
     return None
+
+
+def only_program(source, head, keep, out_dir):
+    """A copy of `source` with every program but `keep` compiled out.
+
+    A program is a `SEC(...)` attribute and the function it annotates, so
+    it occupies the text from the start of its `SEC` line to the `}` that
+    closes its body at column zero.  Removing exactly those ranges leaves
+    every global declaration between programs in place, which matters
+    because a sibling program may declare a type the kept one uses.
+    """
+    text = pathlib.Path(source).read_text(errors="ignore")
+    spans = []
+    for _, name, _, _, offset in head:
+        start = text.rfind("\n", 0, offset) + 1
+        close = text.find("\n}\n", offset)
+        spans.append((start, len(text) if close < 0 else close + 3, name))
+    spans.sort()
+    pieces, cut = [], 0
+    for start, end, name in spans:
+        if name == keep:
+            continue
+        pieces.append(text[cut:start])
+        pieces.append("#if 0\n" + text[start:end] + "#endif\n")
+        cut = end
+    pieces.append(text[cut:])
+    wrapper = out_dir / (pathlib.Path(source).stem + "__" + keep + ".c")
+    wrapper.write_text("".join(pieces))
+    return wrapper
 
 
 def compile_bpf(source, out, includes, clang):
@@ -173,6 +204,7 @@ def main(argv):
                 pathlib.Path("/usr/include/x86_64-linux-gnu")]
 
     rows = []
+    per_file = {}
     for src in sorted(progs.glob("*.c")):
         if args.only and args.only not in src.name:
             continue
@@ -180,12 +212,14 @@ def main(argv):
             text = src.read_text(errors="ignore")
         except OSError:
             continue
-        for section, name, attrs, kind in annotations(text):
+        found = annotations(text)
+        per_file[src.name] = found
+        for section, name, attrs, kind, offset in found:
             want = expectation(attrs)
             if want is None:
                 continue
             rows.append(dict(file=src.name, program=name, section=section,
-                             body=kind, expect=want,
+                             body=kind, expect=want, offset=offset,
                              path=str(src)))
             if args.limit and len(rows) >= args.limit:
                 break
@@ -204,37 +238,51 @@ def main(argv):
     # is the asm family and its C programs share the same obstacle.
     compiled = {}
     asm_files = {r["file"] for r in rows if r["body"] == "asm"}
+    natives = {}
     for r in rows:
         if r["body"] != "c" or r["file"] in asm_files:
             continue
         src = pathlib.Path(r["path"])
-        if src.name in compiled:
-            continue
-        obj = out / (src.stem + ".native.o")
-        ok, err = compile_native(src, obj, includes, clang)
-        bpf = out / (src.stem + ".bpf.o")
-        bpf_ok, bpf_err = (compile_bpf(src, bpf, includes, clang) if ok
+        # The native object is the whole file's, because the native
+        # compiler takes the programs as ordinary C functions; the BPF
+        # object is this program's own, because libbpf reads a program's
+        # type off its section and the kernel groups programs by section.
+        if src.name not in natives:
+            obj = out / (src.stem + ".native.o")
+            natives[src.name] = (obj,) + compile_native(src, obj, includes,
+                                                        clang)
+        obj, ok, err = natives[src.name]
+        unit = (only_program(src, per_file.get(src.name, []), r["program"],
+                             out) if ok else src)
+        bpf = out / (src.stem + "__" + r["program"] + ".bpf.o")
+        bpf_ok, bpf_err = (compile_bpf(unit, bpf, includes, clang) if ok
                            else (False, "native compile failed"))
-        compiled[src.name] = dict(ok=ok, obj=str(obj) if ok else None,
-                                  bpf=str(bpf) if bpf_ok else None,
-                                  error=err[-800:] if not ok else "",
-                                  bpf_error=(bpf_err[-400:]
-                                             if not bpf_ok else ""),
-                                  symbols=symbols(obj) if ok else [])
-    for name in asm_files:
-        compiled.setdefault(name, dict(ok=False, obj=None,
-                                       error="file contains a BPF-asm program",
-                                       symbols=[]))
+        compiled[(src.name, r["program"])] = dict(
+            ok=ok, obj=str(obj) if ok else None,
+            bpf=str(bpf) if bpf_ok else None,
+            error=err[-800:] if not ok else "",
+            bpf_error=(bpf_err[-400:] if not bpf_ok else ""),
+            symbols=symbols(obj) if ok else [])
     for r in rows:
-        info = compiled.get(r["file"], {})
+        if r["file"] in asm_files:
+            r["compiled"] = False
+            r["bpf_object"] = None
+            r["entry"] = False
+            r["compile_error"] = "file contains a BPF-asm program"
+            continue
+        info = compiled.get((r["file"], r["program"]), {})
         r["compiled"] = info.get("ok")
         r["bpf_object"] = info.get("bpf")
         r["entry"] = r["program"] in info.get("symbols", [])
         if not info.get("ok"):
             r["compile_error"] = info.get("error", "")
+        if info.get("ok") and not r["bpf_object"]:
+            r["bpf_error"] = info.get("bpf_error", "")
 
-    counts["files"] = len(compiled)
-    counts["files_compiled"] = sum(1 for v in compiled.values() if v["ok"])
+    counts["files"] = len({k[0] for k in compiled})
+    counts["files_compiled"] = len({k[0] for k, v in compiled.items()
+                                    if v["ok"]})
+    counts["programs_compiled"] = sum(1 for v in compiled.values() if v["ok"])
     counts["entries_present"] = sum(1 for r in rows if r.get("entry"))
 
     json.dump(dict(counts=counts, programs=rows),

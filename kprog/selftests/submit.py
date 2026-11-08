@@ -93,36 +93,33 @@ def start_service(arch=1):
     return proc, proc
 
 
-# A rejection only means something if the native path was reached.  When
-# the companion BPF object fails to load, the loader never submits, so the
-# program agrees with its annotation for a reason that says nothing about
-# the native path.
-COMPANION = "companion bpf_object__load failed"
+# A rejection only means something if the native path was reached.  The
+# loader says so in one way when the specializer rejected the native
+# program, and in many ways when it never got that far: the companion BPF
+# object failed to load, its section had no inferable type, the native
+# entry was missing.  Each of those settles the outcome before the native
+# path is involved, so counting them as agreement would claim the path
+# agreed with an annotation it was never compared against.
+REACHED = "trusted specializer refused native program"
 
 
 def classify(rc, stderr):
     """What happened to one program, in terms of what the path exercised."""
     if rc == 0:
         return "ran"
-    if COMPANION in stderr:
-        return "companion-failed"
-    return "refused"
+    if REACHED in stderr:
+        return "refused"
+    return "not-reached"
 
 
-def program_names(micro_exec, obj):
-    """The programs one object holds, by name.
-
-    `micro_exec` runs exactly one program per object, so an object with
-    several must be skipped until it can be split: the kernel collects
-    unrelated programs in one file, and libbpf enumerates them from BTF
-    rather than the ELF section, so filtering the section is not enough.
-    """
+def program_listing(micro_exec, obj):
+    """The (name, section) pairs one object holds."""
     rc, so, se = run([micro_exec, "list-programs", "--program", str(obj)],
                      timeout=60)
     if rc != 0:
         return []
     try:
-        return [p["name"] for p in json.loads(so)]
+        return [(p["name"], p["section_name"]) for p in json.loads(so)]
     except (ValueError, KeyError):
         return []
 
@@ -163,23 +160,25 @@ def main(argv):
         src = pathlib.Path(r["path"])
         bpf = pathlib.Path(r.get("bpf_object") or "")
         obj = pathlib.Path(args.table) / (src.stem + ".native.o")
-        names = program_names(args.micro_exec, bpf)
-        if len(names) != 1 or names[0] != r["program"]:
-            # Several programs share the object, or the entry name differs
-            # from the object's only program.
+        listing = program_listing(args.micro_exec, bpf)
+        if len(listing) != 1 or listing[0][0] != r["program"]:
+            # `selftests.py` compiles each program into its own object, so
+            # an object holding another program means the compile or the
+            # table is stale.
             skipped.append(dict(file=r["file"], program=r["program"],
-                                expect=r["expect"], programs=names,
-                                reason=("object holds %d programs" % len(names)
-                                        if len(names) != 1
-                                        else "name mismatch")))
+                                expect=r["expect"],
+                                programs=[n for n, _ in listing],
+                                reason="object holds %d programs"
+                                       % len(listing)))
             continue
         kind = KIND.get(program_type(args.micro_exec, bpf))
         if kind is None:
             # The stub is created for one of three types; another type
             # would be rejected, so record why instead of guessing.
-            skipped.append(dict(file=r["file"], program=r["program"],
-                                expect=r["expect"],
-                                programs=names, reason="unsupported type"))
+            skipped.append(dict(
+                file=r["file"], program=r["program"], expect=r["expect"],
+                programs=[n for n, _ in listing],
+                reason="unsupported type"))
             continue
         cmd = [args.micro_exec, "run-native-kernel", "--program", str(bpf),
                "--native-program", str(obj), "--inner-repeat", "1",
@@ -193,15 +192,11 @@ def main(argv):
 
     service.terminate()
     counts = {"submitted": len(results), "skipped": len(skipped)}
-    for outcome in ("ran", "refused", "companion-failed"):
+    for outcome in ("ran", "refused", "not-reached"):
         counts[outcome] = sum(1 for x in results if x["outcome"] == outcome)
-    # Agreement counts only the programs whose native path actually ran:
-    # a companion failure decides the outcome before the native path is
-    # involved, so counting it as agreement would claim the path agreed
-    # with an annotation it was never compared against.
     for want in ("failure", "success"):
         sel = [x for x in results if x["expect"] == want
-               and x["outcome"] != "companion-failed"]
+               and x["outcome"] != "not-reached"]
         counts[want] = len(sel)
         counts[want + "_agrees"] = sum(
             1 for x in sel
