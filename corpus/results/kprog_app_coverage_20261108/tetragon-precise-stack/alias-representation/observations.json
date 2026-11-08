@@ -1,0 +1,60 @@
+{
+  "created": "2026-11-08T12:32:16.212557+00:00",
+  "exits": {
+    "component": 0,
+    "host": 0,
+    "aliases-lea": 0
+  },
+  "sections": [
+    {
+      "name": "tracepoint/trusted/trusted",
+      "instructions": 17122,
+      "maximum_fp_minus_offset": 1264
+    }
+  ],
+  "native_sha256": "75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304",
+  "candidate_header_sha256": "0544de3defd328a44806095c118b8a5e7408dba61597923e23b214a801c4686c",
+  "lea_hosts": [
+    {
+      "name": "test_x86_lea_handler_host.c",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/alias/test_x86_lea_handler_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/alias/test_x86_lea_handler_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "test_x86_lea_route_host.c",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/alias/test_x86_lea_route_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/alias/test_x86_lea_route_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "production_source_changed": false
+}

@@ -1,0 +1,7 @@
+# Private alias and LEA representation candidate
+
+The original full Tetragon event_execve native input75318ea5 compiles under current canonical geometry to a1280-byte FP extent. This private successor carries stack alias metadata through the original offset expression before opacity, and computes full-width LEA pointer representatives from that identical offset. Architectural arithmetic bits, flags, native branches and raw memory accesses retain their meanings. Scalar-address stores keep their original conservative ghost invalidation. No runtime admission check, bound, assertion or per-program proof was added.
+
+Actual terminal measurements: existing exits{"aliases-lea": 0, "component": 0, "host": 0}; complete component [{"instructions": 17122, "maximum_fp_minus_offset": 1264, "name": "tracepoint/trusted/trusted"}]; LEA hosts [{"compile_exit": 0, "name": "test_x86_lea_handler_host.c", "run_exit": 0}, {"compile_exit": 0, "name": "test_x86_lea_route_host.c", "run_exit": 0}].
+
+The original pointer-byte/lifetime host cases, additional direct/alias spill/load/partial-overwrite scenes, and both existing LEA host domains remain in raw logs with their actual exits. The compiler archive retains the complete captured program and object, exact header/dependencies, CPU oracle, commands and every failed attempt. These are private compiler/model measurements; stock-verifier acceptance and complete application execution remain separate. Production source adoption0. Universal erasure/compiler/helper-frame obligations retain V ownership.
