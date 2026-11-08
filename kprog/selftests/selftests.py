@@ -267,20 +267,22 @@ def main(argv):
     # so a C program in a mixed file compiles and its asm siblings do not
     # take it with them.
     compiled = {}
+    companions = {}
     for r in rows:
         if r["body"] != "c":
             continue
         src = pathlib.Path(r["path"])
-        # Both objects come from this program's own unit, so an asm
-        # sibling's body never reaches the native compiler and libbpf sees
-        # exactly one program.
+        # Native compilation isolates each C entry. The complete original BPF
+        # object supplies its program context, maps and complete BTF pointee
+        # definitions; the direct producer disables every program's autoload.
         unit = only_program(src, per_file.get(src.name, []), r["program"],
                             out)
         obj = out / (src.stem + "__" + r["program"] + ".native.o")
         ok, err = compile_native(unit, obj, includes, clang, args.arch)
-        bpf = out / (src.stem + "__" + r["program"] + ".bpf.o")
-        bpf_ok, bpf_err = (compile_bpf(unit, bpf, includes, clang, args.arch) if ok
-                           else (False, "native compile failed"))
+        bpf = out / (src.stem + ".bpf.o")
+        if ok and src not in companions:
+            companions[src] = compile_bpf(src, bpf, includes, clang, args.arch)
+        bpf_ok, bpf_err = companions.get(src, (False, "native compile failed"))
         compiled[(src.name, r["program"])] = dict(
             ok=ok, obj=str(obj) if ok else None,
             bpf=str(bpf) if bpf_ok else None,

@@ -1,0 +1,30 @@
+{
+  "utc": "2026-11-08T17:11:10.989026+00:00",
+  "compile_command": [
+    "taskset",
+    "-c",
+    "12-15",
+    "python3",
+    "/workspaces/.agent-state/kprog-lanes/A/bpf34/whole-resources/source/kprog/selftests/selftests.py",
+    "--arch",
+    "arm64",
+    "--only",
+    "map_kptr_fail",
+    "--out",
+    "/workspaces/.agent-state/kprog-lanes/A/bpf34/whole-resources/catalog"
+  ],
+  "compile_exit": 0,
+  "counts": {
+    "programs": 0,
+    "c": 0,
+    "asm": 0,
+    "failure": 0,
+    "success": 0,
+    "files": 0,
+    "files_compiled": 0,
+    "programs_compiled": 0,
+    "entries_present": 0
+  },
+  "resource_objects": [],
+  "source_scope": "Original complete source supplies BPF resource/program context; isolated native entries retain C bodies; all programs autoloadfalse."
+}
