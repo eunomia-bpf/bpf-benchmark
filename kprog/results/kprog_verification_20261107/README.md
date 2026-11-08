@@ -3903,3 +3903,10 @@ libbpf Git revision. Actual binaries/proof output use lossless XZ inside the
 raw receipt; each compressed and original hash is verified. ARM C-model O2
 coverage reaches61/71; complete raw/compiled, native field/address/provenance,
 source-emission and invocation ABI interfaces continue through universal laws.
+
+### Published source full check 01fba1f4d
+
+`make check` on immutable published01fba1f4d exits0. All1161 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_01fba1f4d`. Every check retains its exact published source identity.

@@ -3666,6 +3666,26 @@
   "full_exit": 2,
   "full_head": "967fc6b49608634cd5566dfd6a2925aa828cdcbe",
   "full_log_sha256": "99ea8d210591437b72f741b2f0349eb271ca9a3b1d1415dfe495222023e970ed",
+  "full_make_check_01fba1f4d": {
+    "actual_exit": 0,
+    "archive_block_sha256": "a4534cff06cb8a0b714c21eb5af2fddeb939f3711598a915e01580ca582f4567",
+    "archive_marker": "=== FULL MAKE CHECK 01FBA1F4D PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.cpu.jsonl.gz": "4b49f753b86f114291fa5af45be4fdd499282e3daf42b6edad0a8c13a3de839d",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.head": "4bda323d89b911dbc9b89823b99dd531b869c28d22253d20d69bb56e470c5888",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.launch.log": "c3a1fb6107344f3b98a3c0522a0137e2e00a4c6e44974df6bd42a7417ba64c66",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.log": "d6811cdf39d27f5db2b635ed7d834447a6042d25a746a9f3d7101d5b51232330",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.py": "e3ef764a595768af85c5f9ff1cd752297b0c0e03d95a326582af1571ff702927",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.sources": "4c572ff2b15342c6ed22bcd58a1a8f7a1671e77ad7181d09cca5d1f2b82350b2",
+      "/workspaces/.agent-state/kprog-lanes/V/memtokens-full.state": "d3d83f5fc48ae1d3dd7f30b45c36cbe81fe8e7aab2149c5756628f37fd8cc15d"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "01fba1f4d38139aeeed78b23617f55f85833c08b",
+    "scope": "Complete formal make check of the exact published source tree 01fba1f4d38139aeeed78b23617f55f85833c08b. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1161
+  },
   "full_make_check_0df15f53f": {
     "actual_exit": 0,
     "archive_block_sha256": "3755516d4b7a12520dc80a2cfc28f74691b4eb52b4653eb112be3cb3b795f241",
