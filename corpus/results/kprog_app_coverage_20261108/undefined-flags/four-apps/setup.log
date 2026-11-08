@@ -1,0 +1,14 @@
+make[1]: Entering directory '/workspaces/repository'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+"/workspaces/repository/runner/scripts/start-vm-docker"
+install -d "/workspaces/repository/corpus/results"
+"/workspaces/repository/runner/scripts/bpfrejit-install" --image "bpf-benchmark/kprog-five-step-tracee:c-runner" "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/four-apps-undefined-flags/runtime.image.tar"
+Loaded image: bpf-benchmark/kprog-five-step-tracee:c-runner
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="e21da980" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e SAMPLES="1"      -e FUZZ_ROUNDS="1000"  -e WORKLOAD_DURATION="2" -e KEEP_WORKDIRS="all"  -e BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler,cilium,tetragon/observer,tracee"           -e MERLIN_COMPILETIME_MODE="none" -e BPFREJIT_CORPUS_APP_TIMEOUT="0" -e BPFREJIT_CORPUS_REJIT_TIMEOUT="0"  -e BPFREJIT_CORPUS_BPF_STATS="1"  -e BPFREJIT_SHIM_NATIVE_LOADER="post"      -e BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF="1"         -e CILIUM_PROFILE_ARM="all"    -w "/workspaces/repository" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/workspaces/repository/corpus/results:/workspaces/repository/corpus/results" "bpf-benchmark/kprog-five-step-tracee:c-runner" python3 -m corpus.driver
+BPFREJIT_CORPUS_APPS references unknown apps: ['otelcol-ebpf-profiler', 'cilium', 'tracee']; available: ['bcc/set', 'cilium/agent', 'katran', 'otelcol-ebpf-profiler/profiling', 'tetragon/observer', 'tracee/monitor']
+make[1]: *** [Makefile:362: __runtime-vm-corpus] Error 1
+make[1]: Leaving directory '/workspaces/repository'
