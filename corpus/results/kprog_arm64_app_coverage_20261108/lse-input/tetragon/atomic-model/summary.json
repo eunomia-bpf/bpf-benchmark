@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-08T08:59:39.528536+00:00",
+  "phase": "private candidate; queued whole Tetragon",
+  "operations": {
+    "LDADD": "0x46 atomic fetch add",
+    "LDSET": "0x47 atomic fetch or",
+    "LDCLR": "0x48 atomic fetch and complemented source"
+  },
+  "common_frame": "Address and source captured before old-value destination, width/order decode, loaded provenance and updated scalar memory tag",
+  "existing_micro_sources": 29,
+  "component_exit": 0,
+  "source_after": {
+    "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+    "kprog/arm64/arm64_sim_local_bpf.h": "2c25355dfdc7d8e92bf4c4f31534a6240a7c5ebbd16e58b79b5352db8b434e45",
+    "kprog/arm64/arm64_sim_direct.h": "9e25ebdc80cfcbcc199a9b882de47ed57632e623bdf6310bc558c01c1e176d92",
+    "kprog/arm64/micro-prog/arm64_abi.py": "3be39d0295ce6512ab576dd854ed23efd9b4802554a9a34f1b44895adf8d0062",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6"
+  },
+  "canonical_source": {
+    "kprog/arm64/arm64_sim.h": "a110ba33c435a770bd90d92743254637fc12a65ae6be3c8e5d2d45c40cef6d75",
+    "kprog/arm64/arm64_sim_local_bpf.h": "9656456a814ba8ca074249fece6c3492caad1de4b9773237e98c69dff7770893",
+    "kprog/arm64/arm64_sim_direct.h": "335c6ddd0b7ef44481413ea1b580c6e3eedcead9d68e0dd9b67264ba794095b4",
+    "kprog/arm64/micro-prog/arm64_abi.py": "5b9f6a4d080b3fb2f9181ed0463630509faf8f7da6f5f06e79337b7ec0eeee1e",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "075c8e78e6ad76752f8ef9c13b472ecfb20b036a197fa87499a1804c42cdf9ef"
+  },
+  "native_input_commit": "f6c4b97f62fa007fdde0e2fc2e41bdae2c424d3d",
+  "actual_atomic_counts": {
+    "ldaddal": 227,
+    "ldsetal": 44,
+    "ldclral": 2
+  },
+  "whole_queue_pid": 1605924,
+  "cilium_successor_pid": 1607727,
+  "universal_contract_owner": "V official ASL/O1/O2/atomic ordering",
+  "runtime_admission_additions": 0
+}
