@@ -4,6 +4,7 @@
 KDIR ?= $(CURDIR)/../../../vendor/linux-framework
 
 ccflags-y += -I$(src)/../include
+CFLAGS_bpf_arm64_native_lab.o += -mno-outline-atomics
 
 obj-m += bpf_arm64_extr.o
 obj-m += bpf_arm64_csel.o

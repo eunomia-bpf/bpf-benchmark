@@ -142,10 +142,38 @@ out:
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_native_lab_emit(u64 arg0) { (void)arg0; }
+
+/* Exact one-byte LSE memory effect. The stock kfunc ABI describes a one-byte
+ * read/write argument; all byte addresses satisfy the ISA alignment. */
+#define ARM64_NATIVE_BYTE_RMW(FETCH, WORD, VALUE, ORDER) ({ \
+ u8 __old; \
+ switch (ORDER) { \
+ case __ATOMIC_RELAXED: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_RELAXED); break; \
+ case __ATOMIC_ACQUIRE: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_ACQUIRE); break; \
+ case __ATOMIC_RELEASE: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_RELEASE); break; \
+ case __ATOMIC_ACQ_REL: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_ACQ_REL); break; \
+ default: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_SEQ_CST); break; \
+ } \
+ __old; })
+__bpf_kfunc u64 bpf_arm64_native_lab_atomic8(u8 *word, u64 value, u32 operation, u32 order)
+{
+ if (operation == 0)
+  return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_add, word, value, order);
+ if (operation == 1)
+  return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_or, word, value, order);
+ return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_and, word, value, order);
+}
+#undef ARM64_NATIVE_BYTE_RMW
+
 __bpf_kfunc_end_defs();
+/* Typed u32 reads use scaled AArch64 relocations into this ELF section. */
+asm(".pushsection .BTF_ids,\"a\"\n.balign 4\n.popsection\n");
 BTF_KFUNCS_START(bpf_arm64_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_arm64_native_lab_emit)
+BTF_ID_FLAGS(func, bpf_arm64_native_lab_atomic8)
 BTF_KFUNCS_END(bpf_arm64_native_lab_kfunc_ids)
+BTF_ID_LIST_SINGLE(bpf_arm64_native_lab_emit_id, func, bpf_arm64_native_lab_emit)
+
 
 static void native_lab_emit_error(const char *reason, int err, u64 payload,
 				  u32 blob_id, size_t blob_len,
@@ -491,7 +519,7 @@ const struct bpf_kinsn bpf_arm64_native_lab_desc = {
     .max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
     .instantiate_insn = instantiate_native_lab, .emit_arm64 = emit_native_lab_arm64,
 };
-static const struct bpf_kinsn * const bpf_arm64_native_lab_kinsn_descs[] = { &bpf_arm64_native_lab_desc };
+static const struct bpf_kinsn *bpf_arm64_native_lab_kinsn_descs[2];
 struct map_ptr_file_priv {
 	char response[32];
 	size_t len;
@@ -633,6 +661,10 @@ static const struct btf_kfunc_id_set bpf_arm64_native_lab_kfunc_set = {
 static int __init bpf_arm64_native_lab_init(void)
 {
     int err;
+    unsigned int i;
+    for (i = 0; i < bpf_arm64_native_lab_kfunc_ids.cnt; i++)
+        bpf_arm64_native_lab_kinsn_descs[i] = bpf_arm64_native_lab_kfunc_ids.pairs[i].id ==
+            bpf_arm64_native_lab_emit_id[0] ? &bpf_arm64_native_lab_desc : NULL;
     debugfs_root = debugfs_create_dir("bpf_arm64_native_lab", NULL);
     if (IS_ERR(debugfs_root)) return PTR_ERR(debugfs_root);
     debugfs_create_file("native_submit", 0600, debugfs_root, NULL, &native_lab_trusted_fops);

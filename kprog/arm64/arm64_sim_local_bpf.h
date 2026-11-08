@@ -1344,6 +1344,18 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 /* LSE atomic RMW returns the pre-update value; operands precede destination writeback.
  * Arm Instruction Set Reference 100076, section D3.6. */
+#if defined(__bpf__)
+extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operation, __u32 order) __ksym;
+#define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_add 0U
+#define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_or 1U
+#define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_and 2U
+#define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
+ ((__u8)bpf_arm64_native_lab_atomic8((__u8 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
+#else
+#define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
+ FETCH((__u8 *)(ADDR), (__u8)(VALUE), (ORDER))
+#endif
+
 #define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
  do { \
         ARM64_SIM_L_SP_ALIGNMENT(BASE); \
@@ -1362,7 +1374,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
     else if ((WIDTH) == ARM64_WIDTH_16) \
         __a64_la_old = FETCH((__u16 *)__a64_la_addr, (__u16)__a64_la_add, __a64_la_order); \
     else \
-        __a64_la_old = FETCH((__u8 *)__a64_la_addr, (__u8)__a64_la_add, __a64_la_order); \
+        __a64_la_old = ARM64_SIM_L_ATOMIC_BYTE(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
     __u64 __a64_la_payload = ARM64_SIM_L_MEM_PAYLOAD((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
     ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE), ARM64_SIM_L_REG_TAG(BASE), 0, ARM64_SIM_TAG_SCALAR, (WIDTH), 0); \
     if (ARM64_SIM_L_LOAD_TAG_PRESERVE(ARM64_OP_LOAD, __a64_la_tag, (WIDTH))) \

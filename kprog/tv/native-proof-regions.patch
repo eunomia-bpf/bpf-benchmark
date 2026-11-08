@@ -283,3 +283,10 @@ diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
  	err = check_reg_arg(env, BPF_REG_0, DST_OP);
  	if (err)
  		return err;
+
+diff --git a/kernel/bpf/btf.c b/kernel/bpf/btf.c
+--- a/kernel/bpf/btf.c
++++ b/kernel/bpf/btf.c
+@@ -9038 +9038 @@
+-			if (!kinsn || kinsn->owner != kset->owner) {
++			if (kinsn && kinsn->owner != kset->owner) {

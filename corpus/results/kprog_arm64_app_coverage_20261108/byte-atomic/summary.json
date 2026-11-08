@@ -1,0 +1,67 @@
+{
+  "utc": "2026-11-08T13:44:36.978055+00:00",
+  "change": "Exact-width ARM byte atomic simulation through typed stock-verifier kfunc ABI",
+  "observations": [
+    {
+      "family": "ldadd",
+      "load_exit": 0,
+      "run_exit": 0,
+      "context_index": 1,
+      "old": 7,
+      "new": 11
+    },
+    {
+      "family": "ldset",
+      "load_exit": 0,
+      "run_exit": 0,
+      "context_index": 1,
+      "old": 7,
+      "new": 7
+    },
+    {
+      "family": "ldclr",
+      "load_exit": 0,
+      "run_exit": 0,
+      "context_index": 1,
+      "old": 7,
+      "new": 3
+    }
+  ],
+  "control": {
+    "ok": true,
+    "retval": 2,
+    "receipt": {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+      "started": "1970-01-01T00:00:13.493249+00:00",
+      "prog_id": 4,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-i7flsqn8/requests/1.success.tar.gz",
+      "finished": "1970-01-01T00:00:20.979563+00:00"
+    },
+    "qemu_exit": 0,
+    "guest_exit": 0,
+    "compiler_exit": 0
+  },
+  "existing_components": {
+    "exit": 0,
+    "micro_programs": 29,
+    "negative_programs": 1,
+    "trusted_service_tests": 9,
+    "kernel_patch": "idempotence/conflict PASS"
+  },
+  "source_sha256": {
+    "kinsn/module/arm64/Makefile": "cb04c24ff4b7f21df2c42223422251c63f81829ca5dd877ff68a91c0f925ff52",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "7032970f989f9e68a70b6e22a37c8ee9f0b843b7ca81847125fc7982fdda6b45",
+    "kprog/arm64/arm64_sim_local_bpf.h": "a17311474ea46c0b09dbe3df581b396f6c05c23c7cdacb6bb534f5aa50bd28cb",
+    "kprog/arm64/README.md": "0c3b9d9ad7c775869c0ec5f62ca4d34fe710541440dbde759978250774a9b63a",
+    "kprog/tv/native-proof-regions.patch": "600b42386e65ae8d0161009533ce092f5d5cbbe3909600081e6cb4ad7173f188"
+  },
+  "runtime_sha256": {
+    "kprog/arm64/build/byte-atomic/Image": "151699fffcd524d1056de167e94e2adc8094f4b79657510243092a785025f1f5",
+    "kprog/arm64/build/byte-atomic/kinsn/bpf_arm64_native_lab.ko": "1945407cedf360344426633694e8cf060eb955d1d4e039044591fdc1803f9bb4"
+  },
+  "remaining": "Halfword alignment predicate case is with the operator; complete application replay follows the byte source publication",
+  "runtime_admission_additions": 0
+}

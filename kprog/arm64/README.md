@@ -86,8 +86,13 @@ updates the native byte extent, and scalarizes the written private-memory tags.
 The approved incoming-SP alignment predicate applies to the shared body. The
 [current component receipt](../../corpus/results/kprog_arm64_app_coverage_20261108/bitwise-lse/README.md)
 records 11,520 host C-model observations and successful 32/64-bit BPF compilation.
-The 8/16-bit C-model observations agree; those BPF atomic builtins reach clang
-18's subword-atomic lowering diagnostic. The complete Tetragon QEMU epoch and
+The earlier 8/16-bit C-model observations agree and retain clang18's original
+subword-atomic lowering diagnostics. The current byte path uses the typed
+atomic8 kfunc in the ARM lab module; its one-byte read/write argument follows
+the stock verifier memory rules, and its operation body uses native atomics.
+The [byte receipt](../../corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/README.md)
+records compiler and QEMU primitive results. The halfword-address alignment
+predicate case remains with the operator. The complete Tetragon QEMU epoch and
 the universal operation theorems retain their own result records.
 
 ## Smoke
