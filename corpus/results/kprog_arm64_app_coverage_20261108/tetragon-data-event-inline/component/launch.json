@@ -1,0 +1,27 @@
+{
+  "utc": "2026-11-08T23:15:31.667608+00:00",
+  "source_publication": "e532845abd3ebe80d8a02469970bf85253e98489",
+  "compiler_publication": {
+    "commit": "d4d905b6ca54d2b1c4373d85844ddfbeffb0e5d3",
+    "paths": [
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/README.md",
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/compile.json",
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/compiler-continuation.tar.gz",
+      "corpus/results/kprog_app_source_changes/README.md"
+    ],
+    "sha256": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/README.md": "c9e361c2993d56c6a59b40c243017a1e95ec64b1840a867c185b63e8158224bc",
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/compile.json": "4d661b30fd9e4c1ef08ffb9355de74c232be1fd0cc53f08ff130191bc3bd9fa6",
+      "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-data-event-inline/compiler-continuation.tar.gz": "e27746f0ad1df48c3b7fcd536a6b4249208453da22eaf603f61c5e046cd38b15",
+      "corpus/results/kprog_app_source_changes/README.md": "0c4dfc5aaa3dfa2fbba6e42e9aa80bd3991d29cadc9c7cb9baa1dc43ac86d9a6"
+    },
+    "remote_ancestor_verified": true
+  },
+  "catalog": {
+    "programs": 3,
+    "success": 3,
+    "c": 3
+  },
+  "scope": "All3execve entries/source0/loadonly/2GiB12-15",
+  "runtime_admission_additions": 0
+}
