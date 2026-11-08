@@ -14,5 +14,53 @@
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
     "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196"
   },
-  "private_control_publication": "197d8052f5d7913b22a9bd80ca9b8d9e36496167"
+  "private_control_publication": "197d8052f5d7913b22a9bd80ca9b8d9e36496167",
+  "shared_runtime_control": {
+    "utc": "2026-11-08T15:59:32.307560+00:00",
+    "exit": 0,
+    "records": [
+      {
+        "case": "small",
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/small.native.o",
+          "0",
+          "2"
+        ],
+        "exit": 0,
+        "request": {
+          "request_id": 1,
+          "source_prog_id": 0,
+          "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+          "started": "2026-11-08T15:59:27.284004+00:00",
+          "prog_id": 4,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/adoption/runtime/requests/1.success.tar.gz",
+          "finished": "2026-11-08T15:59:28.983505+00:00"
+        }
+      },
+      {
+        "case": "medium",
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/extent-control/medium.native.o",
+          "0",
+          "2"
+        ],
+        "exit": 0,
+        "request": {
+          "request_id": 2,
+          "source_prog_id": 0,
+          "native_sha256": "2325ad17685273e1c7d91328c34f5c1f617fe3c96c15eecd09dc9639385fafcc",
+          "started": "2026-11-08T15:59:29.043117+00:00",
+          "prog_id": 8,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/adoption/runtime/requests/2.success.tar.gz",
+          "finished": "2026-11-08T15:59:31.884765+00:00"
+        }
+      }
+    ]
+  }
 }

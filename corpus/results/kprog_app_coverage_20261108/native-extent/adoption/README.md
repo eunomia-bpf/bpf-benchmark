@@ -11,3 +11,7 @@ make -f /workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/adoptio
 ```
 
 [raw.tar.gz](raw.tar.gz) retains exact source/commands/build logs and the paired shared kernel/module. The current shared runtime paths are kprog/tv/build-kernel-x86/arch/x86/boot/bzImage and kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko. Universal copy/relocation/ABI laws retain V ownership.
+
+### Fresh shared runtime control
+
+The newly built shared Image/module repeats the existing original small and264-byte native controls. Actual service statuses and TEST_RUN exits: [('small', 0, 0), ('medium', 0, 0)]. [summary.json](summary.json) retains complete rows; [control.tar.gz](control.tar.gz) retains copied P, generated B, compiler/verifier/native execution receipts and commands. The original BCC/Katran and38native serial queue closes before this2GiB control starts. Runtime admission additions:0.
