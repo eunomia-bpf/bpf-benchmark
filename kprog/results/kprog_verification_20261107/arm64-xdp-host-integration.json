@@ -1160,7 +1160,8 @@
     ]
   },
   "canonical_arm_thread_pointer_reference": {
-    "archive_block_sha256": "30c55b713c9dcfcfb5d7a97275d473abb135a96e6e29e3c0d67afc8c2a928326",
+    "archive_block_sha256": "eb85a75856a22e27078b415a310998b16e274cdd65e7b758d9da49476490ca87",
+    "archive_block_sha256_before_lossless_compaction": "30c55b713c9dcfcfb5d7a97275d473abb135a96e6e29e3c0d67afc8c2a928326",
     "archive_entries": 414,
     "archive_marker": "=== CANONICAL ARM THREAD POINTER REFERENCE AND KIND4 INTERFACE ===",
     "axioms": [
@@ -1169,9 +1170,26 @@
       "Quot.sound",
       "Lean.ofReduceBool"
     ],
+    "binary_archive_compaction": {
+      "executed_binary_bytes": 144167840,
+      "executed_binary_sha256": "f84cb2ecff4f0c68976e0c572d5b7e9fc15c3e7ab9cee7c17f39a2360d735a5a",
+      "gzip_after_bytes": 51243874,
+      "gzip_before_bytes": 83017288,
+      "log": "LOSSLESS COMPACT 83017288 -> 51243874 binary 144167840 xz 28771996 SHA f84cb2ecff4f0c68976e0c572d5b7e9fc15c3e7ab9cee7c17f39a2360d735a5a\n",
+      "lossless_roundtrip": true,
+      "prior_gzip_members_byte_identical": true,
+      "prior_publication": "a2fb22739326e53e7c2022899370f8d325e7f8d2",
+      "source": "from pathlib import Path\nimport gzip,lzma,json,base64,hashlib,traceback\nv=Path('/workspaces/.agent-state/kprog-lanes/V');r=Path('/workspaces/repository/kprog/results/kprog_verification_20261107');sha=lambda b:hashlib.sha256(b).hexdigest();rc=1\ntry:\n m=json.loads((r/'arm64-xdp-host-integration.json').read_text());d=m['canonical_arm_thread_pointer_reference'];gz=r/'arm64-xdp-host-integration.log.gz';old=gz.read_bytes();raw=gzip.decompress(old);mark=('\\n'+d['archive_marker']+'\\n').encode();a=raw.index(mark)+len(mark);b=raw.find(b'\\n=== ',a);end=b if b>=0 else len(raw);block=raw[a:end];assert sha(block)==d['archive_block_sha256'];rows=[json.loads(l) for l in block.splitlines()];e=next(x for x in rows if x['name']=='artifact/reference');data=base64.b64decode(e['base64']);assert sha(data)==e['sha256']==d['executed_reference_binary_sha256'];assert len(data)==e['bytes'];packed=lzma.compress(data,preset=6);assert lzma.decompress(packed)==data\n e.update(name='artifact/reference.xz',bytes=len(packed),sha256=sha(packed),base64=base64.b64encode(packed).decode(),compression='xz',uncompressed_bytes=len(data),uncompressed_sha256=sha(data));newblock=''.join(json.dumps(x,sort_keys=True)+'\\n' for x in rows).encode();d['archive_block_sha256_before_lossless_compaction']=d['archive_block_sha256'];d['archive_block_sha256']=sha(newblock);d['executed_reference_binary_archive_name']='artifact/reference.xz';d['executed_reference_binary_archive_compression']='xz';d['executed_reference_binary_uncompressed_bytes']=len(data)\n # Retain each prior gzip member's actual bytes and replace only the final MRS member.\n marker=gzip.compress(mark+newblock,mtime=0);pieces=[];remaining=old\n import zlib\n found=False\n while remaining:\n  z=zlib.decompressobj(wbits=31);part=z.decompress(remaining)+z.flush();used=len(remaining)-len(z.unused_data);assert used>0;member=remaining[:used]\n  if part.startswith(mark):assert not found;assert part==mark+block;pieces.append(marker);found=True\n  else:pieces.append(member)\n  remaining=z.unused_data\n assert found;new=b''.join(pieces);verify=gzip.decompress(new);a2=verify.index(mark)+len(mark);b2=verify.find(b'\\n=== ',a2);assert sha(verify[a2:b2 if b2>=0 else None])==d['archive_block_sha256'];assert len(new)<len(old)\n assert gz.read_bytes()==old;gz.write_bytes(new);(r/'arm64-xdp-host-integration.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\\n');(v/'mrs-compact-receipt.json').write_text(json.dumps({'gzip_before_bytes':len(old),'gzip_after_bytes':len(new),'executed_binary_bytes':len(data),'xz_bytes':len(packed),'executed_binary_sha256':sha(data),'xz_sha256':sha(packed),'prior_gzip_members_byte_identical':True,'lossless_roundtrip':True},indent=2)+'\\n');print('LOSSLESS COMPACT',len(old),'->',len(new),'binary',len(data),'xz',len(packed),'SHA',sha(data),flush=True);rc=0\nexcept Exception:traceback.print_exc()\nfinally:(v/'mrs-compact.exit').write_text(str(rc)+'\\n')\nraise SystemExit(rc)\n",
+      "source_sha256": "2c7207d8f59f7ceb9dfeba45f47be1807d150f7ac6d92cb7b31b218fa3dc2db0",
+      "xz_bytes": 28771996,
+      "xz_sha256": "83e667ab342bbcb6545e43203ef409a16a143f6a0386a7cf4878d66912b585db"
+    },
     "canonical_arm_reference_sha256": "082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56",
     "default_lake_build_exit": 0,
+    "executed_reference_binary_archive_compression": "xz",
+    "executed_reference_binary_archive_name": "artifact/reference.xz",
     "executed_reference_binary_sha256": "f84cb2ecff4f0c68976e0c572d5b7e9fc15c3e7ab9cee7c17f39a2360d735a5a",
+    "executed_reference_binary_uncompressed_bytes": 144167840,
     "fresh_axiom_audits": 7,
     "mrs_check_runs": 2,
     "mrs_complete_state_observations": 1280,

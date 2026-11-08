@@ -3819,3 +3819,10 @@ retain their current domains. These two native system-register consumers
 provide the kind4 reference interface. The separately published full
 `make check` at `fe6049ac8` passed with all1,140 Git source identities verified
 in `full_make_check_fe6049ac8`.
+
+The captured MRS reference executable now uses lossless XZ inside the existing
+archive. Its144,167,840 bytes round-trip to the same `f84cb2ecff4f` SHA256;
+the gzip receipt shrinks from83,017,288 to51,243,874 bytes. Every preceding
+gzip member retains its exact bytes. `binary_archive_compaction` records the
+compression source, output and round-trip identities; all proof/source/check
+results and coverage totals retain their published values.
