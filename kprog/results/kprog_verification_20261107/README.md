@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 22/75 | 0/71 |
-| Additional partial-model handler families | 9/75 | 0 |
+| Addressed memory model / composed step | 24/75 | 0/71 |
+| Additional partial-model handler families | 7/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 58/75 | 71/71 |
+| O2 C-model token-body equality | 60/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 58 x86 O2 equalities cover44 direct bodies, twelve generic calls and two
+The 60 x86 O2 equalities cover44 direct bodies, fourteen generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining9 x86 reference-family handlers have partial model proofs; eight
+The remaining7 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -78,6 +78,11 @@ ALU/count fields through the same unified dispatcher/token step. Their full
 numeric frame retains incoming count/address aliases, native RSP/STACK
 materialization, all flags and precise read/fault events under the shared
 physical-memory, native-normalization and compiler/ABI interfaces.
+Two generic BZHI/POPCNT memory tokens also compose full64 displacement,
+AUX high-byte count, native width and FLAGS fallback through the unified
+step. Generated result/flag writes and numeric partial destination retain
+RSP/STACK materialization, captured aliases, full read/fault effects and
+the shared native-field, physical-memory/provenance and compiler/ABI interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4144,3 +4149,28 @@ successfully; its target build and two public axiom audits exit0, with
 `sorryAx_count=0`. The original import diagnostic, exact source closure and
 passing checks retain their own archive epoch. Canonical ISA and production
 C definitions retain their existing identities.
+
+### Memory BZHI and POPCNT dispatcher and generic-token composition
+
+`x86_bit_memory_tokens` composes the existing canonical `Instruction.bzhi`
+and `Instruction.popcount` with complete numeric memory-source frames,
+raw fields, the extended universal dispatcher and two generic RUN_OP tokens.
+BZHI samples its AUX high-byte count GPR and low count byte; POPCNT retains
+native16/32/64 writes, including upper-lane preservation at16 bits. Both
+consume full64 displacement, optional base/index/scale and FLAGS fallback.
+Input count/address/destination aliases, numeric RSP and former STACK values,
+generated four/six flag writes and ordered read/fault events retain their
+complete state frame. The previous123 numeric and117 dispatcher theorem
+prefixes remain byte-exact. Ten public axiom audits, default Lean build,
+contract generators and semantic/source checks pass with `sorryAx_count=0`.
+
+The permanent UBSan oracle compares actual specialized RUN_OP/interpreter
+execution and real BMI2/POPCNT instructions over5,369,856 cases, with BZHI's
+shared body checked as a third production route. All16 GPR destinations,
+heap/RSP/STACK/ABI source profiles,64 flag inputs, width/default forms and
+source/count boundary vectors retain full numeric/raw/tag files and both
+512-byte images. Native field/lane/code normalization, physical native/arena
+memory/provenance, C/Lean and compiler/entry/exit ABI/native-link transport
+retain their explicit universal interfaces. Current three-way replay and O4
+source epochs retain their domains. x86 C-model O2 totals60/75
+(44direct/14generic/2branch); ARM C-model O2 totals71/71.

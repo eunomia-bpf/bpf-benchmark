@@ -2654,4 +2654,83 @@ theorem bmi_memory_frame_refines (env : Environment) (frame : Frame) (arena : Na
         cases width <;> rfl
       · simp only [nativeRegisters, Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
 
+
+/-- Memory BZHI captures the low count byte from the incoming numeric frame.
+Its generated flags and numeric destination writer share the captured source. -/
+def bzhiMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst count : Reference.X86.Register) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  let amount := registerValue env frame arena state count &&& 0xff
+  aluSourceFrame env frame arena state (multiplyScalarWidth (X86Bzhi.readWidth width)) dst
+    (fun source => generatedX86BzhiResult source amount (X86Bzhi.handlerWidth width))
+    (fun source => X86Bzhi.liftFlags state.raw.rflags
+      (generatedX86BzhiFlags amount (generatedX86BzhiResult source amount (X86Bzhi.handlerWidth width))
+        (X86Bzhi.handlerWidth width))) address nextPc
+
+theorem bzhi_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst count : Reference.X86.Register) (address nextPc : NativeWord) :
+    bzhiMemoryFrame env frame arena state width dst count address nextPc =
+      Reference.X86.step (.bzhi width dst (.memory address) count nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Bzhi.step_refines width dst (.memory address) count nextPc
+    (nativeRegisters env frame arena state) .scalar]
+  simp only [bzhiMemoryFrame, aluSourceFrame, X86Bzhi.handlerStep,
+    X86Scalar.read_refines, X86Bt.read_refines, Reference.X86.scalarRead]
+  have bytes : (multiplyScalarWidth (X86Bzhi.readWidth width)).bytes = width.bytes := by cases width <;> rfl
+  have readBytes : (X86Bzhi.readWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes, readBytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, native_register_write]
+      simp only [nativeRegisters]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = dst
+      · subst reg
+        simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+        rw [← X86Scalar.register_write_refines]
+        cases width <;> rfl
+      · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+/-- POPCNT's memory read, generated population count and six flags precede
+one numeric destination write with its full register and control frame. -/
+def populationCountMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  aluSourceFrame env frame arena state (multiplyScalarWidth width) dst
+    (X86Popcount.value width) (fun source => X86Popcount.flags width source state.raw.rflags) address nextPc
+
+theorem population_count_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (address nextPc : NativeWord) :
+    populationCountMemoryFrame env frame arena state width dst address nextPc =
+      Reference.X86.step (.popcount width dst (.memory address) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Popcount.memory_step_refines]
+  simp only [populationCountMemoryFrame, aluSourceFrame, X86Popcount.memoryHandlerStep,
+    X86Scalar.read_refines, X86Bt.read_refines, Reference.X86.scalarRead]
+  have bytes : (multiplyScalarWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, native_register_write]
+      simp only [nativeRegisters]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = dst
+      · subst reg
+        simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+        rw [← X86Scalar.register_write_refines]
+        cases width <;> first | rfl | (simp [X86Cmov.handlerValue, X86Cmov.handlerWidth, ↓reduceIte, generatedX86MovPointerWrite, GeneratedPtrAdd.bits, BitVec.add_zero, generatedX86RegWrite,
+          GeneratedX86RegWrite.write, GeneratedX86RegWrite.writeAt, GeneratedX86RegWrite.bitsAt,
+          GeneratedX86RegWrite.bits, X86Scalar.handlerWidth, X86Scalar.lane, multiplyScalarWidth])
+      · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
 end KProgFormal.Refinement.X86NumericAddress
