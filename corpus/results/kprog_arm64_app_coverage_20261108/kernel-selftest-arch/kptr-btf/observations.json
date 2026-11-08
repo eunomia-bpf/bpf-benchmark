@@ -1,0 +1,373 @@
+{
+  "utc": "2026-11-08T17:09:39.220616+00:00",
+  "compiler_observations": [
+    {
+      "label": "current",
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "/usr/lib/llvm-18/bin/clang",
+        "-O2",
+        "-g",
+        "-target",
+        "bpf",
+        "-mcpu=v4",
+        "-c",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs",
+        "-I",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.bpf.license.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/current.bpf.o"
+      ],
+      "returncode": 0,
+      "pointees": [
+        {
+          "id": 43,
+          "name": "prog_test_member",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 44,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 43,
+          "info": "0x12000000"
+        },
+        {
+          "id": 45,
+          "name": "prog_test_ref_kfunc",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 46,
+          "name": "kptr_untrusted",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        },
+        {
+          "id": 47,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        }
+      ]
+    },
+    {
+      "label": "upstream-flags",
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "/usr/lib/llvm-18/bin/clang",
+        "-O2",
+        "-g",
+        "-target",
+        "bpf",
+        "-mcpu=v4",
+        "-c",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs",
+        "-I",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "-fno-strict-aliasing",
+        "-fms-extensions",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.bpf.license.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/upstream-flags.bpf.o"
+      ],
+      "returncode": 0,
+      "pointees": [
+        {
+          "id": 43,
+          "name": "prog_test_member",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 44,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 43,
+          "info": "0x12000000"
+        },
+        {
+          "id": 45,
+          "name": "prog_test_ref_kfunc",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 46,
+          "name": "kptr_untrusted",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        },
+        {
+          "id": 47,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        }
+      ]
+    },
+    {
+      "label": "standalone-debug",
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "/usr/lib/llvm-18/bin/clang",
+        "-O2",
+        "-g",
+        "-target",
+        "bpf",
+        "-mcpu=v4",
+        "-c",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs",
+        "-I",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "-fstandalone-debug",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.bpf.license.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/standalone-debug.bpf.o"
+      ],
+      "returncode": 0,
+      "pointees": [
+        {
+          "id": 43,
+          "name": "prog_test_member",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 44,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 43,
+          "info": "0x12000000"
+        },
+        {
+          "id": 45,
+          "name": "prog_test_ref_kfunc",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 46,
+          "name": "kptr_untrusted",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        },
+        {
+          "id": 47,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 45,
+          "info": "0x12000000"
+        }
+      ]
+    },
+    {
+      "label": "retain-unused-debug",
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "/usr/lib/llvm-18/bin/clang",
+        "-O2",
+        "-g",
+        "-target",
+        "bpf",
+        "-mcpu=v4",
+        "-c",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs",
+        "-I",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "-fno-eliminate-unused-debug-types",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.bpf.license.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/retain-unused-debug.bpf.o"
+      ],
+      "returncode": 0,
+      "pointees": [
+        {
+          "id": 44,
+          "name": "prog_test_member",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 45,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 44,
+          "info": "0x12000000"
+        },
+        {
+          "id": 46,
+          "name": "prog_test_ref_kfunc",
+          "kind": 7,
+          "size_or_target": 0,
+          "info": "0x7000000"
+        },
+        {
+          "id": 47,
+          "name": "kptr_untrusted",
+          "kind": 18,
+          "size_or_target": 46,
+          "info": "0x12000000"
+        },
+        {
+          "id": 48,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 46,
+          "info": "0x12000000"
+        }
+      ]
+    },
+    {
+      "label": "original-whole",
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "/usr/lib/llvm-18/bin/clang",
+        "-O2",
+        "-g",
+        "-target",
+        "bpf",
+        "-mcpu=v4",
+        "-c",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs",
+        "-I",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include",
+        "-I",
+        "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/tools/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/original-whole.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/kptr-btf/original-whole.bpf.o"
+      ],
+      "returncode": 0,
+      "pointees": [
+        {
+          "id": 67,
+          "name": "prog_test_ref_kfunc",
+          "kind": 4,
+          "size_or_target": 32
+        },
+        {
+          "id": 68,
+          "name": "prog_test_member",
+          "kind": 4,
+          "size_or_target": 8
+        },
+        {
+          "id": 134,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 68
+        },
+        {
+          "id": 136,
+          "name": "kptr_untrusted",
+          "kind": 18,
+          "size_or_target": 67
+        },
+        {
+          "id": 137,
+          "name": "kptr",
+          "kind": 18,
+          "size_or_target": 67
+        }
+      ]
+    }
+  ],
+  "actual": "Same clang18/source/header, isolated function object emits FWD prog_test_ref_kfunc/prog_test_member; original complete map_kptr_fail.c object emits STRUCT sizes32/8 and kptr tags target those complete ids.",
+  "source_inference": "btf_find_kptr at kernel/bpf/btf.c3523 returns EINVAL for a forward pointee. map_check_btf stores btf_parse_fields result; IS_ERR records pass btf_check_and_fixup_fields4213 with result0, array_map_check_btf551 checks key shape, and btf_record_has_field/btf_record_find treat IS_ERR as absent fields. This source path explains why a map retains BTF id/value id while kptr slot rules disappear for isolated objects. Fresh whole-object QEMU replay will supply its actual map/verifier outcomes.",
+  "producer_repair": "Keep the original complete BPF translation unit for resource/BTF/program context; native C entries retain isolated compilation. Reuse one resource object for all native entries from that source file. Existing autoloadfalse producer selects its named context and loads maps/BTF only.",
+  "runtime_admission_additions": 0
+}
