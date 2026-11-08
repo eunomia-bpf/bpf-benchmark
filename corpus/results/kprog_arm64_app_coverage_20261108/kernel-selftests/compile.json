@@ -1,0 +1,25 @@
+{
+  "launch": {
+    "utc": "2026-11-08T08:24:09.289119+00:00",
+    "scope": "Existing R selftest enumeration and annotations; architecture compiler/include port; raw upstream source retained",
+    "harness_sha256": "54369ff8d3b685375a5adc2afa2a4cef2a13cda83c9b4468f02c20115c955a04",
+    "kernel_image_sha256": "22111ee39a193bdbdb6c188cfa0335ccea66370bbaedba37bdf4a976a38eb61f",
+    "paired_vmlinux": "/workspaces/.agent-state/kprog-lanes/A/kfunc-kernel/cache/vmlinux",
+    "target": "AArch64",
+    "flags_epoch": "current default ARMv8 baseline",
+    "new_admission_checks": 0
+  },
+  "counts": {
+    "programs": 1917,
+    "c": 657,
+    "asm": 1260,
+    "failure": 916,
+    "success": 1001,
+    "files": 180,
+    "files_compiled": 0,
+    "entries_present": 0
+  },
+  "native_objects": {},
+  "bpf_objects": {},
+  "vmlinux_header_sha256": "947a3e70143364b4447f0dc2bde3ecef7e0bd791a25f277ad31162a3c83d74c6"
+}
