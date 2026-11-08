@@ -79,7 +79,8 @@ ctx_data(const struct __sk_buff *ctx)
 static __always_inline void *
 ctx_data_end(const struct __sk_buff *ctx)
 {
-	return ctx->data + (ctx->len - ctx->data_len);
+	/* The kernel prepares this BPF data_end pointer in skb->cb. */
+	return *(void *const *)&ctx->cb[8];
 }
 
 static __always_inline void *

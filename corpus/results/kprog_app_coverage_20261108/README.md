@@ -6,7 +6,7 @@ The table records the latest closed whole-application attempt, including setup a
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | 60 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_host packetoff30/4 after208instructions/1state | [canonical scalar replay](skb-scalar-fields/README.md) |
+| Cilium | 72 resident | 5 | 5 | 4 | 0 | 1: tail_ipv4_policy helper9 R3scalar after2899instructions/73states | [prepared packet-end ABI](cilium-prepared-end/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit probe-read helper length range after4310instructions/140states | [current MOVX cohort](movx-current/README.md) |
@@ -75,3 +75,5 @@ The [complete live-context replay](skb-live-context/README.md) closes26/26BCC/Ka
 The [live scalar-field representation](skb-scalar-fields/README.md) retains217600UBSan full-state observations, actual29+1micro compilation and captured wholeCilium compilation. The initial four-field whole cohort closes2generated/1installed at packetoff18/2 after415instructions. The canonical three-field profile retains queue_mapping actual kernel access, following its distinct setter behavior. Earlier private micro up-to-date receipts are preserved as command outcomes; the current phony target supplies actual compile records.
 
 The [corrected canonical scalar replay](skb-scalar-fields/README.md) closes26/26BCC/Katran loads and both original workloads, with all26native hashes equal the prior scalar cohort. Cilium closes2generated/compiled and1installed, reaching packetoff30/4 after208instructions. Original closed-broker attempts remain alongside their corrected whole cohorts.
+
+The [prepared native packet-end ABI](cilium-prepared-end/README.md) reads kernel cb.data_end at80 and closes5generated/compiled with4installed. This new native P epoch passes the earlier packet boundary frontier and reaches a numeric stack-pointer spill passed to helper9. All5terminal native hashes reconcile; full application work/timing follows complete startup.
