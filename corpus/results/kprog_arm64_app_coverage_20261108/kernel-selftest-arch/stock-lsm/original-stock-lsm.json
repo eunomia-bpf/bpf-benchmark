@@ -1,0 +1,32 @@
+[
+  {
+    "program": "no_null_check",
+    "original_object": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/verifier_lsm.bpf.o",
+    "mode": "original stock BPF load-only",
+    "executions": 0,
+    "prog_type": 29,
+    "expected_attach_type": 27,
+    "section": "lsm/mmap_file",
+    "original_object_sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a",
+    "target_btf_id": 70008,
+    "load_return": 0,
+    "verifier_log": "processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+    "fd": 3,
+    "stage": "installed"
+  },
+  {
+    "program": "null_check",
+    "original_object": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/verifier_lsm.bpf.o",
+    "mode": "original stock BPF load-only",
+    "executions": 0,
+    "prog_type": 29,
+    "expected_attach_type": 27,
+    "section": "lsm/mmap_file",
+    "original_object_sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a",
+    "target_btf_id": 70008,
+    "load_return": 0,
+    "verifier_log": "processed 7 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+    "fd": 3,
+    "stage": "installed"
+  }
+]

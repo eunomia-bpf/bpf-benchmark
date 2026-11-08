@@ -1,0 +1,470 @@
+libbpf: BTF loading error: -EINVAL
+libbpf: -- BEGIN BTF LOAD LOG ---
+magic: 0xeb9f
+version: 1
+flags: 0x0
+hdr_len: 24
+type_off: 0
+type_len: 2984
+str_off: 2984
+str_len: 3361
+btf_total_size: 6369
+[1] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[2] INT int size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[3] PTR (anon) type_id=0
+[4] FUNC errno_zero_retval_test1 type_id=1
+[5] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 1 type=4 component_idx=-1
+[6] DECL_TAG comment:test_expect_success type=4 component_idx=-1
+[7] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[8] FUNC errno_zero_retval_test2 type_id=7
+[9] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 2 type=8 component_idx=-1
+[10] DECL_TAG comment:test_expect_success type=8 component_idx=-1
+[11] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[12] FUNC errno_zero_retval_test4 type_id=11
+[13] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 4 type=12 component_idx=-1
+[14] DECL_TAG comment:test_expect_failure type=12 component_idx=-1
+[15] DECL_TAG comment:test_expect_msg=0=R0 has smin=-4096 smax=-4096 should have been in [-4095, 0] type=12 component_idx=-1
+[16] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[17] FUNC errno_zero_retval_test5 type_id=16
+[18] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 5 type=17 component_idx=-1
+[19] DECL_TAG comment:test_expect_failure type=17 component_idx=-1
+[20] DECL_TAG comment:test_expect_msg=1=R0 has smin=4096 smax=4096 should have been in [-4095, 0] type=17 component_idx=-1
+[21] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[22] FUNC errno_zero_retval_test6 type_id=21
+[23] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 6 type=22 component_idx=-1
+[24] DECL_TAG comment:test_expect_failure type=22 component_idx=-1
+[25] DECL_TAG comment:test_expect_msg=2=R0 has smin=1 smax=1 should have been in [-4095, 0] type=22 component_idx=-1
+[26] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[27] FUNC bool_retval_test1 type_id=26
+[28] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 1 type=27 component_idx=-1
+[29] DECL_TAG comment:test_expect_success type=27 component_idx=-1
+[30] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[31] FUNC bool_retval_test2 type_id=30
+[32] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 2 type=31 component_idx=-1
+[33] DECL_TAG comment:test_expect_success type=31 component_idx=-1
+[34] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[35] FUNC bool_retval_test3 type_id=34
+[36] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 3 type=35 component_idx=-1
+[37] DECL_TAG comment:test_expect_failure type=35 component_idx=-1
+[38] DECL_TAG comment:test_expect_msg=3=R0 has smin=-1 smax=-1 should have been in [0, 1] type=35 component_idx=-1
+[39] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[40] FUNC bool_retval_test4 type_id=39
+[41] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 4 type=40 component_idx=-1
+[42] DECL_TAG comment:test_expect_failure type=40 component_idx=-1
+[43] DECL_TAG comment:test_expect_msg=4=R0 has smin=2 smax=2 should have been in [0, 1] type=40 component_idx=-1
+[44] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[45] FUNC void_retval_test1 type_id=44
+[46] DECL_TAG comment:test_expect_success type=45 component_idx=-1
+[47] DECL_TAG comment:test_description=lsm bpf prog with void retval. test 1 type=45 component_idx=-1
+[48] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[49] FUNC void_retval_test2 type_id=48
+[50] DECL_TAG comment:test_expect_success type=49 component_idx=-1
+[51] DECL_TAG comment:test_description=lsm bpf prog with void retval. test 2 type=49 component_idx=-1
+[52] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[53] FUNC disabled_hook_test1 type_id=52
+[54] DECL_TAG comment:test_description=lsm disabled hook: getprocattr type=53 component_idx=-1
+[55] DECL_TAG comment:test_expect_failure type=53 component_idx=-1
+[56] DECL_TAG comment:test_expect_msg=5=points to disabled hook type=53 component_idx=-1
+[57] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[58] FUNC disabled_hook_test2 type_id=57
+[59] DECL_TAG comment:test_description=lsm disabled hook: setprocattr type=58 component_idx=-1
+[60] DECL_TAG comment:test_expect_failure type=58 component_idx=-1
+[61] DECL_TAG comment:test_expect_msg=6=points to disabled hook type=58 component_idx=-1
+[62] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[63] FUNC disabled_hook_test3 type_id=62
+[64] DECL_TAG comment:test_description=lsm disabled hook: ismaclabel type=63 component_idx=-1
+[65] DECL_TAG comment:test_expect_failure type=63 component_idx=-1
+[66] DECL_TAG comment:test_expect_msg=7=points to disabled hook type=63 component_idx=-1
+[67] PTR (anon) type_id=68
+[68] INT unsigned long long size=8 bits_offset=0 nr_bits=64 encoding=(none)
+[69] FUNC_PROTO (anon) return=2 args=(67 ctx)
+[70] FUNC no_null_check type_id=69
+[71] DECL_TAG comment:test_description=not null checking nullable pointer in bpf_lsm_mmap_file type=70 component_idx=-1
+[72] DECL_TAG comment:test_expect_failure type=70 component_idx=-1
+[73] DECL_TAG comment:test_expect_msg=8=R1 invalid mem access 'trusted_ptr_or_null_' type=70 component_idx=-1
+[74] STRUCT file size=184 vlen=19
+	f_lock type_id=75 bits_offset=0
+	f_mode type_id=92 bits_offset=32
+	f_op type_id=94 bits_offset=64
+	f_mapping type_id=96 bits_offset=128
+	private_data type_id=3 bits_offset=192
+	f_inode type_id=97 bits_offset=256
+	f_flags type_id=93 bits_offset=320
+	f_iocb_flags type_id=93 bits_offset=352
+	f_cred type_id=98 bits_offset=384
+	f_owner type_id=100 bits_offset=448
+	(anon) type_id=101 bits_offset=512
+	(anon) type_id=106 bits_offset=640
+	f_pos type_id=120 bits_offset=896
+	f_security type_id=3 bits_offset=960
+	f_wb_err type_id=122 bits_offset=1024
+	f_sb_err type_id=122 bits_offset=1056
+	f_ep type_id=125 bits_offset=1088
+	(anon) type_id=126 bits_offset=1152
+	f_ref type_id=137 bits_offset=1408
+[75] TYPEDEF spinlock_t type_id=76
+[76] STRUCT spinlock size=4 vlen=1
+	(anon) type_id=77 bits_offset=0
+[77] UNION (anon) size=4 vlen=1
+	rlock type_id=78 bits_offset=0
+[78] STRUCT raw_spinlock size=4 vlen=1
+	raw_lock type_id=79 bits_offset=0
+[79] TYPEDEF arch_spinlock_t type_id=80
+[80] STRUCT qspinlock size=4 vlen=1
+	(anon) type_id=81 bits_offset=0
+[81] UNION (anon) size=4 vlen=3
+	val type_id=82 bits_offset=0
+	(anon) type_id=84 bits_offset=0
+	(anon) type_id=88 bits_offset=0
+[82] TYPEDEF atomic_t type_id=83
+[83] STRUCT (anon) size=4 vlen=1
+	counter type_id=2 bits_offset=0
+[84] STRUCT (anon) size=2 vlen=2
+	locked type_id=85 bits_offset=0
+	pending type_id=85 bits_offset=8
+[85] TYPEDEF u8 type_id=86
+[86] TYPEDEF __u8 type_id=87
+[87] INT unsigned char size=1 bits_offset=0 nr_bits=8 encoding=(none)
+[88] STRUCT (anon) size=4 vlen=2
+	locked_pending type_id=89 bits_offset=0
+	tail type_id=89 bits_offset=16
+[89] TYPEDEF u16 type_id=90
+[90] TYPEDEF __u16 type_id=91
+[91] INT unsigned short size=2 bits_offset=0 nr_bits=16 encoding=(none)
+[92] TYPEDEF fmode_t type_id=93
+[93] INT unsigned int size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[94] PTR (anon) type_id=95
+[95] CONST (anon) type_id=149
+[96] PTR (anon) type_id=150
+[97] PTR (anon) type_id=151
+[98] PTR (anon) type_id=99
+[99] CONST (anon) type_id=154
+[100] PTR (anon) type_id=156
+[101] UNION (anon) size=16 vlen=2
+	f_path type_id=102 bits_offset=0
+	__f_path type_id=103 bits_offset=0
+[102] CONST (anon) type_id=103
+[103] STRUCT path size=16 vlen=2
+	mnt type_id=104 bits_offset=0
+	dentry type_id=105 bits_offset=64
+[104] PTR (anon) type_id=153
+[105] PTR (anon) type_id=152
+[106] UNION (anon) size=32 vlen=2
+	f_pos_lock type_id=107 bits_offset=0
+	f_pipe type_id=118 bits_offset=0
+[107] STRUCT mutex size=32 vlen=4
+	owner type_id=108 bits_offset=0
+	wait_lock type_id=114 bits_offset=64
+	osq type_id=115 bits_offset=96
+	wait_list type_id=116 bits_offset=128
+[108] TYPEDEF atomic_long_t type_id=109
+[109] TYPEDEF atomic64_t type_id=110
+[110] STRUCT (anon) size=8 vlen=1
+	counter type_id=111 bits_offset=0
+[111] TYPEDEF s64 type_id=112
+[112] TYPEDEF __s64 type_id=113
+[113] INT long long size=8 bits_offset=0 nr_bits=64 encoding=SIGNED
+[114] TYPEDEF raw_spinlock_t type_id=78
+[115] STRUCT optimistic_spin_queue size=4 vlen=1
+	tail type_id=82 bits_offset=0
+[116] STRUCT list_head size=16 vlen=2
+	next type_id=117 bits_offset=0
+	prev type_id=117 bits_offset=64
+[117] PTR (anon) type_id=116
+[118] TYPEDEF u64 type_id=119
+[119] TYPEDEF __u64 type_id=68
+[120] TYPEDEF loff_t type_id=121
+[121] TYPEDEF __kernel_loff_t type_id=113
+[122] TYPEDEF errseq_t type_id=123
+[123] TYPEDEF u32 type_id=124
+[124] TYPEDEF __u32 type_id=93
+[125] PTR (anon) type_id=155
+[126] UNION (anon) size=32 vlen=4
+	f_task_work type_id=127 bits_offset=0
+	f_llist type_id=131 bits_offset=0
+	f_ra type_id=133 bits_offset=0
+	f_freeptr type_id=135 bits_offset=0
+[127] STRUCT callback_head size=16 vlen=2
+	next type_id=128 bits_offset=0
+	func type_id=129 bits_offset=64
+[128] PTR (anon) type_id=127
+[129] PTR (anon) type_id=130
+[130] FUNC_PROTO (anon) return=0 args=(128 (anon))
+[131] STRUCT llist_node size=8 vlen=1
+	next type_id=132 bits_offset=0
+[132] PTR (anon) type_id=131
+[133] STRUCT file_ra_state size=32 vlen=7
+	start type_id=134 bits_offset=0
+	size type_id=93 bits_offset=64
+	async_size type_id=93 bits_offset=96
+	ra_pages type_id=93 bits_offset=128
+	order type_id=91 bits_offset=160
+	mmap_miss type_id=91 bits_offset=176
+	prev_pos type_id=120 bits_offset=192
+[134] INT unsigned long size=8 bits_offset=0 nr_bits=64 encoding=(none)
+[135] TYPEDEF freeptr_t type_id=136
+[136] STRUCT (anon) size=8 vlen=1
+	v type_id=134 bits_offset=0
+[137] TYPEDEF file_ref_t type_id=138
+[138] STRUCT (anon) size=8 vlen=1
+	refcnt type_id=109 bits_offset=0
+[139] FUNC_PROTO (anon) return=2 args=(67 ctx)
+[140] FUNC null_check type_id=139
+[141] DECL_TAG comment:test_description=null checking nullable pointer in bpf_lsm_mmap_file type=140 component_idx=-1
+[142] DECL_TAG comment:test_expect_success type=140 component_idx=-1
+[143] INT char size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[144] ARRAY (anon) type_id=143 index_type_id=145 nr_elems=4
+[145] INT __ARRAY_SIZE_TYPE__ size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[146] VAR __only_license type_id=144 linkage=1
+[147] VAR _license type_id=144 linkage=1
+[148] DATASEC license size=8 vlen=2
+	 type_id=146 offset=0 size=4
+	 type_id=147 offset=4 size=4
+[149] FWD file_operations struct
+[150] FWD address_space struct
+[151] FWD inode struct
+[152] FWD dentry struct
+[153] FWD vfsmount struct
+[154] FWD cred struct
+[155] FWD hlist_head struct
+[156] FWD fown_struct struct
+[4] FUNC errno_zero_retval_test1 type_id=1 Invalid arg#1
+
+-- END BTF LOAD LOG --
+libbpf: Error loading .BTF into kernel: -EINVAL. BTF is optional, ignoring.
+no_null_check installed
+libbpf: BTF loading error: -EINVAL
+libbpf: -- BEGIN BTF LOAD LOG ---
+magic: 0xeb9f
+version: 1
+flags: 0x0
+hdr_len: 24
+type_off: 0
+type_len: 2984
+str_off: 2984
+str_len: 3361
+btf_total_size: 6369
+[1] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[2] INT int size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[3] PTR (anon) type_id=0
+[4] FUNC errno_zero_retval_test1 type_id=1
+[5] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 1 type=4 component_idx=-1
+[6] DECL_TAG comment:test_expect_success type=4 component_idx=-1
+[7] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[8] FUNC errno_zero_retval_test2 type_id=7
+[9] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 2 type=8 component_idx=-1
+[10] DECL_TAG comment:test_expect_success type=8 component_idx=-1
+[11] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[12] FUNC errno_zero_retval_test4 type_id=11
+[13] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 4 type=12 component_idx=-1
+[14] DECL_TAG comment:test_expect_failure type=12 component_idx=-1
+[15] DECL_TAG comment:test_expect_msg=0=R0 has smin=-4096 smax=-4096 should have been in [-4095, 0] type=12 component_idx=-1
+[16] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[17] FUNC errno_zero_retval_test5 type_id=16
+[18] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 5 type=17 component_idx=-1
+[19] DECL_TAG comment:test_expect_failure type=17 component_idx=-1
+[20] DECL_TAG comment:test_expect_msg=1=R0 has smin=4096 smax=4096 should have been in [-4095, 0] type=17 component_idx=-1
+[21] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[22] FUNC errno_zero_retval_test6 type_id=21
+[23] DECL_TAG comment:test_description=lsm bpf prog with -4095~0 retval. test 6 type=22 component_idx=-1
+[24] DECL_TAG comment:test_expect_failure type=22 component_idx=-1
+[25] DECL_TAG comment:test_expect_msg=2=R0 has smin=1 smax=1 should have been in [-4095, 0] type=22 component_idx=-1
+[26] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[27] FUNC bool_retval_test1 type_id=26
+[28] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 1 type=27 component_idx=-1
+[29] DECL_TAG comment:test_expect_success type=27 component_idx=-1
+[30] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[31] FUNC bool_retval_test2 type_id=30
+[32] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 2 type=31 component_idx=-1
+[33] DECL_TAG comment:test_expect_success type=31 component_idx=-1
+[34] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[35] FUNC bool_retval_test3 type_id=34
+[36] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 3 type=35 component_idx=-1
+[37] DECL_TAG comment:test_expect_failure type=35 component_idx=-1
+[38] DECL_TAG comment:test_expect_msg=3=R0 has smin=-1 smax=-1 should have been in [0, 1] type=35 component_idx=-1
+[39] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[40] FUNC bool_retval_test4 type_id=39
+[41] DECL_TAG comment:test_description=lsm bpf prog with bool retval. test 4 type=40 component_idx=-1
+[42] DECL_TAG comment:test_expect_failure type=40 component_idx=-1
+[43] DECL_TAG comment:test_expect_msg=4=R0 has smin=2 smax=2 should have been in [0, 1] type=40 component_idx=-1
+[44] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[45] FUNC void_retval_test1 type_id=44
+[46] DECL_TAG comment:test_expect_success type=45 component_idx=-1
+[47] DECL_TAG comment:test_description=lsm bpf prog with void retval. test 1 type=45 component_idx=-1
+[48] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[49] FUNC void_retval_test2 type_id=48
+[50] DECL_TAG comment:test_expect_success type=49 component_idx=-1
+[51] DECL_TAG comment:test_description=lsm bpf prog with void retval. test 2 type=49 component_idx=-1
+[52] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[53] FUNC disabled_hook_test1 type_id=52
+[54] DECL_TAG comment:test_description=lsm disabled hook: getprocattr type=53 component_idx=-1
+[55] DECL_TAG comment:test_expect_failure type=53 component_idx=-1
+[56] DECL_TAG comment:test_expect_msg=5=points to disabled hook type=53 component_idx=-1
+[57] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[58] FUNC disabled_hook_test2 type_id=57
+[59] DECL_TAG comment:test_description=lsm disabled hook: setprocattr type=58 component_idx=-1
+[60] DECL_TAG comment:test_expect_failure type=58 component_idx=-1
+[61] DECL_TAG comment:test_expect_msg=6=points to disabled hook type=58 component_idx=-1
+[62] FUNC_PROTO (anon) return=2 args=(3 (anon))
+[63] FUNC disabled_hook_test3 type_id=62
+[64] DECL_TAG comment:test_description=lsm disabled hook: ismaclabel type=63 component_idx=-1
+[65] DECL_TAG comment:test_expect_failure type=63 component_idx=-1
+[66] DECL_TAG comment:test_expect_msg=7=points to disabled hook type=63 component_idx=-1
+[67] PTR (anon) type_id=68
+[68] INT unsigned long long size=8 bits_offset=0 nr_bits=64 encoding=(none)
+[69] FUNC_PROTO (anon) return=2 args=(67 ctx)
+[70] FUNC no_null_check type_id=69
+[71] DECL_TAG comment:test_description=not null checking nullable pointer in bpf_lsm_mmap_file type=70 component_idx=-1
+[72] DECL_TAG comment:test_expect_failure type=70 component_idx=-1
+[73] DECL_TAG comment:test_expect_msg=8=R1 invalid mem access 'trusted_ptr_or_null_' type=70 component_idx=-1
+[74] STRUCT file size=184 vlen=19
+	f_lock type_id=75 bits_offset=0
+	f_mode type_id=92 bits_offset=32
+	f_op type_id=94 bits_offset=64
+	f_mapping type_id=96 bits_offset=128
+	private_data type_id=3 bits_offset=192
+	f_inode type_id=97 bits_offset=256
+	f_flags type_id=93 bits_offset=320
+	f_iocb_flags type_id=93 bits_offset=352
+	f_cred type_id=98 bits_offset=384
+	f_owner type_id=100 bits_offset=448
+	(anon) type_id=101 bits_offset=512
+	(anon) type_id=106 bits_offset=640
+	f_pos type_id=120 bits_offset=896
+	f_security type_id=3 bits_offset=960
+	f_wb_err type_id=122 bits_offset=1024
+	f_sb_err type_id=122 bits_offset=1056
+	f_ep type_id=125 bits_offset=1088
+	(anon) type_id=126 bits_offset=1152
+	f_ref type_id=137 bits_offset=1408
+[75] TYPEDEF spinlock_t type_id=76
+[76] STRUCT spinlock size=4 vlen=1
+	(anon) type_id=77 bits_offset=0
+[77] UNION (anon) size=4 vlen=1
+	rlock type_id=78 bits_offset=0
+[78] STRUCT raw_spinlock size=4 vlen=1
+	raw_lock type_id=79 bits_offset=0
+[79] TYPEDEF arch_spinlock_t type_id=80
+[80] STRUCT qspinlock size=4 vlen=1
+	(anon) type_id=81 bits_offset=0
+[81] UNION (anon) size=4 vlen=3
+	val type_id=82 bits_offset=0
+	(anon) type_id=84 bits_offset=0
+	(anon) type_id=88 bits_offset=0
+[82] TYPEDEF atomic_t type_id=83
+[83] STRUCT (anon) size=4 vlen=1
+	counter type_id=2 bits_offset=0
+[84] STRUCT (anon) size=2 vlen=2
+	locked type_id=85 bits_offset=0
+	pending type_id=85 bits_offset=8
+[85] TYPEDEF u8 type_id=86
+[86] TYPEDEF __u8 type_id=87
+[87] INT unsigned char size=1 bits_offset=0 nr_bits=8 encoding=(none)
+[88] STRUCT (anon) size=4 vlen=2
+	locked_pending type_id=89 bits_offset=0
+	tail type_id=89 bits_offset=16
+[89] TYPEDEF u16 type_id=90
+[90] TYPEDEF __u16 type_id=91
+[91] INT unsigned short size=2 bits_offset=0 nr_bits=16 encoding=(none)
+[92] TYPEDEF fmode_t type_id=93
+[93] INT unsigned int size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[94] PTR (anon) type_id=95
+[95] CONST (anon) type_id=149
+[96] PTR (anon) type_id=150
+[97] PTR (anon) type_id=151
+[98] PTR (anon) type_id=99
+[99] CONST (anon) type_id=154
+[100] PTR (anon) type_id=156
+[101] UNION (anon) size=16 vlen=2
+	f_path type_id=102 bits_offset=0
+	__f_path type_id=103 bits_offset=0
+[102] CONST (anon) type_id=103
+[103] STRUCT path size=16 vlen=2
+	mnt type_id=104 bits_offset=0
+	dentry type_id=105 bits_offset=64
+[104] PTR (anon) type_id=153
+[105] PTR (anon) type_id=152
+[106] UNION (anon) size=32 vlen=2
+	f_pos_lock type_id=107 bits_offset=0
+	f_pipe type_id=118 bits_offset=0
+[107] STRUCT mutex size=32 vlen=4
+	owner type_id=108 bits_offset=0
+	wait_lock type_id=114 bits_offset=64
+	osq type_id=115 bits_offset=96
+	wait_list type_id=116 bits_offset=128
+[108] TYPEDEF atomic_long_t type_id=109
+[109] TYPEDEF atomic64_t type_id=110
+[110] STRUCT (anon) size=8 vlen=1
+	counter type_id=111 bits_offset=0
+[111] TYPEDEF s64 type_id=112
+[112] TYPEDEF __s64 type_id=113
+[113] INT long long size=8 bits_offset=0 nr_bits=64 encoding=SIGNED
+[114] TYPEDEF raw_spinlock_t type_id=78
+[115] STRUCT optimistic_spin_queue size=4 vlen=1
+	tail type_id=82 bits_offset=0
+[116] STRUCT list_head size=16 vlen=2
+	next type_id=117 bits_offset=0
+	prev type_id=117 bits_offset=64
+[117] PTR (anon) type_id=116
+[118] TYPEDEF u64 type_id=119
+[119] TYPEDEF __u64 type_id=68
+[120] TYPEDEF loff_t type_id=121
+[121] TYPEDEF __kernel_loff_t type_id=113
+[122] TYPEDEF errseq_t type_id=123
+[123] TYPEDEF u32 type_id=124
+[124] TYPEDEF __u32 type_id=93
+[125] PTR (anon) type_id=155
+[126] UNION (anon) size=32 vlen=4
+	f_task_work type_id=127 bits_offset=0
+	f_llist type_id=131 bits_offset=0
+	f_ra type_id=133 bits_offset=0
+	f_freeptr type_id=135 bits_offset=0
+[127] STRUCT callback_head size=16 vlen=2
+	next type_id=128 bits_offset=0
+	func type_id=129 bits_offset=64
+[128] PTR (anon) type_id=127
+[129] PTR (anon) type_id=130
+[130] FUNC_PROTO (anon) return=0 args=(128 (anon))
+[131] STRUCT llist_node size=8 vlen=1
+	next type_id=132 bits_offset=0
+[132] PTR (anon) type_id=131
+[133] STRUCT file_ra_state size=32 vlen=7
+	start type_id=134 bits_offset=0
+	size type_id=93 bits_offset=64
+	async_size type_id=93 bits_offset=96
+	ra_pages type_id=93 bits_offset=128
+	order type_id=91 bits_offset=160
+	mmap_miss type_id=91 bits_offset=176
+	prev_pos type_id=120 bits_offset=192
+[134] INT unsigned long size=8 bits_offset=0 nr_bits=64 encoding=(none)
+[135] TYPEDEF freeptr_t type_id=136
+[136] STRUCT (anon) size=8 vlen=1
+	v type_id=134 bits_offset=0
+[137] TYPEDEF file_ref_t type_id=138
+[138] STRUCT (anon) size=8 vlen=1
+	refcnt type_id=109 bits_offset=0
+[139] FUNC_PROTO (anon) return=2 args=(67 ctx)
+[140] FUNC null_check type_id=139
+[141] DECL_TAG comment:test_description=null checking nullable pointer in bpf_lsm_mmap_file type=140 component_idx=-1
+[142] DECL_TAG comment:test_expect_success type=140 component_idx=-1
+[143] INT char size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[144] ARRAY (anon) type_id=143 index_type_id=145 nr_elems=4
+[145] INT __ARRAY_SIZE_TYPE__ size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[146] VAR __only_license type_id=144 linkage=1
+[147] VAR _license type_id=144 linkage=1
+[148] DATASEC license size=8 vlen=2
+	 type_id=146 offset=0 size=4
+	 type_id=147 offset=4 size=4
+[149] FWD file_operations struct
+[150] FWD address_space struct
+[151] FWD inode struct
+[152] FWD dentry struct
+[153] FWD vfsmount struct
+[154] FWD cred struct
+[155] FWD hlist_head struct
+[156] FWD fown_struct struct
+[4] FUNC errno_zero_retval_test1 type_id=1 Invalid arg#1
+
+-- END BTF LOAD LOG --
+libbpf: Error loading .BTF into kernel: -EINVAL. BTF is optional, ignoring.
+null_check installed
