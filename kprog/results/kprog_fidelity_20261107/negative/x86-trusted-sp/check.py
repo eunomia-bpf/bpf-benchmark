@@ -91,9 +91,10 @@ def check():
     else:stage,message=classify(record)
    else:stage,message=('valid_executed' if record['status']==0 and done.returncode==0 else 'positive_infrastructure_error'),done.stdout+done.stderr
    result.update(stage=stage,message=message);outcomes.append(result);(OUT/'outcomes.json').write_text(json.dumps(outcomes,indent=2)+'\n');print(row['name'],stage,flush=True)
-   if stage in ['accepted_finding','positive_infrastructure_error','infrastructure_error','pipeline_rejected_unclassified']:raise RuntimeError('inspect '+stage+' before continuing: '+row['name'])
  finally:
   service.terminate();tail=service.communicate()[0];log.append(tail);(OUT/'service.log').write_text(''.join(log))
+ findings=[row for row in outcomes if row['stage'] in ['accepted_finding','positive_infrastructure_error','infrastructure_error','pipeline_rejected_unclassified']]
+ if findings:raise RuntimeError('inspect completed native-only findings: '+', '.join(row['name']+':'+row['stage'] for row in findings))
  print('ALL current native-only checks passed',flush=True)
 
 if __name__=='__main__':
