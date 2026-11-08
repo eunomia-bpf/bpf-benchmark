@@ -4585,3 +4585,24 @@ x86 helper call12, ARM identities82 and ARM helper call154 observations.
 Every original semantic case remains. Exact sources, commands and the
 original full outcome/all1263 Git source hashes appear under
 `typed_helper_oracle_refresh`; the full source export is retired.
+
+### Compiled kind6 input primitives
+
+The BPF model now interprets the existing kind6 input marker through an
+arbitrary-word stream and its own dynamic visit index. The index stays
+independent of exclusive-store visits. Generic single- and two-read C units
+use the production input macro; the existing extractor exposes the actual
+clang18 bytes to Lean. Three new universal input-unit laws quantify over
+arbitrary initial BPF state and choice streams, preserving memory and guest
+effects while advancing the visit index and returning the selected words.
+The pair unit reads two separate stream positions and returns their sum.
+
+Existing input-unit laws and the input ABI, numeric source, source-address
+and return-coordinate observations remain. The existing BPF proof checks,
+five compiled-input controls, generic simulator composition and ARM
+exclusive laws pass; proof hygiene passes. These are compiled primitive
+components for every caller. The ACTUAL_COMPILED_B row keeps its remaining
+per-token body, field/control, physical ABI and linking obligations explicit.
+Current C-model body totals stay72x86/71ARM. Exact C/header/compiler inputs,
+ELF bytes, extracted Lean arrays, source pins and outcomes appear under
+`compiled_kind6_inputs`.

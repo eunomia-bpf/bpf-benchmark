@@ -33,6 +33,8 @@ structure State where
   halted : Bool := false
   /-- Ghost index for fresh environment choices, including loop retries. -/
   exclusiveVisit : Nat := 0
+  /-- Fresh arbitrary-word input choices are indexed independently of exclusive attempts. -/
+  unspecifiedVisit : Nat := 0
 
 /-- Helper results and memory effects are supplied by the matched platform
 contract, never replaced with zero. Registers r1-r5 become arbitrary after a
@@ -61,6 +63,8 @@ structure Environment where
   nativeInput : NativeInput → Except String Word := fun _ => .error "unbound native proof input"
   exclusiveFailure : BitVec 32 → Nat → Except String Bool :=
     fun _ _ => .error "unbound exclusive environment choice"
+  unspecifiedInput : Nat → Except String Word :=
+    fun _ => .error "unbound unspecified input choice"
   immediate : Instruction → BitVec 32 → State → Except String Word
   helperCall : Instruction → State → Except String HelperCall
   helper : HelperCall → List Word → Memory → Except String HelperResult
@@ -194,6 +198,9 @@ def execute (env : Environment) (program : Array Byte) (s : State) (i : Instruct
       return ⟨setReg { next with exclusiveVisit := s.exclusiveVisit + 1 } 0
         (if failure then 1 else 0), [], none⟩
     if i.imm ≠ 2 then throw "invalid native proof input ABI/kind/register"
+    if i.offset = 6 then
+      let value ← env.unspecifiedInput s.unspecifiedVisit
+      return ⟨setReg { next with unspecifiedVisit := s.unspecifiedVisit + 1 } 0 value, [], none⟩
     let value ← match i.offset.toNat with
       | 1 => env.nativeInput .stackPointer
       | 2 => env.nativeInput .codeBase

@@ -77,9 +77,61 @@ theorem compiled_arm64_entry (native : EntryEnvironment.Environment)
   rw [compiled_inputs, witness.code, witness.stack, witness.outerReturn, witness.argument]
   simp [EntryEnvironment.base, BitVec.add_sub_cancel]
 
+/-- The choice stream is shared by the compiled input units and their caller's
+kind6 model. Each dynamic visit has its own arbitrary64-bit value. -/
+def choiceEnvironment (native : EntryEnvironment.Environment) (choices : Nat → Word) : Environment :=
+  { environment native with unspecifiedInput := fun visit => .ok (choices visit) }
+
+def choiceSummary (native : EntryEnvironment.Environment) (choices : Nat → Word)
+    (program : Array Byte) (positions : List Nat) (s : State) := do
+  let result ← BPFPath.evaluate (choiceEnvironment native choices) program positions
+    { s with pc := 0, halted := false }
+  pure (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+    result.state.halted, result.fault, result.events)
+
+theorem compiled_unspecified (native : EntryEnvironment.Environment) (choices : Nat → Word) (s : State) :
+    choiceSummary native choices Compiled.input_unspecified [0,1] s =
+      .ok (choices s.unspecifiedVisit, s.memory, s.unspecifiedVisit + 1, true, none, []) := by
+  simp [choiceSummary, choiceEnvironment, BPFPath.evaluate, execute, source, alu, setReg,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem compiled_unspecified_pair (native : EntryEnvironment.Environment)
+    (choices : Nat → Word) (s : State) :
+    choiceSummary native choices Compiled.input_unspecified_pair [0,1,2,3,4] s =
+      .ok (choices (s.unspecifiedVisit + 1) + choices s.unspecifiedVisit,
+        s.memory, s.unspecifiedVisit + 2, true, none, []) := by
+  simp [choiceSummary, choiceEnvironment, BPFPath.evaluate, execute, source, alu, setReg,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad, Nat.add_assoc]
+
+/-- Successful byte execution supplies the generic execution relation used by
+all callers of either compiled kind6 unit. -/
+theorem compiled_choice_execution (native : EntryEnvironment.Environment) (choices : Nat → Word)
+    (program : Array Byte) (positions : List Nat) (s : State) (value : Word) (visit : Nat)
+    (computed : choiceSummary native choices program positions s =
+      .ok (value, s.memory, visit, true, none, [])) :
+    ∃ result : Transition State,
+      Execution (BPFPath.instructionStep (choiceEnvironment native choices) program)
+        { s with pc := 0, halted := false } result.events result.state ∧
+      (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+        result.state.halted, result.fault, result.events) =
+        (value, s.memory, visit, true, none, []) := by
+  cases evaluated : BPFPath.evaluate (choiceEnvironment native choices) program positions
+      { s with pc := 0, halted := false } with
+  | error error => simp [choiceSummary, evaluated, Except.bind, Except.pure,
+      Bind.bind, Pure.pure, Except.instMonad] at computed
+  | ok result =>
+      refine ⟨result, BPFPath.evaluate_sound _ _ _ _ _ evaluated, ?_⟩
+      simpa [choiceSummary, evaluated, Except.bind, Except.pure,
+        Bind.bind, Pure.pure, Except.instMonad] using computed
+
+
 end KProgTV.InputCertificate
 #print axioms KProgTV.InputCertificate.compiled_inputs
 #print axioms KProgTV.InputCertificate.compiled_execution
 
 #print axioms KProgTV.InputCertificate.compiled_x86_entry
 #print axioms KProgTV.InputCertificate.compiled_arm64_entry
+
+#print axioms KProgTV.InputCertificate.compiled_unspecified
+#print axioms KProgTV.InputCertificate.compiled_unspecified_pair
+#print axioms KProgTV.InputCertificate.compiled_choice_execution

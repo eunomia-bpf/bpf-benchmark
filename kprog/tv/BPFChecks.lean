@@ -70,12 +70,20 @@ theorem native_input_rejects_wrong_destination :
       .error "invalid native proof input ABI/kind/register" := by rfl
 
 theorem native_input_rejects_unknown_kind :
-    step inputExternals #[0xb7,0x90,6,0,2,0,0,0] initial =
+    step inputExternals #[0xb7,0x90,7,0,2,0,0,0] initial =
       .error "invalid native proof input ABI/kind/register" := by rfl
 
 theorem unbound_exclusive_choice_rejected :
     step externals #[0xb7,0x90,5,0,16,0,0,0] initial =
       .error "unbound exclusive environment choice" := by rfl
+
+/-- Existing kind6 markers observe their own dynamic arbitrary-word stream. -/
+theorem unspecified_input_uses_fresh_word (env : Environment) (s : State) (value : Word)
+    (supplied : env.unspecifiedInput s.unspecifiedVisit = .ok value) :
+    execute env #[] s ⟨0xb7, 0, 9, 6, 2⟩ =
+      .ok ⟨setReg { s with pc := s.pc + 1, unspecifiedVisit := s.unspecifiedVisit + 1 } 0 value,
+        [], none⟩ := by
+  simp [execute, supplied, Except.map, Except.bind, Except.pure, Except.instMonad]
 
 -- Reusing a source PC must not correlate retry outcomes with the first visit.
 def retryExternals : Environment := { externals with
