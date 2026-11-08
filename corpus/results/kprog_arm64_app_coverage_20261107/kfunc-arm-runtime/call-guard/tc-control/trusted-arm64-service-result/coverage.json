@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-08T01:04:35.975932+00:00",
+  "host_ok": false,
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_request_attempts": 1,
+  "distinct_source_prog_ids": 1,
+  "proof_generated": 1,
+  "stages": {
+    "loader_rejected": 1
+  },
+  "failure_causes": {
+    "see_exact_load_stderr": 1
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+      "entry": "trusted_entry",
+      "status": -5,
+      "stage": "loader_rejected",
+      "cause": "see_exact_load_stderr",
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": null,
+      "request_archive": "run/requests/1.failure.tar.gz",
+      "request_archive_sha256": "5ca10ab94b3d895292c6f9612db8f15b5285796690e3fbf2700d7df6f0c05446",
+      "failed_commands": [],
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-kfunc-resources/trusted-native-loader', 'load', '4', '1', '3', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-gjrzkctm/requests/request-xzk21_0q/generated/request.native.o', 'trusted_entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-gjrzkctm/requests/request-xzk21_0q/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-gjrzkctm/requests/request-xzk21_0q/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "load_stderr": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=151\nstub fd_array_cnt=2 fd_array=0:6,1:6\nstub insns=0:code=183,dst=0,src=3,off=0,imm=4;1:code=133,dst=0,src=4,off=1,imm=126406;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\nkinsn proof call requires a resolved helper identity\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5101929,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5102264,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=3 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126406\nnative_blob_diag: fnv64=9fa92c6c268abd80 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n"
+    }
+  ],
+  "applications": [],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}
