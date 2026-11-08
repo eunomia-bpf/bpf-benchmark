@@ -143,6 +143,7 @@ NativeLinkArgs build_native_link_args(
             BPF_FUNC_get_stack,
             BPF_FUNC_get_prandom_u32,
             BPF_FUNC_fib_lookup,
+            BPF_FUNC_check_mtu,
             BPF_FUNC_redirect_map,
             BPF_FUNC_skc_lookup_tcp,
             BPF_FUNC_sk_lookup_udp,

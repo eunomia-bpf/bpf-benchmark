@@ -1,0 +1,236 @@
+{
+  "utc": "2026-11-08T16:47:24.168903+00:00",
+  "refresh": {
+    "utc": "2026-11-08T15:29:53.928076+00:00",
+    "phase": "finished",
+    "binary_before": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+    "source_sha256": {
+      "kprog/x86/native_lab/native_link/Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+      "kprog/x86/native_lab/native_link/Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+      "kprog/x86/native_lab/native_link/src/main.rs": "2a07ef43915d1821f2f9e6c45f743a0c67e97345c5f5518c6a33d8807219a897",
+      "kprog/x86/native_lab/native_link/src/x86.rs": "fa174bc51c021ce9810998d27acaeffee3a8d33be7b93749b9f440df74c29dcd"
+    },
+    "commands": [
+      {
+        "entry": "tcx2",
+        "command": [
+          "qemu-aarch64-static",
+          "-L",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "--input",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.proof.o",
+          "--symbol",
+          "tcx2",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.blob.bin",
+          "--output-relocs",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.relocs.bin",
+          "--output-map-patches",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.map-patches.tsv",
+          "--output-abi",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.abi.tsv",
+          "--output-data-layout",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.data-layout.json",
+          "--link-plan",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx2/request/generated/kernel-link/1b4e04aa858163e5.tmp.1164.1164.link-plan.json"
+        ],
+        "returncode": 0,
+        "original_native_sha256": "c6cbabe7b9119382749302dfb314af3ce153598f8ec59c2a73c94336944a9318",
+        "original_error": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=tcx2 (56 bytes), 1 reachable symbol(s) total\n  - tcx2 (vaddr 0x0, 56 bytes) [entry]\nError: arm64 unresolved register-indirect call in tcx2 at byte offset 0x28 through x8; helper calls must be rewritten before kernel load\n"
+      },
+      {
+        "entry": "tcx3",
+        "command": [
+          "qemu-aarch64-static",
+          "-L",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "--input",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.proof.o",
+          "--symbol",
+          "tcx3",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.blob.bin",
+          "--output-relocs",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.relocs.bin",
+          "--output-map-patches",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.map-patches.tsv",
+          "--output-abi",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.abi.tsv",
+          "--output-data-layout",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.data-layout.json",
+          "--link-plan",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx3/request/generated/kernel-link/cd3e554c2f881a6d.tmp.1173.1173.link-plan.json"
+        ],
+        "returncode": 0,
+        "original_native_sha256": "47fea5b2035d82fa2802f92e7d2aa279829d28b64c513b2da0e8a78456c58bb0",
+        "original_error": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=tcx3 (56 bytes), 1 reachable symbol(s) total\n  - tcx3 (vaddr 0x0, 56 bytes) [entry]\nError: arm64 unresolved register-indirect call in tcx3 at byte offset 0x28 through x8; helper calls must be rewritten before kernel load\n"
+      },
+      {
+        "entry": "tcx5",
+        "command": [
+          "qemu-aarch64-static",
+          "-L",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "--input",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.proof.o",
+          "--symbol",
+          "tcx5",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.blob.bin",
+          "--output-relocs",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.relocs.bin",
+          "--output-map-patches",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.map-patches.tsv",
+          "--output-abi",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.abi.tsv",
+          "--output-data-layout",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.data-layout.json",
+          "--link-plan",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx5/request/generated/kernel-link/dde4f6650d47536d.tmp.1185.1185.link-plan.json"
+        ],
+        "returncode": 1,
+        "original_native_sha256": "c6a6e425ea7945f715d2b688e2c4159c888ccfd33e23b21ab379871928f3cfdb",
+        "original_error": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=tcx5 (44 bytes), 1 reachable symbol(s) total\n  - tcx5 (vaddr 0x0, 44 bytes) [entry]\nError: arm64 unresolved register-indirect call in tcx5 at byte offset 0x1c through x8; helper calls must be rewritten before kernel load\n"
+      },
+      {
+        "entry": "tcx6",
+        "command": [
+          "qemu-aarch64-static",
+          "-L",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "--input",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.proof.o",
+          "--symbol",
+          "tcx6",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.blob.bin",
+          "--output-relocs",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.relocs.bin",
+          "--output-map-patches",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.map-patches.tsv",
+          "--output-abi",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.abi.tsv",
+          "--output-data-layout",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.data-layout.json",
+          "--link-plan",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tcx6/request/generated/kernel-link/1ca2fc0f16f68ec2.tmp.1194.1194.link-plan.json"
+        ],
+        "returncode": 1,
+        "original_native_sha256": "81401780393cff5dc41f44dac94648128e9c432a37b39271d13075dca72a3bae",
+        "original_error": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=tcx6 (44 bytes), 1 reachable symbol(s) total\n  - tcx6 (vaddr 0x0, 44 bytes) [entry]\nError: arm64 unresolved register-indirect call in tcx6 at byte offset 0x1c through x8; helper calls must be rewritten before kernel load\n"
+      },
+      {
+        "entry": "tc_uninit_mtu",
+        "command": [
+          "qemu-aarch64-static",
+          "-L",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "--input",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.proof.o",
+          "--symbol",
+          "tc_uninit_mtu",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.blob.bin",
+          "--output-relocs",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.relocs.bin",
+          "--output-map-patches",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.map-patches.tsv",
+          "--output-abi",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.abi.tsv",
+          "--output-data-layout",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.data-layout.json",
+          "--link-plan",
+          "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/helper-flow/requests/tc_uninit_mtu/request/generated/kernel-link/ed52e8ad416d9983.tmp.1246.1246.link-plan.json"
+        ],
+        "returncode": 1,
+        "original_native_sha256": "4d7a1538c1a545f8717f14ba9470df4a7f6a2fc79063589a0464e344d555c0f0",
+        "original_error": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=tc_uninit_mtu (40 bytes), 1 reachable symbol(s) total\n  - tc_uninit_mtu (vaddr 0x0, 40 bytes) [entry]\nError: arm64 unresolved register-indirect call in tc_uninit_mtu at byte offset 0x18 through x8; helper calls must be rewritten before kernel load\n"
+      }
+    ],
+    "build_exit": 0,
+    "binary_after": "c0d0dfed3ec5ae3610f266458957ab142b0b3a6cfbfce991678717fb6218018e",
+    "finished": "2026-11-08T15:30:15.502665+00:00"
+  },
+  "build_and_qemu": {
+    "utc": "2026-11-08T15:38:28.936000+00:00",
+    "phase": "finished",
+    "commands": [
+      {
+        "label": "build",
+        "returncode": 0
+      },
+      {
+        "label": "replay",
+        "returncode": 0
+      }
+    ],
+    "finished": "2026-11-08T15:41:24.906858+00:00"
+  },
+  "qemu": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "compiler_exit": 0,
+    "archive_sha256": "c83ce5ef9583b7db7a2d2d634c3fef73a28ba2454b1a92beb8b65547257c5d95"
+  },
+  "service_stages": [
+    {
+      "entry": "tcx2",
+      "request_archive": "run/service-state/trusted-1zx8344b/1.success.tar.gz",
+      "stage": "installed"
+    },
+    {
+      "entry": "tcx3",
+      "request_archive": "run/service-state/trusted-1zx8344b/2.success.tar.gz",
+      "stage": "installed"
+    },
+    {
+      "entry": "tcx5",
+      "request_archive": "run/service-state/trusted-1zx8344b/3.success.tar.gz",
+      "stage": "installed"
+    },
+    {
+      "entry": "tcx6",
+      "request_archive": "run/service-state/trusted-1zx8344b/4.success.tar.gz",
+      "stage": "installed"
+    },
+    {
+      "entry": "tc_uninit_mtu",
+      "request_archive": "run/service-state/trusted-1zx8344b/5.failure.tar.gz",
+      "stage": "stock_verifier_rejected",
+      "error": {
+        "request_id": 5,
+        "source_prog_id": 37,
+        "native_sha256": "4d7a1538c1a545f8717f14ba9470df4a7f6a2fc79063589a0464e344d555c0f0",
+        "started": "1970-01-01T00:00:58.535482+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/arm64/build/kernel-selftest-helpers/loader/trusted-native-loader', 'load', '4', '5', '37', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/request.native.o', 'tc_uninit_mtu', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '46', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/arm64/build/kernel-selftest-helpers/loader/trusted-native-loader', 'load', '4', '5', '37', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/request.native.o', 'tc_uninit_mtu', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-kttw7gy7/service-state/trusted-1zx8344b/request-ubttdt6b/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '46', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n"
+      }
+    }
+  ],
+  "counts": {
+    "generated": 5,
+    "compiled": 5,
+    "installed": 4,
+    "stock_verifier_rejected": 1,
+    "native_link_failed": 0
+  },
+  "source_change": "Add existing BPF_FUNC_check_mtu to contextual helper identity set; existing alias selects bpf_skb_check_mtu or bpf_xdp_check_mtu. Current shared helper id105/163 table is already published. Incremental ARM native-link and canonical runner/loader rebuilds reuse warm caches.",
+  "remaining": "tc_uninit_mtu source/native/helper model pass the raw fp-4 output address. The native-proof branch in lower_kinsn_proof_regions forces env->allow_uninit_stack=false (verifier.c3744), while stock privileged entry initializes it through bpf_allow_uninit_stack(token). The annotation __success and __failure_unpriv express that privilege policy. C owns the shared patch; the exact policy difference is posted for priority1 removal review."
+}
