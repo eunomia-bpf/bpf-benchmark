@@ -1,0 +1,222 @@
+{
+  "utc": "2026-11-08T10:52:23.321721+00:00",
+  "make_exit": 0,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/vendor/bpf",
+    "ARCH=arm64",
+    "CLANG=/workspaces/.agent-state/kprog-lanes/A/design-only/otel-os/clang.py",
+    "NATIVE_OUT=/workspaces/repository/kprog/arm64/build/otel-os/native",
+    "NATIVE_STAGE_ROOT=/workspaces/repository/kprog/arm64/build/otel-os/stage",
+    "NATIVE_LINK=/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "NATIVE_ARCH_CFLAGS=-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x18 -ffixed-x26 -ffixed-x27 -ffixed-x28 -march=armv8.1-a+lse",
+    "native-otel"
+  ],
+  "compiler_wrapper": "#!/usr/bin/env python3\nimport os,sys\nroot='/workspaces/repository'\nargs=sys.argv[1:]+['-Os','-fstack-usage','--sysroot='+root+'/kprog/arm64/build/app-runtime-v35/root','-I'+root+'/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu','-I'+root+'/vendor/build/.bcc-libbpf/none/arm64/output']\nos.execv('/usr/lib/llvm-18/bin/clang',['clang',*args])\n",
+  "scope": "Complete upstream OTel native build at one Os profile, same ABI/helper/map source and reserved registers; observed stock BPF stack frontier motivates native frame geometry",
+  "objects": [
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/custom_trace.native.o",
+      "bytes": 55256,
+      "sha256": "ef3d328ea0d6397bec1013ea33d8ae9d0d4be542e5ac4acec177be701627a437"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/dotnet_tracer.native.o",
+      "bytes": 293016,
+      "sha256": "024b1f3a5a3ed422b861df69868aa3ca4681c66a10d10e6cd5f18749755604aa"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/go_labels.native.o",
+      "bytes": 50224,
+      "sha256": "a41a8185ecb5d380cc746f1f1ccce5dc6672c3a6767152e08f1620e7b324f2dd"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/hotspot_tracer.native.o",
+      "bytes": 268992,
+      "sha256": "c9db7c49b0a0f81454f39d60018ab2c70a35e61f7943fcd336c0b3c83fb18ad3"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/interpreter_dispatcher.native.o",
+      "bytes": 96592,
+      "sha256": "d8ef7363620aba34e5d6393d02ba97bcbe981c4b11480faa5783d80846d80bd6"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/native_stack_trace.native.o",
+      "bytes": 288000,
+      "sha256": "4cb815243b54d2257d67eabe39a6174c4e7565937f577a3b0c0c063fb007ddca"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/off_cpu.native.o",
+      "bytes": 58896,
+      "sha256": "d481556df65ed818efd33fc68a04add05aad3c7e5172ca2ae0da113e2df6257c"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/otelcol-ebpf-profiler.native.o",
+      "bytes": 2317296,
+      "sha256": "29adf5ff798c6e01ef1cf9809036a26d97b517f26c4f9c5b42177bf8c8020462"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/perl_tracer.native.o",
+      "bytes": 271880,
+      "sha256": "577237608081411612a7b2cc0a373841787c986343914bac064dfe05cb8aaec9"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/php_tracer.native.o",
+      "bytes": 234784,
+      "sha256": "b3718ad99300c9d8e0b2620373fef8e2811af4fb42ebb4c915265af27ed02cc6"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/python_tracer.native.o",
+      "bytes": 158816,
+      "sha256": "ad259c893e7e0aaf97339a6142fe5a386718c6973cda43e63ef0b9d713801b14"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/ruby_tracer.native.o",
+      "bytes": 211112,
+      "sha256": "d5579c38e18a1e3f51c10ebbe2149c56bd7a2b35cf4d649af2a2ecbdf214eb3c"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/sched_monitor.native.o",
+      "bytes": 30176,
+      "sha256": "99064e8b4d6ccaceb6c43c9acd3794cdfef4fcf28a7f66218d3bda6f10490dae"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/system_config.native.o",
+      "bytes": 10016,
+      "sha256": "3b5a26dcaf9359df6e398e1ccac56f87a416fae2b80c94b6030af663b6d37e4e"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/uprobe.native.o",
+      "bytes": 53904,
+      "sha256": "2d57b89be20109a557b381d11da3f292751a7df578910f9cd1788643e6c2e7e4"
+    },
+    {
+      "path": "kprog/arm64/build/otel-os/native/otel/v8_tracer.native.o",
+      "bytes": 270496,
+      "sha256": "b4cbb8cd814dcc7fb800a15450cea13a820aeccfe7278469f78ac1bba3fb6fb5"
+    }
+  ],
+  "stack_usage": [
+    {
+      "file": "custom_trace.native.su",
+      "record": "otel/support/ebpf/custom_trace.ebpf.c:23:custom__generic\t512\tstatic"
+    },
+    {
+      "file": "dotnet_tracer.native.su",
+      "record": "otel/support/ebpf/dotnet_tracer.ebpf.c:328:perf_unwind_dotnet\t208\tstatic"
+    },
+    {
+      "file": "dotnet_tracer.native.su",
+      "record": "otel/support/ebpf/dotnet_tracer.ebpf.c:328:kprobe_unwind_dotnet\t208\tstatic"
+    },
+    {
+      "file": "go_labels.native.su",
+      "record": "otel/support/ebpf/go_labels.ebpf.c:191:perf_go_labels\t256\tstatic"
+    },
+    {
+      "file": "go_labels.native.su",
+      "record": "otel/support/ebpf/go_labels.ebpf.c:191:kprobe_go_labels\t256\tstatic"
+    },
+    {
+      "file": "hotspot_tracer.native.su",
+      "record": "otel/support/ebpf/hotspot_tracer.ebpf.c:955:perf_unwind_hotspot\t384\tstatic"
+    },
+    {
+      "file": "hotspot_tracer.native.su",
+      "record": "otel/support/ebpf/hotspot_tracer.ebpf.c:955:kprobe_unwind_hotspot\t384\tstatic"
+    },
+    {
+      "file": "interpreter_dispatcher.native.su",
+      "record": "otel/support/ebpf/interpreter_dispatcher.ebpf.c:311:perf_unwind_stop\t224\tstatic"
+    },
+    {
+      "file": "interpreter_dispatcher.native.su",
+      "record": "otel/support/ebpf/interpreter_dispatcher.ebpf.c:311:kprobe_unwind_stop\t224\tstatic"
+    },
+    {
+      "file": "native_stack_trace.native.su",
+      "record": "otel/support/ebpf/native_stack_trace.ebpf.c:666:native_tracer_entry\t496\tstatic"
+    },
+    {
+      "file": "native_stack_trace.native.su",
+      "record": "otel/support/ebpf/native_stack_trace.ebpf.c:680:perf_unwind_native\t496\tstatic"
+    },
+    {
+      "file": "native_stack_trace.native.su",
+      "record": "otel/support/ebpf/native_stack_trace.ebpf.c:680:kprobe_unwind_native\t496\tstatic"
+    },
+    {
+      "file": "off_cpu.native.su",
+      "record": "otel/support/ebpf/off_cpu.ebpf.c:26:tracepoint__sched_switch\t96\tstatic"
+    },
+    {
+      "file": "off_cpu.native.su",
+      "record": "otel/support/ebpf/off_cpu.ebpf.c:53:kprobe__dummy\t16\tstatic"
+    },
+    {
+      "file": "off_cpu.native.su",
+      "record": "otel/support/ebpf/off_cpu.ebpf.c:62:finish_task_switch\t496\tstatic"
+    },
+    {
+      "file": "perl_tracer.native.su",
+      "record": "otel/support/ebpf/perl_tracer.ebpf.c:437:perf_unwind_perl\t272\tstatic"
+    },
+    {
+      "file": "perl_tracer.native.su",
+      "record": "otel/support/ebpf/perl_tracer.ebpf.c:437:kprobe_unwind_perl\t272\tstatic"
+    },
+    {
+      "file": "php_tracer.native.su",
+      "record": "otel/support/ebpf/php_tracer.ebpf.c:257:perf_unwind_php\t208\tstatic"
+    },
+    {
+      "file": "php_tracer.native.su",
+      "record": "otel/support/ebpf/php_tracer.ebpf.c:257:kprobe_unwind_php\t208\tstatic"
+    },
+    {
+      "file": "python_tracer.native.su",
+      "record": "otel/support/ebpf/python_tracer.ebpf.c:316:perf_unwind_python\t224\tstatic"
+    },
+    {
+      "file": "python_tracer.native.su",
+      "record": "otel/support/ebpf/python_tracer.ebpf.c:316:kprobe_unwind_python\t224\tstatic"
+    },
+    {
+      "file": "ruby_tracer.native.su",
+      "record": "otel/support/ebpf/ruby_tracer.ebpf.c:308:perf_unwind_ruby\t224\tstatic"
+    },
+    {
+      "file": "ruby_tracer.native.su",
+      "record": "otel/support/ebpf/ruby_tracer.ebpf.c:308:kprobe_unwind_ruby\t224\tstatic"
+    },
+    {
+      "file": "sched_monitor.native.su",
+      "record": "otel/support/ebpf/sched_monitor.ebpf.c:45:tracepoint__sched_process_free\t160\tstatic"
+    },
+    {
+      "file": "sched_monitor.native.su",
+      "record": "otel/support/ebpf/sched_monitor.ebpf.c:51:tracepoint__sched_process_free_pre616\t160\tstatic"
+    },
+    {
+      "file": "system_config.native.su",
+      "record": "otel/support/ebpf/system_config.ebpf.c:21:read_kernel_memory\t64\tstatic"
+    },
+    {
+      "file": "system_config.native.su",
+      "record": "otel/support/ebpf/system_config.ebpf.c:52:read_task_struct\t80\tstatic"
+    },
+    {
+      "file": "uprobe.native.su",
+      "record": "otel/support/ebpf/uprobe.ebpf.c:7:uprobe__generic\t496\tstatic"
+    },
+    {
+      "file": "v8_tracer.native.su",
+      "record": "otel/support/ebpf/v8_tracer.ebpf.c:347:perf_unwind_v8\t272\tstatic"
+    },
+    {
+      "file": "v8_tracer.native.su",
+      "record": "otel/support/ebpf/v8_tracer.ebpf.c:347:kprobe_unwind_v8\t272\tstatic"
+    }
+  ]
+}
