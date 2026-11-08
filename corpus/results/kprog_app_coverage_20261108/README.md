@@ -9,7 +9,7 @@ The table records the latest closed whole-application attempt, including setup a
 | Cilium | 56 resident | 3 | 3 | 2 | 0 | 1: tail_handle_ipv4 misaligned stack off-156/8 after352instructions | [XDP metadata projection](xdp-metadata/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 1: sys_exit_submit native chunk creation ENOENT | 0 | [current CORE input](tracee-current-core/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 1: historical300second client exit; sys_exit_submit chunk ENOENT | 0 | [current CORE input](tracee-current-core/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
 
@@ -54,6 +54,6 @@ The [final BCC/Katran five-step cohort](bcc-katran-five-step/README.md) complete
 
 The [whole Tetragon/OTel five-step cohorts](whole-five-step-0700/README.md) retain11terminal native hash joins. Restoring the current237-row Tetragon asset inventory advances its entire startup to5generated/4installed and the event_execve stack-write frontier. OTel reaches3generated/2installed and the perf_unwind_native exploration frontier. Original startup errors, native objects and work counters retain their full logs.
 
-The [Tracee current CORE-input cohort](tracee-current-core/README.md) consumes the existing published native build7479850e and installs five entries across six generated/compiled requests. The sixth reaches native chunk creation ENOENT; relocation resolution supplies the next step. The current header/native-source identity and original151-program baseline are preserved.
+The [Tracee current CORE-input cohort](tracee-current-core/README.md) consumes the existing published native build7479850e and installs five entries across six generated/compiled requests. The sixth reaches native chunk creation ENOENT after the historical300second image runner closes its client. The current-runner image successor keeps the same native input and waits for compile/load completion. The current header/native-source identity and original151-program baseline are preserved.
 
 The [XDP metadata projection](xdp-metadata/README.md) maps the actual native xdp_buff64-bit field16 to the typed data_meta context field. Existing29+1micro compile controls complete. The full Cilium startup advances to3generated/compiled and2installed, reaching a stack-alignment refusal in tail_handle_ipv4 after352instructions.

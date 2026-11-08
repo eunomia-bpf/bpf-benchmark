@@ -16,3 +16,5 @@ make -n __runtime-vm-corpus PLATFORM=kvm ARCH=x86 RUNTIME_CONTAINER_IMAGE=bpf-be
 ```
 
 The Tracee successor uses the current already-published runner source in an incremental image layer. The inherited image has the historical300second startup timeout; the current runner waits for verified compile/load completion. Native input remains7479850e, and the whole original application supplies the next terminal receipt.
+
+The shared vendor source now consumes the exact three changed headers/verifier snapshots used by the promoted cache. Existing syscall diagnostics already match that epoch. Original source timestamps are preserved, and the existing patch applier reports the complete applied patch with exit0. `source-integration.json` carries before/after hashes and `source-integration.log` carries the actual applier receipt. Each following kernel build uses the existing cache with its matching source.

@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "path": "include/linux/bpf.h",
+      "before": "2276a95506a4a88a698c9c34cbe6991c37ef77056a42cd14035fa019b01caecf",
+      "after": "272ed8b2196c8825416474e0c10c8e6d9a5c10db878f0e66dbb49ddcd00b7978"
+    },
+    {
+      "path": "include/linux/bpf_native_input.h",
+      "before": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+      "after": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918"
+    },
+    {
+      "path": "kernel/bpf/verifier.c",
+      "before": "6bccb2ae3244f1d85ffc4b3e7b0c64acafa9aa78d2955944ae1f1bdc870375a1",
+      "after": "d4c17cbe2c157164658b4d20221825bca9a4510df04119a01ca0e4c3f583a9de"
+    }
+  ],
+  "compiled_snapshots": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-source"
+}

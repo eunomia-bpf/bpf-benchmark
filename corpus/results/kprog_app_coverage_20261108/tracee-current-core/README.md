@@ -1,6 +1,6 @@
 # Tracee current CORE input, November8 UTC
 
-The complete original Tracee startup submits six native requests: all six generate and compile, and five install through the five-step path. `sys_exit_submit` reaches native chunk creation and returns `ENOENT` from the loader. Its stock-verifier outcome remains pending native relocation resolution. The corpus records startup error and retains its original application stderr and counters. Baseline resident census is151.
+The complete original Tracee startup submits six native requests: all six generate and compile, and five install through the five-step path. `sys_exit_submit` reaches native chunk creation and returns `ENOENT` from the loader. Its stock-verifier outcome remains pending request completion. The corpus records startup error and retains its original application stderr and counters. Baseline resident census is151.
 
 | Native entry | Generated | Compiled | Installed | Terminal result |
 | --- | ---: | ---: | ---: | --- |
@@ -23,3 +23,5 @@ make -f /workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee
 ```
 
 `runtime.tar.gz` carries the actual image build/manifest/source receipts and launch commands. `service.tar.gz` carries all six terminal native requests with generated C/BPF and loader logs. `result.tar.gz` preserves the entire corpus result. `coverage.json` joins all six request hashes to the native object. The image is `sha256:c10e55947ac3c724b3297b6ed238b0548be492f6d0676f3af87e57c8b22e3da5`. Worker exit0 and corpus startup error retain their separate meanings.
+
+The image source comparison identifies the lifecycle boundary: its Tracee runner calls `wait_healthy` with300seconds, while the current committed runner waits for verified compile/load completion. The application starts at07:18:33 and exits at07:23:35; request6 finishes at07:23:51. The client exit precedes the chunk upload error. `runner-refresh.tar.gz` preserves both runner files, their hashes, the one-file incremental image build and whole-application successor commands. The successor runs detached on CPUs20-23 with the same7479850e native object, eight vCPUs and12GiB. Kernel path is the promoted shared tree. The original observed ENOENT remains in the table and raw logs; the successor supplies the ensuing verifier/application receipt.
