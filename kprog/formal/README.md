@@ -119,6 +119,9 @@ ghost indices; pointer/RSP frame and physical ABI embedding remain explicit.
 MOVZX/MOVSX add15 scalar source-lane/width units with canonical extension,
 whole memory and both ghost indices; register/tag frame and ABI embedding
 remain explicit.
+SHIFTX adds6 scalar width/count units with arbitrary counts and both SARX
+control paths; complete register/flag/tag frame and ABI embedding remain
+explicit.
 Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.

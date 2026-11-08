@@ -207,3 +207,24 @@ MOVX_UNIT(tv_movs8hto32, X86_OP_MOVSX_REG, X86_WIDTH_32, X86_WIDTH_8, 130)
 MOVX_UNIT(tv_movs16lto32, X86_OP_MOVSX_REG, X86_WIDTH_32, X86_WIDTH_16, X86_RDX)
 MOVX_UNIT(tv_movs16lto64, X86_OP_MOVSX_REG, X86_WIDTH_64, X86_WIDTH_16, X86_RDX)
 MOVX_UNIT(tv_movs32lto64, X86_OP_MOVSX_REG, X86_WIDTH_64, X86_WIDTH_32, X86_RDX)
+
+#define SHIFTX_UNIT(NAME, WIDTH, KIND) \
+__attribute__((section("tv/shiftx/" #NAME), used)) \
+__u64 NAME(__u64 old, __u64 source, __u64 count) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    __x86_rdx.ptr = (void *)(long)source; \
+    __x86_rcx.ptr = (void *)(long)count; \
+    X86_SIM_L_EXEC(X86_OP_SHIFTX, X86_RAX, X86_RDX, WIDTH, X86_RCX, KIND); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+SHIFTX_UNIT(tv_shl32, X86_WIDTH_32, X86_ALU_SHL)
+SHIFTX_UNIT(tv_shl64, X86_WIDTH_64, X86_ALU_SHL)
+SHIFTX_UNIT(tv_shr32, X86_WIDTH_32, X86_ALU_SHR)
+SHIFTX_UNIT(tv_shr64, X86_WIDTH_64, X86_ALU_SHR)
+SHIFTX_UNIT(tv_sar32, X86_WIDTH_32, X86_ALU_SAR)
+SHIFTX_UNIT(tv_sar64, X86_WIDTH_64, X86_ALU_SAR)
