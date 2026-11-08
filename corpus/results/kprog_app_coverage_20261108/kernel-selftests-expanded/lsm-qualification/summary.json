@@ -1,0 +1,132 @@
+{
+  "original_stock": [
+    {
+      "program": "no_null_check",
+      "original_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/table/verifier_lsm.bpf.o",
+      "mode": "original stock BPF load-only",
+      "executions": 0,
+      "prog_type": 29,
+      "expected_attach_type": 27,
+      "section": "lsm/mmap_file",
+      "original_object_sha256": "d5118f586c8d6d15867eb7efe147539d1f34b124a154fa80b9edd43688ca1054",
+      "target_btf_id": 71327,
+      "load_return": -13,
+      "verifier_log": "0: R1=ctx() R10=fp0\n0: (79) r1 = *(u64 *)(r1 +0)\nfunc 'bpf_lsm_mmap_file' arg0 has btf_id 86271 type STRUCT 'file'\n1: R1=trusted_ptr_or_null_file(id=1)\n1: (79) r1 = *(u64 *)(r1 +32)\nR1 invalid mem access 'trusted_ptr_or_null_'\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "fd": -2,
+      "stage": "load_rejected"
+    },
+    {
+      "program": "null_check",
+      "original_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/table/verifier_lsm.bpf.o",
+      "mode": "original stock BPF load-only",
+      "executions": 0,
+      "prog_type": 29,
+      "expected_attach_type": 27,
+      "section": "lsm/mmap_file",
+      "original_object_sha256": "d5118f586c8d6d15867eb7efe147539d1f34b124a154fa80b9edd43688ca1054",
+      "target_btf_id": 71327,
+      "load_return": 0,
+      "verifier_log": "processed 9 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n",
+      "fd": 6,
+      "stage": "installed"
+    }
+  ],
+  "native": [
+    {
+      "file": "verifier_lsm.c",
+      "program": "no_null_check",
+      "stage": "verifier_rejected",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 29,
+          "expected_attach_type": 27,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 71327,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 0,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": []
+      },
+      "diagnostic": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1797\nstub fd_array_cnt=2 fd_array=0:3,1:3\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=129899;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (bf) r2 = r0                       ; R0=scalar(id=1) R2=scalar(id=1)\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (7b) *(u64 *)(r10 -8) = r2        ; R2=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n26: (79) r1 = *(u64 *)(r1 +0)\nfunc 'bpf_lsm_mmap_file' arg0 has btf_id 86271 type STRUCT 'file'\n27: R1=trusted_ptr_or_null_file(id=2)\n27: (b7) r2 = 32                      ; R2=32\n28: (0f) r2 += r1\nR2 pointer arithmetic on trusted_ptr_or_null_ prohibited, null-check it first\nprocessed 29 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,484,3581080,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=29 blob_bytes=15 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=27 attach_btf_id=71327 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=29 kfunc_btf_id=129899\nnative_blob_diag: fnv64=f11e4f62f10c6105 word_count=3 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=15 final_size_matches=1\nchunk_bytes=0:15\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "native_sha256": "ef2c5d0c27cb7f29b68f1df5c0f4335a4883a02315647c5fd5cbd6fabfcbb462",
+      "service": {
+        "request_id": 251,
+        "source_prog_id": 0,
+        "native_sha256": "ef2c5d0c27cb7f29b68f1df5c0f4335a4883a02315647c5fd5cbd6fabfcbb462",
+        "started": "2026-11-08T22:53:12.466576+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '251', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/request.native.o', 'no_null_check', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '27', '0', '71327', '0', '0', '0', '29', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '251', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/request.native.o', 'no_null_check', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/request-iexb7ftq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '27', '0', '71327', '0', '0', '0', '29', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/251.failure.tar.gz",
+        "finished": "2026-11-08T22:53:14.067609+00:00"
+      }
+    },
+    {
+      "file": "verifier_lsm.c",
+      "program": "null_check",
+      "stage": "installed",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 29,
+          "expected_attach_type": 27,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 71327,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 0,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": []
+      },
+      "diagnostic": "",
+      "native_sha256": "8de7d7d6e4e3bdce985efa36af8c6e09eb086637b497e2da554bd2744caf855e",
+      "service": {
+        "request_id": 252,
+        "source_prog_id": 0,
+        "native_sha256": "8de7d7d6e4e3bdce985efa36af8c6e09eb086637b497e2da554bd2744caf855e",
+        "started": "2026-11-08T22:53:14.801575+00:00",
+        "prog_id": 1000,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/tmp/trusted-xh7h9lou/252.success.tar.gz",
+        "finished": "2026-11-08T22:53:16.438503+00:00"
+      }
+    }
+  ],
+  "prototype": {
+    "id": 71327,
+    "name": "bpf_lsm_mmap_file",
+    "prototype": 35653,
+    "parameters": [
+      {
+        "name": "file__nullable",
+        "type_id": 349
+      },
+      {
+        "name": "reqprot",
+        "type_id": 96763
+      },
+      {
+        "name": "prot",
+        "type_id": 96763
+      },
+      {
+        "name": "flags",
+        "type_id": 96763
+      }
+    ]
+  },
+  "current_source_hook_line": "LSM_HOOK(int, 0, mmap_file, struct file *file, unsigned long reqprot,",
+  "kernel_image_sha256": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+  "native_execution_count": 0,
+  "stock_bpf_execution_count": 0
+}
