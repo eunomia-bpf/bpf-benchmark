@@ -15,6 +15,7 @@ LLC ?= llc-18
 BPF_LINK ?= llvm-link-18
 LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
+LLVM_CONFIG ?= llvm-config-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
 NATIVE_LINK ?= $(ROOT)/native-sim/x86/native_lab/native_link/target/release/native-link
@@ -38,6 +39,7 @@ BCC_OBJS := $(patsubst %,$(OUT)/bcc/output/%.bpf.o,$(BCC_TOOLS))
 CILIUM_OBJS := bpf_lxc.o bpf_overlay.o bpf_sock.o bpf_host.o bpf_wireguard.o bpf_xdp.o bpf_alignchecker.o
 NATIVE_OUT := $(OUT)/native
 NATIVE_STAGE_ROOT := $(BUILD)/$(ARCH)/stage
+NATIVE_DIVISION_PLUGIN := $(NATIVE_STAGE_ROOT)/native_division.so
 KATRAN_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/katran
 BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
@@ -51,6 +53,7 @@ NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mg
 		-ffixed-x18 -ffixed-x26 -ffixed-x27 \
 		-ffixed-x28)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
+	-fpass-plugin=$(NATIVE_DIVISION_PLUGIN) \
 	-D$(TARGET_ARCH_DEFINE) \
 	-fms-extensions \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
@@ -58,6 +61,7 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-fno-optimize-sibling-calls \
 	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
 KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
+	-fpass-plugin=$(NATIVE_DIVISION_PLUGIN) \
 	-D$(TARGET_ARCH_DEFINE) \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
@@ -509,3 +513,10 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 native-artifacts: native-katran native-bcc native-otel native-tracee native-tetragon native-cilium
+
+# The same eBPF division lowering is part of every corpus native input.
+$(NATIVE_DIVISION_PLUGIN): native_division.cpp
+	install -d "$(dir $@)"
+	"$(CLANG)" -x c++ -fPIC -shared "$<" $$($(LLVM_CONFIG) --cxxflags --ldflags --system-libs --libs core passes) -O2 -o "$@"
+
+$(KATRAN_NATIVE_OBJS) $(BCC_NATIVE_OBJS) $(CILIUM_NATIVE_OBJS) $(OTEL_NATIVE_UNIT_OBJS) $(TRACEE_NATIVE_OBJS) native-tetragon native-cilium: $(NATIVE_DIVISION_PLUGIN)

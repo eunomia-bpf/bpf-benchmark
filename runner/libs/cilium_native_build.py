@@ -281,6 +281,7 @@ def native_compile_args(
                    "-ffixed-x18", "-ffixed-x26", "-ffixed-x27", "-ffixed-x28"])
     return [
         "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE", f"-D__TARGET_ARCH_{arch}",
+        "-fpass-plugin=" + str(compat.with_name("native_division.so")),
         *extra_defines,
         "-fms-extensions", "-fomit-frame-pointer", *arch_flags,
         "-mgeneral-regs-only", "-fno-stack-protector", "-fno-asynchronous-unwind-tables",

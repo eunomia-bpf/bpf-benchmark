@@ -196,6 +196,7 @@ COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/
 COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
+COPY --link --from=runner-runtime-host-native-bpf /native_division.so /usr/local/lib/bpfrejit/native/native_division.so
 COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
 COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
 COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original

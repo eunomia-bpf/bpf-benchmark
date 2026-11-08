@@ -1755,7 +1755,7 @@ def render_program(name: str, insns: list[NativeInsn],
         f'#include "{sim_header}"',
         "",
     ])
-    if has_indirect:
+    if has_indirect or subfunctions:
         lines.extend([
             '#if defined(__bpf__) || defined(__BPF__)',
             'static __attribute__((always_inline)) inline void',
@@ -1835,6 +1835,7 @@ def render_program(name: str, insns: list[NativeInsn],
         for addr in return_addrs:
             lines.append(f"\tcase 0x{addr:x}ULL: goto x86_l_{addr:x};")
         lines.extend([
+            "\tdefault: __x86_sim_unresolved_indirect_target();",
             "\t}",
             "",
         ])
