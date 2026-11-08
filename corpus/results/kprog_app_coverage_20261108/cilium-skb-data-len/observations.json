@@ -1,0 +1,56 @@
+{
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "verifier_rejections": 1,
+  "native_sha_matches": 2,
+  "source_drift": [],
+  "entry": "cil_from_host",
+  "verifier_class": "32-bit pointer arithmetic in captured TC data_len projection",
+  "processed_insns": 310,
+  "total_states": 1,
+  "actual_compiler_inputs": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/tc-stack-successors/cilium__agent/skb_abi.h",
+      "md5": "4040f099a56b75936eb95839f0c9db56",
+      "sha256": "9ea9835cd6520d924234fb296e0677ce9567e091b0aec7f4a84921610d87f96d"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/cilium-skb-data-len-runtime/candidate.h",
+      "md5": "aff5b1d114d920e33e7857c091c19171",
+      "sha256": "2126503bb7af9a7465391b1f73fa0c2d404b912b9d9d679e3a7ce25362b92ff4"
+    }
+  ],
+  "local_scalar_header_sha256": "dc2ef76755aa8711705b8fe0faaf8357beb054609943ba9250c293fd2db0c20f",
+  "actual_skb_include": "tc-stack-successors/cilium__agent/skb_abi.h",
+  "pending_correction": "Retarget private main-header skb/ABI includes to the actual cohort files",
+  "collector_repair": {
+    "updated": "2026-11-08T04:26:34.802528+00:00",
+    "restored_prior_driver_sha256": "e43be354ea9db967302a3f2845f145ad9519c10ff8f4547cfa46f389248ea43e",
+    "retained_current_driver_sha256": "83ecfe9b58114d74d7b021ac4effbf84196f7b9aedca6452511fd323408668e0",
+    "repairs": [
+      {
+        "directory": "cilium-skb-data-len-runtime",
+        "collector_before_sha256": "c322947d67a48b6ab188dacea4dfe38bbbbc14320c31e8c3caf269d4095a57d3",
+        "collector_sha256": "2fffe5ac9be6882348bc3c31962f3e012f38da949146c3ec2540a6a503b54cae",
+        "actual_output": "/workspaces/repository/corpus/results/kprog_app_coverage_20261108/cilium-skb-data-len",
+        "application_input_action": "collector destination repair; actual app/source/native/header inputs retain their captured bytes"
+      },
+      {
+        "directory": "tracee-movx-identity-runtime",
+        "collector_before_sha256": "f5f1e690e73e6c22d03c8b7b76030dd7f728c5a8a7c77291d8b292b8c3b81a9a",
+        "collector_sha256": "e50fe3cf34fafeddd19baedce2a660aae9f8313c2ae87f45093d1b33d7610d04",
+        "actual_output": "/workspaces/repository/corpus/results/kprog_app_coverage_20261108/tracee-movx-identity",
+        "application_input_action": "collector destination repair; actual app/source/native/header inputs retain their captured bytes"
+      },
+      {
+        "directory": "host-compile-otel-continuation",
+        "collector_before_sha256": "2acdbe3525615bd581ec5e54c100e69ade865fb387ff24c002322b430d992a66",
+        "collector_sha256": "69ff1cfeb3f0b20702d13de96400405f62975b798baf1df2c57673468e977cb9",
+        "actual_output": "/workspaces/repository/corpus/results/kprog_app_coverage_20261108/otel-host-compile-continuation",
+        "application_input_action": "collector destination repair; actual app/source/native/header inputs retain their captured bytes"
+      }
+    ]
+  },
+  "input_audit_sha256": "dd606282ff424b5a814ee902a10d4c9d638d6d53694e3b428050a1aac149d28e"
+}
