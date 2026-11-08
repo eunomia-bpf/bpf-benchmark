@@ -1,0 +1,3 @@
+Complete Tetragon V61 counted-loop paired source replay
+
+Pairednative/upstream JIT source47cfe3594 uses original2048 bound/body/order/early break with a counted path loop, retaining CONFIG_ITER_NUM and recorded credential namespace/local-length edits. The actual selectedV61 variant and every native manifest entry retain the original workload selector. Existing source scanner updatesV61 bytecode selectors. Generic ARM88helper source8eac3b42a and paired88a Image/module are captured. Guest8GiB16-19/eightvCPU follows the prior actual pairedV61 whole application through pidfd. QEMU timing supplies functional evidence; all original per-program work counters are retained. Runtime admission additions0.
