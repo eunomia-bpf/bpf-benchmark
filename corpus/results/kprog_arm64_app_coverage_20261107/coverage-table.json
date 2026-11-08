@@ -594,5 +594,21 @@
         "baseline_bpf_calls": 94569
       }
     ]
+  },
+  "latest_startup_attempts": {
+    "Cilium": {
+      "commit": "142681d1ff10ea8447a41a27c3a6677f4506c7dd",
+      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-cilium-result/coverage.json",
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-cilium-result/run-20261108T082733371541Z.tar.gz",
+      "native_service_requests": 0,
+      "baseline_resident": null,
+      "baseline_snapshot_rows": 0,
+      "stage": "baseline_endpoint_creation",
+      "cause": "synchronous_api_endpoint_generation_deadline",
+      "application_status": "error",
+      "runner_fix": "5f640f6101f29cd8a2e84a023e413379fd358629",
+      "next_complete_cohort_pid": 1607727,
+      "scope": "The earlier Cilium row retains its actual native-stage cohort; this latest whole-startup attempt closes before its phase counter snapshot."
+    }
   }
 }
