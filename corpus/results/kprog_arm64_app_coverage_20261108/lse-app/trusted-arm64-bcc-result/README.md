@@ -1,0 +1,5 @@
+Complete ARM BCC two-start LSE workload
+
+Commit b9378e020 records host, QEMU, guest, compiler and Make exits0; bcc/set statusok. All23native service requests generate and compile B, pass the stock verifier, install and participate in the application workload. Every request carries its copied native ELF, generated B, verifier and loader output in the raw runtime archive. The source/kernel/loader epoch is captured by launch73bcf5819; canonical LDADD adoption is48c989919.
+
+The phase-local measurement has23program rows in each arm: JIT116354BPF calls, native72897. Thirteen programs have positive execution counters in each arm; ten retain zero counters for block-I/O, TCP4/TCP6 connection/state hooks and vfs_fsync. Their IDs/names, full counter rows and original stress-ng outputs are in work-counters.json. JIT/native bogo counts are syscall507/507, cap1466/720, set114/70 and sockfd920/446. The existing duration-based workload completes successfully; all-program execution coverage and cross-arm same-work accounting continue through the recorded trigger classes. QEMU durations provide functional evidence.

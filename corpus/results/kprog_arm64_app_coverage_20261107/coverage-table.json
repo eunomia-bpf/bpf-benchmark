@@ -160,34 +160,39 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T08:43:27.538503+00:00",
+    "as_of_utc": "2026-11-08T08:56:01.249981+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
         "application": "BCC",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-bcc-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/lse-app/trusted-arm64-bcc-result/coverage.json",
         "baseline_resident": 23,
-        "service_source_ids": 19,
-        "generated": 19,
-        "compiled": 19,
+        "service_source_ids": 23,
+        "generated": 23,
+        "compiled": 23,
         "stages": {
-          "verifier_rejected": 3,
-          "verifier_accepted_installed": 15,
-          "loader_rejected": 1
+          "verifier_accepted_installed": 23
         },
-        "failure_classes": {
-          "exclusive_retry_loop": 3,
-          "kernel_chunk_enoent": 1
-        },
+        "failure_classes": {},
         "application_status": [
-          "error"
+          "ok"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-bcc-result/run-20261108T065115786479Z.tar.gz",
-        "raw_archive_sha256": "87121d05238518c61748ef07d8219a1fa01df79418833850458f5b9a03afafb6",
-        "host_ok": false,
-        "guest_exit": 1,
-        "runtime_epoch": "five_step_e2d3",
-        "baseline_bpf_calls": 174084
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/lse-app/trusted-arm64-bcc-result/run-20261108T082153675399Z.tar.gz",
+        "raw_archive_sha256": "e64a2bd4eefb0b1fdb6ffe42c862976fc46f32fe59da9ea4434ace687996b4eb",
+        "host_ok": true,
+        "guest_exit": 0,
+        "runtime_epoch": "five_step_e2d3_LSE_73bcf5819",
+        "baseline_bpf_calls": 116354,
+        "native_bpf_calls": 72897,
+        "execution_counter_positive": {
+          "baseline": 13,
+          "native": 13
+        },
+        "execution_counter_zero": {
+          "baseline": 10,
+          "native": 10
+        },
+        "work_counters": "corpus/results/kprog_arm64_app_coverage_20261108/lse-app/trusted-arm64-bcc-result/work-counters.json"
       },
       {
         "application": "OTel",

@@ -82,7 +82,7 @@ Each row retains its source/runtime epoch. Baseline resident programs count the 
 
 | Application | Baseline resident | Service source IDs | Generated C / compiled B | Verifier accepted and installed | Specialization errors | Verifier errors | Request or loader errors | Cause | Whole app |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| [BCC](../kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-bcc-result/coverage.json) | 23 | 19 | 19 / 19 | 15 | 0 | 3 | 1 | 3 exclusive_retry_loop, 1 kernel_chunk_enoent | error |
+| [BCC](../kprog_arm64_app_coverage_20261108/lse-app/trusted-arm64-bcc-result/coverage.json) | 23 | 23 | 23 / 23 | 23 | 0 | 0 | 0 | 13positive /10zero execution counters in each arm | ok |
 | [OTel](../kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json) | 12 | 3 | 3 / 3 | 2 | 0 | 1 | 0 | 1 bpf_stack_extent (-576) | error |
 | [Cilium](xdp-byte-helpers/applications/cilium/trusted-arm64-cilium-result/coverage.json) | 62 | 3 | 2 / 2 | 1 | 0 | 1 | 1 | 1 context_access_alignment, 1 kernel_facts_estale | error |
 | [Tetragon](../kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tetragon-result/coverage.json) | 163 | 1 | 1 / 1 | 0 | 0 | 1 | 0 | 1 exclusive_retry_loop | error |
@@ -94,3 +94,5 @@ Five-step Katran84907b44c completes with host/QEMU/guest/application success and
 Tetragon493965393 closes its first complete five-step replay with163baseline resident programs and29897BPF invocations. Its first native request generates and compiles B, then reaches the stock exclusive-retry-loop error. The serial queue continues with OTel/Cilium/Tracee on captured source385d5095c. Canonical source adoptionf434f46a2 and the complete34-case replay retain separate cohorts.
 
 OTel d7eab41ef closes the captured five-step replay with3fresh source/B objects and2installed programs. perf_unwind_native reaches stock-verifier stackoffset-576; the raw arena/tag/payload layout is496/64/8bytes. The serial queue continues with captured Cilium and Tracee. The complete BCC LSE successor has23successful service receipts while its application workload closes.
+
+BCC b9378e020 completes the full five-step LSE two-start recipe at host/QEMU/guest/compiler exits0, with23fresh generated/compiled/accepted/installed requests. JIT/native counters record116354/72897BPF calls;13programs in each arm have positive counters and10retain zero counts for block/TCP/fsync trigger classes. [Exact phase and stressor counters](../kprog_arm64_app_coverage_20261108/lse-app/trusted-arm64-bcc-result/work-counters.json) retain syscall507/507 and each remaining duration-driven count.
