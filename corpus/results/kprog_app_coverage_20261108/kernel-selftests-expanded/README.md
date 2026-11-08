@@ -1,0 +1,7 @@
+# Expanded original x86 kernel C entry cohort
+
+The current common catalog contains317 compiled native objects and315 present C entries, compared with the previous239-entry runtime cohort. This epoch captures all315 existing original native objects and all1917 catalog rows. Every native/source/annotation byte retains its origin. All50 whole original resource BPF files compile with the existing60e37 wrapper. Captured generic named-helper/RAW context source is0818f5677. Original BPF object programs use autoload=false for native resource preparation, native source_prog_id0 and load-only submission; native executions0.
+
+Before the entire native cohort, the original published verifier_lsm no_null_check and null_check BPF programs are each loaded by libbpf with every sibling autoload=false. Their stock load result, hook target, original object identity and verifier log are retained. This original BPF baseline has attachments0 and executions0. The full315 native table includes both LSM cases and all existing native-compiled C entries. Actual native/P/B/context and original kernel annotations supply their own domains; the paired-kernel LSM nullability question remains explicit.
+
+The20-23/12GiB guest follows the existing239 dynptr replay and precedes queued whole Tetragon, following priority2a. The existing Tetragon waiter keeps its captured source and resumes after this actual guest closes. Every outcome remains recorded, including generation/compiler/resource and installed failure findings. Runtime admission additions0.
