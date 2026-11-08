@@ -9231,6 +9231,99 @@
       "NativeLinkFinalImage.readonly_transferred_load"
     ]
   },
+  "readonly_image_write_preservation": {
+    "actual_existing_component_exit": 0,
+    "archive": {
+      "block_sha256": "d580fffed3251c193532c45572cfcf01bad5753d7d124545a0fc0d26480bb58c",
+      "compressed_prefix_bytes": 99653179,
+      "compressed_prefix_sha256": "9e6e4a645a30cd12fef58849910fed47cdbbf090b475651480869f040c290d27",
+      "entries": {
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-component.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-component.launch.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-component.log": {
+          "bytes": 7186,
+          "sha256": "2ad0cf18ed959acae87af6e82684dc69418185d09589a31f21111ca18cd07637"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-component.mk": {
+          "bytes": 77,
+          "sha256": "211d01d847ef1453e7b473f4859924991b57c3a2f19fcb33b93cca31a64b7c7f"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-initial.lean": {
+          "bytes": 2613,
+          "sha256": "a3efff9dbd0b28f7290954bc904c68323ba8ad3025c3aa75b58fbbcdf8a2e720"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-initial.log": {
+          "bytes": 2098,
+          "sha256": "cce130224e68678e196ea1c3032e446eb8adbbb80bc675537d18f709ff06d4d6"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-second.lean": {
+          "bytes": 2631,
+          "sha256": "5c6642f4f4d030c4eccccb73a3f1f68ec8838d9d9b7a045259b7cdf705565065"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-second.log": {
+          "bytes": 1606,
+          "sha256": "d72302e86569b260cff9706d511151c5901448fa3d15667fc5844365d8bd8a6a"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-third.lean": {
+          "bytes": 2639,
+          "sha256": "1b8345e3c2bbf2eacd25911d74f94b134e27be8690d26002cf6e64d9161b38e8"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant-third.log": {
+          "bytes": 941,
+          "sha256": "a45489d243c466d29fb71dceabea87afb1b3aa695b62ef7133f2cd7d5e37dc90"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant.launch.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant.lean": {
+          "bytes": 2696,
+          "sha256": "b051c561e0e039794c76bc14206b11506af82d2a44abe9729e83d58197911942"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant.log": {
+          "bytes": 247,
+          "sha256": "5db7e8a4b36ec0a7e0e89dad3bf79abdcbf4bfc59825466676960e39fe474c86"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-invariant.mk": {
+          "bytes": 155,
+          "sha256": "dc17ba195f69f3436f15e0bb81d763de3b293e667d673ca3bd86c71a4a91af25"
+        },
+        "/workspaces/.agent-state/kprog-lanes/V/readonly-write-publication-inputs.json": {
+          "bytes": 480,
+          "sha256": "32ce9aa209f790b46945ce24e218645bbac036baadee5d07dd9fa75dc6490cb1"
+        },
+        "/workspaces/repository/kprog/tv/NativeLinkLiteral.lean": {
+          "bytes": 19784,
+          "sha256": "b25c7cc16569a7aaabb47ef0b94637c21846460daaeb9085772a2995104c9a1c"
+        }
+      },
+      "marker": "=== READONLY IMAGE WRITE PRESERVATION V1 ==="
+    },
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "command": "make -C kprog/tv native-link-literal-check",
+    "interfaces": "Actual native/proof object and physical permission correspondence, map lifetime and returning helper/platform memory effects remain universal implementation interfaces.",
+    "scope": "Every permitted canonical guest store preserves the complete frozen image. Readonly write permissions persist and supply the same premise to every later store; wrapping64-bit addresses and arbitrary counts are included.",
+    "source_commit": "afbfe97ca1843c7848b9e4731230d96fc573d6fb",
+    "source_sha256": "b25c7cc16569a7aaabb47ef0b94637c21846460daaeb9085772a2995104c9a1c",
+    "theorems": [
+      "NativeLinkLiteral.ReadOnly.permitted_write_outside",
+      "NativeLinkLiteral.ReadOnly.image_store_preserved",
+      "NativeLinkLiteral.ReadOnly.image_write_preserved"
+    ]
+  },
   "return_route_focused": {
     "archive_block_sha256": "98b43f626b36e1fa05de751f69b7057524dfe903d58268a1ae014848b3882af6",
     "commands": [

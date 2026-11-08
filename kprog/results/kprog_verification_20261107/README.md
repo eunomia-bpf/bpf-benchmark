@@ -4931,3 +4931,14 @@ private-binary successor are archived together.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_b3d713f42`. Every check retains its exact published source identity.
+
+### Frozen readonly images through guest writes
+
+The published `afbfe97ca` laws preserve every frozen object byte through each
+permitted canonical store, including wrapping64-bit addresses and arbitrary
+counts. The same write permissions persist for every later write. The existing
+native-link literal component passes; the laws use `propext` and `Quot.sound`.
+Original proof attempts, final source and command output are archived under
+`readonly_image_write_preservation`. Actual native/proof identity, physical
+permissions/map lifetime and helper/platform state effects retain their explicit
+interfaces. Full source b3d713f42 retains its separate complete PASS receipt.
