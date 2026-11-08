@@ -3953,3 +3953,10 @@ CPU-trace finalizer (`failed_full_check_d2246b5c8_resource`). Its1161 source
 hashes match both Git and the retired export; the complete CPU trace and raw
 failure controls are recovered and archived. The latest published source
 continues through the complete check with the existing incremental caches.
+
+### Published source full check 2ea4ef3f3
+
+`make check` on immutable published2ea4ef3f3 exits0. All1162 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_2ea4ef3f3`. Every check retains its exact published source identity.

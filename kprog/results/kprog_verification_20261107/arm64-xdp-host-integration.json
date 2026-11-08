@@ -4334,6 +4334,27 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_2ea4ef3f3": {
+    "actual_exit": 0,
+    "archive_block_sha256": "e0c480cabacf874358a6b5d1bb5b304beb50014fd51d239b4a53882aa21ac262",
+    "archive_marker": "=== FULL MAKE CHECK 2EA4EF3F3 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.cpu.jsonl.gz": "72607ead49645aecfc5f3c44090002d90b27ebcce02a9c55cf5c9594e07b7439",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.head": "c73923182bb49feba5a60e57bf8b3eaf3d7768ba57ecceaa4cdf2a922c9b5014",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.launch.log": "7f93b3fcd878ec782c44411a29eaed43f215f55616b958162b0572f8bb98c566",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.log": "7afcdac08df1985a8f0ac0f6ec4d251445f04d6d38f6940f5fc20b644cbb49ca",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.preflight.json": "5ac01e23ad218c66c27acd0b40b9dc5c8429dcf28d7fb9dd8185b47140562455",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.py": "a98b51d24ce89355b47407509631bcf18b40ada9086a7cb1b948d6aa47fdf8a7",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.sources": "39affdc00f26f6c4f03c9ce20dd6c7b2ef55de42c836ee10303c39b2e8770304",
+      "/workspaces/.agent-state/kprog-lanes/V/returntoken-full.state": "a05ff8977acf4de187d4c3d6f66bb334a24af22dac7d3ceb7cc510f20520efa4"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "2ea4ef3f3fd2c997e639994504a34781e1e1286d",
+    "scope": "Complete formal make check of the exact published source tree 2ea4ef3f3fd2c997e639994504a34781e1e1286d. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1162
+  },
   "full_make_check_43a7fa48d": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "9f739716535e8155bb4cb69c9ebfa8ad4dfef9261540a5708963ce5d1c1ae7f0",
