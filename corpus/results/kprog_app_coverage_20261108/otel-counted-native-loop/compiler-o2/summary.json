@@ -1,0 +1,29 @@
+{
+  "make_exit": 0,
+  "original_whole_application": "f162c3111c5653df5776aeba1b268dfb56200259",
+  "original_B_compiled": true,
+  "original_stock_frontier": "invalid write to stack R10 off=-528 size=8",
+  "command": [
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/otel-counted-native-loop/clang",
+    "-g",
+    "-O2",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-counted-native-loop/compiler-o2/input.bpf.c",
+    "-o",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-counted-native-loop/compiler-o2/o2.bpf.o"
+  ],
+  "native_executions": 0,
+  "service_compiler_policy": "captured original O3 retained"
+}

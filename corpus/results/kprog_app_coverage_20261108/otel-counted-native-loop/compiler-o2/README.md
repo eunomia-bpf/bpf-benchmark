@@ -1,0 +1,3 @@
+# OTel captured B compilation at O2
+
+The identical generated C from whole paired-source OTel f162c3111 compiles with O2 as a generic simulator compiler-policy candidate. Source/entry/native P/metadata stay captured; the original O3 object reaches stock-verifier stackoff528/8. Actual compile Makeexit0. Complete old/new compiler commands, source dependencies, warnings, B and disassembly accompany raw.tar.gz. This host compilation records its artifact outcome; stock-verifier acceptance follows a source-captured guest. Current service compiler policy retains O3. Native executions0; runtime admission additions0.
