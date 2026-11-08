@@ -1,0 +1,56 @@
+{
+  "utc": "2026-11-08T15:30:38.789741+00:00",
+  "scope": "Canonical ARM micro_exec refreshed from the retained incremental CMake/LLVM/libbpf caches and published native-only source",
+  "build": {
+    "utc": "2026-11-08T15:15:11.037930+00:00",
+    "phase": "finished",
+    "source_commit": "fe1d7487e9407176af2f0f13ad532ed844e0ec0c",
+    "binary_before": "58a0d26ceba5c7fb8b2c4a0391f839e44f7ba7ede100fc71a370dbdb26e1d94b",
+    "commands": [
+      {
+        "target": "refresh",
+        "returncode": 0
+      },
+      {
+        "target": "list",
+        "returncode": 0
+      }
+    ],
+    "finished": "2026-11-08T15:16:01.278724+00:00",
+    "binary_after": "c78a11d9b1a383c2059677bf1cbe2f6bb9398b24985576dbf28452851dd6548b",
+    "binary_size": 79434744
+  },
+  "canonical_binary_sha256": "c78a11d9b1a383c2059677bf1cbe2f6bb9398b24985576dbf28452851dd6548b",
+  "control": {
+    "counts": {
+      "submitted": 1,
+      "skipped": 0,
+      "ran": 1,
+      "refused": 0,
+      "not-reached": 0,
+      "failure": 0,
+      "failure_agrees": 0,
+      "success": 1,
+      "success_agrees": 1
+    },
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_exit": 0,
+    "compiler_exit": 0,
+    "service_records": [
+      {
+        "request_id": 1,
+        "source_prog_id": 6,
+        "native_sha256": "e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7",
+        "started": "1970-01-01T00:00:47.361418+00:00",
+        "prog_id": 7,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-7oyps4u2/service-state/trusted-4z06p1gm/1.success.tar.gz",
+        "finished": "1970-01-01T00:01:02.570053+00:00"
+      }
+    ],
+    "archive": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/runner-current/canonical/control/trusted-arm64-service-result/run-20261108T151921660058Z.tar.gz",
+    "archive_sha256": "0f1c0256ad7391057b3346b2e8c899432080192053e210210e5894b2f280f576"
+  },
+  "runtime_admission_additions": 0
+}

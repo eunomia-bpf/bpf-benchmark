@@ -1,0 +1,7 @@
+Canonical current-source ARM runner
+
+The sole canonical runner/build-arm64-llvmbpf/micro_exec now builds incrementally from the current native-only source. Its retained CMake cache resolves the current kprog/libnativeloader and build-bpf-kinsn-arm64 paths; warm LLVM/libbpf archives and dependency caches remain in use. Build and existing kernel-object listing finish at0. Current executable SHA is c78a11d9b1a383c2059677bf1cbe2f6bb9398b24985576dbf28452851dd6548b. The earlier Sept30 executable and cache metadata remain in retired-canonical.tar.gz inside the build archive.
+
+The existing original kernel global_func8 __success control uses this canonical executable, the production ordered ARM tag source and paired exact-extent88a Image/module. It freshly generates/compiles B, passes the stock verifier, installs and completes native execution. Annotation success agrees; guest, QEMU, compiler and Make exits are0. Its complete terminal service archive and actual request/native ID are retained in runtime.json. Shared submit.py uses its captured d253 companion-stage epoch; R owns BPF-34 direct source0 submission and the following complete catalog replay.
+
+Current full annotation and application cohorts retain their captured runner/linker/source bytes. This publication activates the finished canonical producer and keeps historical receipts individually attributable. build-inputs.tar.gz includes both executable epochs, exact source/cache/flags/build logs and the existing control invocation. Runtime admission additions:0.
