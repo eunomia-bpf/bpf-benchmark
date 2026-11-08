@@ -4861,3 +4861,10 @@ original case table and loop domain is retained. Archive `live_skb_and_approved_
 contains the original full result/all1258 verified source hashes, complete
 suffix survey and corrected logs. Live Workspace diagnostic epochs and the next
 immutable full check keep their own source identities.
+
+### Published source full check 0e21d357c
+
+`make check` on immutable published0e21d357c exits0. All1258 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_0e21d357c`. Every check retains its exact published source identity.
