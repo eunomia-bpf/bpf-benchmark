@@ -6,8 +6,12 @@
       "returncode": 0
     },
     {
-      "phase": "baseline",
-      "returncode": 0
+      "phase": "initial_baseline_Make",
+      "returncode": 2
+    },
+    {
+      "phase": "baseline_retry",
+      "returncode": 2
     }
   ],
   "scope": "Private candidate: three internal inlining attributes, complete identical selected C/header source; original2048 bound/helper/output logic retained; canonicalO3/native and upstreamV61BPF",
@@ -417,5 +421,7 @@
   },
   "runtime_admission_additions": 0,
   "source_edit": "Three FUNC_LOCAL to FUNC_INLINE attributes; same full selected C/header tree for both frontends",
-  "source_change_patch": "corpus/results/kprog_app_source_changes/tetragon-data-event-inline.patch"
+  "source_change_patch": "corpus/results/kprog_app_source_changes/tetragon-data-event-inline.patch",
+  "initial_wrapper_status": "Initial wrapper returned0 while Make returned2; original command/stderr retained and actual Make exit propagated in retry",
+  "compiler_context": "Baseline uses the existing native frontend -fms-extensions for generated anonymous-tag members and three public iterator declarations from vendor/libbpf/src/bpf_helpers.h345-347; complete selected appC/header bytes remain equal"
 }
