@@ -117,3 +117,5 @@ BCC real-event successor584ae11ac retains all23 generated/compiled/verifier-acce
 BCC block_rq_insert uses the upstream optional -Q attachment path; its current command uses default arguments. The remaining merge hook keeps its zero observation. Tetragon LSE replaces the earlier exclusive-retry frontier with the current private-storage frontier. Each cohort retains its complete raw archive and source epoch.
 
 Cilium async-endpoint successor closes with62JIT-baseline rows and17540BPF calls. Native configuration compilation exits with signal:killed before service submission; the latest-terminal-attempt JSON retains0requests and its exact raw archive alongside the earlier native-stage row. Signal/OOM/context-cancellation attribution continues from the captured compiler and kernel logs.
+
+Cilium wrapper follow-up: captured native ELF complete, six text functions; host configuration compile0 with allocated sections byte-identical, all six proof-link commands0. The terminal QEMU epoch contains0service requests. Detailed source/context observations and the frozen-runner operator case are in ../kprog_arm64_app_coverage_20261108/cilium-native-compile/.

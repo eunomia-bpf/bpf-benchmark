@@ -1,0 +1,217 @@
+{
+  "utc": "2026-11-08T12:08:18.150889+00:00",
+  "original_application_result": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-endpoint-replay/trusted-arm64-cilium-result/coverage.json",
+  "guest_artifacts": {
+    "native_object_bytes": 262872,
+    "elf_machine": "AArch64",
+    "text_functions": 6,
+    "proof_objects": 0,
+    "manifest_fragments": 0,
+    "service_requests": 0
+  },
+  "host_compiler": {
+    "utc": "2026-11-08T12:00:42.612099+00:00",
+    "returncode": 0,
+    "wall_seconds": 0.5646799318492413,
+    "max_rss_kib": 127616,
+    "user_seconds": 0.51305,
+    "system_seconds": 0.048909
+  },
+  "allocated_section_comparison": {
+    "allocated_sections_equal": true,
+    "sections": {
+      "guest": {
+        ".text": {
+          "size": 32,
+          "sha256": "a46833fc74a8b684dd46f8b5b77cb9b6f6a3e9f712022e745c4ba91b158e1308"
+        },
+        "xdp/tail": {
+          "size": 19596,
+          "sha256": "acbdc15eccdd2d944102c5f991f469bdd839dd3e67f68ac064de5aa01d086407"
+        },
+        "xdp/entry": {
+          "size": 972,
+          "sha256": "5ae6bb131219945fba0b51e05d9cba1bbdbc204a9772e84e326083f28fa8fb32"
+        },
+        ".rodata.config": {
+          "size": 178,
+          "sha256": "f4b5d7df878f4aa41ba8d4ef519a5aed1c27498972caa6f639419fa3dc12145b"
+        },
+        ".maps": {
+          "size": 2696,
+          "sha256": "3fe07f46ac6e620fe8fd1e6a88260ceb498745a031b24eb918570b68db7ef7a3"
+        },
+        "license": {
+          "size": 13,
+          "sha256": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba"
+        },
+        ".rodata.aux": {
+          "size": 16,
+          "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+        },
+        ".bss": {
+          "size": 8,
+          "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        }
+      },
+      "host": {
+        ".text": {
+          "size": 32,
+          "sha256": "a46833fc74a8b684dd46f8b5b77cb9b6f6a3e9f712022e745c4ba91b158e1308"
+        },
+        "xdp/tail": {
+          "size": 19596,
+          "sha256": "acbdc15eccdd2d944102c5f991f469bdd839dd3e67f68ac064de5aa01d086407"
+        },
+        "xdp/entry": {
+          "size": 972,
+          "sha256": "5ae6bb131219945fba0b51e05d9cba1bbdbc204a9772e84e326083f28fa8fb32"
+        },
+        ".rodata.config": {
+          "size": 178,
+          "sha256": "f4b5d7df878f4aa41ba8d4ef519a5aed1c27498972caa6f639419fa3dc12145b"
+        },
+        ".maps": {
+          "size": 2696,
+          "sha256": "3fe07f46ac6e620fe8fd1e6a88260ceb498745a031b24eb918570b68db7ef7a3"
+        },
+        "license": {
+          "size": 13,
+          "sha256": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba"
+        },
+        ".rodata.aux": {
+          "size": 16,
+          "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+        },
+        ".bss": {
+          "size": 8,
+          "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        }
+      }
+    }
+  },
+  "host_native_link": [
+    {
+      "symbol": "cil_xdp_entry",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "cil_xdp_entry",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/cil_xdp_entry.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.017332273069769144,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=cil_xdp_entry (972 bytes), 1 reachable symbol(s) total\n  - cil_xdp_entry (vaddr 0x0, 972 bytes) [entry]\nnative-link: wrote proof object 980 bytes, 18 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/cil_xdp_entry.proof.o\n"
+    },
+    {
+      "symbol": "tail_drop_notify",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "tail_drop_notify",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_drop_notify.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.0021556690335273743,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=tail_drop_notify (904 bytes), 1 reachable symbol(s) total\n  - tail_drop_notify (vaddr 0x0, 904 bytes) [entry]\nnative-link: wrote proof object 908 bytes, 34 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_drop_notify.proof.o\n"
+    },
+    {
+      "symbol": "tail_no_service_ipv4",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "tail_no_service_ipv4",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_no_service_ipv4.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.002950218040496111,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=tail_no_service_ipv4 (2068 bytes), 1 reachable symbol(s) total\n  - tail_no_service_ipv4 (vaddr 0x390, 2068 bytes) [entry]\nnative-link: wrote proof object 2076 bytes, 18 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_no_service_ipv4.proof.o\n"
+    },
+    {
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "tail_nodeport_nat_egress_ipv4",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_nat_egress_ipv4.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.0062185307033360004,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=tail_nodeport_nat_egress_ipv4 (5276 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_nat_egress_ipv4 (vaddr 0x37f0, 5276 bytes) [entry]\nnative-link: wrote proof object 5284 bytes, 132 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_nat_egress_ipv4.proof.o\n"
+    },
+    {
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "tail_nodeport_nat_ingress_ipv4",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_nat_ingress_ipv4.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.01064332528039813,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=tail_nodeport_nat_ingress_ipv4 (7764 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_nat_ingress_ipv4 (vaddr 0x1990, 7764 bytes) [entry]\nnative-link: wrote proof object 7772 bytes, 170 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_nat_ingress_ipv4.proof.o\n"
+    },
+    {
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/guest-bpf_xdp.native.o",
+        "--symbol",
+        "tail_nodeport_rev_dnat_ipv4",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_rev_dnat_ipv4.proof.o",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.003908064216375351,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=tail_nodeport_rev_dnat_ipv4 (3548 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_rev_dnat_ipv4 (vaddr 0xbb0, 3548 bytes) [entry]\nnative-link: wrote proof object 3556 bytes, 80 reloc(s) -> /workspaces/.agent-state/kprog-lanes/A/cilium-compile/tail_nodeport_rev_dnat_ipv4.proof.o\n"
+    }
+  ],
+  "upstream_compile_context": {
+    "seconds": 300,
+    "source": "vendor/repos/cilium/pkg/datapath/loader/base.go:375",
+    "default_source": "vendor/repos/cilium/pkg/defaults/defaults.go:179",
+    "compiler_launch_source": "vendor/repos/cilium/pkg/datapath/loader/compile.go:189"
+  },
+  "inference": "The wrapper retained a complete native ELF before its SIGKILL result. The upstream300-second compilation context covers the wrapper pipeline. Exact cancellation attribution remains the next whole-QEMU observation.",
+  "application_verifier_receipt": "Whole QEMU source submission supplies the stock verifier and workload outcomes"
+}

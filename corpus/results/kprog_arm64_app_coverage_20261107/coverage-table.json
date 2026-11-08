@@ -657,10 +657,16 @@
       "baseline_bpf_calls": 17540,
       "service_requests": 0,
       "generated": 0,
-      "failure_class": "native_configuration_clang_signal_killed",
+      "failure_class": "native_compile_wrapper_killed_after_native_ELF_emission",
       "application_status": "error",
       "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-endpoint-replay/trusted-arm64-cilium-result/run-20261108T110755754185Z.tar.gz",
-      "raw_archive_sha256": "d72aa89854bcdb66c0a449836e719f1e3f89a4e8f0332bc318f4be999892e7f2"
+      "raw_archive_sha256": "d72aa89854bcdb66c0a449836e719f1e3f89a4e8f0332bc318f4be999892e7f2",
+      "native_object_complete": true,
+      "host_native_config_compile_exit": 0,
+      "allocated_native_sections_equal": true,
+      "host_proof_link_functions": 6,
+      "host_proof_link_exit": 0,
+      "component_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-native-compile/summary.json"
     }
   }
 }

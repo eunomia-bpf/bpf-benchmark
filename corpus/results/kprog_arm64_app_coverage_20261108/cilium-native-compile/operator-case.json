@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-08T12:08:18.150889+00:00",
+  "scope": "Cilium full-system QEMU native configuration wrapper",
+  "evidence": "Captured native ELF complete; all six actual text-function proof-link commands succeed on host; same generated configuration compiles to byte-identical allocated sections on host",
+  "current_contract": "AGENTS.md freezes app runners, upstream app source and runtime launch wiring until explicit authorization",
+  "proposed_changes": [
+    {
+      "option": "Existing host compiler transport for Cilium native configuration generation",
+      "purpose": "Run the exact captured native compiler/link commands in the Workspace; pass native objects back to the unchanged five-step kernel path"
+    },
+    {
+      "option": "QEMU Cilium upstream compile context duration removal",
+      "purpose": "Use the app compilation context with ordinary cancellation during the functional QEMU recipe; incrementally rebuild the current app binary"
+    }
+  ],
+  "new_checks_gates_limits_validations": 0,
+  "operator_review": "Coordinator takes the concrete scope to operator; other ARM work continues"
+}

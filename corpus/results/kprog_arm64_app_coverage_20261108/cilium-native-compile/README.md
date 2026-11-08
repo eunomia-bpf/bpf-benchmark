@@ -1,0 +1,9 @@
+Cilium ARM native configuration compiler and link frontier
+
+The complete QEMU application attempt retained bpf_xdp.native.o as a valid262872-byte AArch64 ELF, containing six text functions. Its archive contains the BPF object, native ABI record and parity record; proof objects, manifest fragments and service requests each count0. This refines the original signal:killed classification to the native compiler wrapper pipeline after native object emission.
+
+The exact captured configuration headers and native ABI source compile on the Workspace host to AArch64 with clang18: exit0, wall0.565s, maximumRSS127616KiB. Every allocated ELF section matches the QEMU-generated native ELF byte for byte. The same captured guest ELF passes all six actual native-link proof-generation commands, each exit0. These are compiler/link component outcomes. The whole application run supplies verifier installation and work-counter evidence.
+
+Cilium upstream wraps this full compiler command in a300-second context in pkg/datapath/loader/base.go, inherited by exec.WithCancel in compile.go. The observed SIGKILL after native ELF emission is consistent with that context expiry; precise cancellation attribution remains the next whole-QEMU observation. The captured kernel log supplies the original guest memory events.
+
+operator-case.json records two concrete ways to let the functional QEMU application pipeline finish: extend the existing host compiler transport to the native configuration commands, or remove the upstream compile duration for this functional QEMU recipe. AGENTS.md places changes to upstream app source, app runners and runtime launch wiring under explicit authorization. The case is posted under Notices for the coordinator. Existing source, logs, object and component results remain in inputs.tar.gz and summary.json.
