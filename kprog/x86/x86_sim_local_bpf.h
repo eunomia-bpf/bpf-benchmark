@@ -3097,6 +3097,9 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_ima_file_hash() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
 
+#define X86_SIM_BPF_CALL_bpf_kptr_xchg() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_kptr_xchg((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
+
 #define X86_SIM_BPF_CALL_ID(ID) \
 	do { \
 		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) { \

@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-08T17:50:24.628977+00:00",
+  "scope": "Generic native Linux helper194 body with RDI/RSI pointer arguments and existing pointer return/clobber ABI",
+  "compile_results": [
+    {
+      "program": "non_const_var_off_kptr_xchg",
+      "returncode": 0
+    },
+    {
+      "program": "reject_kptr_xchg_on_unref",
+      "returncode": 0
+    },
+    {
+      "program": "reject_untrusted_xchg",
+      "returncode": 0
+    }
+  ],
+  "source_sha256": "7726cf9e7a40588c0261fdce4fea571e53d81aa7efe8baa6e70d56df3f542e26",
+  "native_execution_count": 0
+}
