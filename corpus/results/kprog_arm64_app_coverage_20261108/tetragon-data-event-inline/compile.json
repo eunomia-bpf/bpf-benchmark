@@ -415,5 +415,7 @@
       "bytes": 1026080
     }
   },
-  "runtime_admission_additions": 0
+  "runtime_admission_additions": 0,
+  "source_edit": "Three FUNC_LOCAL to FUNC_INLINE attributes; same full selected C/header tree for both frontends",
+  "source_change_patch": "corpus/results/kprog_app_source_changes/tetragon-data-event-inline.patch"
 }

@@ -1,0 +1,13 @@
+diff --git a/vendor/bpf/tetragon/bpf/process/data_event.h b/vendor/bpf/tetragon/bpf/process/data_event.h
+index e672bd08e..c91066a39 100644
+--- a/vendor/bpf/tetragon/bpf/process/data_event.h
++++ b/vendor/bpf/tetragon/bpf/process/data_event.h
+@@ -75 +75 @@ error:
+-FUNC_LOCAL long
++FUNC_INLINE long
+@@ -186 +186 @@ FUNC_INLINE size_t data_event(
+-FUNC_LOCAL size_t
++FUNC_INLINE size_t
+@@ -203 +203 @@ data_event_bytes(void *ctx, struct data_event_desc *desc, unsigned long uptr,
+-FUNC_LOCAL size_t
++FUNC_INLINE size_t

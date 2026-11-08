@@ -72,7 +72,7 @@ error:
 	return err;
 }
 
-FUNC_LOCAL long
+FUNC_INLINE long
 __do_str(void *ctx, struct msg_data *msg, unsigned long arg, bool *done)
 {
 	size_t size, max = sizeof(msg->arg) - 1;
@@ -183,7 +183,7 @@ FUNC_INLINE size_t data_event(
  *
  * Returns size of struct @desc object or 0 in case of error.
  */
-FUNC_LOCAL size_t
+FUNC_INLINE size_t
 data_event_bytes(void *ctx, struct data_event_desc *desc, unsigned long uptr,
 		 size_t size, struct bpf_map_def *heap)
 {
@@ -200,7 +200,7 @@ data_event_bytes(void *ctx, struct data_event_desc *desc, unsigned long uptr,
  *
  * Returns size of struct @desc object or 0 in case of error.
  */
-FUNC_LOCAL size_t
+FUNC_INLINE size_t
 data_event_str(void *ctx, struct data_event_desc *desc, unsigned long uptr,
 	       struct bpf_map_def *heap)
 {
