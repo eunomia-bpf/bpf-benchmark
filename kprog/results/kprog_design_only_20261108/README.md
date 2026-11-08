@@ -874,3 +874,11 @@ The coordinator has a design-scope review case for direct global-kinsn ingress a
 | `kernel/bpf/verifier.c (applied baseline):21475` | `check_native_input` | keep | d, e | native B uses stock verifier; slice descriptors retain their decoder |
 | `kernel/bpf/verifier.c (applied baseline):21479` | `check_native_input` | remove | outside a?e | native B uses stock verifier; slice descriptors retain their decoder |
 | `kernel/bpf/verifier.c (applied baseline):21483` | `check_native_input` | keep | d, e | native B uses stock verifier; slice descriptors retain their decoder |
+
+## AArch64 migration
+
+Shared publication `82f8e9e77` supplies the immutable chunk/capsule interface. The ARM candidate uses that interface with BL26/far-helper, perCPU, readonly and map/helper resolution. Its657-line module replaces the1269-line baseline. The inventory records127 baseline refusal expressions: 72 removal and55 functional keep decisions. [Exact source sites and decisions](arm64/refusal-inventory.json) accompany the candidate source and command archive.
+
+The private simulator represents entry GPR/NZCV/vector values and helper caller-clobbers through kind6. The layout collector retains stack/payload geometry, and metadata decoding consumes the request fields. Existing byte-arm and skb CB representations join this source epoch. The existing142080 UBSan observations and TC BPF compile pass. The sole warm ARM kernel cache supplies the incremental Image and11-module build on16-19; the existing ARM loader cache supplies the paired caller/service binaries. BCC, Katran and the existing34 native-only cases follow the coherent build. Source/receipts are in [ARM preparation](arm64/preparation.json).
+
+Safety has two facts: the stock verifier accepts B, and B faithfully simulates P. The five steps construct the kernel-copy relationship. Additional runtime admission checks follow the operator approval path through Notices.

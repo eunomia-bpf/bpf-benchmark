@@ -1,0 +1,1089 @@
+[
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 144,
+    "function": "decode_native_lab_payload",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 146,
+    "function": "decode_native_lab_payload",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 148,
+    "function": "decode_native_lab_payload",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 152,
+    "function": "decode_native_lab_payload",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 166,
+    "function": "native_lab_advance_generation",
+    "expression": "return -EOVERFLOW;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 203,
+    "function": "emit_arm64_far_helper_call",
+    "expression": "return -ERANGE;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 249,
+    "function": "instantiate_native_lab",
+    "expression": "return -ESTALE;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 253,
+    "function": "instantiate_native_lab",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 263,
+    "function": "instantiate_native_lab",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 314,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 316,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 324,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -ESTALE;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 341,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 345,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 349,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 353,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 363,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 371,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 379,
+    "function": "emit_native_lab_arm64",
+    "expression": "return -ENOENT;",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Allocated chunk lookup supplies native bytes"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 410,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 422,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -ERANGE;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 434,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 444,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 454,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 466,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 479,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -ERANGE;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 501,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 513,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -ERANGE;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 525,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 535,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 545,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 557,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 587,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 597,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -ERANGE;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 609,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 625,
+    "function": "emit_native_lab_arm64",
+    "expression": "err = -EINVAL;",
+    "decision": "keep",
+    "step": "e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 695,
+    "function": "blob_write",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 697,
+    "function": "blob_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 699,
+    "function": "blob_write",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 701,
+    "function": "blob_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 706,
+    "function": "blob_write",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 709,
+    "function": "blob_write",
+    "expression": "return -EFAULT;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 744,
+    "function": "relocs_write",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 746,
+    "function": "relocs_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 748,
+    "function": "relocs_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 751,
+    "function": "relocs_write",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 756,
+    "function": "relocs_write",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 759,
+    "function": "relocs_write",
+    "expression": "return -EFAULT;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 788,
+    "function": "proof_write",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 790,
+    "function": "proof_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 792,
+    "function": "proof_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 795,
+    "function": "proof_write",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 798,
+    "function": "proof_write",
+    "expression": "return PTR_ERR(kbuf);",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 833,
+    "function": "binding_write",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 835,
+    "function": "binding_write",
+    "expression": "return -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 839,
+    "function": "binding_write",
+    "expression": "return -E2BIG;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 842,
+    "function": "binding_write",
+    "expression": "return PTR_ERR(data);",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 853,
+    "function": "binding_write",
+    "expression": "err = -EINVAL;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 937,
+    "function": "blob_read",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 966,
+    "function": "blob_open",
+    "expression": "return -ENOMEM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1025,
+    "function": "map_ptr_open",
+    "expression": "return -ENOMEM;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1048,
+    "function": "map_ptr_query_write",
+    "expression": "return -EPERM;",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1050,
+    "function": "map_ptr_query_write",
+    "expression": "return -EINVAL;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1052,
+    "function": "map_ptr_query_write",
+    "expression": "return -EINVAL;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1054,
+    "function": "map_ptr_query_write",
+    "expression": "return -EFAULT;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1063,
+    "function": "map_ptr_query_write",
+    "expression": "return PTR_ERR(map);",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1070,
+    "function": "map_ptr_query_write",
+    "expression": "err = -EOPNOTSUPP;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1079,
+    "function": "map_ptr_query_write",
+    "expression": "err = -EOPNOTSUPP;",
+    "decision": "keep",
+    "step": "b/c/e",
+    "purpose": "Instruction encoding, actual map resolution, allocation or IO"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1157,
+    "function": "bpf_arm64_native_lab_debugfs_init",
+    "expression": "return PTR_ERR(debugfs_root);",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1169,
+    "function": "bpf_arm64_native_lab_debugfs_init",
+    "expression": "return PTR_ERR(checked);",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "line": 1176,
+    "function": "bpf_arm64_native_lab_debugfs_init",
+    "expression": "return PTR_ERR(checked);",
+    "decision": "remove",
+    "step": "Five-step constructor",
+    "purpose": "Mutable storage, generation, identity or policy path retires"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 107,
+    "expression": "raise ValueError(f'undefined native ABI register {operand} at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 126,
+    "expression": "raise ValueError('native entry return has an unbalanced stack pointer')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 130,
+    "expression": "raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 211,
+    "expression": "raise ValueError(f'undefined native ABI value escapes private stack at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 222,
+    "expression": "raise ValueError(f'undefined native ABI value escapes private stack at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 236,
+    "expression": "raise ValueError(f'undefined native ABI flags at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 247,
+    "expression": "raise ValueError(f'undefined native ABI register {args[0]} at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 256,
+    "expression": "raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 260,
+    "expression": "raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 267,
+    "expression": "raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 273,
+    "expression": "raise ValueError(f'native SP alignment unresolved at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 275,
+    "expression": "raise ValueError(f'native SP alignment fault at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 399,
+    "expression": "raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 426,
+    "expression": "raise ValueError(f'native helper source stack relation unresolved at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 482,
+    "expression": "raise ValueError(f'native ABI tail return has an unbalanced stack pointer at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 498,
+    "expression": "raise ValueError(f'native call stack relation unresolved at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/arm64_abi.py",
+    "line": 507,
+    "expression": "raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 107,
+    "expression": "raise ValueError(\"native readonly section lacks its symbol table\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 115,
+    "expression": "raise ValueError(f\"native readonly extent exceeds its section: {name} offset={offset} size={size}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 249,
+    "expression": "raise ValueError(f\"expected immediate: {text}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 259,
+    "expression": "raise ValueError(f\"unsupported immediate modifier: {', '.join(parts[index + 1:])}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 271,
+    "expression": "raise ValueError(f\"unsupported register: {reg}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 294,
+    "expression": "raise ValueError(f\"invalid AArch64 extend shift: {text}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 298,
+    "expression": "raise ValueError(f\"unsupported operand modifier: {text}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 314,
+    "expression": "raise ValueError(f\"unsupported memory operand: {parts[index]}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 360,
+    "expression": "raise ValueError(f\"invalid move-wide operands: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 367,
+    "expression": "raise ValueError(f\"invalid move-wide shift: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 370,
+    "expression": "raise ValueError(f\"invalid move-wide immediate or column: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 378,
+    "expression": "raise ValueError(f\"invalid NEGS operands: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 380,
+    "expression": "raise ValueError(f\"invalid NEGS modifier: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 384,
+    "expression": "raise ValueError(f\"invalid NEGS shift or register width: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 398,
+    "expression": "raise ValueError(f\"unsupported adrp without relocation: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 409,
+    "expression": "raise ValueError(f\"unsupported adrp helper relocation: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 423,
+    "expression": "raise ValueError(f\"unsupported movk shift: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 630,
+    "expression": "raise ValueError(f\"unsupported CNT operands: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 634,
+    "expression": "raise ValueError(f\"unsupported UADDLV operands: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 636,
+    "expression": "raise ValueError(f\"unsupported arm64 instruction: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 679,
+    "expression": "raise ValueError(f\"branch target 0x{addr:x} is outside the linked program\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 779,
+    "expression": "raise ValueError(f\"unbounded indirect target at 0x{insn.addr:x}: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 785,
+    "expression": "raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 859,
+    "expression": "raise ValueError(f\"source-map GOT load must retain its exact base: {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 895,
+    "expression": "raise ValueError(f\"unsupported call target in {insn.raw}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 924,
+    "expression": "raise ValueError(\"original source and ELF-defined symbol set must be supplied together\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 933,
+    "expression": "raise ValueError(\"trusted map binding requires native_symbol/value_offset\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 936,
+    "expression": "raise ValueError(\"invalid/duplicate trusted native map symbol\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 938,
+    "expression": "raise ValueError(\"trusted map value offset must be null or u32\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 952,
+    "expression": "raise ValueError(\"source-map binding fields must be explicit\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 955,
+    "expression": "raise ValueError(\"source-map symbols must be C identifiers\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 957,
+    "expression": "raise ValueError(\"duplicate source-map symbol or invalid source kind\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 959,
+    "expression": "raise ValueError(\"source-map instruction index must be nonnegative\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 962,
+    "expression": "raise ValueError(\"source-map value offset is invalid\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 970,
+    "expression": "raise ValueError(\"source-map binding has no native address relocation\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 972,
+    "expression": "raise ValueError(\"source-map binding requires an explicit GOT address/load pair\")",
+    "decision": "remove",
+    "step": "Simulator state in B",
+    "purpose": "ABI and schema admission moves to simulator representation"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 990,
+    "expression": "raise ValueError(\"raw context requires its real BPF program section\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 1053,
+    "expression": "raise ValueError(f\"empty native readonly extent: {symbol}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  },
+  {
+    "file": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "line": 1075,
+    "expression": "raise ValueError(f\"native relocation lacks an original map declaration: {sorted(set(map_symbols) - source_maps)}\")",
+    "decision": "keep",
+    "step": "c/e",
+    "purpose": "Instruction, symbol, relocation or finite-target decoding"
+  }
+]
