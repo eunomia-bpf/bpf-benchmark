@@ -23,8 +23,9 @@ specialization token also has its own row.
 | O2 C-model token-body equality | 72/75 | 74/74 |
 | Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
-| Upstream machine-model sampled architectural-state agreement | 25/75 | 74/74 selected profiles |
-| Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
+| Upstream machine-model sampled architectural-state agreement | 50/75 | 74/74 selected profiles |
+| Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
+| Upstream model-differing operation rows | 1/75 | 1/74 explicit monitor profile |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
 | Additional explicit-monitor-only replay | 0 | 1/74 |
 | Numeric operations awaiting selected replay | 9/75 | 6/74 |
@@ -32,7 +33,8 @@ specialization token also has its own row.
 The [current Arm ASL comparison](reference-arm-asl.md) records5028 comparisons:
 5016 state observations agree across all74 labels, and12 STLXR inputs retain
 the explicit empty-monitor/fixed-success profile difference. The current82-form
-sample adds112 LDADD/STADD forms with1344 agreeing cases over four widths,
+sample adds112 LDADD/STADD forms with1344 agreeing cases and224 logical atomic
+forms with2688 agreeing cases over four widths,
 order bits, aliases, SP and ZR. The original996-case reference epoch retains
 its own decode boundary and monitor profiles in the archive. Observations cover
 X0..X30, SP, PC, NZCV, V0 and32 memory bytes. Events, translation, access permissions,
@@ -4910,6 +4912,18 @@ labels;224 new logical forms contribute2688 agreeing observations. Hardware
 replay epochs stay separately recorded. Physical atomic/tag and ordering,
 compiler/ABI and native fields remain explicit; A records32/64-bit BPF units
 and Clang18 subword8/16-bit lowering diagnostics.
+
+### Expanded x86 machine-model comparison
+
+The [x86 Sail report](reference-x86-sail.md) retains the280-form memory/control
+cohort:3060 sampled states and byte-access traces agree,252 inputs stop in
+model coverage,48 REP inputs differ. Selected register+memory epochs cover
+50 agreeing operation labels,14 model-stopped labels and one differing label.
+REP retains its whole-instruction/element-step and counter/ZF/IP differences;
+the existing canonical REP hardware component passes1120normal/64restart-fault
+cases and1774full-state transitions. Source epochs and physical/compiler/link
+interfaces remain explicit. The original interrupted collector and complete
+private-binary successor are archived together.
 
 ### Published source full check b3d713f42
 
