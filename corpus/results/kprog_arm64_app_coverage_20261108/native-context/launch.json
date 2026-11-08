@@ -1,0 +1,25 @@
+{
+  "utc": "2026-11-08T10:05:24.201659+00:00",
+  "runtime_build": {
+    "commit": "da734ec7a6197ffebe9ef7330dd20eca3f945a65",
+    "paths": [
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/README.md",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build.json",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build.log.gz",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build-inputs.tar.gz"
+    ],
+    "sha256": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/README.md": "3a2d07dca4abbdb9aadac984431d0b7acb92afe226bd6fa457802aab6236671c",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build.json": "dbbed2f5cbe7c8bb7d6879fd0c5a24e8170ba87c83f75f6e48124eb914fe2d46",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build.log.gz": "c5a3fd9ed29d7eb3a92df220e8e2daf056bd8c6fd55bd05f0dc2d983df04fec3",
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-context/build-inputs.tar.gz": "598d36168a18704d9e9cf6ae9bfe4efffc92be7ff5817fa21d2c393e3cb52398"
+    },
+    "remote_ancestor_verified": true
+  },
+  "cases": 34,
+  "source_prog_id": 0,
+  "source_programs_loaded": 0,
+  "resource_context": "Original companion objects autoloadfalse; actual resource maps stay pinned",
+  "programs_executed": 4,
+  "risk_cases_load_only": 30
+}
