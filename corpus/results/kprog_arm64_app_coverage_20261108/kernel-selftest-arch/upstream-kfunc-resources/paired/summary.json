@@ -1,0 +1,544 @@
+{
+  "utc": "2026-11-08T21:51:50.653560+00:00",
+  "arch": "arm64",
+  "upstream_wrapper_commit": "60e37d8940565a990700ded37cc61aae1d3a624c",
+  "resource_sources": 59,
+  "compiled": 59,
+  "previous_compiled": 55,
+  "resources": [
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/async_stack_depth.c",
+      "source_sha256": "d7ccf2095aef8df26d41a77d8f6b688eaa5769f62556450010caf3185c729b82",
+      "object": "objects/async_stack_depth.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "async_stack_depth.stderr",
+      "object_sha256": "c20f281f52d82620ee409cffc8d4d77e91a829dddfe750d8de509408e790fe8b"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/cgrp_kfunc_failure.c",
+      "source_sha256": "8a6bc07e3211401e4128fc0aee6c58568852780626ecac04b20da7f60d168ae8",
+      "object": "objects/cgrp_kfunc_failure.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "cgrp_kfunc_failure.stderr",
+      "object_sha256": "9ceffc9426af2b5985e30345ce9b5aa6053aa4778bc10e14c2fde46bbba67ed7"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/cpumask_failure.c",
+      "source_sha256": "4f220eca6594923b3e199fa5d5151379ccebb63cc657fc2df8723f60d3320f19",
+      "object": "objects/cpumask_failure.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "cpumask_failure.stderr",
+      "object_sha256": "2da6463226cf65557d3e62327d4bdc5f7f88155427f8c2057a76444a0189ed01"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/crypto_basic.c",
+      "source_sha256": "a61e7e1ddc1050e220950f76ad81a98b3a494cb40c00ca99dafda655d7389678",
+      "object": "objects/crypto_basic.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "crypto_basic.stderr",
+      "object_sha256": "b93a182d6e3f5d58f018a973cc5972cd9ec7b9b897422bd2bd9076898bf56b5b"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/dummy_st_ops_fail.c",
+      "source_sha256": "01ed2591876ecacd66c6f87ca3c633b0a724278966a3d2a5d65407122039fe44",
+      "object": "objects/dummy_st_ops_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "dummy_st_ops_fail.stderr",
+      "object_sha256": "e4dc6a8df24f67655a73eb63f0ff4cfeaa4148c2fa99d46dff6b99e97712a488"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/dynptr_fail.c",
+      "source_sha256": "4d93014d90a04c1fc01d0eff09446057eed52ced59471a25d679fbeda7f0da90",
+      "object": "objects/dynptr_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "dynptr_fail.stderr",
+      "object_sha256": "7712ddbeb29c6fe427d7eb4b944781c27df03c3b539890b504e8108e3b07b26d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/irq.c",
+      "source_sha256": "93b65d2f614bce880491118318b7b2f4887f042d53084797172a5b90aac9c781",
+      "object": "objects/irq.bpf.o",
+      "previous_ok": false,
+      "ok": true,
+      "stderr": "irq.stderr",
+      "object_sha256": "80005164fc1c379e5ba3163a69f0115d4a4f6874ad8d9d48f74c9aff4cbaf407"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/iters_testmod_seq.c",
+      "source_sha256": "5d9d761db287685b9c73ea79c2dd4b79d2dba04f29d19cbc26f08b78862164f0",
+      "object": "objects/iters_testmod_seq.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "iters_testmod_seq.stderr",
+      "object_sha256": "870ca6bc76c76a59ef3aa7a3850c3ee7f5ae50b3d58515b2768f58cdc8de926d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/kfunc_implicit_args.c",
+      "source_sha256": "8af5224ca997f8432d8016cf4b5ee95328392988e87ba9442650d15eb86bb581",
+      "object": "objects/kfunc_implicit_args.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "kfunc_implicit_args.stderr",
+      "object_sha256": "1263430e669918d130918c744d7a936be9c59418983824d043aa9147422be8e4"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/kprobe_multi_verifier.c",
+      "source_sha256": "72ba6b7ef3ca9d2c84489ad86fbef0b622dc35971d1da6a38e421aedb7ceb85d",
+      "object": "objects/kprobe_multi_verifier.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "kprobe_multi_verifier.stderr",
+      "object_sha256": "7b665d5547ce449fa99a58f74e4cef5ef0b3d85da589619aedc40b2d533d4759"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c",
+      "source_sha256": "d6e5caa9f86ea88eb9b567e0452a46fbb03d0c1d7a7c24c2c4e07fe2c6a671ce",
+      "object": "objects/map_kptr_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "map_kptr_fail.stderr",
+      "object_sha256": "72df799f540318430233467c739fab5875299016b9b3ccb622eaeb3acd278633"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/nested_acquire.c",
+      "source_sha256": "9c0b1804bb22ce674e2c63fcbdeb560defa7cc1c169e623774e68d84761af829",
+      "object": "objects/nested_acquire.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "nested_acquire.stderr",
+      "object_sha256": "fa41f64dc53907f14e3821542818f7fd36312f96703f867994dc30b95543465f"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/nested_trust_failure.c",
+      "source_sha256": "5f614bb0eb90de4a5a89c1c9e6774d52e5abb27a041981494766848c644854bf",
+      "object": "objects/nested_trust_failure.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "nested_trust_failure.stderr",
+      "object_sha256": "1431062f96f3ff58ab07f9bd37f27155e95f23e48bfe707ea096777521d9849c"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/nested_trust_success.c",
+      "source_sha256": "ea15a58d8fd8deba3fcf03c94bdfc2669d6271dac20fbebfea3eb22c68d23235",
+      "object": "objects/nested_trust_success.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "nested_trust_success.stderr",
+      "object_sha256": "228b5bd9fc42b3a3d5d03d4ce66bb81cb22df16caf1cc3cb0b1a73d7ae645fb3"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/preempt_lock.c",
+      "source_sha256": "49132b263c6c69b1a684cadf61318a2372f0ffb7466f8c57f14c97553b9c4e19",
+      "object": "objects/preempt_lock.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "preempt_lock.stderr",
+      "object_sha256": "702f35600e98ff21b1903602ebfb6d27a38ca7573a64f8ec66b39ad3d727b789"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/sock_destroy_prog_fail.c",
+      "source_sha256": "5c94c15199d1a9f4161245d01c72f20986acd24d45c0c96ea17b5dc4751d8f59",
+      "object": "objects/sock_destroy_prog_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "sock_destroy_prog_fail.stderr",
+      "object_sha256": "305788b258416658a07c8bc41a48eb16e4afa28f71ec946d8a21168f51a2e25d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/task_kfunc_failure.c",
+      "source_sha256": "d46418edfc81ff28e57eb9b4ecdd0de8d7dad26a691af86aaf3e501ed59ef7f5",
+      "object": "objects/task_kfunc_failure.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "task_kfunc_failure.stderr",
+      "object_sha256": "890f27e7aa685fbbda00fb5e8abfb393eccb127ae7cae958fcbc0e3d10d88a51"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_bpf_nf_fail.c",
+      "source_sha256": "8b5d1e46a8c6ccd8d3503aca9b82adb78f5f0e3cec644138bcfa2364cb9af98a",
+      "object": "objects/test_bpf_nf_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_bpf_nf_fail.stderr",
+      "object_sha256": "85fd7a6a72d34dbd22b260a7571df7bfd00d7addd4611f9a80b5feb94b5c96d3"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func1.c",
+      "source_sha256": "999d9d30df8930e8ebf497d297b70a08729b352264ebf1734b1b83782ad2115b",
+      "object": "objects/test_global_func1.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func1.stderr",
+      "object_sha256": "1a8dbb7f408d1a3cda00e41cf28edc57c696363a0fc182be92b47ea44b8608ab"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func10.c",
+      "source_sha256": "a0ba7c88c439ca494d1f5e86964dab11f9c1aa84306180e2e4c91d2c5808de6b",
+      "object": "objects/test_global_func10.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func10.stderr",
+      "object_sha256": "f0fd52128dee644596bf20aaf9dd6fc130ac428732c69eb6bcd279b2b7485c4d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func11.c",
+      "source_sha256": "a110612e80a32c50965650fdd753f70f7eab90d65bf1c714b52bb6e55e088e4f",
+      "object": "objects/test_global_func11.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func11.stderr",
+      "object_sha256": "03e100964d1349c20328ca7f51e1e034edf83a6bfe09e3e504cf1a2ed4e79f6d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func12.c",
+      "source_sha256": "0bfae50b1779cbbfcbf2b58f19cc31c3bdd4606fed913d4f665a8822e9bc13e4",
+      "object": "objects/test_global_func12.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func12.stderr",
+      "object_sha256": "9b3139ce1dbbf4296730b9c6f51b726514abee6b6f8c28c36c664523f59dcea5"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func13.c",
+      "source_sha256": "e53a8e07dbd802a51e200993994f67260502f867ac8ced04eb6e4bbf96ae979c",
+      "object": "objects/test_global_func13.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func13.stderr",
+      "object_sha256": "0b92e6c96eb4c77695a7f935d85f3e56f2552a816fe4e9c35ec7f26d36c8641c"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func14.c",
+      "source_sha256": "f9dad346f02ebc559c72d4b20c19986cf67ebff42714fc1c36c42dc9d69d5255",
+      "object": "objects/test_global_func14.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func14.stderr",
+      "object_sha256": "c7a94ba8701ab27b7dda9cb99cd2c63638e671f42b416f29229b7580c95b53a8"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func16.c",
+      "source_sha256": "9e429b71fa3b95fe230840f3fb7540781e4cbf9a1bb90cdf4e3b3143f95e4d34",
+      "object": "objects/test_global_func16.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func16.stderr",
+      "object_sha256": "02a3701fd222aae5beff304264e9e4bcd5498076bf68240cf06e3ff6918ed0df"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func17.c",
+      "source_sha256": "10397d074b9e1fe1cd47ac0a1aec5f410c581cf708be0cbd6b294232285d3471",
+      "object": "objects/test_global_func17.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func17.stderr",
+      "object_sha256": "85f7f36067ac1b3dd965a5ce6dd2453ae1faa483f2789cce38dce8fd7f93c501"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func2.c",
+      "source_sha256": "f4943124c260b02f8b60100cbed942586302df67a9f9fe6f491a27fda04abf32",
+      "object": "objects/test_global_func2.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func2.stderr",
+      "object_sha256": "932bdcee238b0d36b22ad12c15e6af395577d5de57eadebd791bbe42a0b1ec3a"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func3.c",
+      "source_sha256": "84125b1715c7f0544c692715ee6a9e2c1e30a46b9a556a34edfca63fec7e779f",
+      "object": "objects/test_global_func3.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func3.stderr",
+      "object_sha256": "d8124edee8c047cd744ddd4a88766e9ad8b09749999e5a8d6038d2697f073c1b"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func4.c",
+      "source_sha256": "b0fd34f09e54aa2374fbec585af196f6fc39bf42f043754d419dacfc7b2b3f55",
+      "object": "objects/test_global_func4.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func4.stderr",
+      "object_sha256": "54cd1a2bc77cd90c56d83967822250fb6222cf15b14a187e7dc941f233b4c85d"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func5.c",
+      "source_sha256": "87760e9e92d2c6fd9f6c420319396b31901a77d5922ea95c4d690a72c78da84a",
+      "object": "objects/test_global_func5.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func5.stderr",
+      "object_sha256": "c62b9ac4be66ddceb2bb7203479117ef6b06f3248ee7ee42ae1638c0f2e1de5c"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func6.c",
+      "source_sha256": "5b6198230ff57fa7657ced6db4837c331d5692952bb4182e2a23a68c6064cdda",
+      "object": "objects/test_global_func6.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func6.stderr",
+      "object_sha256": "be28abf1635d61f43b95cdb93b7fb04f25efd28a00d599737280940778e77427"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func7.c",
+      "source_sha256": "3fe583bbe8412d9f2220781b811c8b68bcfc93a2796fe687ff7750a370458a76",
+      "object": "objects/test_global_func7.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func7.stderr",
+      "object_sha256": "c6a2796b72f69b86b9c2fe7559a8bb960432607bd0b0e8dd98538ef610db3b98"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func8.c",
+      "source_sha256": "c77422de2e31a561411facfec0f4c8a40d1c0531e76a60e250fcd792156dba3c",
+      "object": "objects/test_global_func8.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func8.stderr",
+      "object_sha256": "fca0ace4be6d01fc207d32f644c12ef4e269710efb7cccbaa9aa44b1cc8021d4"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_global_func9.c",
+      "source_sha256": "a03cf2d79f1cb764354a0418ba3762437af3a2d6108394b3eb56c8abb9deaf40",
+      "object": "objects/test_global_func9.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_global_func9.stderr",
+      "object_sha256": "192019989090a897959f86364274ae89b31dbcbfc9585526090835b1c6912289"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_kfunc_dynptr_param.c",
+      "source_sha256": "a6bdb5c5238477afcc5092e1b89abba578a89b632f7f9a827002017409e4c1c8",
+      "object": "objects/test_kfunc_dynptr_param.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_kfunc_dynptr_param.stderr",
+      "object_sha256": "d2c95031713e7ad1b9ed1238c2642ef863f390ec9584547c4f62890580b0115e"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/test_kfunc_param_nullable.c",
+      "source_sha256": "b94452c3ec5159bb473908914973a48f1c09a0115dbc423de82c836decff3cc0",
+      "object": "objects/test_kfunc_param_nullable.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "test_kfunc_param_nullable.stderr",
+      "object_sha256": "76db39f6fe445c5ec2c61c2b76d45cb9d285f4bbceeeb6713db1de97741140a3"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/uprobe_multi_verifier.c",
+      "source_sha256": "214a48c7380db8d1d483e1fa66efa61606290f0a66629b2ccb0c6d9f19c59992",
+      "object": "objects/uprobe_multi_verifier.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "uprobe_multi_verifier.stderr",
+      "object_sha256": "810d9f77f5f4fc51fed1b0335b9cefaca5bc93f499a41393b99f2b216155439b"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/uptr_failure.c",
+      "source_sha256": "e62c38750534289bbfbc9ff4d46cc644fe1da8090cbd772877e602bef14c95aa",
+      "object": "objects/uptr_failure.bpf.o",
+      "previous_ok": false,
+      "ok": true,
+      "stderr": "uptr_failure.stderr",
+      "object_sha256": "c778d5d980a1d40d6a46d51e0209d7f13188cabbb637555121f73ab0796b276f"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/user_ringbuf_fail.c",
+      "source_sha256": "34e72004a16254fccdaeb4abfb00422d15778eaa6f00dec33f4ff7f48a3b190c",
+      "object": "objects/user_ringbuf_fail.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "user_ringbuf_fail.stderr",
+      "object_sha256": "ff88d3cd5d429f546e4119faa8890501c763fd6b01e23b6fc21b877c59c26479"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_array_access.c",
+      "source_sha256": "6c4513972ede3e624dc0d428a3ba659e18422ca2f83ef1c5af2fb07ec8a55e1d",
+      "object": "objects/verifier_array_access.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_array_access.stderr",
+      "object_sha256": "e0fc70fa9ce5fff757cc7fab3ac12f90870f8633dea3a351b5278eef27477b55"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_async_cb_context.c",
+      "source_sha256": "e5e55e68e48d3a77ea1f8be6347a0c07d37493eeb9f4614dc0c05f6747b38115",
+      "object": "objects/verifier_async_cb_context.bpf.o",
+      "previous_ok": false,
+      "ok": true,
+      "stderr": "verifier_async_cb_context.stderr",
+      "object_sha256": "2ade838667ab51a7b4bbddfd784e371e1132f895fb7f99dc07beda78ddb67f06"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_bits_iter.c",
+      "source_sha256": "f69f2522118cb43e03ecef9996d2aeffd9ed7815bd88d9b910256b5169819948",
+      "object": "objects/verifier_bits_iter.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_bits_iter.stderr",
+      "object_sha256": "f495b1b128fa2a7293e7d1f71fa4ec882c4994cc839b78543b34739c590b642c"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_const.c",
+      "source_sha256": "5c5419a818e3a68b07664dd975aa2b964e8e009d88dd1368aae56e7b3a6cb254",
+      "object": "objects/verifier_const.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_const.stderr",
+      "object_sha256": "a19f526901d96fab4af5bb81ba4c6f69a6175d9a9b6973d8425cca88dfc2958e"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_default_trusted_ptr.c",
+      "source_sha256": "684c17b51c45a9d9984030022f13d4245af1e7fc2fa373848cbaafa16f7d2989",
+      "object": "objects/verifier_default_trusted_ptr.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_default_trusted_ptr.stderr",
+      "object_sha256": "941912371eba1b164e5ce09fe3ac15568c94d5e73c95c222e3bee2be10eca6a5"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_gotol.c",
+      "source_sha256": "b8d1c3bc4756c0e9176b6b0663c495161f33066220b7d029904cd870beff6765",
+      "object": "objects/verifier_gotol.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_gotol.stderr",
+      "object_sha256": "c7df40d8575b7179f65f62fb87b8f1d97eb5945dc7a977ba01ba91f2d6a1e0aa"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_jit_inline.c",
+      "source_sha256": "e23e72efac70f7e2820fafadde8b1e09e58ada1f525e7f80dad042e7fbe1549b",
+      "object": "objects/verifier_jit_inline.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_jit_inline.stderr",
+      "object_sha256": "0414e59885a54afd4b4d31d9679bf18d1fa8a50f21a9e44a9ad0cdd43330bd72"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_kfunc_prog_types.c",
+      "source_sha256": "1e9595db2bae68b90c46c0c878ea913ce2ea25773a0fffd591acd1e807150287",
+      "object": "objects/verifier_kfunc_prog_types.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_kfunc_prog_types.stderr",
+      "object_sha256": "9640fcef5f587aac6a0215dfad19c36e1e378e889ff5241e0c0fa8f4f9624d0f"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_linked_scalars.c",
+      "source_sha256": "e103e056c26203b8a22ff1538b6fca0f90074bbf7599d6bfea276770e90fd1ef",
+      "object": "objects/verifier_linked_scalars.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_linked_scalars.stderr",
+      "object_sha256": "e427477728fa9ff79c9e692f7649cdecfa3dabbecfa49b169ed377378894a7b3"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_load_acquire.c",
+      "source_sha256": "78f2c70efe116ba24fea56527d6721d8854db2a6f4d42d7c8665266f29130790",
+      "object": "objects/verifier_load_acquire.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_load_acquire.stderr",
+      "object_sha256": "7ef24f37a8e75e83224ecee0ed2a1c439d0a85d32b3cd26339eda4da22f9a5c6"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_lsm.c",
+      "source_sha256": "a28819c09ac9563c2cf45c61c86f9ab7939a7ad9ef75d47abc733e447ac80bd2",
+      "object": "objects/verifier_lsm.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_lsm.stderr",
+      "object_sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_may_goto_2.c",
+      "source_sha256": "ff55722db0e519d3c1bb620a092f5c87876ce7d65ad80aab89b055a78e980283",
+      "object": "objects/verifier_may_goto_2.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_may_goto_2.stderr",
+      "object_sha256": "71fb57b441220da77929f7bb58f65c315ab33a889c5e9f95792776cd535f6105"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_mtu.c",
+      "source_sha256": "2542875b3ae62d942e5297a014622df8e88cc2fddb9d2e1556e5cec455a3ac0f",
+      "object": "objects/verifier_mtu.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_mtu.stderr",
+      "object_sha256": "419a255b3ac267b17ea454af6b02e7a94b2156bea48bbc1e1936886a5c58aed0"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_netfilter_ctx.c",
+      "source_sha256": "dc75b0df0ea3d266d402ce22f2f9748271f19c1f2d7ecadd5991a1e97278920c",
+      "object": "objects/verifier_netfilter_ctx.bpf.o",
+      "previous_ok": false,
+      "ok": true,
+      "stderr": "verifier_netfilter_ctx.stderr",
+      "object_sha256": "6d8f466b4704d423b80c0656a446882be9d1d236e494962d714192b655e756b3"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_sdiv.c",
+      "source_sha256": "c13a18b097356582005c5ae46962aa13cd5c1d75714010a5692a2404bed9209c",
+      "object": "objects/verifier_sdiv.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_sdiv.stderr",
+      "object_sha256": "2d24ea4c7c618d878b264cbb51d5fdd9ff47d6b5ce3313990dd7aebe4cb448ee"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_sock_addr.c",
+      "source_sha256": "6baf3343cf12a163d149ad0bd7c9b9204756ed180bcc77d4849a543eb29d3ef6",
+      "object": "objects/verifier_sock_addr.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_sock_addr.stderr",
+      "object_sha256": "e4da695f70e2114231e8c2776bf7fa034bff52bad16703b4359a05fe0c0f8271"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_sockmap_mutate.c",
+      "source_sha256": "075a67c39c1e1b390fe23f36a0e9bcbe44091b0f7a27e77e0d6554ad69fb5878",
+      "object": "objects/verifier_sockmap_mutate.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_sockmap_mutate.stderr",
+      "object_sha256": "9436f9129756a4a32744cdab94a87055bf244bde60d9f883817768e543362bbb"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_store_release.c",
+      "source_sha256": "68f274f8f44933027ad3a24bdff4744b2ff3674d4f106e634ed7795ecb820a1f",
+      "object": "objects/verifier_store_release.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_store_release.stderr",
+      "object_sha256": "aa3d699be2a0f97c43d48599383c8a84fc8ba9fc5bc5d9143658ae916dd70d55"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_vfs_accept.c",
+      "source_sha256": "7b33f516339ab47893d9b61621238268fc8570a898c6e5c33aca2c196b6c8be9",
+      "object": "objects/verifier_vfs_accept.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_vfs_accept.stderr",
+      "object_sha256": "c4b030e8f087e16ce88c2508fef42507d578789df935568dd237c61e55e43229"
+    },
+    {
+      "source": "/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/verifier_vfs_reject.c",
+      "source_sha256": "30fec1af0cf706781009bf970e2a7d6c001d95d2186e00c32f5c6907da657e89",
+      "object": "objects/verifier_vfs_reject.bpf.o",
+      "previous_ok": true,
+      "ok": true,
+      "stderr": "verifier_vfs_reject.stderr",
+      "object_sha256": "79ba26ddb8de08e7ce3265359db74c734bba3ce0b4e59d28cab051be0ffbf968"
+    }
+  ],
+  "compiler_source_sha256": "d74c104fc674a5a00ed836111eaf7ecbd26603413aaf3e1eea4f1d939569c71c",
+  "scope": "Original complete ARM resource sources; native P and published kernel annotations retain bytes",
+  "runtime_admission_additions": 0
+}
