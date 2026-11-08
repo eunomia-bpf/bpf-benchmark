@@ -1,0 +1,5 @@
+ARM BCC with Armv8.1 LSE native input and generic LDADD simulation
+
+Eight upstream BCC tools compile with the existing ABI flags plus -march=armv8.1-a+lse. The original23 application manifest rows retain their source identity and map matching. The existing two-start recipe uses2vCPUs/2GiB on16-19 and the paired five-step runtime. A private source snapshot carries the generic LDADD instruction, old-value destination, address-before-writeback and memory-order selection. The current canonical compiler flags and simulator remain at their published epoch. QEMU durations provide functional evidence.
+
+The existing29 microprograms generate and compile with the candidate. Preliminary offline source attempts capture the real-section and original-map declaration setup frontiers; the application run supplies map metadata through the kernel request. The terminal replay publishes raw generated B, verifier and application-work results. Architectural O1/O2 coverage for the new operation belongs to the universal token proof work.
