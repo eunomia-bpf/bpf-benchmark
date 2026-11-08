@@ -417,3 +417,11 @@ per-site measurement would divide between the sites.
 per-site split, and it needs no new build and no change to any published
 program. What it does not have is a per-site scale, because the counters
 are read around the whole run.
+
+The per-site scale needs a program that carries map sites, and the micro
+tree's programs do not: `common.h` declares `input_map` once, inside
+`DEFINE_MAP_BACKED_XDP_BENCH`, and no program expands that macro.
+`DEFINE_MAP_BACKED_TC_BENCH` reads its input from a packet, so its name
+promises a map it does not use. The map sites are in the application
+programs, which is where the plan inventory above counts them: 1,051 lookup
+sites and 911 update sites across cilium's 90 plans.
