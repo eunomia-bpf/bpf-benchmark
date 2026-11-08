@@ -327,3 +327,6 @@ docs/tmp/*/llvmbpf_bulk_roundtrip/guest_verify_helper/target/
 /kprog/**/build-*/
 core.*
 kprog/selftests/build/
+
+# Private measurement build output (kprog/perf/call_split.py)
+kprog/perf/measure/

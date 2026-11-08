@@ -425,3 +425,69 @@ tree's programs do not: `common.h` declares `input_map` once, inside
 promises a map it does not use. The map sites are in the application
 programs, which is where the plan inventory above counts them: 1,051 lookup
 sites and 911 update sites across cilium's 90 plans.
+
+### A per-site cycle split, measured
+
+`kprog/perf/call_split.py` builds a private copy of one micro program whose
+entry is bounded by `rdtsc` pairs, and reports where the cycles fall. The
+published program, header and runner are unchanged.
+
+`katran_lb_consistent_hash_select`, 10,000 runs over its own generated
+packet, median of five:
+
+| span | cycles | share |
+| --- | ---: | ---: |
+| packet setup (bounds checks, payload pointer) | 334,580 | 22.2% |
+| benchmark body (the program's computation) | 837,364 | 55.7% |
+| result write (`micro_write_u64_le`) | 334,696 | 22.3% |
+
+The body is the largest span and the two fixed spans are near-equal, which
+is what this program's shape predicts: it parses a 54-byte packet, hashes,
+and writes one word.
+
+**The overhead, stated:** the instrumented build costs 1,956,385 cycles
+against the published build's 442,342 for the same work, a 4.4x factor,
+because each of the five `rdtsc` pairs carries a serializing read plus a
+volatile store. The measured spans account for 1,503,744 of the
+instrumented total, leaving 452,641 cycles of the program outside them,
+against 442,342 uninstrumented -- so the boundaries sit where the spans say
+they do, and the shares are the shares of the instrumented run, not
+absolute costs.
+
+This is the mechanism the task asks for, on one program. Extending it to
+BCC, Katran, Tracee and Cilium means running it on their own native
+objects with their own inputs.
+
+### One application entry, split into the task's categories
+
+`cil_xdp_entry` is the program that carries half of cilium's BPF time. Its
+published native object, 252 instructions, disassembled:
+
+Each call is preceded by the helper ID in `eax`, so the call sites are
+counted exactly rather than inferred:
+
+| helper ID | name | sites |
+| --- | --- | ---: |
+| 1 | `bpf_map_lookup_elem` | 7 |
+| 189 | `bpf_xdp_load_bytes` | 9 |
+| 54 | `bpf_xdp_adjust_meta` | 1 |
+
+The IDs are the kernel's own (`include/uapi/linux/bpf.h:5913`, `:6101`,
+`:5966`). So this entry's 17 call sites are 7 map lookups, 10 helper calls
+and **zero** inlined lookups: every map access goes through the helper.
+
+Tail calls are separate: the object ships five sibling
+`*.proof.o` files (`tail_drop_notify`, `tail_no_service_ipv4`,
+`tail_nodeport_nat_egress_ipv4`, `tail_nodeport_nat_ingress_ipv4`,
+`tail_nodeport_rev_dnat_ipv4`), which are this program's tail-call targets.
+
+| category | sites | share of the 17 calls |
+| --- | ---: | ---: |
+| map lookups | 7 | 41% |
+| helper calls (`xdp_load_bytes`, `xdp_adjust_meta`) | 10 | 59% |
+| tail calls | 5 targets | separate |
+| computation | 235 instructions | of 252 |
+
+The one thing this does not give is the *time* each category takes, for the
+same reason as above: the cycles need a per-site instrumented build of the
+application program, and the split here is by instruction and site count.
