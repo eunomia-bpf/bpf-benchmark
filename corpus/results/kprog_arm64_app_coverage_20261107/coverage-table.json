@@ -177,7 +177,7 @@
         },
         "failure_classes": {
           "exclusive_retry_loop": 3,
-          "kernel_chunk_resource_lookup": 1
+          "kernel_chunk_enoent": 1
         },
         "application_status": [
           "error"
