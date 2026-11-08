@@ -71,6 +71,7 @@ statfunc int strncmp(char *str1, char *str2, int n)
     // update_min sets __value as __max_value if __value is greater than __max_value.
     #define update_min(__value, __max_value)                                                       \
         ({                                                                                         \
+            asm volatile("" : "+r"(__value));                                                     \
             if ((__value) > (__max_value))                                                         \
                 (__value) = (__max_value);                                                         \
         })
