@@ -1,0 +1,77 @@
+{
+  "controls": [
+    {
+      "case": "fresh_compile_and_object_transport",
+      "ok": true,
+      "receipt": {
+        "returncode": 0,
+        "command": [
+          "/usr/lib/llvm-18/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/trusted-host-compile/scope/trusted-control/requests/request-valid/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/trusted-host-compile/scope/trusted-control/requests/request-valid/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "8be1139aebb43197369cc30caa64317971c85ca349dda176f650bde2ddc68805",
+        "compiler_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+        "wall_seconds": 0.025168488267809153,
+        "max_rss_kib": 87560,
+        "user_seconds": 0.008017999999999999,
+        "system_seconds": 0.016037,
+        "object_sha256": "9b33a69b93c21d2829ee5fcfa329d4fd67e82e09ccad2e8c049d03025cc4c1a2"
+      }
+    },
+    {
+      "case": "existing_output_preserved",
+      "ok": true
+    },
+    {
+      "case": "source_digest_mismatch",
+      "ok": true
+    },
+    {
+      "case": "source_scope_enforced",
+      "ok": true
+    },
+    {
+      "case": "architecture_identity",
+      "ok": true
+    },
+    {
+      "case": "compiler_argument_protocol",
+      "ok": true
+    },
+    {
+      "case": "actual_clang_failure_forwarded",
+      "ok": true
+    },
+    {
+      "case": "one_broker_owner",
+      "ok": true
+    }
+  ],
+  "control_count": 8,
+  "source_sha256": "af2f83181bad4dc3ac6c38c6e334b62c8b568d8d1580dda3de58891b779b6629",
+  "archive_sha256": "cfe2a5271d08e208ec5ee51939baaca1de4f085b2485666eed9a4f2ecf68049b",
+  "motivation": "whole OTel hotspot Clang guest OOM at10097068KiB RSS; Workspace host available101GiB",
+  "compiler_flags": "same O3 BPFv4/debug/4096 compiler frame option as registered specializer",
+  "runtime": "fresh whole-application successor prepared after current C serial queue"
+}

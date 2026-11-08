@@ -124,3 +124,7 @@ kernel retains each referenced object in the immutable capsule alongside source
 maps; common service MAP queries supply actual identities, shapes and inner
 templates. The authenticated worker uses those pinned resources for native
 alias binding, including native references beyond the source map set.
+
+### Trusted compiler memory
+
+[`trusted_compile.py`](trusted_compile.py) transports fresh compiler jobs from a registered specializer through its private shared request directory. The Workspace host runs the same Clang/BPF flags and records source/object identity plus wall time, CPU time and peak RSS. Native generation, kernel verification and generation binding keep their existing flow. The runtime owns one broker process and closes it when its application cohort ends. Completed controls and whole-application resource receipts are under [`trusted-host-compile`](../corpus/results/kprog_app_coverage_20261108/trusted-host-compile/README.md).
