@@ -1,0 +1,88 @@
+{
+  "utc": "2026-11-08T09:58:26.322763+00:00",
+  "canonical_commit": "500abe542929fa32a75301f51de8b13c086e3c02",
+  "safety_counts": {
+    "valid_executed": 4,
+    "verifier_rejected": 28,
+    "specialization_rejected": 2
+  },
+  "safety_cases": 34,
+  "safety_make_exit": 0,
+  "targeted": {
+    "cases": 143,
+    "classes": {
+      "defined": 17,
+      "sp_alignment": 109,
+      "pair_overlap": 2,
+      "writeback_overlap": 9,
+      "exclusive_overlap": 6
+    },
+    "simulator_reference_mismatches": 0,
+    "cpu_reference_mismatches": 109,
+    "overlap_qemu_outcomes": {
+      "signal0": 17
+    }
+  },
+  "memory": {
+    "forms": 255,
+    "states": 32640,
+    "cpu_c_mismatches": 0,
+    "reference_cases": 32640,
+    "reference_mismatches": 0
+  },
+  "exclusive": {
+    "forms": 8,
+    "states": 1024,
+    "cpu_c_mismatches": 0,
+    "reference_cases": 1024,
+    "reference_mismatches": 0
+  },
+  "control": {
+    "forms": 101,
+    "states": 12928,
+    "cpu_reference_mismatches": 0,
+    "c_reference_mismatches": 768,
+    "matching_c_forms": 95,
+    "existing_code_address_relation_forms": 6
+  },
+  "qemu_sp_alignment": {
+    "version": "QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.18)",
+    "el1_sctlr": "0x00c50838",
+    "el1_SA": 1,
+    "el1_cases": 143,
+    "el1_esr_nonzero": 0,
+    "source_url": "https://github.com/qemu/qemu/blob/v8.2.2/target/arm/tcg/translate-a64.c#L1331-L1342",
+    "source_sha256": "482d5d837dc523be92f47955cb64e55ec1a16d670a26af72b15d8ffff222311e"
+  },
+  "manual": {
+    "url": "https://documentation-service.arm.com/static/67e40f3398aa3c3b6eea6a85",
+    "document": "DDI0602 ID032025",
+    "sha256": "b7baa6869789722df70da60170d999a62810409aaabbb6db1ef729ed68686bdf",
+    "pages": {
+      "CheckSPAlignment": {
+        "pdf": 5477,
+        "printed": 5474
+      },
+      "LDP": {
+        "pdf": 507,
+        "printed": 504
+      },
+      "LDP_operation": {
+        "pdf": 508,
+        "printed": 505
+      },
+      "STP": {
+        "pdf": 911,
+        "printed": 908
+      },
+      "STLXR": {
+        "pdf": 901,
+        "printed": 898
+      },
+      "STXR": {
+        "pdf": 985,
+        "printed": 982
+      }
+    }
+  }
+}

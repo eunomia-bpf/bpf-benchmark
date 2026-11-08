@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-08T09:53:15.382983+00:00",
+  "memory": {
+    "forms": 255,
+    "states": 32640,
+    "cpu_simulator_mismatches": 0
+  },
+  "exclusive": {
+    "forms": 8,
+    "states": 1024,
+    "cpu_simulator_mismatches": 0
+  },
+  "control": {
+    "forms": 101,
+    "states": 12928,
+    "mismatches": 768,
+    "affected_forms": [
+      "BR finite code choice",
+      "BL / RET x30",
+      "BL / RET x17",
+      "BLR code / RET",
+      "nested BL saved LR stack",
+      "BLR saved LR stack"
+    ],
+    "class_": "Existing logical-code-offset versus native-address relation"
+  },
+  "fault_fixture": {
+    "initial": "buffer-copy extent256 exceeded default160-byte test storage; FORTIFY stopped fixture before operation observations",
+    "repair": "Explicit512-byte oracle storage and256-byte anchor; canonical storage profile retained"
+  }
+}

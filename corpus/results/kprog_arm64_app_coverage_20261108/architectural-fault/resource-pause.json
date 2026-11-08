@@ -1,0 +1,11 @@
+{
+  "utc": "2026-11-08T09:54:16.504897+00:00",
+  "paused_qemu_pid": 1599277,
+  "application": "captured Tracee",
+  "reason": "Tracee consumes roughly290 percent CPU on shared16-19 while priority34 and operation QEMU need the same cores",
+  "queued_paused": [
+    1605924,
+    1607727
+  ],
+  "resume_after": "architectural fault QEMU runs close"
+}
