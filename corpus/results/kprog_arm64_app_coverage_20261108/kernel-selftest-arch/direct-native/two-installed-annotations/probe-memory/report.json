@@ -1,0 +1,105 @@
+{
+  "utc": "2026-11-08T22:38:37.702313+00:00",
+  "scope": "Read-only ARM paired-kernel source audit of the installed LSM annotation",
+  "native_extent_publication": "88a17af867c7475a251e35de35e42ff6060149fa",
+  "sources": [
+    {
+      "name": "paired-bpf-jit.c",
+      "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/bpf_jit_comp.c",
+      "sha256": "1e0ab76ec8aaa4bc6cee345172154afc8efa84936b90ba854190bd160df40b7a",
+      "line_ranges": [
+        [
+          1149,
+          1258
+        ],
+        [
+          1789,
+          1805
+        ],
+        [
+          1867,
+          1887
+        ]
+      ]
+    },
+    {
+      "name": "paired-verifier.c",
+      "path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/verifier.c",
+      "sha256": "8d0803726c9ca48e36b4921ca84cac980d94be805245c787fac767f54ca973ec",
+      "line_ranges": [
+        [
+          23074,
+          23101
+        ]
+      ]
+    },
+    {
+      "name": "paired-native-emitter.c",
+      "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/bpf_arm64_native_lab.c",
+      "sha256": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f",
+      "line_ranges": [
+        [
+          251,
+          300
+        ],
+        [
+          480,
+          519
+        ]
+      ]
+    },
+    {
+      "name": "arm64-simulator.h",
+      "path": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "sha256": "79d8e79645aaaf01dc75f401018d5e192b54fd6e7e7bed39be0228188e294a95",
+      "line_ranges": [
+        [
+          750,
+          775
+        ],
+        [
+          977,
+          1018
+        ]
+      ]
+    },
+    {
+      "name": "design.md",
+      "path": "/workspaces/repository/kprog/docs/design.md",
+      "sha256": "72d920cfbdb25c66d620919d085f7348b523d700e99b793c29061721fff542a1",
+      "line_ranges": [
+        [
+          452,
+          488
+        ]
+      ]
+    },
+    {
+      "name": "kernel-build.sh",
+      "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/inside-kernel.sh",
+      "sha256": "64776d16f146dcf716ee6ce1cd06cdcac6018be05ecc3d04c36a68613033def1",
+      "line_ranges": [
+        [
+          1,
+          50
+        ]
+      ]
+    }
+  ],
+  "runtime": {
+    "kprog/arm64/build/native-extent/Image": "5dda73cc12cf58ff3a9dcc24dc98ee9867a5cdc92515e233cfc182226570c86e",
+    "kprog/arm64/build/native-extent/kinsn/bpf_arm64_native_lab.ko": "ec9f8a08c1c3c751be0f34c8825f833d03d81dd58bad1d4c46fc59b460d71eed"
+  },
+  "findings": [
+    "The paired verifier converts reads through PTR_TO_BTF_ID and listed untrusted pointer types to BPF_PROBE_MEM/BPF_PROBE_MEMSX and increments num_exentries.",
+    "The paired ARM JIT add_exception_handler registers EX_TYPE_BPF for each such BPF load; ex_handler_bpf clears the destination and advances PC by four bytes on a handled fault.",
+    "The paired native emitter copies native words then resolves relocation records. Its emission interface carries image/index/payload/program/final_ip; native memory accesses retain their ordinary CPU fault behavior.",
+    "The archived no_null_check native P and compiled B both read ctx[0] then file+32. The stock-verifier treatment of B gives its BTF pointer access a recoverable load semantic, while the copied native LDR retains the architectural data-abort semantic.",
+    "The design faithfulness obligation includes matching object, boundary and fault behavior. O3 must establish actual physical-entry pointer validity for every plain native access, or faithfully retain the fault in verifier-visible execution. O4 must preserve the selected memory/fault semantics when composing physical entry and emitted P.",
+    "V owns the universal O1/O3/O4 premise statement. C owns the same-kernel stock-BPF LSM baseline. A retains installed-stage accounting and paired ARM source evidence."
+  ],
+  "disposition": "Coordinator/operator model decision requested for generic fault qualification; application producers can express probe reads before submission where source semantics require them. Kernel selftest sources and current running captures retain their published bytes.",
+  "runtime_admission_additions": 0,
+  "native_execution": "Original catalog remains load-only",
+  "source_archive_sha256": "7d5764028e98abc9b041ee57b7e0a6d878d5406b4c69a5608f9d172f6766b80f"
+}

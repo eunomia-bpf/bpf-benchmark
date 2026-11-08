@@ -1,0 +1,7 @@
+ARM BTF load and physical fault semantics
+
+The paired ARM verifier changes BTF-pointer reads into BPF_PROBE_MEM and records an exception entry. The paired JIT handler clears the destination and resumes at the next instruction on a handled fault. The native emitter copies P and resolves relocations; the ordinary native load retains its architectural data-abort behavior.
+
+The archived no_null_check P/B pair keeps ctx[0] and file+32 reads. Its installed stage remains an annotation disagreement. This source audit identifies the remaining faithfulness obligation: physical-entry pointer qualification and memory fault behavior participate in O3, and O4 preserves those semantics in emitted P. The design states matching object, boundary and fault behavior explicitly at kprog/docs/design.md:485. V owns the universal premise statement; C supplies the matched stock-BPF LSM baseline.
+
+The source archive contains numbered excerpts and report.json pins their complete source hashes. Kernel sources come from the captured ARM88a17af867 build inputs, including its actual build mount script, paired verifier and native emitter. Runtime Image/module hashes join the existing published native-extent receipt. Simulator excerpts describe the current88-helper epoch. The audit uses archived/load-only evidence. Runtime admission additions:0. Coordinator/operator disposition precedes a generic model fault predicate; current application and catalog captures retain their input bytes.
