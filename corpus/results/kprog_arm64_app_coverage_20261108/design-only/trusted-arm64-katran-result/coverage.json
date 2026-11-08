@@ -1,0 +1,607 @@
+{
+  "utc": "2026-11-08T06:51:10.256529+00:00",
+  "application": "katran",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T06:51:10.299949+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": false,
+    "service_request_attempts": 1,
+    "distinct_source_prog_ids": 1,
+    "proof_generated": 1,
+    "stages": {
+      "verifier_rejected": 1
+    },
+    "failure_causes": {
+      "verifier_diagnostic": 1
+    },
+    "requests": [
+      {
+        "request_id": 1,
+        "source_prog_id": 31,
+        "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+        "entry": "balancer_ingress",
+        "status": -5,
+        "stage": "verifier_rejected",
+        "cause": "verifier_diagnostic",
+        "proof_generated": true,
+        "source_generated": true,
+        "prog_id": null,
+        "request_archive": "run/requests/1.failure.tar.gz",
+        "request_archive_sha256": "c11b10f84ded547a66fe1e8bcd9d2571a02cdfd761e1f32a7e09195916fbba3e",
+        "failed_commands": [],
+        "error": "Command '['/workspaces/repository/kprog/arm64/build/design-only/loader/trusted-native-loader', 'load', '4', '1', '31', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_ouy_p3p/requests/request-u35etqql/generated/request.native.o', 'balancer_ingress', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_ouy_p3p/requests/request-u35etqql/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_ouy_p3p/requests/request-u35etqql/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '37', '0', '0', '0', '0', '0', 'ch_rings', '32', 'null', 'ctl_array', '28', 'null', 'fallback_cache', '30', 'null', 'lru_mapping', '31', 'null', 'lru_miss_stats', '35', 'null', 'quic_stats_map', '37', 'null', 'reals', '33', 'null', 'reals_stats', '34', 'null', 'server_id_map', '40', 'null', 'server_id_stats', '42', 'null', 'stats', '27', 'null', 'vip_map', '29', 'null', 'vip_miss_stats', '36', 'null', 'vip_to_down_reals_map', '44', 'null']' returned non-zero exit status 1.",
+        "load_stderr": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=45634\nstub fd_array_cnt=16 fd_array=0:33,1:33,2:19,3:20,4:21,5:22,6:23,7:24,8:25,9:26,10:27,11:28,12:29,13:30,14:31,15:32\nstub insns=0:code=183,dst=0,src=3,off=31,imm=0;1:code=133,dst=0,src=4,off=1,imm=126349;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (7b) *(u64 *)(r10 -288) = r0      ; R0=scalar(id=1) R10=fp0 fp-288=scalar(id=1)\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (bf) r2 = r0                      ; R0=scalar(id=2) R2=scalar(id=2)\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (bf) r3 = r0                      ; R0=scalar(id=3) R3=scalar(id=3)\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (bf) r4 = r0                      ; R0=scalar(id=4) R4=scalar(id=4)\n28: (b7) r0 = 2                       ; R0=scalar()\n29: (bf) r5 = r0                      ; R0=scalar(id=5) R5=scalar(id=5)\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (bf) r1 = r0                      ; R0=scalar(id=6) R1=scalar(id=6)\n32: (b7) r0 = 2                       ; R0=scalar()\n33: (bf) r7 = r0                      ; R0=scalar(id=7) R7=scalar(id=7)\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (bf) r9 = r0                      ; R0=scalar(id=8) R9=scalar(id=8)\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (bf) r8 = r0                      ; R0=scalar(id=9) R8=scalar(id=9)\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r0 = 2                       ; R0=scalar()\n51: (b7) r0 = 2                       ; R0=scalar()\n52: (b7) r0 = 2                       ; R0=scalar()\n53: (b7) r0 = 2                       ; R0=scalar()\n54: (b7) r0 = 2                       ; R0=scalar()\n55: (b7) r0 = 2                       ; R0=scalar()\n56: (b7) r0 = 2                       ; R0=scalar()\n57: (b7) r0 = 2                       ; R0=scalar()\n58: (b7) r0 = 2                       ; R0=scalar()\n59: (b7) r0 = 2                       ; R0=scalar()\n60: (b7) r0 = 2                       ; R0=scalar()\n61: (b7) r0 = 2                       ; R0=scalar()\n62: (b7) r0 = 2                       ; R0=scalar()\n63: (b7) r0 = 2                       ; R0=scalar()\n64: (b7) r0 = 2                       ; R0=scalar()\n65: (b7) r0 = 2                       ; R0=scalar()\n66: (b7) r0 = 2                       ; R0=scalar()\n67: (b7) r0 = 2                       ; R0=scalar()\n68: (b7) r0 = 2                       ; R0=scalar()\n69: (b7) r0 = 2                       ; R0=scalar()\n70: (b7) r0 = 2                       ; R0=scalar()\n71: (b7) r0 = 2                       ; R0=scalar()\n72: (b7) r0 = 2                       ; R0=scalar()\n73: (b7) r0 = 2                       ; R0=scalar()\n74: (b7) r0 = 2                       ; R0=scalar()\n75: (b7) r0 = 2                       ; R0=scalar()\n76: (b7) r0 = 2                       ; R0=scalar()\n77: (b7) r0 = 2                       ; R0=scalar()\n78: (b7) r0 = 2                       ; R0=scalar()\n79: (b7) r0 = 2                       ; R0=scalar()\n80: (b7) r0 = 2                       ; R0=scalar()\n81: (b7) r0 = 2                       ; R0=scalar()\n82: (b7) r0 = 2                       ; R0=scalar()\n83: (b7) r0 = 2                       ; R0=scalar()\n84: (b7) r0 = 2                       ; R0=scalar()\n85: (b7) r0 = 2                       ; R0=scalar()\n86: (b7) r0 = 2                       ; R0=scalar()\n87: (b7) r0 = 2                       ; R0=scalar()\n88: (b7) r0 = 2                       ; R0=scalar()\n89: (b7) r0 = 2                       ; R0=scalar()\n90: (b7) r0 = 2                       ; R0=scalar()\n91: (b7) r0 = 2                       ; R0=scalar()\n92: (b7) r0 = 2                       ; R0=scalar()\n93: (b7) r0 = 2                       ; R0=scalar()\n94: (b7) r0 = 2                       ; R0=scalar()\n95: (b7) r0 = 2                       ; R0=scalar()\n96: (b7) r0 = 2                       ; R0=scalar()\n97: (b7) r0 = 2                       ; R0=scalar()\n98: (b7) r0 = 2                       ; R0=scalar()\n99: (b7) r0 = 2                       ; R0=scalar()\n100: (b7) r0 = 2                      ; R0=scalar()\n101: (b7) r0 = 2                      ; R0=scalar()\n102: (b7) r0 = 2                      ; R0=scalar()\n103: (b7) r0 = 2                      ; R0=scalar()\n104: (b7) r0 = 2                      ; R0=scalar()\n105: (b7) r0 = 2                      ; R0=scalar()\n106: (b7) r0 = 2                      ; R0=scalar()\n107: (b7) r0 = 2                      ; R0=scalar()\n108: (b7) r0 = 2                      ; R0=scalar()\n109: (7a) *(u64 *)(r10 -256) = 0      ; R10=fp0 fp-256=0\n110: (7a) *(u64 *)(r10 -264) = 0      ; R10=fp0 fp-264=0\n111: (7a) *(u64 *)(r10 -272) = 0      ; R10=fp0 fp-272=0\n112: (7a) *(u64 *)(r10 -280) = 0      ; R10=fp0 fp-280=0\n113: (b7) r0 = 2                      ; R0=scalar()\n114: (7b) *(u64 *)(r10 -296) = r0     ; R0=scalar(id=10) R10=fp0 fp-296=scalar(id=10)\n115: (7b) *(u64 *)(r10 -80) = r9      ; R9=scalar(id=8) R10=fp0 fp-80=scalar(id=8)\n116: (18) r9 = 0xffffff00ffffffff     ; R9=0xffffff00ffffffff\n118: (79) r0 = *(u64 *)(r10 -264)     ; R0=0 R10=fp0 fp-264=0\n119: (5f) r0 &= r9                    ; R0=0 R9=0xffffff00ffffffff\n120: (7b) *(u64 *)(r10 -264) = r0     ; R0=0 R10=fp0 fp-264=0\n121: (b7) r0 = 2                      ; R0=scalar()\n122: (7b) *(u64 *)(r10 -304) = r0     ; R0=scalar(id=11) R10=fp0 fp-304=scalar(id=11)\n123: (0f) r0 += r8                    ; R0=scalar() R8=scalar(id=9)\n124: (7b) *(u64 *)(r10 -64) = r0      ; R0=scalar(id=12) R10=fp0 fp-64=scalar(id=12)\n125: (7b) *(u64 *)(r10 -248) = r8     ; R8=scalar(id=9) R10=fp0 fp-248=scalar(id=9)\n126: (18) r0 = 0xff00ffffffffffff     ; R0=0xff00ffffffffffff\n128: (79) r8 = *(u64 *)(r10 -264)     ; R8=0 R10=fp0 fp-264=0\n129: (5f) r8 &= r0                    ; R0=0xff00ffffffffffff R8=0\n130: (18) r0 = 0xa000000000000        ; R0=0xa000000000000\n132: (4f) r8 |= r0                    ; R0=0xa000000000000 R8=0xa000000000000\n133: (7b) *(u64 *)(r10 -264) = r8     ; R8=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n134: (7b) *(u64 *)(r10 -56) = r7      ; R7=scalar(id=7) R10=fp0 fp-56=scalar(id=7)\n135: (18) r0 = 0xffffffffffffff       ; R0=0xffffffffffffff\n137: (79) r7 = *(u64 *)(r10 -264)     ; R7=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n138: (5f) r7 &= r0                    ; R0=0xffffffffffffff R7=0xa000000000000\n139: (7b) *(u64 *)(r10 -264) = r7     ; R7=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n140: (7b) *(u64 *)(r10 -48) = r1      ; R1=scalar(id=6) R10=fp0 fp-48=scalar(id=6)\n141: (79) r0 = *(u64 *)(r10 -256)     ; R0=0 R10=fp0 fp-256=0\n142: (57) r0 &= -256                  ; R0=0\n143: (7b) *(u64 *)(r10 -256) = r0     ; R0=0 R10=fp0 fp-256=0\n144: (7b) *(u64 *)(r10 -40) = r5      ; R5=scalar(id=5) R10=fp0 fp-40=scalar(id=5)\n145: (79) r5 = *(u64 *)(r10 -256)     ; R5=0 R10=fp0 fp-256=0\n146: (57) r5 &= -65281                ; R5=0\n147: (7b) *(u64 *)(r10 -256) = r5     ; R5=0 R10=fp0 fp-256=0\n148: (7b) *(u64 *)(r10 -32) = r4      ; R4=scalar(id=4) R10=fp0 fp-32=scalar(id=4)\n149: (79) r4 = *(u64 *)(r10 -256)     ; R4=0 R10=fp0 fp-256=0\n150: (57) r4 &= -16711681             ; R4=0\n151: (7b) *(u64 *)(r10 -256) = r4     ; R4=0 R10=fp0 fp-256=0\n152: (7b) *(u64 *)(r10 -24) = r3      ; R3=scalar(id=3) R10=fp0 fp-24=scalar(id=3)\n153: (18) r3 = 0xffffffff00ffffff     ; R3=0xffffffff00ffffff\n155: (79) r4 = *(u64 *)(r10 -256)     ; R4=0 R10=fp0 fp-256=0\n156: (5f) r4 &= r3                    ; R3=0xffffffff00ffffff R4=0\n157: (7b) *(u64 *)(r10 -256) = r4     ; R4=0 R10=fp0 fp-256=0\n158: (7b) *(u64 *)(r10 -16) = r2      ; R2=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\n159: (79) r2 = *(u64 *)(r10 -256)     ; R2=0 R10=fp0 fp-256=0\n160: (5f) r2 &= r9                    ; R2=0 R9=0xffffff00ffffffff\n161: (7b) *(u64 *)(r10 -256) = r2     ; R2=0 R10=fp0 fp-256=0\n162: (79) r1 = *(u64 *)(r10 -288)     ; R1=scalar(id=1) R10=fp0 fp-288=scalar(id=1)\n163: (7b) *(u64 *)(r10 -8) = r1       ; R1=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n164: (18) r1 = 0xffff00ffffffffff     ; R1=0xffff00ffffffffff\n166: (79) r2 = *(u64 *)(r10 -256)     ; R2=0 R10=fp0 fp-256=0\n167: (5f) r2 &= r1                    ; R1=0xffff00ffffffffff R2=0\n168: (7b) *(u64 *)(r10 -256) = r2     ; R2=0 R10=fp0 fp-256=0\n169: (61) r9 = *(u32 *)(r6 +0)        ; R6=ctx() R9=pkt(r=0)\n170: (7b) *(u64 *)(r10 -288) = r6     ; R6=ctx() R10=fp0 fp-288=ctx()\n171: (61) r8 = *(u32 *)(r6 +4)        ; R6=ctx() R8=pkt_end()\n172: (b4) w7 = 1                      ; R7=1\n173: (bf) r1 = r9                     ; R1=pkt(r=0) R9=pkt(r=0)\n174: (07) r1 += 14                    ; R1=pkt(off=14,r=0)\n175: (2d) if r1 > r8 goto pc+718      ; R1=pkt(off=14,r=14) R8=pkt_end()\n176: (79) r1 = *(u64 *)(r10 -280)     ; R1=0 R10=fp0 fp-280=0\n177: (57) r1 &= -16711681             ; R1=0\n178: (7b) *(u64 *)(r10 -280) = r1     ; R1=0 R10=fp0 fp-280=0\n179: (72) *(u8 *)(r10 -220) = 16      ; R10=fp0 fp-224=???m????\n180: (72) *(u8 *)(r10 -219) = 2       ; R10=fp0 fp-224=??mm????\n181: (72) *(u8 *)(r10 -218) = 0       ; R10=fp0 fp-224=?0mm????\n182: (72) *(u8 *)(r10 -217) = 0       ; R10=fp0 fp-224=00mm????\n183: (b7) r2 = -220                   ; R2=-220\n184: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n185: (07) r1 += -240                  ; R1=fp-240\n186: (0f) r2 += r1                    ; R1=fp-240 R2=fp-460\n187: (07) r2 += 240                   ; R2=fp-220\n188: (18) r1 = 0xffff0000c1ac4000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n190: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=13,map=stats,ks=4,vs=16)\n191: (bf) r1 = r0                     ; R0=map_value_or_null(id=13,map=stats,ks=4,vs=16) R1=map_value_or_null(id=13,map=stats,ks=4,vs=16)\n192: (b7) r0 = 2                      ; R0=scalar()\n193: (b7) r0 = 2                      ; R0=scalar()\n194: (b7) r0 = 2                      ; R0=scalar()\n195: (b7) r0 = 2                      ; R0=scalar()\n196: (b7) r0 = 2                      ; R0=scalar()\n197: (b7) r0 = 2                      ; R0=scalar()\n198: (b7) r0 = 2                      ; R0=scalar()\n199: (b7) r0 = 2                      ; R0=scalar()\n200: (b7) r0 = 2                      ; R0=scalar()\n201: (b7) r0 = 2                      ; R0=scalar()\n202: (b7) r0 = 2                      ; R0=scalar()\n203: (b7) r0 = 2                      ; R0=scalar()\n204: (b7) r0 = 2                      ; R0=scalar()\n205: (b7) r0 = 2                      ; R0=scalar()\n206: (b7) r0 = 2                      ; R0=scalar()\n207: (b7) r0 = 2                      ; R0=scalar()\n208: (b7) r0 = 2                      ; R0=scalar()\n209: (b7) r0 = 2                      ; R0=scalar()\n210: (b7) r0 = 2                      ; R0=scalar()\n211: (b7) r0 = 2                      ; R0=scalar()\n212: (b7) r0 = 2                      ; R0=scalar()\n213: (b7) r0 = 2                      ; R0=scalar()\n214: (b7) r0 = 2                      ; R0=scalar()\n215: (b7) r0 = 2                      ; R0=scalar()\n216: (b7) r0 = 2                      ; R0=scalar()\n217: (b7) r0 = 2                      ; R0=scalar()\n218: (b7) r0 = 2                      ; R0=scalar()\n219: (b7) r0 = 2                      ; R0=scalar()\n220: (b7) r0 = 2                      ; R0=scalar()\n221: (b7) r0 = 2                      ; R0=scalar()\n222: (b7) r0 = 2                      ; R0=scalar()\n223: (b7) r0 = 2                      ; R0=scalar()\n224: (b7) r0 = 2                      ; R0=scalar()\n225: (b7) r0 = 2                      ; R0=scalar()\n226: (b7) r0 = 2                      ; R0=scalar()\n227: (b7) r0 = 2                      ; R0=scalar()\n228: (b7) r0 = 2                      ; R0=scalar()\n229: (b7) r0 = 2                      ; R0=scalar()\n230: (b7) r0 = 2                      ; R0=scalar()\n231: (b7) r0 = 2                      ; R0=scalar()\n232: (b7) r0 = 2                      ; R0=scalar()\n233: (b7) r0 = 2                      ; R0=scalar()\n234: (b7) r0 = 2                      ; R0=scalar()\n235: (b7) r0 = 2                      ; R0=scalar()\n236: (b7) r0 = 2                      ; R0=scalar()\n237: (b7) r0 = 2                      ; R0=scalar()\n238: (b7) r0 = 2                      ; R0=scalar()\n239: (b7) r0 = 2                      ; R0=scalar()\n240: (b7) r0 = 2                      ; R0=scalar()\n241: (b7) r0 = 2                      ; R0=scalar()\n242: (b7) r0 = 2                      ; R0=scalar()\n243: (b7) r0 = 2                      ; R0=scalar()\n244: (b7) r0 = 2                      ; R0=scalar()\n245: (b7) r0 = 2                      ; R0=scalar()\n246: (b7) r0 = 2                      ; R0=scalar()\n247: (b7) r0 = 2                      ; R0=scalar()\n248: (b7) r0 = 2                      ; R0=scalar()\n249: (b7) r0 = 2                      ; R0=scalar()\n250: (b7) r0 = 2                      ; R0=scalar()\n251: (b7) r0 = 2                      ; R0=scalar()\n252: (b7) r0 = 2                      ; R0=scalar()\n253: (b7) r0 = 2                      ; R0=scalar()\n254: (b7) r0 = 2                      ; R0=scalar()\n255: (b7) r0 = 2                      ; R0=scalar()\n256: (b7) r0 = 2                      ; R0=scalar()\n257: (b7) r0 = 2                      ; R0=scalar()\n258: (b7) r0 = 2                      ; R0=scalar()\n259: (b7) r0 = 2                      ; R0=scalar()\n260: (b7) r0 = 2                      ; R0=scalar()\n261: (b7) r0 = 2                      ; R0=scalar()\n262: (b7) r0 = 2                      ; R0=scalar()\n263: (b7) r0 = 2                      ; R0=scalar()\n264: (b7) r0 = 2                      ; R0=scalar()\n265: (b7) r0 = 2                      ; R0=scalar()\n266: (b7) r0 = 2                      ; R0=scalar()\n267: (b7) r0 = 2                      ; R0=scalar()\n268: (b7) r0 = 2                      ; R0=scalar()\n269: (b7) r0 = 2                      ; R0=scalar()\n270: (b7) r0 = 2                      ; R0=scalar()\n271: (b7) r0 = 2                      ; R0=scalar()\n272: (b7) r0 = 2                      ; R0=scalar()\n273: (b7) r0 = 2                      ; R0=scalar()\n274: (b7) r0 = 2                      ; R0=scalar()\n275: (b7) r0 = 2                      ; R0=scalar()\n276: (b7) r0 = 2                      ; R0=scalar()\n277: (b7) r0 = 2                      ; R0=scalar()\n278: (15) if r1 == 0x0 goto pc+615    ; R1=map_value(map=stats,ks=4,vs=16)\n279: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=stats,ks=4,vs=16) R2=scalar()\n280: (79) r3 = *(u64 *)(r1 +8)        ; R1=map_value(map=stats,ks=4,vs=16) R3=scalar()\n281: (07) r2 += 1                     ; R2=scalar()\n282: (7b) *(u64 *)(r1 +0) = r2        ; R1=map_value(map=stats,ks=4,vs=16) R2=scalar()\n283: (1f) r8 -= r9                    ; R8=scalar() R9=pkt(r=14)\n284: (7b) *(u64 *)(r10 -312) = r8     ; R8=scalar(id=14) R10=fp0 fp-312=scalar(id=14)\n285: (0f) r3 += r8                    ; R3=scalar() R8=scalar(id=14)\n286: (07) r1 += 8                     ; R1=map_value(map=stats,ks=4,vs=16,off=8)\n287: (7b) *(u64 *)(r1 +0) = r3        ; R1=map_value(map=stats,ks=4,vs=16,off=8) R3=scalar()\n288: (69) r1 = *(u16 *)(r9 +12)       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=pkt(r=14)\n289: (54) w1 &= 65535                 ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n290: (16) if w1 == 0xdd86 goto pc+196         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n291: (b4) w7 = 19                     ; R7=19\n292: (b4) w6 = 2                      ; R6=2\n293: (56) if w1 != 0x8 goto pc+487    ; R1=8\n294: (79) r1 = *(u64 *)(r10 -288)     ; R1=ctx() R10=fp0 fp-288=ctx()\n295: (61) r8 = *(u32 *)(r1 +0)        ; R1=ctx() R8=pkt(r=0)\n296: (61) r9 = *(u32 *)(r1 +4)        ; R1=ctx() R9=pkt_end()\n297: (7a) *(u64 *)(r10 -144) = 0      ; R10=fp0 fp-144=0\n298: (18) r2 = 0xffffff00ffffffff     ; R2=0xffffff00ffffffff\n300: (79) r1 = *(u64 *)(r10 -272)     ; R1=0 R10=fp0 fp-272=0\n301: (5f) r1 &= r2                    ; R1=0 R2=0xffffff00ffffffff\n302: (7b) *(u64 *)(r10 -272) = r1     ; R1=0 R10=fp0 fp-272=0\n303: (7a) *(u64 *)(r10 -136) = 0      ; R10=fp0 fp-136=0\n304: (18) r1 = 0xffff00ffffffffff     ; R1=0xffff00ffffffffff\n306: (79) r3 = *(u64 *)(r10 -272)     ; R3=0 R10=fp0 fp-272=0\n307: (5f) r3 &= r1                    ; R1=0xffff00ffffffffff R3=0\n308: (7b) *(u64 *)(r10 -272) = r3     ; R3=0 R10=fp0 fp-272=0\n309: (18) r3 = 0xffffffffffffff       ; R3=0xffffffffffffff\n311: (79) r4 = *(u64 *)(r10 -280)     ; R4=0 R10=fp0 fp-280=0\n312: (5f) r4 &= r3                    ; R3=0xffffffffffffff R4=0\n313: (7b) *(u64 *)(r10 -280) = r4     ; R4=0 R10=fp0 fp-280=0\n314: (72) *(u8 *)(r10 -184) = 0       ; R10=fp0 fp-184=???????0\n315: (72) *(u8 *)(r10 -183) = 0       ; R10=fp0 fp-184=??????0m\n316: (72) *(u8 *)(r10 -182) = 0       ; R10=fp0 fp-184=?????00m\n317: (72) *(u8 *)(r10 -181) = 0       ; R10=fp0 fp-184=????000m\n318: (7a) *(u64 *)(r10 -160) = 0      ; R10=fp0 fp-160=0\n319: (79) r3 = *(u64 *)(r10 -272)     ; R3=0 R10=fp0 fp-272=0\n320: (57) r3 &= -16711681             ; R3=0\n321: (7b) *(u64 *)(r10 -272) = r3     ; R3=0 R10=fp0 fp-272=0\n322: (7a) *(u64 *)(r10 -152) = 0      ; R10=fp0 fp-152=0\n323: (18) r3 = 0xffffffff00ffffff     ; R3=0xffffffff00ffffff\n325: (79) r4 = *(u64 *)(r10 -272)     ; R4=0 R10=fp0 fp-272=0\n326: (5f) r4 &= r3                    ; R3=0xffffffff00ffffff R4=0\n327: (7b) *(u64 *)(r10 -272) = r4     ; R4=0 R10=fp0 fp-272=0\n328: (7a) *(u64 *)(r10 -176) = 0      ; R10=fp0 fp-176=0\n329: (79) r3 = *(u64 *)(r10 -272)     ; R3=0 R10=fp0 fp-272=0\n330: (57) r3 &= -256                  ; R3=0\n331: (7b) *(u64 *)(r10 -272) = r3     ; R3=0 R10=fp0 fp-272=0\n332: (7a) *(u64 *)(r10 -168) = 0      ; R10=fp0 fp-168=0\n333: (79) r3 = *(u64 *)(r10 -272)     ; R3=0 R10=fp0 fp-272=0\n334: (57) r3 &= -65281                ; R3=0\n335: (7b) *(u64 *)(r10 -272) = r3     ; R3=0 R10=fp0 fp-272=0\n336: (79) r3 = *(u64 *)(r10 -280)     ; R3=0 R10=fp0 fp-280=0\n337: (5f) r3 &= r2                    ; R2=0xffffff00ffffffff R3=0\n338: (7b) *(u64 *)(r10 -280) = r3     ; R3=0 R10=fp0 fp-280=0\n339: (72) *(u8 *)(r10 -208) = 0       ; R10=fp0 fp-208=???????0\n340: (72) *(u8 *)(r10 -207) = 0       ; R10=fp0 fp-208=??????0m\n341: (72) *(u8 *)(r10 -206) = 0       ; R10=fp0 fp-208=?????00m\n342: (72) *(u8 *)(r10 -205) = 0       ; R10=fp0 fp-208=????000m\n343: (7a) *(u64 *)(r10 -200) = 0      ; R10=fp0 fp-200=0\n344: (79) r2 = *(u64 *)(r10 -280)     ; R2=0 R10=fp0 fp-280=0\n345: (5f) r2 &= r1                    ; R1=0xffff00ffffffffff R2=0\n346: (7b) *(u64 *)(r10 -280) = r2     ; R2=0 R10=fp0 fp-280=0\n347: (7a) *(u64 *)(r10 -192) = 0      ; R10=fp0 fp-192=0\n348: (18) r1 = 0xff00ffffffffffff     ; R1=0xff00ffffffffffff\n350: (79) r2 = *(u64 *)(r10 -280)     ; R2=0 R10=fp0 fp-280=0\n351: (5f) r2 &= r1                    ; R1=0xff00ffffffffffff R2=0\n352: (7b) *(u64 *)(r10 -280) = r2     ; R2=0 R10=fp0 fp-280=0\n353: (bf) r3 = r8                     ; R3=pkt(r=0) R8=pkt(r=0)\n354: (07) r3 += 34                    ; R3=pkt(off=34,r=0)\n355: (b4) w7 = 18                     ; R7=18\n356: (b4) w6 = 1                      ; R6=1\n357: (2d) if r3 > r9 goto pc+423      ; R3=pkt(off=34,r=34) R9=pkt_end()\n358: (71) r1 = *(u8 *)(r8 +14)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=34)\n359: (57) r1 &= 15                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))\n360: (55) if r1 != 0x5 goto pc+420    ; R1=5\n361: (71) r1 = *(u8 *)(r8 +15)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=34)\n362: (18) r2 = 0xffff00ffffffffff     ; R2=0xffff00ffffffffff\n364: (79) r4 = *(u64 *)(r10 -272)     ; R4=0 R10=fp0 fp-272=0\n365: (5f) r4 &= r2                    ; R2=0xffff00ffffffffff R4=0\n366: (7b) *(u64 *)(r10 -272) = r4     ; R4=0 R10=fp0 fp-272=0\n367: (73) *(u8 *)(r10 -131) = r1      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-136=mmmmmmmm\n368: (71) r1 = *(u8 *)(r8 +23)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=34)\n369: (18) r2 = 0xffffff00ffffffff     ; R2=0xffffff00ffffffff\n371: (79) r4 = *(u64 *)(r10 -272)     ; R4=0 R10=fp0 fp-272=0\n372: (5f) r4 &= r2                    ; R2=0xffffff00ffffffff R4=0\n373: (7b) *(u64 *)(r10 -272) = r4     ; R4=0 R10=fp0 fp-272=0\n374: (73) *(u8 *)(r10 -140) = r1      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-144=mmmmmmmm\n375: (69) r2 = *(u16 *)(r8 +20)       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=34)\n376: (bf) r4 = r2                     ; R2=scalar(id=15,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=scalar(id=15,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n377: (57) r4 &= 65343                 ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff3f,var_off=(0x0; 0xff3f))\n378: (55) if r4 != 0x0 goto pc+402    ; R4=0\n379: (bf) r0 = r9                     ; R0=pkt_end() R9=pkt_end()\n380: (57) r1 &= 255                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n381: (69) r4 = *(u16 *)(r8 +16)       ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=34)\n382: (57) r4 &= 65535                 ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n383: (7b) *(u64 *)(r10 -320) = r4     ; R4=scalar(id=16,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-320=scalar(id=16,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n384: (7b) *(u64 *)(r10 -328) = r0     ; R0=pkt_end() R10=fp0 fp-328=pkt_end()\n385: (55) if r1 != 0x1 goto pc+56     ; R1=1\n386: (bf) r1 = r8                     ; R1=pkt(r=34) R8=pkt(r=34)\n387: (07) r1 += 42                    ; R1=pkt(off=42,r=34)\n388: (7b) *(u64 *)(r10 -336) = r1     ; R1=pkt(off=42,r=34) R10=fp0 fp-336=pkt(off=42,r=34)\n389: (2d) if r1 > r0 goto pc+391      ; R0=pkt_end() R1=pkt(off=42,r=42)\n390: (71) r1 = *(u8 *)(r3 +0)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=pkt(off=34,r=42)\n391: (54) w1 &= 255                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n392: (16) if w1 == 0x3 goto pc+1919   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n393: (b4) w7 = 19                     ; R7=19\n394: (b4) w6 = 2                      ; R6=2\n395: (56) if w1 != 0x8 goto pc+385    ; R1=8\n396: (57) r2 &= 65535                 ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n397: (69) r6 = *(u16 *)(r8 +14)       ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n398: (61) r5 = *(u32 *)(r8 +30)       ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=pkt(r=42)\n399: (bf) r1 = r8                     ; R1=pkt(r=42) R8=pkt(r=42)\n400: (07) r1 += 22                    ; R1=pkt(off=22,r=42)\n401: (b7) r3 = 64                     ; R3=64\n402: (73) *(u8 *)(r1 +0) = r3         ; R1=pkt(off=22,r=42) R3=64\n403: (69) r0 = *(u16 *)(r8 +18)       ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n404: (69) r1 = *(u16 *)(r8 +22)       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n405: (7b) *(u64 *)(r10 -288) = r1     ; R1=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-288=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n406: (bf) r3 = r8                     ; R3=pkt(r=42) R8=pkt(r=42)\n407: (07) r3 += 34                    ; R3=pkt(off=34,r=42)\n408: (b7) r4 = 0                      ; R4=0\n409: (73) *(u8 *)(r3 +0) = r4         ; R3=pkt(off=34,r=42) R4=0\n410: (61) r1 = *(u32 *)(r8 +26)       ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=pkt(r=42)\n411: (bf) r3 = r5                     ; R3=scalar(id=18,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=scalar(id=18,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n412: (67) r3 <<= 32                   ; R3=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n413: (77) r3 >>= 32                   ; R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n414: (bf) r7 = r8                     ; R7=pkt(r=42) R8=pkt(r=42)\n415: (07) r7 += 26                    ; R7=pkt(off=26,r=42)\n416: (63) *(u32 *)(r7 +0) = r3        ; R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(off=26,r=42)\n417: (69) r7 = *(u16 *)(r8 +28)       ; R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n418: (69) r3 = *(u16 *)(r8 +36)       ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n419: (bf) r4 = r1                     ; R1=scalar(id=19,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R4=scalar(id=19,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n420: (67) r4 <<= 32                   ; R4=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n421: (77) r4 >>= 32                   ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n422: (bf) r9 = r8                     ; R8=pkt(r=42) R9=pkt(r=42)\n423: (07) r9 += 30                    ; R9=pkt(off=30,r=42)\n424: (63) *(u32 *)(r9 +0) = r4        ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=pkt(off=30,r=42)\n425: (79) r9 = *(u64 *)(r10 -320)     ; R9=scalar(id=16,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-320=scalar(id=16,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n426: (0f) r9 += r2                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x1fffe,var_off=(0x0; 0x1ffff))\n427: (57) r6 &= 65535                 ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n428: (0f) r9 += r6                    ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x2fffd,var_off=(0x0; 0x3ffff))\n429: (57) r5 &= 65535                 ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n430: (0f) r9 += r5                    ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x3fffc,var_off=(0x0; 0x3ffff))\n431: (57) r0 &= 65535                 ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n432: (0f) r9 += r0                    ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x4fffb,var_off=(0x0; 0x7ffff))\n433: (79) r2 = *(u64 *)(r10 -288)     ; R2=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-288=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n434: (57) r2 &= 65535                 ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n435: (0f) r9 += r2                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x5fffa,var_off=(0x0; 0x7ffff))\n436: (57) r1 &= 65535                 ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n437: (0f) r9 += r1                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x6fff9,var_off=(0x0; 0x7ffff))\n438: (57) r7 &= 65535                 ; R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n439: (0f) r9 += r7                    ; R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x7fff8,var_off=(0x0; 0x7ffff))\n440: (69) r1 = *(u16 *)(r8 +32)       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n441: (05) goto pc+288\n730: (04) w3 += 8                     ; R3=scalar(smin=umin=smin32=umin32=8,smax=umax=smax32=umax32=0x10007,var_off=(0x0; 0x1ffff))\n731: (57) r3 &= 65535                 ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n732: (61) r4 = *(u32 *)(r8 +0)        ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=pkt(r=42)\n733: (61) r2 = *(u32 *)(r8 +6)        ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=pkt(r=42)\n734: (bf) r5 = r8                     ; R5=pkt(r=42) R8=pkt(r=42)\n735: (07) r5 += 36                    ; R5=pkt(off=36,r=42)\n736: (6b) *(u16 *)(r5 +0) = r3        ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R5=pkt(off=36,r=42)\n737: (67) r4 <<= 32                   ; R4=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n738: (77) r4 >>= 32                   ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n739: (bf) r3 = r8                     ; R3=pkt(r=42) R8=pkt(r=42)\n740: (07) r3 += 6                     ; R3=pkt(off=6,r=42)\n741: (63) *(u32 *)(r3 +0) = r4        ; R3=pkt(off=6,r=42) R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n742: (57) r1 &= 65535                 ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n743: (0f) r1 += r9                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x8fff7,var_off=(0x0; 0xfffff)) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x7fff8,var_off=(0x0; 0x7ffff))\n744: (a5) if r1 < 0x10000 goto pc+4   ; R1=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x8fff7,var_off=(0x0; 0xfffff))\n745: (bf) r3 = r1                     ; R1=scalar(id=20,smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x8fff7,var_off=(0x0; 0xfffff)) R3=scalar(id=20,smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x8fff7,var_off=(0x0; 0xfffff))\n746: (57) r3 &= 65535                 ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n747: (77) r1 >>= 16                   ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf))\n748: (0f) r1 += r3                    ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0x10007,var_off=(0x0; 0x1ffff)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n749: (a5) if r1 < 0x10000 goto pc+4   ; R1=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x10007,var_off=(0x10000; 0x7))\n750: (bf) r3 = r1                     ; R1=scalar(id=21,smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x10007,var_off=(0x10000; 0x7)) R3=scalar(id=21,smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x10007,var_off=(0x10000; 0x7))\n751: (57) r3 &= 65535                 ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))\n752: (77) r1 >>= 16                   ; R1=1\n753: (0f) r1 += r3                    ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))\n754: (a5) if r1 < 0x10000 goto pc+4   ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf))\n759: (bc) w3 = w1                     ; R1=scalar(id=22,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf)) R3=scalar(id=22,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf))\n760: (74) w3 >>= 16                   ; R3=0\n761: (0c) w3 += w1                    ; R1=scalar(id=22,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf)) R3=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=8,var_off=(0x0; 0xf))\n762: (69) r1 = *(u16 *)(r8 +10)       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n763: (a4) w3 ^= -1                    ; R3=scalar(smin=umin=umin32=0xfffffff0,smax=umax=0xffffffff,smin32=-16,smax32=-1,var_off=(0xfffffff0; 0xf))\n764: (57) r3 &= 65535                 ; R3=scalar(smin=umin=smin32=umin32=0xfff0,smax=umax=smax32=umax32=0xffff,var_off=(0xfff0; 0xf))\n765: (bf) r4 = r8                     ; R4=pkt(r=42) R8=pkt(r=42)\n766: (07) r4 += 24                    ; R4=pkt(off=24,r=42)\n767: (6b) *(u16 *)(r4 +0) = r3        ; R3=scalar(smin=umin=smin32=umin32=0xfff0,smax=umax=smax32=umax32=0xffff,var_off=(0xfff0; 0xf)) R4=pkt(off=24,r=42)\n768: (67) r2 <<= 32                   ; R2=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n769: (77) r2 >>= 32                   ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n770: (69) r3 = *(u16 *)(r8 +4)        ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(r=42)\n771: (63) *(u32 *)(r8 +0) = r2        ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=pkt(r=42)\n772: (57) r3 &= 65535                 ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n773: (bf) r2 = r8                     ; R2=pkt(r=42) R8=pkt(r=42)\n774: (07) r2 += 10                    ; R2=pkt(off=10,r=42)\n775: (6b) *(u16 *)(r2 +0) = r3        ; R2=pkt(off=10,r=42) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n776: (07) r8 += 4                     ; R8=pkt(off=4,r=42)\n777: (57) r1 &= 65535                 ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n778: (6b) *(u16 *)(r8 +0) = r1        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=pkt(off=4,r=42)\n779: (b4) w6 = 3                      ; R6=3\n780: (b4) w7 = 17                     ; R7=17\n781: (79) r1 = *(u64 *)(r10 -280)     ; R1=0 R10=fp0 fp-280=0\n782: (57) r1 &= -16711681             ; R1=0\n783: (7b) *(u64 *)(r10 -280) = r1     ; R1=0 R10=fp0 fp-280=0\n784: (73) *(u8 *)(r10 -220) = r7      ; R7=17 R10=fp0 fp-224=00mm????\n785: (72) *(u8 *)(r10 -219) = 2       ; R10=fp0 fp-224=00mm????\n786: (72) *(u8 *)(r10 -218) = 0       ; R10=fp0 fp-224=00mm????\n787: (72) *(u8 *)(r10 -217) = 0       ; R10=fp0 fp-224=00mm????\n788: (b7) r2 = -220                   ; R2=-220\n789: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n790: (07) r1 += -240                  ; R1=fp-240\n791: (0f) r2 += r1                    ; R1=fp-240 R2=fp-460\n792: (07) r2 += 240                   ; R2=fp-220\n793: (18) r1 = 0xffff0000c1ac4000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n795: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=23,map=stats,ks=4,vs=16)\n796: (bf) r1 = r0                     ; R0=map_value_or_null(id=23,map=stats,ks=4,vs=16) R1=map_value_or_null(id=23,map=stats,ks=4,vs=16)\n797: (b7) r0 = 2                      ; R0=scalar()\n798: (b7) r0 = 2                      ; R0=scalar()\n799: (b7) r0 = 2                      ; R0=scalar()\n800: (b7) r0 = 2                      ; R0=scalar()\n801: (b7) r0 = 2                      ; R0=scalar()\n802: (b7) r0 = 2                      ; R0=scalar()\n803: (b7) r0 = 2                      ; R0=scalar()\n804: (b7) r0 = 2                      ; R0=scalar()\n805: (b7) r0 = 2                      ; R0=scalar()\n806: (b7) r0 = 2                      ; R0=scalar()\n807: (b7) r0 = 2                      ; R0=scalar()\n808: (b7) r0 = 2                      ; R0=scalar()\n809: (b7) r0 = 2                      ; R0=scalar()\n810: (b7) r0 = 2                      ; R0=scalar()\n811: (b7) r0 = 2                      ; R0=scalar()\n812: (b7) r0 = 2                      ; R0=scalar()\n813: (b7) r0 = 2                      ; R0=scalar()\n814: (b7) r0 = 2                      ; R0=scalar()\n815: (b7) r0 = 2                      ; R0=scalar()\n816: (b7) r0 = 2                      ; R0=scalar()\n817: (b7) r0 = 2                      ; R0=scalar()\n818: (b7) r0 = 2                      ; R0=scalar()\n819: (b7) r0 = 2                      ; R0=scalar()\n820: (b7) r0 = 2                      ; R0=scalar()\n821: (b7) r0 = 2                      ; R0=scalar()\n822: (b7) r0 = 2                      ; R0=scalar()\n823: (b7) r0 = 2                      ; R0=scalar()\n824: (b7) r0 = 2                      ; R0=scalar()\n825: (b7) r0 = 2                      ; R0=scalar()\n826: (b7) r0 = 2                      ; R0=scalar()\n827: (b7) r0 = 2                      ; R0=scalar()\n828: (b7) r0 = 2                      ; R0=scalar()\n829: (b7) r0 = 2                      ; R0=scalar()\n830: (b7) r0 = 2                      ; R0=scalar()\n831: (b7) r0 = 2                      ; R0=scalar()\n832: (b7) r0 = 2                      ; R0=scalar()\n833: (b7) r0 = 2                      ; R0=scalar()\n834: (b7) r0 = 2                      ; R0=scalar()\n835: (b7) r0 = 2                      ; R0=scalar()\n836: (b7) r0 = 2                      ; R0=scalar()\n837: (b7) r0 = 2                      ; R0=scalar()\n838: (b7) r0 = 2                      ; R0=scalar()\n839: (b7) r0 = 2                      ; R0=scalar()\n840: (b7) r0 = 2                      ; R0=scalar()\n841: (b7) r0 = 2                      ; R0=scalar()\n842: (b7) r0 = 2                      ; R0=scalar()\n843: (b7) r0 = 2                      ; R0=scalar()\n844: (b7) r0 = 2                      ; R0=scalar()\n845: (b7) r0 = 2                      ; R0=scalar()\n846: (b7) r0 = 2                      ; R0=scalar()\n847: (b7) r0 = 2                      ; R0=scalar()\n848: (b7) r0 = 2                      ; R0=scalar()\n849: (b7) r0 = 2                      ; R0=scalar()\n850: (b7) r0 = 2                      ; R0=scalar()\n851: (b7) r0 = 2                      ; R0=scalar()\n852: (b7) r0 = 2                      ; R0=scalar()\n853: (b7) r0 = 2                      ; R0=scalar()\n854: (b7) r0 = 2                      ; R0=scalar()\n855: (b7) r0 = 2                      ; R0=scalar()\n856: (b7) r0 = 2                      ; R0=scalar()\n857: (b7) r0 = 2                      ; R0=scalar()\n858: (b7) r0 = 2                      ; R0=scalar()\n859: (b7) r0 = 2                      ; R0=scalar()\n860: (b7) r0 = 2                      ; R0=scalar()\n861: (b7) r0 = 2                      ; R0=scalar()\n862: (b7) r0 = 2                      ; R0=scalar()\n863: (b7) r0 = 2                      ; R0=scalar()\n864: (b7) r0 = 2                      ; R0=scalar()\n865: (b7) r0 = 2                      ; R0=scalar()\n866: (b7) r0 = 2                      ; R0=scalar()\n867: (b7) r0 = 2                      ; R0=scalar()\n868: (b7) r0 = 2                      ; R0=scalar()\n869: (b7) r0 = 2                      ; R0=scalar()\n870: (b7) r0 = 2                      ; R0=scalar()\n871: (b7) r0 = 2                      ; R0=scalar()\n872: (b7) r0 = 2                      ; R0=scalar()\n873: (b7) r0 = 2                      ; R0=scalar()\n874: (b7) r0 = 2                      ; R0=scalar()\n875: (b7) r0 = 2                      ; R0=scalar()\n876: (b7) r0 = 2                      ; R0=scalar()\n877: (b7) r0 = 2                      ; R0=scalar()\n878: (b7) r0 = 2                      ; R0=scalar()\n879: (b7) r0 = 2                      ; R0=scalar()\n880: (b7) r0 = 2                      ; R0=scalar()\n881: (b7) r0 = 2                      ; R0=scalar()\n882: (b7) r0 = 2                      ; R0=scalar()\n883: (b4) w7 = 1                      ; R7=1\n884: (79) r4 = *(u64 *)(r10 -312)     ; R4=scalar(id=24) R10=fp0 fp-312=scalar(id=24)\n885: (15) if r1 == 0x0 goto pc+8      ; R1=map_value(map=stats,ks=4,vs=16)\n886: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=stats,ks=4,vs=16) R2=scalar()\n887: (79) r3 = *(u64 *)(r1 +8)        ; R1=map_value(map=stats,ks=4,vs=16) R3=scalar()\n888: (07) r2 += 1                     ; R2=scalar()\n889: (7b) *(u64 *)(r1 +0) = r2        ; R1=map_value(map=stats,ks=4,vs=16) R2=scalar()\n890: (0f) r3 += r4                    ; R3=scalar() R4=scalar(id=24)\n891: (07) r1 += 8                     ; R1=map_value(map=stats,ks=4,vs=16,off=8)\n892: (7b) *(u64 *)(r1 +0) = r3        ; R1=map_value(map=stats,ks=4,vs=16,off=8) R3=scalar()\n893: (bc) w7 = w6                     ; R6=3 R7=3\n894: (79) r1 = *(u64 *)(r10 -16)      ; R1=scalar(id=25) R10=fp0 fp-16=scalar(id=25)\n895: (79) r1 = *(u64 *)(r10 -8)       ; R1=scalar(id=26) R10=fp0 fp-8=scalar(id=26)\n896: (79) r2 = *(u64 *)(r10 -256)     ; R2=0 R10=fp0 fp-256=0\n897: (77) r2 >>= 32                   ; R2=0\n898: (79) r1 = *(u64 *)(r10 -256)     ; R1=0 R10=fp0 fp-256=0\n899: (77) r1 >>= 40                   ; R1=0\n900: (bc) w3 = w2                     ; R2=0 R3=0\n901: (4c) w3 |= w1                    ; R1=0 R3=0\n902: (54) w3 &= 255                   ; R3=0\n903: (16) if w3 == 0x0 goto pc+8      ; R3=0\n912: (79) r1 = *(u64 *)(r10 -80)      ; R1=scalar(id=27) R10=fp0 fp-80=scalar(id=27)\n913: (79) r1 = *(u64 *)(r10 -264)     ; R1=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n914: (77) r1 >>= 32                   ; R1=0xa0000\n915: (54) w1 &= 255                   ; R1=0\n916: (16) if w1 == 0xa goto pc+1      ; R1=0\n917: (56) if w1 != 0x4 goto pc+1      ; R1=0\n919: (79) r1 = *(u64 *)(r10 -32)      ; R1=scalar(id=28) R10=fp0 fp-32=scalar(id=28)\n920: (79) r1 = *(u64 *)(r10 -24)      ; R1=scalar(id=29) R10=fp0 fp-24=scalar(id=29)\n921: (79) r2 = *(u64 *)(r10 -256)     ; R2=0 R10=fp0 fp-256=0\n922: (77) r2 >>= 16                   ; R2=0\n923: (79) r1 = *(u64 *)(r10 -256)     ; R1=0 R10=fp0 fp-256=0\n924: (77) r1 >>= 24                   ; R1=0\n925: (bc) w3 = w2                     ; R2=0 R3=0\n926: (4c) w3 |= w1                    ; R1=0 R3=0\n927: (54) w3 &= 255                   ; R3=0\n928: (16) if w3 == 0x0 goto pc+8      ; R3=0\n937: (79) r1 = *(u64 *)(r10 -48)      ; R1=scalar(id=30) R10=fp0 fp-48=scalar(id=30)\n938: (79) r1 = *(u64 *)(r10 -40)      ; R1=scalar(id=31) R10=fp0 fp-40=scalar(id=31)\n939: (79) r2 = *(u64 *)(r10 -256)     ; R2=0 R10=fp0 fp-256=0\n940: (79) r1 = *(u64 *)(r10 -256)     ; R1=0 R10=fp0 fp-256=0\n941: (77) r1 >>= 8                    ; R1=0\n942: (bc) w3 = w2                     ; R2=0 R3=0\n943: (4c) w3 |= w1                    ; R1=0 R3=0\n944: (54) w3 &= 255                   ; R3=0\n945: (16) if w3 == 0x0 goto pc+8      ; R3=0\n954: (79) r2 = *(u64 *)(r10 -64)      ; R2=scalar(id=32) R10=fp0 fp-64=scalar(id=32)\n955: (79) r1 = *(u64 *)(r10 -56)      ; R1=scalar(id=33) R10=fp0 fp-56=scalar(id=33)\n956: (79) r1 = *(u64 *)(r10 -264)     ; R1=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n957: (77) r1 >>= 48                   ; R1=10\n958: (79) r3 = *(u64 *)(r10 -264)     ; R3=0xa000000000000 R10=fp0 fp-264=0xa000000000000\n959: (77) r3 >>= 56                   ; R3=0\n960: (bc) w4 = w1                     ; R1=10 R4=10\n961: (4c) w4 |= w3                    ; R3=0 R4=10\n962: (54) w4 &= 255                   ; R4=10\n963: (16) if w4 == 0x0 goto pc+14     ; R4=10\n964: (bc) w4 = w1                     ; R1=10 R4=10\n965: (54) w4 &= 255                   ; R4=10\n966: (16) if w4 == 0xa goto pc+1      ; R4=10\n968: (79) r2 = *(u64 *)(r10 -248)     ; R2=scalar(id=34) R10=fp0 fp-248=scalar(id=34)\n969: (16) if w3 == 0xa goto pc+1      ; R3=0\n970: (56) if w3 != 0x4 goto pc+1      ; R3=0\n972: (bc) w3 = w1                     ; R1=10 R3=10\n973: (54) w3 &= 255                   ; R3=10\n974: (16) if w3 == 0x0 goto pc+3      ; R3=10\n975: (55) if r2 != 0x0 goto pc+2 978: R0=scalar() R1=10 R2=scalar(id=34,umin=1) R3=10 R4=10 R6=3 R7=3 R8=pkt(off=4,r=42) R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=0x7fff8,var_off=(0x0; 0x7ffff)) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=scalar() fp-64=scalar() fp-80=scalar() fp-136=mmmmmmmm fp-144=mmmmmmmm fp-152=0 fp-160=0 fp-168=0 fp-176=0 fp-184=????000m fp-192=0 fp-200=0 fp-208=????000m fp-224=00mm???? fp-248=scalar(id=34,umin=1) fp-256=0 fp-264=0xa000000000000 fp-272=0 fp-280=0 fp-288=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-296=scalar() fp-304=scalar() fp-312=scalar() fp-320=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-328=pkt_end() fp-336=pkt(off=42,r=42)\n978: (85) call unknown#-1\ninvalid func unknown#-1\nprocessed 652 insns (limit 1000000) max_states_per_insn 0 total_states 14 peak_states 14 mark_read 0\n\nkernel log tail:\n4,244,6266876,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,245,6267272,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=10172 reloc_records=80 reloc_bytes=1280 chunks=1 proof_bound=1 callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=14 relocated_map_ids=14 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126349\nretained_map_info=19:id=27:type=6:name=stats,20:id=29:type=1:name=vip_map,21:id=31:type=12:name=lru_mapping,22:id=30:type=9:name=fallback_cache,23:id=37:type=6:name=quic_stats_map,24:id=42:type=6:name=server_id_stats,25:id=44:type=13:name=vip_to_down_rea,26:id=33:type=2:name=reals,27:id=28:type=2:name=ctl_array,28:id=34:type=6:name=reals_stats,29:id=32:type=2:name=ch_rings,30:id=36:type=2:name=vip_miss_stats,31:id=35:type=6:name=lru_miss_stats,32:id=40:type=2:name=server_id_map\nnative_blob_diag: fnv64=311e0cb6c93850d1 word_count=2543 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=28 first_zero_offset=10056 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=10172 final_size_matches=1\nchunk_bytes=0:10172\nreloc_targets=100:0x0,1148:0xffff800080301a48,1240:0x0,1332:0xffff800080308070,1404:0x0,1512:0x0,1808:0x0,1988:0x0,2136:0xffff800080301a48,2276:0xffff800080301a48,2368:0x0,2460:0xffff800080308070,2532:0x0,2640:0x0,2884:0x0,3032:0xffff800080301a48,3140:0x0,3352:0x0,3480:0x0,3624:0x0,3732:0x0,3956:0xffff8000802f0f80,3996:0xffff8000802f1240,4116:0x0,4144:0xffff8000802f1240,4240:0xffff8000802f0f80,4272:0xffff8000802f0f80,4340:0x0,4552:0x0,4640:0x0,4712:0xffff800080c7e728,4916:0x0,5016:0x0,5044:0xffff8000802f1240,5428:0xffff8000802f0fb8,5580:0xffff800080c7e728,5820:0x0,6052:0xffff8000802f0f80,6360:0xffff8000802f0f80,6400:0xffff8000802f1240,6520:0x0,6548:0xffff8000802f1240,6644:0xffff8000802f0f80,6676:0xffff8000802f0f80,6744:0x0,6956:0x0,7040:0x0,7112:0xffff800080c7e728,7220:0x0,7316:0x0,7344:0xffff8000802f1240,7740:0xffff8000802f0fb8,7904:0x0,8024:0x0,8072:0xffff800080c7e728,8140:0x0,8268:0x0,8812:0x0,8840:0xffff8000802f1240,8952:0x0,9176:0xffff8000802f0f80,9332:0xffff8000802f0fb8,9432:0x0,9460:0xffff8000802f1240,9576:0x0,9672:0xffff8000802f0fb8,10056:0x1b,10064:0x1d,10072:0x1f,10080:0x1e,10088:0x25,10096:0x2a,10104:0x2c,10112:0x21,10120:0x1c,10128:0x22,10136:0x20,10144:0x24,10152:0x23,10160:0x28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n"
+      }
+    ],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000048_709460/details/apps/katran.json",
+        "app": "katran",
+        "status": "error",
+        "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI19700101 00:11:01.461520  1672 KatranGrpcService.cpp:69] Starting Katran\nE19700101 00:11:01.588436  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:11:01.600975  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:11:01.685696  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:11:01.699185  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE19700101 00:11:01.797969  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE19700101 00:11:01.817678  1672 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+        "phases": {
+          "baseline": {
+            "programs": [
+              {
+                "bytes_jited": 14456,
+                "bytes_xlated": 23808,
+                "id": 17,
+                "name": "balancer_ingres",
+                "run_cnt_delta": 21360,
+                "run_time_ns_delta": 475954800,
+                "type": "xdp"
+              }
+            ],
+            "workload": null,
+            "raw_measurement": {
+              "bpf": {
+                "17": {
+                  "bytes_jited": 14456,
+                  "bytes_xlated": 23808,
+                  "id": 17,
+                  "name": "balancer_ingres",
+                  "run_cnt_delta": 21360,
+                  "run_time_ns_delta": 475954800,
+                  "type": "xdp"
+                }
+              },
+              "workloads": [
+                {
+                  "command": [
+                    "/usr/sbin/ip",
+                    "netns",
+                    "exec",
+                    "katran-router",
+                    "sh",
+                    "-c",
+                    "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                  ],
+                  "components": [
+                    {
+                      "command": [
+                        "/usr/sbin/ip",
+                        "netns",
+                        "exec",
+                        "katran-router",
+                        "sh",
+                        "-c",
+                        "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                      ],
+                      "config": {
+                        "clone_skb": 0,
+                        "dst_ip": "10.100.1.1",
+                        "dst_port": 8080,
+                        "iface": "rtlb0@7",
+                        "namespace": "katran-router",
+                        "pkt_size": 64,
+                        "proto": 17,
+                        "shared_skb": true,
+                        "src_ip": "10.0.0.2",
+                        "thread_id": 7,
+                        "tool": "kernel_pktgen",
+                        "xmit_mode": "start_xmit"
+                      },
+                      "duration_s": 3.2840175840000256,
+                      "returncode": 0,
+                      "stderr": "",
+                      "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 21360  errors: 0\n     started: 449741292us  stopped: 452049980us idle: 0us\n     seq_num: 21361  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2308688(c2308688+d0) usec, 21360 (64byte,0frags)\n  9252pps 4Mb/sec (4737024bps) errors: 0",
+                      "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+                    }
+                  ],
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0",
+                    "namespace": "katran-router",
+                    "outcomes": {
+                      "after": {
+                        "counters": {
+                          "consistent_hash_drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "decap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "encap_fail": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "fallback_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 44492
+                          },
+                          "global_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v4": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v6": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_too_big": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lpm_src": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lru": {
+                            "bytes_or_v2": 2,
+                            "packets_or_v1": 44492
+                          },
+                          "lru_miss": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "new_conn_rate": {
+                            "bytes_or_v2": 451744517984,
+                            "packets_or_v1": 2563
+                          },
+                          "pass": {
+                            "bytes_or_v2": 70,
+                            "packets_or_v1": 1
+                          },
+                          "quic_icmp": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "remote_encap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "total": {
+                            "bytes_or_v2": 2847558,
+                            "packets_or_v1": 44493
+                          },
+                          "tx": {
+                            "bytes_or_v2": 2847488,
+                            "packets_or_v1": 44492
+                          },
+                          "udp_flow_migration": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "vip_0": {
+                            "bytes_or_v2": 2224600,
+                            "packets_or_v1": 44492
+                          },
+                          "xpop_decap_success": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          }
+                        },
+                        "interfaces": {
+                          "load_balancer/katran0": {
+                            "rx_bytes": 2225702,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 44506,
+                            "tx_bytes": 3738388,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 44506
+                          },
+                          "real/real0": {
+                            "rx_bytes": 3738486,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 44508,
+                            "tx_bytes": 1116,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 14
+                          },
+                          "router/rtlb0": {
+                            "rx_bytes": 3738388,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 44506,
+                            "tx_bytes": 2225702,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 44506
+                          },
+                          "router/rtreal0": {
+                            "rx_bytes": 1116,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 14,
+                            "tx_bytes": 3738486,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 44508
+                          }
+                        },
+                        "real_counters": {
+                          "real_1": {
+                            "bytes_or_v2": 2224600,
+                            "packets_or_v1": 44492
+                          }
+                        },
+                        "reals_stats_map_ids": [
+                          13
+                        ],
+                        "receiver": {
+                          "rx_bytes": 3738486,
+                          "rx_dropped": 0,
+                          "rx_errors": 0,
+                          "rx_packets": 44508,
+                          "tx_bytes": 1116,
+                          "tx_dropped": 0,
+                          "tx_errors": 0,
+                          "tx_packets": 14
+                        },
+                        "stats_map_ids": [
+                          6
+                        ]
+                      },
+                      "before": {
+                        "counters": {
+                          "consistent_hash_drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "decap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "encap_fail": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "fallback_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 23132
+                          },
+                          "global_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v4": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v6": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_too_big": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lpm_src": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lru": {
+                            "bytes_or_v2": 1,
+                            "packets_or_v1": 23132
+                          },
+                          "lru_miss": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "new_conn_rate": {
+                            "bytes_or_v2": 349401484112,
+                            "packets_or_v1": 3751
+                          },
+                          "pass": {
+                            "bytes_or_v2": 70,
+                            "packets_or_v1": 1
+                          },
+                          "quic_icmp": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "remote_encap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "total": {
+                            "bytes_or_v2": 1480518,
+                            "packets_or_v1": 23133
+                          },
+                          "tx": {
+                            "bytes_or_v2": 1480448,
+                            "packets_or_v1": 23132
+                          },
+                          "udp_flow_migration": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "vip_0": {
+                            "bytes_or_v2": 1156600,
+                            "packets_or_v1": 23132
+                          },
+                          "xpop_decap_success": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          }
+                        },
+                        "interfaces": {
+                          "load_balancer/katran0": {
+                            "rx_bytes": 1157702,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 23146,
+                            "tx_bytes": 1944148,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 23146
+                          },
+                          "real/real0": {
+                            "rx_bytes": 1944246,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 23148,
+                            "tx_bytes": 1116,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 14
+                          },
+                          "router/rtlb0": {
+                            "rx_bytes": 1944148,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 23146,
+                            "tx_bytes": 1157702,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 23146
+                          },
+                          "router/rtreal0": {
+                            "rx_bytes": 1116,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 14,
+                            "tx_bytes": 1944246,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 23148
+                          }
+                        },
+                        "real_counters": {
+                          "real_1": {
+                            "bytes_or_v2": 1156600,
+                            "packets_or_v1": 23132
+                          }
+                        },
+                        "reals_stats_map_ids": [
+                          13
+                        ],
+                        "receiver": {
+                          "rx_bytes": 1944246,
+                          "rx_dropped": 0,
+                          "rx_errors": 0,
+                          "rx_packets": 23148,
+                          "tx_bytes": 1116,
+                          "tx_dropped": 0,
+                          "tx_errors": 0,
+                          "tx_packets": 14
+                        },
+                        "stats_map_ids": [
+                          6
+                        ]
+                      },
+                      "delta": {
+                        "counters": {
+                          "consistent_hash_drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "decap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "drop": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "encap_fail": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "fallback_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 21360
+                          },
+                          "global_lru": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v4": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_ptb_v6": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "icmp_too_big": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lpm_src": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "lru": {
+                            "bytes_or_v2": 1,
+                            "packets_or_v1": 21360
+                          },
+                          "lru_miss": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "new_conn_rate": {
+                            "bytes_or_v2": 102343033872,
+                            "packets_or_v1": -1188
+                          },
+                          "pass": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "quic_icmp": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "remote_encap": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "total": {
+                            "bytes_or_v2": 1367040,
+                            "packets_or_v1": 21360
+                          },
+                          "tx": {
+                            "bytes_or_v2": 1367040,
+                            "packets_or_v1": 21360
+                          },
+                          "udp_flow_migration": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          },
+                          "vip_0": {
+                            "bytes_or_v2": 1068000,
+                            "packets_or_v1": 21360
+                          },
+                          "xpop_decap_success": {
+                            "bytes_or_v2": 0,
+                            "packets_or_v1": 0
+                          }
+                        },
+                        "interfaces": {
+                          "load_balancer/katran0": {
+                            "rx_bytes": 1068000,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 21360,
+                            "tx_bytes": 1794240,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 21360
+                          },
+                          "real/real0": {
+                            "rx_bytes": 1794240,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 21360,
+                            "tx_bytes": 0,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 0
+                          },
+                          "router/rtlb0": {
+                            "rx_bytes": 1794240,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 21360,
+                            "tx_bytes": 1068000,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 21360
+                          },
+                          "router/rtreal0": {
+                            "rx_bytes": 0,
+                            "rx_dropped": 0,
+                            "rx_errors": 0,
+                            "rx_packets": 0,
+                            "tx_bytes": 1794240,
+                            "tx_dropped": 0,
+                            "tx_errors": 0,
+                            "tx_packets": 21360
+                          }
+                        },
+                        "real_counters": {
+                          "real_1": {
+                            "bytes_or_v2": 1068000,
+                            "packets_or_v1": 21360
+                          }
+                        },
+                        "reals_stats_map_ids": [
+                          13
+                        ],
+                        "receiver": {
+                          "rx_bytes": 1794240,
+                          "rx_dropped": 0,
+                          "rx_errors": 0,
+                          "rx_packets": 21360,
+                          "tx_bytes": 0,
+                          "tx_dropped": 0,
+                          "tx_errors": 0,
+                          "tx_packets": 0
+                        },
+                        "stats_map_ids": [
+                          6
+                        ]
+                      },
+                      "settle_seconds": 1.0
+                    },
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": true,
+                    "src_ip": "10.0.0.2",
+                    "threads": [
+                      7
+                    ],
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  },
+                  "duration_s": 3.2840175840000256,
+                  "returncode": 0,
+                  "stderr": "",
+                  "stdout": "",
+                  "workload_name": "katran_kernel_pktgen_l2_udp"
+                }
+              ]
+            }
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
