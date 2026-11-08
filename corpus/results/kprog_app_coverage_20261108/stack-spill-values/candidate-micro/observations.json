@@ -1,0 +1,310 @@
+{
+  "make_exit": 0,
+  "compiled_rows": 30,
+  "derivative_sources": 30,
+  "candidate_header_sha256": "dbe7c13982d16c0d5540c3acefbd2e0728c48c9ee3c25b05bcc31eabb9e29ce6",
+  "rows": [
+    {
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "compile_s": 18.340883609838784,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c",
+      "object_sha256": "2590e1d5655ff9b0888fc40b48a45bee0367cc07c3748752d27c2637f702cffb"
+    },
+    {
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "compile_s": 22.183737410232425,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c",
+      "object_sha256": "b5f934fd42716f0588ed14620f612010b1d12179b2052a5da7c5aef5facd2e1b"
+    },
+    {
+      "name": "bitmap_popcount_scan",
+      "compile_s": 17.158340530004352,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bitmap_popcount_scan.bpf.c",
+      "object_sha256": "5df9455db76955bae367afc10af75f887057d58151bc4998d10e1c9a2ca4cdab"
+    },
+    {
+      "name": "bpf_local_call_fanout_dispatch",
+      "compile_s": 49.12059461232275,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c",
+      "object_sha256": "b8de4b96579dccce874ed49f6d89962f258875b44d7ab6176675ef5090593dd5"
+    },
+    {
+      "name": "bpftrace_comm_key_fnv_hash",
+      "compile_s": 32.594082470051944,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c",
+      "object_sha256": "6a6a5a7ef856f9297528c6c8f0f17712cf6ba4b378e6fb4528342ae09a9bfa89"
+    },
+    {
+      "name": "bpftrace_string_search_prefix_scan",
+      "compile_s": 8.026955120265484,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpftrace_string_search_prefix_scan.bpf.c",
+      "object_sha256": "f1d86e11499d6156056d83abdc569890307be03ff5c2a7252a8733c673a614cd"
+    },
+    {
+      "name": "cgroup_skb_hash_chain",
+      "compile_s": 9.550648731179535,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cgroup_skb_hash_chain.bpf.c",
+      "object_sha256": "ce5ddb4a96ed76eef5f522bc6b8dad24e9b1ec83abfee6fa23ac02183c7e39e0"
+    },
+    {
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "compile_s": 17.022565397899598,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c",
+      "object_sha256": "b9ecbf6247362860de1f1456b529f33653df4dfed02af58151982a716f6d92b7"
+    },
+    {
+      "name": "cilium_policy_guard_tree_filter",
+      "compile_s": 18.983921067789197,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_policy_guard_tree_filter.bpf.c",
+      "object_sha256": "7276c7bf0058212f7099309d0f412112ef0e98eabfe4cdac5a86b64d92ba129e"
+    },
+    {
+      "name": "cilium_socket_lb_service_select",
+      "compile_s": 21.07185985799879,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_socket_lb_service_select.bpf.c",
+      "object_sha256": "126c4842620183affe5608c34a216427d60d3dd54184ab8ff72281f3b2615f89"
+    },
+    {
+      "name": "flow_5tuple_rss_hash",
+      "compile_s": 31.919358431827277,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/flow_5tuple_rss_hash.bpf.c",
+      "object_sha256": "a3ba13b3086fd4f880986b9cc5241d957e3267de23ab762d7bc8b8a5f3dc6e77"
+    },
+    {
+      "name": "flow_record_field_scan",
+      "compile_s": 21.940282304305583,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/flow_record_field_scan.bpf.c",
+      "object_sha256": "e9f197cdd12ccf81f83ca06093bcd97552ebcf68e4a362bb46df9426e68587a1"
+    },
+    {
+      "name": "katran_lb_consistent_hash_select",
+      "compile_s": 71.26170776691288,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c",
+      "object_sha256": "ce648db22ed63462dac18d0352d62d75c8a7724e95e97aea8fb0262f5b1e2335"
+    },
+    {
+      "name": "otel_stack_frame_unwind_scan",
+      "compile_s": 14.723078088834882,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/otel_stack_frame_unwind_scan.bpf.c",
+      "object_sha256": "c03b79abec4b24f7aa244211d615a82f8d263eb7bf01386562512d1caa4c7525"
+    },
+    {
+      "name": "packed_header_bitfield_decode",
+      "compile_s": 45.27819125074893,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c",
+      "object_sha256": "657c2ef2f43fc28afcbadbfaf52fa502a2b2ac6abe78768b6f62da170992ff70"
+    },
+    {
+      "name": "packet_checksum_fold",
+      "compile_s": 8.377200010698289,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_checksum_fold.bpf.c",
+      "object_sha256": "c5ade575df43c2b39607212b46a11b3ab4270207977ea06a7bd0a9f801b887f8"
+    },
+    {
+      "name": "packet_record_bounds_window",
+      "compile_s": 20.64249759307131,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_record_bounds_window.bpf.c",
+      "object_sha256": "23417769fff78e6c85a14bd3810732c0ff0e1885b5b512a7e45aec3391b052d5"
+    },
+    {
+      "name": "packet_toeplitz_rss_hash",
+      "compile_s": 25.41309984913096,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_toeplitz_rss_hash.bpf.c",
+      "object_sha256": "9b148b2dca02b3d35585b4cca4a32c76e6f8fccc6ad97212d4d96f78ae0997a6"
+    },
+    {
+      "name": "packet_vlan_tcpopt_parser",
+      "compile_s": 48.023859466891736,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_vlan_tcpopt_parser.bpf.c",
+      "object_sha256": "9f15c26541dab3a4c5be322068cf31cf32392bbf87615b80ff17b9a588aa9024"
+    },
+    {
+      "name": "payload_prefix_memcmp_scan",
+      "compile_s": 17.629770840983838,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/payload_prefix_memcmp_scan.bpf.c",
+      "object_sha256": "4d655c17f7c7651ed02fb6ab0c65fe6d511dc8ae4844134123095bf861e1b11a"
+    },
+    {
+      "name": "simple",
+      "compile_s": 1.1258659902960062,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/simple.bpf.c",
+      "object_sha256": "c5a05b4d2e977309ed0b85249b091f08619c2f194400bb948e04cf63fa578648"
+    },
+    {
+      "name": "simple_packet",
+      "compile_s": 0.8275942709296942,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/simple_packet.bpf.c",
+      "object_sha256": "2b5e5e3065432d0bb009c2865e1ea982bfa2b6755ec07a99cf2968a671b62632"
+    },
+    {
+      "name": "siphash_rotate64_mixer",
+      "compile_s": 42.59588827006519,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c",
+      "object_sha256": "67afdb42b89dd80077abc3c934bf8f1a92e044846ff4ad530c83ebb867389ac0"
+    },
+    {
+      "name": "sorted_rule_binary_search",
+      "compile_s": 3.7415863517671824,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/sorted_rule_binary_search.bpf.c",
+      "object_sha256": "fdf1cf1fc88581cdeb79182d864a9f484954f3534099e105ccd60ca05dde52fd"
+    },
+    {
+      "name": "tc_packet_checksum_fold",
+      "compile_s": 8.427700514905155,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tc_packet_checksum_fold.bpf.c",
+      "object_sha256": "126de0bc26f16361e7619d88e717aca6a7f408783b28a083ffa4444ad7da6e28"
+    },
+    {
+      "name": "tetragon_process_event_arg_filter",
+      "compile_s": 33.78787418408319,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c",
+      "object_sha256": "b00dd787979f4f19c75d4eaef0d0b2fd2ee63ae4d13fa4c97b7e52b45bc85eba"
+    },
+    {
+      "name": "trace_event_type_switch_dispatch",
+      "compile_s": 7.085921301040798,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/trace_event_type_switch_dispatch.bpf.c",
+      "object_sha256": "9883f6586e8dc6c9034b9f4c91584fc3b4d28ae709ab023f8c33b7bafc7c4b5e"
+    },
+    {
+      "name": "tracee_http_method_prefix_detect",
+      "compile_s": 11.223146989010274,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tracee_http_method_prefix_detect.bpf.c",
+      "object_sha256": "b8506b1196c9ca0fbc0072755dc5a4942e9bbfce892f56bf0247712d6e1acbc4"
+    },
+    {
+      "name": "tracee_syscall_name_table_lookup",
+      "compile_s": 17.623510006349534,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tracee_syscall_name_table_lookup.bpf.c",
+      "object_sha256": "d9f19ce191d789ebfb4b3fbd0a14c7434749a0391eba0a972fa71e8792b67a2d"
+    },
+    {
+      "name": "unchecked_packet_read",
+      "compile_s": 0.24942846596240997,
+      "source": "/workspaces/repository/kprog/x86/micro-prog/unchecked_packet_read.bpf.c",
+      "object_sha256": "ee21867b984ea6e578afbc8d5c1c42ecf59a334f2f797be893f564d40b771e29"
+    }
+  ],
+  "derivatives": [
+    {
+      "path": "18c72e5a1b59-tc_packet_checksum_fold.bpf.c",
+      "sha256": "5e42a626a3d6e53116bcee2313006a40a809885e86bb6b1009caf849d9a059a8"
+    },
+    {
+      "path": "1b66a62ea6b5-tetragon_process_event_arg_filter.bpf.c",
+      "sha256": "9a74ced0e303b9d7d008fe986f4b21d413c3cfc336850b66dadcc4a3941a2116"
+    },
+    {
+      "path": "20c1ff2c33e6-tracee_http_method_prefix_detect.bpf.c",
+      "sha256": "e7c71f8c53c46dd13032f5b752f8aa12f28a0020b8be36b3e211fa89163325ba"
+    },
+    {
+      "path": "234b4d12f12f-packet_toeplitz_rss_hash.bpf.c",
+      "sha256": "01a04490de283c2b5f4285cab89b0e7aa4cefd6d9639e263a7b5f062a5f22650"
+    },
+    {
+      "path": "251317976d87-katran_lb_consistent_hash_select.bpf.c",
+      "sha256": "e8c5ea63c7d92be692534a39b7ff6ff57b63e3839366baf6eb515ee049795d1f"
+    },
+    {
+      "path": "258adb84d135-bpftrace_comm_key_fnv_hash.bpf.c",
+      "sha256": "631404a107cc08745d1862f17516dcf726be6f1875b9e133ca54917212a1e13a"
+    },
+    {
+      "path": "29f86f508131-payload_prefix_memcmp_scan.bpf.c",
+      "sha256": "441f24f8fc6c873f34e6083e2aba5a659a5a9ef95dc865df8bc1a142de0980a3"
+    },
+    {
+      "path": "3b692d1442d7-bcc_tcpconnect_ipv4_tuple_filter.bpf.c",
+      "sha256": "4387f5a27c8151dd72077f8a6fce11651bf842f09a4c5a1893dc957a8e885502"
+    },
+    {
+      "path": "3eede90daea1-otel_stack_frame_unwind_scan.bpf.c",
+      "sha256": "b08ed0dcff5fe07833b77fa4f7c8d8eb2dd9bae263f6a0ee999841ca2d8d2356"
+    },
+    {
+      "path": "4477bad9609e-simple_packet.bpf.c",
+      "sha256": "298125924b0d2023b52b9247c0ea06eafbe0faf2a5be72dabfc037f1fcf545c2"
+    },
+    {
+      "path": "4b0c7bef7362-packet_checksum_fold.bpf.c",
+      "sha256": "8212cf08cdee559a041e5a00290d80728bd7e7ca457f3547841733455738d916"
+    },
+    {
+      "path": "54fb7ce74fdf-tracee_syscall_name_table_lookup.bpf.c",
+      "sha256": "ef184d236533dee7c5cfa147c1ddc8de27df590e8e96f7fd6e6ade2343c65b6b"
+    },
+    {
+      "path": "66f436490165-bpf_local_call_fanout_dispatch.bpf.c",
+      "sha256": "38a88c1067f688a72fe83c3bca265d96dcd434b9438d360d9f1615f92b5d9341"
+    },
+    {
+      "path": "6784442827d4-sorted_rule_binary_search.bpf.c",
+      "sha256": "f68f5c7c0592115b2dfaed541a1c9cd6494478fd04dcd17244ba3e66620257b0"
+    },
+    {
+      "path": "74b8cbef68d5-flow_record_field_scan.bpf.c",
+      "sha256": "0213003e0b1a1d74431240db9fa02090f518638aa6901d28b3a40addd0681ff6"
+    },
+    {
+      "path": "7e576db9b3ec-cilium_socket_lb_service_select.bpf.c",
+      "sha256": "88b4f9f4191abebcafdf5b6b8f8c02014d26225f5f8fd6a1fdfde2869603a34e"
+    },
+    {
+      "path": "8051c3cc9123-packet_record_bounds_window.bpf.c",
+      "sha256": "8aa16a9b748b434d3bd5b4b9faa6c10856e1943d03a590008ebc754cd060bf88"
+    },
+    {
+      "path": "84c98c601695-flow_5tuple_rss_hash.bpf.c",
+      "sha256": "f50a644adf564ea7622fb6c9c349fe33955da877b6afca2c7597d21fe89c060d"
+    },
+    {
+      "path": "9ed443ff4cac-bitmap_popcount_scan.bpf.c",
+      "sha256": "5a2a34b9f3730a1d67564114a48fd096ed9c220b259125648c34d228a11ecbfe"
+    },
+    {
+      "path": "ab127e8ce052-siphash_rotate64_mixer.bpf.c",
+      "sha256": "d7013c64a3223226728897395f36e931c69f0b81598539e0130fd0eb002fde40"
+    },
+    {
+      "path": "b0f96b4050b2-packet_vlan_tcpopt_parser.bpf.c",
+      "sha256": "ca87ec846d7f7252c89d4256d59c2b8cec534fb6cb1413b3df22df5f92195202"
+    },
+    {
+      "path": "bbf159836547-cilium_policy_guard_tree_filter.bpf.c",
+      "sha256": "3fd21760e498379b86b1219ea78a785416a4f05d41e128eedb82c3db720190de"
+    },
+    {
+      "path": "cf13cf6fefc1-cilium_ct_nat_tuple_rewrite.bpf.c",
+      "sha256": "8dbb4188db7b0bf6d7831b1626530a8d9497fc7e7d952213276da6e13ce45558"
+    },
+    {
+      "path": "cfaafe717b42-bpftrace_string_search_prefix_scan.bpf.c",
+      "sha256": "4868d39cebae810e7482555536e390e12b3d5fc6fc875063f7c7efa2f9b91de3"
+    },
+    {
+      "path": "d1aa0faf8a07-cgroup_skb_hash_chain.bpf.c",
+      "sha256": "3dfe4fbfe2a763e256fe8c2c2dc798bf3f8d71dd04b487e2b096a891625a6297"
+    },
+    {
+      "path": "d360d9e558f3-packed_header_bitfield_decode.bpf.c",
+      "sha256": "b701d725631dc1f378e0d438e34f70031f88623796ef9dd914684edad319639b"
+    },
+    {
+      "path": "de8a0b714b1b-trace_event_type_switch_dispatch.bpf.c",
+      "sha256": "1e97e7e87a4aec45ed49c97db41795f2bc880689505db7e04f809369d975f5ee"
+    },
+    {
+      "path": "e90d8c8cbe65-unchecked_packet_read.bpf.c",
+      "sha256": "668fe33346801096da9ab7052a09c6957c3db5f5c582dd2a2de43d28171ef950"
+    },
+    {
+      "path": "eaa986e66c55-simple.bpf.c",
+      "sha256": "0de66f8a9bb0bfdbe5891a32a353defde6bb13f19c7fe50e46857ec8eb0dc60f"
+    },
+    {
+      "path": "f6dbcec6686b-bcc_runqlat_log2_histogram_bucket.bpf.c",
+      "sha256": "cb3c1ad0aa547cc775b40f8d718a91834731477e20b6c38693b76f0e922fa76d"
+    }
+  ]
+}

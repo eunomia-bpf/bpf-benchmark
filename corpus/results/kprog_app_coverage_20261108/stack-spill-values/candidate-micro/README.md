@@ -1,0 +1,3 @@
+# Existing micro compiler batch using the private stack-spill model
+
+Actual terminal make exit: 0. Compiled metadata rows: 30. Private derivative C sources: 30. The wrapper redirects both absolute and relative simulator includes to the same frozen pure-offset stack-spill header. Other quoted includes retain their original resolved locations. Every derivative source stays under lane C. The archive contains all original commands, generated sources, exact candidate header/formal dependencies, objects and compiler output. These are compiler results; the38-case native safety replay and complete Cilium execution have their own receipts. Production source adoption0; runtime admission additions0.
