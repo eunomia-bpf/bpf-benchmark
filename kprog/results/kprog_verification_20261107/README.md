@@ -89,6 +89,12 @@ captured register/address aliases through the unified step. BT retains actual
 CF and its complete numeric frame. ANDN retains actual PF parity and uses
 canonical defined-flag observation with full numeric destination/read/fault
 state under the same physical-memory, native-field and compiler/ABI interfaces.
+The XMM0 numeric frame now composes its two generated lanes, vector/memory
+update and complete preserved GPR/flag/control state under whole16-byte
+permission, MOVAPS alignment and coherent guest-observation witnesses.
+The corrected no-base load includes its resolved index. Source-fixed CPU
+and BPF identity evidence accompanies this component; raw field/dispatcher/
+token composition continues within the current partial-model rows.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4229,3 +4235,31 @@ source manifest, CPU trace and exit receipt are archived under
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_d08e1d626`. Every check retains its exact published source identity.
+
+### XMM0 absolute-index correction and numeric frame
+
+`x86_xmm0_source_frame` retains the original native SIB MOVUPS counterexample:
+index16 selected different C and CPU byte windows, with actual exit1.
+LOAD_XMM0 now passes its absolute displacement plus resolved index to the
+existing base-pointer primitive. Literal relocation with an absent index and
+register-base paths retain their code identities. The original generated
+base-form/address primitive theorems and every existing route-oracle case
+remain, with the actual indexed absolute expectation updated.
+
+The permanent direct/interpreter/MOVUPS/MOVAPS oracle checks778,240 complete
+frames, including40,960 aligned MOVAPS cases. All16 base seeds, heap/RSP/
+STACK/ABI/absolute profiles, optional index/four scales, misaligned MOVUPS,
+64 flags and source/vector boundary pairs retain every numeric/raw/tag GPR,
+vector pair and all three512-byte images. The separate native SIB probe now
+agrees. Five public numeric-frame axiom audits and the default Lean build
+pass, with `sorryAx_count=0`. Existing128 numeric theorem statements/body
+bytes persist with the added XMM0 import.
+
+The frame composes the established lane/byte/permission proofs with canonical
+`xmm0Move` under explicit complete16-byte access, MOVAPS alignment and whole
+guest-event observation witnesses. Scalar lane atomicity, physical arena/
+native memory, native normalization, compiler/invocation/ABI and native-link
+transport retain their surrounding universal interfaces. XMM0 operation/
+token rows retain their partial-model status while their raw field/dispatcher/
+token composition proceeds. Existing O2 C-model totals62x86/71ARM and all
+selected replay/O4 source identities retain their domains.

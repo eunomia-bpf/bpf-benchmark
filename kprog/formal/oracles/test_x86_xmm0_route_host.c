@@ -6,7 +6,7 @@
  *
  * Both bodies formerly restated the contract inline — the stack-pointer arm
  * selection, the lane offsets, and (for the load) the `X86_REG_NONE` absolute
- * base form with its discarded offset. They now resolve the arm through
+ * base form with its resolved index. They now resolve the arm through
  * `KPROG_X86_XMM0_ARM`, the lane offsets through `KPROG_X86_XMM0_LANE_OFFSET`,
  * the ordinary-arm base form through `KPROG_X86_XMM0_BASE_FORM` /
  * `_ADDS_DISP` / `_BASE_PTR`, so the bodies and the Lean refinement share one
@@ -19,8 +19,8 @@
  * compares the written XMM0 pair against an independent byte model; the store
  * half drives the real body and compares the *entire* resulting modeled memory
  * and stack against an independent byte model. Both halves cover the stack
- * arm, an ordinary register base, the `X86_REG_NONE` base form (load: raw
- * absolute immediate with the offset discarded; store: null base with the
+ * arm, an ordinary register base, the `X86_REG_NONE` base form (load: absolute
+ * displacement plus resolved index; store: null base with the
  * offset added), and indexed addressing. It also checks the routed arm
  * selector, the lane offsets, and the base-form macro directly. Exit 1 on
  * mismatch.
@@ -134,11 +134,11 @@ static void check_load(const char *what, __u8 src, __u64 imm,
 		       : 0;
 
 	/* ---- independent model of the effective address and the lanes ---- */
-	base_ptr = base_is_none ? (void *)(long)imm
+	base_ptr = base_is_none ? (void *)(long)(imm + (index_reg != X86_REG_NONE ? index_val << scale_log2 : 0ULL))
 				: (src == X86_RSP ? X86_SIM_L_READ_REG_PTR(src)
 						  : heap);
-	/* The load's X86_REG_NONE absolute-immediate form *discards* the
-	 * addressing offset; every register base adds it. */
+	/* The load's absolute base includes its resolved index. The base-form
+	 * selector then adds the full displacement only for register bases. */
 	adds_disp = !base_is_none;
 	if (src == X86_RSP) {
 		__u32 idx = X86_SIM_L_STACK_INDEX(

@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Xmm0
 import KProgFormal.Refinement.X86Push
 import KProgFormal.Refinement.X86Divide
 import KProgFormal.Refinement.X86Lea
@@ -2828,5 +2829,61 @@ theorem andn_memory_frame_refines (env : Environment) (frame : Frame) (arena : N
       refine ⟨trivial, trivial, ?_⟩
       congr 1
       exact (andn_flags_observed width _ _).symm
+
+
+/-- The XMM0 pair update leaves every numeric GPR materialization intact. -/
+def registerVector (state : RegisterState) (value : BitVec 128) : RegisterState :=
+  { state with raw := { state.raw with xmm0 := value } }
+
+theorem native_register_vector (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (value : BitVec 128) :
+    nativeRegisters env frame arena (registerVector state value) =
+      { nativeRegisters env frame arena state with xmm0 := value } := rfl
+
+/-- Both actual lanes share the established native-memory observation. Complete
+16-byte permission and MOVAPS alignment are the surrounding access witnesses. -/
+def xmmMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (store : Bool) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  if store then
+    ⟨nativeRegisters env frame arena (registerPc
+      (registerMemory state (X86Xmm0.store state.raw.memory address state.raw.xmm0)) nextPc),
+      [.memory .write address (Reference.X86.xmm0Bytes state.raw.xmm0) true], none⟩
+  else
+    ⟨nativeRegisters env frame arena (registerPc
+      (registerVector state (X86Xmm0.load state.raw.memory address)) nextPc),
+      [.memory .read address (bytesAt state.raw.memory address 16) (initializedAt state.raw.memory address 16)], none⟩
+
+theorem xmm_memory_frame_success (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (store : Bool) (address nextPc : NativeWord) :
+    xmmMemoryFrame env frame arena state store address nextPc =
+      X86Xmm0.success store address nextPc (nativeRegisters env frame arena state) := by
+  cases store <;> simp only [xmmMemoryFrame, Bool.false_eq_true, ↓reduceIte,
+    X86Xmm0.success, native_register_pc, native_register_memory, native_register_vector] <;> rfl
+
+theorem xmm_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (store aligned : Bool) (address nextPc : NativeWord)
+    (alignment : (aligned && address &&& 15 != 0) = false)
+    (permission : permitted (if store then state.raw.memory.writable else state.raw.memory.readable) address 16 = true) :
+    xmmMemoryFrame env frame arena state store address nextPc =
+      Reference.X86.step (.xmm0Move store aligned address nextPc) (nativeRegisters env frame arena state) := by
+  rw [xmm_memory_frame_success]
+  exact X86Xmm0.success_refines store aligned address nextPc _ alignment permission
+
+theorem xmm_memory_frame_step_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (store aligned : Bool) (address nextPc : NativeWord)
+    (alignment : (aligned && address &&& 15 != 0) = false)
+    (permission : permitted (if store then state.raw.memory.writable else state.raw.memory.readable) address 16 = true) :
+    Reference.X86.Step (.xmm0Move store aligned address nextPc) (nativeRegisters env frame arena state)
+      (xmmMemoryFrame env frame arena state store address nextPc) := by
+  rw [xmm_memory_frame_refines env frame arena state store aligned address nextPc alignment permission]
+  exact ⟨rfl, rfl, rfl⟩
+
+/-- The production absolute-base argument includes its resolved index. The
+existing base-form primitive then selects that complete address directly. -/
+theorem xmm_load_absolute_index (immediate indexOffset ignored : NativeWord) :
+    generatedX86Xmm0OrdinaryAddr .loadXmm0 true (immediate + indexOffset) ignored ignored =
+      immediate + indexOffset := by
+  simp [generatedX86Xmm0OrdinaryAddr, generatedX86Xmm0BasePtr, generatedX86Xmm0AddsOffset,
+    GeneratedX86Xmm0.baseForm, x86Xmm0ToOp]
 
 end KProgFormal.Refinement.X86NumericAddress

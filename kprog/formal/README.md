@@ -161,3 +161,9 @@ The MOV memory oracle compares ordinary, scalar and signed loads with real
 x86 instructions over numeric RSP/STACK frames and ABI pointers. Stack MOVSX
 applies source-width sign extension; ABI and live XDP pointer loads to RSP
 normalize the loaded native value through the numeric stack writer.
+
+The XMM0 numeric frame joins the two scalar lanes to the existing canonical
+128-bit move under explicit whole16-byte permission, alignment and memory
+observation witnesses. Absolute indexed loads pass the resolved index into
+the existing base primitive. Its original contracts remain reusable with
+that selected argument; raw field/dispatcher/token composition continues.

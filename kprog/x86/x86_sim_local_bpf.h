@@ -1177,7 +1177,8 @@ extern void x86_sim_unmapped_xdp_read(void)
 			void *__x86_l_base_ptr =                          \
 				KPROG_X86_XMM0_BASE_PTR(                  \
 					__x86_l_base_none, __x86_l_base_form, \
-					(IMM), X86_SIM_L_READ_REG_PTR(SRC));  \
+					(__u64)(IMM) + (__u64)X86_SIM_L_MEM_OFFSET((AUX), 0), \
+					X86_SIM_L_READ_REG_PTR(SRC));  \
 			void *__x86_l_addr =                              \
 				KPROG_X86_XMM0_ADDS_DISP(                 \
 					__x86_l_base_none, __x86_l_base_form) \
