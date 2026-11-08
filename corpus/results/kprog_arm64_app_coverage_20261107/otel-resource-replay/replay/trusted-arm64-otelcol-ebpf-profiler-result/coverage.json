@@ -1,0 +1,562 @@
+{
+  "utc": "2026-11-08T00:09:19.069542+00:00",
+  "host_ok": false,
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_request_attempts": 2,
+  "distinct_source_prog_ids": 2,
+  "proof_generated": 1,
+  "stages": {
+    "bound_accepted": 1,
+    "specialization_failed": 1
+  },
+  "failure_causes": {
+    "compiler": 1
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 20,
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "entry": "read_task_struct",
+      "status": 0,
+      "stage": "bound_accepted",
+      "cause": null,
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": 23,
+      "request_archive": "run/requests/1.success.tar.gz",
+      "request_archive_sha256": "e8e87fc85db9daf175b4233deaef51723e45f69ce21eb239b38303825627a618",
+      "failed_commands": [],
+      "error": null,
+      "load_stderr": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\n"
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 24,
+      "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+      "entry": "perf_unwind_stop",
+      "status": -5,
+      "stage": "specialization_failed",
+      "cause": "compiler",
+      "proof_generated": false,
+      "source_generated": true,
+      "prog_id": null,
+      "request_archive": "run/requests/2.failure.tar.gz",
+      "request_archive_sha256": "6700de5db69b3d7c476a345afd9d8dcf6c5fafedd1c262de4e859c057425648f",
+      "failed_commands": [
+        {
+          "command": [
+            "clang",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/repository/kprog/arm64/build/trusted-transport/service-twav86j2/requests/request-bbbi5_h0/generated/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/repository/kprog/arm64/build/trusted-transport/service-twav86j2/requests/request-bbbi5_h0/generated/trusted_arm64.bpf.o"
+          ],
+          "returncode": -9,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "error": "Command '['clang', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/aarch64-linux-gnu', '-c', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-twav86j2/requests/request-bbbi5_h0/generated/trusted_arm64.bpf.c', '-o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-twav86j2/requests/request-bbbi5_h0/generated/trusted_arm64.bpf.o']' died with <Signals.SIGKILL: 9>.",
+      "load_stderr": ""
+    }
+  ],
+  "applications": [
+    {
+      "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000047_476009/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "status": "error",
+      "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n1970-01-01T00:03:18.286Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:18.385Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:18.624Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n1970-01-01T00:03:18.627Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:18.652Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:22.846Z\tinfo\tDetermined PAC mask to be 0x007F000000000000\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:06:33.668Z\tinfo\tFound offsets: task stack 0x28, pt_regs 0x3ec0, tpbase 0x1ed0\t{\"resource\": {\"service.instance.id\": \"9a1484ec-bc14-45f8-adab-a42e864f9262\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+      "phases": {
+        "baseline": {
+          "programs": [
+            {
+              "bytes_jited": 15168,
+              "bytes_xlated": 24768,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18776,
+              "bytes_xlated": 33192,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18496,
+              "bytes_xlated": 30264,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 20496,
+              "bytes_xlated": 34040,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 1640,
+              "bytes_xlated": 2504,
+              "id": 14,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 928,
+              "bytes_xlated": 1320,
+              "id": 15,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 26,
+              "run_time_ns_delta": 832736,
+              "type": "tracepoint"
+            },
+            {
+              "bytes_jited": 4112,
+              "bytes_xlated": 6000,
+              "id": 16,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 163875,
+              "run_time_ns_delta": 16944376512,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 3928,
+              "bytes_xlated": 5848,
+              "id": 17,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            {
+              "bytes_jited": 3880,
+              "bytes_xlated": 6136,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 21936,
+              "bytes_xlated": 36624,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 14888,
+              "bytes_xlated": 24472,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            {
+              "bytes_jited": 18272,
+              "bytes_xlated": 29624,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          ],
+          "workload": null,
+          "raw_measurement": {
+            "bpf": {
+              "10": {
+                "bytes_jited": 15168,
+                "bytes_xlated": 24768,
+                "id": 10,
+                "name": "perf_unwind_php",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "11": {
+                "bytes_jited": 18776,
+                "bytes_xlated": 33192,
+                "id": 11,
+                "name": "perf_unwind_pyt",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "12": {
+                "bytes_jited": 18496,
+                "bytes_xlated": 30264,
+                "id": 12,
+                "name": "perf_unwind_rub",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "13": {
+                "bytes_jited": 20496,
+                "bytes_xlated": 34040,
+                "id": 13,
+                "name": "perf_unwind_v8",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "14": {
+                "bytes_jited": 1640,
+                "bytes_xlated": 2504,
+                "id": 14,
+                "name": "perf_go_labels",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "15": {
+                "bytes_jited": 928,
+                "bytes_xlated": 1320,
+                "id": 15,
+                "name": "tracepoint__sch",
+                "run_cnt_delta": 26,
+                "run_time_ns_delta": 832736,
+                "type": "tracepoint"
+              },
+              "16": {
+                "bytes_jited": 4112,
+                "bytes_xlated": 6000,
+                "id": 16,
+                "name": "native_tracer_e",
+                "run_cnt_delta": 163875,
+                "run_time_ns_delta": 16944376512,
+                "type": "perf_event"
+              },
+              "17": {
+                "bytes_jited": 3928,
+                "bytes_xlated": 5848,
+                "id": 17,
+                "name": "custom__generic",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              "6": {
+                "bytes_jited": 3880,
+                "bytes_xlated": 6136,
+                "id": 6,
+                "name": "perf_unwind_sto",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "7": {
+                "bytes_jited": 21936,
+                "bytes_xlated": 36624,
+                "id": 7,
+                "name": "perf_unwind_nat",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "8": {
+                "bytes_jited": 14888,
+                "bytes_xlated": 24472,
+                "id": 8,
+                "name": "perf_unwind_hot",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              "9": {
+                "bytes_jited": 18272,
+                "bytes_xlated": 29624,
+                "id": 9,
+                "name": "perf_unwind_per",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              }
+            },
+            "workloads": [
+              {
+                "components": [
+                  {
+                    "command": [
+                      "/usr/bin/python3",
+                      "-u",
+                      "-c",
+                      "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "python3",
+                      "loop": "integer_lcg",
+                      "tool": "python3",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 8.111531664000012,
+                    "returncode": 0,
+                    "stderr": "python3 int_loop ops=10676 elapsed_s=2.000131 worker=0 sink=194185485",
+                    "stdout": "",
+                    "workload_name": "otel_python3_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/python3",
+                      "-u",
+                      "-c",
+                      "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "python3",
+                      "loop": "integer_lcg",
+                      "tool": "python3",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 8.134447488000006,
+                    "returncode": 0,
+                    "stderr": "python3 int_loop ops=13829 elapsed_s=2.000211 worker=1 sink=3487813999",
+                    "stdout": "",
+                    "workload_name": "otel_python3_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/ruby",
+                      "-e",
+                      "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "ruby",
+                      "loop": "integer_lcg",
+                      "tool": "ruby",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.28016428800001,
+                    "returncode": 0,
+                    "stderr": "ruby int_loop ops=58579 elapsed_s=2.000169 worker=0 sink=4212635908",
+                    "stdout": "",
+                    "workload_name": "otel_ruby_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/ruby",
+                      "-e",
+                      "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "ruby",
+                      "loop": "integer_lcg",
+                      "tool": "ruby",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.28819865600002,
+                    "returncode": 0,
+                    "stderr": "ruby int_loop ops=50519 elapsed_s=2.000619 worker=1 sink=2381244981",
+                    "stdout": "",
+                    "workload_name": "otel_ruby_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/nodejs",
+                      "-e",
+                      "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "nodejs",
+                      "loop": "integer_lcg",
+                      "tool": "nodejs",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.29523833600001,
+                    "returncode": 0,
+                    "stderr": "nodejs int_loop ops=19248 elapsed_s=2.051800 worker=0 sink=3588217913",
+                    "stdout": "",
+                    "workload_name": "otel_nodejs_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/nodejs",
+                      "-e",
+                      "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "nodejs",
+                      "loop": "integer_lcg",
+                      "tool": "nodejs",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.30216198400001,
+                    "returncode": 0,
+                    "stderr": "nodejs int_loop ops=16818 elapsed_s=2.056976 worker=1 sink=1084535808",
+                    "stdout": "",
+                    "workload_name": "otel_nodejs_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/perl",
+                      "-e",
+                      "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "perl",
+                      "loop": "integer_lcg",
+                      "tool": "perl",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.30846832,
+                    "returncode": 0,
+                    "stderr": "perl int_loop ops=20033 elapsed_s=2.000104 worker=0 sink=2112920422",
+                    "stdout": "",
+                    "workload_name": "otel_perl_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/perl",
+                      "-e",
+                      "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "perl",
+                      "loop": "integer_lcg",
+                      "tool": "perl",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.314858896000004,
+                    "returncode": 0,
+                    "stderr": "perl int_loop ops=20906 elapsed_s=2.000107 worker=1 sink=27685704",
+                    "stdout": "",
+                    "workload_name": "otel_perl_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/php",
+                      "-r",
+                      "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                      "2",
+                      "0"
+                    ],
+                    "config": {
+                      "language": "php",
+                      "loop": "integer_lcg",
+                      "tool": "php",
+                      "worker_index": 0,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.32235593600001,
+                    "returncode": 0,
+                    "stderr": "php int_loop ops=197733 elapsed_s=2.000600 worker=0 sink=4097988946",
+                    "stdout": "",
+                    "workload_name": "otel_php_int_loop_0"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/php",
+                      "-r",
+                      "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                      "2",
+                      "1"
+                    ],
+                    "config": {
+                      "language": "php",
+                      "loop": "integer_lcg",
+                      "tool": "php",
+                      "worker_index": 1,
+                      "workers_per_language": 2
+                    },
+                    "duration_s": 40.327402207999995,
+                    "returncode": 0,
+                    "stderr": "php int_loop ops=195218 elapsed_s=2.000028 worker=1 sink=910102528",
+                    "stdout": "",
+                    "workload_name": "otel_php_int_loop_1"
+                  },
+                  {
+                    "command": [
+                      "/usr/bin/stress-ng",
+                      "--cpu",
+                      "1",
+                      "--timeout",
+                      "2s",
+                      "--metrics-brief",
+                      "--temp-path",
+                      "/var/tmp/bpfrejit-runtime/86ddf06c"
+                    ],
+                    "config": {
+                      "stressors": [
+                        "cpu"
+                      ],
+                      "tool": "stress-ng"
+                    },
+                    "duration_s": 40.333971968000014,
+                    "returncode": 0,
+                    "stderr": "",
+                    "stdout": "stress-ng: info:  [719] setting to a 2 secs run per stressor\nstress-ng: info:  [719] dispatching hogs: 1 cpu\nstress-ng: info:  [719] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [719] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [719]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [719] cpu                  24      2.29      2.00      0.15        10.48          11.15\nstress-ng: info:  [719] skipped: 0\nstress-ng: info:  [719] passed: 1: cpu (1)\nstress-ng: info:  [719] failed: 0\nstress-ng: info:  [719] metrics untrustworthy: 0\nstress-ng: info:  [719] successful run completed in 2.39 secs",
+                    "workload_name": "otel_stress_ng_cpu"
+                  }
+                ],
+                "workload_name": "otel_mixed_workload"
+              }
+            ]
+          }
+        },
+        "post_rejit": {
+          "programs": [],
+          "workload": null,
+          "raw_measurement": {}
+        }
+      }
+    }
+  ],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}
