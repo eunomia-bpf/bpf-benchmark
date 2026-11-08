@@ -4698,3 +4698,22 @@ address, complete arena and heap comparisons remain; the original default-arm
 case retains its full preserved-state comparison. All582existing cases pass
 UBSan. Full command, actual2 outcome, Git source manifest, dependency pins and
 original/final oracle data are retained in `dispatch_singleton_caller_frame`.
+
+### Consecutive compiled input composition
+
+`BPFPath.InputBurst.evaluate_burst` proves the exact effect of every finite
+consecutive kind6 marker sequence before an arbitrary following byte path.
+Each dynamic visit consumes its own arbitrary64-bit word; memory, other GPRs,
+halt state and exclusive visits survive. R0 contains the last fresh word,
+PC and the unspecified-input visit count advance by the exact number of
+instructions, and the suffix retains its original complete result/events/faults.
+The zero-length case preserves the starting state. Byte-decoding, active-state
+and starting-PC premises describe this universal execution law.
+
+The existing actual clang input certificate and its five controls pass.
+The new laws use propext/Quot.sound. Exact sources, byte arrays and original
+proof diagnostics are retained in `compiled_input_burst_composition`.
+The extractor carries a local Lean recursion budget for its larger literal
+byte arrays; each named decode theorem remains a kernel rfl equality.
+The48CMOV-condition units are active proof work, with full-frame and compiler
+transport still recorded separately in the compiled-B obligation.

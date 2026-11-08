@@ -176,6 +176,71 @@ theorem evaluate_execution_transport (env : Environment) (source : Array Byte)
                   first.state tail continued)
       · simp [evaluate, active, position] at accepted
 
+/-! Consecutive kind6 reads retain memory and every register except R0.
+Each visit consumes its own arbitrary word. The finite byte path is shared by
+all callers and retains the actual PC and ordered-execution relation. -/
+namespace InputBurst
+
+def afterInputs (choices : Nat → Word) (s : State) : Nat → State
+  | 0 => s
+  | n + 1 => { s with
+      regs := fun r => if r = 0 then choices (s.unspecifiedVisit + n) else s.regs r
+      pc := s.pc + Int.ofNat (n + 1)
+      unspecifiedVisit := s.unspecifiedVisit + n + 1 }
+
+theorem after_one (choices : Nat → Word) (s : State) (n : Nat) :
+    afterInputs choices (afterInputs choices s 1) n = afterInputs choices s (n + 1) := by
+  cases n with
+  | zero => rfl
+  | succ n =>
+      simp only [afterInputs]
+      congr 1
+      · funext r
+        by_cases h : r = 0 <;> simp [h, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+      · simp [Int.natCast_add, Int.add_assoc]
+        omega
+      · omega
+
+@[irreducible] def inputPositions (start count : Nat) (rest : List Nat) : List Nat :=
+  List.range' start count ++ rest
+
+def marker : Instruction := ⟨0xb7, 0, 9, 6, 2⟩
+
+theorem evaluate_burst (env : Environment) (choices : Nat → Word) (program : Array Byte)
+    (start count : Nat) (rest : List Nat) (s : State)
+    (inputs : ∀ visit, env.unspecifiedInput visit = .ok (choices visit))
+    (active : s.halted = false) (position : s.pc = Int.ofNat start)
+    (decoded : ∀ i : Fin count, decode program (start + i.val) = .ok marker) :
+    BPFPath.evaluate env program (inputPositions start count rest) s =
+      BPFPath.evaluate env program rest (afterInputs choices s count) := by
+  unfold inputPositions
+  induction count generalizing start s with
+  | zero => rfl
+  | succ count ih =>
+      have first : decode program start = .ok marker := by
+        simpa using decoded ⟨0, by omega⟩
+      have later : ∀ i : Fin count, decode program (start + 1 + i.val) = .ok marker := by
+        intro i
+        have step := decoded ⟨i.val + 1, by have := i.isLt; omega⟩
+        simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using step
+      have nextActive : (afterInputs choices s 1).halted = false := active
+      have nextPosition : (afterInputs choices s 1).pc = Int.ofNat (start + 1) := by
+        simp [afterInputs, position, Int.natCast_add]
+      simp only [List.range'_succ, List.cons_append, BPFPath.evaluate, active, position,
+        bne_self_eq_false, Bool.false_eq_true, if_false, first]
+      simp [execute, marker, inputs, source, alu, setReg,
+        Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+      have evaluated := ih (start + 1) (afterInputs choices s 1) nextActive nextPosition later
+      rw [after_one] at evaluated
+      change (match BPFPath.evaluate env program (List.range' (start + 1) count ++ rest)
+          (afterInputs choices s 1) with
+        | .error error => Except.error error
+        | .ok tail => Except.ok (⟨tail.state, tail.events, tail.fault⟩ : Transition State)) = _
+      rw [evaluated]
+      cases BPFPath.evaluate env program rest (afterInputs choices s (count + 1)) <;> rfl
+
+end InputBurst
+
 end KProgTV.BPFPath
 
 #print axioms KProgTV.BPFPath.evaluate_sound
@@ -185,3 +250,6 @@ end KProgTV.BPFPath
 #print axioms KProgTV.BPFPath.evaluate_program_congr_if_wide
 
 #print axioms KProgTV.BPFPath.evaluate_execution_transport
+
+#print axioms KProgTV.BPFPath.InputBurst.after_one
+#print axioms KProgTV.BPFPath.InputBurst.evaluate_burst

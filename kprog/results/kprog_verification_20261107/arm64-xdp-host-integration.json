@@ -3164,6 +3164,42 @@
     },
     "source_drift": []
   },
+  "compiled_input_burst_composition": {
+    "archive_compressed_prefix_bytes": 94891789,
+    "archive_compressed_prefix_sha256": "e1d50a7e309b3692e04e6c8d810033ac7737d22b85e81550ead388e01a6f741f",
+    "archive_entries": 21,
+    "archive_marker": "COMPILED_INPUT_BURST_COMPOSITION_V1",
+    "archive_raw_bytes": 154582,
+    "archive_raw_sha256": "fbb1fb72ebc2d71baaecc91f5776b7c323436a8ad2aabe1d79bb09dd56c71dad",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "existing_input_controls": [
+      "unchanged clang artifact",
+      "wrong-stack-base",
+      "wrong-return-base",
+      "wrong-numeric-source",
+      "wrong-input-abi"
+    ],
+    "existing_input_controls_exit": 0,
+    "input_check_exit": 0,
+    "proved_laws": [
+      "BPFPath.InputBurst.after_one",
+      "BPFPath.InputBurst.evaluate_burst"
+    ],
+    "scope": "Every finite consecutive kind6 input burst, every starting BPF state and fresh-word stream, with exact byte decoding/PC and arbitrary following execution. Complete frame/compiled-token/native-link interfaces remain active.",
+    "source_sha256": {
+      "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFChecks.lean": "b28a0523e8bc1977d9033264313a2c44f6f9162286799e546bade5d6bb1b6d2a",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771",
+      "kprog/tv/InputCertificate.lean": "aab1fdb461989ccc6e1cc917191d60b42ad2e6dc3a7a9a04905e290348d37dd3",
+      "kprog/tv/extract_blocks.py": "b02eb057ff0b315dceb417ff0b79318c39b63466286a4cc447835e18b63d1fbe",
+      "kprog/tv/input_block.bpf.c": "f47cf0ecb128074d7f07cd405805fe6a8a292e9563f713fbd60ce5126cf01dec"
+    }
+  },
   "compiled_kind6_inputs": {
     "archive_compressed_prefix_bytes": 91177271,
     "archive_compressed_prefix_sha256": "0ebb18533355de08c885c6e835243e3b871f29f7bfea750de3907093fe385cbe",

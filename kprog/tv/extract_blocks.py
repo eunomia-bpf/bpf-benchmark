@@ -15,7 +15,7 @@ with args.object.open("rb") as stream:
     if elf["e_machine"] != "EM_BPF" or not elf.little_endian:
         raise SystemExit("expected little-endian BPF ELF")
     symbols = elf.get_section_by_name(".symtab")
-    rows = ["import BPF", "namespace KProgTV.Compiled"]
+    rows = ["import BPF", "set_option maxRecDepth 100000", "namespace KProgTV.Compiled"]
     immediates, offsets = set(), set()
     for symbol in symbols.iter_symbols():
         if symbol["st_info"]["type"] != "STT_FUNC":
