@@ -3826,3 +3826,10 @@ the gzip receipt shrinks from83,017,288 to51,243,874 bytes. Every preceding
 gzip member retains its exact bytes. `binary_archive_compaction` records the
 compression source, output and round-trip identities; all proof/source/check
 results and coverage totals retain their published values.
+
+### Published source full check a2fb22739
+
+`make check` on immutable publisheda2fb22739 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_a2fb22739`. Every check retains its exact published source identity.

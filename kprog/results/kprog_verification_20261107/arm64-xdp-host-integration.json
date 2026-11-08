@@ -3745,6 +3745,26 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_a2fb22739": {
+    "actual_exit": 0,
+    "archive_block_sha256": "1bacfe59d53b9321964b2b4c8e65efcc65fb1523e2548861021822ee28eca47d",
+    "archive_marker": "=== FULL MAKE CHECK A2FB22739 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.cpu.jsonl.gz": "57394f79999743099940f884eb29c63f32563c969406c09b9f1f9f5fb348ad2c",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.head": "c289190fa42c4d771932d67e9d8b3c56b0e2f84dbb899f6fea9ce73f94352796",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.launch.log": "dfa8c5136f467343f39efe784086f38438b67255764c2bb0e2e2d2badca570ab",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.log": "60ec0bf022f676bc3d3ea22d1f7a333d9b874c9e3e87612feb6d5ca8d11bee00",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.py": "d29029707dd0d9366bf7b52d6e4ebb2c3d90f55e9828c85139f3a010a215197f",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.sources": "33668734b054527ec1bae4c35413f20dcde5a4b78c01ee0af8897a77fad04a75",
+      "/workspaces/.agent-state/kprog-lanes/V/mrs-full.state": "55252c98f30a90ce09f57d23dcb2280461d9b23f942a420669f843d2f93211c9"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "a2fb22739326e53e7c2022899370f8d325e7f8d2",
+    "scope": "Complete formal make check of the exact published source tree a2fb22739326e53e7c2022899370f8d325e7f8d2. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_a6bc0aad3": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "307727d05d58146fae3b1193193ea856fbccf321735a6e1b0f57b47ec27b0c78",
