@@ -5095,3 +5095,12 @@ and all7 standalone MOV unit bytes. [Original evidence](compiled-movreg.log.gz)
 retains preprocessing, actual ELF/arrays, scripts and proof logs. Pointer and
 RSP frame cases, architectural register mapping, physical ABI and compiler
 embedding remain explicit; scalar family counts do not establish full closure.
+
+### Published source full check 3057f2dd0
+
+`make check` on immutable published3057f2dd0 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_3057f2dd0`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-3057f2dd0.log.gz](full-make-check-3057f2dd0.log.gz).
