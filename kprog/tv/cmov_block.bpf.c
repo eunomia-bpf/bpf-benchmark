@@ -88,3 +88,54 @@ CMOV_CONDITION(tv_cmov64_c12, X86_WIDTH_64, 12)
 CMOV_CONDITION(tv_cmov64_c13, X86_WIDTH_64, 13)
 CMOV_CONDITION(tv_cmov64_c14, X86_WIDTH_64, 14)
 CMOV_CONDITION(tv_cmov64_c15, X86_WIDTH_64, 15)
+
+/* All16 conditions for both legal byte-register slices. */
+#define SETCC_UNIT(NAME, SHIFT, CC) \
+__attribute__((section("tv/setcc/" #NAME), used)) \
+__u64 NAME(__u64 old, __u64 flags) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    __x86_cf = flags & 1; \
+    __x86_pf = (flags >> 2) & 1; \
+    __x86_zf = (flags >> 6) & 1; \
+    __x86_sf = (flags >> 7) & 1; \
+    __x86_of = (flags >> 11) & 1; \
+    X86_SIM_L_EXEC_SETCC(X86_RAX, KPROG_X86_REG_LANE_AUX(CC, SHIFT, 0)); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+SETCC_UNIT(tv_setcc_lo_c0, 0, 0)
+SETCC_UNIT(tv_setcc_lo_c1, 0, 1)
+SETCC_UNIT(tv_setcc_lo_c2, 0, 2)
+SETCC_UNIT(tv_setcc_lo_c3, 0, 3)
+SETCC_UNIT(tv_setcc_lo_c4, 0, 4)
+SETCC_UNIT(tv_setcc_lo_c5, 0, 5)
+SETCC_UNIT(tv_setcc_lo_c6, 0, 6)
+SETCC_UNIT(tv_setcc_lo_c7, 0, 7)
+SETCC_UNIT(tv_setcc_lo_c8, 0, 8)
+SETCC_UNIT(tv_setcc_lo_c9, 0, 9)
+SETCC_UNIT(tv_setcc_lo_c10, 0, 10)
+SETCC_UNIT(tv_setcc_lo_c11, 0, 11)
+SETCC_UNIT(tv_setcc_lo_c12, 0, 12)
+SETCC_UNIT(tv_setcc_lo_c13, 0, 13)
+SETCC_UNIT(tv_setcc_lo_c14, 0, 14)
+SETCC_UNIT(tv_setcc_lo_c15, 0, 15)
+SETCC_UNIT(tv_setcc_hi_c0, 8, 0)
+SETCC_UNIT(tv_setcc_hi_c1, 8, 1)
+SETCC_UNIT(tv_setcc_hi_c2, 8, 2)
+SETCC_UNIT(tv_setcc_hi_c3, 8, 3)
+SETCC_UNIT(tv_setcc_hi_c4, 8, 4)
+SETCC_UNIT(tv_setcc_hi_c5, 8, 5)
+SETCC_UNIT(tv_setcc_hi_c6, 8, 6)
+SETCC_UNIT(tv_setcc_hi_c7, 8, 7)
+SETCC_UNIT(tv_setcc_hi_c8, 8, 8)
+SETCC_UNIT(tv_setcc_hi_c9, 8, 9)
+SETCC_UNIT(tv_setcc_hi_c10, 8, 10)
+SETCC_UNIT(tv_setcc_hi_c11, 8, 11)
+SETCC_UNIT(tv_setcc_hi_c12, 8, 12)
+SETCC_UNIT(tv_setcc_hi_c13, 8, 13)
+SETCC_UNIT(tv_setcc_hi_c14, 8, 14)
+SETCC_UNIT(tv_setcc_hi_c15, 8, 15)

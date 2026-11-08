@@ -2686,3 +2686,1330 @@ end KProgTV.CmovCertificate
 #print axioms KProgTV.CmovCertificate.compiled_execution
 
 #print axioms KProgTV.CmovCertificate.compiled_all_conditions
+
+set_option maxRecDepth 100000
+set_option maxHeartbeats 0
+
+namespace KProgTV.SetccCertificate
+open KProgFormal.Reference KProgTV.BPF
+open KProgTV.BPFPath.InputBurst
+
+def environment (choices : Nat → Word) : Environment where
+  unspecifiedInput := fun visit => .ok (choices visit)
+  immediate := fun _ _ _ => .error "external immediate"
+  helperCall := fun _ _ => .error "external helper"
+  helper := fun _ _ _ => .error "external helper"
+
+def entry (s : X86.State) (visit : Nat) : State where
+  regs := fun r => match r.val with
+    | 1 => s.gpr 0
+    | 2 => s.rflags
+    | 10 => 0x10000
+    | _ => 0
+  memory := s.memory
+  pc := 0
+  unspecifiedVisit := visit
+
+def summary (program : Array Byte) (positions : List Nat) (choices : Nat → Word)
+    (visit : Nat) (s : X86.State) :
+    Except String (Word × Memory × Nat × Bool × Option Fault × List Event) := do
+  let result ← BPFPath.evaluate (environment choices) program positions (entry s visit)
+  pure (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+    result.state.halted, result.fault, result.events)
+
+@[simp] private theorem burst_lo_0_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c0
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c0 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c0 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_0 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c0 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 0 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_1_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c1
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c1 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c1 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_lo_1_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c1
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c1 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c1 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_1 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c1 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 1 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_2_3 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c2
+        (inputPositions 3 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 3 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c2 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 3
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c2 3 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_2 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c2 (0 :: (1 :: (2 :: (inputPositions 3 23 (26 :: (27 :: [])))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 2 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_3_3 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c3
+        (inputPositions 3 10 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 3 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c3 rest
+          (afterInputs choices state 10)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 3
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c3 3 10 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_lo_3_14 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c3
+        (inputPositions 14 13 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 14 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c3 rest
+          (afterInputs choices state 13)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 14
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c3 14 13 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_3 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c3 (0 :: (1 :: (2 :: (inputPositions 3 10 (13 :: (inputPositions 14 13 (27 :: (28 :: [])))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 3 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_4_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c4
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c4 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c4 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_4 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c4 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 4 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_5_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c5
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c5 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c5 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_lo_5_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c5
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c5 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c5 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_5 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c5 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 5 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_lo_6_0 (s : X86.State) : BPF.comparison 64 5 (s.rflags &&& (65#64)) (0#64) = .ok (decide ((s.rflags &&& (65#64)) ≠ (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_lo_6_6 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c6
+        (inputPositions 6 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 6 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c6 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 6
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c6 6 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_6 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c6 (if ((s.rflags &&& (65#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 6 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((s.rflags &&& (65#64)) ≠ (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_lo_6_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_lo_7_0 (s : X86.State) : BPF.comparison 64 1 (s.rflags &&& (65#64)) (0#64) = .ok (decide ((s.rflags &&& (65#64)) = (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_lo_7_6 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c7
+        (inputPositions 6 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 6 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c7 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 6
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c7 6 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_7 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c7 (if ((s.rflags &&& (65#64)) = (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 7 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((s.rflags &&& (65#64)) = (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_lo_7_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_8_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c8
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c8 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c8 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_8 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c8 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 8 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_9_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c9
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c9 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c9 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_lo_9_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c9
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c9 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c9 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_9 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c9 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 9 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_10_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c10
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c10 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c10 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_10 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c10 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 10 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_11_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c11
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c11 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c11 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_lo_11_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c11
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c11 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c11 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_11 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c11 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 11 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_12_7 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c12
+        (inputPositions 7 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 7 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c12 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 7
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c12 7 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_12 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c12 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: [])))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 12 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_13_8 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c13
+        (inputPositions 8 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 8 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c13 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 8
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c13 8 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_13 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c13 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: []))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 13 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_lo_14_10 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c14
+        (inputPositions 10 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 10 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c14 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 10
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c14 10 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_14 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c14 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (inputPositions 10 23 (33 :: (34 :: []))))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 14 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_lo_15_0 (s : X86.State) : BPF.comparison 64 1 ((s.rflags &&& (64#64)) ||| (((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64))) (0#64) = .ok (decide (((s.rflags &&& (64#64)) ||| (((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64))) = (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_lo_15_13 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c15
+        (inputPositions 13 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 13 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_lo_c15 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 13
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_lo_c15 13 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lo_15 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_lo_c15 (if (((s.rflags &&& (64#64)) ||| (((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64))) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 15 then 1 else 0)
+        .w8 (.low 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : (((s.rflags &&& (64#64)) ||| (((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64))) = (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_lo_15_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_0_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c0
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c0 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c0 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_0 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c0 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 0 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_1_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c1
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c1 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c1 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_hi_1_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c1
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c1 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c1 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_1 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c1 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 1 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_2_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c2
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c2 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c2 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_2 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c2 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 2 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_3_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c3
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c3 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c3 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_hi_3_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c3
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c3 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c3 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_3 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c3 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 3 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_4_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c4
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c4 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c4 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_4 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c4 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 4 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_5_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c5
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c5 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c5 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_hi_5_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c5
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c5 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c5 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_5 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c5 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 5 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_hi_6_0 (s : X86.State) : BPF.comparison 64 5 (s.rflags &&& (65#64)) (0#64) = .ok (decide ((s.rflags &&& (65#64)) ≠ (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_hi_6_7 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c6
+        (inputPositions 7 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 7 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c6 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 7
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c6 7 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_6 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c6 (if ((s.rflags &&& (65#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 6 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((s.rflags &&& (65#64)) ≠ (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_hi_6_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_hi_7_0 (s : X86.State) : BPF.comparison 64 1 (s.rflags &&& (65#64)) (0#64) = .ok (decide ((s.rflags &&& (65#64)) = (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_hi_7_7 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c7
+        (inputPositions 7 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 7 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c7 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 7
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c7 7 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_7 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c7 (if ((s.rflags &&& (65#64)) = (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 7 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((s.rflags &&& (65#64)) = (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_hi_7_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_8_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c8
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c8 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c8 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_8 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c8 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 8 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_9_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c9
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c9 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c9 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_hi_9_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c9
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c9 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c9 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_9 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c9 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 9 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_10_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c10
+        (inputPositions 4 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c10 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c10 4 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_10 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c10 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: []))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 10 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_11_4 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c11
+        (inputPositions 4 11 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 4 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c11 rest
+          (afterInputs choices state 11)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c11 4 11 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_hi_11_16 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c11
+        (inputPositions 16 12 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 16 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c11 rest
+          (afterInputs choices state 12)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 16
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c11 16 12 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_11 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c11 (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: []))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 11 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_12_8 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c12
+        (inputPositions 8 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 8 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c12 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 8
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c12 8 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_12 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c12 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: []))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 12 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+@[simp] private theorem burst_hi_13_9 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c13
+        (inputPositions 9 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 9 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c13 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 9
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c13 9 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_13 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c13 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (inputPositions 9 23 (32 :: (33 :: [])))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 13 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_hi_14_0 (s : X86.State) : BPF.comparison 64 5 (s.rflags &&& (64#64)) (0#64) = .ok (decide ((s.rflags &&& (64#64)) ≠ (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_hi_14_13 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c14
+        (inputPositions 13 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 13 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c14 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 13
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c14 13 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_14 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c14 (if ((s.rflags &&& (64#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (3 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 14 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((s.rflags &&& (64#64)) ≠ (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_hi_14_0, branch0] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+private theorem branch_hi_15_0 (s : X86.State) : BPF.comparison 64 1 (((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64)) (0#64) = .ok (decide ((((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64)) = (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+private theorem branch_hi_15_1 (s : X86.State) : BPF.comparison 64 1 (s.rflags &&& (64#64)) (0#64) = .ok (decide ((s.rflags &&& (64#64)) = (0#64))) := by
+  simp [BPF.comparison] <;> bv_decide
+
+@[simp] private theorem burst_hi_15_15 (choices : Nat → Word) (state : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c15
+        (inputPositions 15 23 rest) state =
+      if state.halted then .error "certificate continues after BPF return"
+      else if state.pc = 15 then
+        BPFPath.evaluate (environment choices) Compiled.tv_setcc_hi_c15 rest
+          (afterInputs choices state 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : state.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : state.pc = 15
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_setcc_hi_c15 15 23 rest state
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_hi_15 (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    summary Compiled.tv_setcc_hi_c15 (if ((((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64)) = (0#64)) then (if ((s.rflags &&& (64#64)) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (9 :: (10 :: (11 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: [])))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (9 :: (10 :: (11 :: (12 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: [])))))))))))))))))) else (if ((s.rflags &&& (64#64)) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: []))))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: [])))))))))))))))))))) choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags 15 then 1 else 0)
+        .w8 (.high 0), s.memory, visit + 23, true, none, []) := by
+  all_goals by_cases branch0 : ((((s.rflags >>> 7) ^^^ (s.rflags >>> 11)) &&& (1#64)) = (0#64))
+  all_goals by_cases branch1 : ((s.rflags &&& (64#64)) = (0#64))
+  all_goals
+    simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.alu, BPF.comparison, entry,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      X86.scalarWriteValue, X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes,
+      X86.condition, BitVec.getLsbD_eq_getElem, Nat.add_assoc, branch_hi_15_0, branch_hi_15_1, branch0, branch1] <;>
+      (try dsimp) <;> generalize s.gpr 0 = old at * <;> generalize s.rflags = flags at * <;> unfold Word at * <;> bv_decide
+
+/-- The unit ABI passes the old RAX value and flags in R1/R2; its scalar
+result is returned in R0. This relation states the unit interface. -/
+def compiledCondition (high : Bool) (cc : Nat) : Array Byte :=
+  match high, cc with
+  | false, 0 => Compiled.tv_setcc_lo_c0
+  | false, 1 => Compiled.tv_setcc_lo_c1
+  | false, 2 => Compiled.tv_setcc_lo_c2
+  | false, 3 => Compiled.tv_setcc_lo_c3
+  | false, 4 => Compiled.tv_setcc_lo_c4
+  | false, 5 => Compiled.tv_setcc_lo_c5
+  | false, 6 => Compiled.tv_setcc_lo_c6
+  | false, 7 => Compiled.tv_setcc_lo_c7
+  | false, 8 => Compiled.tv_setcc_lo_c8
+  | false, 9 => Compiled.tv_setcc_lo_c9
+  | false, 10 => Compiled.tv_setcc_lo_c10
+  | false, 11 => Compiled.tv_setcc_lo_c11
+  | false, 12 => Compiled.tv_setcc_lo_c12
+  | false, 13 => Compiled.tv_setcc_lo_c13
+  | false, 14 => Compiled.tv_setcc_lo_c14
+  | false, 15 => Compiled.tv_setcc_lo_c15
+  | true, 0 => Compiled.tv_setcc_hi_c0
+  | true, 1 => Compiled.tv_setcc_hi_c1
+  | true, 2 => Compiled.tv_setcc_hi_c2
+  | true, 3 => Compiled.tv_setcc_hi_c3
+  | true, 4 => Compiled.tv_setcc_hi_c4
+  | true, 5 => Compiled.tv_setcc_hi_c5
+  | true, 6 => Compiled.tv_setcc_hi_c6
+  | true, 7 => Compiled.tv_setcc_hi_c7
+  | true, 8 => Compiled.tv_setcc_hi_c8
+  | true, 9 => Compiled.tv_setcc_hi_c9
+  | true, 10 => Compiled.tv_setcc_hi_c10
+  | true, 11 => Compiled.tv_setcc_hi_c11
+  | true, 12 => Compiled.tv_setcc_hi_c12
+  | true, 13 => Compiled.tv_setcc_hi_c13
+  | true, 14 => Compiled.tv_setcc_hi_c14
+  | true, 15 => Compiled.tv_setcc_hi_c15
+  | _, _ => Compiled.tv_setcc_lo_c0
+
+def positionsCondition (high : Bool) (cc : Nat) (flags : Word) : List Nat :=
+  match high, cc with
+  | false, 0 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | false, 1 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | false, 2 => (0 :: (1 :: (2 :: (inputPositions 3 23 (26 :: (27 :: []))))))
+  | false, 3 => (0 :: (1 :: (2 :: (inputPositions 3 10 (13 :: (inputPositions 14 13 (27 :: (28 :: []))))))))
+  | false, 4 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | false, 5 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | false, 6 => (if ((flags &&& (65#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: []))))))))))
+  | false, 7 => (if ((flags &&& (65#64)) = (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: [])))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (inputPositions 6 23 (29 :: (30 :: []))))))))))
+  | false, 8 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | false, 9 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | false, 10 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | false, 11 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | false, 12 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))))
+  | false, 13 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: [])))))))))))
+  | false, 14 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (inputPositions 10 23 (33 :: (34 :: [])))))))))))))
+  | false, 15 => (if (((flags &&& (64#64)) ||| (((flags >>> 7) ^^^ (flags >>> 11)) &&& (1#64))) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: [])))))))))))))))))
+  | true, 0 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | true, 1 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | true, 2 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | true, 3 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | true, 4 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | true, 5 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | true, 6 => (if ((flags &&& (65#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: [])))))))))))
+  | true, 7 => (if ((flags &&& (65#64)) = (0#64)) then (0 :: (1 :: (2 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (inputPositions 7 23 (30 :: (31 :: [])))))))))))
+  | true, 8 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | true, 9 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | true, 10 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 23 (27 :: (28 :: [])))))))
+  | true, 11 => (0 :: (1 :: (2 :: (3 :: (inputPositions 4 11 (15 :: (inputPositions 16 12 (28 :: (29 :: [])))))))))
+  | true, 12 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: [])))))))))))
+  | true, 13 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (inputPositions 9 23 (32 :: (33 :: []))))))))))))
+  | true, 14 => (if ((flags &&& (64#64)) ≠ (0#64)) then (0 :: (1 :: (2 :: (3 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: []))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (inputPositions 13 23 (36 :: (37 :: [])))))))))))))))))
+  | true, 15 => (if ((((flags >>> 7) ^^^ (flags >>> 11)) &&& (1#64)) = (0#64)) then (if ((flags &&& (64#64)) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (9 :: (10 :: (11 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: [])))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (9 :: (10 :: (11 :: (12 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: [])))))))))))))))))) else (if ((flags &&& (64#64)) = (0#64)) then (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: []))))))))))))))))) else (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (8 :: (9 :: (10 :: (11 :: (12 :: (13 :: (14 :: (inputPositions 15 23 (38 :: (39 :: []))))))))))))))))))))
+  | _, _ => []
+
+def targetSlice (high : Bool) : X86.RegisterSlice := if high then .high 0 else .low 0
+
+def conditionSummary (high : Bool) (cc : Nat) (choices : Nat → Word)
+    (visit : Nat) (s : X86.State) :
+    Except String (Word × Memory × Nat × Bool × Option Fault × List Event) :=
+  summary (compiledCondition high cc) (positionsCondition high cc s.rflags) choices visit s
+
+/-- All 16 x86 conditions for both low and high byte destinations, decoded
+from the actual compiled production-handler units. -/
+theorem compiled_all_conditions (high : Bool) (cc : Fin 16)
+    (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    conditionSummary high cc choices visit s = .ok
+      (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags cc then 1 else 0)
+        .w8 (targetSlice high), s.memory, visit + 23, true, none, []) := by
+  rcases cc with ⟨cc, bound⟩
+  have cases : cc = 0 ∨ cc = 1 ∨ cc = 2 ∨ cc = 3 ∨ cc = 4 ∨ cc = 5 ∨ cc = 6 ∨ cc = 7 ∨ cc = 8 ∨ cc = 9 ∨ cc = 10 ∨ cc = 11 ∨ cc = 12 ∨ cc = 13 ∨ cc = 14 ∨ cc = 15 := by omega
+  rcases cases with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · cases high with
+    | false => exact compiled_lo_0 choices visit s
+    | true => exact compiled_hi_0 choices visit s
+  · cases high with
+    | false => exact compiled_lo_1 choices visit s
+    | true => exact compiled_hi_1 choices visit s
+  · cases high with
+    | false => exact compiled_lo_2 choices visit s
+    | true => exact compiled_hi_2 choices visit s
+  · cases high with
+    | false => exact compiled_lo_3 choices visit s
+    | true => exact compiled_hi_3 choices visit s
+  · cases high with
+    | false => exact compiled_lo_4 choices visit s
+    | true => exact compiled_hi_4 choices visit s
+  · cases high with
+    | false => exact compiled_lo_5 choices visit s
+    | true => exact compiled_hi_5 choices visit s
+  · cases high with
+    | false => exact compiled_lo_6 choices visit s
+    | true => exact compiled_hi_6 choices visit s
+  · cases high with
+    | false => exact compiled_lo_7 choices visit s
+    | true => exact compiled_hi_7 choices visit s
+  · cases high with
+    | false => exact compiled_lo_8 choices visit s
+    | true => exact compiled_hi_8 choices visit s
+  · cases high with
+    | false => exact compiled_lo_9 choices visit s
+    | true => exact compiled_hi_9 choices visit s
+  · cases high with
+    | false => exact compiled_lo_10 choices visit s
+    | true => exact compiled_hi_10 choices visit s
+  · cases high with
+    | false => exact compiled_lo_11 choices visit s
+    | true => exact compiled_hi_11 choices visit s
+  · cases high with
+    | false => exact compiled_lo_12 choices visit s
+    | true => exact compiled_hi_12 choices visit s
+  · cases high with
+    | false => exact compiled_lo_13 choices visit s
+    | true => exact compiled_hi_13 choices visit s
+  · cases high with
+    | false => exact compiled_lo_14 choices visit s
+    | true => exact compiled_hi_14 choices visit s
+  · cases high with
+    | false => exact compiled_lo_15 choices visit s
+    | true => exact compiled_hi_15 choices visit s
+
+/-- Each checked path is an execution of the byte decoder and BPF semantics;
+branch choices are checked against the evolving machine state. -/
+theorem compiled_execution (high : Bool) (cc : Fin 16)
+    (choices : Nat → Word) (visit : Nat) (s : X86.State) :
+    ∃ result : Transition State,
+      Execution (BPFPath.instructionStep (environment choices) (compiledCondition high cc))
+        (entry s visit) result.events result.state ∧
+      (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+        result.state.halted, result.fault, result.events) =
+        (X86.scalarWriteValue (s.gpr 0) (if X86.condition s.rflags cc then 1 else 0)
+          .w8 (targetSlice high), s.memory, visit + 23, true, none, []) := by
+  have value := compiled_all_conditions high cc choices visit s
+  cases evaluated : BPFPath.evaluate (environment choices) (compiledCondition high cc)
+      (positionsCondition high cc s.rflags) (entry s visit) with
+  | error error =>
+      simp [conditionSummary, summary, evaluated, Except.bind, Except.pure,
+        Except.map, Bind.bind, Pure.pure, Except.instMonad] at value
+  | ok result =>
+      refine ⟨result, BPFPath.evaluate_sound _ _ _ _ _ evaluated, ?_⟩
+      simpa [conditionSummary, summary, evaluated, Except.bind, Except.pure,
+        Except.map, Bind.bind, Pure.pure, Except.instMonad] using value
+
+end KProgTV.SetccCertificate
+
+#print axioms KProgTV.SetccCertificate.compiled_all_conditions
+#print axioms KProgTV.SetccCertificate.compiled_execution

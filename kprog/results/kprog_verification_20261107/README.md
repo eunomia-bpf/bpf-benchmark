@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32) | 2/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
@@ -5006,3 +5006,20 @@ completes379 jobs. This proves the coordinate/erasure policy; helper readonly
 classification and effects, physical memory/provenance/payload, native ABI/target,
 tail transfer and compiled-B correspondence remain explicit interfaces.
 Original attempts and exact sources are in `x86_helper_call_frame_metadata`.
+
+### Compiled SETCC token units
+
+`SetccCertificate.compiled_all_conditions` and `compiled_execution`, in the existing
+CmovCertificate module, cover all16 conditions and low/high byte destinations.
+For arbitrary old RAX, flags, whole memory, fresh-input stream and initial visit,
+the actual clang byte execution returns canonical `X86.scalarWriteValue`,
+preserves every other bit of the old value and the whole memory, consumes
+exactly23 fresh inputs, and returns with events=[] and fault=none. Both branch
+successors are checked through the existing byte decoder. The combined83-unit
+object preserves all51 existing CMOV function byte sequences and all32 SETCC
+sequences; its extracted arrays reproduce exactly. The existing `cmov-check`
+target typechecks the combined certificate. The receipt `compiled_setcc_all_conditions`
+retains sources, preprocessing, object/array hashes and original proof attempts. Regenerable .olean caches retain their hashes and toolchain identity; checked Lean sources and actual proof logs are archived.
+Its unit entry maps old RAX/flags to BPF R1/R2 and states initial scratch/frame
+values. Full architectural frame, register renaming, physical compiler embedding
+and production invocation ABI remain explicit interfaces.

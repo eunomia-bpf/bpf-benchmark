@@ -91,7 +91,9 @@ vendor/linux-framework submodules. This entry point builds all Lean modules,
 checks generated contracts and proof hygiene, and runs retained semantic C
 oracles and executable-reference comparisons. The existing compiled CMOV unit covers all16 conditions and16/32/64 widths
 through decoded clang bytes, arbitrary fresh inputs and whole-memory preservation;
-its scalar-register mapping and invocation interface remain explicit. Existing build caches are reused. Generator checks compare locked numeric contracts
+The same fixture proves all32 SETCC condition/low-high-byte units and their actual
+decoded executions, with arbitrary old value/flags/fresh inputs and whole-memory preservation;
+their scalar-register mapping, initial scratch state and invocation interface remain explicit. Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.
 
