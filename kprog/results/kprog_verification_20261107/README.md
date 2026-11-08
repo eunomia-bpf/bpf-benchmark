@@ -4729,3 +4729,15 @@ image preservation laws pass through the same Make component. Existing offset,
 word, VHE and canary observations are retained. The original full outcome,
 source manifest and actual component output are archived in
 `percpu_emitter_fixture_native_length`.
+
+### Source-spelling audit cleanup
+
+Published `c58fadcaad0bbe0142e2ed17d5ddc7b48a04b189` retires six source-only audit tools, the
+RET output-spelling audit and production-text validation in54 generators.
+All141 generator checks pass;781 generated C, Lean and semantic oracle files
+retain their exact source bytes. Rust map-selection tests and the complete
+semantic/compiler/CPU/QEMU/reference checks remain in `make check`. The ARM
+far-helper oracle compares the compiled production writer against independent
+ISA word encodings. Archive `source_spelling_retirement` retains the exact
+change list, source hashes and every generator outcome. The immutable full
+check of this commit has its own terminal receipt.

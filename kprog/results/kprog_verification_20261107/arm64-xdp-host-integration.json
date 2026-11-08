@@ -8747,6 +8747,29 @@
     "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
     "kprog/formal/oracles/test_arm64_imm_operand_route_host.c": "9b985653d0650ae5a251ed14cb78388fd0cf2540ce05f534e5f3a2273dec7621"
   },
+  "source_spelling_retirement": {
+    "archive_compressed_prefix_bytes": 95241997,
+    "archive_compressed_prefix_sha256": "7c05c48378721299d54a969c2e2bbc1dcb2c7e3d077b166a6db6937c74cdc669",
+    "archive_entries": 8,
+    "archive_marker": "SOURCE_SPELLING_RETIREMENT_V1",
+    "archive_raw_bytes": 169941,
+    "archive_raw_sha256": "7a5840604f5e506c64bd6929120866f13acdc4bca46997dca765018dfe3f41e0",
+    "changed_generators": 54,
+    "changed_paths": 67,
+    "generator_check_exit": 0,
+    "generator_checks": 141,
+    "published_source": "c58fadcaad0bbe0142e2ed17d5ddc7b48a04b189",
+    "retained_scope": "Locked numeric contracts and generated artifacts; actual production C/encoder compilation and execution, Lean theorem kernel checks, Rust resolver selection tests and CPU/QEMU/reference replays.",
+    "retired_source_only_tools": [
+      "check_macro_hygiene.py",
+      "check_helper_idents.py",
+      "check_jcc_opcodes.py",
+      "check_dispatch_model.py",
+      "check_dual_emit_coverage.py",
+      "check_oracle_composition.py"
+    ],
+    "unchanged_semantic_source_files": 781
+  },
   "typed_helper_oracle_refresh": {
     "added_generated_identities": [
       188,
