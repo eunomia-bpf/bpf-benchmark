@@ -5073,3 +5073,12 @@ retains all proof attempts, final source and build output. Producer soundness
 for the Python CFG transfer/join/helper analysis, actual sparse allocation,
 C alignment/aliasing/volatile ordering and clang/ABI transport remain explicit.
 These are proof premises; no runtime predicate or per-program certificate is added.
+
+### Published source full check 963750cd7
+
+`make check` on immutable published963750cd7 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_963750cd7`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-963750cd7.log.gz](full-make-check-963750cd7.log.gz).
