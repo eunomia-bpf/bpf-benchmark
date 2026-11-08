@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-08T22:44:54.796271+00:00",
+  "publication": "d243825c9101149598642c62459a0520f7a51349",
+  "program": "execve_send",
+  "stage": "verifier_rejected",
+  "native_sha256": "228280ec895e9d7bb069718e30e1c5b4c5c55c6198ae6b0139f4049871b28e7e",
+  "original_bound": 2048,
+  "diagnostic": [
+    "The sequence of 8193 jumps is too complex.",
+    "processed 668277 insns (limit 1000000) max_states_per_insn 4 total_states 6807 peak_states 6807 mark_read 0"
+  ],
+  "source_publication": "47cfe359424456f61567f8a90911453a05e21681",
+  "scope": "Paired source0/load-only component uses object-default CONFIG_ITER_NUM globals; whole runtime keeps its actual globals",
+  "runtime_admission_additions": 0
+}
