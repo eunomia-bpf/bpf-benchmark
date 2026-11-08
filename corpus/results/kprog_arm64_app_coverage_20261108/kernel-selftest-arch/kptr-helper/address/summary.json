@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-08T17:20:22.821211+00:00",
+  "build": {
+    "utc": "2026-11-08T17:19:08.009034+00:00",
+    "phase": "build_finished",
+    "returncode": 0
+  },
+  "previous_component": "b685218f27307b7f2a33a0c1deef8605c6219b56",
+  "cause": "Actual generated/compiled helper194 component reaches native-link missing bpf_kptr_xchg address. kSupportedHelpers now records its real kernel helper symbol.",
+  "runtime_admission_additions": 0,
+  "binaries": {
+    "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "3b892c842242e87897e914bc2a17188a87f8c7c52a1e589b82c11a4214037ecc",
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": "abb78db3722ddd3d35d75d1f67835f2ba343e54c2d04c01c4a497cb14e6cd9cd",
+    "runner/build-arm64-llvmbpf/native_loader/trusted-service-client": "e46fc5cee19fc93cbf61dde2cfebd517b461ab8d8e068ceb16fe05e821b15eb3",
+    "runner/build-arm64-llvmbpf/micro_exec": "e247405235b0e230bd20b630113784d8ad3b0fbb3ccbd020ec7acfcbe59047d8"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-08T17:20:22.821211+00:00",
+  "base_publication": "65a83554cda49349754ef2181d017a24127c20f2",
+  "changes": [
+    {
+      "path": "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+      "before_sha256": "c1e0b98e2c002bc907a2dd9074fc1b221cee3e7228be522e787b29901bac8028",
+      "after_sha256": "3b892c842242e87897e914bc2a17188a87f8c7c52a1e589b82c11a4214037ecc"
+    },
+    {
+      "path": "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so",
+      "before_sha256": "bda543b205d5c8ad8d2f04517a1d46e230d7c6a3c7ad31f2abaaebf91399c79c",
+      "after_sha256": "abb78db3722ddd3d35d75d1f67835f2ba343e54c2d04c01c4a497cb14e6cd9cd"
+    },
+    {
+      "path": "kprog/libnativeloader/src/native_loader.cpp",
+      "before_sha256": "6ed8f21e92a722c0d3cc53ed76b9e32d895b8f6593c7a72b533b3b3cdd8cd6cf",
+      "after_sha256": "eac996ae9329debcc39f3db00960a7df2fd390156348d90e89243dd2ed60b207"
+    }
+  ]
+}

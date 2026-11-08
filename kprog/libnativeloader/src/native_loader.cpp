@@ -426,6 +426,7 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_get_func_ret, "bpf_get_func_ret"},
     {BPF_FUNC_get_func_arg_cnt, "bpf_get_func_arg_cnt"},
     {BPF_FUNC_ima_file_hash, "bpf_ima_file_hash"},
+    {BPF_FUNC_kptr_xchg, "bpf_kptr_xchg"},
     {BPF_FUNC_set_hash, "bpf_set_hash"},
     {BPF_FUNC_redirect_neigh, "bpf_redirect_neigh"},
     {BPF_FUNC_redirect_peer, "bpf_redirect_peer"},
