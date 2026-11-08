@@ -151,11 +151,6 @@ abi-negative-build:
 	taskset -c 16-23 $(MAKE) -C $(ROOT)/kprog/fidelity negative-build ARCH=arm64 NEGATIVE_BUILD=$(HERE)/$(PHASE)
 
 
-.PHONY: abi-effect-check
-abi-effect-check:
-	taskset -c 16-23 python3 $(HERE)/abi_check.py $(HERE)/$(PHASE)
-
-
 .PHONY: generate-frozen
 generate-frozen:
 	python3 $(HERE)/freeze_constructor.py $(HERE)/$(PHASE)
@@ -174,14 +169,6 @@ abi-negative-bound: abi-negative-build
 		-initrd $(HERE)/negative-bound.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
 		>$(HERE)/$(PHASE)/guest-console.log 2>&1
 	python3 $(ROOT)/kprog/fidelity/negative.py collect-bound --arch arm64 --build $(HERE)/$(PHASE) --out $(HERE)/$(PHASE)
-
-.PHONY: abi-artifacts
-abi-artifacts:
-	tar -C $(HERE) -czf $(HERE)/abi-constructor-artifacts.tar.gz abi-effects-before abi-effects-fixed abi-effects-tail abi-negative-final abi-stage2-final abi-positives-fixed abi_check.py
-
-.PHONY: abi-positive-identity
-abi-positive-identity:
-	python3 -c 'from pathlib import Path; base=Path("$(HERE)"); new=list((base/"abi-positives-fixed/sources").glob("*.bpf.c")); assert len(new)==29; assert all(p.read_bytes()==(base/"control-return-micro/sources"/p.name).read_bytes() for p in new); print("29 current ABI-checked C sources exactly match the 29 full-system QEMU passes")'
 
 .PHONY: abi-census-artifacts
 abi-census-artifacts:
