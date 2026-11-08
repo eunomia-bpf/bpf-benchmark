@@ -7,3 +7,5 @@ The active complete-application queues retain their captured inputs and result p
 The same exclusive component now includes complete failed-iteration State/GPR/base-address frames, with7cycle-law audits on the frozen57-source closure.
 
 [Generic map-helper target binding](map-helper-binding/README.md) records the coherent incremental ARM external-module build consuming C21e8040. Captured source and11 module identities accompany build exit0. Runtime controls and whole-application consumption follow the serial queue.
+
+[Universal exclusive failure-prefix composition](exclusive-prefix-composition/README.md) joins arbitrary dynamic exclusive visits with the complete architectural frame and ordered event/fault transition. Seven laws and the57-source incremental target check exit0; generic CFG/platform/progress interfaces continue.

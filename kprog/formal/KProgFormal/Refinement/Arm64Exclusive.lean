@@ -368,4 +368,177 @@ theorem retry_cycle_failed_base (width : Width)
         status value base increment displacement s)
     simpa only [memoryBase, general, ↓reduceDIte] using preserved
 
+/-- A sequence of dynamic exclusive visits, preserving every read/attempt event
+and ending at the first architectural fault. The list describes an observed
+finite prefix; each visit carries its own platform inputs. -/
+def retryFailurePrefix (cycle : State → Transition State) :
+    List ExclusiveInputs → State → Transition State
+  | [], s => ⟨s, [], none⟩
+  | input :: rest, s =>
+      continueWith (cycle { s with exclusiveInputs := input })
+        (retryFailurePrefix cycle rest)
+
+/-- Architectural frame shared by all failed visits. Environment inputs,
+reservation, data/status GPRs and PC retain their explicit threaded values. -/
+def RetryFrame (initial final : State) : Prop :=
+  final = { initial with gpr := final.gpr, pc := final.pc, exclusiveMonitor := final.exclusiveMonitor, exclusiveInputs := final.exclusiveInputs }
+
+theorem retry_frame_trans (s t u : State) (first : RetryFrame s t)
+    (second : RetryFrame t u) : RetryFrame s u := by
+  unfold RetryFrame at *
+  rw [first] at second
+  exact second
+
+/-- Every finite failed prefix preserves memory, flags, vector bank, SP,
+alignment profile and thread-pointer inputs, across arbitrary dynamic inputs. -/
+theorem retry_failure_prefix_frame (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word)
+    (inputs : List ExclusiveInputs) (s : State) :
+    RetryFrame s (retryFailurePrefix
+      (retryCycleCore width acquire release true sourceScalar sourceStack
+        status value base increment displacement) inputs s).state := by
+  induction inputs generalizing s with
+  | nil => rfl
+  | cons input rest ih =>
+      let start := { s with exclusiveInputs := input }
+      let first := retryCycleCore width acquire release true sourceScalar sourceStack
+        status value base increment displacement start
+      have one : RetryFrame start first.state := by
+        unfold RetryFrame
+        rw [retry_cycle_failed_frame width acquire release sourceScalar sourceStack
+          status value base increment displacement start]
+      have entry : RetryFrame s start := rfl
+      have framed := retry_frame_trans s start first.state entry one
+      change RetryFrame s (continueWith first _).state
+      cases h : first.fault with
+      | some fault => simpa only [continueWith, h] using framed
+      | none =>
+          simpa only [continueWith, h] using
+            retry_frame_trans s first.state _ framed (ih first.state)
+
+/-- Data/status are the complete GPR write set for every failed prefix. -/
+theorem retry_failure_prefix_other_gpr (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value other : Gpr)
+    (base : Register) (increment displacement : Word)
+    (inputs : List ExclusiveInputs) (s : State)
+    (outsideValue : other.val ≠ value.val) (outsideStatus : other.val ≠ status.val) :
+    (retryFailurePrefix (retryCycleCore width acquire release true sourceScalar sourceStack
+      status value base increment displacement) inputs s).state.gpr other = s.gpr other := by
+  induction inputs generalizing s with
+  | nil => rfl
+  | cons input rest ih =>
+      let start := { s with exclusiveInputs := input }
+      let first := retryCycleCore width acquire release true sourceScalar sourceStack
+        status value base increment displacement start
+      have one : first.state.gpr other = s.gpr other :=
+        retry_cycle_failed_other_gpr width acquire release sourceScalar sourceStack
+          status value other base increment displacement start outsideValue outsideStatus
+      change (continueWith first _).state.gpr other = s.gpr other
+      cases h : first.fault with
+      | some fault => simpa only [continueWith, h] using one
+      | none => simpa only [continueWith, h] using (ih first.state).trans one
+
+/-- Every disjoint ordinary/SP retry base retains its complete address. -/
+theorem retry_failure_prefix_base (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word)
+    (inputs : List ExclusiveInputs) (s : State)
+    (outsideValue : base.val ≠ value.val) (outsideStatus : base.val ≠ status.val) :
+    memoryBase (retryFailurePrefix
+      (retryCycleCore width acquire release true sourceScalar sourceStack
+        status value base increment displacement) inputs s).state base = memoryBase s base := by
+  by_cases general : base.val < 31
+  · simpa only [memoryBase, general, ↓reduceDIte] using
+      retry_failure_prefix_other_gpr width acquire release sourceScalar sourceStack
+        status value ⟨base.val, general⟩ base increment displacement inputs s
+        outsideValue outsideStatus
+  · have frame := retry_failure_prefix_frame width acquire release sourceScalar sourceStack
+      status value base increment displacement inputs s
+    have sp := congrArg State.sp frame
+    simpa only [memoryBase, general, ↓reduceDIte] using sp
+
+/-- Exact existing canonical platform/memory premises for a failed visit. -/
+structure RetryFailureDomain (width : Width) (acquire : Bool) (value : Gpr)
+    (base : Register) (increment : Word) (s : State) : Prop where
+  loadSp : spAlignmentFault s base = none
+  loadAligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none
+  failed : exclusiveStorePass (retryPrefix width acquire value base increment s).state
+    width.bytes = false
+  storeSp : spAlignmentFault (retryPrefix width acquire value base increment s).state base = none
+  storeAligned : exclusiveNaturalFault
+    (memoryBase (retryPrefix width acquire value base increment s).state base) width.bytes = none
+  preflight :
+    (exclusiveMonitorPass (retryPrefix width acquire value base increment s).state width.bytes ||
+      (retryPrefix width acquire value base increment s).state.exclusiveInputs.abortOnFailure) = true →
+    permitted (retryPrefix width acquire value base increment s).state.memory.writable
+      (memoryBase (retryPrefix width acquire value base increment s).state base) width.bytes = true
+
+/-- Per-visit premises follow the actual canonical path and its first fault. -/
+def RetryFailurePrefixDomain (width : Width) (acquire release : Bool)
+    (status value : Gpr) (base : Register) (increment displacement : Word) :
+    List ExclusiveInputs → State → Prop
+  | [], _ => True
+  | input :: rest, s =>
+      let start := { s with exclusiveInputs := input }
+      let first := retryCycle width acquire release status value base increment displacement start
+      RetryFailureDomain width acquire value base increment start ∧
+        (first.fault = none → RetryFailurePrefixDomain width acquire release
+          status value base increment displacement rest first.state)
+
+/-- Every observed finite prefix has the exact canonical state, ordered events
+and first fault, with independently supplied dynamic exclusive outcomes. -/
+theorem retry_failure_prefix_refines (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word)
+    (inputs : List ExclusiveInputs) (s : State)
+    (admitted : RetryFailurePrefixDomain width acquire release status value
+      base increment displacement inputs s) :
+    retryFailurePrefix (retryCycleCore width acquire release true sourceScalar sourceStack
+      status value base increment displacement) inputs s =
+    retryFailurePrefix (retryCycle width acquire release
+      status value base increment displacement) inputs s := by
+  induction inputs generalizing s with
+  | nil => rfl
+  | cons input rest ih =>
+      let start := { s with exclusiveInputs := input }
+      let first := retryCycle width acquire release status value base increment displacement start
+      change RetryFailureDomain width acquire value base increment start ∧
+        (first.fault = none → RetryFailurePrefixDomain width acquire release
+          status value base increment displacement rest first.state) at admitted
+      have one := retry_cycle_refines width acquire release true sourceScalar sourceStack
+        status value base increment displacement start admitted.1.loadSp admitted.1.loadAligned
+        (by simp only [admitted.1.failed]; rfl) admitted.1.storeSp
+        admitted.1.storeAligned admitted.1.preflight
+      change continueWith (retryCycleCore width acquire release true sourceScalar sourceStack
+        status value base increment displacement start) _ = continueWith first _
+      rw [one]
+      change continueWith first _ = continueWith first _
+      cases h : first.fault with
+      | some fault => simp only [continueWith, h]
+      | none =>
+          simp only [continueWith, h]
+          rw [ih first.state (admitted.2 h)]
+
+/-- The canonical failed prefix inherits the complete architectural frame. -/
+theorem retry_failure_prefix_canonical_frame (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word)
+    (inputs : List ExclusiveInputs) (s : State)
+    (admitted : RetryFailurePrefixDomain width acquire release status value
+      base increment displacement inputs s) :
+    RetryFrame s (retryFailurePrefix (retryCycle width acquire release
+      status value base increment displacement) inputs s).state := by
+  rw [← retry_failure_prefix_refines width acquire release sourceScalar sourceStack
+    status value base increment displacement inputs s admitted]
+  exact retry_failure_prefix_frame width acquire release sourceScalar sourceStack
+    status value base increment displacement inputs s
+
+/-- The original first-fault transition contains the complete prefix effects. -/
+theorem retry_failure_prefix_fault (cycle : State → Transition State)
+    (input : ExclusiveInputs) (rest : List ExclusiveInputs) (s : State) (fault : Fault)
+    (failed : (cycle { s with exclusiveInputs := input }).fault = some fault) :
+    retryFailurePrefix cycle (input :: rest) s = cycle { s with exclusiveInputs := input } := by
+  simp only [retryFailurePrefix, continueWith, failed]
+
 end KProgFormal.Refinement.Arm64Exclusive

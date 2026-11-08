@@ -1,0 +1,30 @@
+{
+  "utc": "2026-11-08T03:21:36.694184+00:00",
+  "scope": "Universal ARM failed-prefix composition over arbitrary lists of dynamic exclusive inputs; canonical cycle state, ordered guest events and first fault under the existing per-visit platform/memory premises.",
+  "source_files": 57,
+  "build_exit": 0,
+  "axiom_audits": 7,
+  "source_before_sha256": "d29f7cdb168a706c3e4e1c0a574d42ecc47f3b286f2a50cde24f65e14a4bda58",
+  "source_after_sha256": "64ed0586b3fd51a7d120276638a642a100ed6af5a2bd494edfa6c5ac7ed044c7",
+  "prior_module_prefix_preserved": true,
+  "runtime": "Captured application/module/compiler epochs retain their identities. Native CFG entry/backedge correspondence, physical platform relations and progress admission continue as explicit generic interfaces.",
+  "checks": "Source closure and Git identities, incremental target build and seven theorem audits.",
+  "preserved": [
+    "memory",
+    "NZCV",
+    "all32SIMD",
+    "SP",
+    "alignment_profile",
+    "thread_pointer",
+    "other_GPRs",
+    "disjoint_retry_base"
+  ],
+  "threaded": [
+    "dynamic_exclusive_inputs",
+    "reservation",
+    "data_status_GPRs",
+    "PC",
+    "all_read_and_exclusive_events",
+    "first_fault"
+  ]
+}
