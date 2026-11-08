@@ -1,0 +1,557 @@
+{
+  "utc": "2026-11-08T08:27:29.589262+00:00",
+  "application": "otelcol-ebpf-profiler",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T08:27:29.844835+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 3,
+    "distinct_source_prog_ids": 3,
+    "proof_generated": 3,
+    "stages": {
+      "verifier_accepted_installed": 2,
+      "loader_rejected": 1
+    },
+    "failure_causes": {
+      "see_exact_load_stderr": 1
+    },
+    "requests": [
+      {
+        "request_id": 1,
+        "source_prog_id": 20,
+        "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+        "entry": "read_task_struct",
+        "status": 0,
+        "stage": "verifier_accepted_installed",
+        "cause": null,
+        "proof_generated": true,
+        "source_generated": true,
+        "prog_id": 23,
+        "request_archive": "run/requests/1.success.tar.gz",
+        "request_archive_sha256": "ea4520c1ad1a1e8098e8a9aa348b45bf682e10f611625894f94fd087d3919f5b",
+        "failed_commands": [],
+        "error": null,
+        "load_stderr": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\n"
+      },
+      {
+        "request_id": 2,
+        "source_prog_id": 24,
+        "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+        "entry": "perf_unwind_stop",
+        "status": 0,
+        "stage": "verifier_accepted_installed",
+        "cause": null,
+        "proof_generated": true,
+        "source_generated": true,
+        "prog_id": 27,
+        "request_archive": "run/requests/2.success.tar.gz",
+        "request_archive_sha256": "b2b4fca1c209dd81a6a00c581ccea28383dc24cec5c423f7c1183dcc7af89ebe",
+        "failed_commands": [],
+        "error": null,
+        "load_stderr": "libbpf: elf: skipping unrecognized data section(30) .native_lab.rodata\n"
+      },
+      {
+        "request_id": 3,
+        "source_prog_id": 28,
+        "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
+        "entry": "perf_unwind_native",
+        "status": -5,
+        "stage": "loader_rejected",
+        "cause": "see_exact_load_stderr",
+        "proof_generated": true,
+        "source_generated": true,
+        "prog_id": null,
+        "request_archive": "run/requests/3.failure.tar.gz",
+        "request_archive_sha256": "64c358515bd2133357c6e7fb63fd965ee6bcd109044cf7b387c99b67a56c715e",
+        "failed_commands": [],
+        "error": "Command '['/workspaces/repository/kprog/arm64/build/design-only/loader/trusted-native-loader', 'load', '4', '3', '28', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-cz2mklhq/requests/request-tczbzi1n/generated/request.native.o', 'perf_unwind_native', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-cz2mklhq/requests/request-tczbzi1n/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-cz2mklhq/requests/request-tczbzi1n/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '0', '0', '0', '0', '0', '0', 'exe_id_to_10_stack_deltas', '196', 'null', 'exe_id_to_11_stack_deltas', '210', 'null', 'exe_id_to_12_stack_deltas', '214', 'null', 'exe_id_to_13_stack_deltas', '192', 'null', 'exe_id_to_14_stack_deltas', '182', 'null', 'exe_id_to_15_stack_deltas', '194', 'null', 'exe_id_to_16_stack_deltas', '198', 'null', 'exe_id_to_17_stack_deltas', '205', 'null', 'exe_id_to_18_stack_deltas', '207', 'null', 'exe_id_to_19_stack_deltas', '185', 'null', 'exe_id_to_20_stack_deltas', '175', 'null', 'exe_id_to_21_stack_deltas', '190', 'null', 'exe_id_to_22_stack_deltas', '188', 'null', 'exe_id_to_23_stack_deltas', '218', 'null', 'exe_id_to_8_stack_deltas', '172', 'null', 'exe_id_to_9_stack_deltas', '203', 'null', 'interpreter_offsets', '199', 'null', 'inverse_pac_mask', '211', '24', 'metrics', '169', 'null', 'per_cpu_records', '178', 'null', 'perf_progs', '216', 'null', 'pid_page_to_mapping_info', '166', 'null', 'stack_delta_page_to_info', '222', 'null', 'unwind_info_array', '221', 'null', 'with_debug_output', '211', '32']' returned non-zero exit status 1.",
+        "load_stderr": "libbpf: elf: skipping unrecognized data section(37) .native_lab.rodata\ntrusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=6567\nstub fd_array_cnt=26 fd_array=0:150,1:150,2:126,3:127,4:128,5:129,6:130,7:131,8:132,9:133,10:134,11:135,12:136,13:137,14:138,15:139,16:140,17:141,18:142,19:143,20:144,21:145,22:146,23:147,24:148,25:149\nstub insns=0:code=183,dst=0,src=3,off=351,imm=0;1:code=133,dst=0,src=4,off=1,imm=126349;2:code=183,dst=0,src=3,off=367,imm=0;3:code=133,dst=0,src=4,off=1,imm=126349;4:code=183,dst=0,src=3,off=383,imm=0;5:code=133,dst=0,src=4,off=1,imm=126349;6:code=183,dst=0,src=3,off=399,imm=0;7:code=133,dst=0,src=4,off=1,imm=126349;8:code=183,dst=0,src=3,off=415,imm=0;9:code=133,dst=0,src=4,off=1,imm=126349;10:code=183,dst=0,src=3,off=431,imm=0;11:code=133,dst=0,src=4,off=1,imm=126349;12:code=183,dst=0,src=3,off=447,imm=0;13:code=133,dst=0,src=4,off=1,imm=126349;14:code=183,dst=0,src=3,off=463,imm=0;15:code=133,dst=0,src=4,off=1,imm=126349;16:code=183,dst=0,src=3,off=479,imm=0;17:code=133,dst=0,src=4,off=1,imm=126349;18:code=183,dst=0,src=3,off=495,imm=0;19:code=133,dst=0,src=4,off=1,imm=126349;20:code=183,dst=0,src=3,off=511,imm=0;21:code=133,dst=0,src=4,off=1,imm=126349;22:code=183,dst=0,src=3,off=527,imm=0;23:code=133,dst=0,src=4,off=1,imm=126349;24:code=183,dst=0,src=3,off=543,imm=0;25:code=133,dst=0,src=4,off=1,imm=126349;26:code=183,dst=0,src=3,off=559,imm=0;27:code=133,dst=0,src=4,off=1,imm=126349;28:code=183,dst=0,src=3,off=575,imm=0;29:code=133,dst=0,src=4,off=1,imm=126349;30:code=183,dst=0,src=3,off=591,imm=0;31:code=133,dst=0,src=4,off=1,imm=126349;32:code=183,dst=0,src=3,off=607,imm=0;33:code=133,dst=0,src=4,off=1,imm=126349;34:code=183,dst=0,src=3,off=623,imm=0;35:code=133,dst=0,src=4,off=1,imm=126349;36:code=183,dst=0,src=3,off=639,imm=0;37:code=133,dst=0,src=4,off=1,imm=126349;38:code=183,dst=0,src=3,off=655,imm=0;39:code=133,dst=0,src=4,off=1,imm=126349;40:code=183,dst=0,src=3,off=671,imm=0;41:code=133,dst=0,src=4,off=1,imm=126349;42:code=183,dst=0,src=3,off=687,imm=0;43:code=133,dst=0,src=4,off=1,imm=126349;44:code=183,dst=0,src=3,off=703,imm=0;45:code=133,dst=0,src=4,off=1,imm=126349;46:code=183,dst=0,src=3,off=719,imm=0;47:code=133,dst=0,src=4,off=1,imm=126349;48:code=183,dst=0,src=3,off=735,imm=0;49:code=133,dst=0,src=4,off=1,imm=126349;50:code=183,dst=0,src=3,off=751,imm=0;51:code=133,dst=0,src=4,off=1,imm=126349;52:code=183,dst=0,src=3,off=767,imm=0;53:code=133,dst=0,src=4,off=1,imm=126349;54:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (bf) r6 = r0                       ; R0=0 R6=0\n2: (bf) r7 = r0                       ; R0=0 R7=0\n3: (bf) r8 = r0                       ; R0=0 R8=0\n4: (bf) r9 = r0                       ; R0=0 R9=0\n5: (b7) r0 = 0                        ; R0=0\n6: (bf) r6 = r0                       ; R0=0 R6=0\n7: (bf) r7 = r0                       ; R0=0 R7=0\n8: (bf) r8 = r0                       ; R0=0 R8=0\n9: (bf) r9 = r0                       ; R0=0 R9=0\n10: (b7) r0 = 0                       ; R0=0\n11: (bf) r6 = r0                      ; R0=0 R6=0\n12: (bf) r7 = r0                      ; R0=0 R7=0\n13: (bf) r8 = r0                      ; R0=0 R8=0\n14: (bf) r9 = r0                      ; R0=0 R9=0\n15: (b7) r0 = 0                       ; R0=0\n16: (bf) r6 = r0                      ; R0=0 R6=0\n17: (bf) r7 = r0                      ; R0=0 R7=0\n18: (bf) r8 = r0                      ; R0=0 R8=0\n19: (bf) r9 = r0                      ; R0=0 R9=0\n20: (b7) r0 = 0                       ; R0=0\n21: (bf) r6 = r0                      ; R0=0 R6=0\n22: (bf) r7 = r0                      ; R0=0 R7=0\n23: (bf) r8 = r0                      ; R0=0 R8=0\n24: (bf) r9 = r0                      ; R0=0 R9=0\n25: (b7) r0 = 0                       ; R0=0\n26: (bf) r6 = r0                      ; R0=0 R6=0\n27: (bf) r7 = r0                      ; R0=0 R7=0\n28: (bf) r8 = r0                      ; R0=0 R8=0\n29: (bf) r9 = r0                      ; R0=0 R9=0\n30: (b7) r0 = 0                       ; R0=0\n31: (bf) r6 = r0                      ; R0=0 R6=0\n32: (bf) r7 = r0                      ; R0=0 R7=0\n33: (bf) r8 = r0                      ; R0=0 R8=0\n34: (bf) r9 = r0                      ; R0=0 R9=0\n35: (b7) r0 = 0                       ; R0=0\n36: (bf) r6 = r0                      ; R0=0 R6=0\n37: (bf) r7 = r0                      ; R0=0 R7=0\n38: (bf) r8 = r0                      ; R0=0 R8=0\n39: (bf) r9 = r0                      ; R0=0 R9=0\n40: (b7) r0 = 0                       ; R0=0\n41: (bf) r6 = r0                      ; R0=0 R6=0\n42: (bf) r7 = r0                      ; R0=0 R7=0\n43: (bf) r8 = r0                      ; R0=0 R8=0\n44: (bf) r9 = r0                      ; R0=0 R9=0\n45: (b7) r0 = 0                       ; R0=0\n46: (bf) r6 = r0                      ; R0=0 R6=0\n47: (bf) r7 = r0                      ; R0=0 R7=0\n48: (bf) r8 = r0                      ; R0=0 R8=0\n49: (bf) r9 = r0                      ; R0=0 R9=0\n50: (b7) r0 = 0                       ; R0=0\n51: (bf) r6 = r0                      ; R0=0 R6=0\n52: (bf) r7 = r0                      ; R0=0 R7=0\n53: (bf) r8 = r0                      ; R0=0 R8=0\n54: (bf) r9 = r0                      ; R0=0 R9=0\n55: (b7) r0 = 0                       ; R0=0\n56: (bf) r6 = r0                      ; R0=0 R6=0\n57: (bf) r7 = r0                      ; R0=0 R7=0\n58: (bf) r8 = r0                      ; R0=0 R8=0\n59: (bf) r9 = r0                      ; R0=0 R9=0\n60: (b7) r0 = 0                       ; R0=0\n61: (bf) r6 = r0                      ; R0=0 R6=0\n62: (bf) r7 = r0                      ; R0=0 R7=0\n63: (bf) r8 = r0                      ; R0=0 R8=0\n64: (bf) r9 = r0                      ; R0=0 R9=0\n65: (b7) r0 = 0                       ; R0=0\n66: (bf) r6 = r0                      ; R0=0 R6=0\n67: (bf) r7 = r0                      ; R0=0 R7=0\n68: (bf) r8 = r0                      ; R0=0 R8=0\n69: (bf) r9 = r0                      ; R0=0 R9=0\n70: (b7) r0 = 0                       ; R0=0\n71: (bf) r6 = r0                      ; R0=0 R6=0\n72: (bf) r7 = r0                      ; R0=0 R7=0\n73: (bf) r8 = r0                      ; R0=0 R8=0\n74: (bf) r9 = r0                      ; R0=0 R9=0\n75: (b7) r0 = 0                       ; R0=0\n76: (bf) r6 = r0                      ; R0=0 R6=0\n77: (bf) r7 = r0                      ; R0=0 R7=0\n78: (bf) r8 = r0                      ; R0=0 R8=0\n79: (bf) r9 = r0                      ; R0=0 R9=0\n80: (b7) r0 = 0                       ; R0=0\n81: (bf) r6 = r0                      ; R0=0 R6=0\n82: (bf) r7 = r0                      ; R0=0 R7=0\n83: (bf) r8 = r0                      ; R0=0 R8=0\n84: (bf) r9 = r0                      ; R0=0 R9=0\n85: (b7) r0 = 0                       ; R0=0\n86: (bf) r6 = r0                      ; R0=0 R6=0\n87: (bf) r7 = r0                      ; R0=0 R7=0\n88: (bf) r8 = r0                      ; R0=0 R8=0\n89: (bf) r9 = r0                      ; R0=0 R9=0\n90: (b7) r0 = 0                       ; R0=0\n91: (bf) r6 = r0                      ; R0=0 R6=0\n92: (bf) r7 = r0                      ; R0=0 R7=0\n93: (bf) r8 = r0                      ; R0=0 R8=0\n94: (bf) r9 = r0                      ; R0=0 R9=0\n95: (b7) r0 = 0                       ; R0=0\n96: (bf) r6 = r0                      ; R0=0 R6=0\n97: (bf) r7 = r0                      ; R0=0 R7=0\n98: (bf) r8 = r0                      ; R0=0 R8=0\n99: (bf) r9 = r0                      ; R0=0 R9=0\n100: (b7) r0 = 0                      ; R0=0\n101: (bf) r6 = r0                     ; R0=0 R6=0\n102: (bf) r7 = r0                     ; R0=0 R7=0\n103: (bf) r8 = r0                     ; R0=0 R8=0\n104: (bf) r9 = r0                     ; R0=0 R9=0\n105: (b7) r0 = 0                      ; R0=0\n106: (bf) r6 = r0                     ; R0=0 R6=0\n107: (bf) r7 = r0                     ; R0=0 R7=0\n108: (bf) r8 = r0                     ; R0=0 R8=0\n109: (bf) r9 = r0                     ; R0=0 R9=0\n110: (b7) r0 = 0                      ; R0=0\n111: (bf) r6 = r0                     ; R0=0 R6=0\n112: (bf) r7 = r0                     ; R0=0 R7=0\n113: (bf) r8 = r0                     ; R0=0 R8=0\n114: (bf) r9 = r0                     ; R0=0 R9=0\n115: (b7) r0 = 0                      ; R0=0\n116: (bf) r6 = r0                     ; R0=0 R6=0\n117: (bf) r7 = r0                     ; R0=0 R7=0\n118: (bf) r8 = r0                     ; R0=0 R8=0\n119: (bf) r9 = r0                     ; R0=0 R9=0\n120: (b7) r0 = 0                      ; R0=0\n121: (bf) r6 = r0                     ; R0=0 R6=0\n122: (bf) r7 = r0                     ; R0=0 R7=0\n123: (bf) r8 = r0                     ; R0=0 R8=0\n124: (bf) r9 = r0                     ; R0=0 R9=0\n125: (b7) r0 = 0                      ; R0=0\n126: (bf) r6 = r0                     ; R0=0 R6=0\n127: (bf) r7 = r0                     ; R0=0 R7=0\n128: (bf) r8 = r0                     ; R0=0 R8=0\n129: (bf) r9 = r0                     ; R0=0 R9=0\n130: (7b) *(u64 *)(r10 -576) = r1\ninvalid write to stack R10 off=-576 size=8\nprocessed 131 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,244,5832598,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,245,5833011,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=7 blob_bytes=438364 reloc_records=276 reloc_bytes=4416 chunks=27 proof_bound=1 callee_saved_mask=15 tail_call_reachable=1 retained_map_fds=24 relocated_map_ids=24 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126349\nretained_map_info=126:id=178:type=6:name=per_cpu_records,127:id=211:type=2:name=.rodata.var,128:id=169:type=6:name=metrics,129:id=222:type=1:name=stack_delta_pag,130:id=203:type=13:name=exe_id_to_9_sta,131:id=205:type=13:name=exe_id_to_17_st,132:id=192:type=13:name=exe_id_to_13_st,133:id=190:type=13:name=exe_id_to_21_st,134:id=210:type=13:name=exe_id_to_11_st,135:id=185:type=13:name=exe_id_to_19_st,136:id=194:type=13:name=exe_id_to_15_st,137:id=218:type=13:name=exe_id_to_23_st,138:id=172:type=13:name=exe_id_to_8_sta,139:id=198:type=13:name=exe_id_to_16_st,140:id=214:type=13:name=exe_id_to_12_st,141:id=175:type=13:name=exe_id_to_20_st,142:id=196:type=13:name=exe_id_to_10_st,143:id=207:type=13:name=exe_id_to_18_st,144:id=182:type=13:name=exe_id_to_14_st,145:id=188:type=13:name=exe_id_to_22_st,146:id=221:type=2:name=unwind_info_arr,147:id=166:type=11:name=pid_page_to_map,148:id=199:type=1:name=interpreter_off,149:id=216:type=3:name=perf_progs\nnative_blob_diag: fnv64=5fc7e0dcaa629127 word_count=109591 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=50 first_zero_offset=28560 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=438364 final_size_matches=1\nchunk_bytes=0:16384,16384:16384,32768:16384,49152:16384,65536:16384,81920:16384,98304:16384,114688:16384,131072:16384,147456:16384,163840:16384,180224:16384,196608:16384,212992:16384,229376:16384,245760:16384,262144:16384,278528:16384,294912:16384,311296:16384,327680:16384,344064:16384,360448:16384,376832:16384,393216:16384,409600:16384,425984:12380\nreloc_targets=80:0x0,176:0x0,292:0xffff80008029b9e8,388:0x0,480:0xffff80008029b9e8,612:0xffff800080301a48,1060:0xffff8000802f0f80,1144:0xffff8000802f0f80,1224:0xffff8000802f0f80,1300:0xffff8000802f0f80,1376:0xffff8000802f0f80,1452:0xffff8000802f0f80,1528:0xffff8000802f0f80,1604:0xffff8000802f0f80,1680:0xffff8000802f0f80,1756:0xffff8000802f0f80,1832:0xffff8000802f0f80,1908:0xffff8000802f0f80,1984:0xffff8000802f0f80,2060:0xffff8000802f0f80,2136:0xffff8000802f0f80,2212:0xffff8000802f0f80,2288:0xffff8000802f0f80,2364:0xffff8000802f0f80,2524:0x0,2924:0xffff800080296fd8,3064:0xffff80008029b9e8,3176:0x0,3260:0xffff800080296fd8,3356:0xffff800080296fd8,3584:0x0,3688:0xffff80008029b9e8,3816:0x0,3888:0xffff800080296fd8,3992:0xffff80008029b9e8,4044:0xffff800080296fd8,4152:0x0,4244:0xffff80008029b9e8,4412:0xffff800080296fd8,4492:0x0,4600:0xffff80008029b9e8,4764:0xffff80008029b9e8,4856:0xffff80008029b9e8,4956:0xffff80008029b9e8,5032:0xffff80008029b9e8,5116:0xffff80008029b9e8,5208:0xffff80008029b9e8,5304:0xffff80008029b9e8,5396:0xffff80008029b9e8,5492:0xffff80008029b9e8,5584:0xffff80008029b9e8,5696:0xffff80008029b9e8,5780:0xffff80008029b9e8,5864:0xffff80008029b9e8,5956:0xffff80008029b9e8,6072:0xffff8000802f0f80,6176:0xffff800080301a48,6372:0xffff80008029b9e8,6444:0xffff80008029b9e8,6536:0xffff80008029b9e8,6648:0xffff80008029b9e8,6744:0xffff80008029b9e8,6828:0xffff80008029b9e8,6920:0xffff80008029b9e8,7012:0xffff80008029b9e8,7096:0xffff80008029b9e8,7184:0xffff80008029b9e8,7260:0xffff80008029b9e8,7344:0x0,7492:0x0,7612:0xffff80008029b9e8,7776:0xffff800080301a48,8200:0xffff8000802f0f80,8316:0xffff8000802f0f80,8400:0xffff8000802f0f80,8484:0xffff8000802f0f80,8568:0xffff8000802f0f80,8652:0xffff8000802f0f80,8736:0xffff8000802f0f80,8820:0xffff8000802f0f80,8904:0xffff8000802f0f80,8988:0xffff8000802f0f80,9072:0xffff8000802f0f80,9156:0xffff8000802f0f80,9240:0xffff8000802f0f80,9324:0xffff8000802f0f80,9408:0xffff8000802f0f80,9492:0xffff8000802f0f80,9576:0xffff8000802f0f80,9660:0xffff8000802f0f80,9812:0x0,10012:0xffff80008029b9e8,10356:0xffff800080296fd8,10516:0x0,10676:0xffff800080296fd8,10836:0xffff80008029b9e8,10900:0xffff800080296fd8,11216:0xffff800080296fd8,11320:0xffff800080296fd8,11428:0xffff800080296fd8,11508:0x0,11624:0xffff80008029b9e8,11780:0xffff80008029b9e8,11860:0xffff80008029b9e8,11960:0xffff80008029b9e8,12052:0xffff80008029b9e8,12136:0xffff80008029b9e8,12220:0xffff80008029b9e8,12304:0xffff80008029b9e8,12392:0xffff80008029b9e8,12484:0xffff80008029b9e8,12568:0xffff80008029b9e8,12648:0xffff80008029b9e8,12748:0xffff80008029b9e8,12820:0xffff80008029b9e8,12900:0xffff80008029b9e8,13020:0xffff80008029b9e8,13088:0xffff8000802f0f80,13200:0xffff800080301a48,13412:0xffff80008029b9e8,13480:0xffff80008029b9e8,13556:0xffff80008029b9e8,13640:0xffff80008029b9e8,13744:0xffff80008029b9e8,13836:0xffff80008029b9e8,13936:0xffff80008029b9e8,14012:0xffff80008029b9e8,14096:0x0,14228:0x0,14352:0xffff80008029b9e8,14540:0xffff800080301a48,14984:0xffff8000802f0f80,15100:0xffff8000802f0f80,15184:0xffff8000802f0f80,15268:0xffff8000802f0f80,15352:0xffff8000802f0f80,15436:0xffff8000802f0f80,15520:0xffff8000802f0f80,15604:0xffff8000802f0f80,15688:0xffff8000802f0f80,15772:0xffff8000802f0f80,15856:0xffff8000802f0f80,15940:0xffff8000802f0f80,16024:0xffff8000802f0f80,16108:0xffff8000802f0f80,16192:0xffff8000802f0f80,16276:0xffff8000802f0f80,16360:0xffff8000802f0f80,16444:0xffff8000802f0f80,16596:0x0,17052:0xffff800080296fd8,17212:0x0,17372:0xffff800080296fd8,17532:0xffff80008029b9e8,17596:0xffff800080296fd8,17912:0xffff800080296fd8,18016:0xffff800080296fd8,18124:0xffff800080296fd8,18204:0x0,18320:0xffff80008029b9e8,18448:0xffff8000802f0f80,18560:0xffff800080301a48,18768:0xffff80008029b9e8,18868:0xffff80008029b9e8,18960:0xffff80008029b9e8,19044:0xffff80008029b9e8,19148:0xffff80008029b9e8,19244:0xffff80008029b9e8,19336:0xffff80008029b9e8,19420:0xffff80008029b9e8,19500:0xffff80008029b9e8,19600:0xffff80008029b9e8,19672:0xffff80008029b9e8,19752:0xffff80008029b9e8,19836:0xffff80008029b9e8,19904:0xffff80008029b9e8,19980:0xffff80008029b9e8,20064:0xffff80008029b9e8,20168:0xffff80008029b9e8,20260:0xffff80008029b9e8,20360:0xffff80008029b9e8,20436:0xffff80008029b9e8,20520:0x0,20652:0x0,20776:0xffff80008029b9e8,20964:0xffff800080301a48,21184:0xffff80008029b9e8,21544:0xffff8000802f0f80,21660:0xffff8000802f0f80,21740:0xffff8000802f0f80,21816:0xffff8000802f0f80,21892:0xffff8000802f0f80,21968:0xffff8000802f0f80,22044:0xffff8000802f0f80,22120:0xffff8000802f0f80,22196:0xffff8000802f0f80,22272:0xffff8000802f0f80,22348:0xffff8000802f0f80,22424:0xffff8000802f0f80,22500:0xffff8000802f0f80,22576:0xffff8000802f0f80,22652:0xffff8000802f0f80,22728:0xffff8000802f0f80,22804:0xffff8000802f0f80,22880:0xffff8000802f0f80,23036:0x0,23228:0xffff80008029b9e8,23652:0x0,23752:0xffff80008029b9e8,23864:0xffff80008029b9e8,23976:0xffff800080296fd8,24108:0x0,24208:0x0,24544:0xffff80008029b9e8,24628:0xffff80008029b9e8,24752:0x0,24844:0xffff800080296fd8,25004:0xffff80008029b9e8,25068:0xffff800080296fd8,25384:0xffff800080296fd8,25488:0xffff800080296fd8,25596:0xffff800080296fd8,25676:0x0,25824:0xffff8000802f0f80,25936:0xffff800080301a48,26184:0xffff80008029b9e8,26324:0xffff80008029b9e8,26404:0xffff80008029b9e8,26504:0xffff80008029b9e8,26664:0xffff80008029b9e8,26748:0xffff80008029b9e8,26844:0xffff80008029b9e8,26940:0xffff80008029b9e8,27032:0xffff80008029b9e8,27116:0xffff80008029b9e8,27200:0xffff80008029b9e8,27280:0xffff80008029b9e8,27368:0xffff80008029b9e8,27436:0xffff80008029b9e8,27532:0xffff80008029b9e8,27600:0xffff80008029b9e8,27672:0xffff80008029b9e8,27756:0xffff80008029b9e8,27856:0xffff80008029b9e8,27948:0xffff80008029b9e8,28052:0xffff80008029b9e8,28152:0xffff80008029b9e8,28228:0xffff80008029b9e8,28312:0x0,28428:0xffff80008029b9e8,28540:0xffff80008029b9e8,28560:0xb2,28568:0x20000000d3,28576:0xa9,438184:0xde,438192:0xcb,438200:0xcd,438208:0xc0,438216:0xbe,438224:0xd2,438232:0xb9,438240:0xc2,438248:0xda,438256:0xac,438264:0xc6,438272:0xd6,438280:0xaf,438288:0xc4,438296:0xcf,438304:0xb6,438312:0xbc,438320:0xdd,438328:0x18000000d3,438336:0xa6,438344:0xc7,438352:0xd8\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n"
+      }
+    ],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000048_453973/details/apps/otelcol-ebpf-profiler__profiling.json",
+        "app": "otelcol-ebpf-profiler/profiling",
+        "status": "error",
+        "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n1970-01-01T00:03:04.739Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:04.856Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:05.087Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n1970-01-01T00:03:05.092Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:05.129Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:09.597Z\tinfo\tDetermined PAC mask to be 0x007F000000000000\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:38.910Z\tinfo\tFound offsets: task stack 0x28, pt_regs 0x3ec0, tpbase 0x1ed0\t{\"resource\": {\"service.instance.id\": \"abcd752e-79bf-48c7-b88b-49b45074d9cd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+        "phases": {
+          "baseline": {
+            "programs": [
+              {
+                "bytes_jited": 15168,
+                "bytes_xlated": 24768,
+                "id": 10,
+                "name": "perf_unwind_php",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 18776,
+                "bytes_xlated": 33192,
+                "id": 11,
+                "name": "perf_unwind_pyt",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 18496,
+                "bytes_xlated": 30264,
+                "id": 12,
+                "name": "perf_unwind_rub",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 20496,
+                "bytes_xlated": 34040,
+                "id": 13,
+                "name": "perf_unwind_v8",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 1640,
+                "bytes_xlated": 2504,
+                "id": 14,
+                "name": "perf_go_labels",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 920,
+                "bytes_xlated": 1320,
+                "id": 15,
+                "name": "tracepoint__sch",
+                "run_cnt_delta": 34,
+                "run_time_ns_delta": 3356640,
+                "type": "tracepoint"
+              },
+              {
+                "bytes_jited": 4104,
+                "bytes_xlated": 6000,
+                "id": 16,
+                "name": "native_tracer_e",
+                "run_cnt_delta": 159920,
+                "run_time_ns_delta": 17265157152,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 3920,
+                "bytes_xlated": 5848,
+                "id": 17,
+                "name": "custom__generic",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 3872,
+                "bytes_xlated": 6136,
+                "id": 6,
+                "name": "perf_unwind_sto",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 21936,
+                "bytes_xlated": 36624,
+                "id": 7,
+                "name": "perf_unwind_nat",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 14888,
+                "bytes_xlated": 24472,
+                "id": 8,
+                "name": "perf_unwind_hot",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              },
+              {
+                "bytes_jited": 18272,
+                "bytes_xlated": 29624,
+                "id": 9,
+                "name": "perf_unwind_per",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "perf_event"
+              }
+            ],
+            "workload": null,
+            "raw_measurement": {
+              "bpf": {
+                "10": {
+                  "bytes_jited": 15168,
+                  "bytes_xlated": 24768,
+                  "id": 10,
+                  "name": "perf_unwind_php",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "11": {
+                  "bytes_jited": 18776,
+                  "bytes_xlated": 33192,
+                  "id": 11,
+                  "name": "perf_unwind_pyt",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "12": {
+                  "bytes_jited": 18496,
+                  "bytes_xlated": 30264,
+                  "id": 12,
+                  "name": "perf_unwind_rub",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "13": {
+                  "bytes_jited": 20496,
+                  "bytes_xlated": 34040,
+                  "id": 13,
+                  "name": "perf_unwind_v8",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "14": {
+                  "bytes_jited": 1640,
+                  "bytes_xlated": 2504,
+                  "id": 14,
+                  "name": "perf_go_labels",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "15": {
+                  "bytes_jited": 920,
+                  "bytes_xlated": 1320,
+                  "id": 15,
+                  "name": "tracepoint__sch",
+                  "run_cnt_delta": 34,
+                  "run_time_ns_delta": 3356640,
+                  "type": "tracepoint"
+                },
+                "16": {
+                  "bytes_jited": 4104,
+                  "bytes_xlated": 6000,
+                  "id": 16,
+                  "name": "native_tracer_e",
+                  "run_cnt_delta": 159920,
+                  "run_time_ns_delta": 17265157152,
+                  "type": "perf_event"
+                },
+                "17": {
+                  "bytes_jited": 3920,
+                  "bytes_xlated": 5848,
+                  "id": 17,
+                  "name": "custom__generic",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "6": {
+                  "bytes_jited": 3872,
+                  "bytes_xlated": 6136,
+                  "id": 6,
+                  "name": "perf_unwind_sto",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "7": {
+                  "bytes_jited": 21936,
+                  "bytes_xlated": 36624,
+                  "id": 7,
+                  "name": "perf_unwind_nat",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "8": {
+                  "bytes_jited": 14888,
+                  "bytes_xlated": 24472,
+                  "id": 8,
+                  "name": "perf_unwind_hot",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                },
+                "9": {
+                  "bytes_jited": 18272,
+                  "bytes_xlated": 29624,
+                  "id": 9,
+                  "name": "perf_unwind_per",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "perf_event"
+                }
+              },
+              "workloads": [
+                {
+                  "components": [
+                    {
+                      "command": [
+                        "/usr/bin/python3",
+                        "-u",
+                        "-c",
+                        "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                        "2",
+                        "0"
+                      ],
+                      "config": {
+                        "language": "python3",
+                        "loop": "integer_lcg",
+                        "tool": "python3",
+                        "worker_index": 0,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 9.246679136000012,
+                      "returncode": 0,
+                      "stderr": "python3 int_loop ops=12351 elapsed_s=2.000158 worker=0 sink=447149736",
+                      "stdout": "",
+                      "workload_name": "otel_python3_int_loop_0"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/python3",
+                        "-u",
+                        "-c",
+                        "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                        "2",
+                        "1"
+                      ],
+                      "config": {
+                        "language": "python3",
+                        "loop": "integer_lcg",
+                        "tool": "python3",
+                        "worker_index": 1,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 9.253249216,
+                      "returncode": 0,
+                      "stderr": "python3 int_loop ops=11238 elapsed_s=2.004276 worker=1 sink=1538528284",
+                      "stdout": "",
+                      "workload_name": "otel_python3_int_loop_1"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/ruby",
+                        "-e",
+                        "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                        "2",
+                        "0"
+                      ],
+                      "config": {
+                        "language": "ruby",
+                        "loop": "integer_lcg",
+                        "tool": "ruby",
+                        "worker_index": 0,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 39.71915718400001,
+                      "returncode": 0,
+                      "stderr": "ruby int_loop ops=37767 elapsed_s=2.000178 worker=0 sink=3061127296",
+                      "stdout": "",
+                      "workload_name": "otel_ruby_int_loop_0"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/ruby",
+                        "-e",
+                        "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                        "2",
+                        "1"
+                      ],
+                      "config": {
+                        "language": "ruby",
+                        "loop": "integer_lcg",
+                        "tool": "ruby",
+                        "worker_index": 1,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.391308272,
+                      "returncode": 0,
+                      "stderr": "ruby int_loop ops=47577 elapsed_s=2.001602 worker=1 sink=862032827",
+                      "stdout": "",
+                      "workload_name": "otel_ruby_int_loop_1"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/nodejs",
+                        "-e",
+                        "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                        "2",
+                        "0"
+                      ],
+                      "config": {
+                        "language": "nodejs",
+                        "loop": "integer_lcg",
+                        "tool": "nodejs",
+                        "worker_index": 0,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.74607257599999,
+                      "returncode": 0,
+                      "stderr": "nodejs int_loop ops=11701 elapsed_s=2.523252 worker=0 sink=3001435648",
+                      "stdout": "",
+                      "workload_name": "otel_nodejs_int_loop_0"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/nodejs",
+                        "-e",
+                        "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                        "2",
+                        "1"
+                      ],
+                      "config": {
+                        "language": "nodejs",
+                        "loop": "integer_lcg",
+                        "tool": "nodejs",
+                        "worker_index": 1,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.754182128,
+                      "returncode": 0,
+                      "stderr": "nodejs int_loop ops=11701 elapsed_s=2.522929 worker=1 sink=357225472",
+                      "stdout": "",
+                      "workload_name": "otel_nodejs_int_loop_1"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/perl",
+                        "-e",
+                        "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                        "2",
+                        "0"
+                      ],
+                      "config": {
+                        "language": "perl",
+                        "loop": "integer_lcg",
+                        "tool": "perl",
+                        "worker_index": 0,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.762655744,
+                      "returncode": 0,
+                      "stderr": "perl int_loop ops=26916 elapsed_s=2.000371 worker=0 sink=2655066909",
+                      "stdout": "",
+                      "workload_name": "otel_perl_int_loop_0"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/perl",
+                        "-e",
+                        "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                        "2",
+                        "1"
+                      ],
+                      "config": {
+                        "language": "perl",
+                        "loop": "integer_lcg",
+                        "tool": "perl",
+                        "worker_index": 1,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.769096432,
+                      "returncode": 0,
+                      "stderr": "perl int_loop ops=26992 elapsed_s=2.000595 worker=1 sink=2147118802",
+                      "stdout": "",
+                      "workload_name": "otel_perl_int_loop_1"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/php",
+                        "-r",
+                        "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                        "2",
+                        "0"
+                      ],
+                      "config": {
+                        "language": "php",
+                        "loop": "integer_lcg",
+                        "tool": "php",
+                        "worker_index": 0,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.78152643199999,
+                      "returncode": 0,
+                      "stderr": "php int_loop ops=196349 elapsed_s=2.001125 worker=0 sink=128873434",
+                      "stdout": "",
+                      "workload_name": "otel_php_int_loop_0"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/php",
+                        "-r",
+                        "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                        "2",
+                        "1"
+                      ],
+                      "config": {
+                        "language": "php",
+                        "loop": "integer_lcg",
+                        "tool": "php",
+                        "worker_index": 1,
+                        "workers_per_language": 2
+                      },
+                      "duration_s": 40.791021312,
+                      "returncode": 0,
+                      "stderr": "php int_loop ops=207579 elapsed_s=2.000292 worker=1 sink=710136625",
+                      "stdout": "",
+                      "workload_name": "otel_php_int_loop_1"
+                    },
+                    {
+                      "command": [
+                        "/usr/bin/stress-ng",
+                        "--cpu",
+                        "1",
+                        "--timeout",
+                        "2s",
+                        "--metrics-brief",
+                        "--temp-path",
+                        "/var/tmp/bpfrejit-runtime/86ddf06c"
+                      ],
+                      "config": {
+                        "stressors": [
+                          "cpu"
+                        ],
+                        "tool": "stress-ng"
+                      },
+                      "duration_s": 40.79873940799999,
+                      "returncode": 0,
+                      "stderr": "",
+                      "stdout": "stress-ng: info:  [703] setting to a 2 secs run per stressor\nstress-ng: info:  [703] dispatching hogs: 1 cpu\nstress-ng: info:  [703] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [703] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [703]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [703] cpu                  24      2.16      1.85      0.20        11.13          11.70\nstress-ng: info:  [703] skipped: 0\nstress-ng: info:  [703] passed: 1: cpu (1)\nstress-ng: info:  [703] failed: 0\nstress-ng: info:  [703] metrics untrustworthy: 0\nstress-ng: info:  [703] successful run completed in 2.28 secs",
+                      "workload_name": "otel_stress_ng_cpu"
+                    }
+                  ],
+                  "workload_name": "otel_mixed_workload"
+                }
+              ]
+            }
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
