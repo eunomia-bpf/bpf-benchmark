@@ -1,0 +1,43 @@
+{
+  "created": "2026-11-08T04:33:18.109237+00:00",
+  "application": "cilium/agent",
+  "predecessor_pid": 334148,
+  "cpus": "20-23",
+  "guest_memory": "12G",
+  "vcpus": 8,
+  "source_native_entry": "cil_from_host",
+  "native_sha256": "017224db35d154041c0016e7d4c47b50e3eef188ab2e8c1da5d2c6992727b7c9",
+  "mechanism": "Cohort-owned actual skb/ABI includes; native data_len raw32 read through bpf_cast_to_kern_ctx",
+  "existing_lifecycle_environment": {
+    "BPFREJIT_CORPUS_APP_TIMEOUT": "0",
+    "BPFREJIT_CORPUS_REJIT_TIMEOUT": "0"
+  },
+  "sha256": {
+    "Makefile": "4c420ee9f8b18e66a4e93869302f01e23e03d6da5faea448afa260dfba0820a7",
+    "Dockerfile": "0c921058bf39028dc43af565a3b66a52f06f41f81dc8e53f741999c1e06205a8",
+    "run.sh": "1b84a87f9a70db11e499478f58549a040ef6d4badcfd99ab38e6499eb4c305ff",
+    "queue.py": "fab7420ba4e10bc8566d22dc63951de3926064b37ad3633d1b08c15301f18d7d",
+    "guest.py": "3eceb3a4ba9179dfcf4d5dd5216b5df85dceaea3f57ef70b9df40803ac058bb6",
+    "guest-before.py": "eebab553094964f857d5f538837812769fffc3c4f1d1c8f9fc1175ca8c755a83",
+    "collect.py": "0406c5556e6fc99ba588f191e8960934a86c8f89ec9dc36cabde04d7df1456dc",
+    "candidate.h": "62ed59a3f7a83ab4901a0a4d43e5eb71bec6c0d68ee6b2a3fe260a614b4119af",
+    "clang-candidate": "ceef8310dea6b38826ecd2e2d12efdcb6b95b72dce1993310f3aa2c0604dca52",
+    "abi_load.h": "b640bf8b9e6e8db9955b801b6822802347155acad52b56fd82e9e9a31e1dba8f",
+    "skb_abi.h": "dc2ef76755aa8711705b8fe0faaf8357beb054609943ba9250c293fd2db0c20f",
+    "helper.h": "1753ebe72ea80b0f49b70ab577030f2d05e674bea5ee72dafe04d8a36a2453ae",
+    "native-link-readonly-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
+    "trusted-native-loader": "005b89dbf7b4570867ce27bb04fba0cb1ea4f280e91eb3e1449b97e140e6b262",
+    "libnative_loader.so": "11cb214901ae9f778103974106af607bf85cfd392a5b69ce864992229a274ae2",
+    "base-image.json": "6c590d42538f50ba01ce685f9c677274a59b20c723ca6189ca8dffd04d61ecb4",
+    "transport-inputs.json": "913365f1e12d2a0000a084cfa4b9e478898cbe639b048db5665a53c3759a6bf4",
+    "module.ko": "bb38537701ae06af25b8d2fc0d27b2e8a7855f2875d88b8f290c6bec069e4c57",
+    "module-identities.json": "fed3c258b58dda682334f103917918f3dcd260b567d758ebcf3f66ed9d7c1644",
+    "kernel-build-inputs.json": "b946a57f78fc2dd4412b5bd3c2d58aeeb0113c5c1e5f076913d0e187849db1fd"
+  },
+  "inputs_archive_sha256": "fc848137f8d980ff17d7f33b6e3d1d2d6e5754d4c2740413b196e06d8575daa0",
+  "queue_pid": 354296,
+  "preflight_pid": 354295,
+  "preflight_exit": 0,
+  "syntax_check": "four Python files and shell PASS",
+  "actual_includes": "main candidate uses cohort-owned skb_abi.h and abi_load.h"
+}
