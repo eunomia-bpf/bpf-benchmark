@@ -1,0 +1,17 @@
+{
+  "application": "Tetragon",
+  "entry": "execve_send",
+  "generated": 4,
+  "compiled": 4,
+  "accepted_bound": 3,
+  "verifier_rejected": 1,
+  "error_class": "8193-jump complexity",
+  "processed_insns": 62590,
+  "total_states": 707,
+  "native_sha_matches": 4,
+  "source_drift": [],
+  "run_exit": 0,
+  "app_status": "error",
+  "collector_exit": 1,
+  "collector_outcome": "Complete archives and coverage recorded; final assertion requires full application acceptance"
+}
