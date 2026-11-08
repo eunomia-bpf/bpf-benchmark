@@ -1,0 +1,3 @@
+Tetragon actual V61 paired source compilation
+
+The complete application kernel request SHA2de9f398 selects the original V61 native object. This continuation builds V61 native and upstream JIT BPF inputs from the same edited process.h, bpf_d_path.h and main C bytes. Both actual compiler exits are0. The V511 pair keeps its separate compiler/component records. Source edits remain the two recorded patches; V61 retains its original2048 path-iteration bound and helper/iterator choices. Its source/config state and actual complete runtime adoption keep their own records. Kernel selftest/safety sources retain published bytes. Runtime admission additions0.

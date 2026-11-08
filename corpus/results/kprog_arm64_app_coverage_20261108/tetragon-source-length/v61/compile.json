@@ -1,0 +1,98 @@
+{
+  "utc": "2026-11-08T21:59:44.932905+00:00",
+  "actual_selected_variant": "V61",
+  "original_request_native_sha256": "2de9f398b896a9a34e2a4c07f0abe5f498c3ef27f9c202f408906fae7b9fc607",
+  "commands": [
+    {
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-c",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/build/arm64/stage/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=armv8.1-a+lse",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_arm64",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I",
+        "/usr/aarch64-linux-gnu/include",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf_execve_event_v61.native.o",
+        "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-C",
+        "/workspaces/repository/vendor/repos/tetragon/bpf",
+        "CLANG=/usr/lib/llvm-18/bin/clang",
+        "LLC=/usr/lib/llvm-18/bin/llc",
+        "BPF_TARGET_ARCH=arm64",
+        "OBJSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/",
+        "DEPSDIR=/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/baseline-deps/",
+        "/workspaces/.agent-state/kprog-lanes/A/app-source/tetragon-loop/bpf/bpf_execve_event_v61.o",
+        "-j2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "sources": {
+    "lib/process.h": {
+      "native": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0",
+      "baseline": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0"
+    },
+    "lib/bpf_d_path.h": {
+      "native": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+      "baseline": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3"
+    },
+    "process/bpf_execve_event.c": {
+      "native": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+      "baseline": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6"
+    }
+  },
+  "artifacts": {
+    "bpf_execve_event_v61.native.o": "848c6da68e0e2a4f2264035dca0269759e347936fc30e76b769529a3fe1f1c84",
+    "bpf/bpf_execve_event_v61.o": "6d7763aad2aa542e2aa6891422288e1eec9e5f83d9c765782393b9d3f43c16bb"
+  }
+}
