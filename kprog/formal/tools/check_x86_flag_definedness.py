@@ -45,6 +45,24 @@ def main():
     check([("test", ("rbx", "rbx")), ("setp", ("al",))] + finish, "undefined native ABI flags")
     check([("mov", ("dh", "3")), ("add", ("edx", "1")), ("setp", ("al",))] + finish,
           "undefined native ABI flags")
+    # BMI2 counts consume a byte (BZHI) or low5/6 bits (variable shifts).
+    # Partial count initialization remains sufficient; source values keep
+    # their complete operand-width dependency.
+    for op in ("bzhi", "shlx", "shrx", "sarx"):
+        for dst, src in (("eax", "ecx"), ("rax", "rcx")):
+            setup = [("mov", (src, "255"))]
+            count = "r8d" if dst == "eax" else "r8"
+            use = [(op, (dst, src, count)), ("ret", ())]
+            check(setup + [("mov", ("r8b", "24")), ("sub", ("r8b", "cl"))] + use)
+            check(setup + use, "undefined native ABI register " + count)
+            check([("mov", ("r8b", "24"))] + use,
+                  "undefined native ABI register " + src)
+            # These masks define precisely the count bits hardware observes.
+            mask = "0xffffff00" if op == "bzhi" else "0xffffffe0" if dst == "eax" else "0xffffffffffffffc0"
+            check(setup + [("and", (count, mask))] + use)
+    check([("mov", ("eax", "255")), ("mov", ("dh", "24")),
+           ("bzhi", ("eax", "eax", "edx")), ("ret", ())],
+          "undefined native ABI register edx")
     for op, args in (("andn", ("eax", "eax", "ebx")), ("bzhi", ("eax", "eax", "ebx")),
                      ("imul", ("eax", "ebx")), ("div", ("ebx",))):
         prefix = initialize + [("mov", ("edx", "0")), (op, args)]

@@ -457,7 +457,14 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             pure = op in {'andn','bzhi','mulx','popcnt','movbe','shlx','shrx','sarx','rorx'} or (op=='imul' and len(args)==3)
             for n,arg in enumerate(args):
                 if ri(arg) and not zero and not ((n==0 and pure) or (op=='mulx' and n==1)):
-                    need(incoming,arg,where)
+                    if n == 2 and op in {'bzhi','shlx','shrx','sarx'}:
+                        # BZHI observes the count byte; BMI2 shifts observe
+                        # the low5/6 bits even with a wider register operand.
+                        required = 255 if op == 'bzhi' else 63 if ri(args[0])[1] == 64 else 31
+                        if mask(incoming,arg) & required != required:
+                            raise ValueError(f'undefined native ABI register {arg} at {where}')
+                    else:
+                        need(incoming,arg,where)
                 if decode.is_mem(arg):
                     value,_ = read_memory(arg,decode.operand_width(arg))
                     if value != (1 << decode.operand_width(arg))-1:

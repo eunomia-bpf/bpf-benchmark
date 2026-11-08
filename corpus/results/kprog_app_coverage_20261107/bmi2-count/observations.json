@@ -1,0 +1,16 @@
+{
+  "check_exit": 0,
+  "encoder_abi_cases": 176,
+  "compiled_movx_cases": 19,
+  "compiled_CL_packet_directions": 2,
+  "actual_cilium_native_instructions": 758,
+  "actual_cilium_generated_bytes": 118975,
+  "source_sha256": {
+    "kprog/x86/micro-prog/x86_abi.py": "cd2241f4039c07c69274f102b1401449328c7d1f74436c447f6a5f0ae2bcc8da",
+    "kprog/formal/tools/check_x86_flag_definedness.py": "aa5ae5efa1d50c33b538928188170c95260188844d83a70f629bf0563b20c5c4"
+  },
+  "artifact_sha256": {
+    "inputs.tar.gz": "4520506b751a9036fb3d2c89971125be41b748bf50564babdddc29e09259f815",
+    "checks.log.gz": "d89a7c2950e845d49effa625a78df814e001f5bbf1edb08434001d018ff3e863"
+  }
+}
