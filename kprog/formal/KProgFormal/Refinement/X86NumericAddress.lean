@@ -2557,4 +2557,62 @@ theorem multiply_memory_immediate_frame_refines (env : Environment) (frame : Fra
       funext reg
       by_cases same : reg = dst <;> simp [same, nativeRegisters, Reference.X86.RegisterSlice.reg]
 
+/-- A load captures its common-input address and memory value before the
+numeric destination write; flags and every other architectural cell persist. -/
+def loadMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (sourceWidth targetWidth : Reference.X86.ScalarWidth)
+    (signed : Bool) (destination : Reference.X86.Register) (address nextPc : NativeWord) :
+    Transition Reference.X86.State :=
+  match X86Scalar.read (nativeRegisters env frame arena state) sourceWidth (.memory address) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (source, reads) =>
+      ⟨nativeRegisters env frame arena
+        (registerPc (writeRegister env frame arena state targetWidth (.low destination)
+          (X86Movx.value sourceWidth signed source)) nextPc), reads, none⟩
+
+theorem load_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (sourceWidth targetWidth : Reference.X86.ScalarWidth)
+    (signed : Bool) (destination : Reference.X86.Register) (address nextPc : NativeWord) :
+    loadMemoryFrame env frame arena state sourceWidth targetWidth signed destination address nextPc =
+      Reference.X86.step (.extend sourceWidth targetWidth signed destination (.memory address) nextPc)
+        (nativeRegisters env frame arena state) := by
+  simp only [loadMemoryFrame, X86Scalar.read_refines, Reference.X86.step, Reference.X86.scalarRead]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) sourceWidth.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_write, X86Movx.value_refines]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = destination <;> simp [same, nativeRegisters, Reference.X86.RegisterSlice.reg]
+
+/-- The extra zero-narrowing of an ordinary load retains exactly its native
+write lane, including byte/word merges and32-bit zero-extension. -/
+theorem load_narrow_write (width : Reference.X86.ScalarWidth) (destination : Reference.X86.Register)
+    (old value : NativeWord) :
+    Reference.X86.scalarWriteValue old (Reference.X86.extendValue width false value) width (.low destination) =
+      Reference.X86.scalarWriteValue old value width (.low destination) := by
+  cases width <;> simp only [Reference.X86.scalarWriteValue, Reference.X86.extendValue,
+    Reference.X86.RegisterSlice.shift, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    Nat.reduceMul, Bool.false_eq_true, ↓reduceIte] <;> bv_decide
+
+theorem load_memory_move_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (destination : Reference.X86.Register)
+    (address nextPc : NativeWord) :
+    loadMemoryFrame env frame arena state width width false destination address nextPc =
+      Reference.X86.step (.move width (.register (.low destination)) (.memory address) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [load_memory_frame_refines]
+  simp only [Reference.X86.step, Reference.X86.moveStep, Reference.X86.scalarRead]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [Reference.X86.scalarWrite, load_narrow_write, List.append_nil]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = destination <;> simp [same, Reference.X86.RegisterSlice.reg]
+
 end KProgFormal.Refinement.X86NumericAddress

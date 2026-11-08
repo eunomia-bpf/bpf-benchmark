@@ -4056,3 +4056,13 @@ their domains as the load field/frame/dispatcher proof work continues.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_664370524`. Every check retains its exact published source identity.
+
+The load numeric-frame core now has universal canonical extension and ordinary
+MOV laws for all source/target widths, signed selection, destination aliases
+and observed memory reads/faults. It retains the full numeric GPR/vector/control
+frame, flags and ordered events. Three axiom audits and the default Lean build
+pass; the prior119 numeric theorems keep their byte-exact module prefix.
+`x86_load_memory_frame` and `X86_LOAD_MEMORY_FRAME_V1` pin217 source inputs
+and their checks against the corrected production load epoch6e6905907.
+The three operation/token rows retain their partial-model status while actual
+field/dispatcher/token composition and physical/compiler/ABI bridges continue.
