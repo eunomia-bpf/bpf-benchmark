@@ -1,0 +1,1 @@
+Generic tc-control with coherent ARM kfunc kernel/module and paired worker. Guest exit0, host statusTrue, Make exit0, stages{"bound_accepted": 1}. Raw source/request/byte/proof/BTF/native execution records accompany this result. Universal mechanism and whole-application composition continue.
