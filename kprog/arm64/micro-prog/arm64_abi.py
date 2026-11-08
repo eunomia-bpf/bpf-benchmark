@@ -215,7 +215,16 @@ def collect_layout(insns, targets, decode):
 
 
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
-        if memory_index is not None:
+        if op in {'ldaddalb', 'ldaddah', 'ldaddlb', 'ldaddalh', 'staddlb', 'ldaddab', 'ldadd', 'ldaddh', 'ldaddlh', 'ldaddb', 'staddh', 'staddl', 'staddlh', 'ldaddl', 'ldadda', 'staddb', 'ldaddal', 'stadd'}:
+            mem = decode.parse_mem(args, memory_index)
+            location = address(mem)
+            width = 8 if op.endswith('b') else 16 if op.endswith('h') else ri(args[0])[1]
+            value, pointer = load(location, width)
+            may_payload = location in incoming.ghost_memory if type(location) is int else True
+            store(location, width, 0, False, may_payload=False)
+            if not op.startswith('stadd'):
+                write(args[1], value, pointer, may_payload=may_payload)
+        elif memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
             # LDPOVERLAP permits UNDEF/NOP as well as unknown data. A later
             # overwrite does not make the native instruction safe to admit.

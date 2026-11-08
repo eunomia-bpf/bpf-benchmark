@@ -71,6 +71,7 @@
 #define ARM64_OP_BICS_REG 0x43U
 #define ARM64_OP_CSETM 0x44U
 #define ARM64_OP_CSNEG 0x45U
+#define ARM64_OP_LDADD 0x46U
 #define ARM64_OP_RET 0xffU
 
 #include "../formal/generated/arm64_decode.h"

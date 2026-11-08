@@ -43,7 +43,7 @@ GPR_WRITE_OPS = {
     "mvn", "neg", "cneg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
     "rev", "rev16", "sxtb", "sxth", "sxtw", "ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh",
     "ldrsb", "ldrsh", "ldrsw",
-    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "csetm", "fmov",
+    "ldp", "stlxr", "stxr", 'ldadd', 'ldadda', 'ldaddab', 'ldaddah', 'ldaddal', 'ldaddalb', 'ldaddalh', 'ldaddb', 'ldaddh', 'ldaddl', 'ldaddlb', 'ldaddlh', 'stadd', 'staddb', 'staddh', 'staddl', 'staddlb', 'staddlh', "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "csetm", "fmov",
 }
 
 
@@ -525,6 +525,14 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         width = reg_width(ops[0])
         return Encoded("ARM64_OP_STP", mem.base, reg_const(ops[0]), reg_const(ops[1]), mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op in {'ldaddalb', 'ldaddah', 'ldaddlb', 'ldaddalh', 'staddlb', 'ldaddab', 'ldadd', 'ldaddh', 'ldaddlh', 'ldaddb', 'staddh', 'staddl', 'staddlh', 'ldaddl', 'ldadda', 'staddb', 'ldaddal', 'stadd'}:
+        store_only = op.startswith("stadd")
+        mem = parse_mem(ops, 1 if store_only else 2)
+        stem = op[:-1] if op.endswith(("b", "h")) else op
+        width = 1 if op.endswith("b") else 2 if op.endswith("h") else reg_width(ops[0])
+        order = (1 if stem in {"ldadda", "ldaddal"} else 0) | (2 if stem in {"ldaddl", "ldaddal", "staddl"} else 0)
+        return Encoded("ARM64_OP_LDADD", "ARM64_XZR" if store_only else reg_const(ops[1]),
+                       reg_const(ops[0]), mem.base, width=width_const(width), aux=str(order))
     if op in {"stlxr", "stxr"}:
         mem = parse_mem(ops, 2)
         width = reg_width(ops[1])

@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-08T08:45:17.849591+00:00",
+  "source_before": {
+    "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+    "kprog/arm64/arm64_sim_local_bpf.h": "f68e19f82e74478c251a36f1ba8a97f2b0793d3a14e9890b1b2fefdd4949456b",
+    "kprog/arm64/arm64_sim_direct.h": "4f0f074d953295594e4c443ac0d826d78764ec35bc581b39af0e60fdc6785d1d",
+    "kprog/arm64/micro-prog/arm64_abi.py": "b9b8bb3727ea5b63ee013962ec4c4c856a67241ff8ed3201ec1c2ba07dfc5cdb",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "8e2a29c5e4eda69b9d22be7ad618b1411a38fc8af68e7990eadbb3d4c2bcc38c"
+  },
+  "source_after": {
+    "kprog/arm64/arm64_sim.h": "a110ba33c435a770bd90d92743254637fc12a65ae6be3c8e5d2d45c40cef6d75",
+    "kprog/arm64/arm64_sim_local_bpf.h": "9656456a814ba8ca074249fece6c3492caad1de4b9773237e98c69dff7770893",
+    "kprog/arm64/arm64_sim_direct.h": "335c6ddd0b7ef44481413ea1b580c6e3eedcead9d68e0dd9b67264ba794095b4",
+    "kprog/arm64/micro-prog/arm64_abi.py": "5b9f6a4d080b3fb2f9181ed0463630509faf8f7da6f5f06e79337b7ec0eeee1e",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "075c8e78e6ad76752f8ef9c13b472ecfb20b036a197fa87499a1804c42cdf9ef"
+  },
+  "existing_micro_generation_compile": 29,
+  "actual_complete_bcc_service_successes": 23,
+  "whole_application_phase": "workload closure active",
+  "scope": "Generic LDADD operation/decode/layout adoption; native compiler default profile retained",
+  "universal_contract_owner": "V official ASL/O1/O2 atomic work",
+  "runtime_admission_additions": 0
+}
