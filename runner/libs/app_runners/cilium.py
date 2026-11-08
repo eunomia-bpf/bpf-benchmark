@@ -491,7 +491,7 @@ class CiliumRunner(NativeProcessRunner):
             ],
             "mac": peer_mac,
             "state": "waiting-for-identity",
-            "sync-build-endpoint": True,
+            "sync-build-endpoint": False,
         }
         try:
             response = _api_json(
