@@ -34,3 +34,10 @@ assembler/ELF inputs, model outputs, structured reference observations, scripts,
 source pins and CPU-component records. Reproduce the existing register comparison
 with `formal/tools/compare_sail_x86.py`; archived memory/control inputs use the
 same upstream model and canonical JSON interface.
+
+The historical grid/maintained loose outputs share the exact archived
+`comparison/` entries in the upstream-register member of
+`arm64-xdp-host-integration.log.gz`. The JSON retains the archive offset/hash,
+filename mapping and the original five-file ADD probe verbatim. All4519 loose
+files were checked byte for byte before retirement; source epochs, state
+observations, model stops/differences and reusable model caches are preserved.
