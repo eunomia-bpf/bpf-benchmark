@@ -4215,3 +4215,10 @@ code normalization, physical memory/provenance, C/Lean, compiler/entry/exit
 ABI and native-link transport retain explicit universal production interfaces.
 Existing replay and O4 source epochs retain their domains. x86 C-model O2
 covers62/75 (46direct/14generic/2branch); ARM C-model O2 covers71/71.
+
+### Published source full check 13ac4f9d7
+
+`make check` on immutable published13ac4f9d7 exits0. All1168 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_13ac4f9d7`. Every check retains its exact published source identity.
