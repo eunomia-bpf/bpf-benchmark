@@ -1,0 +1,55 @@
+{
+  "coordinator_decision": "2026-11-08 installed __failure native-compile differences",
+  "raw_counts": {
+    "catalog_rows": 1917,
+    "attempted": 239,
+    "submitted": 238,
+    "installed": 53,
+    "verifier_rejected": 58,
+    "generation_failed": 124,
+    "compilation_failed": 3,
+    "resource_failed": 1,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 51,
+    "failure_agrees": 49,
+    "failure_installed": 2,
+    "success": 60,
+    "success_agrees": 51,
+    "success_installed": 51
+  },
+  "native_compile_differences": [
+    {
+      "program": "test_dynptr_reg_type",
+      "file": "dynptr_fail.c",
+      "request_id": 82,
+      "native_stage": "installed",
+      "source_annotation": "failure",
+      "classification": "native_compile_difference",
+      "native_access": "The native callee writes its local zero result, returns0 and performs0 argument-memory reads; native caller carries a direct call with0 argument setup instructions. The kernel annotation describes the original BPF global-call dynptr signature policy.",
+      "native_execution_count": 0,
+      "identities": {
+        "dynptr_fail__test_dynptr_reg_type.native.o": "3217480e7d540c5e83bfddd6ffd7f0155f4c6824902b7e2d614af5d6b6c24697",
+        "dynptr_fail.bpf.o": "b12576ca5bb5791742a02fb73e4c63c2bcc32f0faf7daa4c96e9d85e9c6a8729",
+        "dynptr_fail.c": "4d93014d90a04c1fc01d0eff09446057eed52ced59471a25d679fbeda7f0da90"
+      }
+    },
+    {
+      "program": "misaligned_access_read",
+      "file": "map_kptr_fail.c",
+      "request_id": 97,
+      "native_stage": "installed",
+      "source_annotation": "failure",
+      "classification": "native_compile_difference",
+      "native_access": "The original complete BPF object loads64bits at map value+1; native P loads32bits at+1 into EAX for the int return. The generated B models that32bit native access. Stock-verifier typed-map policy evaluates the two widths separately.",
+      "native_execution_count": 0,
+      "identities": {
+        "map_kptr_fail__misaligned_access_read.native.o": "1e44517122201807295665f2430d5fa498063fd6a33298e93ecde4a9c72c800d",
+        "map_kptr_fail.bpf.o": "2fbd7d8a270bc71dfeb7418c3b407e03e417ca8f2eb08873e37bf7fd33da3ad0",
+        "map_kptr_fail.c": "d6e5caa9f86ea88eb9b567e0452a46fbb03d0c1d7a7c24c2c4e07fe2c6a671ce"
+      }
+    }
+  ],
+  "native_execution_count": 0
+}
