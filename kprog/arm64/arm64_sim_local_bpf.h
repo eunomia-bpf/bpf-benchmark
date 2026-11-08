@@ -297,6 +297,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;                                      \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
+	__a64_sim_helper_ctx = (void *)(CTX);                             \
+	__a64_sim_helper_abi_base = (void *)(CTX);                        \
 	__a64_x0.ptr = (void *)(CTX);                                      \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN; \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
