@@ -842,5 +842,55 @@
         "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/xdp_root.c": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe"
       }
     }
+  ],
+  "executable_comparison": [
+    {
+      "object": "native/bcc/biosnoop.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/capable.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/opensnoop.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/runqlat.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/syscount.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/tcpconnect.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/tcplife.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/bcc/vfsstat.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/katran/balancer.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/katran/healthchecking.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/katran/healthchecking_ipip.native.o",
+      "executable_sections_match": true
+    },
+    {
+      "object": "native/katran/xdp_root.native.o",
+      "executable_sections_match": true
+    }
   ]
 }
