@@ -1,0 +1,7 @@
+[70002] FUNC 'bpf_lsm_mmap_file' type_id=12310 linkage=static
+[12310] FUNC_PROTO '(anon)' ret_type_id=89666 vlen=4
+	'file__nullable' type_id=276
+	'reqprot' type_id=94824
+	'prot' type_id=94824
+	'flags' type_id=94824
+[12311] FUNC_PROTO '(anon)' ret_type_id=89666 vlen=2
