@@ -7351,6 +7351,33 @@
     "test_arm64_aux_host",
     "test_arm64_aux_route_host"
   ],
+  "percpu_emitter_fixture_native_length": {
+    "aarch64_qemu_cases": 81996,
+    "accepted_each": 2048,
+    "archive_compressed_prefix_bytes": 94931201,
+    "archive_compressed_prefix_sha256": "6222de4fb6ebd2c3ebb894ccaba16ab77c3dfb4e16d9d441710a76307815c45d",
+    "archive_entries": 12,
+    "archive_marker": "PERCPU_EMITTER_FIXTURE_NATIVE_LENGTH_V1",
+    "archive_raw_bytes": 3448635,
+    "archive_raw_sha256": "bb6e61c5481e874e655f4f1c442d1584658692e2ed153c6c58d60ba9fe85931f",
+    "binary_sha256": {
+      "aarch64": "f46af3cf663c5150bd56c6107dc7338c4adce306debe8dfc57024babd30b1a00",
+      "host": "0d57c18c82b3478bde650c52a5fa6a02a806f38c5c43598b2d73b4acdd8cbd8b"
+    },
+    "component_make_exit": 0,
+    "full_actual_exit": 2,
+    "full_epoch": "ce6604bcc483cd71924d7472eda88e72410a06fb",
+    "full_git_sources": 1264,
+    "full_private_export_retired": true,
+    "host_cases": 81996,
+    "refused_each": 79948,
+    "scope": "The existing C oracle wrapper names its native_len parameter consistently with the production relocation case. Original offset/current-word/one-word-store/VHE/canary observations and Lean link laws remain.",
+    "source_sha256": {
+      "kinsn/module/arm64/bpf_arm64_native_lab.c": "7c6d753f238b9737b4de40f39602140944bfef576517813da2159ac2517364c3",
+      "kprog/tv/NativeLinkArmPerCpu.lean": "e86769f9b2c8921ffd07356496e770e88bc06974e6bf823f800270e929cf6076",
+      "kprog/tv/test_arm_percpu_emitter.py": "6d4be22257e372a89df293a4c90b52bd3c0193108ed08cb7181f8e5abc2a6f09"
+    }
+  },
   "post_entry_full": {
     "authoritative_exit": 2,
     "failure": "Makefile176/tools/check_x86_popcount_memory.py; x86_sim_local_bpf.h941 attribute(error) x86_sim_unmapped_xdp_read",

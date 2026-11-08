@@ -36,7 +36,7 @@ _Static_assert(sizeof(size_t)==8,"ARM64 offset arithmetic");
 struct native_lab_reloc_record { u32 offset,kind; u64 target; };
 '''
 wrapper = '''
-static int actual_case(u32 *image, size_t start_idx, size_t snapshot_len, u32 offset, u64 target, int vhe)
+static int actual_case(u32 *image, size_t start_idx, size_t native_len, u32 offset, u64 target, int vhe)
 {
     struct native_lab_reloc_record record={offset,NATIVE_LAB_RELOC_ARM64_PERCPU_MRS,target};
     const struct native_lab_reloc_record *r=&record;

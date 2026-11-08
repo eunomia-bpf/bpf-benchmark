@@ -4717,3 +4717,15 @@ The extractor carries a local Lean recursion budget for its larger literal
 byte arrays; each named decode theorem remains a kernel rfl equality.
 The48CMOV-condition units are active proof work, with full-frame and compiler
 transport still recorded separately in the compiled-B obligation.
+
+### Per-CPU emitter fixture parameter
+
+The immutablece6604bcc full check reached the per-CPU emitter and returned
+Make exit2: its extracted production case uses `native_len`, while the C
+oracle wrapper still declared `snapshot_len`. The wrapper parameter now
+uses the production name. The existing host and AArch64/QEMU UBSan cohorts
+both pass81996cases (2048accepted/79948refused each); canonical MRS and final
+image preservation laws pass through the same Make component. Existing offset,
+word, VHE and canary observations are retained. The original full outcome,
+source manifest and actual component output are archived in
+`percpu_emitter_fixture_native_length`.
