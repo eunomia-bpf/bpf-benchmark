@@ -11,3 +11,5 @@ The same exclusive component now includes complete failed-iteration State/GPR/ba
 [Universal exclusive failure-prefix composition](exclusive-prefix-composition/README.md) joins arbitrary dynamic exclusive visits with the complete architectural frame and ordered event/fault transition. Seven laws and the57-source incremental target check exit0; generic CFG/platform/progress interfaces continue.
 
 The [exclusive prefix/backedge interface](exclusive-prefix-composition/backedge-summary.json) also carries four universal PC equations, including exact failed-cycle re-entry for the native-12-byte CBNZ operand and64-bit wrapping PCs. All11axiom audits and the57-source target build exit0.
+
+[Generic ARM fresh compiler profile](host-compile/README.md) adds thirteen passing transport/profile controls and exact allocated-byte/relocation identity for two accepted QEMU fixtures, preserving the existing ARM O2 profile and2270guest header identities. Captured runtime consumption follows original OTel/skb.

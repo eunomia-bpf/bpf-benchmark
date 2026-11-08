@@ -1,0 +1,95 @@
+{
+  "utc": "2026-11-08T03:34:08.302130+00:00",
+  "scope": "Generic fresh trusted compiler ARM O2/header-sysroot profile; kernel-owned generation and kernel verifier/binding retain their architecture.",
+  "check_exit": 0,
+  "existing_protocol_controls": 8,
+  "arm_controls": 5,
+  "existing_x86_command_exact": true,
+  "arm_sysroot_headers": 2270,
+  "matched_qemu_fixtures": {
+    "valid": {
+      "allocated_section_bytes_equal": {
+        ".text": true,
+        "license": true,
+        "xdp": true
+      },
+      "relocations_equal": true,
+      "compiler_receipt": {
+        "returncode": 0,
+        "command": [
+          "/usr/lib/llvm-18/bin/clang",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/host-compile/scope/trusted-valid/requests/request-valid/generated/trusted_arm64.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/host-compile/scope/trusted-valid/requests/request-valid/generated/trusted_arm64.bpf.o"
+        ],
+        "source_sha256": "c01125a2d1911e744d3d2d09abea9eaacd45d09c4c84582851dac5d5b2a8b808",
+        "compiler_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+        "wall_seconds": 0.4872349929064512,
+        "max_rss_kib": 115084,
+        "user_seconds": 0.38058899999999996,
+        "system_seconds": 0.044833,
+        "object_sha256": "3757854616d48223f19da36121cb1a3c4d4a701738af2c75d8e38e903e80444f"
+      }
+    },
+    "bounds": {
+      "allocated_section_bytes_equal": {
+        ".text": true,
+        "license": true,
+        "xdp": true
+      },
+      "relocations_equal": true,
+      "compiler_receipt": {
+        "returncode": 0,
+        "command": [
+          "/usr/lib/llvm-18/bin/clang",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/host-compile/scope/trusted-bounds/requests/request-bounds/generated/trusted_arm64.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/host-compile/scope/trusted-bounds/requests/request-bounds/generated/trusted_arm64.bpf.o"
+        ],
+        "source_sha256": "766208750ef7f30e06fc0634093e396256c678c158421d32b928681f5cffda9a",
+        "compiler_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+        "wall_seconds": 0.42948204604908824,
+        "max_rss_kib": 116380,
+        "user_seconds": 0.39587,
+        "system_seconds": 0.032989,
+        "object_sha256": "a181343a77c494e37cbaae8ef524a3f09a4bf7c53ceb985f24b83cf1f6cc3569"
+      }
+    }
+  },
+  "candidate_sha256": "09bcfec916bbfd9b68c5e1decc27872bdc4657dec50cea3e9792907e4be04a51",
+  "common_before_sha256": "af2f83181bad4dc3ac6c38c6e334b62c8b568d8d1580dda3de58891b779b6629",
+  "canonical_source_status": "Private backward-compatible source profile retained with its patch while current C broker source epochs remain captured.",
+  "runtime": "ARM original OTel/skb closes before matched host compiler control/application consumption; CPU/native/workload/kernel identities retain their existing epoch."
+}

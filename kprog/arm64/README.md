@@ -151,3 +151,5 @@ label6; AUX supplies its arithmetic operation. The [shared operand/family
 contracts](../../corpus/results/kprog_arm64_app_coverage_20261107/numeric-contract-sync/README.md)
 record the universal alias equation, operation-specific refinement and focused
 C/Lean checks. Existing label6/7 bodies retain their implementation.
+
+The [generic fresh compiler profile](../../corpus/results/kprog_arm64_app_coverage_20261108/host-compile/README.md) retains ARM O2/BPFv4/4096-byte settings and the captured guest header sysroot. Thirteen transport/profile controls pass, including complete allocated-section and relocation identity for two accepted QEMU helper fixtures. The captured private source epoch supports subsequent whole-application memory-capacity runs.
