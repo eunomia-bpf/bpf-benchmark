@@ -63,12 +63,14 @@ def annotations(text):
         # A BPF inline-assembly program starts its body with `asm volatile`
         # whether or not it is declared `__naked`; anything else begins with
         # a C statement the native compiler can express.
+        # The task's rule: a BPF inline-assembly program is the `__naked`
+        # form, and it stays with the kernel's test_progs.  The body is
+        # checked as well, because a handful of `asm volatile` programs
+        # declare a normal C signature and only their body is BPF asm.
         body = re.sub(r"\s+", " ", tail[am.end():].lstrip())
-        # `__clobber_all`/`__clobber_common` only appear as inline-asm
-        # clobber lists, so their presence marks a BPF-asm body even when
-        # the body opens with a comment or a local declaration.
-        kind = ("asm" if body.startswith("asm") or "__clobber" in body[:1200]
-                else "c")
+        naked = re.search(r"__naked(?![\w])", attrs) is not None
+        kind = ("asm" if naked or body.startswith("asm")
+                or "__clobber" in body[:1200] else "c")
         out.append((section, am.group(3), attrs, kind))
     return out
 

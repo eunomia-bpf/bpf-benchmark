@@ -18,13 +18,35 @@ vmlinux.h`, dumped from the same kernel with
 lines) because the vendored bcc header predates `bpf_rb_root`,
 `bpf_res_spin_lock` and the arena helpers.
 
+## Why these counts differ from the 453/298 in the task
+
+The task quotes 453 `__failure` and 298 `__success` C programs on the
+2026-11-07 tree. This harness measures **424 and 262** under the task's
+`__naked` rule, and 686 annotated C programs against the 751 implied by
+those figures. The residual 17-per-class difference is reported rather
+than smoothed: the rule is now the task's, so the gap is in how a
+borderline body is classified, not in the tree.
+
+What this harness counts, using the task's own rule: one row per
+`SEC("...")` declaration that is **not** marked `__naked`, carrying
+`__failure` or `__success` as an exact marker in the annotation run
+between `SEC(...)` and the declaration. The body is inspected as well,
+because a handful of `asm volatile` programs declare an ordinary C
+signature, so a body opening with `asm` or carrying a `__clobber` list
+inside its first 1200 characters is also `asm`.
+
+Checked and ruled out as explanations: subdirectories under `progs/`
+(none), annotations placed after the signature (160 such programs, all
+`__naked`-only and unannotated), `__failure_unpriv`-only programs, and
+counting files rather than programs (146 / 129).
+
 ## Counts on the 2026-11-08 tree
 
 | quantity | count |
 | --- | ---: |
 | `SEC(...)` declarations in `progs/*.c` | 5,000+ scanned, **1,917** annotated |
-| annotated programs whose body is BPF inline asm | **1,248** |
-| annotated programs whose body is ordinary C | **669** |
+| annotated programs whose body is BPF inline asm (`__naked`) | **1260** |
+| annotated programs whose body is ordinary C | **657** |
 | of which `__failure` | 916 (all bodies) |
 | of which `__success` | 1,001 (all bodies) |
 
