@@ -9,7 +9,7 @@ The table records the latest closed complete-application attempt. Baseline resid
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: native relocation binding for pruned map helper | [021801](cilium-matched-runtime/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: event_execve proof stack depth | [014223](tetragon-fixed-stack-retry/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [013224](tracee-fixed-stack/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly table index range | [typed-stack](tracee-typed-stack/README.md) |
 
 Current detached work consumes the generic typed private-stack profile with the published MOV_LOAD fidelity correction: complete OTel, Tracee and Tetragon run serially on12GiB/eightvCPU/20-23. The Cilium successor then runs the existing38-case native-only suite and the complete original application in separate fresh guests, using the generic pruned-map-helper binding correction and the matching compact kernel module tree. Each guest registers one trusted service. Actual terminal receipts determine coverage and acceptance.
 
@@ -33,3 +33,5 @@ The [kernel and matching module records](kernel-kfunc-binding/README.md) preserv
 Earlier complete attempts preserve the progression through [OTel aligned stack](otel-stack-aligned/README.md), [typed reads](otel-typed-read/README.md), [explicit RSP offsets](stack-fixed-offsets/README.md), [Tracee aligned stack](tracee-stack-aligned/README.md), [Tracee typed reads](tracee-typed-read/README.md), [Cilium original BTF](proof-kfunc-original-btf/README.md), [paired kfunc transport](proof-kfunc-transport/README.md) and the current table's raw cohorts. Universal ISA/token/link laws supply safety; captured component measurements and whole-application outcomes each retain their own evidence domain.
 
 The [whole OTel typed-stack cohort](otel-typed-stack/README.md) freshly binds perf_unwind_native and advances to perf_unwind_hotspot compilation. Its12GiB guest records a Clang OOM kill at9.63GiB anonymous RSS; fresh trusted host compilation is the next resource correction. The [generic typed-stack measurements](typed-private-stack/README.md) preserve exact compiler inputs and completed fidelity controls.
+
+The [whole Tracee typed-stack cohort](tracee-typed-stack/README.md) retains6fresh generation/compilation and5bound loads. Its readonly80-byte table frontier exposes a redundant mask on a comparison copy; a generic C-cast width representation is being checked against BPF-JIT/host/byte observations before the complete-app successor. Prior fixed-RSP helper-length logs preserve their own source epoch.

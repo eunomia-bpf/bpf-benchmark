@@ -1,0 +1,19 @@
+{
+  "generated": 6,
+  "compiled": 6,
+  "accepted_bound": 5,
+  "verifier_rejected": 1,
+  "native_sha_matches": 6,
+  "source_drift": [],
+  "entry": "sys_exit_submit",
+  "class_name": "readonly data table index range",
+  "processed_insns": 1564,
+  "total_states": 59,
+  "peak_states": 59,
+  "max_states_per_insn": 1,
+  "value_size": 80,
+  "maximum_read_offset": 1036,
+  "access_size": 4,
+  "compiler_dataflow": "r2&255;r1=r2;r1&255;cmp r1<=15;index uses r2",
+  "next": "generic C casts for8/16-bit register reads retain shared value identity"
+}
