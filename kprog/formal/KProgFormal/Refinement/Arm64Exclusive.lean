@@ -582,7 +582,7 @@ theorem retry_cycle_failed_backedge (width : Width)
   simp only [continueWith, prefixFacts.1]
   rw [retry_suffix_core_pc, prefixFacts.2]
   simp only [if_true]
-  bv_decide
+  cases width <;> bv_decide
 
 /-- Existing per-visit platform witnesses transfer the exact backedge PC
 equality to the canonical load/ADD/store/W-status branch sequence. -/

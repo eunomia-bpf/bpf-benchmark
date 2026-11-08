@@ -4133,3 +4133,14 @@ compiler/entry/exit ABI and native-link transport retain their explicit
 universal production interfaces. Selected three-way replay identities and O4
 rows retain their existing source domains. The x86 C-model O2 total is58/75
 (44direct/12generic/2branch); the ARM C-model total remains71/71.
+
+### ARM enum and dispatcher proof composition
+
+`arm64_enum_import_composition` joins the existing exclusive retry-backedge
+proof with the complete ARM dispatcher import graph. Splitting its final
+bitvector proof by native width retains every theorem statement and every
+other module byte. The shared dispatcher and multiplication imports compose
+successfully; its target build and two public axiom audits exit0, with
+`sorryAx_count=0`. The original import diagnostic, exact source closure and
+passing checks retain their own archive epoch. Canonical ISA and production
+C definitions retain their existing identities.
