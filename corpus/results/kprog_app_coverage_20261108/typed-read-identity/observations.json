@@ -1,0 +1,19 @@
+{
+  "forms": 10,
+  "observations": 655360,
+  "jit_host_byte_differences": 0,
+  "memory_changes": 0,
+  "shape_exit": 0,
+  "whole_otel_compile": "active detached job4099776; actual exit and object follow completion",
+  "source_sha256": {
+    "read.h": "07252fc34dcadba6f9ac106d3cd65414a2b069ba8f10c4e608e4962e299cc102",
+    "candidate.h": "2f2c9314e89bece86b71e97e00e4db64bc13f10a23a0a2e669f2818983dc5a25",
+    "reads.c": "1f4f637e7810ccde3157dd2b7a0b0c500cd67889ed1fe707310c11921f40e480",
+    "run.cpp": "e168d5bb590c6b5d35f619a7a0a9ba14ad64a1802bc0260d85f330d5bcf3b88e",
+    "actual-otel.bpf.c": "9a309386f47462e00e68af191a7a9405fc65628d01721d5eef65e1ebac41c22e"
+  },
+  "artifact_sha256": {
+    "inputs.tar.gz": "e2e242ddb63b21aa2f89fd335dc25cc10634713007bd0b4267cc739fceb8cd85",
+    "checks.log.gz": "4f7067dd5f1a63b1eeed21f24b9ea4298dd4f9ac11827a050583a215183b4996"
+  }
+}
