@@ -1,0 +1,41 @@
+{
+  "started": "2026-11-08T07:30:59.341588+00:00",
+  "before": {
+    "arch/x86/boot/bzImage": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52",
+    "vmlinux": "1530dcc64c783a950d360e27d3589e0ea26e403391fda25e8395d1230c2e738c",
+    "Module.symvers": "3dbe7f92e2ca73d9c242d31d1d6b7047c2b41d44d7f3472e7d1052cba9d2e77b",
+    ".config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
+  },
+  "old": {
+    "arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+    "vmlinux": "76c6adc50151a4a7f8ab5591b353c27bcb1d404609fb7d56c00c861efc58bc02",
+    "Module.symvers": "59e1113d4d6a08410452bfec5bc047fb9a21ad1e15d7ca044b10eb12a5e64447",
+    ".config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
+  },
+  "destination": "/workspaces/repository/kprog/tv/build-kernel-x86",
+  "rewired": [
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/apps-attempt-1/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-final/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-final-modules/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-current-assets/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-xdp-helper/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-final-modules/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/otel/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-current-core/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-xdp-metadata/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/otel-final-modules/Makefile",
+    "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-final-modules/Makefile"
+  ],
+  "after": {
+    "arch/x86/boot/bzImage": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52",
+    "vmlinux": "1530dcc64c783a950d360e27d3589e0ea26e403391fda25e8395d1230c2e738c",
+    "Module.symvers": "3dbe7f92e2ca73d9c242d31d1d6b7047c2b41d44d7f3472e7d1052cba9d2e77b",
+    ".config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
+  },
+  "finished": "2026-11-08T07:31:02.875209+00:00",
+  "disk": "Filesystem                                              Size  Used Avail Use% Mounted on\n/dev/longhorn/pvc-5d4c4db8-b59c-44d0-a162-0ff347a6a005  251G  202G   50G  81% /workspaces\n"
+}

@@ -70,9 +70,9 @@ ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
 
-X86_RUNTIME_KERNEL_IMAGE := $(VENDOR_BUILD_DIR)/x86/linux/arch/x86/boot/bzImage
+X86_RUNTIME_KERNEL_IMAGE := $(ROOT_DIR)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage
 HOST_GO ?= $(or $(GO),go)
-HOST_KERNEL_BUILD_DIR_X86 := $(VENDOR_BUILD_DIR)/x86/linux
+HOST_KERNEL_BUILD_DIR_X86 := $(ROOT_DIR)/kprog/tv/build-kernel-x86
 HOST_KERNEL_BUILD_DIR_ARM64 := $(VENDOR_BUILD_DIR)/arm64/linux
 HOST_KERNEL_MODULES_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/modules-install-current
 HOST_KERNEL_CONFIG_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/bpf-benchmark-kernel-config-context
