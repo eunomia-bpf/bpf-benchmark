@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 13/75 | 0/71 |
-| Additional partial-model handler families | 18/75 | 0 |
+| Addressed memory model / composed step | 15/75 | 0/71 |
+| Additional partial-model handler families | 16/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 71/71 |
+| O2 C-model token-body equality | 51/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 49 x86 O2 equalities cover37 direct bodies, ten generic calls and two
+The 51 x86 O2 equalities cover39 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining18 x86 reference-family handlers have partial model proofs; eight
+The remaining16 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -52,6 +52,12 @@ CODE case, and observes the same canonical register branch. The71 ARM
 entries comprise70 numeric body equalities and one emitted-return control
 body equality; complete exit memory/ABI and C/compiler transport remain
 explicit universal interfaces.
+Two memory ALU tokens also compose ADD/ADC/SUB/SBB/AND/OR/XOR and
+SHL/SHR/SAR/ROL through full-frame read/modify/write, six defined flags,
+ordered effects/faults and the extended unified dispatcher/token step.
+Their field relation retains low source lanes, packed/full displacements
+and CL counting; native lane normalization and physical arena/permission
+correspondence remain explicit production interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -3960,3 +3966,16 @@ continues through the complete check with the existing incremental caches.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_2ea4ef3f3`. Every check retains its exact published source identity.
+
+The x86 memory-destination ALU tokens now compose ADD/ADC/SUB/SBB/AND/OR/XOR
+and SHL/SHR/SAR/ROL with full numeric frame, six defined flags and ordered
+read/write/fault effects through the extended unified dispatcher/token step.
+Seventeen axiom audits and the default Lean build pass; 8,007,360 production-C
+direct/interpreter/real-CPU cases pass under UBSan. The prior108 numeric and65
+dispatcher theorems retain their exact module prefixes. The source relation
+carries low source lanes, CL counting and packed/full displacements; the
+recorded AH diagnostic goes to C for production normalization. Physical
+arena/permissions, compiled C/BPF, ABI and native-link correspondence retain
+their universal interfaces. The source-pinned `x86_alu_memory_tokens` receipt
+and `X86_ALU_MEMORY_TOKENS_V1` raw block retain all224 inputs, diagnostics and
+checks. O2 C-model totals are51/75 x86 (39direct/10generic/2branch) and71/71 ARM.

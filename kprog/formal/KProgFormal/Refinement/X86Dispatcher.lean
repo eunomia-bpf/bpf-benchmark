@@ -2685,4 +2685,306 @@ theorem simulator_token_native_matches (env : EntryEnvironment.Environment) (fra
     simulator_token_step_refines env frame arena current token opcode flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refines⟩
 
+
+/-- The memory ALU consumes AUX's operation byte and captures RHS before
+flags/store. Its scalar writing domain covers arithmetic, logic and shifts. -/
+def aluMemoryBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (payload : BitVec 32)
+    (right address nextPc : Reference.Word) : Option (Transition Reference.X86.State) :=
+  match logicKindOf payload with
+  | some kind => some (logicMemoryFrame env frame arena state width kind right address nextPc)
+  | none => match arithmeticKindOf payload with
+    | some kind => some (arithmeticMemoryFrame env frame arena state width kind right address nextPc)
+    | none => (shiftKindOf payload).map (fun kind => shiftMemoryFrame env frame arena state width kind right address nextPc)
+
+def aluMemoryRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  if code = GeneratedX86Opcode.code .aluMemImm then do
+    let width ← widthOf flags
+    let address ← memoryAddressRegisters env frame arena state dst aux (((value >>> 32).setWidth 32).signExtend 64)
+    aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+      (GeneratedX86Immediate.value value (X86Scalar.handlerWidth width)) address nextPc
+  else if code = GeneratedX86Opcode.code .aluMemReg then do
+    let width ← widthOf flags
+    let right ← registerOf src
+    let address ← memoryAddressRegisters env frame arena state dst aux value
+    aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+      (registerValue env frame arena state right) address nextPc
+  else none
+
+theorem alu_memory_arithmetic_body (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (payload : BitVec 32)
+    (kind : Reference.X86.ArithmeticKind) (right address nextPc : Reference.Word)
+    (writing : kind ≠ .compare) (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind))) :
+    aluMemoryBody env frame arena state width payload right address nextPc =
+      some (arithmeticMemoryFrame env frame arena state width kind right address nextPc) := by
+  simp only [aluMemoryBody, (arithmetic_payload_separate payload kind field).1,
+    arithmetic_kind_binding_decodes payload kind writing field]
+
+theorem alu_memory_logic_body (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (payload : BitVec 32)
+    (kind : Reference.X86.LogicKind) (right address nextPc : Reference.Word)
+    (writing : kind ≠ .test) (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Logic.alu kind))) :
+    aluMemoryBody env frame arena state width payload right address nextPc =
+      some (logicMemoryFrame env frame arena state width kind right address nextPc) := by
+  rw [aluMemoryBody, logic_kind_binding_decodes payload kind writing field]
+
+theorem alu_memory_shift_body (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (width : ScalarWidth) (payload : BitVec 32)
+    (kind : Reference.X86.LegacyShift) (right address nextPc : Reference.Word)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (shiftAlu kind))) :
+    aluMemoryBody env frame arena state width payload right address nextPc =
+      some (shiftMemoryFrame env frame arena state width kind right address nextPc) := by
+  obtain ⟨logic, arithmetic, _⟩ := shift_payload_separate payload kind field
+  simp only [aluMemoryBody, logic, arithmetic, shift_kind_binding_decodes payload kind field, Option.map_some]
+  all_goals rfl
+
+inductive AluMemoryBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) :
+    Nat → Reference.X86.Instruction → Prop where
+  | arithmetic (immediate : Bool) (width : ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+      (right : Register) (base index : Option Register) (writing : kind ≠ .compare)
+      (widthField : WidthBinding flags width)
+      (kindField : GeneratedX86MemAux.op aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind)))
+      (rightField : immediate = false → src = registerByte right)
+      (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      AluMemoryBinding flags aux dst src value nextPc nativeState
+        (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
+        (.arithmetic width kind
+          (.memory (leaAddress nativeState base index aux
+            (if immediate then ((value >>> 32).setWidth 32).signExtend 64 else value)))
+          (if immediate then .immediate (KProgFormal.x86ImmediateValueSpec value (X86Scalar.handlerWidth width))
+            else .register (.low right)) nextPc)
+  | logic (immediate : Bool) (width : ScalarWidth) (kind : Reference.X86.LogicKind)
+      (right : Register) (base index : Option Register) (writing : kind ≠ .test)
+      (widthField : WidthBinding flags width)
+      (kindField : GeneratedX86MemAux.op aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Logic.alu kind)))
+      (rightField : immediate = false → src = registerByte right)
+      (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      AluMemoryBinding flags aux dst src value nextPc nativeState
+        (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
+        (.logic width kind
+          (.memory (leaAddress nativeState base index aux
+            (if immediate then ((value >>> 32).setWidth 32).signExtend 64 else value)))
+          (if immediate then .immediate (KProgFormal.x86ImmediateValueSpec value (X86Scalar.handlerWidth width))
+            else .register (.low right)) nextPc)
+  | shift (immediate : Bool) (width : ScalarWidth) (kind : Reference.X86.LegacyShift)
+      (base index : Option Register)
+      (widthField : WidthBinding flags width)
+      (kindField : GeneratedX86MemAux.op aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code (shiftAlu kind)))
+      (rightField : immediate = false → src = registerByte 1)
+      (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      AluMemoryBinding flags aux dst src value nextPc nativeState
+        (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
+        (.legacyShift width kind
+          (.memory (leaAddress nativeState base index aux
+            (if immediate then ((value >>> 32).setWidth 32).signExtend 64 else value)))
+          (if immediate then KProgFormal.x86ImmediateValueSpec value (X86Scalar.handlerWidth width)
+            else ((nativeState.gpr 1).setWidth 8).setWidth 64) nextPc)
+
+theorem alu_memory_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : AluMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    aluMemoryRegisters env frame arena code flags aux dst src value nextPc state =
+      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+  cases binding with
+  | arithmetic immediate width kind right base index writing widthField kindField rightField baseField indexField =>
+      cases immediate
+      · change (widthOf flags >>= fun width => registerOf src >>= fun right =>
+          memoryAddressRegisters env frame arena state dst aux value >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (registerValue env frame arena state right) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [rightField rfl, register_of_byte]
+        rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
+        simpa only [Option.bind_some, alu_memory_arithmetic_body _ _ _ _ _ _ kind _ _ _ writing kindField] using
+          congrArg some (arithmetic_memory_register_refines env frame arena state width kind right _ nextPc writing)
+      · change (widthOf flags >>= fun width =>
+          memoryAddressRegisters env frame arena state dst aux (((value >>> 32).setWidth 32).signExtend 64) >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (GeneratedX86Immediate.value value (X86Scalar.handlerWidth width)) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [memory_address_registers_refine env frame arena state dst base index aux _ baseField indexField]
+        simpa only [Option.bind_some, alu_memory_arithmetic_body _ _ _ _ _ _ kind _ _ _ writing kindField,
+          KProgFormal.x86_immediate_value_refines] using
+          congrArg some (arithmetic_memory_value_refines env frame arena state width kind _ _ nextPc writing)
+  | logic immediate width kind right base index writing widthField kindField rightField baseField indexField =>
+      cases immediate
+      · change (widthOf flags >>= fun width => registerOf src >>= fun right =>
+          memoryAddressRegisters env frame arena state dst aux value >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (registerValue env frame arena state right) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [rightField rfl, register_of_byte]
+        rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
+        simpa only [Option.bind_some, alu_memory_logic_body _ _ _ _ _ _ kind _ _ _ writing kindField] using
+          congrArg some (logic_memory_register_refines env frame arena state width kind right _ nextPc writing)
+      · change (widthOf flags >>= fun width =>
+          memoryAddressRegisters env frame arena state dst aux (((value >>> 32).setWidth 32).signExtend 64) >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (GeneratedX86Immediate.value value (X86Scalar.handlerWidth width)) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [memory_address_registers_refine env frame arena state dst base index aux _ baseField indexField]
+        simpa only [Option.bind_some, alu_memory_logic_body _ _ _ _ _ _ kind _ _ _ writing kindField,
+          KProgFormal.x86_immediate_value_refines] using
+          congrArg some (logic_memory_value_refines env frame arena state width kind _ _ nextPc writing)
+  | shift immediate width kind base index widthField kindField rightField baseField indexField =>
+      cases immediate
+      · change (widthOf flags >>= fun width => registerOf src >>= fun right =>
+          memoryAddressRegisters env frame arena state dst aux value >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (registerValue env frame arena state right) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [rightField rfl, register_of_byte]
+        rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
+        simpa only [Option.bind_some, alu_memory_shift_body _ _ _ _ _ _ kind _ _ _ kindField] using
+          congrArg some (shift_memory_register_refines env frame arena state width kind 1 _ nextPc)
+      · change (widthOf flags >>= fun width =>
+          memoryAddressRegisters env frame arena state dst aux (((value >>> 32).setWidth 32).signExtend 64) >>= fun address =>
+            aluMemoryBody env frame arena state width (GeneratedX86MemAux.op aux)
+              (GeneratedX86Immediate.value value (X86Scalar.handlerWidth width)) address nextPc) = _
+        rw [width_binding_decodes flags width widthField]
+        rw [memory_address_registers_refine env frame arena state dst base index aux _ baseField indexField]
+        simpa only [Option.bind_some, alu_memory_shift_body _ _ _ _ _ _ kind _ _ _ kindField,
+          KProgFormal.x86_immediate_value_refines] using
+          congrArg some (shift_memory_value_refines env frame arena state width kind _ _ nextPc)
+
+
+/-- Extend the existing unified model with the two memory-destination ALU
+opcodes, preserving every previously composed register/control/memory arm. -/
+def dispatchMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match dispatchStep env frame arena current code flags aux dst src value nextPc state with
+  | some result => some result
+  | none => aluMemoryRegisters env frame arena code flags aux dst src value nextPc state
+
+theorem before_alu_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (immediate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) :
+    dispatchStep env frame arena current (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
+      flags aux dst src value nextPc state = none := by
+  cases immediate <;> rfl
+
+theorem alu_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : AluMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    dispatchStep env frame arena current code flags aux dst src value nextPc state = none := by
+  cases binding <;> apply before_alu_memory_none
+
+inductive MemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | earlier (code : Nat) (native : Reference.X86.Instruction)
+      (fields : StepBinding flags aux dst src value nextPc nativeState code native) :
+      MemoryStepBinding flags aux dst src value nextPc nativeState code native
+  | alu (code : Nat) (native : Reference.X86.Instruction)
+      (fields : AluMemoryBinding flags aux dst src value nextPc nativeState code native) :
+      MemoryStepBinding flags aux dst src value nextPc nativeState code native
+
+/-- One composed step for all earlier model arms and the new memory ALU
+fields. It retains native state, ordered effects, faults and defined flags. -/
+theorem memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, dispatchMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | earlier fields =>
+      obtain ⟨actual, dispatched, refined⟩ := simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      exact ⟨actual, by simp only [dispatchMemoryStep, dispatched], refined⟩
+  | alu fields =>
+      apply exact_dispatch_refines
+      rw [dispatchMemoryStep, alu_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]
+      exact alu_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
+
+def specializedMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  if token = .aluMemImm then aluMemoryRegisters env frame arena (GeneratedX86Opcode.code .aluMemImm) flags aux dst src value nextPc state
+  else if token = .aluMemReg then aluMemoryRegisters env frame arena (GeneratedX86Opcode.code .aluMemReg) flags aux dst src value nextPc state
+  else specializedStep env frame arena current token flags aux dst src value nextPc state
+
+def memoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
+  if token = .aluMemImm then some .aluMemImm else if token = .aluMemReg then some .aluMemReg
+  else stepTokenOpcode token
+
+theorem memory_step_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (selected : memoryStepTokenOpcode token = some opcode) :
+    (GeneratedX86Specialization.dispatch token = .directMacro ∨
+      GeneratedX86Specialization.dispatch token = .genericRunOp ∨
+      GeneratedX86Specialization.dispatch token = .branchHandler) ∧
+      GeneratedX86Specialization.tokenName token = GeneratedX86Opcode.define opcode := by
+  cases token <;> simp only [memoryStepTokenOpcode, stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+private theorem earlier_token_excludes_alu_memory (token : GeneratedX86Specialization.Op)
+    (opcode : GeneratedX86Opcode.Op) (selected : stepTokenOpcode token = some opcode) :
+    GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .aluMemImm ∧
+      GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .aluMemReg := by
+  cases token <;> simp only [stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+theorem memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (selected : memoryStepTokenOpcode token = some opcode) :
+    specializedMemoryStep env frame arena current token flags aux dst src value nextPc state =
+      dispatchMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+  by_cases immediate : token = .aluMemImm
+  · subst token
+    simp only [memoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
+    subst opcode
+    have skipped := before_alu_memory_none env frame arena current true flags aux dst src value nextPc state
+    simp only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] at skipped
+    rw [specializedMemoryStep, if_pos rfl, dispatchMemoryStep, skipped]
+  · by_cases registers : token = .aluMemReg
+    · subst token
+      simp only [memoryStepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
+      subst opcode
+      have skipped := before_alu_memory_none env frame arena current false flags aux dst src value nextPc state
+      simp only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] at skipped
+      rw [specializedMemoryStep, if_neg (by decide), if_pos rfl, dispatchMemoryStep, skipped]
+    · have earlier : stepTokenOpcode token = some opcode := by
+        simpa only [memoryStepTokenOpcode, immediate, registers, ↓reduceIte] using selected
+      obtain ⟨notImmediate, notRegisters⟩ := earlier_token_excludes_alu_memory token opcode earlier
+      simp only [specializedMemoryStep, immediate, registers, ↓reduceIte]
+      rw [step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      unfold dispatchMemoryStep
+      cases dispatched : dispatchStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+        simp [dispatched, aluMemoryRegisters, notImmediate, notRegisters]
+
+theorem memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : memoryStepTokenOpcode token = some opcode)
+    (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) :
+    ∃ actual, specializedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  rw [memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
+  exact memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+
+theorem memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : memoryStepTokenOpcode token = some opcode)
+    (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, specializedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refined⟩ := memory_simulator_token_step_refines env frame arena current token opcode
+    flags aux dst src value nextPc state native selected binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
+
 end KProgFormal.Refinement.X86Dispatcher

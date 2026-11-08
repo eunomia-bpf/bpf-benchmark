@@ -2273,4 +2273,141 @@ theorem compare_register_memory_refines (env : Environment) (frame : Frame) (are
         show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl,
         List.nil_append, List.append_nil, ↓reduceIte]
 
+
+/-- A memory-destination arithmetic body captures its original carry and RHS
+before replacing flags and exactly the selected bytes. -/
+def arithmeticMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (right address nextPc : NativeWord) : Transition Reference.X86.State :=
+  modifyMemoryFrame env frame arena state width
+    (fun left => X86Arithmetic.value width kind.subtract (kind.carry state.raw.rflags) left right)
+    (fun left _ old => X86Arithmetic.flags width kind left right old) address nextPc
+
+theorem arithmetic_memory_value_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (right address nextPc : NativeWord) (writing : kind ≠ .compare) :
+    arithmeticMemoryFrame env frame arena state width kind right address nextPc =
+      Reference.X86.step (.arithmetic width kind (.memory address) (.immediate right) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Arithmetic.step_refines]
+  simp only [arithmeticMemoryFrame, modifyMemoryFrame, X86Arithmetic.handlerStep,
+    Reference.X86.ScalarDestination.source]
+  cases read : X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨left, reads⟩
+      simp only [X86Scalar.read, Reference.X86.scalarRead, writing, ↓reduceIte, X86Scalar.write,
+        native_register_pc, native_register_flags, native_register_memory, List.append_nil,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
+def logicMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (right address nextPc : NativeWord) : Transition Reference.X86.State :=
+  modifyMemoryFrame env frame arena state width (fun left => X86Logic.value width kind left right)
+    (fun left _ old => X86Logic.flags width kind left right old) address nextPc
+
+theorem logic_memory_value_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (right address nextPc : NativeWord) (writing : kind ≠ .test) :
+    logicMemoryFrame env frame arena state width kind right address nextPc =
+      Reference.X86.step (.logic width kind (.memory address) (.immediate right) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Logic.step_refines]
+  simp only [logicMemoryFrame, modifyMemoryFrame, X86Logic.handlerStep,
+    Reference.X86.ScalarDestination.source]
+  cases read : X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨left, reads⟩
+      simp only [X86Scalar.read, Reference.X86.scalarRead, writing, ↓reduceIte, X86Scalar.write,
+        native_register_pc, native_register_flags, native_register_memory, List.append_nil,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
+def shiftMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (count address nextPc : NativeWord) : Transition Reference.X86.State :=
+  modifyMemoryFrame env frame arena state width (fun left => X86LegacyShift.value width kind left count)
+    (fun left _ old => X86LegacyShift.flags width kind left count old) address nextPc
+
+theorem shift_memory_value_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (count address nextPc : NativeWord) :
+    shiftMemoryFrame env frame arena state width kind count address nextPc =
+      Reference.X86.step (.legacyShift width kind (.memory address) count nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86LegacyShift.step_refines]
+  simp only [shiftMemoryFrame, modifyMemoryFrame, X86LegacyShift.handlerStep,
+    Reference.X86.ScalarDestination.source]
+  cases read : X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨left, reads⟩
+      simp only [X86Scalar.write, native_register_pc, native_register_flags, native_register_memory,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
+theorem arithmetic_memory_register_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (right : Reference.X86.Register) (address nextPc : NativeWord) (writing : kind ≠ .compare) :
+    arithmeticMemoryFrame env frame arena state width kind (registerValue env frame arena state right) address nextPc =
+      Reference.X86.step (.arithmetic width kind (.memory address) (.register (.low right)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits := register_low_operand_bits env frame arena state width right
+  have values (left : NativeWord) := arithmetic_value_operand_bits width kind.subtract
+    (kind.carry state.raw.rflags) left _ _ bits
+  have flags (left old : NativeWord) := arithmetic_flags_operand_bits width kind left _ _ old bits
+  simp only [arithmeticMemoryFrame, values, flags]
+  change arithmeticMemoryFrame env frame arena state width kind
+    (readRegister env frame arena state width (.low right)) address nextPc = _
+  rw [arithmetic_memory_value_refines env frame arena state width kind _ address nextPc writing,
+    native_register_read]
+  rfl
+
+theorem logic_memory_register_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (right : Reference.X86.Register) (address nextPc : NativeWord) (writing : kind ≠ .test) :
+    logicMemoryFrame env frame arena state width kind (registerValue env frame arena state right) address nextPc =
+      Reference.X86.step (.logic width kind (.memory address) (.register (.low right)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits := register_low_operand_bits env frame arena state width right
+  have values (left : NativeWord) := logic_value_operand_bits width kind left _ _ bits
+  have flags (left old : NativeWord) := logic_flags_operand_bits width kind left _ _ old bits
+  simp only [logicMemoryFrame, values, flags]
+  change logicMemoryFrame env frame arena state width kind
+    (readRegister env frame arena state width (.low right)) address nextPc = _
+  rw [logic_memory_value_refines env frame arena state width kind _ address nextPc writing,
+    native_register_read]
+  rfl
+
+
+/-- CL count masking consumes the same low byte as the native decoder. -/
+theorem shift_memory_register_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LegacyShift)
+    (right : Reference.X86.Register) (address nextPc : NativeWord) :
+    shiftMemoryFrame env frame arena state width kind (registerValue env frame arena state right) address nextPc =
+      Reference.X86.step (.legacyShift width kind (.memory address)
+        (((nativeRegisters env frame arena state).gpr right).setWidth 8 |>.setWidth 64) nextPc)
+        (nativeRegisters env frame arena state) := by
+  let count := registerValue env frame arena state right
+  have masked : Reference.X86.legacyCount width count =
+      Reference.X86.legacyCount width ((count.setWidth 8).setWidth 64) := by
+    cases width <;> simp only [Reference.X86.legacyCount, reduceCtorEq, ↓reduceIte]
+      <;> bv_decide
+  have values (left : NativeWord) : X86LegacyShift.value width kind left count =
+      X86LegacyShift.value width kind left ((count.setWidth 8).setWidth 64) := by
+    simp only [X86LegacyShift.value_refines, Reference.X86.legacyShiftValue, masked]
+  have flags (left old : NativeWord) : X86LegacyShift.flags width kind left count old =
+      X86LegacyShift.flags width kind left ((count.setWidth 8).setWidth 64) old := by
+    simp only [X86LegacyShift.flags_refine, Reference.X86.legacyShiftFlags,
+      Reference.X86.legacyShiftValue, masked]
+  change shiftMemoryFrame env frame arena state width kind count address nextPc = _
+  simp only [shiftMemoryFrame, values, flags]
+  change shiftMemoryFrame env frame arena state width kind ((count.setWidth 8).setWidth 64) address nextPc = _
+  exact shift_memory_value_refines env frame arena state width kind _ address nextPc
+
 end KProgFormal.Refinement.X86NumericAddress
