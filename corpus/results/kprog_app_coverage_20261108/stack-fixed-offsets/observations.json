@@ -1,0 +1,66 @@
+{
+  "forms": 45,
+  "observations": 184320,
+  "differences": 0,
+  "mismatch_bytes": 0,
+  "host_ubsan_exit": 0,
+  "compiled_tetragon_insns": 1355,
+  "prior_tetragon_insns": 4826,
+  "compiler_dwarf_entries": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/stack-fixed-offsets/tetragon.bpf.c",
+      "md5": "901cdcc09523c5d071afe20ef0167b6c",
+      "sha256": "fa2f41f8a5e153b59a846970c07c920befe94f8569de37a37b6d8d07316e6a6f"
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h",
+      "md5": "1a4f9d7387ea7d9b92f499307bdf712e",
+      "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697"
+    },
+    {
+      "path": "/usr/include/asm-generic/int-ll64.h",
+      "md5": "b810f270733e106319b67ef512c6246e",
+      "sha256": "eb8b891e775ebb50af0353fdcbc625854fd98780399b3a57a404d36af6c29749"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/stack-fixed-offsets/tetragon.bpf.c",
+      "md5": "901cdcc09523c5d071afe20ef0167b6c",
+      "sha256": "fa2f41f8a5e153b59a846970c07c920befe94f8569de37a37b6d8d07316e6a6f"
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h",
+      "md5": "af3577c2b1c2566ad76f1bd2c69dbe37",
+      "sha256": "d116a84a62207260a394206e2b1f0811ac72f3563b88d4f49b8dce7377c08ab4"
+    },
+    {
+      "path": "/usr/include/linux/types.h",
+      "md5": "bf9fbc0e8f60927fef9d8917535375a6",
+      "sha256": "89de4736e44cf154844fad3d6c40c435f3d15200801046becb1876030db247ce"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim.h",
+      "md5": "cedba0dfb15f459a1fb61860887ac4b4",
+      "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_mem_access.h",
+      "md5": "642fcb4f054d60386fcd37ded524589c",
+      "sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e"
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_shift_result.h",
+      "md5": "5fe3ccb6b79d41b1697e6028053391d1",
+      "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/stack-fixed-offsets/candidate.h",
+      "md5": "4ccbe8ae06272735ac9d8269750572c3",
+      "sha256": "54a353a085624cd27ba5388b236df14b4ebe9228657a8d8e93dd2bc4cbef7544"
+    }
+  ],
+  "tetragon_source_sha256": "fa2f41f8a5e153b59a846970c07c920befe94f8569de37a37b6d8d07316e6a6f",
+  "tetragon_object_sha256": "11aff63c38f15ad7a0c9a194944186c6e78a1df5189ebe1bda37ffb7287c3cb1",
+  "whole_otel_compile_phase": "running",
+  "runtime_successor_queue": 4152726,
+  "component_archive_sha256": "44e337ceca9122162b57ac1387fdca337cca8a77b041ec6216f51e4e23d3b904"
+}
