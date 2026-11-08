@@ -1,0 +1,1983 @@
+{
+  "application": "bcc/set,katran",
+  "native_requests": 26,
+  "generated": 26,
+  "compiled": 26,
+  "installed": 26,
+  "failed": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "fentry_vfs_read",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 2,
+      "status": 0,
+      "entry": "tcp_v4_connect",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 3,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 4,
+      "status": 0,
+      "entry": "sys_enter",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 5,
+      "status": 0,
+      "entry": "inet_sock_set_state",
+      "native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 6,
+      "status": 0,
+      "entry": "sched_wakeup",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 7,
+      "status": 0,
+      "entry": "blk_account_io_merge_bio",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 8,
+      "status": 0,
+      "entry": "kprobe__cap_capable_entry",
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 9,
+      "status": 0,
+      "entry": "fentry_vfs_write",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 10,
+      "status": 0,
+      "entry": "tcp_v4_connect_ret",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 11,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 12,
+      "status": 0,
+      "entry": "sys_exit",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 13,
+      "status": 0,
+      "entry": "sched_wakeup_new",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 14,
+      "status": 0,
+      "entry": "block_rq_insert",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 15,
+      "status": 0,
+      "entry": "kprobe__cap_capable_exit",
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 16,
+      "status": 0,
+      "entry": "fentry_vfs_fsync",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 17,
+      "status": 0,
+      "entry": "tcp_v6_connect",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 18,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 19,
+      "status": 0,
+      "entry": "sched_switch",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 20,
+      "status": 0,
+      "entry": "block_rq_issue",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 21,
+      "status": 0,
+      "entry": "fentry_vfs_open",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 22,
+      "status": 0,
+      "entry": "tcp_v6_connect_ret",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 23,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 24,
+      "status": 0,
+      "entry": "block_rq_complete",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 25,
+      "status": 0,
+      "entry": "fentry_vfs_create",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 26,
+      "status": 0,
+      "entry": "balancer_ingress",
+      "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    }
+  ],
+  "summary": {
+    "started": "2026-11-08T23:17:40.349968+00:00",
+    "apps": "bcc/set,katran",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-same-copy/trusted-aintpa3d/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-same-copy/runtime.image.tar",
+      "SAMPLES=1",
+      "WORKLOAD_DURATION=2"
+    ],
+    "returncode": 0,
+    "retained_service_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-same-copy/trusted-state-20261108T231740",
+    "retained_service_files": [
+      "requests/requests.jsonl"
+    ],
+    "finished": "2026-11-08T23:30:58.704002+00:00",
+    "corpus_metadata": [
+      {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_232046_843736/metadata.json",
+        "status": "completed",
+        "error_message": null
+      }
+    ],
+    "archive": "corpus-20261108T233106101432Z.tar.gz",
+    "archive_sha256": "f760ff924499581145fd7e21c22a526fdc2a0d1227740f4485bdd7b3c8ca992f"
+  },
+  "results": [
+    {
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_232046_843736/metadata.json",
+        "status": "completed",
+        "error_message": null
+      },
+      "application": "bcc/set",
+      "app": {
+        "app": "bcc/set",
+        "baseline": {
+          "bpf": {
+            "30": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 30,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 5088,
+              "run_time_ns_delta": 275438,
+              "type": "tracing"
+            },
+            "37": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 37,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 326292,
+              "run_time_ns_delta": 40813578,
+              "type": "kprobe"
+            },
+            "38": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 38,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "40": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 40,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 5013,
+              "run_time_ns_delta": 254448,
+              "type": "tracing"
+            },
+            "43": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 43,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "45": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 45,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 12,
+              "run_time_ns_delta": 2696,
+              "type": "tracing"
+            },
+            "47": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 47,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 48,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 326290,
+              "run_time_ns_delta": 166881732,
+              "type": "kprobe"
+            },
+            "49": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 49,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 176349,
+              "run_time_ns_delta": 8548671,
+              "type": "tracing"
+            },
+            "53": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 53,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 14,
+              "run_time_ns_delta": 880,
+              "type": "tracing"
+            },
+            "55": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 55,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 40,
+              "run_time_ns_delta": 10396,
+              "type": "kprobe"
+            },
+            "56": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 56,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "57": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 57,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 176139,
+              "run_time_ns_delta": 26418135,
+              "type": "tracepoint"
+            },
+            "59": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 59,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 33905,
+              "run_time_ns_delta": 12604079,
+              "type": "tracing"
+            },
+            "61": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 61,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "62": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 62,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "63": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 63,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "65": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 65,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 176139,
+              "run_time_ns_delta": 541761395,
+              "type": "tracepoint"
+            },
+            "68": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 68,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 39,
+              "run_time_ns_delta": 16449,
+              "type": "tracing"
+            },
+            "69": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 69,
+              "name": "sys_enter",
+              "run_cnt_delta": 7067244,
+              "run_time_ns_delta": 964435647,
+              "type": "tracepoint"
+            },
+            "70": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 70,
+              "name": "sched_switch",
+              "run_cnt_delta": 67417,
+              "run_time_ns_delta": 25576442,
+              "type": "tracing"
+            },
+            "74": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 74,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "75": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 75,
+              "name": "sys_exit",
+              "run_cnt_delta": 7067251,
+              "run_time_ns_delta": 652939674,
+              "type": "tracepoint"
+            },
+            "76": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 76,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 60,
+              "run_time_ns_delta": 74080,
+              "type": "tracing"
+            },
+            "78": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 78,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 67,
+              "run_time_ns_delta": 456774,
+              "type": "tracing"
+            }
+          },
+          "workloads": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14800",
+                "--timeout",
+                "2s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/70e7f73d"
+              ],
+              "config": {
+                "stressors": [
+                  "syscall",
+                  "cap",
+                  "set",
+                  "sockfd"
+                ],
+                "tool": "stress-ng"
+              },
+              "duration_s": 3.0393317310000043,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "stress-ng: info:  [2092] setting to a 2 secs run per stressor\nstress-ng: info:  [2092] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2092] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2093] syscall: using method 'fast75'\nstress-ng: info:  [2093] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2093] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2093] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2093] syscall:                  pkey_set       95.0         93\nstress-ng: info:  [2093] syscall:              gettimeofday      103.5         69\nstress-ng: info:  [2093] syscall:                      time      117.0         47\nstress-ng: info:  [2093] syscall:                  pkey_get      135.0         72\nstress-ng: info:  [2093] syscall:                    getcpu      392.5        224\nstress-ng: info:  [2093] syscall:                 pkey_free      525.5        524\nstress-ng: info:  [2093] syscall:              timer_delete      638.0        637\nstress-ng: info:  [2093] syscall:                epoll_wait      644.0        625\nstress-ng: info:  [2093] syscall:                mq_setattr      700.5        688\nstress-ng: info:  [2093] syscall:                   prlimit      730.5        687\nstress-ng: metrc: [2092] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2092]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2092] syscall             514      3.02      0.01      0.03       170.14       13680.76\nstress-ng: metrc: [2092] cap              360834      2.00      0.24      1.47    180416.10      211374.98\nstress-ng: metrc: [2092] set               29174      2.00      0.16      1.70     14586.47       15648.27\nstress-ng: metrc: [2092] sockfd           173020      2.00      0.07      1.43     86378.54      115656.63\nstress-ng: info:  [2092] skipped: 0\nstress-ng: info:  [2092] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2092] failed: 0\nstress-ng: info:  [2092] metrics untrustworthy: 0\nstress-ng: info:  [2092] successful run completed in 3.02 secs",
+              "workload_name": "stress_ng_bcc_hook_hot"
+            }
+          ]
+        },
+        "error": "",
+        "post_rejit": {
+          "bpf": {
+            "128": {
+              "bytes_jited": 38,
+              "bytes_xlated": 24,
+              "id": 128,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 5163,
+              "run_time_ns_delta": 289406,
+              "type": "tracing"
+            },
+            "130": {
+              "bytes_jited": 139,
+              "bytes_xlated": 24,
+              "id": 130,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "133": {
+              "bytes_jited": 198,
+              "bytes_xlated": 40,
+              "id": 133,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "136": {
+              "bytes_jited": 158,
+              "bytes_xlated": 24,
+              "id": 136,
+              "name": "sys_enter",
+              "run_cnt_delta": 7431293,
+              "run_time_ns_delta": 940310944,
+              "type": "tracepoint"
+            },
+            "139": {
+              "bytes_jited": 1606,
+              "bytes_xlated": 216,
+              "id": 139,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "142": {
+              "bytes_jited": 161,
+              "bytes_xlated": 40,
+              "id": 142,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 27256,
+              "run_time_ns_delta": 13752345,
+              "type": "tracing"
+            },
+            "145": {
+              "bytes_jited": 164,
+              "bytes_xlated": 40,
+              "id": 145,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 40,
+              "run_time_ns_delta": 10922,
+              "type": "kprobe"
+            },
+            "148": {
+              "bytes_jited": 180,
+              "bytes_xlated": 40,
+              "id": 148,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 336846,
+              "run_time_ns_delta": 39484742,
+              "type": "kprobe"
+            },
+            "151": {
+              "bytes_jited": 39,
+              "bytes_xlated": 24,
+              "id": 151,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 5071,
+              "run_time_ns_delta": 230367,
+              "type": "tracing"
+            },
+            "155": {
+              "bytes_jited": 755,
+              "bytes_xlated": 104,
+              "id": 155,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "157": {
+              "bytes_jited": 198,
+              "bytes_xlated": 40,
+              "id": 157,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 167763,
+              "run_time_ns_delta": 26635621,
+              "type": "tracepoint"
+            },
+            "161": {
+              "bytes_jited": 567,
+              "bytes_xlated": 88,
+              "id": 161,
+              "name": "sys_exit",
+              "run_cnt_delta": 7431298,
+              "run_time_ns_delta": 660307004,
+              "type": "tracepoint"
+            },
+            "163": {
+              "bytes_jited": 161,
+              "bytes_xlated": 40,
+              "id": 163,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 39,
+              "run_time_ns_delta": 16774,
+              "type": "tracing"
+            },
+            "165": {
+              "bytes_jited": 402,
+              "bytes_xlated": 56,
+              "id": 165,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "167": {
+              "bytes_jited": 608,
+              "bytes_xlated": 88,
+              "id": 167,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 336847,
+              "run_time_ns_delta": 168961320,
+              "type": "kprobe"
+            },
+            "169": {
+              "bytes_jited": 39,
+              "bytes_xlated": 24,
+              "id": 169,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 12,
+              "run_time_ns_delta": 1947,
+              "type": "tracing"
+            },
+            "171": {
+              "bytes_jited": 139,
+              "bytes_xlated": 24,
+              "id": 171,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "173": {
+              "bytes_jited": 326,
+              "bytes_xlated": 56,
+              "id": 173,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "177": {
+              "bytes_jited": 1091,
+              "bytes_xlated": 152,
+              "id": 177,
+              "name": "sched_switch",
+              "run_cnt_delta": 54229,
+              "run_time_ns_delta": 25786179,
+              "type": "tracing"
+            },
+            "178": {
+              "bytes_jited": 462,
+              "bytes_xlated": 72,
+              "id": 178,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 45,
+              "run_time_ns_delta": 39301,
+              "type": "tracing"
+            },
+            "180": {
+              "bytes_jited": 39,
+              "bytes_xlated": 24,
+              "id": 180,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 167973,
+              "run_time_ns_delta": 8289697,
+              "type": "tracing"
+            },
+            "184": {
+              "bytes_jited": 1069,
+              "bytes_xlated": 136,
+              "id": 184,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "186": {
+              "bytes_jited": 326,
+              "bytes_xlated": 56,
+              "id": 186,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 167763,
+              "run_time_ns_delta": 462783857,
+              "type": "tracepoint"
+            },
+            "188": {
+              "bytes_jited": 536,
+              "bytes_xlated": 72,
+              "id": 188,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 52,
+              "run_time_ns_delta": 164735,
+              "type": "tracing"
+            },
+            "190": {
+              "bytes_jited": 39,
+              "bytes_xlated": 24,
+              "id": 190,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 14,
+              "run_time_ns_delta": 1099,
+              "type": "tracing"
+            }
+          },
+          "workloads": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15824",
+                "--timeout",
+                "2s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/70e7f73d"
+              ],
+              "config": {
+                "stressors": [
+                  "syscall",
+                  "cap",
+                  "set",
+                  "sockfd"
+                ],
+                "tool": "stress-ng"
+              },
+              "duration_s": 2.6921094810000454,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "stress-ng: info:  [2576] setting to a 2 secs run per stressor\nstress-ng: info:  [2576] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2576] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2577] syscall: using method 'fast75'\nstress-ng: info:  [2577] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2577] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2577] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2577] syscall:                  pkey_get       70.5         66\nstress-ng: info:  [2577] syscall:              gettimeofday       92.5         69\nstress-ng: info:  [2577] syscall:                  pkey_set       96.0         96\nstress-ng: info:  [2577] syscall:                      time      141.5         79\nstress-ng: info:  [2577] syscall:                    getcpu      472.0        337\nstress-ng: info:  [2577] syscall:                 pkey_free      530.5        528\nstress-ng: info:  [2577] syscall:           set_robust_list      603.0        577\nstress-ng: info:  [2577] syscall:              timer_delete      675.0        667\nstress-ng: info:  [2577] syscall:                epoll_wait      692.0        668\nstress-ng: info:  [2577] syscall:                mq_setattr      730.0        728\nstress-ng: metrc: [2576] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2576]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2576] syscall             514      2.67      0.01      0.03       192.31       15059.62\nstress-ng: metrc: [2576] cap              400615      2.00      0.25      1.61    200307.02      215598.27\nstress-ng: metrc: [2576] set               30106      2.00      0.23      1.67     15027.93       15863.46\nstress-ng: metrc: [2576] sockfd           164364      2.00      0.05      1.43     81981.25      110993.39\nstress-ng: info:  [2576] skipped: 0\nstress-ng: info:  [2576] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2576] failed: 0\nstress-ng: info:  [2576] metrics untrustworthy: 0\nstress-ng: info:  [2576] successful run completed in 2.67 secs",
+              "workload_name": "stress_ng_bcc_hook_hot"
+            }
+          ]
+        },
+        "rejit_result": {
+          "enabled_passes": [],
+          "mode": "verified_native_loader",
+          "status": "ok"
+        },
+        "runner": "bcc_set",
+        "selected_workload": "stress_ng_bcc_hook_hot",
+        "status": "ok"
+      }
+    },
+    {
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_232046_843736/metadata.json",
+        "status": "completed",
+        "error_message": null
+      },
+      "application": "katran",
+      "app": {
+        "app": "katran",
+        "baseline": {
+          "bpf": {
+            "207": {
+              "bytes_jited": 13641,
+              "bytes_xlated": 23840,
+              "id": 207,
+              "name": "balancer_ingres",
+              "run_cnt_delta": 2475437,
+              "run_time_ns_delta": 402138376,
+              "type": "xdp"
+            }
+          },
+          "workloads": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "components": [
+                {
+                  "command": [
+                    "/usr/sbin/ip",
+                    "netns",
+                    "exec",
+                    "katran-router",
+                    "sh",
+                    "-c",
+                    "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                  ],
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@7",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": true,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 7,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  },
+                  "duration_s": 2.0244614920000004,
+                  "returncode": 0,
+                  "stderr": "",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 2475437  errors: 0\n     started: 522140021us  stopped: 524078949us idle: 0us\n     seq_num: 2475438  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 1938927(c1938927+d0) usec, 2475437 (64byte,0frags)\n  1276704pps 653Mb/sec (653672448bps) errors: 0",
+                  "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+                }
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0",
+                "namespace": "katran-router",
+                "outcomes": {
+                  "after": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 5009317
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 1,
+                        "packets_or_v1": 5009317
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 523140036261,
+                        "packets_or_v1": 1192666
+                      },
+                      "pass": {
+                        "bytes_or_v2": 70,
+                        "packets_or_v1": 1
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 320596358,
+                        "packets_or_v1": 5009318
+                      },
+                      "tx": {
+                        "bytes_or_v2": 320596288,
+                        "packets_or_v1": 5009317
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 250465850,
+                        "packets_or_v1": 5009317
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 250466672,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 5009327,
+                        "tx_bytes": 420783352,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 5009327
+                      },
+                      "real/real0": {
+                        "rx_bytes": 420784020,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 5009335,
+                        "tx_bytes": 912,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 11
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 420783352,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 5009327,
+                        "tx_bytes": 250466672,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 5009327
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 912,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 11,
+                        "tx_bytes": 420784020,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 5009335
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 250465850,
+                        "packets_or_v1": 5009317
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      138
+                    ],
+                    "receiver": {
+                      "rx_bytes": 420784020,
+                      "rx_dropped": 0,
+                      "rx_errors": 0,
+                      "rx_packets": 5009335,
+                      "tx_bytes": 912,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 11
+                    },
+                    "stats_map_ids": [
+                      131
+                    ]
+                  },
+                  "before": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2533880
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 1,
+                        "packets_or_v1": 2533880
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 519610076022,
+                        "packets_or_v1": 1254423
+                      },
+                      "pass": {
+                        "bytes_or_v2": 70,
+                        "packets_or_v1": 1
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 162168390,
+                        "packets_or_v1": 2533881
+                      },
+                      "tx": {
+                        "bytes_or_v2": 162168320,
+                        "packets_or_v1": 2533880
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 126694000,
+                        "packets_or_v1": 2533880
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 126694822,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2533890,
+                        "tx_bytes": 212846644,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2533890
+                      },
+                      "real/real0": {
+                        "rx_bytes": 212847256,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2533897,
+                        "tx_bytes": 912,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 11
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 212846644,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2533890,
+                        "tx_bytes": 126694822,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2533890
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 912,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 11,
+                        "tx_bytes": 212847256,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2533897
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 126694000,
+                        "packets_or_v1": 2533880
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      138
+                    ],
+                    "receiver": {
+                      "rx_bytes": 212847256,
+                      "rx_dropped": 0,
+                      "rx_errors": 0,
+                      "rx_packets": 2533897,
+                      "tx_bytes": 912,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 11
+                    },
+                    "stats_map_ids": [
+                      131
+                    ]
+                  },
+                  "delta": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2475437
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2475437
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 3529960239,
+                        "packets_or_v1": -61757
+                      },
+                      "pass": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 158427968,
+                        "packets_or_v1": 2475437
+                      },
+                      "tx": {
+                        "bytes_or_v2": 158427968,
+                        "packets_or_v1": 2475437
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 123771850,
+                        "packets_or_v1": 2475437
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 123771850,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2475437,
+                        "tx_bytes": 207936708,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2475437
+                      },
+                      "real/real0": {
+                        "rx_bytes": 207936764,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2475438,
+                        "tx_bytes": 0,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 0
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 207936708,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2475437,
+                        "tx_bytes": 123771850,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2475437
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 0,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 0,
+                        "tx_bytes": 207936764,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2475438
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 123771850,
+                        "packets_or_v1": 2475437
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      138
+                    ],
+                    "receiver": {
+                      "rx_bytes": 207936764,
+                      "rx_dropped": 0,
+                      "rx_errors": 0,
+                      "rx_packets": 2475438,
+                      "tx_bytes": 0,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 0
+                    },
+                    "stats_map_ids": [
+                      131
+                    ]
+                  },
+                  "settle_seconds": 1.0
+                },
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": true,
+                "src_ip": "10.0.0.2",
+                "threads": [
+                  7
+                ],
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 2.0244614920000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "",
+              "workload_name": "katran_kernel_pktgen_l2_udp"
+            }
+          ]
+        },
+        "error": "",
+        "post_rejit": {
+          "bpf": {
+            "222": {
+              "bytes_jited": 8744,
+              "bytes_xlated": 1112,
+              "id": 222,
+              "name": "balancer_ingres",
+              "run_cnt_delta": 2433201,
+              "run_time_ns_delta": 424634531,
+              "type": "xdp"
+            }
+          },
+          "workloads": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "components": [
+                {
+                  "command": [
+                    "/usr/sbin/ip",
+                    "netns",
+                    "exec",
+                    "katran-router",
+                    "sh",
+                    "-c",
+                    "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+                  ],
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@7",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": true,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 7,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  },
+                  "duration_s": 2.1056943090000004,
+                  "returncode": 0,
+                  "stderr": "",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 2433201  errors: 0\n     started: 794420035us  stopped: 796368053us idle: 0us\n     seq_num: 2433202  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 1948018(c1948018+d0) usec, 2433201 (64byte,0frags)\n  1249064pps 639Mb/sec (639520768bps) errors: 0",
+                  "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+                }
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0",
+                "namespace": "katran-router",
+                "outcomes": {
+                  "after": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 4871509
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 1,
+                        "packets_or_v1": 4871509
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 795420123015,
+                        "packets_or_v1": 1184539
+                      },
+                      "pass": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 311776576,
+                        "packets_or_v1": 4871509
+                      },
+                      "tx": {
+                        "bytes_or_v2": 311776576,
+                        "packets_or_v1": 4871509
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 243575450,
+                        "packets_or_v1": 4871509
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 243576476,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 4871522,
+                        "tx_bytes": 409207704,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 4871523
+                      },
+                      "real/real0": {
+                        "rx_bytes": 409165142,
+                        "rx_dropped": 518,
+                        "rx_errors": 0,
+                        "rx_packets": 4871017,
+                        "tx_bytes": 1102,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 14
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 409207704,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 4871523,
+                        "tx_bytes": 243576476,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 4871522
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 1102,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 14,
+                        "tx_bytes": 409165142,
+                        "tx_dropped": 518,
+                        "tx_errors": 0,
+                        "tx_packets": 4871017
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 243575450,
+                        "packets_or_v1": 4871509
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      159
+                    ],
+                    "receiver": {
+                      "rx_bytes": 409165142,
+                      "rx_dropped": 518,
+                      "rx_errors": 0,
+                      "rx_packets": 4871017,
+                      "tx_bytes": 1102,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 14
+                    },
+                    "stats_map_ids": [
+                      152
+                    ]
+                  },
+                  "before": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2438308
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 1,
+                        "packets_or_v1": 2438308
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 791930164556,
+                        "packets_or_v1": 1183664
+                      },
+                      "pass": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 156051712,
+                        "packets_or_v1": 2438308
+                      },
+                      "tx": {
+                        "bytes_or_v2": 156051712,
+                        "packets_or_v1": 2438308
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 121915400,
+                        "packets_or_v1": 2438308
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 121916426,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2438321,
+                        "tx_bytes": 204818820,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2438322
+                      },
+                      "real/real0": {
+                        "rx_bytes": 204800534,
+                        "rx_dropped": 229,
+                        "rx_errors": 0,
+                        "rx_packets": 2438105,
+                        "tx_bytes": 1102,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 14
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 204818820,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2438322,
+                        "tx_bytes": 121916426,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2438321
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 1102,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 14,
+                        "tx_bytes": 204800534,
+                        "tx_dropped": 229,
+                        "tx_errors": 0,
+                        "tx_packets": 2438105
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 121915400,
+                        "packets_or_v1": 2438308
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      159
+                    ],
+                    "receiver": {
+                      "rx_bytes": 204800534,
+                      "rx_dropped": 229,
+                      "rx_errors": 0,
+                      "rx_packets": 2438105,
+                      "tx_bytes": 1102,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 14
+                    },
+                    "stats_map_ids": [
+                      152
+                    ]
+                  },
+                  "delta": {
+                    "counters": {
+                      "consistent_hash_drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "decap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "drop": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "encap_fail": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "fallback_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2433201
+                      },
+                      "global_lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v4": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_ptb_v6": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "icmp_too_big": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lpm_src": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "lru": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 2433201
+                      },
+                      "lru_miss": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "new_conn_rate": {
+                        "bytes_or_v2": 3489958459,
+                        "packets_or_v1": 875
+                      },
+                      "pass": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "quic_icmp": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "remote_encap": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "total": {
+                        "bytes_or_v2": 155724864,
+                        "packets_or_v1": 2433201
+                      },
+                      "tx": {
+                        "bytes_or_v2": 155724864,
+                        "packets_or_v1": 2433201
+                      },
+                      "udp_flow_migration": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      },
+                      "vip_0": {
+                        "bytes_or_v2": 121660050,
+                        "packets_or_v1": 2433201
+                      },
+                      "xpop_decap_success": {
+                        "bytes_or_v2": 0,
+                        "packets_or_v1": 0
+                      }
+                    },
+                    "interfaces": {
+                      "load_balancer/katran0": {
+                        "rx_bytes": 121660050,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2433201,
+                        "tx_bytes": 204388884,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2433201
+                      },
+                      "real/real0": {
+                        "rx_bytes": 204364608,
+                        "rx_dropped": 289,
+                        "rx_errors": 0,
+                        "rx_packets": 2432912,
+                        "tx_bytes": 0,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 0
+                      },
+                      "router/rtlb0": {
+                        "rx_bytes": 204388884,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 2433201,
+                        "tx_bytes": 121660050,
+                        "tx_dropped": 0,
+                        "tx_errors": 0,
+                        "tx_packets": 2433201
+                      },
+                      "router/rtreal0": {
+                        "rx_bytes": 0,
+                        "rx_dropped": 0,
+                        "rx_errors": 0,
+                        "rx_packets": 0,
+                        "tx_bytes": 204364608,
+                        "tx_dropped": 289,
+                        "tx_errors": 0,
+                        "tx_packets": 2432912
+                      }
+                    },
+                    "real_counters": {
+                      "real_1": {
+                        "bytes_or_v2": 121660050,
+                        "packets_or_v1": 2433201
+                      }
+                    },
+                    "reals_stats_map_ids": [
+                      159
+                    ],
+                    "receiver": {
+                      "rx_bytes": 204364608,
+                      "rx_dropped": 289,
+                      "rx_errors": 0,
+                      "rx_packets": 2432912,
+                      "tx_bytes": 0,
+                      "tx_dropped": 0,
+                      "tx_errors": 0,
+                      "tx_packets": 0
+                    },
+                    "stats_map_ids": [
+                      152
+                    ]
+                  },
+                  "settle_seconds": 1.0
+                },
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": true,
+                "src_ip": "10.0.0.2",
+                "threads": [
+                  7
+                ],
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 2.1056943090000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "",
+              "workload_name": "katran_kernel_pktgen_l2_udp"
+            }
+          ]
+        },
+        "rejit_result": {
+          "enabled_passes": [],
+          "mode": "verified_native_loader",
+          "status": "ok"
+        },
+        "runner": "katran",
+        "selected_workload": "xdp_pktgen",
+        "status": "ok"
+      }
+    }
+  ]
+}
