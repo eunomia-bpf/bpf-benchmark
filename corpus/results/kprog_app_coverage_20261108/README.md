@@ -6,12 +6,12 @@ The table records the latest closed complete-application attempt. Baseline resid
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 5 | 5 | 4 | 1: 900-second lifecycle timeout, then worker activation refusal | 0 | [035354](otel-host-compile/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: TC data_len pointer arithmetic | [033637](cilium-dead-helper/README.md) |
+| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: TC data_len pointer arithmetic; captured historical include | [041458](cilium-skb-data-len/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send jump complexity | [035351](tetragon-c-mask/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly table index range | [034222](tracee-c-mask/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: probe_read helper length range | [042532](tracee-movx-identity/README.md) |
 
-Current detached work runs the complete original Cilium application with the native skb data_len scalar read through the matching kernel context. Whole Tracee follows with [destination-width MOVZX/MOVSX value identity](movx-value-identity/typed32/README.md), then the [OTel continuation](otel-host-compile-continuation-plan.json) uses fresh host compilation and the existing corpus lifecycle interfaces set to0. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The completed 38-case pruned-helper suite retains 9 positive executions and 29 unsafe refusals. Actual terminal receipts determine coverage and acceptance. The [Cilium input record](cilium-skb-data-len-plan.json) captures its BTF field identity and launch source.
+Current detached work runs the OTel continuation with fresh host compilation and the existing corpus lifecycle interfaces set to0. The [Cilium successor](cilium-owned-skb-plan.json) follows with cohort-owned skb and ABI includes. Its complete captured TC source compiles successfully; actual terminal loading supplies acceptance. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The completed 38-case pruned-helper suite retains 9 positive executions and 29 unsafe refusals. Complete Tracee with destination-width MOVX reaches the later helper-length frontier recorded above.
 
 Recorded frontiers retain their separate entries and candidate epochs:
 
@@ -41,3 +41,5 @@ The [whole Tetragon typed-stack cohort](tetragon-typed-stack/README.md) closes4f
 The latest complete batches retain [Cilium TC scalar projection](cilium-dead-helper/README.md), [Tracee readonly indexing](tracee-c-mask/README.md) and [Tetragon native control-flow complexity](tetragon-c-mask/README.md). All12terminal native hashes reconcile. The existing pruned-helper38-case safety suite retains9positive executions and29unsafe refusals. OTel fresh host compilation continues with its captured native and source inputs.
 
 The [fresh host-compiled OTel cohort](otel-host-compile/README.md) binds perf_unwind_native and perf_unwind_hotspot, reaching 4 bound entries across 5 successful compilations. Its explicit 900-second lifecycle timeout precedes the fifth worker activation refusal. The public simulator header evolves during the run; the actual private compiler inputs retain their captured hashes. The continuation keeps native input and workload identity while allowing startup to follow compiler/load completion.
+
+The [whole Tracee destination-width cohort](tracee-movx-identity/README.md) carries the checked byte through readonly indexing and reaches probe_read length range at 2,776 instructions and107states. The [Cilium include audit](cilium-skb-data-len/README.md) attributes its measured object to the historical skb header; the selected-header successor preserves that diagnostic epoch and changes the actual compiler include graph. Its collection repair also preserves the prior published driver and archive bytes. The [generic numeric-iterator control](numeric-iterator-call/README.md) completes native/BPF compilation and native proof linking, then identifies typed kernel-call ABI modelling as the next Tetragon mechanism.
