@@ -1,0 +1,66 @@
+[
+  {
+    "name": "baseline",
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I/workspaces/repository/kprog/x86",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/compiler-flags/baseline.c",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/compiler-flags/baseline.bpf.o"
+    ],
+    "exit": 0,
+    "wall_seconds": 389.98560406873,
+    "source_sha256": "f02468263d5cb90c3cb8cb521caecd7d81558ff3612a2ce2c537465e32f7a15a",
+    "sections": [
+      {
+        "name": "tracepoint/trusted/trusted",
+        "instructions": 17118,
+        "maximum_fp_minus_offset": 1280
+      }
+    ]
+  },
+  {
+    "name": "alias",
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I/workspaces/repository/kprog/x86",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/alias/captured.c",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/compiler-flags/alias.bpf.o"
+    ],
+    "exit": 0,
+    "wall_seconds": 378.1760353478603,
+    "source_sha256": "5eb7ed3afadbd4906585f9cf42c1d6873c35908cbecfbc889c846dff28fa7f8b",
+    "sections": [
+      {
+        "name": "tracepoint/trusted/trusted",
+        "instructions": 17122,
+        "maximum_fp_minus_offset": 1264
+      }
+    ]
+  }
+]
