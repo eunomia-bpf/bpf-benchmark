@@ -15102,6 +15102,130 @@
     "source_drift": [],
     "stop_sha256": "6a9c1ee32919154cda9d68f2033856603cc029af2054ed577318cc5a14485d93"
   },
+  "returning_bpf_helper_call": {
+    "actual_integrated_bpf_check_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "8b902f0fb30532f61b46a3e326a52123f5009c31e21ba61cecb2c91517744820",
+    "archive_file": "kprog/results/kprog_verification_20261107/returning-helper-call.log.gz",
+    "archive_marker": "=== RETURNING BPF HELPER CALL ABI V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-integrated.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-integrated.log": {
+        "bytes": 2579,
+        "sha256": "8af861eac75caaf3113f149822f842e6050e80e5fee798ffa1e6bccf08a69932"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-integrated.py": {
+        "bytes": 374,
+        "sha256": "875ba5d8df94f5578455719d249334a8b2ecc247283e3fcf8ddafdb41bae1052"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.attempt1.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.attempt1.log": {
+        "bytes": 933,
+        "sha256": "c0c644cc8badbe895e2622f642f70f3953d6bf07f9fbae785c727821c4d06236"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.attempt2.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.attempt2.log": {
+        "bytes": 544,
+        "sha256": "89f150c6849dc43a90a184009b5c7513bde0ea459468c22843a6651b7b464a5c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.log": {
+        "bytes": 921,
+        "sha256": "a05a2e4fdd65c076f7b0fa8f4caf71fa6c03ad2a5dcbe9a4914001016c7bcf03"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-proof.py": {
+        "bytes": 466,
+        "sha256": "96261f566fb9dafeaa87b8e78875c4b3bbe37550ba02f37a345277a76b611209"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-work/BPFPlatform.lean": {
+        "bytes": 13594,
+        "sha256": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-work/addition.lean": {
+        "bytes": 8104,
+        "sha256": "492eacc1ecab645aa6a55bb1ee62687383d3026f3fb1b4174863a0f59745624e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-work/attempt1-addition.lean": {
+        "bytes": 5305,
+        "sha256": "6cff89d66433d6a132d93db9ae4011cc627080bd1285ae1ed5ad7be5f43adf4a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-work/attempt3-addition.lean": {
+        "bytes": 8122,
+        "sha256": "6069c695a74357fe67a4bc805057cf32be4a4fb92052f9890bbea64da86e9022"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper-call-work/base.lean": {
+        "bytes": 5490,
+        "sha256": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPath.lean": {
+        "bytes": 13188,
+        "sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      "/workspaces/repository/kprog/tv/BPFPlatform.lean": {
+        "bytes": 13594,
+        "sha256": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48"
+      },
+      "/workspaces/repository/kprog/tv/Composition.lean": {
+        "bytes": 18251,
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      }
+    },
+    "domain": "Every returning BPF CALL0x85 with src0/2, any complete state/environment/program, full64-bit resolved identity and argumentCount0..5, arbitrary result/memory/effects and independent five caller-clobber words. Actual decoded final-program Execution additionally assumes active/nonnegative PC.",
+    "existing_entry_point": "Existing formal make check invokes make -C ../tv bpf-check, which compiles BPFPlatform.lean.",
+    "new_theorem_axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "remaining_interface": "Physical/native argument and result ABI; typed pointers/provenance and helper/platform effects; actual C/compiler-to-BPF call and register allocation; production resolver identity/count correspondence and native-to-B reachability. Successful nonreturning tail transfer is outside this returning law. Legacy numeric70-slot epoch is unchanged; direct named new helpers are not claimed as numeric slots.",
+    "result": "Pre-call R1..R5 argument capture, exact identity/arguments/result helper event after supplied ordered effects, whole result/memory/PC frame, arbitrary R1..R5 clobbers, preserved R6..R10/halted/ghost indices. Resolver/effect-preserving relocation retains the entire transition, even when instruction/program/resolver differ.",
+    "source_sha256": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/BPFPlatform.lean": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+    },
+    "theorems": [
+      "KProgTV.BPFPlatform.returning_helper_execute",
+      "KProgTV.BPFPlatform.returning_helper_resolution_preserves",
+      "KProgTV.BPFPlatform.returning_helper_execution",
+      "KProgTV.BPFPlatform.returning_helper_argument",
+      "KProgTV.BPFPlatform.returning_helper_frame"
+    ]
+  },
   "returning_helper_token_wrappers": {
     "archive_compressed_prefix_bytes": 92838054,
     "archive_compressed_prefix_sha256": "898f1243e328f82ffe1088a024f3f0c4efb34e4ebf3864d1311cbd7991d55f2b",

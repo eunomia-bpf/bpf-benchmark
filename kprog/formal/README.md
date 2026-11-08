@@ -50,6 +50,10 @@ accepted entered states under explicit compiled-edge/stock rejection premises.
 The shared architectural-fault prefix also has actual byte decode/execution
 and a complete scratch/memory/ghost frame at every linked instruction offset,
 under literal-copy, entry/reachability, NULL-unmapped and verifier premises.
+Actual returning BPF CALL laws also retain the pre-call argument snapshot,
+full-width resolved identity, result/memory/effects and caller/callee/ghost frame
+through identity-preserving resolution; physical/native ABI and C/compiler
+correspondence remain explicit.
 Outer invocation/return-slot, physical memory/provenance, native-to-B entry
 coverage and C/compiler correspondence remain explicit.
 

@@ -5229,3 +5229,15 @@ retains every source/log/exit, including unsuccessful development attempts.
 Actual compiler/link byte preservation, native-to-B reachability/physical ABI,
 active entry, NULL-unmapped memory and verifier soundness remain explicit.
 No per-program check or runtime admission condition is introduced.
+
+### Actual returning BPF helper-call primitive
+
+Five `BPFPlatform.returning_helper_*` laws cover decoded final-program calls
+for every resolved64-bit identity and argument count0..5. Arguments retain
+the pre-call R1..R5 snapshot; actual result, memory and ordered effects survive
+with arbitrary caller clobbers and preserved R6..R10/ghost/halted state.
+Identity/effect-preserving relocation retains the complete transition.
+Existing `bpf-check` passes. [Original evidence](returning-helper-call.log.gz)
+retains sources, all proof attempts and integrated output. Physical/native
+and typed ABI, actual resolver, C/compiler correspondence and successful
+tail transfer remain explicit interfaces. Numeric70-slot coverage is unchanged.
