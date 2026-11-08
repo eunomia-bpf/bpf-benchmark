@@ -5,13 +5,13 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [004333](otel-typed-read/README.md) |
+| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: proof stack depth | [012120](otel-fixed-stack/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [005356](tetragon-typed-read/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [005903](tracee-typed-read/README.md) |
 
-Current serial trials: whole OTel then Tracee use the generic fixed-RSP-offset candidate on12GiB/eightvCPU/20-23. The Tetragon invocation affected during the shared ENOSPC interval has a [closed resource archive](tetragon-fixed-stack/README.md) and a queued complete retry after those two applications. Whole Cilium then uses the [completed registered-kfunc x86 kernel/module profile](kernel-kfunc-binding/README.md). Every completed valid batch retains commands, native input hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
+Current serial trials: whole Tracee uses the generic fixed-RSP-offset candidate on12GiB/eightvCPU/20-23, followed by the complete Tetragon resource retry and new-kernel Cilium. The [OTel fixed-RSP batch012120](otel-fixed-stack/README.md) closes with3generated/compiled and2bound requests, reaching an8-byte proof-stack write at R10-520. Generic exact-width private-stack stores now receive byte/JIT/host and full-source checks. Every completed valid batch retains commands, native hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
 
 The [OTel aligned private-stack batch001743](otel-stack-aligned/README.md) freshly binds read_task_struct and perf_unwind_stop and continues from perf_unwind_native instruction exploration,1000001instructions/66042states. The [generic proof kfunc loader](proof-kfunc/README.md) passes20BTF/site/prototype controls and the exact original CiliumELF/matching kernelBTF call. Its whole-application successor follows Tracee serially.
 

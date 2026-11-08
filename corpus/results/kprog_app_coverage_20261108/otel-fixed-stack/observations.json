@@ -1,0 +1,22 @@
+{
+  "baseline_resident": 13,
+  "generated": 3,
+  "compiled": 3,
+  "accepted_bound": 2,
+  "verifier_rejections": 1,
+  "verifier_class": "proof stack write beyond 512-byte frame",
+  "rejected_stack_offset": -520,
+  "rejected_store_size": 8,
+  "processed_instructions": 2398,
+  "total_states": 60,
+  "peak_states": 60,
+  "max_states_per_insn": 0,
+  "terminal_native_hashes_checked": 3,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "ec4086d57008f60808f82cb76bc42f2da46acfe9444a1d6fb15f33496b33eec5",
+    "service.tar.gz": "339b0d019132dc2231d073fe9dd8189a0c2755b5de4d8dde4dcead567ec79563",
+    "launch.tar.gz": "7f0e20343eee16a0b3cfdc9b13c08727a679364a4f0cea41169c5045ba202e0f",
+    "result.tar.gz": "fd719b659b972353bd6dc5f0694c00b8ce2eb0a3239f89dac3c2404ddf88117a"
+  }
+}
