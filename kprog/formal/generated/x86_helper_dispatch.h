@@ -5,7 +5,7 @@
  * Slots follow numeric ID order. An unarmed ID reaches a compile-time error;
  * no default return value or helper substitution is permitted. */
 /* The number of helper ids the ladder dispatches to a body macro. */
-#define KPROG_X86_HELPER_COUNT 68U
+#define KPROG_X86_HELPER_COUNT 70U
 /* The ladder slot no armed helper id names. */
 #define KPROG_X86_HELPER_SLOT_NONE 0xffU
 /*
@@ -61,29 +61,31 @@
 	((__u64)((ID)) == X86_SIM_HELPER_bpf_map_pop_elem ? 43U : \
 	((__u64)((ID)) == X86_SIM_HELPER_bpf_sk_fullsock ? 44U : \
 	((__u64)((ID)) == X86_SIM_HELPER_bpf_skc_lookup_tcp ? 45U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_send_signal ? 46U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_user ? 47U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_kernel ? 48U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_user_str ? 49U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_kernel_str ? 50U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_jiffies64 ? 51U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_netns_cookie ? 52U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_sk_assign ? 53U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_ktime_get_boot_ns ? 54U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_ringbuf_output ? 55U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_copy_from_user ? 56U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_redirect_neigh ? 57U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_redirect_peer ? 58U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_current_task_btf ? 59U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_ktime_get_coarse_ns ? 60U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_func_ip ? 61U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_attach_cookie ? 62U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_task_pt_regs ? 63U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_loop ? 64U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_func_ret ? 65U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_xdp_load_bytes ? 66U : \
-	((__u64)((ID)) == X86_SIM_HELPER_bpf_ima_file_hash ? 67U : \
-	KPROG_X86_HELPER_SLOT_NONE))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_strtol ? 46U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_send_signal ? 47U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_user ? 48U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_kernel ? 49U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_user_str ? 50U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_probe_read_kernel_str ? 51U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_jiffies64 ? 52U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_netns_cookie ? 53U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_sk_assign ? 54U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_ktime_get_boot_ns ? 55U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_ringbuf_output ? 56U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_copy_from_user ? 57U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_redirect_neigh ? 58U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_redirect_peer ? 59U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_current_task_btf ? 60U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_ktime_get_coarse_ns ? 61U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_check_mtu ? 62U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_func_ip ? 63U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_attach_cookie ? 64U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_task_pt_regs ? 65U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_loop ? 66U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_get_func_ret ? 67U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_xdp_load_bytes ? 68U : \
+	((__u64)((ID)) == X86_SIM_HELPER_bpf_ima_file_hash ? 69U : \
+	KPROG_X86_HELPER_SLOT_NONE))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
 /* The hand-written helper-id defines must equal the generated table. */
 _Static_assert(X86_SIM_HELPER_bpf_map_lookup_elem == 1ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_map_update_elem == 2ULL, "x86 helper id drift");
@@ -131,6 +133,7 @@ _Static_assert(X86_SIM_HELPER_bpf_map_push_elem == 87ULL, "x86 helper id drift")
 _Static_assert(X86_SIM_HELPER_bpf_map_pop_elem == 88ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_sk_fullsock == 95ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_skc_lookup_tcp == 99ULL, "x86 helper id drift");
+_Static_assert(X86_SIM_HELPER_bpf_strtol == 105ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_send_signal == 109ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_probe_read_user == 112ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_probe_read_kernel == 113ULL, "x86 helper id drift");
@@ -146,6 +149,7 @@ _Static_assert(X86_SIM_HELPER_bpf_redirect_neigh == 152ULL, "x86 helper id drift
 _Static_assert(X86_SIM_HELPER_bpf_redirect_peer == 155ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_get_current_task_btf == 158ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_ktime_get_coarse_ns == 160ULL, "x86 helper id drift");
+_Static_assert(X86_SIM_HELPER_bpf_check_mtu == 163ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_get_func_ip == 173ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_get_attach_cookie == 174ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_task_pt_regs == 175ULL, "x86 helper id drift");
@@ -153,9 +157,9 @@ _Static_assert(X86_SIM_HELPER_bpf_loop == 181ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_get_func_ret == 184ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_xdp_load_bytes == 189ULL, "x86 helper id drift");
 _Static_assert(X86_SIM_HELPER_bpf_ima_file_hash == 193ULL, "x86 helper id drift");
-_Static_assert(KPROG_X86_HELPER_COUNT == 68U,
+_Static_assert(KPROG_X86_HELPER_COUNT == 70U,
 	       "x86 helper dispatch count drift");
-/* The generated selector must roll the armed ids up to `0 .. 67` in the
+/* The generated selector must roll the armed ids up to `0 .. 69` in the
  * same order as the hand-written ladder arms, and name nothing else. */
 _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_lookup_elem) == 0U, "x86 helper dispatch slot drift");
 _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_update_elem) == 1U, "x86 helper dispatch slot drift");
@@ -203,28 +207,30 @@ _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_push_elem) == 42U, "
 _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_pop_elem) == 43U, "x86 helper dispatch slot drift");
 _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_fullsock) == 44U, "x86 helper dispatch slot drift");
 _Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skc_lookup_tcp) == 45U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_send_signal) == 46U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user) == 47U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel) == 48U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user_str) == 49U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel_str) == 50U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_jiffies64) == 51U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_netns_cookie) == 52U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_assign) == 53U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_boot_ns) == 54U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ringbuf_output) == 55U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_copy_from_user) == 56U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_neigh) == 57U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_peer) == 58U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_task_btf) == 59U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_coarse_ns) == 60U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ip) == 61U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_attach_cookie) == 62U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_task_pt_regs) == 63U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_loop) == 64U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ret) == 65U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_load_bytes) == 66U, "x86 helper dispatch slot drift");
-_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ima_file_hash) == 67U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_strtol) == 46U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_send_signal) == 47U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user) == 48U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel) == 49U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user_str) == 50U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel_str) == 51U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_jiffies64) == 52U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_netns_cookie) == 53U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_assign) == 54U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_boot_ns) == 55U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ringbuf_output) == 56U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_copy_from_user) == 57U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_neigh) == 58U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_peer) == 59U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_task_btf) == 60U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_coarse_ns) == 61U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_check_mtu) == 62U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ip) == 63U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_attach_cookie) == 64U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_task_pt_regs) == 65U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_loop) == 66U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ret) == 67U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_load_bytes) == 68U, "x86 helper dispatch slot drift");
+_Static_assert(KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ima_file_hash) == 69U, "x86 helper dispatch slot drift");
 _Static_assert(KPROG_X86_HELPER_SLOT(0U) ==
 	       KPROG_X86_HELPER_SLOT_NONE,
 	       "x86 helper dispatch none drift");

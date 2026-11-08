@@ -8,7 +8,7 @@ open GeneratedX86HelperDispatch (helperCount idBits helperIds helperNames
 
 /-- Independent Linux IDs, in increasing order, checked against public libbpf declarations. -/
 def x86HelperDispatchIdsSpec : List Nat :=
-  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 20, 21, 23, 25, 26, 27, 28, 32, 35, 36, 37, 38, 39, 43, 44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109, 112, 113, 114, 115, 118, 122, 124, 125, 130, 148, 152, 155, 158, 160, 173, 174, 175, 181, 184, 189, 193]
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 20, 21, 23, 25, 26, 27, 28, 32, 35, 36, 37, 38, 39, 43, 44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 105, 109, 112, 113, 114, 115, 118, 122, 124, 125, 130, 148, 152, 155, 158, 160, 163, 173, 174, 175, 181, 184, 189, 193]
 
 /-- Independent names in Linux numeric ID order. -/
 def x86HelperDispatchNamesSpec : List String :=
@@ -58,6 +58,7 @@ def x86HelperDispatchNamesSpec : List String :=
    "bpf_map_pop_elem",
    "bpf_sk_fullsock",
    "bpf_skc_lookup_tcp",
+   "bpf_strtol",
    "bpf_send_signal",
    "bpf_probe_read_user",
    "bpf_probe_read_kernel",
@@ -73,6 +74,7 @@ def x86HelperDispatchNamesSpec : List String :=
    "bpf_redirect_peer",
    "bpf_get_current_task_btf",
    "bpf_ktime_get_coarse_ns",
+   "bpf_check_mtu",
    "bpf_get_func_ip",
    "bpf_get_attach_cookie",
    "bpf_task_pt_regs",
@@ -193,7 +195,7 @@ theorem x86_helper_dispatch_name_slot_roundtrip :
   refine ⟨rfl, ?_, ?_⟩ <;> native_decide
 
 /-- The armed count is68. The legacy theorem name is retained for compatibility. -/
-theorem x86_helper_dispatch_count_is_7 : helperCount = 68 := rfl
+theorem x86_helper_dispatch_count_is_7 : helperCount = 70 := rfl
 
 /-- The default is a compile-time error. The legacy theorem name is retained. -/
 theorem x86_helper_dispatch_default_is_rax_zero :

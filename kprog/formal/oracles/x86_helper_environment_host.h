@@ -57,6 +57,7 @@ static inline int ora_x86_armed(__u64 id)
     case 88ULL:
     case 95ULL:
     case 99ULL:
+    case 105ULL:
     case 109ULL:
     case 112ULL:
     case 113ULL:
@@ -72,6 +73,7 @@ static inline int ora_x86_armed(__u64 id)
     case 155ULL:
     case 158ULL:
     case 160ULL:
+    case 163ULL:
     case 173ULL:
     case 174ULL:
     case 175ULL:

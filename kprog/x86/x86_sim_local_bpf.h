@@ -170,6 +170,7 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_map_pop_elem 88ULL
 #define X86_SIM_HELPER_bpf_sk_fullsock 95ULL
 #define X86_SIM_HELPER_bpf_skc_lookup_tcp 99ULL
+#define X86_SIM_HELPER_bpf_strtol 105ULL
 #define X86_SIM_HELPER_bpf_send_signal 109ULL
 #define X86_SIM_HELPER_bpf_probe_read_user 112ULL
 #define X86_SIM_HELPER_bpf_probe_read_kernel 113ULL
@@ -185,6 +186,7 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_redirect_peer 155ULL
 #define X86_SIM_HELPER_bpf_get_current_task_btf 158ULL
 #define X86_SIM_HELPER_bpf_ktime_get_coarse_ns 160ULL
+#define X86_SIM_HELPER_bpf_check_mtu 163ULL
 #define X86_SIM_HELPER_bpf_get_func_ip 173ULL
 #define X86_SIM_HELPER_bpf_get_attach_cookie 174ULL
 #define X86_SIM_HELPER_bpf_task_pt_regs 175ULL
@@ -2907,6 +2909,9 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_skc_lookup_tcp() \
 	X86_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (struct bpf_sock_tuple *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
 
+#define X86_SIM_BPF_CALL_bpf_strtol() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_strtol((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (unsigned long)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (long *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX)))
+
 #define X86_SIM_BPF_CALL_bpf_send_signal() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)X86_SIM_L_READ_REG(X86_RDI)))
 
@@ -2951,6 +2956,9 @@ extern void __x86_sim_unsupported_helper(void)
 
 #define X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
+
+#define X86_SIM_BPF_CALL_bpf_check_mtu() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_check_mtu((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u32 *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__s32)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
 
 #define X86_SIM_BPF_CALL_bpf_get_func_ip() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
@@ -3114,6 +3122,9 @@ extern void __x86_sim_unsupported_helper(void)
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skc_lookup_tcp): \
 			X86_SIM_BPF_CALL_bpf_skc_lookup_tcp(); \
 			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_strtol): \
+			X86_SIM_BPF_CALL_bpf_strtol(); \
+			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_send_signal): \
 			X86_SIM_BPF_CALL_bpf_send_signal(); \
 			break; \
@@ -3158,6 +3169,9 @@ extern void __x86_sim_unsupported_helper(void)
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_coarse_ns): \
 			X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_check_mtu): \
+			X86_SIM_BPF_CALL_bpf_check_mtu(); \
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ip): \
 			X86_SIM_BPF_CALL_bpf_get_func_ip(); \

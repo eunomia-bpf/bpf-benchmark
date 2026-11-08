@@ -1,0 +1,70 @@
+{
+  "updated": "2026-11-08T10:47:50.158706+00:00",
+  "sources": [
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "before_sha256": "38851d800b3540df2f4649807b2bd6d00cebd94c3f7d5944efccd89fb2b59a92",
+      "after_sha256": "4ea969da15d0e77793ade6911dfa7274e148cb42587a013365d77a9d9fcbf9c0"
+    },
+    {
+      "path": "kprog/formal/tools/generate_x86_helper_dispatch_spec.py",
+      "before_sha256": "6af8bc2e8b5a35d48af492d5259b66e1b09afde97d6281e880e0c49bd77d9541",
+      "after_sha256": "683955b03c9b96a0de5461a5db355ff8fa9938a8e777552fa047d7284498d1c2"
+    },
+    {
+      "path": "kprog/formal/contracts/x86_helper_dispatch_spec.json",
+      "before_sha256": "95a4a653c02b9c68e0b3a0f6e0b32994e21959a91cfd034e8ffdf4abe2aa4f93",
+      "after_sha256": "520e2f936a939a6823affe82414eb5248f1540ba0812cac247b42591c2a8c3b5"
+    },
+    {
+      "path": "kprog/formal/generated/x86_helper_dispatch.h",
+      "before_sha256": "68d1816d65db1a30761c77939bd7c57ce0ab323d41d555f6c47f356e6a50fd1a",
+      "after_sha256": "a8e04dc636c756c2aa5a152f67eedb95b7abdfb87d257a6540c53e48b7021e7b"
+    },
+    {
+      "path": "kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean",
+      "before_sha256": "c265223a0014cea1bb09061bcede28723a09cd8e14966b86f918adc1d98bfd5f",
+      "after_sha256": "8b4dd6dde25c12d5f1845067a41f8172a4f191a1c146f74b3033650812e1183f"
+    },
+    {
+      "path": "kprog/formal/KProgFormal/X86HelperDispatch.lean",
+      "before_sha256": "9c137fa758fa72a7af3d9fc1726754c2db0412b29482f768eb80988b35d56476",
+      "after_sha256": "f0ac7b22c0a229950bf2e36ff058e8a005f740f1188646e172b42c5b3b0846c2"
+    },
+    {
+      "path": "kprog/formal/oracles/test_x86_helper_dispatch_host.c",
+      "before_sha256": "64599ad56347e9e1a41607c618283a84c0b730d38e7ed185c3a11194b8f0730f",
+      "after_sha256": "e6340a67beb08fa913f453fb1151795a899c7843bd561c78f039c75eb11ed231"
+    },
+    {
+      "path": "kprog/formal/oracles/test_x86_helper_dispatch_route_host.c",
+      "before_sha256": "f1f379cac81d89681fe6ccfd113cd5f110f6c6fb39aed0a68b486716e27c1009",
+      "after_sha256": "a553e47e8c6afc9e20fe00790f3148564a2d4ec6c3116b5c973d1ca4e31cd456"
+    },
+    {
+      "path": "kprog/formal/oracles/x86_helper_environment_host.h",
+      "before_sha256": "aec30f9d20fba4fe355681e6a57c075b319b4890e198d32a231628c45325f5dd",
+      "after_sha256": "b19ce1e1d933cf0787aec87fcdac013b13500b9b66b27513786c14fc945af5ef"
+    },
+    {
+      "path": "kprog/formal/oracles/generated_helper_calls.h",
+      "before_sha256": "52c5da1e510d33422141204225dbbed392a37659e023774a2d3c738928b12b8c",
+      "after_sha256": "5bc81a60f17739ddcaeecaf73f668861d0e257af4853d1fdc79bcb8d17c13bef"
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "before_sha256": "7e49c5fe135036f11b4abc26169a900047679cd717db81f7d8ed6d84f9035434",
+      "after_sha256": "b71f6ad79477a108e3426a9becbb2897b8c636cd9f7d296f2ebd773bb3df13dc"
+    }
+  ],
+  "exits": {
+    "check.exit": 0,
+    "micro.exit": 0,
+    "linker-test.exit": 0
+  },
+  "helper_rows": 70,
+  "host_slot_cases": 4100,
+  "host_abi_cases": 19458,
+  "linker_unit_tests": 89,
+  "micro_rows": 30
+}

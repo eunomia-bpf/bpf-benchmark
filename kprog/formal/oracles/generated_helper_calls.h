@@ -477,6 +477,16 @@ static inline struct bpf_sock * bpf_skc_lookup_tcp(void *ctx, struct bpf_sock_tu
   ora_arguments[4] = (__u64)(uintptr_t)flags;
   return (struct bpf_sock *)(uintptr_t)ora_raw_result(99U);
 }
+static inline long bpf_strtol(const char *buf, unsigned long buf_len, __u64 flags, long *res)
+{
+  ora_called = 105U;
+  ora_argc = 4U;
+  ora_arguments[0] = (__u64)(uintptr_t)buf;
+  ora_arguments[1] = (__u64)(uintptr_t)buf_len;
+  ora_arguments[2] = (__u64)(uintptr_t)flags;
+  ora_arguments[3] = (__u64)(uintptr_t)res;
+  return (long)(uintptr_t)ora_raw_result(105U);
+}
 static inline long bpf_send_signal(__u32 sig)
 {
   ora_called = 109U;
@@ -618,6 +628,17 @@ static inline long bpf_ima_inode_hash(struct inode *inode, void *dst, __u32 size
   ora_arguments[1] = (__u64)(uintptr_t)dst;
   ora_arguments[2] = (__u64)(uintptr_t)size;
   return (long)(uintptr_t)ora_raw_result(161U);
+}
+static inline long bpf_check_mtu(void *ctx, __u32 ifindex, __u32 *mtu_len, __s32 len_diff, __u64 flags)
+{
+  ora_called = 163U;
+  ora_argc = 5U;
+  ora_arguments[0] = (__u64)(uintptr_t)ctx;
+  ora_arguments[1] = (__u64)(uintptr_t)ifindex;
+  ora_arguments[2] = (__u64)(uintptr_t)mtu_len;
+  ora_arguments[3] = (__u64)(uintptr_t)len_diff;
+  ora_arguments[4] = (__u64)(uintptr_t)flags;
+  return (long)(uintptr_t)ora_raw_result(163U);
 }
 static inline __u64 bpf_get_func_ip(void *ctx)
 {
@@ -978,6 +999,12 @@ static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u6
     out[3] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[3]);
     out[4] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[4]);
     return 5U;
+  case 105ULL:
+    out[0] = (__u64)(uintptr_t)((const char *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((unsigned long)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[2]);
+    out[3] = (__u64)(uintptr_t)((long *)(uintptr_t)raw[3]);
+    return 4U;
   case 109ULL:
     out[0] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[0]);
     return 1U;
@@ -1052,6 +1079,13 @@ static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u6
     out[1] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[1]);
     out[2] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[2]);
     return 3U;
+  case 163ULL:
+    out[0] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((__u32 *)(uintptr_t)raw[2]);
+    out[3] = (__u64)(uintptr_t)((__s32)(uintptr_t)raw[3]);
+    out[4] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[4]);
+    return 5U;
   case 173ULL:
     out[0] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[0]);
     return 1U;
@@ -1169,6 +1203,7 @@ static inline __u64 ora_expected_result(__u64 id)
   case 88ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(88U));
   case 95ULL: return (__u64)(uintptr_t)((struct bpf_sock *)(uintptr_t)ora_raw_result(95U));
   case 99ULL: return (__u64)(uintptr_t)((struct bpf_sock *)(uintptr_t)ora_raw_result(99U));
+  case 105ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(105U));
   case 109ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(109U));
   case 112ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(112U));
   case 113ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(113U));
@@ -1186,6 +1221,7 @@ static inline __u64 ora_expected_result(__u64 id)
   case 158ULL: return (__u64)(uintptr_t)((struct task_struct *)(uintptr_t)ora_raw_result(158U));
   case 160ULL: return (__u64)(uintptr_t)((__u64)(uintptr_t)ora_raw_result(160U));
   case 161ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(161U));
+  case 163ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(163U));
   case 173ULL: return (__u64)(uintptr_t)((__u64)(uintptr_t)ora_raw_result(173U));
   case 174ULL: return (__u64)(uintptr_t)((__u64)(uintptr_t)ora_raw_result(174U));
   case 175ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(175U));
@@ -1259,6 +1295,7 @@ static inline unsigned ora_pointer_arguments(__u64 id)
   case 88ULL: return 3U;
   case 95ULL: return 1U;
   case 99ULL: return 3U;
+  case 105ULL: return 9U;
   case 109ULL: return 0U;
   case 112ULL: return 5U;
   case 113ULL: return 5U;
@@ -1276,6 +1313,7 @@ static inline unsigned ora_pointer_arguments(__u64 id)
   case 158ULL: return 0U;
   case 160ULL: return 0U;
   case 161ULL: return 3U;
+  case 163ULL: return 5U;
   case 173ULL: return 1U;
   case 174ULL: return 1U;
   case 175ULL: return 1U;
