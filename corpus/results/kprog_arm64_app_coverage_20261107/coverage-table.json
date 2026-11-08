@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T14:48:00.214372+00:00",
+    "as_of_utc": "2026-11-08T14:51:56.595406+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -214,27 +214,28 @@
       },
       {
         "application": "OTel",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
         "baseline_resident": 12,
-        "service_source_ids": 3,
-        "generated": 3,
-        "compiled": 3,
+        "baseline_bpf_calls": 164002,
+        "service_source_ids": 2,
+        "generated": 2,
+        "compiled": 2,
         "stages": {
-          "verifier_accepted_installed": 2,
+          "verifier_accepted_installed": 1,
           "verifier_rejected": 1
         },
         "failure_classes": {
-          "bpf_stack_extent": 1
+          "verifier_diagnostic": 1
         },
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T074944818655Z.tar.gz",
-        "raw_archive_sha256": "8de657769d253d6a29315295195344fe80ffe3bb0270bbd2d65148148ae5ea78",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T144057714910Z.tar.gz",
+        "raw_archive_sha256": "871ba68312109ac27686bcb505f34c16866258fbbc10468109b9b443e041a750",
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "five_step_e2d3_captured_385d5095c",
-        "baseline_bpf_calls": 159954
+        "runtime_epoch": "captured numeric tag source5379bb7ca paired byte Image/module",
+        "publication": "47b210682fb3aad01fcab9b9d96fa5927c7abbc9"
       },
       {
         "application": "Cilium",
@@ -700,6 +701,36 @@
       "native_stack_bytes": 368,
       "payload_words": 1,
       "source_scope": "Original complete two-start application; identical native and generated C pair preserves ordered-tag accepted receipt6e072973b"
+    },
+    "OTel": {
+      "utc": "2026-11-08T14:51:56.595406+00:00",
+      "application": "OTel",
+      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+      "baseline_resident": 12,
+      "baseline_bpf_calls": 164002,
+      "service_source_ids": 2,
+      "generated": 2,
+      "compiled": 2,
+      "stages": {
+        "verifier_accepted_installed": 1,
+        "verifier_rejected": 1
+      },
+      "failure_classes": {
+        "verifier_diagnostic": 1
+      },
+      "application_status": [
+        "error"
+      ],
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T144057714910Z.tar.gz",
+      "raw_archive_sha256": "871ba68312109ac27686bcb505f34c16866258fbbc10468109b9b443e041a750",
+      "host_ok": false,
+      "guest_exit": 1,
+      "runtime_epoch": "captured numeric tag source5379bb7ca paired byte Image/module",
+      "publication": "47b210682fb3aad01fcab9b9d96fa5927c7abbc9",
+      "entry": "perf_unwind_stop",
+      "failure_class": "stock_verifier_invalid_func",
+      "diagnostic": "invalid func unknown#-1; processed2486insns,total_states41",
+      "source_scope": "Original complete two-start application at fixed numeric-tag epoch; ordered-tag exact-extent successor queued"
     }
   },
   "terminal_history": {
@@ -774,6 +805,32 @@
         "native_stack_bytes": 480,
         "payload_words": 3,
         "source_scope": "Original complete Tetragon two-start recipe; current tag-source whole application successor follows"
+      }
+    ],
+    "OTel": [
+      {
+        "application": "OTel",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+        "baseline_resident": 12,
+        "service_source_ids": 3,
+        "generated": 3,
+        "compiled": 3,
+        "stages": {
+          "verifier_accepted_installed": 2,
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "bpf_stack_extent": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T074944818655Z.tar.gz",
+        "raw_archive_sha256": "8de657769d253d6a29315295195344fe80ffe3bb0270bbd2d65148148ae5ea78",
+        "host_ok": false,
+        "guest_exit": 1,
+        "runtime_epoch": "five_step_e2d3_captured_385d5095c",
+        "baseline_bpf_calls": 159954
       }
     ]
   }
