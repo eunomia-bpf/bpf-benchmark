@@ -1010,3 +1010,10 @@ native-link-arm-exclusive-check: native-link-arm-helper-check bpf-check build/te
 	./build/test-environment-binding
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmExclusive.olean ../tv/NativeLinkArmExclusive.lean
+
+.PHONY: native-link-arm-percpu-check
+native-link-arm-percpu-check: native-link-arm-helper-check native-link-final-image-check
+	python3 test_arm_percpu_emitter.py
+	cd ../formal && lake build KProgFormal.Refinement.Arm64Register
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkArmPerCpu.olean ../tv/NativeLinkArmPerCpu.lean

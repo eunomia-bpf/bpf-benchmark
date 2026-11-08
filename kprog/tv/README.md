@@ -2639,3 +2639,18 @@ remain explicit premises. The missing kernel stack/packet separation and
 context-conversion obligations are not discharged by assuming those reads.
 The earlier wrapper's pure frame constructors are reused, while actual fresh
 bytes and return address are checked anew. No new guest run or timing is used.
+
+`generic-native-link-arm-percpu.json` connects kind4 to the canonical ARM MRS
+reference. Eighteen universal audits cover the offset&3/modulo4 guard, full4B
+u32-to-size_t span, current EL1/X10 placeholder, VHE EL1/EL2 selection, exact
+stored bytes, surrounding bytes/permissions, storage view and final-copy
+consumption. Every accepted final slot has complete-state/effect/fault TV over
+arbitrary finite prefixes and reverse execution reflection. The chosen CPU/EL
+profile supplies a permitted full64 per-CPU word or the canonical access fault;
+the permitted word equals canonical MOV64 materialization. The production
+source-extracted C case passes host and ARM QEMU-user UBSan checks with all
+canaries retained. The generic target joins `make -C kprog/formal check`.
+Actual producer descriptor/PC and C-to-model correspondence, complete-copy/
+fixup separation, executable lifetime, dynamic CPU/EL/VHE/profile binding and
+complete invocation/compiler ABI remain the surrounding production interfaces.
+V continues the universal O4 line following the three-lane handoff.

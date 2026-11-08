@@ -12,7 +12,8 @@ make -C kprog/formal check
 ```
 
 It requires Lean/Elan, Python3, Rust/Cargo, a C compiler with UBSan,
-clang18/LLVM18, GNU objdump, and the vendor/libbpf and vendor/linux-framework
+clang18/LLVM18, GNU objdump, AArch64 cross-GCC and QEMU user emulation,
+and the vendor/libbpf and vendor/linux-framework
 submodules. The target builds all Lean modules, checks generated contracts,
 rejects proof placeholders, and runs semantic C oracles and executable-reference
 checks. Existing build caches are reused. Papers and paper/count checkers are
@@ -107,3 +108,9 @@ permitted reads retain full64 values, XZR discards the value, and denied reads
 retain the incoming state with an identified system-register fault. The generic
 register laws connect a permitted MRS to MOV-immediate and the selected
 per-CPU value; kind4 CPU/profile/relocation binding remains its caller interface.
+
+The same entry point checks the generic kind4 per-CPU MRS native-link law and
+its existing generic dependencies. It composes the emitted four-byte word and
+final-code copy with canonical full-state/effect/fault preservation. The current
+CPU/profile, producer field/PC, executable lifetime and complete ABI/compiler
+bindings remain the surrounding production interfaces.

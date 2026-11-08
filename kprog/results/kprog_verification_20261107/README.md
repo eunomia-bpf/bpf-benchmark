@@ -98,8 +98,8 @@ continue to count their own `row_kind` values.
 | --- | ---: | --- |
 | `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
 | `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
-| `partial-universal-component` | 6 | ARM kind2 near/far body and kind9 exclusive/marker binding, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
-| `pending-universal-law` | 7 | ARM kind4, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `partial-universal-component` | 7 | ARM kind2 near/far body, kind4 per-CPU MRS and kind9 exclusive/marker binding, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
+| `pending-universal-law` | 6 | Readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
 All nine production relocation kinds have explicit rows. The seven proved
 components carry their production correspondence premises in `o4_completion`.
@@ -113,9 +113,8 @@ The next completion steps establish actual producer layout and compiler/frame
 preservation, the remaining transformations, and production entry/binding
 correspondence. V supplies universal O1/O2 token and definedness laws. The
 trusted inputs are accepted-B verifier soundness, the canonical ISA semantics
-with F's hardware/QEMU fidelity evidence, and the kernel binding code. T updates
-these O4 rows and this summary with each preservation-status publication; V
-retains the operation/token rows and totals. Historical individual-program
+with F's hardware/QEMU fidelity evidence, and the kernel binding code. V continues these O4 rows and this summary after the three-lane handoff,
+alongside the operation/token rows and totals. Historical individual-program
 material remains frozen.
 Shared kinds5/6/7 now link to
 [`generic-native-link-literal.json`](../kprog_tv_20261107/generic-native-link-literal.json):
@@ -3833,3 +3832,28 @@ results and coverage totals retain their published values.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_a2fb22739`. Every check retains its exact published source identity.
+
+### Universal kind4 per-CPU MRS component
+
+[The kind4 receipt](../kprog_tv_20261107/generic-native-link-arm-percpu.json)
+adds18 passing universal audits. The exact alignment/u32 span/current EL1-X10
+placeholder guards select the kernel's EL1/EL2 word under VHE. Four-byte
+stores preserve surrounding bytes and code permissions; the temporary-storage
+view and complete-copy relation carry canonical decode into final text.
+Canonical full-state/effect/fault TV covers every finite prefix and reverse
+execution reflection. A resolved current CPU/EL profile supplies the full64
+per-CPU word or its access fault; the permitted read equals canonical MOV64.
+
+The source-extracted production C case passes81,996 UBSan cases on host and
+81,996 on AArch64 QEMU-user, each2,048 accepted and79,948 refused, with complete
+buffer canaries and exact errors. All393 proof/tool inputs stayed stable, and
+the generic Make target passes. It now joins `make -C kprog/formal check`,
+reusing shared incremental caches. Initial diagnostics, final checks, sources
+and proof artifact identities are retained in the receipt and its gzip archive.
+Actual producer descriptor/PC and C-to-model correspondence, complete-copy/
+fixup separation, executable lifetime, dynamic CPU/EL/VHE/profile binding and
+complete invocation/compiler ABI remain the surrounding interfaces. O4 totals
+are7 conditional,7 component,6 pending and1 trusted implementation; operation/
+token and replay totals retain their published domains. V continues the O4
+line following the three-lane handoff. The prior published `a2fb22739` complete
+formal check separately passed in `full_make_check_a2fb22739`.
