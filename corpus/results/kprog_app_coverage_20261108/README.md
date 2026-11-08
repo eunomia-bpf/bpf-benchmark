@@ -9,7 +9,7 @@ The table records the latest closed whole-application attempt, including setup a
 | Cilium | 62 resident | 5 | 5 | 4 | 0 | 1: tail_handle_ipv4_cont stackoff-544/8 after389instructions | [private-stack alias cohort](private-stack-bytes/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit readonly80-byte table offset1036/4 after3042instructions | [current runner cohort](tracee-current-runner/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit probe-read helper length range after4310instructions/140states | [current MOVX cohort](movx-current/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
 
@@ -63,3 +63,5 @@ The [whole Tracee current-runner cohort](tracee-current-runner/README.md) reache
 The [private-stack register-alias store representation](private-stack-bytes/README.md) reuses the existing byte ladder for scalar MOV stores while preserving pointer-wide and public memory operations. Existing4104678UBSan state observations and29+1micro compile controls pass, as does the captured wholeCilium source compile. The complete original Cilium successor closes5generated/compiled and4installed, reaching the proof-stack writeoff-544/8 after389instructions.
 
 The [current MOVZX/MOVSX destination-lane representation](movx-current/README.md) adopts the existing generic profile in the canonical model and preserves142564UBSan complete-state observations. Current Tracee source compilation and29+1micro controls complete; the entire original Tracee startup follows with its frozen current snapshot and native7479850e.
+
+The [whole Tracee current MOVX cohort](movx-current/README.md) closes6generated/compiled and5installed, passing the readonly table frontier and reaching probe-read helper length range after4310instructions/140states. All six terminal native hashes match; the original application error and work counters retain their raw records.
