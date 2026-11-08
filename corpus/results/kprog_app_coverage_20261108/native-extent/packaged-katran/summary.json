@@ -1,0 +1,33 @@
+{
+  "utc": "2026-11-08T16:22:33.689598+00:00",
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "installed": 1,
+  "failed": 0,
+  "work": [
+    {
+      "application": "katran",
+      "status": "ok",
+      "error": ""
+    }
+  ],
+  "inputs": {
+    "utc": "2026-11-08T16:14:20.676375+00:00",
+    "image": "sha256:a507d19020a23b703710e831c5002d887fb384d7f80df321d2cf3afe5a74e35e",
+    "base_image": "sha256:3769b3fdbba1a1643c334b313948da47ece5df8d1b95c4f118aaff4ae39a364d",
+    "previous_results": [
+      "d28f03a335a7897ffd15b13f8778c9ca7263bae9",
+      "5b498c6dd90673b0418ee5d7c2209e55f04a849f"
+    ],
+    "ordinary_module_count": 842,
+    "native_module_count": 15,
+    "files": {
+      "/workspaces/repository/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+      "/workspaces/repository/kprog/tv/build-kernel-x86/vmlinux": "ed899513b238af5a32c1c06a5361b168f128b61e43f750f2d040a032154d7c4b",
+      "/workspaces/repository/kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-packaged/Makefile": "b59ffe92cbcd4157c7d0777debac9aa8e96806c23656fb84d960903d4d8cf0c4",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-packaged/guest.py": "f73ce89cdbab8b75d38f8000c7871c2f285217c8bc2e4315e2edf75de3765304"
+    }
+  }
+}
