@@ -15,5 +15,11 @@
   "module_sha256": "34a916b858eef9417821d211ff26d650824f18e1784da1b0e169b12cc69f88f6",
   "prior_cohort_error": "ENOSPC",
   "prior_exit_receipt": "empty",
-  "retained_shared_kernel": true
+  "retained_shared_kernel": true,
+  "matched_modules_build_exit": 0,
+  "matched_kernel_modules": 842,
+  "matched_kernel_release": "7.0.0-rc2+",
+  "matched_modules_archive_sha256": "2b20247508f135f5e7c827a70a5808473357c0b5726a52f24ab897bf1d477062",
+  "module_payload_packaging": "module identity/build records published; compact strip/sign runtime bundle follows",
+  "retained_debug_archive_sha256": "db42d13241b72e182985d9e4ffaf7ecf6cb980136cf5d867145996b926efe530"
 }
