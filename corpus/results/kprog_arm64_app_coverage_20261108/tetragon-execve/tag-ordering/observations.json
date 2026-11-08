@@ -1,0 +1,24 @@
+{
+  "utc": "2026-11-08T14:47:28.877499+00:00",
+  "before_sha256": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c",
+  "after_sha256": "a17311474ea46c0b09dbe3df581b396f6c05c23c7cdacb6bb534f5aa50bd28cb",
+  "same_native_sha256": "49ca30f2f87a7c4219088767b6fbb583fa304e55f78d3b5ef8bcfbfb3cf4cf9b",
+  "same_generated_C_sha256": "2c6232d9e4e74f6497b384d76665bce67aa84e757c749b88e62cde75f3c109e4",
+  "application_before": "07872c1afc72e68b7135ed3ecacf0ca73e06c2d5",
+  "application_ordered": "6e072973b47cf7be04cc8f0c4771548691e57976",
+  "observation": "Current numeric tags reach spurious stack-tag branch and FP+104; ordered tag words install the identical native/generated C request",
+  "runtime_admission_additions": 0,
+  "check_exit": 0,
+  "source_matches_ordered_epoch": "042ae2e505a845f9826bb9373a765736f2d44777",
+  "host_case_counts": [
+    3843515,
+    2814832,
+    167480,
+    60144
+  ],
+  "host_total": 6885971,
+  "micro_compile_cases": 29,
+  "negative_compile_cases": 1,
+  "accepted_source_receipt": "6e072973b47cf7be04cc8f0c4771548691e57976",
+  "whole_successor": "Complete serial restored-tag/runtime88a replay follows existing captured OTel/Tracee queue"
+}

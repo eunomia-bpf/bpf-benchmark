@@ -1,0 +1,7 @@
+Ordered ARM ghost-tag compiler observations
+
+The complete Tetragon receipts6e072973b and07872c1af contain identical event_wake_up_new_task native ELF49ca30f2 and identical generated C2c6232d9. The ordered ghost-tag header installs this request; the plain numeric-tag header reaches a verifier path with tag4 and an FP+104 byte read. The whole application counters and complete request archives preserve both outcomes. This is compiler/verifier precision evidence for a common representation used by every program.
+
+The common header now preserves volatile reads and updates of its numeric packed ghost-tag words. Exactly two qualifiers change; raw native memory, pointer payloads, operation bodies, input programs, helpers and map matching retain their expressions. The resulting header is byte-identical to published042ae2e50, whose complete application archive installs the paired request. Existing UBSan host regressions pass6,885,971scenes; the existing29micro plus one negative BPF compile cases pass. The earlier34ISA source-epoch receipt retains its4native/28verifier/2generation outcomes and accepted unsafe0. The queued whole-application successor will capture this ordered header and paired exact-extent runtime88a.
+
+raw-inputs.tar.gz retains both complete application requests, before/after headers, existing host/compiler logs and all29+1existing micro compiler inputs/objects. observations.json pins source epochs and actual outcomes. Runtime admission additions:0.
