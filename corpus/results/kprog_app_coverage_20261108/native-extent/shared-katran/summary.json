@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-08T16:03:41.762353+00:00",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "work": [
+    {
+      "application": "katran",
+      "status": "error",
+      "error": "modprobe ip_tunnel failed: modprobe: ERROR: could not insert 'ip_tunnel': Invalid argument"
+    }
+  ],
+  "inputs": {
+    "utc": "2026-11-08T16:01:14.453434+00:00",
+    "previous_result": "d28f03a335a7897ffd15b13f8778c9ca7263bae9",
+    "previous_error": "ip_tunnel BTF -22 from ordinary modules linked against the earlier vmlinux",
+    "runtime_source": "006e69efcbc20608c94bcc3df1d136bc92fe42ab",
+    "shared_control": "3d78247e27f47fffecc534724b81a98e28c404cc",
+    "image": "sha256:3769b3fdbba1a1643c334b313948da47ece5df8d1b95c4f118aaff4ae39a364d",
+    "files": {
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+      "kprog/tv/build-kernel-x86/vmlinux": "ed899513b238af5a32c1c06a5361b168f128b61e43f750f2d040a032154d7c4b",
+      "kprog/tv/build-kernel-x86/net/ipv4/ip_tunnel.ko": "eb156e022ffa3ae767ec5ccb851a8fe81a9f8c70a7e29c9967054904ec7c98d1",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-extent/Makefile": "cb3ee3f160e9814545568fe2facf6ccd9ebcdfaddcf3a610f0ba261005416991",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-extent/guest.py": "f73ce89cdbab8b75d38f8000c7871c2f285217c8bc2e4315e2edf75de3765304"
+    }
+  }
+}

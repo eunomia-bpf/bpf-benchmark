@@ -1,0 +1,62 @@
+{
+  "application": "katran",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-08T16:01:31.326226+00:00",
+    "apps": "katran",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-extent/trusted-2ug1idgz/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-shared-extent/runtime.image.tar",
+      "SAMPLES=1",
+      "WORKLOAD_DURATION=2"
+    ],
+    "returncode": 0,
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-08T16:03:32.568505+00:00",
+    "corpus_metadata": [
+      {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_160327_910780/metadata.json",
+        "status": "error",
+        "error_message": "corpus suite reported errors"
+      }
+    ],
+    "archive": "corpus-20261108T160340245983Z.tar.gz",
+    "archive_sha256": "b458cfcdea586055c622ce022da305af60474882e19c8861fc4b6d7299d8a16d"
+  },
+  "results": [
+    {
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_160327_910780/metadata.json",
+        "status": "error",
+        "error_message": "corpus suite reported errors"
+      },
+      "application": "katran",
+      "app": {
+        "app": "katran",
+        "baseline": null,
+        "error": "modprobe ip_tunnel failed: modprobe: ERROR: could not insert 'ip_tunnel': Invalid argument",
+        "post_rejit": null,
+        "rejit_result": null,
+        "runner": "katran",
+        "selected_workload": "xdp_pktgen",
+        "status": "error"
+      }
+    }
+  ]
+}
