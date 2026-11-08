@@ -1,0 +1,304 @@
+{
+  "utc": "2026-11-08T00:46:50.152983+00:00",
+  "pid": 4011585,
+  "process_start_ticks": "252604573",
+  "argv": [
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "max",
+    "-smp",
+    "8",
+    "-m",
+    "8192",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root,security_model=none,readonly=on",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=rootfs",
+    "-fsdev",
+    "local,id=repo,path=/workspaces/repository,security_model=none",
+    "-device",
+    "virtio-9p-device,fsdev=repo,mount_tag=repo",
+    "-append",
+    "console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=-1 oops=panic"
+  ],
+  "argv_sha256": "510235fe0acd2fac41c693aaea3e0991b90ac1f4f89b11f3d14059fcb64daccf",
+  "argv_retained": true,
+  "guest_vcpus": 8,
+  "guest_memory_mib": 8192,
+  "before": {
+    "4011585": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011586": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011587": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011588": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011589": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011590": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011591": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011592": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011593": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4011594": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4124884": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "4125227": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11
+      ]
+    }
+  },
+  "after": {
+    "4011585": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011586": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011587": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011588": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011589": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011590": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011591": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011592": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011593": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4011594": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4124884": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "4125227": {
+      "name": "qemu-system-aar",
+      "cpus": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  },
+  "action": "os.sched_setaffinity(tid, set(range(8,16))) for every observed QEMU thread",
+  "scope": "Host scheduling for the existing functional QEMU whole-Tracee run; original guest/native/workload and launcher bytes retained."
+}
