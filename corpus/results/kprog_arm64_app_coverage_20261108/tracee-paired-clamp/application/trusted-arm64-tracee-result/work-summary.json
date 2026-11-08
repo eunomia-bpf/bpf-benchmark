@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-08T23:22:53.741794+00:00",
+  "application": "Tracee",
+  "publication": "7c9fe02ed64fbf40ef3fa8ac5e5c2147d0758398",
+  "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/application/trusted-arm64-tracee-result/run-20261108T230513512167Z.tar.gz",
+  "raw_archive_sha256": "5811782f9f644d69e36698c12b72750bf8f98f982b1e6dde4bac4c9a07b185d6",
+  "phases": {
+    "baseline": {
+      "resident_programs": 0,
+      "bpf_calls": 0,
+      "per_program_bpf": {},
+      "raw_measurement": {},
+      "workload": null,
+      "phase_record": {
+        "programs": [],
+        "workload": null,
+        "raw_measurement": {}
+      }
+    },
+    "post_rejit": {
+      "resident_programs": 0,
+      "bpf_calls": 0,
+      "per_program_bpf": {},
+      "raw_measurement": {},
+      "workload": null,
+      "phase_record": {
+        "programs": [],
+        "workload": null,
+        "raw_measurement": {}
+      }
+    }
+  },
+  "measurement_scope": "Actual recorded per-phase tracking/work; startup closure retains its raw error instead of a completed resident census"
+}

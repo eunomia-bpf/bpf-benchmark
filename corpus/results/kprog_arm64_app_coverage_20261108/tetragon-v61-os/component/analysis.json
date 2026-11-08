@@ -1,0 +1,46 @@
+{
+  "utc": "2026-11-08T23:22:53.741794+00:00",
+  "publication": "f8738c3c1b2f1eb17c640c11cfc182a75a6c86af",
+  "scope": "All3 original V61 execve entries under nativeOs; same edited C source and original2048bound, object-default globals/source0/load-only",
+  "rows": [
+    {
+      "program": "event_execve",
+      "stage": "verifier_rejected",
+      "native_sha256": "298ddc1e80c1a58bc9327ef33dece4e49d47382d4d53a1227ad7d7f9928a190b",
+      "frontier": "compiled_B_stack_write_minus520_110instructions"
+    },
+    {
+      "program": "execve_rate",
+      "stage": "installed",
+      "native_sha256": "298ddc1e80c1a58bc9327ef33dece4e49d47382d4d53a1227ad7d7f9928a190b",
+      "frontier": "installed"
+    },
+    {
+      "program": "execve_send",
+      "stage": "verifier_rejected",
+      "native_sha256": "298ddc1e80c1a58bc9327ef33dece4e49d47382d4d53a1227ad7d7f9928a190b",
+      "frontier": "stock_8193jump_sequence_668277instructions_6807states"
+    }
+  ],
+  "counts": {
+    "catalog_rows": 3,
+    "attempted": 3,
+    "submitted": 3,
+    "installed": 1,
+    "verifier_rejected": 2,
+    "generation_failed": 0,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 0,
+    "failure_agrees": 0,
+    "failure_installed": 0,
+    "success": 3,
+    "success_agrees": 1,
+    "success_installed": 1
+  },
+  "canonical_producer": "O3 retained",
+  "runtime_admission_additions": 0
+}
