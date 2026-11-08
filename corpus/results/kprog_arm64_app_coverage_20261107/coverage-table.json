@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T14:28:33.212035+00:00",
+    "as_of_utc": "2026-11-08T14:48:00.214372+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -261,14 +261,14 @@
       },
       {
         "application": "Tetragon",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/coverage.json",
-        "baseline_resident": 153,
-        "baseline_bpf_calls": 30809,
-        "service_source_ids": 4,
-        "generated": 4,
-        "compiled": 4,
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-tetragon-result/coverage.json",
+        "baseline_resident": 155,
+        "baseline_bpf_calls": 30913,
+        "service_source_ids": 3,
+        "generated": 3,
+        "compiled": 3,
         "stages": {
-          "verifier_accepted_installed": 3,
+          "verifier_accepted_installed": 2,
           "verifier_rejected": 1
         },
         "failure_classes": {
@@ -277,12 +277,12 @@
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/trusted-arm64-tetragon-result/run-20261108T134642030576Z.tar.gz",
-        "raw_archive_sha256": "af744e0af966beb2f7bb667158b55bd6ece912b562ad9b003fb2801e5dd34c70",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-tetragon-result/run-20261108T141711847561Z.tar.gz",
+        "raw_archive_sha256": "247173ced9d4291651735a0f9b7e941030b85548084ba96f1164f55d97085c7e",
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "captured byte source042ae2e50 paired Image/module",
-        "publication": "6e072973b47cf7be04cc8f0c4771548691e57976"
+        "runtime_epoch": "captured numeric tag source5379bb7ca paired byte Image/module",
+        "publication": "07872c1afc72e68b7135ed3ecacf0ca73e06c2d5"
       },
       {
         "application": "Katran",
@@ -670,16 +670,16 @@
       "component_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-native-compile/summary.json"
     },
     "Tetragon": {
-      "utc": "2026-11-08T14:28:33.212035+00:00",
+      "utc": "2026-11-08T14:48:00.214372+00:00",
       "application": "Tetragon",
-      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/coverage.json",
-      "baseline_resident": 153,
-      "baseline_bpf_calls": 30809,
-      "service_source_ids": 4,
-      "generated": 4,
-      "compiled": 4,
+      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-tetragon-result/coverage.json",
+      "baseline_resident": 155,
+      "baseline_bpf_calls": 30913,
+      "service_source_ids": 3,
+      "generated": 3,
+      "compiled": 3,
       "stages": {
-        "verifier_accepted_installed": 3,
+        "verifier_accepted_installed": 2,
         "verifier_rejected": 1
       },
       "failure_classes": {
@@ -688,18 +688,18 @@
       "application_status": [
         "error"
       ],
-      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/trusted-arm64-tetragon-result/run-20261108T134642030576Z.tar.gz",
-      "raw_archive_sha256": "af744e0af966beb2f7bb667158b55bd6ece912b562ad9b003fb2801e5dd34c70",
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-tetragon-result/run-20261108T141711847561Z.tar.gz",
+      "raw_archive_sha256": "247173ced9d4291651735a0f9b7e941030b85548084ba96f1164f55d97085c7e",
       "host_ok": false,
       "guest_exit": 1,
-      "runtime_epoch": "captured byte source042ae2e50 paired Image/module",
-      "publication": "6e072973b47cf7be04cc8f0c4771548691e57976",
-      "entry": "event_execve",
-      "failure_class": "stock_verifier_stack_extent",
-      "stack_offset": -672,
-      "native_stack_bytes": 480,
-      "payload_words": 3,
-      "source_scope": "Original complete Tetragon two-start recipe; current tag-source whole application successor follows"
+      "runtime_epoch": "captured numeric tag source5379bb7ca paired byte Image/module",
+      "publication": "07872c1afc72e68b7135ed3ecacf0ca73e06c2d5",
+      "entry": "event_wake_up_new_task",
+      "failure_class": "stock_verifier_stack_read",
+      "stack_offset": 104,
+      "native_stack_bytes": 368,
+      "payload_words": 1,
+      "source_scope": "Original complete two-start application; identical native and generated C pair preserves ordered-tag accepted receipt6e072973b"
     }
   },
   "terminal_history": {
@@ -742,6 +742,38 @@
         "guest_exit": 1,
         "runtime_epoch": "five_step_e2d3_LSE_lse-tetragon",
         "baseline_bpf_calls": 23944
+      },
+      {
+        "utc": "2026-11-08T14:28:33.212035+00:00",
+        "application": "Tetragon",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/coverage.json",
+        "baseline_resident": 153,
+        "baseline_bpf_calls": 30809,
+        "service_source_ids": 4,
+        "generated": 4,
+        "compiled": 4,
+        "stages": {
+          "verifier_accepted_installed": 3,
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "bpf_stack_extent": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/trusted-arm64-tetragon-result/run-20261108T134642030576Z.tar.gz",
+        "raw_archive_sha256": "af744e0af966beb2f7bb667158b55bd6ece912b562ad9b003fb2801e5dd34c70",
+        "host_ok": false,
+        "guest_exit": 1,
+        "runtime_epoch": "captured byte source042ae2e50 paired Image/module",
+        "publication": "6e072973b47cf7be04cc8f0c4771548691e57976",
+        "entry": "event_execve",
+        "failure_class": "stock_verifier_stack_extent",
+        "stack_offset": -672,
+        "native_stack_bytes": 480,
+        "payload_words": 3,
+        "source_scope": "Original complete Tetragon two-start recipe; current tag-source whole application successor follows"
       }
     ]
   }

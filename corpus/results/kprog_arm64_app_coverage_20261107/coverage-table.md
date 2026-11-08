@@ -127,3 +127,9 @@ Tetragon precise-copy application terminal c9a653161: baseline154 resident rows,
 [Whole Tetragon6e072973b](../kprog_arm64_app_coverage_20261108/byte-atomic/tetragon/coverage.json) retains153baseline resident programs and30,809BPF calls. All four submitted native requests generate and compile; three pass the stock verifier and install. event_execve reaches the stock stack write at offset-672. Its original native input has a480-byte modeled stack and three pointer-payload words. The existing two-start recipe records the native startup error and preserves the complete source/kernel/compiler/verifier archive.
 
 The earlier precise-copy execve_send jump-sequence cohort stays in terminal_history and its original report. The current generic tag-source Tetragon/OTel/Tracee serial successor consumes its own captured inputs. Each phase uses its own actual program IDs and counters.
+
+## Complete numeric-tag Tetragon terminal cohort
+
+[Whole Tetragon07872c1af](../kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/application/trusted-arm64-tetragon-result/coverage.json) retains155baseline resident programs and30,913BPF calls. Three requests generate and compile, two install, and event_wake_up_new_task reaches a stock-verifier FP+104 byte read. The same native49ca30f2 and generatedC2c6232d9 install in the ordered-tag byte-source cohort6e072973b. That paired source evidence identifies the numeric-tag compiler observation frontier. A private restoration of the two ordered ghost-tag qualifiers reuses the existing host and micro compiler regressions; every raw native memory and pointer-payload expression stays fixed.
+
+The prior byte-source event_execve FP-672 and precise-copy execve_send jump-sequence8193 receipts stay in terminal_history and their original reports. OTel and Tracee continue serially at their captured numeric-tag source epoch.
