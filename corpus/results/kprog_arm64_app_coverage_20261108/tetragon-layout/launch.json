@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-08T11:39:11.932894+00:00",
+  "utc": "2026-11-08T11:45:14.129256+00:00",
   "layout_scope": "External destination classification preserves native memory operations and allocates private pointer payloads for private destinations",
   "matched_baseline_max_fp_minus_offset": 872,
   "candidate_max_fp_minus_offset": 488,
@@ -50,7 +50,7 @@
     "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "3f35952259ab078688ec2d6169149d0aa42af183454033fdd4b5c27831c9d03a",
     "kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
     "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "a65fb8609273d464cf557908a738bdb005fe0732f72a9e846785dd3b1671722a",
-    "kprog/arm64/micro-prog/arm64_abi.py": "8f9d263e70041c4f1238b69ed110f839453f83032bfea9973fef11c6d8f13843",
+    "kprog/arm64/micro-prog/arm64_abi.py": "acfe0424fa03f56e55cc899570e9fec81a7ff7cd97390ece97a3940c91739f32",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
     "kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
     "kprog/arm64/micro-prog/__pycache__/generated_arm64_decode.cpython-312.pyc": "acfeaaae2a3dfc3af8a3aa45d1672bd939630acf0a3957d008ef08d180896a9b",
