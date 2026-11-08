@@ -1,0 +1,3 @@
+# Original38 with RAW helper context identity
+
+Actual stages {'make_exit': 0, 'cases': 38, 'stages': {'specialization_rejected': 1, 'valid_executed': 9, 'verifier_rejected': 28}, 'native_risk_executions': 0}. Original native fixtures/annotations retain bytes. Positive controls use their original TEST_RUN comparison; risky inputs use load-only submission. Native risky executions0. Captured production source includes two RAW entry environment assignments, giving identity helper context translation. Complete native/C/B/compiler/verifier/request records accompany raw.tar.gz. Runtime admission additions0.
