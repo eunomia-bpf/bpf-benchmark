@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-08T23:24:00.724683+00:00",
+  "utc": "2026-11-08T23:26:16.405672+00:00",
   "build_publication": "7d3821fef293d8357bea8a61b677cc040c591c07",
   "native_objects": {
     "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o": "6e6e64388be7afc8eabd9851b41d1a04eb28f860543976aac4070737c2dfc063",
@@ -17,7 +17,7 @@
   },
   "embedded_binary_sha256": "d312418772f6fe1b4dee5676d18c5e9f6498ca91f26e6038bffbdb2077b758f2",
   "paired_bpf_sha256": "2e4e7a851b1e98e28f04a3f247d395fe930fa927f56cc80951dd9e8509292381",
-  "predecessor": "same-copy BCC/Katran serial apps",
+  "predecessor": "mode-corrected same-copy BCC/Katran serial apps",
   "scope": "Full original Tracee recipe; all existing native manifest entries and paired embedded BPF retained;88-helper model;8GiB16-19",
   "runtime_admission_additions": 0
 }
