@@ -239,7 +239,7 @@ _Static_assert(KPROG_X86_GPR_CELL(X86_R15) == 15U,
 	       "x86 gpr dispatch cell drift");
 
 #define X86_SIM_L_DECLARE_REG(REG, NAME)                                    \
-	union x86_sim_gpr __x86_##NAME = { .ptr = (void *)0 };              \
+	union x86_sim_gpr __x86_##NAME = { .ptr = (REG) == X86_RSP ? (void *)0 : (void *)X86_SIM_L_UNSPECIFIED() };              \
 	__u8 __x86_##NAME##_tag = X86_SIM_TAG_SCALAR;
 
 #define X86_SIM_L_STATE_REG_FIELD(REG, NAME)                                \
@@ -325,20 +325,26 @@ struct x86_sim_state {
 #define __x86_sim_abi_kind (__x86_state->abi_kind)
 #endif
 
+#if defined(__bpf__) || defined(__BPF__)
+#define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
+#else
+#define X86_SIM_L_UNSPECIFIED() 0ULL
+#endif
+
 #define X86_SIM_L_DECLARE_STATE()                                           \
 	__u8 __x86_sim_is_xdp = 0;                 \
 	void *__x86_sim_helper_ctx = (void *)0;                            \
 	void *__x86_sim_helper_abi_base = (void *)0;                       \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
 	__u64 __x86_native_stack_base = 0;                                 \
-	__u8 __x86_cf = 0;                                                  \
-	__u8 __x86_zf = 0;                                                  \
-	__u8 __x86_sf = 0;                                                  \
-	__u8 __x86_of = 0;                                                  \
-	__u8 __x86_pf = 0;                                                  \
-	__u8 __x86_af = 0;                                                  \
-	__u64 __x86_xmm0_lo = 0;                                            \
-	__u64 __x86_xmm0_hi = 0;                                            \
+	__u8 __x86_cf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u8 __x86_zf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u8 __x86_sf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u8 __x86_of = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u8 __x86_pf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u8 __x86_af = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+	__u64 __x86_xmm0_lo = X86_SIM_L_UNSPECIFIED();                                            \
+	__u64 __x86_xmm0_hi = X86_SIM_L_UNSPECIFIED();                                            \
 	__u64 __x86_sim_ret_addr = 0
 
 #ifdef X86_SIM_ENABLE_STACK
@@ -1796,6 +1802,7 @@ extern void x86_sim_unmapped_xdp_read(void)
 		}                                                        \
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,     \
 					    X86_SIM_L_REG_TAG(X86_RDI)); \
+		X86_SIM_L_HELPER_CLOBBERS();                             \
 	} while (0)
 
 #define X86_SIM_L_EXEC_CALL_MEMSET(IMM)                                     \
@@ -2550,16 +2557,46 @@ extern void __x86_sim_unsupported_helper(void)
     __attribute__((error("unresolved x86 helper ID")));
 #define X86_SIM_L_UNSUPPORTED_HELPER() __x86_sim_unsupported_helper()
 
+#define X86_SIM_L_HELPER_CLOBBERS() \
+    do { \
+        __x86_rcx.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_rcx_tag = X86_SIM_TAG_SCALAR; \
+        __x86_rdx.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_rdx_tag = X86_SIM_TAG_SCALAR; \
+        __x86_rsi.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_rsi_tag = X86_SIM_TAG_SCALAR; \
+        __x86_rdi.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_rdi_tag = X86_SIM_TAG_SCALAR; \
+        __x86_r8.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_r8_tag = X86_SIM_TAG_SCALAR; \
+        __x86_r9.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_r9_tag = X86_SIM_TAG_SCALAR; \
+        __x86_r10.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_r10_tag = X86_SIM_TAG_SCALAR; \
+        __x86_r11.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
+        __x86_r11_tag = X86_SIM_TAG_SCALAR; \
+        __x86_cf = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_zf = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_sf = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_of = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_pf = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_af = X86_SIM_L_UNSPECIFIED() & 1; \
+        __x86_xmm0_lo = X86_SIM_L_UNSPECIFIED(); \
+        __x86_xmm0_hi = X86_SIM_L_UNSPECIFIED(); \
+    } while (0)
+
 #define X86_SIM_L_HELPER_SCALAR_RESULT(EXPR) \
     do { \
         __u64 __x86_helper_result = (__u64)(EXPR); \
         X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_helper_result, X86_WIDTH_64); \
+        X86_SIM_L_HELPER_CLOBBERS(); \
     } while (0)
 
 #define X86_SIM_L_HELPER_POINTER_RESULT(EXPR) \
     do { \
         void *__x86_helper_result = (void *)(EXPR); \
         X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_helper_result, X86_SIM_TAG_MAP_VALUE); \
+        X86_SIM_L_HELPER_CLOBBERS(); \
     } while (0)
 
 #define X86_SIM_BPF_CALL_bpf_map_lookup_elem() \

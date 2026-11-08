@@ -47,7 +47,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert b"env->allow_uninit_stack = false;" in modified
     apply(kernel, patch)
     assert source.read_bytes() == modified, "second apply reversed the kernel fix"
-    conflict = modified.replace(b"if (op == BPF_EXIT) {", b"if (op == BPF_JA) {", 1)
+    conflict = modified.replace(b"int err = add_kfunc_desc(env, insn->imm, insn->off, false);", b"int err = add_kfunc_desc(env, insn->imm, insn->off, true);", 1)
     source.write_bytes(conflict)
     try:
         apply(kernel, patch)

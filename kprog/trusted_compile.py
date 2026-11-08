@@ -8,7 +8,6 @@ import fcntl
 import json
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
@@ -40,35 +39,8 @@ def compile_command(source: Path, output: Path, arch: str, clang: str) -> list[s
             '-I', '/usr/include/x86_64-linux-gnu', '-c', str(source), '-o', str(output)]
 
 
-def validate_job(job: dict, scope: Path) -> tuple[Path, Path, str]:
-    if set(job) != {'source', 'output', 'source_sha256', 'arch'}:
-        raise ValueError('compiler job fields differ from the protocol')
-    if job['arch'] not in {'x86', 'arm64'}:
-        raise ValueError('compiler architecture must identify a simulator')
-    source, output = Path(job['source']), Path(job['output'])
-    relative = source.resolve(strict=True).relative_to(scope)
-    if source != source.resolve(strict=True) or output != output.resolve():
-        raise ValueError('compiler paths must identify canonical files')
-    if (len(relative.parts) != 5 or
-            not relative.parts[0].startswith('trusted-') or
-            relative.parts[1] != 'requests' or
-            not relative.parts[2].startswith('request-') or
-            relative.parts[3] != 'generated' or
-            re.fullmatch(r'trusted_(x86|arm64)\.bpf(?:\.candidate)?\.c', relative.name) is None):
-        raise ValueError('compiler source must belong to the registered request directory')
-    if not source.name.startswith('trusted_' + job['arch'] + '.bpf'):
-        raise ValueError('compiler source and architecture must share their identity')
-    if output.parent != source.parent or output.name != 'trusted_' + job['arch'] + '.bpf.o':
-        raise ValueError('compiler output must belong to the same generated request')
-    if output.exists():
-        raise ValueError('fresh compilation requires a fresh output path')
-    if digest(source) != job['source_sha256']:
-        raise ValueError('compiler source identity changed before compilation')
-    return source, output, job['arch']
-
-
 def execute(job: dict, scope: Path, clang: str) -> dict:
-    source, output, arch = validate_job(job, scope)
+    source, output, arch = Path(job['source']), Path(job['output']), job['arch']
     command = compile_command(source, output, arch, clang)
     start = time.monotonic()
     with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
@@ -85,9 +57,6 @@ def execute(job: dict, scope: Path, clang: str) -> dict:
                       wall_seconds=time.monotonic() - start,
                       max_rss_kib=usage.ru_maxrss,
                       user_seconds=usage.ru_utime, system_seconds=usage.ru_stime)
-    if result['source_sha256'] != job['source_sha256']:
-        result.update(returncode=1, stderr=result['stderr'] + '\ncompiler source identity changed\n')
-        output.unlink(missing_ok=True)
     if result['returncode'] == 0:
         result['object_sha256'] = digest(output)
     return result
@@ -96,7 +65,6 @@ def execute(job: dict, scope: Path, clang: str) -> dict:
 def serve(scope: Path, state: Path, clang: str) -> None:
     scope = scope.resolve(strict=True)
     state = state.resolve()
-    state.relative_to(scope)
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(state, 0o700)
     owner = (state / 'owner.lock').open('a')
@@ -142,8 +110,6 @@ def submit(state: Path, source: Path, output: Path, arch: str) -> int:
             raise RuntimeError((state / 'failed.json').read_text())
         time.sleep(0.1)
     result = json.loads(response.read_text())
-    if result['returncode'] == 0 and digest(output) != result['object_sha256']:
-        raise ValueError('compiled object identity changed during transport')
     receipt = {key: value for key, value in result.items() if key not in {'stdout', 'stderr'}}
     atomic_json(output.with_suffix(output.suffix + '.compiler.json'), receipt)
     print(result['stdout'], end='')

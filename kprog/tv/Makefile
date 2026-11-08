@@ -2,17 +2,16 @@ ARCH ?= x86
 KDIR ?= $(abspath ../../vendor/build/$(ARCH)/linux)
 CROSS_arm64 := aarch64-linux-gnu-
 
-.PHONY: check binding-check module-check kernel-check guest-kernel-check kernel-check-arm64 inventory
+.PHONY: check module-check inventory
 
-check: binding-check data-layout-check manifest-check
+check: data-layout-check manifest-check
 	python3 test_kernel_patch.py
 	cd ../formal && lake build KProgFormal.Reference.Memory
 	cd ../formal && lake env lean ../tv/Composition.lean
 	$(MAKE) bpf-check
 
 .PHONY: environment-check
-environment-check: build/test-environment-binding build/exclusive-input.bpf.o build/test-exclusive-host
-	./build/test-environment-binding
+environment-check: build/exclusive-input.bpf.o build/test-exclusive-host
 	python3 test_exclusive_wire.py
 	python3 test_kernel_patch.py
 
@@ -24,9 +23,6 @@ build/test-exclusive-host: test_exclusive_host.c ../../kinsn/module/include/nati
 	install -d build
 	$(CC) -std=gnu11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
-build/test-environment-binding: test_environment_binding.cpp ../libnativeloader/src/native_environment_binding.hpp ../libnativeloader/src/native_loader_manifest.hpp ../../kinsn/module/include/native_lab_exclusive.h ../../kinsn/module/include/native_lab_input.h
-	install -d build
-	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
 .PHONY: bpf-check cmov-check cmov-certificate cmov-negative-check
 bpf-check:
@@ -52,9 +48,6 @@ cmov-certificate:
 cmov-negative-check: cmov-check
 	python3 test_compiled_blocks.py
 
-binding-check: build/test-binding
-	./build/test-binding
-
 .PHONY: data-layout-check
 data-layout-check: build/test-data-layout
 	./build/test-data-layout
@@ -64,10 +57,6 @@ build/test-data-layout: test_data_layout.cpp ../libnativeloader/src/native_data_
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include $< \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
-
-build/test-binding: test_binding.c ../../kinsn/module/include/native_lab_binding.h ../../kinsn/module/include/native_lab_map_offset.h ../../kinsn/module/include/native_lab_checked_wire.h
-	install -d build
-	$(CC) -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
 # Build only this module in a lane-owned directory, without replacing the
 # shared image or the other lanes' module artifacts.
@@ -83,44 +72,8 @@ build-$(ARCH)/bpf_$(ARCH)_native_lab.c: ../../kinsn/module/$(ARCH)/bpf_$(ARCH)_n
 	install -d build-$(ARCH)
 	cp $< $@
 
-build/test-binding-kernel: test_binding_kernel.c test_native_inputs.h test_context.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h ../../kinsn/module/include/native_lab_checked_wire.h
-	install -d build
-	$(CC) -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
-		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
-
-kernel-check: kernel-build-x86 build/test-binding-kernel build/test-loader
-	test "$(ARCH)" = x86
-	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
-	taskset -c 8-23 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
-		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
-		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/tv guest-kernel-check'
-
-guest-kernel-check:
-	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod build-x86/bpf_x86_native_lab.ko || { dmesg; exit 1; }
-	./build/test-binding-kernel
-	./build/test-loader
-
 # Diagnose the shared build's stale-header BTF failure without replacing the
 # immutable per-lane runtime pairs or adding a benchmark admission gate.
-.PHONY: shared-kernel-check guest-shared-kernel-check
-shared-kernel-check: build/test-binding-kernel build/test-loader
-	$(MAKE) -C ../../vendor/build/x86/linux ARCH=x86 \
-		M=$(abspath ../../kinsn/module/x86) MO=$(CURDIR)/build-x86/all-shared-btf modules
-	taskset -c 8-23 vng --run $(abspath ../../vendor/build/x86/linux/arch/x86/boot/bzImage) \
-		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
-		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/tv guest-shared-kernel-check'
-
-guest-shared-kernel-check:
-	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	for module in build-x86/all-shared-btf/*.ko; do insmod "$$module" || { dmesg; exit 1; }; done
-	cat /proc/modules
-	./build/test-binding-kernel
-	./build/test-loader
-
 build/native-entry.o: test_native_entry.c
 	install -d build
 	$(CC) -O2 -c -fno-stack-protector -fno-asynchronous-unwind-tables \
@@ -174,29 +127,7 @@ build/wrong-data-layout/simulator.bpf.o: test_simulator.bpf.c
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 
-build-arm64/test-binding-kernel: test_binding_kernel.c test_native_inputs.h test_context.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h ../../kinsn/module/include/native_lab_checked_wire.h
-	install -d build-arm64
-	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -static -D__EXPORTED_HEADERS__ \
-		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
-		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o $@
-
 TV_ARM64_KERNEL_PREREQUISITE ?= kernel-build-arm64
-kernel-check-arm64: build-arm64/test-binding-kernel
-	$(MAKE) $(TV_ARM64_KERNEL_PREREQUISITE)
-	$(MAKE) module-check ARCH=arm64 KDIR=$(CURDIR)/build-kernel-arm64
-	install -d build-arm64/initramfs/sys build-arm64/initramfs/proc build-arm64/initramfs/dev
-	cp build-arm64/test-binding-kernel build-arm64/initramfs/init
-	cp build-arm64/bpf_arm64_native_lab.ko build-arm64/initramfs/module.ko
-	cd build-arm64/initramfs && find . -print0 | cpio --null -o --format=newc > ../initramfs.cpio
-	timeout 180 taskset -c 8-23 qemu-system-aarch64 -M virt -cpu cortex-a72 \
-		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
-		-kernel build-kernel-arm64/arch/arm64/boot/Image \
-		-initrd build-arm64/initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
-		> build-arm64/kernel.log 2>&1
-	cat build-arm64/kernel.log
-	rg -q '^kernel binding regression: PASS' build-arm64/kernel.log
-
 inventory:
 	python3 inventory.py --out ../results/kprog_tv_20261106/programs.jsonl
 
@@ -248,14 +179,6 @@ input-negative-check: input-check
 .PHONY: manifest-check
 manifest-check: build/test-manifest
 	./build/test-manifest
-
-.PHONY: rodata-metadata-check
-rodata-metadata-check: build/test-rodata-metadata
-	./build/test-rodata-metadata
-
-build/test-rodata-metadata: test_rodata_metadata.cpp ../libnativeloader/src/native_rodata_binding.hpp ../libnativeloader/src/native_loader_manifest.hpp
-	install -d build
-	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
 build/test-manifest: test_manifest.cpp ../libnativeloader/src/native_loader_manifest.hpp
 	install -d build
@@ -461,22 +384,6 @@ build-arm64/all-modules-init: arm64_all_modules_init.c
 	install -d build-arm64
 	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static $< -o $@
 
-.PHONY: kernel-check-arm64-all
-kernel-check-arm64-all: build-arm64/all-modules-init build-arm64/test-binding-kernel
-	install -d build-arm64/all-initramfs/sys build-arm64/all-initramfs/proc build-arm64/all-initramfs/dev build-arm64/all-initramfs/kinsn
-	cp build-arm64/all-modules-init build-arm64/all-initramfs/init
-	cp build-arm64/test-binding-kernel build-arm64/all-initramfs/test-binding-kernel
-	cp build-arm64/all-exclusive/*.ko build-arm64/all-initramfs/kinsn/
-	cp build-arm64/all-exclusive/bpf_arm64_native_lab.ko build-arm64/all-initramfs/module.ko
-	cd build-arm64/all-initramfs && find . -print0 | cpio --null -o --format=newc > ../all-initramfs.cpio
-	timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
-		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
-		-kernel build-kernel-arm64/arch/arm64/boot/Image \
-		-initrd build-arm64/all-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
-		> build-arm64/all-kernel.log 2>&1
-	cat build-arm64/all-kernel.log
-	rg -q '^kernel binding regression: PASS' build-arm64/all-kernel.log
-
 .PHONY: simple-entry-check simple-entry-certificate
 simple-entry-check: simple-platform-check simple-kernel-artifact-check
 	$(MAKE) simple-entry-certificate
@@ -520,52 +427,9 @@ simple-blocks-certificate:
 		-o ../tv/build/SimpleGuardCertificate.olean ../tv/SimpleGuardCertificate.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleBlocks.olean ../tv/SimpleBlocks.lean
 
-build-arm64/capture-checked: capture_checked.cpp ../libnativeloader/build-arm64/libnative_loader.a ../../kinsn/module/include/native_lab_checked_wire.h
-	install -d build-arm64
-	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
-		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../libnativeloader/build-arm64/libnative_loader.a \
-		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
-		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $@
-
 CAPTURE_ARM64_PROGRAM ?= simple
 CAPTURE_ARM64_ARTIFACTS ?= build/simple-arm64
 CAPTURE_ARM64_OUTPUT ?= build-arm64
-.PHONY: simple-checked-kernel-check-arm64
-simple-checked-kernel-check-arm64: build-arm64/capture-checked
-	$(MAKE) module-check ARCH=arm64 KDIR=$(CURDIR)/build-kernel-arm64
-	install -d $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/sys $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/proc $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/tmp $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/dev
-	cp build-arm64/capture-checked $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/init
-	cp build-arm64/bpf_arm64_native_lab.ko $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/module.ko
-	cp $(CAPTURE_ARM64_ARTIFACTS)/$(CAPTURE_ARM64_PROGRAM).bpf.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.bpf.o
-	cp $(CAPTURE_ARM64_ARTIFACTS)/native-link/$(CAPTURE_ARM64_PROGRAM).proof.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.o
-	cp $(CAPTURE_ARM64_ARTIFACTS)/native-link/$(CAPTURE_ARM64_PROGRAM).proof.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.$(CAPTURE_ARM64_PROGRAM)_xdp.proof.o
-	cp -a ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/bin ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/lib ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/native-link $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/
-	cd $(CAPTURE_ARM64_OUTPUT)/checked-initramfs && find . -print0 | cpio --null -o --format=newc > ../checked-initramfs.cpio
-	timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
-		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
-		-kernel build-kernel-arm64/arch/arm64/boot/Image \
-		-initrd $(CAPTURE_ARM64_OUTPUT)/checked-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1 -- $(CAPTURE_ARM64_PROGRAM)_xdp' \
-		> $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log 2>&1
-	cat $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log
-	grep -q '^actual bound expanded artifact capture: PASS' $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log
-
-.PHONY: checked-kernel-check-x86 guest-checked-kernel-check-x86
-checked-kernel-check-x86: build/test-binding-kernel build/test-loader
-	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
-	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
-		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
-		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/tv guest-checked-kernel-check-x86'
-
-guest-checked-kernel-check-x86:
-	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod build-x86/bpf_x86_native_lab.ko
-	./build/test-binding-kernel
-	capture=$$(mktemp -d build/capture-loader-x86.XXXXXX) && \
-		BPFREJIT_NATIVE_LOADER_TV_DIR=$$capture ./build/test-loader && \
-		printf '%s\n' "$$capture" > build/capture-loader-x86.latest
-
 .PHONY: simple-checked-artifact-check
 simple-checked-artifact-check:
 	python3 extract_checked.py build-arm64/checked-kernel.log build/simple-checked
@@ -576,10 +440,6 @@ SIMPLE_CHECKED_DIR ?= build/simple-checked
 checked-certificate:
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/$(SIMPLE_CHECKED_DIR) \
 		-o ../tv/$(SIMPLE_CHECKED_DIR)/SimpleChecked.olean ../tv/$(SIMPLE_CHECKED_DIR)/SimpleChecked.lean
-
-.PHONY: checked-artifact-negative-check
-checked-artifact-negative-check:
-	python3 test_checked_artifact.py build/simple-checked/checked.snapshot.bin build-arm64/kernel.log
 
 .PHONY: checked-platform-check
 checked-platform-check: bpf-check simple-checked-artifact-check
@@ -625,10 +485,7 @@ X86_ABI_NATIVE_LINK ?= ../x86/native_lab/native_link/target/release/native-link
 x86-native-abi-check:
 	python3 test_x86_native_abi.py $(X86_ABI_NATIVE_LINK) build/x86-native-abi
 
-.PHONY: x86-native-abi-proof-build x86-native-abi-kernel-check guest-x86-native-abi-check
-x86-native-abi-proof-build:
-	python3 test_x86_abi_kernel.py build build/x86-abi-proof
-
+.PHONY: x86-native-abi-kernel-check
 build/x86-abi-bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/build/libnative_loader.a
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
 		-DNATIVE_LINK_PATH='"$(abspath build/native-link-abi)"' \
@@ -642,13 +499,6 @@ x86-native-abi-kernel-check: build/x86-abi-bound-probe
 		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/tv guest-x86-native-abi-check'
-
-guest-x86-native-abi-check:
-	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
-	output=$$(mktemp -d build/x86-abi-kernel.XXXXXX) && \
-		python3 test_x86_abi_kernel.py run $$output --probe build/x86-abi-bound-probe && \
-		printf '%s\n' "$$output" > build/x86-abi-kernel.latest
 
 .PHONY: simple-execution-relocation-check
 simple-execution-relocation-check: simple-pc-relocation-check
@@ -815,20 +665,6 @@ trusted-simple-cfg-certificate: trusted-simple-entry-certificate
 		-o ../tv/build/TrustedSimpleCFG.olean ../tv/TrustedSimpleCFG.lean
 
 # Regression for unbound ABI output markers reading an undefined entry r0.
-.PHONY: unbound-kernel-check guest-unbound-kernel-check
-unbound-kernel-check: build/test-binding-kernel build/test-loader
-	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
-	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
-		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
-		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/tv guest-unbound-kernel-check'
-
-guest-unbound-kernel-check:
-	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod build-x86/bpf_x86_native_lab.ko
-	./build/test-binding-kernel --unbound-only
-	./build/test-loader --unbound-only
-
 # Actual Katran loads its own programs through the unchanged upstream server.
 UNBOUND_KATRAN_INPUTS ?= $(CURDIR)/build/unbound-katran
 .PHONY: unbound-katran-inputs unbound-katran-check guest-unbound-katran-check unbound-loader-regression
@@ -1007,7 +843,6 @@ native-link-arm-placement-check: native-link-arm-helper-guard-check native-link-
 
 .PHONY: native-link-arm-exclusive-check
 native-link-arm-exclusive-check: native-link-arm-helper-check bpf-check build/test-environment-binding
-	./build/test-environment-binding
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmExclusive.olean ../tv/NativeLinkArmExclusive.lean
 

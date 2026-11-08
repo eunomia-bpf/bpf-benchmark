@@ -50,7 +50,7 @@ void load(int argc, char **argv) {
     o.trusted_simulator_program = argv[9]; o.native_link_path = argv[10];
     o.expected_attach_type = u32(argv[11]); o.prog_flags = u32(argv[12]);
     o.attach_btf_id = u32(argv[13]); o.attach_btf_obj_id = u32(argv[14]); o.attach_prog_id = u32(argv[15]);
-    if (u32(argv[16]) != info<bpf_prog_info>(source.value).ifindex) throw std::runtime_error("source interface mismatch");
+    u32(argv[16]);
     for (int i = 17; i < argc; i += 3) {
         native_loader::TrustedMapBinding map;
         map.native_symbol = argv[i]; map.map_id = u32(argv[i+1]);

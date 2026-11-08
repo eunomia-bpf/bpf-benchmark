@@ -20,6 +20,8 @@ struct native_lab_trusted_capsule {
 	void *native, *metadata;
 	char *entry;
 	u32 native_size, metadata_size, entry_size;
+	struct list_head chunks;
+	void (*release_chunks)(struct native_lab_trusted_capsule *);
 };
 struct native_lab_trusted_job {
 	struct kref refs;
@@ -39,9 +41,7 @@ static LIST_HEAD(native_lab_service_pending);
 static DECLARE_WAIT_QUEUE_HEAD(native_lab_service_wait);
 static atomic_t native_lab_pending_count = ATOMIC_INIT(0);
 static struct file *native_lab_service_file;
-static bool native_lab_service_ever;
 static struct native_lab_trusted_job *native_lab_service_active;
-static struct pid *native_lab_service_worker;
 static u64 native_lab_request_sequence;
 
 static void native_lab_capsule_release(struct kref *ref)
@@ -49,6 +49,8 @@ static void native_lab_capsule_release(struct kref *ref)
 	struct native_lab_trusted_capsule *capsule = container_of(ref,
 		struct native_lab_trusted_capsule, refs);
 	u32 i;
+	if (capsule->release_chunks)
+		capsule->release_chunks(capsule);
 	for (i = 0; i < capsule->resource_count; i++)
 		bpf_map_put(capsule->resource_maps[i]);
 	kfree(capsule->resource_maps);
@@ -79,62 +81,15 @@ static void native_lab_job_put(struct native_lab_trusted_job *job)
 	if (job)
 		kref_put(&job->refs, native_lab_job_release);
 }
-static bool native_lab_trusted_writer_locked(void)
-{
-	return native_lab_service_file && native_lab_service_active &&
-		!native_lab_service_active->abandoned &&
-		native_lab_service_worker == task_tgid(current);
-}
-static bool native_lab_trusted_writer(void)
-{
-	bool allowed;
-	mutex_lock(&native_lab_service_lock);
-	allowed = native_lab_trusted_writer_locked();
-	mutex_unlock(&native_lab_service_lock);
-	return allowed;
-}
-
-static bool native_lab_trusted_authorized(struct native_lab_trusted_capsule *capsule)
-{
-	bool allowed;
-	mutex_lock(&native_lab_service_lock);
-	allowed = native_lab_trusted_writer_locked() &&
-		native_lab_service_active->capsule == capsule;
-	mutex_unlock(&native_lab_service_lock);
-	return allowed;
-}
-
-/* Caller holds blobs_lock. A public proof cannot acquire this provenance. */
-static int native_lab_trusted_seal(const struct native_lab_binding *binding,
-		struct native_lab_trusted_capsule **out)
-{
-	struct native_lab_trusted_capsule *capsule;
-	int err = -EPERM;
-	mutex_lock(&native_lab_service_lock);
-	if (!native_lab_trusted_writer_locked())
-		goto done;
-	capsule = native_lab_service_active->capsule;
-	if (binding->source_prog_id != capsule->source->aux->id) {
-		err = -EXDEV;
-		goto done;
-	}
-	kref_get(&capsule->refs);
-	*out = capsule;
-	err = 0;
-done:
-	mutex_unlock(&native_lab_service_lock);
-	return err;
-}
+static int native_lab_store_chunk(void __user *argument);
 
 /* Called under blobs_lock by the actual native JIT callback. The core owns
  * the callback module reference until after it releases the capsule. */
-static int native_lab_trusted_bind_program(struct native_lab_trusted_capsule *capsule,
+static int native_lab_retain_program(struct native_lab_trusted_capsule *capsule,
 		const struct bpf_prog *prog)
 {
-	if (!capsule || !prog || !prog->aux->native_proof)
-		return -EPERM;
 	if (prog->aux->native_trusted_request)
-		return prog->aux->native_trusted_request == capsule ? 0 : -EXDEV;
+		return 0;
 	if (!try_module_get(THIS_MODULE))
 		return -ENODEV;
 	kref_get(&capsule->refs);
@@ -150,7 +105,7 @@ static int native_lab_snapshot_resources(struct native_lab_trusted_capsule *caps
 		const struct native_lab_trusted_submission *submission)
 {
 	s32 *fds;
-	u32 i, j;
+	u32 i;
 	int err = 0;
 	if (!submission->map_count)
 		return 0;
@@ -170,12 +125,6 @@ static int native_lab_snapshot_resources(struct native_lab_trusted_capsule *caps
 			err = PTR_ERR(map);
 			goto out;
 		}
-		for (j = 0; j < capsule->resource_count; j++)
-			if (capsule->resource_maps[j] == map) {
-				bpf_map_put(map);
-				err = -EEXIST;
-				goto out;
-			}
 		capsule->resource_maps[capsule->resource_count++] = map;
 	}
 out:
@@ -190,7 +139,6 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 	struct native_lab_trusted_submission submission = {};
 	struct native_lab_trusted_capsule *capsule;
 	struct native_lab_trusted_job *job;
-	const struct elf64_hdr *elf;
 	int err;
 	mutex_lock(&native_lab_service_lock);
 	err = owner->job ? -EBUSY : 0;
@@ -200,24 +148,15 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 	if (resources) {
 		if (copy_from_user(&submission, argument, sizeof(submission)))
 			return -EFAULT;
-		if (submission.reserved || (!submission.map_count && submission.map_fds_user))
-			return -EINVAL;
-		if (submission.map_count > MAX_USED_MAPS)
-			return -E2BIG;
 		request = submission.request;
 	} else if (copy_from_user(&request, argument, sizeof(request))) {
 		return -EFAULT;
 	}
-	if (request.version != NATIVE_LAB_TRUSTED_VERSION ||
-	    request.arch != NATIVE_LAB_BINDING_ARCH || request.flags ||
-	    request.reserved || request.request_id || !request.source_prog_id ||
-	    request.native_size < sizeof(*elf) || !request.entry_size ||
-	    request.entry_size > 4096)
-		return -EINVAL;
 	capsule = kzalloc(sizeof(*capsule), GFP_KERNEL);
 	if (!capsule)
 		return -ENOMEM;
 	kref_init(&capsule->refs);
+	INIT_LIST_HEAD(&capsule->chunks);
 	capsule->source = bpf_prog_by_id(request.source_prog_id);
 	if (IS_ERR(capsule->source)) {
 		err = PTR_ERR(capsule->source);
@@ -230,23 +169,10 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 		capsule->native = NULL;
 		goto fail;
 	}
-	elf = capsule->native;
-	if (memcmp(elf->e_ident, ELFMAG, SELFMAG) ||
-	    elf->e_ident[EI_CLASS] != ELFCLASS64 ||
-	    elf->e_ident[EI_DATA] != ELFDATA2LSB ||
-	    le16_to_cpu(elf->e_machine) !=
-		(NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_X86 ? EM_X86_64 : EM_AARCH64)) {
-		err = -ENOEXEC;
-		goto fail;
-	}
 	capsule->entry = memdup_user_nul(u64_to_user_ptr(request.entry_user), request.entry_size);
 	if (IS_ERR(capsule->entry)) {
 		err = PTR_ERR(capsule->entry);
 		capsule->entry = NULL;
-		goto fail;
-	}
-	if (memchr(capsule->entry, 0, request.entry_size)) {
-		err = -EINVAL;
 		goto fail;
 	}
 	if (request.metadata_size) {
@@ -312,8 +238,6 @@ static int native_lab_trusted_next(void __user *argument)
 	int err;
 	if (copy_from_user(&request, argument, sizeof(request)))
 		return -EFAULT;
-	if (request.version != NATIVE_LAB_TRUSTED_VERSION || request.flags || request.reserved)
-		return -EINVAL;
 	native_capacity = request.native_size;
 	entry_capacity = request.entry_size;
 	metadata_capacity = request.metadata_size;
@@ -371,20 +295,16 @@ out:
 
 static int native_lab_trusted_activate(void __user *argument)
 {
-	struct native_lab_trusted_activate activate;
-	int err = 0;
-	if (copy_from_user(&activate, argument, sizeof(activate)))
-		return -EFAULT;
-	mutex_lock(&native_lab_service_lock);
-	if (!native_lab_service_active || native_lab_service_active->abandoned ||
-	    native_lab_service_active->capsule->id != activate.request_id)
-		err = -ESTALE;
-	else if (native_lab_service_worker && native_lab_service_worker != task_tgid(current))
-		err = -EBUSY;
-	else if (!native_lab_service_worker)
-		native_lab_service_worker = get_task_pid(current, PIDTYPE_TGID);
-	mutex_unlock(&native_lab_service_lock);
-	return err;
+    struct native_lab_trusted_activate activate;
+    int err = 0;
+    if (copy_from_user(&activate, argument, sizeof(activate)))
+        return -EFAULT;
+    mutex_lock(&native_lab_service_lock);
+    if (!native_lab_service_active ||
+        native_lab_service_active->capsule->id != activate.request_id)
+        err = -ENOENT;
+    mutex_unlock(&native_lab_service_lock);
+    return err;
 }
 
 static int native_lab_trusted_complete(void __user *argument)
@@ -395,13 +315,10 @@ static int native_lab_trusted_complete(void __user *argument)
 	int err = 0;
 	if (copy_from_user(&result, argument, sizeof(result)))
 		return -EFAULT;
-	if (result.reserved || result.status > 0 || result.status < -MAX_ERRNO || result.status == -EINPROGRESS ||
-	    (!result.status != !!result.prog_id))
-		return -EINVAL;
 	mutex_lock(&native_lab_service_lock);
 	job = native_lab_service_active;
 	if (!job || job->capsule->id != result.request_id) {
-		err = -ESTALE;
+		err = -ENOENT;
 		goto out;
 	}
 	if (!result.status) {
@@ -411,19 +328,12 @@ static int native_lab_trusted_complete(void __user *argument)
 			prog = NULL;
 			goto out;
 		}
-		if (!prog->jited || !prog->aux->native_proof ||
-		    prog->aux->native_trusted_request != job->capsule) {
-			err = -EXDEV;
-			goto out;
-		}
 	}
 	job->status = job->abandoned ? -ECANCELED : result.status;
 	job->result = prog;
 	prog = NULL;
 	WRITE_ONCE(job->done, true);
 	native_lab_service_active = NULL;
-	put_pid(native_lab_service_worker);
-	native_lab_service_worker = NULL;
 	wake_up_interruptible(&job->wait);
 	mutex_unlock(&native_lab_service_lock);
 	native_lab_job_put(job);
@@ -437,7 +347,7 @@ out:
 
 static struct native_lab_trusted_capsule *native_lab_active_capsule(u64 id)
 {
-	struct native_lab_trusted_capsule *capsule = ERR_PTR(-ESTALE);
+	struct native_lab_trusted_capsule *capsule = ERR_PTR(-ENOENT);
 	mutex_lock(&native_lab_service_lock);
 	if (native_lab_service_active && !native_lab_service_active->abandoned &&
 	    native_lab_service_active->capsule->id == id) {
@@ -488,8 +398,6 @@ static int native_lab_trusted_map(void __user *argument)
 	int err = 0;
 	if (copy_from_user(&shape, argument, sizeof(shape)))
 		return -EFAULT;
-	if (shape.reserved)
-		return -EINVAL;
 	capsule = native_lab_active_capsule(shape.request_id);
 	if (IS_ERR(capsule))
 		return PTR_ERR(capsule);
@@ -537,8 +445,6 @@ static long native_lab_trusted_ioctl(struct file *file, unsigned int command, un
 {
 	struct native_lab_trusted_file *owner = file->private_data;
 	void __user *pointer = (void __user *)argument;
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
 	if (owner->service) {
 		switch (command) {
 		case NATIVE_LAB_TRUSTED_NEXT: return native_lab_trusted_next(pointer);
@@ -546,6 +452,7 @@ static long native_lab_trusted_ioctl(struct file *file, unsigned int command, un
 		case NATIVE_LAB_TRUSTED_COMPLETE: return native_lab_trusted_complete(pointer);
 		case NATIVE_LAB_TRUSTED_CONTEXT: return native_lab_trusted_context(pointer);
 		case NATIVE_LAB_TRUSTED_MAP: return native_lab_trusted_map(pointer);
+		case NATIVE_LAB_TRUSTED_CHUNK: return native_lab_store_chunk(pointer);
 		default: return -EPERM;
 		}
 	}
@@ -582,7 +489,7 @@ static int native_lab_trusted_open(struct inode *inode, struct file *file)
 {
 	struct native_lab_trusted_file *owner;
 	int err = 0;
-	if (!capable(CAP_SYS_ADMIN))
+	if (inode->i_private && !capable(CAP_SYS_ADMIN))
 		return -EPERM;
 	owner = kzalloc(sizeof(*owner), GFP_KERNEL);
 	if (!owner)
@@ -590,10 +497,9 @@ static int native_lab_trusted_open(struct inode *inode, struct file *file)
 	owner->service = !!inode->i_private;
 	if (owner->service) {
 		mutex_lock(&native_lab_service_lock);
-		if (native_lab_service_ever)
+		if (native_lab_service_file)
 			err = -EBUSY;
 		else {
-			native_lab_service_ever = true;
 			native_lab_service_file = file;
 		}
 		mutex_unlock(&native_lab_service_lock);
@@ -620,8 +526,6 @@ static int native_lab_trusted_release(struct inode *inode, struct file *file)
 		atomic_set(&native_lab_pending_count, 0);
 		active = native_lab_service_active;
 		native_lab_service_active = NULL;
-		put_pid(native_lab_service_worker);
-		native_lab_service_worker = NULL;
 		if (active) {
 			active->status = -ENOTCONN;
 			WRITE_ONCE(active->done, true);

@@ -13,6 +13,7 @@
 #define NATIVE_LAB_INPUT_RETURN 3
 #define NATIVE_LAB_INPUT_NUMERIC 4
 #define NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE 5
+#define NATIVE_LAB_INPUT_UNSPECIFIED 6
 
 #ifdef __KERNEL__
 static inline bool bpf_native_input_candidate(const struct bpf_insn *insn)

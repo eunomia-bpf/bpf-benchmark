@@ -1,40 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
-/*
- * BpfReJIT x86 native-code lab kinsn.
- *
- * Test-only escape hatch: lets userspace upload an x86-64 byte sequence and a
- * verifier proof, then have a BPF program splat the native bytes inline at JIT
- * time via a kinsn. A non-zero generation in the sidecar payload binds both
- * callbacks to the same immutable upload snapshot. Generation zero retains
- * the explicitly unbound lower-bound mode used by trusted-native experiments.
- *
- * Use cases:
- *  - Establish a hand-tuned "pure native" performance lower bound to compare
- *    against the production kinsn passes.
- *  - Bring up new optimization ideas at the x86 level without going through
- *    bpfopt+kinsn+REJIT first.
- *
- * Safety: generation-zero calls disable verifier guarantees. Bound calls make
- * the verifier analyze the uploaded proof but still trust the proof generator
- * to model the uploaded native instructions correctly. Do NOT load on
- * production kernels. Upload requires CAP_SYS_ADMIN, the debugfs nodes are
- * root-only by default, and the module intentionally has no in-tree Kconfig.
- *
- * ABI considerations the caller must respect:
- *  - Blob is splatted in the middle of a JITted BPF function. It must reach
- *    the next BPF insn by falling through (no `ret`). To return a value from
- *    the BPF program, set rax in the blob and follow with BPF `exit`.
- *  - Callee-saved registers (rbx, rbp, r12-r15) map to BPF r6-r10 and to the
- *    BPF JIT frame pointer; clobber them only if the surrounding BPF program
- *    doesn't use those registers. native-link may strip RBX/R13-R15 saves from
- *    the blob only when the sidecar ABI mask below asks the JIT proof to mark
- *    the corresponding BPF callee-saved regs as used, forcing the BPF JIT
- *    prologue/epilogue to preserve the host registers.
- *  - Caller-saved (rdi, rsi, rdx, rcx, r8, r9, r10, r11) and rax are free.
- *  - The kfunc takes a single u64 argument so the BPF program can stage one
- *    value (e.g. a context pointer cast to u64) into rdi before the call.
- */
-
+/* Trusted service creates immutable linked P chunks; verifier and JIT use
+ * these allocations through ordinary kernel handles. */
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/bpf_verifier.h>
@@ -47,131 +13,146 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/uaccess.h>
-
+#include <linux/xarray.h>
 #include "kinsn_x86_emit.h"
-
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
 #include "native_lab_trusted.h"
-
-/* Name the exported entry, without compiler builtin/fortify substitution. */
-extern void *native_lab_x86_memset(void *, int, size_t) __asm__("memset");
-extern void *native_lab_x86_memcpy(void *, const void *, size_t) __asm__("memcpy");
-
-#define NATIVE_LAB_MAX_BLOBS	512
-/*
- * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kinsn
- * emit at 128 bytes. Userspace uploads longer programs as multiple
- * back-to-back sidecar/call pairs.
- */
-#define NATIVE_LAB_MAX_BLOB_BYTES	128
-#define NATIVE_LAB_MAX_PROOF_INSNS	1000000
-
-/*
- * Stage 2 side-band relocations:
- *
- * Userspace native-link can't compute a helper call's rel32 displacement,
- * because that depends on where the BPF JIT will splat the blob. The blob
- * ships a `call rel32` placeholder and a separate `relocs` array describing
- * each patch site. After memcpy'ing the blob bytes into the JIT image,
- * emit_x86 patches the displacement. Out-of-range targets fail load instead
- * of falling back to an indirect call.
- *
- * relocs are uploaded via a sibling debugfs file blob<N>.relocs whose
- * payload is a tightly packed array of `struct native_lab_reloc_record`.
- */
-#define NATIVE_LAB_RELOC_HELPER_CALL_REL32	1
-#define NATIVE_LAB_MAX_RELOCS		32
-#define NATIVE_LAB_ABI_RBX		(1U << 0)
-#define NATIVE_LAB_ABI_R13		(1U << 1)
-#define NATIVE_LAB_ABI_R14		(1U << 2)
-#define NATIVE_LAB_ABI_R15		(1U << 3)
-#define NATIVE_LAB_ABI_MASK		(NATIVE_LAB_ABI_RBX | \
-					 NATIVE_LAB_ABI_R13 | \
-					 NATIVE_LAB_ABI_R14 | \
-					 NATIVE_LAB_ABI_R15)
-
-struct native_lab_reloc_record {
-	__u32 offset;   /* byte offset of the helper call placeholder */
-	__u32 kind;     /* NATIVE_LAB_RELOC_* */
-	__u64 target;   /* absolute kernel address */
-};
-
+#define NATIVE_LAB_MAX_BLOB_BYTES 128
+#define NATIVE_LAB_RELOC_HELPER_CALL_REL32 1
+#define NATIVE_LAB_ABI_RBX 1U
+#define NATIVE_LAB_ABI_R13 2U
+#define NATIVE_LAB_ABI_R14 4U
+#define NATIVE_LAB_ABI_R15 8U
+struct native_lab_reloc_record { u32 offset, kind; u64 target; };
 struct native_blob {
-	u8 *bytes;
-	size_t len;
-	struct native_lab_reloc_record *relocs;
-	size_t reloc_count;
-	struct bpf_insn *proof;
-	size_t proof_len;
-	u32 generation;
-	struct native_lab_binding binding;
-	u32 *bound_generations;
-	struct bpf_map **bound_maps;
-	u32 bound_map_count;
-	struct bpf_prog *bound_source;
-	struct bpf_prog *bound_target;
-	struct native_lab_trusted_capsule *trusted;
+    struct list_head list;
+    u32 id;
+    u8 *bytes;
+    size_t len, reloc_count, proof_len;
+    struct native_lab_reloc_record *relocs;
+    struct bpf_insn *proof;
+    struct bpf_map **maps;
+    u32 map_count;
+    struct native_lab_trusted_capsule *capsule;
 };
-
-static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
+static DEFINE_XARRAY_ALLOC(blobs);
 static DEFINE_MUTEX(blobs_lock);
 static struct dentry *debugfs_root;
+#include "native_lab_group.h"
+
+static void native_lab_free_blob(struct native_blob *blob)
+{
+    while (blob->map_count)
+        bpf_map_put(blob->maps[--blob->map_count]);
+    kfree(blob->maps);
+    kvfree(blob->bytes);
+    kvfree(blob->relocs);
+    kvfree(blob->proof);
+    kfree(blob);
+}
+static void native_lab_free_chunks(struct native_lab_trusted_capsule *capsule)
+{
+    struct native_blob *blob, *next;
+    mutex_lock(&blobs_lock);
+    list_for_each_entry_safe(blob, next, &capsule->chunks, list) {
+        xa_erase(&blobs, blob->id);
+        list_del(&blob->list);
+        native_lab_free_blob(blob);
+    }
+    mutex_unlock(&blobs_lock);
+}
+static int native_lab_store_chunk(void __user *argument)
+{
+    struct native_lab_trusted_chunk input;
+    struct native_lab_trusted_capsule *capsule;
+    struct native_blob *blob;
+    size_t i;
+    int err;
+    if (copy_from_user(&input, argument, sizeof(input)))
+        return -EFAULT;
+    capsule = native_lab_active_capsule(input.request_id);
+    if (IS_ERR(capsule))
+        return PTR_ERR(capsule);
+    blob = kzalloc(sizeof(*blob), GFP_KERNEL);
+    if (!blob) { err = -ENOMEM; goto out; }
+    blob->len = input.native_size;
+    blob->proof_len = input.proof_insns;
+    blob->reloc_count = input.reloc_count;
+    blob->capsule = capsule;
+    blob->bytes = vmemdup_user(u64_to_user_ptr(input.native_user), blob->len);
+    if (IS_ERR(blob->bytes)) { err = PTR_ERR(blob->bytes); blob->bytes = NULL; goto fail; }
+    if (blob->reloc_count) {
+        blob->relocs = vmemdup_user(u64_to_user_ptr(input.relocs_user),
+            array_size(blob->reloc_count, sizeof(*blob->relocs)));
+        if (IS_ERR(blob->relocs)) { err = PTR_ERR(blob->relocs); blob->relocs = NULL; goto fail; }
+    }
+    blob->proof = vmemdup_user(u64_to_user_ptr(input.proof_user),
+        array_size(blob->proof_len, sizeof(*blob->proof)));
+    if (IS_ERR(blob->proof)) { err = PTR_ERR(blob->proof); blob->proof = NULL; goto fail; }
+    blob->maps = kcalloc(blob->reloc_count, sizeof(*blob->maps), GFP_KERNEL);
+    if (!blob->maps && blob->reloc_count) { err = -ENOMEM; goto fail; }
+    for (i = 0; i < blob->reloc_count; i++) {
+        u32 id = (u32)blob->relocs[i].target;
+        struct bpf_map *map;
+        if (blob->relocs[i].kind != NATIVE_LAB_RELOC_MAP_POINTER &&
+            blob->relocs[i].kind != NATIVE_LAB_RELOC_MAP_VALUE &&
+            blob->relocs[i].kind != NATIVE_LAB_RELOC_READONLY_DATA)
+            continue;
+        map = bpf_map_get_curr_or_next(&id);
+        if (!map || id != (u32)blob->relocs[i].target) {
+            if (map) bpf_map_put(map);
+            err = -ENOENT; goto fail;
+        }
+        blob->maps[blob->map_count++] = map;
+    }
+    mutex_lock(&blobs_lock);
+    err = xa_alloc(&blobs, &blob->id, blob, XA_LIMIT(1, U32_MAX), GFP_KERNEL);
+    if (!err) {
+        list_add_tail(&blob->list, &capsule->chunks);
+        capsule->release_chunks = native_lab_free_chunks;
+        input.chunk_id = blob->id;
+    }
+    mutex_unlock(&blobs_lock);
+    if (err) goto fail;
+    err = copy_to_user(argument, &input, sizeof(input)) ? -EFAULT : 0;
+    goto out;
+fail:
+    native_lab_free_blob(blob);
+out:
+    native_lab_trusted_put(capsule);
+    return err;
+}
 
 __bpf_kfunc_start_defs();
-/*
- * The BPF stub. Verifier sees an empty void kfunc taking one u64; the JIT
- * never actually calls it because the kinsn descriptor below provides
- * emit_x86. The argument exists so BPF code can stage a value into rdi
- * before the call, which the blob can then consume.
- */
-__bpf_kfunc void bpf_x86_native_lab_emit(u64 arg0)
-{
-	(void)arg0;
-}
+__bpf_kfunc void bpf_x86_native_lab_emit(u64 arg0) { (void)arg0; }
 __bpf_kfunc_end_defs();
-
 BTF_KFUNCS_START(bpf_x86_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_native_lab_emit)
 BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 
-static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask,
-				     u32 *generation)
+static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 {
-	payload = kinsn_payload_decode(payload);
-
-	if (payload & 0xf)
-		return -EINVAL;
-	if (((payload >> 4) & 0xf) & ~NATIVE_LAB_ABI_MASK)
-		return -EINVAL;
-	if ((payload >> 17) & 0x7)
-		return -EINVAL;
-
-	*blob_id = (u32)((payload >> 8) & 0x1ff);
-	if (*blob_id >= NATIVE_LAB_MAX_BLOBS)
-		return -EINVAL;
-	if (abi_mask)
-		*abi_mask = (u32)((payload >> 4) & 0xf);
-	if (generation)
-		*generation = (u32)(payload >> 20);
-
-	return 0;
+    struct native_blob *blob;
+    u32 id, abi;
+    int count;
+    payload = kinsn_payload_decode(payload);
+    id = payload >> 8;
+    abi = (payload >> 4) & 15;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, id);
+    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }
+    count = blob->proof_len;
+    if (insn_buf) {
+        memcpy(insn_buf, blob->proof, count * sizeof(*insn_buf));
+        if (abi & NATIVE_LAB_ABI_RBX) insn_buf[count++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_0);
+        if (abi & NATIVE_LAB_ABI_R13) insn_buf[count++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_0);
+        if (abi & NATIVE_LAB_ABI_R14) insn_buf[count++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_0);
+        if (abi & NATIVE_LAB_ABI_R15) insn_buf[count++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_0);
+    } else count += hweight32(abi);
+    mutex_unlock(&blobs_lock);
+    return count;
 }
-
-#include "native_lab_group.h"
-
-static int native_lab_advance_generation(struct native_blob *blob)
-{
-	if (blob->generation == U32_MAX)
-		return -EOVERFLOW;
-	native_lab_forget_checked();
-	native_lab_release_binding_objects(blob);
-	blob->generation++;
-	kfree(blob->bound_generations);
-	blob->bound_generations = NULL;
-	return 0;
-}
-
 static void native_lab_emit_error(const char *reason, int err, u64 payload,
 				  u32 blob_id, size_t blob_len,
 				  size_t reloc_count, size_t reloc_index,
@@ -184,135 +165,35 @@ static void native_lab_emit_error(const char *reason, int err, u64 payload,
 			   reloc_kind, (unsigned long long)reloc_target);
 }
 
-/*
- * Generation-zero is the explicit trusted-native lower-bound mode and retains
- * the old r0=0 proof. A non-zero generation copies the proof paired with this
- * blob slot. The ABI marker moves are appended after the proof so verifier/JIT
- * register-save discovery also covers native-link's callee-saved contract.
- */
-static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
-{
-	u32 abi_mask = 0;
-	u32 generation = 0;
-	u32 blob_id;
-	int err;
-	int cnt = 0;
-
-	err = decode_native_lab_payload(payload, &blob_id, &abi_mask,
-					&generation);
-	if (err)
-		return err;
-	if (generation) {
-		mutex_lock(&blobs_lock);
-		if (blobs[blob_id].generation != generation ||
-		    !blobs[blob_id].proof || !blobs[blob_id].proof_len) {
-			mutex_unlock(&blobs_lock);
-			return -ESTALE;
-		}
-		if (!native_lab_trusted_authorized(blobs[blob_id].trusted)) {
-			mutex_unlock(&blobs_lock);
-			return -EPERM;
-		}
-		err = native_lab_group_use(blob_id, generation, abi_mask);
-		if (err) {
-			mutex_unlock(&blobs_lock);
-			return err;
-		}
-		if (blobs[blob_id].proof_len + hweight32(abi_mask) >
-		    NATIVE_LAB_MAX_PROOF_INSNS) {
-			mutex_unlock(&blobs_lock);
-			return -E2BIG;
-		}
-		if (!insn_buf) {
-			cnt = blobs[blob_id].proof_len + hweight32(abi_mask);
-			mutex_unlock(&blobs_lock);
-			return cnt;
-		}
-		memcpy(insn_buf, blobs[blob_id].proof,
-		       blobs[blob_id].proof_len * sizeof(*insn_buf));
-		cnt = blobs[blob_id].proof_len;
-		mutex_unlock(&blobs_lock);
-	}
-
-	if (!insn_buf)
-		return hweight32(abi_mask) + 1;
-
-	/* The unbound stub must define r0 before the ABI marker reads it. */
-	if (!generation)
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
-
-	if (abi_mask & NATIVE_LAB_ABI_RBX)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_0);
-	if (abi_mask & NATIVE_LAB_ABI_R13)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_0);
-	if (abi_mask & NATIVE_LAB_ABI_R14)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_0);
-	if (abi_mask & NATIVE_LAB_ABI_R15)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_0);
-	return cnt;
-}
 
 static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			       const struct bpf_prog *prog,
-			       const u8 *final_ip)
+                              const struct bpf_prog *prog, const u8 *final_ip)
 {
-	size_t snapshot_len = 0;
-	u32 abi_mask = 0;
-	u32 generation = 0;
-	u32 blob_id;
-	int err;
-
-
-	err = decode_native_lab_payload(payload, &blob_id, &abi_mask, &generation);
-	if (err) {
-		native_lab_emit_error("decode_payload", err, payload, 0, 0, 0,
-				      0, 0, 0, 0);
-		return err;
-	}
-
-	mutex_lock(&blobs_lock);
-	if (generation && blobs[blob_id].generation != generation) {
-		mutex_unlock(&blobs_lock);
-		native_lab_emit_error("stale_generation", -ESTALE, payload,
-				      blob_id, 0, 0, 0, 0, 0, 0);
-		return -ESTALE;
-	}
-	if (generation) {
-		err = native_lab_group_use(blob_id, generation, abi_mask);
-		if (!err)
-			err = native_lab_group_program(prog, blob_id);
-		if (!err)
-			err = native_lab_trusted_bind_program(blobs[blob_id].trusted, prog);
-		if (err) {
-			mutex_unlock(&blobs_lock);
-			native_lab_emit_error("program_or_trusted_binding", err, payload,
-				blob_id, 0, 0, 0, 0, 0, 0);
-			return err;
-		}
-	}
-	if (blobs[blob_id].bytes && blobs[blob_id].len) {
-		snapshot_len = blobs[blob_id].len;
-		if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
-			mutex_unlock(&blobs_lock);
-			native_lab_emit_error("blob_too_large", -E2BIG, payload,
-					      blob_id, snapshot_len,
-					      blobs[blob_id].reloc_count, 0,
-					      0, 0, 0);
-			return -E2BIG;
-		}
-		if (emit) {
+    struct native_blob *blob;
+    size_t snapshot_len;
+    u32 blob_id;
+    int err = 0;
+    payload = kinsn_payload_decode(payload);
+    blob_id = payload >> 8;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, blob_id);
+    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }
+    err = native_lab_retain_program(blob->capsule, prog);
+    if (err) { mutex_unlock(&blobs_lock); return err; }
+    snapshot_len = blob->len;
+    if (emit) {
 			u8 *emit_at = image + *off;
 			const u8 *final_emit_at = final_ip ? final_ip + *off : NULL;
 			size_t i;
 
-			memcpy(emit_at, blobs[blob_id].bytes, snapshot_len);
+			memcpy(emit_at, blob->bytes, snapshot_len);
 
 			/* Apply each side-band relocation after the blob lands in
 			 * final JIT memory.
 			 */
-			for (i = 0; i < blobs[blob_id].reloc_count; i++) {
+			for (i = 0; i < blob->reloc_count; i++) {
 				const struct native_lab_reloc_record *r =
-					&blobs[blob_id].relocs[i];
+					&blob->relocs[i];
 				switch (r->kind) {
 				case NATIVE_LAB_RELOC_READONLY_DATA:
 					/* Immutable-data binding metadata; emits no patch. */
@@ -321,37 +202,22 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				case NATIVE_LAB_RELOC_MAP_VALUE:
 				case NATIVE_LAB_RELOC_HELPER_POINTER:
 					err = native_lab_emit_literal(r,
-						blobs[blob_id].bytes, snapshot_len, emit_at, prog);
+						blob->bytes, snapshot_len, emit_at, blob->maps, blob->map_count);
 					break;
 
 				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
-					static const u8 rel32_slot[5] = {
-						0xe8, 0, 0, 0, 0
-					};
 					u64 slot_va;
 					u64 rip_after;
 					s64 disp64;
 					s32 disp;
 
-					if ((size_t)r->offset + sizeof(rel32_slot) >
+					if ((size_t)r->offset + 5 >
 					    snapshot_len) {
 						err = -ERANGE;
 						native_lab_emit_error("reloc_bounds", err,
 								      payload, blob_id,
 								      snapshot_len,
-								      blobs[blob_id].reloc_count,
-								      i, r->offset,
-								      r->kind, r->target);
-						break;
-					}
-					if (memcmp(emit_at + r->offset, rel32_slot,
-						   sizeof(rel32_slot))) {
-						err = -EINVAL;
-						native_lab_emit_error("reloc_slot_mismatch",
-								      err, payload,
-								      blob_id,
-								      snapshot_len,
-								      blobs[blob_id].reloc_count,
+								      blob->reloc_count,
 								      i, r->offset,
 								      r->kind, r->target);
 						break;
@@ -362,7 +228,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 								      err, payload,
 								      blob_id,
 								      snapshot_len,
-								      blobs[blob_id].reloc_count,
+								      blob->reloc_count,
 								      i, r->offset,
 								      r->kind, r->target);
 						break;
@@ -377,7 +243,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 								      err, payload,
 								      blob_id,
 								      snapshot_len,
-								      blobs[blob_id].reloc_count,
+								      blob->reloc_count,
 								      i, r->offset,
 								      r->kind, r->target);
 						break;
@@ -390,7 +256,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					native_lab_emit_error("unknown_reloc_kind",
 							      err, payload,
 							      blob_id, snapshot_len,
-							      blobs[blob_id].reloc_count,
+							      blob->reloc_count,
 							      i, r->offset,
 							      r->kind, r->target);
 					break;
@@ -403,378 +269,19 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				return err;
 			}
 		}
-	}
-	if (snapshot_len && emit && final_ip && generation && native_lab_capture_checked) {
-		err = native_lab_capture_emit(blob_id, generation, abi_mask, final_ip + *off);
-		if (err) {
-			mutex_unlock(&blobs_lock);
-			return err;
-		}
-	}
-	mutex_unlock(&blobs_lock);
-
-	if (!snapshot_len) {
-		native_lab_emit_error("missing_blob", -ENOENT, payload, blob_id,
-				      0, 0, 0, 0, 0, 0);
-		return -ENOENT;
-	}
-
-	*off += snapshot_len;
-	return snapshot_len;
+    mutex_unlock(&blobs_lock);
+    *off += snapshot_len;
+    return snapshot_len;
 }
-
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = NATIVE_LAB_MAX_PROOF_INSNS,
-	.native_proof = true,
-	.validate_native_program = native_lab_validate_program,
-	.validate_native_proof = native_lab_validate_proof,
-	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
-	.instantiate_insn = instantiate_native_lab,
-	.emit_x86 = emit_native_lab_x86,
+    .owner = THIS_MODULE, .max_insn_cnt = U32_MAX,
+    .native_proof = true, .max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
+    .instantiate_insn = instantiate_native_lab, .emit_x86 = emit_native_lab_x86,
 };
-
-static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = {
-	&bpf_x86_native_lab_desc,
-};
-
-/* ---- debugfs: /sys/kernel/debug/bpf_x86_native_lab/blob<id> ----
- *
- * Write: overwrite blob N with raw bytes (max NATIVE_LAB_MAX_BLOB_BYTES).
- * Truncate to zero length: unregister blob N.
- * Read: read back current blob bytes (debug aid).
- */
-
-struct blob_file_priv {
-	u32 id;
-};
-
+static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = { &bpf_x86_native_lab_desc };
 struct map_ptr_file_priv {
 	char response[32];
 	size_t len;
-};
-
-static ssize_t blob_write(struct file *file, const char __user *ubuf,
-			  size_t len, loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	u8 *kbuf = NULL;
-	int err;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	if (*ppos)
-		return -EINVAL; /* whole-file writes only */
-
-	if (len > NATIVE_LAB_MAX_BLOB_BYTES)
-		return -E2BIG;
-
-	if (len) {
-		kbuf = kmalloc(len, GFP_KERNEL);
-		if (!kbuf)
-			return -ENOMEM;
-		if (copy_from_user(kbuf, ubuf, len)) {
-			kfree(kbuf);
-			return -EFAULT;
-		}
-	}
-
-	mutex_lock(&blobs_lock);
-	err = native_lab_advance_generation(&blobs[priv->id]);
-	if (err) {
-		mutex_unlock(&blobs_lock);
-		kfree(kbuf);
-		return err;
-	}
-	kfree(blobs[priv->id].bytes);
-	/* Reuploading the blob invalidates any previously uploaded relocs. */
-	kfree(blobs[priv->id].relocs);
-	kvfree(blobs[priv->id].proof);
-	blobs[priv->id].relocs = NULL;
-	blobs[priv->id].reloc_count = 0;
-	blobs[priv->id].proof = NULL;
-	blobs[priv->id].proof_len = 0;
-	blobs[priv->id].bytes = kbuf;
-	blobs[priv->id].len = len;
-	mutex_unlock(&blobs_lock);
-
-	*ppos = len;
-	return len;
-}
-
-/*
- * relocs debugfs file: whole-file write of a packed array of
- * native_lab_reloc_record. Truncate to 0 to clear.
- */
-static ssize_t relocs_write(struct file *file, const char __user *ubuf,
-			    size_t len, loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	struct native_lab_reloc_record *kbuf = NULL;
-	size_t count;
-	int err;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-	if (*ppos)
-		return -EINVAL;
-	if (len % sizeof(struct native_lab_reloc_record))
-		return -EINVAL;
-	count = len / sizeof(struct native_lab_reloc_record);
-	if (count > NATIVE_LAB_MAX_RELOCS)
-		return -E2BIG;
-
-	if (len) {
-		kbuf = kmalloc(len, GFP_KERNEL);
-		if (!kbuf)
-			return -ENOMEM;
-		if (copy_from_user(kbuf, ubuf, len)) {
-			kfree(kbuf);
-			return -EFAULT;
-		}
-	}
-
-	mutex_lock(&blobs_lock);
-	err = native_lab_advance_generation(&blobs[priv->id]);
-	if (err) {
-		mutex_unlock(&blobs_lock);
-		kfree(kbuf);
-		return err;
-	}
-	kfree(blobs[priv->id].relocs);
-	blobs[priv->id].relocs = kbuf;
-	blobs[priv->id].reloc_count = count;
-	mutex_unlock(&blobs_lock);
-
-	*ppos = len;
-	return len;
-}
-
-static ssize_t proof_write(struct file *file, const char __user *ubuf,
-			   size_t len, loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	struct bpf_insn *kbuf;
-	size_t count;
-	int err;
-
-	if (!capable(CAP_SYS_ADMIN) || !native_lab_trusted_writer())
-		return -EPERM;
-	if (*ppos)
-		return -EINVAL;
-	if (!len || len % sizeof(*kbuf))
-		return -EINVAL;
-	count = len / sizeof(*kbuf);
-	if (count > NATIVE_LAB_MAX_PROOF_INSNS)
-		return -E2BIG;
-	kbuf = vmemdup_user(ubuf, len);
-	if (IS_ERR(kbuf))
-		return PTR_ERR(kbuf);
-
-	mutex_lock(&blobs_lock);
-	err = native_lab_advance_generation(&blobs[priv->id]);
-	if (err) {
-		mutex_unlock(&blobs_lock);
-		kvfree(kbuf);
-		return err;
-	}
-	kvfree(blobs[priv->id].proof);
-	blobs[priv->id].proof = kbuf;
-	blobs[priv->id].proof_len = count;
-	mutex_unlock(&blobs_lock);
-	*ppos = len;
-	return len;
-}
-
-/* Seal only an exact snapshot. All writes, including this seal, advance the
- * generation, so a stale or partially reuploaded artifact cannot be reused.
- */
-static ssize_t binding_write(struct file *file, const char __user *ubuf,
-			     size_t len, loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	struct native_lab_binding header;
-	struct native_blob *blob = &blobs[priv->id];
-	u8 *data;
-	u32 *group_generations = NULL;
-	struct bpf_map **pinned_maps = NULL;
-	u32 pinned_map_count = 0;
-	struct bpf_prog *source = NULL, *target = NULL;
-	struct native_lab_trusted_capsule *trusted = NULL;
-	int err;
-
-	if (!capable(CAP_SYS_ADMIN) || !native_lab_trusted_writer())
-		return -EPERM;
-	if (*ppos || len < sizeof(header))
-		return -EINVAL;
-	if (len > sizeof(header) + NATIVE_LAB_MAX_BLOB_BYTES +
-	    NATIVE_LAB_MAX_RELOCS * sizeof(struct native_lab_reloc_record) +
-	    NATIVE_LAB_MAX_PROOF_INSNS * sizeof(struct bpf_insn))
-		return -E2BIG;
-	data = vmemdup_user(ubuf, len);
-	if (IS_ERR(data))
-		return PTR_ERR(data);
-	memcpy(&header, data, sizeof(header));
-
-	mutex_lock(&blobs_lock);
-	err = native_lab_binding_validate(&header, NATIVE_LAB_ARCH_X86,
-		priv->id, blob->len, blob->reloc_count, blob->proof_len,
-		blob->generation);
-	if (err)
-		goto out;
-	if (header.prog_type >= __MAX_BPF_PROG_TYPE ||
-	    header.expected_attach_type >= __MAX_BPF_ATTACH_TYPE) {
-		err = -EINVAL;
-		goto out;
-	}
-	BUILD_BUG_ON(sizeof(header) != 96);
-	BUILD_BUG_ON(sizeof(*blob->relocs) != 16);
-	BUILD_BUG_ON(sizeof(*blob->proof) != 8);
-	err = native_lab_binding_snapshot(&header, data, len, blob->bytes,
-					  blob->relocs, blob->proof);
-	if (err)
-		goto out;
-	err = native_lab_group_prepare(&header, &group_generations);
-	if (err)
-		goto out;
-	err = native_lab_pin_maps(blob, &pinned_maps, &pinned_map_count);
-	if (err)
-		goto out;
-	err = native_lab_pin_context(&header, &source, &target);
-	if (err)
-		goto out;
-	err = native_lab_trusted_seal(&header, &trusted);
-	if (err)
-		goto out;
-	err = native_lab_advance_generation(blob);
-	if (err)
-		goto out;
-	blob->binding = header;
-	blob->trusted = trusted;
-	trusted = NULL;
-	blob->bound_source = source;
-	blob->bound_target = target;
-	source = NULL;
-	target = NULL;
-	blob->bound_maps = pinned_maps;
-	blob->bound_map_count = pinned_map_count;
-	blob->bound_generations = group_generations;
-	pinned_maps = NULL;
-	pinned_map_count = 0;
-	group_generations = NULL;
-out:
-	native_lab_trusted_put(trusted);
-	if (source)
-		bpf_prog_put(source);
-	if (target)
-		bpf_prog_put(target);
-	kfree(group_generations);
-	native_lab_put_maps(pinned_maps, pinned_map_count);
-	mutex_unlock(&blobs_lock);
-	kvfree(data);
-	if (err)
-		return err;
-	*ppos = len;
-	return len;
-}
-
-static ssize_t generation_read(struct file *file, char __user *ubuf,
-			       size_t len, loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	char buf[16];
-	u32 generation;
-	int n;
-
-	mutex_lock(&blobs_lock);
-	generation = blobs[priv->id].generation;
-	mutex_unlock(&blobs_lock);
-	n = scnprintf(buf, sizeof(buf), "%u\n", generation);
-	return simple_read_from_buffer(ubuf, len, ppos, buf, n);
-}
-
-static ssize_t blob_read(struct file *file, char __user *ubuf, size_t len,
-			 loff_t *ppos)
-{
-	struct blob_file_priv *priv = file->private_data;
-	u8 stash[NATIVE_LAB_MAX_BLOB_BYTES];
-	size_t copy_len;
-	size_t blen;
-
-	mutex_lock(&blobs_lock);
-	blen = blobs[priv->id].len;
-	if (blen)
-		memcpy(stash, blobs[priv->id].bytes, blen);
-	mutex_unlock(&blobs_lock);
-
-	if (*ppos >= blen)
-		return 0;
-	copy_len = min(len, blen - (size_t)*ppos);
-	if (copy_to_user(ubuf, stash + *ppos, copy_len))
-		return -EFAULT;
-	*ppos += copy_len;
-	return copy_len;
-}
-
-static int blob_open(struct inode *inode, struct file *file)
-{
-	struct blob_file_priv *priv;
-	long id = (long)inode->i_private;
-
-	priv = kmalloc(sizeof(*priv), GFP_KERNEL);
-	if (!priv)
-		return -ENOMEM;
-	priv->id = (u32)id;
-	file->private_data = priv;
-	return 0;
-}
-
-static int blob_release(struct inode *inode, struct file *file)
-{
-	kfree(file->private_data);
-	return 0;
-}
-
-static const struct file_operations blob_fops = {
-	.owner = THIS_MODULE,
-	.open = blob_open,
-	.release = blob_release,
-	.read = blob_read,
-	.write = blob_write,
-	.llseek = default_llseek,
-};
-
-static const struct file_operations relocs_fops = {
-	.owner = THIS_MODULE,
-	.open = blob_open,
-	.release = blob_release,
-	.write = relocs_write,
-	.llseek = default_llseek,
-};
-
-static const struct file_operations proof_fops = {
-	.owner = THIS_MODULE,
-	.open = blob_open,
-	.release = blob_release,
-	.write = proof_write,
-	.llseek = default_llseek,
-};
-
-static const struct file_operations binding_fops = {
-	.owner = THIS_MODULE,
-	.open = blob_open,
-	.release = blob_release,
-	.write = binding_write,
-	.llseek = default_llseek,
-};
-
-static const struct file_operations generation_fops = {
-	.owner = THIS_MODULE,
-	.open = blob_open,
-	.release = blob_release,
-	.read = generation_read,
-	.llseek = default_llseek,
 };
 
 static int map_ptr_open(struct inode *inode, struct file *file)
@@ -805,8 +312,6 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 	char buf[32];
 	int err;
 
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
 	if (*ppos)
 		return -EINVAL;
 	if (!len || len >= sizeof(buf))
@@ -908,123 +413,32 @@ static const struct file_operations map_update_elem_fops = {
 	.llseek = default_llseek,
 };
 
-static int __init bpf_x86_native_lab_debugfs_init(void)
-{
-	long i;
-	struct dentry *checked;
-
-	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
-	if (IS_ERR(debugfs_root))
-		return PTR_ERR(debugfs_root);
-
-	debugfs_create_file("native_submit", 0600, debugfs_root, NULL,
-			    &native_lab_trusted_fops);
-	debugfs_create_file("specializer", 0600, debugfs_root, (void *)1,
-			    &native_lab_trusted_fops);
-
-	checked = debugfs_create_file("checked_proof", 0400, debugfs_root, NULL,
-			      &native_lab_checked_fops);
-	if (IS_ERR(checked)) {
-		debugfs_remove_recursive(debugfs_root);
-		debugfs_root = NULL;
-		return PTR_ERR(checked);
-	}
-	checked = debugfs_create_file("emitted_native", 0400, debugfs_root, NULL,
-			      &native_lab_emitted_fops);
-	if (IS_ERR(checked)) {
-		debugfs_remove_recursive(debugfs_root);
-		debugfs_root = NULL;
-		return PTR_ERR(checked);
-	}
-	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL,
-			    &map_ptr_fops);
-	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
-			    &map_value_ptr_fops);
-	debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL,
-			    &map_update_elem_fops);
-
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
-		char name[24];
-
-		scnprintf(name, sizeof(name), "blob%ld", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &blob_fops);
-		scnprintf(name, sizeof(name), "blob%ld.relocs", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &relocs_fops);
-		scnprintf(name, sizeof(name), "blob%ld.proof", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &proof_fops);
-		scnprintf(name, sizeof(name), "blob%ld.binding", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &binding_fops);
-		scnprintf(name, sizeof(name), "blob%ld.generation", i);
-		debugfs_create_file(name, 0400, debugfs_root, (void *)i,
-				    &generation_fops);
-	}
-	return 0;
-}
-
-static void bpf_x86_native_lab_debugfs_exit(void)
-{
-	int i;
-
-	debugfs_remove_recursive(debugfs_root);
-	debugfs_root = NULL;
-
-	mutex_lock(&blobs_lock);
-	native_lab_forget_checked();
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
-		kfree(blobs[i].bytes);
-		kfree(blobs[i].relocs);
-		kvfree(blobs[i].proof);
-		native_lab_release_binding_objects(&blobs[i]);
-		kfree(blobs[i].bound_generations);
-		blobs[i].bound_generations = NULL;
-		blobs[i].bytes = NULL;
-		blobs[i].len = 0;
-		blobs[i].relocs = NULL;
-		blobs[i].reloc_count = 0;
-		blobs[i].proof = NULL;
-		blobs[i].proof_len = 0;
-		blobs[i].generation = 0;
-	}
-	mutex_unlock(&blobs_lock);
-}
-
 static const struct btf_kfunc_id_set bpf_x86_native_lab_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_x86_native_lab_kfunc_ids,
-	.kinsn_descs = bpf_x86_native_lab_kinsn_descs,
+    .owner = THIS_MODULE, .set = &bpf_x86_native_lab_kfunc_ids,
+    .kinsn_descs = bpf_x86_native_lab_kinsn_descs,
 };
-
 static int __init bpf_x86_native_lab_init(void)
 {
-	int err;
-
-	err = bpf_x86_native_lab_debugfs_init();
-	if (err)
-		return err;
-
-	err = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					&bpf_x86_native_lab_kfunc_set);
-	if (err) {
-		bpf_x86_native_lab_debugfs_exit();
-		return err;
-	}
-
-	return 0;
+    int err;
+    debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
+    if (IS_ERR(debugfs_root)) return PTR_ERR(debugfs_root);
+    debugfs_create_file("native_submit", 0600, debugfs_root, NULL, &native_lab_trusted_fops);
+    debugfs_create_file("specializer", 0600, debugfs_root, (void *)1, &native_lab_trusted_fops);
+    debugfs_create_file("map_ptr", 0600, debugfs_root, NULL, &map_ptr_fops);
+    debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL, &map_value_ptr_fops);
+    debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL, &map_update_elem_fops);
+    err = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC, &bpf_x86_native_lab_kfunc_set);
+    if (err) debugfs_remove_recursive(debugfs_root);
+    return err;
 }
-
 static void __exit bpf_x86_native_lab_exit(void)
 {
-	bpf_x86_native_lab_debugfs_exit();
+    debugfs_remove_recursive(debugfs_root);
+    xa_destroy(&blobs);
 }
-
 module_init(bpf_x86_native_lab_init);
 module_exit(bpf_x86_native_lab_exit);
-
-MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kinsn (test only; optional bound proof)");
+MODULE_DESCRIPTION("NativeSim trusted native path");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
 MODULE_IMPORT_NS("BPF_INTERNAL");

@@ -71,7 +71,7 @@ struct FdLoadOptions {
     std::filesystem::path source_bpf_path;
     std::vector<bpf_insn> source_insns;
     /* Service-generated verifier proof only. The loader redirects its EXITs past
-     * the proof region and binds the instructions to the native blob snapshot. */
+     * the proof region and creates the immutable native chunks. */
     std::vector<bpf_insn> proof_insns;
     /* Service-generated simulator ELF, or metadata for its already-loaded raw proof. */
     std::filesystem::path proof_object_path;
@@ -105,8 +105,6 @@ struct native_loader_source_load_context {
     uint32_t reserved;
 };
 
-/* Version 1 enforces REQUIRE_BOUND_PROOF before native upload. */
-unsigned native_loader_bound_proof_abi_version(void);
 
 struct native_loader_c_result {
     int prog_fd;

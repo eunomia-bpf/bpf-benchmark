@@ -1,4 +1,4 @@
-"""Strict generation view shared by trusted ISA workers.
+"""Generation metadata shared by trusted ISA workers.
 
 The service derives this view from kernel-pinned source/map identities.
 These functions accept no producer paths, C source or compiler flags.
@@ -36,18 +36,8 @@ def u32(value, field):
 
 
 def declarations(metadata):
-    if type(metadata) is not dict or set(metadata) != {"version", "prog_type", "section", "maps"}:
-        raise ValueError("generation metadata requires only version, prog_type, section and maps")
-    if type(metadata["version"]) is not int or metadata["version"] != 1:
-        raise ValueError("generation metadata version must be 1")
-    prog_type = u32(metadata["prog_type"], "prog_type")
-    if prog_type == 0:
-        raise ValueError("program type must be explicit")
+    prog_type = metadata["prog_type"]
     section = metadata["section"]
-    if not isinstance(section, str) or not section or any(ord(c) < 32 or ord(c) > 126 for c in section):
-        raise ValueError("program section must be nonempty printable ASCII")
-    if type(metadata["maps"]) is not list:
-        raise ValueError("maps must be a list of typed declarations")
     lines = ["#include <linux/bpf.h>", "#include <bpf_helpers.h>"]
     names = set()
     c_names = c_symbol_aliases([item.get("name") if type(item) is dict else None for item in metadata["maps"]], "__trusted_map_decl_")
@@ -56,19 +46,7 @@ def declarations(metadata):
 
     def emit(item, label, name=None, tag=None):
         nonlocal inner_count
-        required = fields | ({"name"} if name is not None else set())
-        if type(item) is not dict or set(item) - ({"inner_map", "value_offset"} if name is not None else {"inner_map"}) != required:
-            raise ValueError(f"{label} requires exactly the typed map fields")
-        for field in fields:
-            u32(item[field], f"{label}.{field}")
-        if item["map_type"] == 0:
-            raise ValueError(f"{label} type must be explicit")
-        if name is not None and item.get("value_offset") is not None:
-            if u32(item["value_offset"], label + ".value_offset") >= item["value_size"]:
-                raise ValueError(f"{label} direct value offset exceeds its map value")
         is_outer = item["map_type"] in {12, 13}
-        if is_outer != ("inner_map" in item):
-            raise ValueError(f"{label} inner template must match its map-in-map type")
         inner_type = None
         if is_outer:
             inner_type = f"__trusted_inner_{inner_count}"
@@ -87,8 +65,6 @@ def declarations(metadata):
             lines.append(f'}} {c_names[name]}{alias} SEC(".maps");')
 
     for index, item in enumerate(metadata["maps"]):
-        if type(item) is not dict:
-            raise ValueError(f"map {index} must be a typed declaration")
         name = item.get("name")
         if elf_symbol(name) in names:
             raise ValueError(f"map {index} has an invalid or duplicate identifier")

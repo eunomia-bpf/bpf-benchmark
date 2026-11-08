@@ -1,0 +1,1401 @@
+{
+  "collected": "2026-11-08T06:08:04.600968+00:00",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_053635_529825",
+  "metadata": {
+    "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261108_053635_529825/metadata.json",
+    "status": "completed",
+    "error_message": null
+  },
+  "apps": {
+    "bcc/set": {
+      "status": "ok",
+      "error": "",
+      "native_programs": 25,
+      "baseline": {
+        "workload_returncodes": [
+          0
+        ],
+        "bpf": {
+          "30": {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 30,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 4993,
+            "run_time_ns_delta": 274156,
+            "type": "tracing"
+          },
+          "32": {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 32,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 4915,
+            "run_time_ns_delta": 233511,
+            "type": "tracing"
+          },
+          "33": {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 33,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "37": {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 37,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 12,
+            "run_time_ns_delta": 2669,
+            "type": "tracing"
+          },
+          "39": {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 39,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 157535,
+            "run_time_ns_delta": 23388546,
+            "type": "tracepoint"
+          },
+          "40": {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 40,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 157711,
+            "run_time_ns_delta": 6996435,
+            "type": "tracing"
+          },
+          "44": {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 44,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "45": {
+            "bytes_jited": 1501,
+            "bytes_xlated": 2240,
+            "id": 45,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "46": {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 46,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 157535,
+            "run_time_ns_delta": 604069961,
+            "type": "tracepoint"
+          },
+          "47": {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 47,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 13,
+            "run_time_ns_delta": 1595,
+            "type": "tracing"
+          },
+          "50": {
+            "bytes_jited": 121,
+            "bytes_xlated": 200,
+            "id": 50,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 40,
+            "run_time_ns_delta": 10464,
+            "type": "kprobe"
+          },
+          "53": {
+            "bytes_jited": 143,
+            "bytes_xlated": 232,
+            "id": 53,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 305438,
+            "run_time_ns_delta": 35399705,
+            "type": "kprobe"
+          },
+          "55": {
+            "bytes_jited": 108,
+            "bytes_xlated": 168,
+            "id": 55,
+            "name": "sys_enter",
+            "run_cnt_delta": 6143938,
+            "run_time_ns_delta": 923798834,
+            "type": "tracepoint"
+          },
+          "59": {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 59,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "63": {
+            "bytes_jited": 354,
+            "bytes_xlated": 648,
+            "id": 63,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "64": {
+            "bytes_jited": 383,
+            "bytes_xlated": 616,
+            "id": 64,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 305434,
+            "run_time_ns_delta": 192729090,
+            "type": "kprobe"
+          },
+          "66": {
+            "bytes_jited": 406,
+            "bytes_xlated": 656,
+            "id": 66,
+            "name": "sys_exit",
+            "run_cnt_delta": 6143942,
+            "run_time_ns_delta": 641097931,
+            "type": "tracepoint"
+          },
+          "67": {
+            "bytes_jited": 440,
+            "bytes_xlated": 824,
+            "id": 67,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 50039,
+            "type": "tracing"
+          },
+          "68": {
+            "bytes_jited": 493,
+            "bytes_xlated": 752,
+            "id": 68,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "69": {
+            "bytes_jited": 437,
+            "bytes_xlated": 712,
+            "id": 69,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 59,
+            "run_time_ns_delta": 490781,
+            "type": "tracing"
+          },
+          "71": {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 71,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "72": {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 72,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 24049,
+            "run_time_ns_delta": 8986540,
+            "type": "tracing"
+          },
+          "73": {
+            "bytes_jited": 496,
+            "bytes_xlated": 752,
+            "id": 73,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "76": {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 76,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 39,
+            "run_time_ns_delta": 17411,
+            "type": "tracing"
+          },
+          "77": {
+            "bytes_jited": 935,
+            "bytes_xlated": 1632,
+            "id": 77,
+            "name": "sched_switch",
+            "run_cnt_delta": 47801,
+            "run_time_ns_delta": 15622694,
+            "type": "tracing"
+          }
+        }
+      },
+      "post_rejit": {
+        "workload_returncodes": [
+          0
+        ],
+        "bpf": {
+          "128": {
+            "bytes_jited": 38,
+            "bytes_xlated": 24,
+            "id": 128,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 4858,
+            "run_time_ns_delta": 279477,
+            "type": "tracing"
+          },
+          "130": {
+            "bytes_jited": 198,
+            "bytes_xlated": 40,
+            "id": 130,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "133": {
+            "bytes_jited": 1624,
+            "bytes_xlated": 216,
+            "id": 133,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "136": {
+            "bytes_jited": 158,
+            "bytes_xlated": 24,
+            "id": 136,
+            "name": "sys_enter",
+            "run_cnt_delta": 6589629,
+            "run_time_ns_delta": 914688497,
+            "type": "tracepoint"
+          },
+          "139": {
+            "bytes_jited": 164,
+            "bytes_xlated": 40,
+            "id": 139,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 41,
+            "run_time_ns_delta": 13264,
+            "type": "kprobe"
+          },
+          "142": {
+            "bytes_jited": 139,
+            "bytes_xlated": 24,
+            "id": 142,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "145": {
+            "bytes_jited": 180,
+            "bytes_xlated": 40,
+            "id": 145,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 296685,
+            "run_time_ns_delta": 37982005,
+            "type": "kprobe"
+          },
+          "148": {
+            "bytes_jited": 161,
+            "bytes_xlated": 40,
+            "id": 148,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 25820,
+            "run_time_ns_delta": 12536966,
+            "type": "tracing"
+          },
+          "151": {
+            "bytes_jited": 39,
+            "bytes_xlated": 24,
+            "id": 151,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 4747,
+            "run_time_ns_delta": 235432,
+            "type": "tracing"
+          },
+          "153": {
+            "bytes_jited": 198,
+            "bytes_xlated": 40,
+            "id": 153,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 157490,
+            "run_time_ns_delta": 19899184,
+            "type": "tracepoint"
+          },
+          "157": {
+            "bytes_jited": 594,
+            "bytes_xlated": 88,
+            "id": 157,
+            "name": "sys_exit",
+            "run_cnt_delta": 6589631,
+            "run_time_ns_delta": 638372986,
+            "type": "tracepoint"
+          },
+          "159": {
+            "bytes_jited": 411,
+            "bytes_xlated": 56,
+            "id": 159,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "163": {
+            "bytes_jited": 782,
+            "bytes_xlated": 104,
+            "id": 163,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "165": {
+            "bytes_jited": 630,
+            "bytes_xlated": 88,
+            "id": 165,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 296685,
+            "run_time_ns_delta": 180508832,
+            "type": "kprobe"
+          },
+          "167": {
+            "bytes_jited": 161,
+            "bytes_xlated": 40,
+            "id": 167,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 41,
+            "run_time_ns_delta": 26178,
+            "type": "tracing"
+          },
+          "169": {
+            "bytes_jited": 39,
+            "bytes_xlated": 24,
+            "id": 169,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 12,
+            "run_time_ns_delta": 3333,
+            "type": "tracing"
+          },
+          "171": {
+            "bytes_jited": 335,
+            "bytes_xlated": 56,
+            "id": 171,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "173": {
+            "bytes_jited": 471,
+            "bytes_xlated": 72,
+            "id": 173,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 70,
+            "run_time_ns_delta": 87555,
+            "type": "tracing"
+          },
+          "175": {
+            "bytes_jited": 139,
+            "bytes_xlated": 24,
+            "id": 175,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "179": {
+            "bytes_jited": 1118,
+            "bytes_xlated": 152,
+            "id": 179,
+            "name": "sched_switch",
+            "run_cnt_delta": 51237,
+            "run_time_ns_delta": 27853177,
+            "type": "tracing"
+          },
+          "180": {
+            "bytes_jited": 39,
+            "bytes_xlated": 24,
+            "id": 180,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 157670,
+            "run_time_ns_delta": 7588462,
+            "type": "tracing"
+          },
+          "182": {
+            "bytes_jited": 335,
+            "bytes_xlated": 56,
+            "id": 182,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 157490,
+            "run_time_ns_delta": 600963507,
+            "type": "tracepoint"
+          },
+          "184": {
+            "bytes_jited": 554,
+            "bytes_xlated": 72,
+            "id": 184,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 77,
+            "run_time_ns_delta": 1389089,
+            "type": "tracing"
+          },
+          "188": {
+            "bytes_jited": 1096,
+            "bytes_xlated": 152,
+            "id": 188,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "190": {
+            "bytes_jited": 39,
+            "bytes_xlated": 24,
+            "id": 190,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 15,
+            "run_time_ns_delta": 2160,
+            "type": "tracing"
+          }
+        }
+      }
+    },
+    "katran": {
+      "status": "ok",
+      "error": "",
+      "native_programs": 1,
+      "baseline": {
+        "workload_returncode": 0,
+        "counters": {
+          "consistent_hash_drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "decap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "encap_fail": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "fallback_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2375305
+          },
+          "global_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v4": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v6": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_too_big": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lpm_src": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2375305
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "new_conn_rate": {
+            "bytes_or_v2": 3709835447,
+            "packets_or_v1": 34860
+          },
+          "pass": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "quic_icmp": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "remote_encap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "total": {
+            "bytes_or_v2": 152019520,
+            "packets_or_v1": 2375305
+          },
+          "tx": {
+            "bytes_or_v2": 152019520,
+            "packets_or_v1": 2375305
+          },
+          "udp_flow_migration": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "vip_0": {
+            "bytes_or_v2": 118765250,
+            "packets_or_v1": 2375305
+          },
+          "xpop_decap_success": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          }
+        },
+        "receiver": {
+          "rx_bytes": 195073508,
+          "rx_dropped": 9762,
+          "rx_errors": 0,
+          "rx_packets": 2322304,
+          "tx_bytes": 0,
+          "tx_dropped": 0,
+          "tx_errors": 0,
+          "tx_packets": 0
+        },
+        "interfaces": {
+          "load_balancer/katran0": {
+            "rx_bytes": 118765250,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 2375305,
+            "tx_bytes": 195893460,
+            "tx_dropped": 43240,
+            "tx_errors": 0,
+            "tx_packets": 2332065
+          },
+          "real/real0": {
+            "rx_bytes": 195073508,
+            "rx_dropped": 9762,
+            "rx_errors": 0,
+            "rx_packets": 2322304,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "router/rtlb0": {
+            "rx_bytes": 195893460,
+            "rx_dropped": 43240,
+            "rx_errors": 0,
+            "rx_packets": 2332065,
+            "tx_bytes": 118765250,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 2375305
+          },
+          "router/rtreal0": {
+            "rx_bytes": 0,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 0,
+            "tx_bytes": 195073508,
+            "tx_dropped": 9762,
+            "tx_errors": 0,
+            "tx_packets": 2322304
+          }
+        }
+      },
+      "post_rejit": {
+        "workload_returncode": 0,
+        "counters": {
+          "consistent_hash_drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "decap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "encap_fail": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "fallback_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2453813
+          },
+          "global_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v4": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v6": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_too_big": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lpm_src": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2453813
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "new_conn_rate": {
+            "bytes_or_v2": 3639990232,
+            "packets_or_v1": -98715
+          },
+          "pass": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "quic_icmp": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "remote_encap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "total": {
+            "bytes_or_v2": 157044032,
+            "packets_or_v1": 2453813
+          },
+          "tx": {
+            "bytes_or_v2": 157044032,
+            "packets_or_v1": 2453813
+          },
+          "udp_flow_migration": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "vip_0": {
+            "bytes_or_v2": 122690650,
+            "packets_or_v1": 2453813
+          },
+          "xpop_decap_success": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          }
+        },
+        "receiver": {
+          "rx_bytes": 206120292,
+          "rx_dropped": 0,
+          "rx_errors": 0,
+          "rx_packets": 2453813,
+          "tx_bytes": 0,
+          "tx_dropped": 0,
+          "tx_errors": 0,
+          "tx_packets": 0
+        },
+        "interfaces": {
+          "load_balancer/katran0": {
+            "rx_bytes": 122690650,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 2453813,
+            "tx_bytes": 206120292,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 2453813
+          },
+          "real/real0": {
+            "rx_bytes": 206120292,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 2453813,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "router/rtlb0": {
+            "rx_bytes": 206120292,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 2453813,
+            "tx_bytes": 122690650,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 2453813
+          },
+          "router/rtreal0": {
+            "rx_bytes": 0,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 0,
+            "tx_bytes": 206120292,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 2453813
+          }
+        }
+      }
+    }
+  },
+  "service_counts": {
+    "requests": 26,
+    "generated": 26,
+    "compiled": 26,
+    "verifier_accepted_native_installed": 26
+  },
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 108,
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "started": "2026-11-08T05:37:10.611297+00:00",
+      "prog_id": 128,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/1.success.tar.gz",
+      "finished": "2026-11-08T05:37:14.448314+00:00",
+      "entry": "fentry_vfs_read",
+      "prog_type": 26,
+      "native_sha256_observed": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 117,
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "started": "2026-11-08T05:37:14.462885+00:00",
+      "prog_id": 130,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/2.success.tar.gz",
+      "finished": "2026-11-08T05:37:20.253801+00:00",
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "prog_type": 5,
+      "native_sha256_observed": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 119,
+      "native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "started": "2026-11-08T05:37:20.268338+00:00",
+      "prog_id": 133,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/3.success.tar.gz",
+      "finished": "2026-11-08T05:38:03.981015+00:00",
+      "entry": "inet_sock_set_state",
+      "prog_type": 5,
+      "native_sha256_observed": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 127,
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "started": "2026-11-08T05:38:04.002298+00:00",
+      "prog_id": 136,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/4.success.tar.gz",
+      "finished": "2026-11-08T05:38:09.396817+00:00",
+      "entry": "sys_enter",
+      "prog_type": 5,
+      "native_sha256_observed": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 114,
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "started": "2026-11-08T05:38:09.437436+00:00",
+      "prog_id": 139,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/5.success.tar.gz",
+      "finished": "2026-11-08T05:38:14.991671+00:00",
+      "entry": "blk_account_io_merge_bio",
+      "prog_type": 2,
+      "native_sha256_observed": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 122,
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "started": "2026-11-08T05:38:15.012939+00:00",
+      "prog_id": 142,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/6.success.tar.gz",
+      "finished": "2026-11-08T05:38:19.837211+00:00",
+      "entry": "tcp_v4_connect",
+      "prog_type": 2,
+      "native_sha256_observed": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 125,
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "started": "2026-11-08T05:38:19.866109+00:00",
+      "prog_id": 145,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/7.success.tar.gz",
+      "finished": "2026-11-08T05:38:24.930207+00:00",
+      "entry": "kprobe__cap_capable_entry",
+      "prog_type": 2,
+      "native_sha256_observed": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 123,
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "started": "2026-11-08T05:38:24.949184+00:00",
+      "prog_id": 148,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/8.success.tar.gz",
+      "finished": "2026-11-08T05:38:29.688346+00:00",
+      "entry": "sched_wakeup",
+      "prog_type": 26,
+      "native_sha256_observed": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 129,
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "started": "2026-11-08T05:38:29.710547+00:00",
+      "prog_id": 151,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/9.success.tar.gz",
+      "finished": "2026-11-08T05:38:31.260088+00:00",
+      "entry": "fentry_vfs_write",
+      "prog_type": 26,
+      "native_sha256_observed": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 132,
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "started": "2026-11-08T05:38:31.292848+00:00",
+      "prog_id": 153,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/10.success.tar.gz",
+      "finished": "2026-11-08T05:38:35.617587+00:00",
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "prog_type": 5,
+      "native_sha256_observed": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 138,
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "started": "2026-11-08T05:38:35.637175+00:00",
+      "prog_id": 157,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/11.success.tar.gz",
+      "finished": "2026-11-08T05:38:46.530872+00:00",
+      "entry": "sys_exit",
+      "prog_type": 5,
+      "native_sha256_observed": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 141,
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "started": "2026-11-08T05:38:46.556797+00:00",
+      "prog_id": 159,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/12.success.tar.gz",
+      "finished": "2026-11-08T05:38:55.198903+00:00",
+      "entry": "block_rq_insert",
+      "prog_type": 26,
+      "native_sha256_observed": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 144,
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "started": "2026-11-08T05:38:55.230750+00:00",
+      "prog_id": 163,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/13.success.tar.gz",
+      "finished": "2026-11-08T05:39:11.222520+00:00",
+      "entry": "tcp_v4_connect_ret",
+      "prog_type": 2,
+      "native_sha256_observed": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 147,
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "started": "2026-11-08T05:39:11.238415+00:00",
+      "prog_id": 165,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/14.success.tar.gz",
+      "finished": "2026-11-08T05:39:23.320596+00:00",
+      "entry": "kprobe__cap_capable_exit",
+      "prog_type": 2,
+      "native_sha256_observed": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 150,
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "started": "2026-11-08T05:39:23.341146+00:00",
+      "prog_id": 167,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/15.success.tar.gz",
+      "finished": "2026-11-08T05:39:27.705499+00:00",
+      "entry": "sched_wakeup_new",
+      "prog_type": 26,
+      "native_sha256_observed": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 152,
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "started": "2026-11-08T05:39:27.723683+00:00",
+      "prog_id": 169,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/16.success.tar.gz",
+      "finished": "2026-11-08T05:39:28.782976+00:00",
+      "entry": "fentry_vfs_fsync",
+      "prog_type": 26,
+      "native_sha256_observed": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 154,
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "started": "2026-11-08T05:39:28.801230+00:00",
+      "prog_id": 171,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/17.success.tar.gz",
+      "finished": "2026-11-08T05:39:37.363089+00:00",
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "prog_type": 5,
+      "native_sha256_observed": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 160,
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "started": "2026-11-08T05:39:37.382725+00:00",
+      "prog_id": 173,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/18.success.tar.gz",
+      "finished": "2026-11-08T05:39:47.819190+00:00",
+      "entry": "block_rq_issue",
+      "prog_type": 26,
+      "native_sha256_observed": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 164,
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "started": "2026-11-08T05:39:47.838439+00:00",
+      "prog_id": 175,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/19.success.tar.gz",
+      "finished": "2026-11-08T05:39:52.091448+00:00",
+      "entry": "tcp_v6_connect",
+      "prog_type": 2,
+      "native_sha256_observed": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 168,
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "started": "2026-11-08T05:39:52.122392+00:00",
+      "prog_id": 179,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/20.success.tar.gz",
+      "finished": "2026-11-08T05:40:28.771022+00:00",
+      "entry": "sched_switch",
+      "prog_type": 26,
+      "native_sha256_observed": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 170,
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "started": "2026-11-08T05:40:28.790817+00:00",
+      "prog_id": 180,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/21.success.tar.gz",
+      "finished": "2026-11-08T05:40:29.952058+00:00",
+      "entry": "fentry_vfs_open",
+      "prog_type": 26,
+      "native_sha256_observed": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 172,
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "started": "2026-11-08T05:40:29.979223+00:00",
+      "prog_id": 182,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/22.success.tar.gz",
+      "finished": "2026-11-08T05:40:38.472322+00:00",
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "prog_type": 5,
+      "native_sha256_observed": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 174,
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "started": "2026-11-08T05:40:38.493492+00:00",
+      "prog_id": 184,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/23.success.tar.gz",
+      "finished": "2026-11-08T05:40:48.593134+00:00",
+      "entry": "block_rq_complete",
+      "prog_type": 26,
+      "native_sha256_observed": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 176,
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "started": "2026-11-08T05:40:48.609315+00:00",
+      "prog_id": 188,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/24.success.tar.gz",
+      "finished": "2026-11-08T05:41:04.985521+00:00",
+      "entry": "tcp_v6_connect_ret",
+      "prog_type": 2,
+      "native_sha256_observed": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 181,
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "started": "2026-11-08T05:41:05.049906+00:00",
+      "prog_id": 190,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/25.success.tar.gz",
+      "finished": "2026-11-08T05:41:07.619821+00:00",
+      "entry": "fentry_vfs_create",
+      "prog_type": 26,
+      "native_sha256_observed": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "generated": true,
+      "compiled": true
+    },
+    {
+      "request_id": 26,
+      "source_prog_id": 221,
+      "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "started": "2026-11-08T05:42:34.866166+00:00",
+      "prog_id": 222,
+      "status": 0,
+      "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/apps/trusted-wg9l8hsj/requests/26.success.tar.gz",
+      "finished": "2026-11-08T05:43:54.959481+00:00",
+      "entry": "balancer_ingress",
+      "prog_type": 6,
+      "native_sha256_observed": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "generated": true,
+      "compiled": true
+    }
+  ],
+  "safety": {
+    "first": {
+      "cases": 38,
+      "stages": {
+        "valid_executed": 9,
+        "verifier_rejected": 27,
+        "specialization_rejected": 2
+      },
+      "accepted_dangerous": 0
+    },
+    "final_kernel": {
+      "cases": 38,
+      "stages": {
+        "valid_executed": 9,
+        "verifier_rejected": 27,
+        "specialization_rejected": 2
+      },
+      "accepted_dangerous": 0
+    },
+    "complete": {
+      "cases": 38,
+      "stages": {
+        "valid_executed": 9,
+        "verifier_rejected": 27,
+        "specialization_rejected": 2
+      },
+      "accepted_dangerous": 0
+    }
+  },
+  "build_exits": {
+    "build.exit": 0,
+    "all-modules.exit": 0,
+    "runtime-modules.exit": 0,
+    "loader-build.exit": 0,
+    "refresh-kernel.exit": 0,
+    "safety-run.exit": 0,
+    "safety-final.exit": 0,
+    "complete-check.exit": 0
+  },
+  "binary_sha256": {
+    "build/arch/x86/boot/bzImage": "4eaf9f27f21720e63ee7f18a14e7da83d6cc07269815adbe14e696dfd612bf52",
+    "module/bpf_x86_native_lab.ko": "6d901ac8a6f00e72017796cf0483b19bdd5b6e1fb2c2093403cc0653c9b56744",
+    "loader/libnative_loader.so": "e5073417e3d66063a4fe0a6002b172ec7d6b3a44e880b92ba7b180cf5b2ae1fe",
+    "loader/trusted-native-loader": "f53a779f49a0b12e0b872bda2cfe338983a732ff1e0883dc333d7612963c7687",
+    "libbpfrejit_shim.so": "26907ed079b3635cec0f0a9a2cbcfad9dd81b1efb254c69c2bf2021d234f92bd",
+    "native-link": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864"
+  },
+  "source_epochs": {
+    "initial_controller_launch": {
+      "started": "2026-11-08T05:24:20.836781+00:00",
+      "apps": "bcc/set,katran",
+      "source_head": "d8126895041d70d571cd5faeb339c20727f467ff",
+      "source_sha256": {
+        "bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+        "kinsn/module/include/native_lab_binding.h": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+        "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+        "kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+        "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+        "kinsn/module/include/native_lab_trusted.h": "c60f3cd83f649672840d2be0daeb013810a8b1ce72c087e77e1377992664f388",
+        "kinsn/module/include/native_lab_trusted_wire.h": "a775639fcebf59e94584e625c57ddb0c27cdf1d07ab431f639285c1f2b50d289",
+        "kinsn/module/x86/bpf_x86_native_lab.c": "315169ea675a5b129f4af628a72bc97508d8ba19ce71512270177fbb4700646c",
+        "kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+        "kprog/libnativeloader/src/native_loader.cpp": "bffb0286aa174ba037c02d7d31096be21d860776f00b31b080712b111245e467",
+        "kprog/trusted_compile.py": "81997fe78230e43fdca72df8ab964fe4ebb9fe412dc2fcb56a7c1b82b27b175a",
+        "kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "kprog/trusted_loader.cpp": "638eb7023405d0c7165408ed6f5ead9948812afc5a34454a8ac6b247c56ada3c",
+        "kprog/trusted_service.py": "450cc96c418471d2a46add852c4763b361a43f302dbd707ade07fa2a0ebdc296",
+        "kprog/tv/native-proof-regions.patch": "3a3ae441ff03da7c27513a4a304f22bd25167ec12b6f1054814f44ea66c49346",
+        "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "3f35952259ab078688ec2d6169149d0aa42af183454033fdd4b5c27831c9d03a",
+        "kprog/x86/micro-prog/x86_abi.py": "3da2aab8ba4a39940bf7cc5c1b28b0539069cf567e8c90c2d0ac448654531023",
+        "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+        "kprog/x86/x86_sim_local_bpf.h": "22e8995f6b64e0be9d099fa67a9d92de461d460b832b84007edc4b36dd44e64d"
+      },
+      "cpus": "20-23",
+      "vcpus": 4,
+      "guest_memory": "8G",
+      "samples": 1,
+      "duration": 2
+    },
+    "kernel_base": "9c50491de2a5f7c3067201b10a7182dbf172e541"
+  },
+  "review_case": "COORDINATION Notices records direct kinsn ingress scope for operator decision; extra admission checks await approval",
+  "application_image": {
+    "Id": "sha256:d0a3ff376e2211fd3ce10af56ac00350cc16bf00daa0360b0a93c1a6efc0ced2",
+    "RepoTags": [
+      "bpf-benchmark/kprog-design-only:c-20261108"
+    ],
+    "RepoDigests": [
+      "bpf-benchmark/kprog-design-only@sha256:d0a3ff376e2211fd3ce10af56ac00350cc16bf00daa0360b0a93c1a6efc0ced2"
+    ],
+    "Comment": "buildkit.dockerfile.v0",
+    "Created": "2026-11-08T05:32:09.328620016Z",
+    "Config": {
+      "Env": [
+        "PATH=/workspaces/repository/runner/build-llvmbpf:/workspaces/repository/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "DEBIAN_FRONTEND=noninteractive",
+        "BPFREJIT_IMAGE_WORKSPACE=/workspaces/repository",
+        "BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/x86_64",
+        "BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so",
+        "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1",
+        "PYTHONPATH=/workspaces/repository",
+        "RUN_TARGET_ARCH=x86_64"
+      ],
+      "Cmd": [
+        "/bin/bash"
+      ],
+      "WorkingDir": "/workspaces/repository",
+      "Labels": {
+        "org.opencontainers.image.version": "24.04"
+      }
+    },
+    "Architecture": "amd64",
+    "Os": "linux",
+    "Size": 5371020109,
+    "RootFS": {
+      "Type": "layers",
+      "Layers": [
+        "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
+        "sha256:00bf98dea94ae93db644926814eba2ab9d800af151b02189bcd87b95da34145f",
+        "sha256:f9d03c48a3cec5e7d784183fae85fcc03c6ba3e15e8efb9a3933230f395c9626",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:d5518088562e30de948d1e6580487322cd604768b9e8d933d651d9993befaf2e",
+        "sha256:baf288c8cd034c2d2a455004f752cb88be507807fa239b1ad4e4f95aa37633f2",
+        "sha256:a51d161c020f8a0e8fd0df9345cbba3b23e8db5563fd8fe7b637bfcba0d66e46",
+        "sha256:eb845e07f23eb432a76e9a0bb921fa1cdbfb4327f2cae2a097b98228d16e8355",
+        "sha256:c54565a179cb0f0db335590907171c3631394d047fb2c312bd0701e4ddfdec1f",
+        "sha256:3c537eb7f8ca9a5bde02770a17cf675f9a4a4146d6c70b1df8da96468f93b5f7",
+        "sha256:f4342b31fb6ac149f7f355190055e221b75799d82d95d2cd325aa01007dd2c03",
+        "sha256:1051f9961a53edde645ab53d48bc0e2e62ff7f72c3f6bf408e260257dc8ac5be",
+        "sha256:be2e0bc1a7a5afe4693f72b1152e0b358d223893988696f615975587ac1c3f40",
+        "sha256:33fcea4348006787971d32198ec91d997d68e5d9277db5a0f41ac2b11442f8ae",
+        "sha256:3825ada5f3e8d9c6ad8d6aa23631ca722ecb9bd746736309443aac06e27bef90",
+        "sha256:772064614f51a89dc14586b0c884ae4d64be8ba2345e9c26dfd57df4bd071790",
+        "sha256:94a54c2801c8207649792739f120d9de5c005e86de6bf374481b1fd1430898b1",
+        "sha256:08ce0a993d5160c6c70840de26beb850acbbb88b03d5bf22d1667dcdd52b1165",
+        "sha256:3dd76e16a058a8a8c72321c8b507e55c4ec4e9d78be0ae8df14dfe9eca76a4b1",
+        "sha256:3acfb86e28394b000ca308f9411627de0a1ee1d9b4a62938810b1bb59847fdde",
+        "sha256:e11501a6665fc9386a615b3742ae2e6961a1eb0aba9a558a416d52f64c7002ad",
+        "sha256:619013d7becad301d86933d2c20d58f2eb2693a525f29aa8f8c179d544657084",
+        "sha256:43052ca1e2ba96556542e7820780a08e9010862a0cf58e9a214df4d74ef39cc3",
+        "sha256:f766d462d042f832bdab1f22401ed2256d261aaa7f11912c81b2a7d11480bc0a",
+        "sha256:29f2c001f5714a1ea119dbdca0df30b02ff9685a3b3e26cd11b4b85f067151b9",
+        "sha256:3eacbe74c066db86cbc7ea7898cdf0703602b25a83221b8a8b1ada10819834ba",
+        "sha256:e0b93a635502f59da323bf2fe43b58c01cefee46211060b2d14975a3869ebd0f",
+        "sha256:6474d2e7e2197c9990d4184a690644bcce12c41507880a078ca2cab86856f13b",
+        "sha256:fff8371bca86cf3c82238739a9eca5ccb1478cf2091336ef8c6150ed88c480a9",
+        "sha256:331591956fec13a4d42d21df525c1dab192e14aa8c6cb1315b977a492cae24a0",
+        "sha256:ee9b0d52b5a9c61d6fda39511f4a9358194ef950c673d067ec2283e86926cc9e",
+        "sha256:b04792b845d75ad9d706d96073922d710977150ce883368b5aa00de5e90791a6",
+        "sha256:e15b93c87c044308185f25a2301a31490d81395044daa02190e069c49f314390",
+        "sha256:0a788da2a114e5012fe2b76a54e1b0918e3df0b2f36ff6ed39123aaaa342bf34",
+        "sha256:29afada1d9c443120889a2ae362e94727321032ba19d4ed9885f2054f07daa4b",
+        "sha256:5e030fff7d25077478d8b319873441b98bd24fb2f3cdddb57a93ffbaa3dd286c",
+        "sha256:ce9b03f679111ecb13e69ad8e1dcb86ffb18e7ef57b2c6db71adb3a008631bce",
+        "sha256:346e31cd399f410d3d5304885eadcbf4e3fabacc7d3b7033dc765877248b21ee",
+        "sha256:7f42bfd31fa4389b4311838f96804ac37b723c6767fee7086e0f1d440325b15d",
+        "sha256:a355a988118ea705d21ac0d5181674e45bc12f791366c66fafb5245505d5a436",
+        "sha256:d3718362444cc2e78548e6fba27a45f1570cca87c7e1f419a583cc6145f6b410",
+        "sha256:6e53859e8887f6137b266f68c4ac349cb72f33d16434ca0a5aaa160e94ae3c79",
+        "sha256:7a92d3ea7df5f15547c7c735a0161d287ca306a13a8759434461245dfd152d4f",
+        "sha256:47943f69a63c140b66644aed2db5966a5c1d13c0c0e43995919bc56f5b246757",
+        "sha256:8a108457be811c18a0e15ea1ea0efd58a3a8af8add5a5d974d6530eb70b38f49",
+        "sha256:60b072b50a0d2493f1fff9fd3115b076e9bf7aed8f1577d0f71e3460bbb4c733",
+        "sha256:d5930ddd18f742c1b8fab1cdcaf728ed546fb4bd787dc6d64f3333155c954869",
+        "sha256:d2d5beba102040d234be7de700f0f0b848bf2d7a607997664119268f83c83e74",
+        "sha256:0334277665a43620c21350d1adebf1d50f191aefe62665bfb16499775612fd6e",
+        "sha256:52e96c1977bb1aed533f0b3f04bb2c5841f81bfbc2597eb37ad4775bc6269b11",
+        "sha256:ce8f3905ad77d0868ab190c8d5b090a8037872f11f7530de3e1d0ac54e50ce72",
+        "sha256:8d3d155f3bda3c60470102a424187309318acb09fc2f1815aaa9b89a031923da",
+        "sha256:91263fa3dbd678f3eb2aa7cd1356b7ea134af0fc26dd632b64ee8e1e5f3b8523",
+        "sha256:e2887a2ad0173afacf33b018110563e25ec44f06689dc3437679965688be899b",
+        "sha256:44b6e66c82f81348e316c288a66fe9e5082f7762f9849a13786468e8386de2f8",
+        "sha256:1663f255d2d122c06cbda4290a4a02d7271b7b369e09bd5d7d808095b9c5f4c1",
+        "sha256:522d9290fa0ba78bfa30c821a44371666380854a9902889c62adce36d9e87586",
+        "sha256:7cb66b955bc39a52e5f0441ea72ca59ec563c795516dabec2fbc9ef213aa1621",
+        "sha256:8b5f8c890cb6a9b062e5ab7e4da07bc93d7d4ee0566fad0cc3932ad9586a06a7",
+        "sha256:a5f016af281a5e54c79b210f0e333686e89d745bf2cdc7c31ab01145abed109a",
+        "sha256:b6bf50d3768405f703c9c2abb4c6d4861217176466459f35e44b690a7e424feb",
+        "sha256:54ebc27fd446b84f4f1549d67028afbcf93ae0846d5e5386b78f1084ebdf5e92",
+        "sha256:843fda309ffb5af6b9700f7190bca3dacf84cd4b430368715ebfe444bab14cc9"
+      ]
+    },
+    "Metadata": {
+      "LastTagTime": "2026-11-08T05:32:13.10032149Z"
+    },
+    "Descriptor": {
+      "mediaType": "application/vnd.oci.image.index.v1+json",
+      "digest": "sha256:d0a3ff376e2211fd3ce10af56ac00350cc16bf00daa0360b0a93c1a6efc0ced2",
+      "size": 857
+    },
+    "Identity": {
+      "Build": [
+        {
+          "Ref": "2eoo971f1rx6l7ajcui9e4bp4",
+          "CreatedAt": "2026-11-08T05:32:13.829615995Z"
+        }
+      ]
+    }
+  },
+  "current_source_sha256": {
+    "bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+    "kinsn/module/include/native_lab_binding.h": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+    "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+    "kinsn/module/include/native_lab_trusted.h": "c60f3cd83f649672840d2be0daeb013810a8b1ce72c087e77e1377992664f388",
+    "kinsn/module/include/native_lab_trusted_wire.h": "a775639fcebf59e94584e625c57ddb0c27cdf1d07ab431f639285c1f2b50d289",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "85545035850318149c275e62f15ac7ca906c458c98ce93b04b467a5aa8196fdc",
+    "kprog/libnativeloader/include/native_loader.hpp": "39ce874f728682a440fbfdee922783fce4f663f47000c837f2928457a2ba285a",
+    "kprog/libnativeloader/src/native_data_layout.hpp": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
+    "kprog/libnativeloader/src/native_loader.cpp": "17bfc015a696e649f155caee3c575bac6d334a9b8e9aa7f1780d322bb3dd22de",
+    "kprog/libnativeloader/src/native_loader_bytecode.hpp": "f7e0184d400aad9ba981f03be14644677c61473b5ba022e54175099827dc68e1",
+    "kprog/libnativeloader/src/native_loader_cache.hpp": "39d7c8ed55f3107fac778dc8f5ffdf4f65eef23383c72b94972f61d1ed90f14d",
+    "kprog/libnativeloader/src/native_loader_fd_scan.hpp": "545c2cdbc6bec151250c95729d28acd4e3dbb72e416eb589c087df7597e32027",
+    "kprog/libnativeloader/src/native_loader_link_plan.hpp": "b1024931b2b97d698620856b2222dedcf2115f146eaeb573dcc67429eda95f9d",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "4b811749b020d99ec78c1a8b428de4c00a7a796a952c7dc5e038afb4c8fe645f",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+    "kprog/trusted_compile.py": "81997fe78230e43fdca72df8ab964fe4ebb9fe412dc2fcb56a7c1b82b27b175a",
+    "kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+    "kprog/trusted_loader.cpp": "638eb7023405d0c7165408ed6f5ead9948812afc5a34454a8ac6b247c56ada3c",
+    "kprog/trusted_service.py": "450cc96c418471d2a46add852c4763b361a43f302dbd707ade07fa2a0ebdc296",
+    "kprog/tv/native-proof-regions.patch": "24a84fbb309c9fd4df7c53ea5594d81e6735de7763d8081b529eff817954181d",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "3f35952259ab078688ec2d6169149d0aa42af183454033fdd4b5c27831c9d03a",
+    "kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
+    "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5"
+  },
+  "artifact_sizes": {
+    "implementation-epochs.tar.gz": 778248,
+    "safety-results.tar.gz": 1764303,
+    "application-service.tar.gz": 10540436,
+    "observations.json": 52403,
+    "README.md": 120265,
+    "application-results.tar.gz": 228891,
+    "kernel-loader-artifacts.tar.gz": 21279512
+  }
+}

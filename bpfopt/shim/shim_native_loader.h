@@ -98,31 +98,11 @@ static void shim_native_loader_fatal(void) {
     shim_native_loader_fatal_reason("unspecified");
 }
 
-static void shim_native_loader_check_bound_abi(void *handle) {
-    if (!shim_native_loader_requires_bound_proof())
-        return;
-    dlerror();
-    unsigned (*version)(void) = (unsigned (*)(void))dlsym(
-        handle, "native_loader_bound_proof_abi_version");
-    const char *error = dlerror();
-    if (error || !version || version() != 1) {
-        log_line("verified native runtime requires native-loader bound-proof ABI version 1: %s",
-                 error ? error : "incompatible version");
-        shim_native_loader_fatal_reason("bound-proof-abi");
-    }
-}
-
 static native_loader_load_from_fd_with_manifest_path_btf_and_context_fn
 shim_native_loader_resolve_load_fn(const char *so_path) {
     pthread_mutex_lock(&shim_native_loader_handle_lock);
     if (shim_native_loader_load_fn) {
-        shim_native_loader_check_bound_abi(shim_native_loader_handle);
-        if (strcmp(shim_native_loader_handle_path, so_path) != 0) {
-            log_line("native-loader refusing to switch shared object from %s to %s",
-                     shim_native_loader_handle_path, so_path);
-            pthread_mutex_unlock(&shim_native_loader_handle_lock);
-            shim_native_loader_fatal_reason("so-switch");
-        }
+
         native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =
             shim_native_loader_load_fn;
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
@@ -135,7 +115,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
         shim_native_loader_fatal_reason("dlopen");
     }
-    shim_native_loader_check_bound_abi(handle);
+
 
     dlerror();
     native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =

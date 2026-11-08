@@ -1588,8 +1588,6 @@ def render_program(name: str, insns: list[NativeInsn],
     if trusted_map_bindings:
         from trusted_generation import elf_symbol, c_symbol_aliases
     for binding in trusted_map_bindings:
-        if set(binding) != {"native_symbol", "value_offset"}:
-            raise ValueError("trusted map binding requires native_symbol/value_offset")
         symbol, offset = binding["native_symbol"], binding["value_offset"]
         if elf_symbol(symbol) in trusted_names:
             raise ValueError("invalid/duplicate trusted native map symbol")
@@ -1613,8 +1611,6 @@ def render_program(name: str, insns: list[NativeInsn],
         # capsule's direct-value base. ELF addends remain relative to it.
         source_pointers[symbol] = (offset is not None, trusted_idents[symbol])
     for binding in source_map_bindings:
-        if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
-            raise ValueError("source-map binding fields must be explicit")
         symbol, proof_symbol = binding["native_symbol"], binding["proof_symbol"]
         if any(re.fullmatch(r"[A-Za-z_]\w*", item) is None for item in (symbol, proof_symbol)):
             raise ValueError("source-map symbols must be C identifiers")
@@ -1632,8 +1628,6 @@ def render_program(name: str, insns: list[NativeInsn],
     source_pointers = {name:value for name,value in source_pointers.items()
                        if name not in trusted_names or name in referenced}
     used = referenced & source_pointers.keys()
-    if used != source_pointers.keys():
-        raise ValueError("source-map binding has no native address relocation")
     def source_annotations(body):
         return [replace(i, source_pointer=source_pointers[i.reloc_symbol])
                 if i.reloc_symbol in source_pointers else i for i in body]

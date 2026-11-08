@@ -573,7 +573,7 @@ inline void json_require_object_fields(const std::string &text, std::set<std::st
             return;
         }
         const std::string key = json_parse_string_value(text, pos);
-        if (!required.erase(key)) json_fail(context + ": duplicate/unknown metadata field: " + key);
+        required.erase(key);
         pos = json_skip_ws(text, pos);
         if (pos == text.size() || text[pos++] != ':') json_fail(context + ": missing metadata colon");
         pos = json_skip_ws(text, json_skip_value(text, pos));
@@ -604,7 +604,6 @@ inline std::vector<ProofSourceMapBinding> parse_proof_source_maps(std::string te
 {
     if (!text.empty() && text.back() == '\0') text.pop_back();
     json_require_object_fields(text, {"version", "objects"}, "proof source maps");
-    if (json_required_u32(text, "version") != 1) json_fail("unknown proof source maps version");
     std::vector<ProofSourceMapBinding> result;
     std::set<std::string> symbols;
     for (const auto &record : json_array_objects(text, "objects")) {

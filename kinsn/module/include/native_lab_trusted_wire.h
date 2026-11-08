@@ -7,10 +7,10 @@
 #define NATIVE_LAB_TRUSTED_VERSION 1U
 
 /* SUBMIT accepts native ELF, an entry symbol (without a terminating NUL),
- * and typed specialization metadata. There is no proof input or path field.
+ * and specialization metadata. B is generated through the service.
  * All three spans are copied into kernel-owned storage before submission
  * returns. request_id is kernel-issued, source_prog_id pins the original
- * kernel program/context. flags/reserved and input request_id must be zero.
+ * kernel program/context. request_id is returned by the kernel.
  * NEXT uses the sizes as user buffer capacities and returns exact sizes;
  * -EMSGSIZE leaves the request queued and reports required capacities.
  * Pointer fields are user addresses, not data to be retained by the kernel.
@@ -53,10 +53,10 @@ struct native_lab_trusted_activate {
 	__u64 request_id;
 };
 
-/* The service returns an already kernel-verified, request-bound program ID,
+/* The service returns an already kernel-verified program ID,
  * or a negative errno with prog_id zero. WAIT is available only on the
  * submitting file and retains the result program until that file closes.
- * status is zero only after proof verification and native binding succeed.
+ * status is zero only after verifier acceptance and JIT emission.
  */
 struct native_lab_trusted_result {
 	__u64 request_id;
@@ -105,4 +105,18 @@ struct native_lab_trusted_map {
 #define NATIVE_LAB_TRUSTED_CONTEXT _IOWR('N', 0x75, struct native_lab_trusted_context)
 #define NATIVE_LAB_TRUSTED_MAP _IOWR('N', 0x76, struct native_lab_trusted_map)
 #define NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES _IOWR('N', 0x77, struct native_lab_trusted_submission)
+/* Service-created immutable linked chunk. Counts describe copied spans.
+ * chunk_id is allocated by the kernel and names that allocation for its life.
+ */
+struct native_lab_trusted_chunk {
+    __u64 request_id;
+    __u64 native_user;
+    __u64 relocs_user;
+    __u64 proof_user;
+    __u32 native_size;
+    __u32 reloc_count;
+    __u32 proof_insns;
+    __u32 chunk_id;
+};
+#define NATIVE_LAB_TRUSTED_CHUNK _IOWR('N', 0x78, struct native_lab_trusted_chunk)
 #endif

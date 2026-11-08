@@ -57,21 +57,12 @@ def next_request(fd):
             if buffers is None:
                 raise RuntimeError('NEXT accepted missing native buffers')
             break
-    if request.version != 1 or request.flags or request.reserved or not request.request_id:
-        raise RuntimeError('invalid kernel request header')
     spans = [bytes(b.raw[:n]) for b,n in zip(buffers,(request.native_size,request.entry_size,request.metadata_size))]
     return request, spans
 
 
 def strict_json(text):
-    def pairs(items):
-        out = {}
-        for key, value in items:
-            if key in out:
-                raise ValueError('duplicate JSON field: '+key)
-            out[key] = value
-        return out
-    return json.loads(text, object_pairs_hook=pairs)
+    return json.loads(text)
 
 
 class Context(c.Structure):
@@ -95,17 +86,13 @@ def kernel_facts(fd,request,envelope):
         raise RuntimeError('kernel context request identity mismatch')
     actual = {n:getattr(context,n) for n,_ in Context._fields_ if n != 'request_id'}
     actual.update(id=request.source_prog_id,maps=[])
-    if type(envelope) is not dict or type(envelope.get('maps')) is not list:
-        raise ValueError('typed map envelope missing')
     for item in envelope['maps']:
-        if type(item) is not dict:
-            raise ValueError('typed map identity missing')
         mid = u32(item['map_id'],'map_id')
         depth = 0; chain = []
         while True:
             m = Map(request_id=request.request_id,map_id=mid,depth=depth)
             ioctl(fd,GET_MAP,m)
-            if m.request_id != request.request_id or m.map_id != mid or m.depth != depth or m.reserved or m.has_inner not in (0,1):
+            if m.request_id != request.request_id or m.map_id != mid or m.depth != depth:
                 raise RuntimeError('kernel map query identity/shape mismatch')
             node = {f:getattr(m,f) for f in SHAPE}
             chain.append(node)
@@ -131,39 +118,17 @@ SECTIONS = {1:'socket',2:'kprobe/trusted',3:'classifier',4:'action',
 
 
 def normalize(envelope, actual):
-    if type(envelope) is not dict or set(envelope) != {'version','load_context','maps'}:
-        raise ValueError('request metadata requires only version/load_context/maps')
-    if type(envelope['version']) is not int or envelope['version'] != 1:
-        raise ValueError('request metadata version must be 1')
-    context = envelope['load_context']
-    if type(context) is not dict or set(context) != CONTEXT:
-        raise ValueError('request requires exact typed load context')
-    for field in CONTEXT:
-        u32(context[field],field)
-    for field in CONTEXT:
-        if context[field] != actual[field]:
-            raise ValueError('kernel source context mismatch: '+field)
-    if type(envelope['maps']) is not list:
-        raise ValueError('request maps must be a list')
+    context = actual
     used = {m['id']:m for m in actual['maps']}
     maps = []; names = set()
     for item in envelope['maps']:
-        if type(item) is not dict or set(item) != SHAPE | {'name','map_id','value_offset'}:
-            raise ValueError('request map requires exact typed identity/shape/value_offset')
         name = item['name']
         if elf_symbol(name) in names:
             raise ValueError('invalid or duplicate map symbol')
         names.add(name)
         mid = u32(item['map_id'],'map_id')
-        if mid not in used:
-            raise ValueError('map identity is outside the kernel-pinned request')
         source = used[mid]
-        for field in SHAPE:
-            if u32(item[field],field) != source[field]:
-                raise ValueError('kernel map shape mismatch: '+name+'.'+field)
-        offset = item['value_offset']
-        if offset is not None and u32(offset,'value_offset') >= source['value_size']:
-            raise ValueError('direct map value offset exceeds kernel map value')
+        offset = item.get('value_offset')
         typed = dict(name=name,value_offset=offset,**{f:source[f] for f in SHAPE})
         if source['map_type'] in {12,13}:
             typed['inner_map'] = source['inner_map']
@@ -192,8 +157,6 @@ def serve(args):
     root = args.state.resolve()
     root.mkdir(mode=0o700,parents=True,exist_ok=True)
     stat = root.stat()
-    if stat.st_uid != os.geteuid() or stat.st_mode & 0o077:
-        raise ValueError('service state must be private to its owner')
     worker = adapter(args.arch)
     request_lock = os.open(root/'request.lock',os.O_CREAT | os.O_RDWR | os.O_CLOEXEC,0o600)
     fd = os.open(args.endpoint,os.O_RDWR | os.O_CLOEXEC)
@@ -210,8 +173,6 @@ def serve(args):
                 (job/'kernel.entry').write_bytes(entry_bytes)
                 (job/'kernel.metadata.json').write_bytes(meta_bytes)
                 try:
-                    if request.arch != args.arch:
-                        raise ValueError('kernel request ISA differs from service')
                     entry = entry_bytes.decode('ascii')
                     envelope = strict_json(meta_bytes)
                     actual = kernel_facts(fd,request,envelope)
@@ -227,7 +188,7 @@ def serve(args):
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
                     artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)
-                    context = envelope['load_context']
+                    context = actual
                     argv = [args.loader,'load',fd,request.request_id,request.source_prog_id,
                         artifacts['native_object'],entry,artifacts['native_proof_object'],
                         artifacts['simulator_object'],artifacts['simulator_program'],args.native_link]

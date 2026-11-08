@@ -93,19 +93,17 @@ def main():
     groups['application syscall shim'] = {p for p in (ROOT/'bpfopt/shim').glob('*.c') if not p.name.startswith('selftest')} | set((ROOT/'bpfopt/shim').glob('*.h'))
     for arch in ['x86','arm64']:
         groups[f'{arch} native kernel module'] = {ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'}
-    groups['trusted kernel queue and checked capture (including wire headers)'] = (
-        includes(ROOT/'kinsn/module/include/native_lab_trusted.h')
-        | includes(ROOT/'kinsn/module/include/native_lab_checked.h'))
+    groups['trusted kernel queue (including wire headers)'] = includes(ROOT/'kinsn/module/include/native_lab_trusted.h')
     groups['shared native module support'] = {ROOT/'kinsn/module/include/kinsn_common.h'}
     groups['x86 native module emitter support'] = {ROOT/'kinsn/module/include/kinsn_x86_emit.h'}
     groups['shared binding and proof-input contracts'] = {
         ROOT/'kinsn/module/include'/name for name in [
             'native_lab_binding.h','native_lab_group.h','native_lab_input.h',
-            'native_lab_map_offset.h','native_lab_exclusive.h']}
+            'native_lab_exclusive.h']}
     groups['loader artifact-binding headers (overlap with loader)'] = {
         ROOT/'kprog/libnativeloader/src'/name for name in [
-            'native_data_layout.hpp','native_rodata_binding.hpp',
-            'native_source_map_binding.hpp','native_environment_binding.hpp']}
+            'native_data_layout.hpp',
+            'native_source_map_binding.hpp']}
     groups['vendored helper declarations (ABI input, not project-owned)'] = {ROOT/'vendor/libbpf/src/bpf_helper_defs.h'}
     groups['formal model, reference API and proofs (Lean, including generated)'] = set((ROOT/'kprog/formal/KProgFormal').rglob('*.lean')) | {ROOT/'kprog/formal/KProgFormal.lean',ROOT/'kprog/formal/ReferenceMain.lean'}
     groups['formal contracts (JSON)'] = set((ROOT/'kprog/formal/contracts').glob('*.json'))
