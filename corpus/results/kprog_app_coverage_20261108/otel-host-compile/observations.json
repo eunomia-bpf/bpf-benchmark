@@ -1,0 +1,73 @@
+{
+  "generated": 5,
+  "compiled": 5,
+  "accepted_bound": 4,
+  "native_sha_matches": 5,
+  "compiler_receipt_joins": [
+    {
+      "entry": "read_task_struct",
+      "status": 0,
+      "compiler_returncode": 0,
+      "source_sha256": "8ae9dd7c0f60a8349ec2ffd72dabab537394a3f136f77749ea556c74a3d9a037",
+      "object_sha256": "62841ff99bd981debb00fe2520557b7360d347b242b1a2230415d02da5700ee8",
+      "wall_seconds": 1.2859753943048418,
+      "max_rss_kib": 179516,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    },
+    {
+      "entry": "perf_unwind_stop",
+      "status": 0,
+      "compiler_returncode": 0,
+      "source_sha256": "93c5793b3e4ba72e5f216227ed612cbb66cb3cfc94a8d0bdd377888e724cc0b8",
+      "object_sha256": "5680cc9bf7fe332a5ff5a62a4a2edba8bf0a336b37804f0b01f5ec0a88bf91f8",
+      "wall_seconds": 31.27184565877542,
+      "max_rss_kib": 1771448,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    },
+    {
+      "entry": "perf_unwind_native",
+      "status": 0,
+      "compiler_returncode": 0,
+      "source_sha256": "8ea109f586c69ae4b7e6ab659a8805ddb5948efd7722213320724228cd8fa4f9",
+      "object_sha256": "f9a6b89497132ee0820e864bb59cd65f11b72350788f33ef3af8097137a0bca3",
+      "wall_seconds": 391.3898016656749,
+      "max_rss_kib": 9404968,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    },
+    {
+      "entry": "perf_unwind_hotspot",
+      "status": 0,
+      "compiler_returncode": 0,
+      "source_sha256": "3bc8e3c9d6f46d7131274ae65b7a15f9af153e83e4b47a67385072c30082efba",
+      "object_sha256": "21d45ba40393c58b03335b8863690a06d52526a9052a1ed63f19f0c9b60524c7",
+      "wall_seconds": 454.4293970428407,
+      "max_rss_kib": 11756356,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    },
+    {
+      "entry": "perf_unwind_perl",
+      "status": -5,
+      "compiler_returncode": 0,
+      "source_sha256": "604ec4402e7f675c5966a4da906acf39abbdf9ce908395ba0d31bafc5db1f28f",
+      "object_sha256": "520c955ac65646498459d10bc999aba84796f714d2b4759f7788e7fdb72f1af0",
+      "wall_seconds": 319.66900627082214,
+      "max_rss_kib": 9795096,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    }
+  ],
+  "driver_error": "otelcol-ebpf-profiler/profiling loadtime rejit timed out after 900.0s",
+  "error_class": "900-second loadtime lifecycle timeout followed by worker activation refusal",
+  "verifier_rejections": 0,
+  "worker_activation_refusals": 1,
+  "source_drift": [
+    "kprog/x86/x86_sim_local_bpf.h"
+  ],
+  "private_header_sha256": "a46abc8b460350c4e0e248982b66d5bfc90e55f432e7db0078cc033cc262f1f0",
+  "private_read_sha256": "4554067c1e54b6a70c2f871b3e72592717dfd9a09471ba49113cd5358ccf4931",
+  "private_compiler_inputs": "captured launch hashes retained",
+  "broker_exit": 0,
+  "guest_exit": 0,
+  "collector_exit": 1,
+  "timeout_cancellation_relation": "inference from explicit driver timeout, request timestamps and subsequent activation refusal",
+  "archive_sha256": "d4002f7003d5cace8365422b545ba3984948f3c87af1a43967bf6341a0b42c31"
+}
