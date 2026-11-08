@@ -25,3 +25,5 @@ make -f "$D/bcc-katran-skb-write/Makefile" corpus STATE="$D/bcc-katran-skb-write
 ```
 
 The field and memory-operation relations apply generically to all native programs. V owns their universal ABI/token integration. Additional runtime admission predicates total0.
+
+The initial scalar-field whole BCC/Katran replay closes26generated/compiled/installed and both applications report `ok`. All26native hashes equal the live-context replay. Its complete raw counters and work outcomes appear in `bcc-katran-skb-scalars/` and `scalar-work.json`. These workloads use tracing/XDP entries; the skb scalar projection applies to their separate Cilium cohort. The canonical three-field successor retains its own pending runtime epoch.
