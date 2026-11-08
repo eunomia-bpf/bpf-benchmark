@@ -2027,6 +2027,22 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 #define ARM64_SIM_BPF_CALL_bpf_seq_write() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_seq_write((struct seq_file *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
+/* Paired ringbuf submit/discard helpers return architectural zero. */
+#define ARM64_SIM_BPF_CALL_bpf_ringbuf_reserve() \
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_ringbuf_reserve((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+
+#define ARM64_SIM_BPF_CALL_bpf_ringbuf_submit() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; }))
+
+#define ARM64_SIM_BPF_CALL_bpf_ringbuf_discard() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_discard((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; }))
+
+#define ARM64_SIM_BPF_CALL_bpf_this_cpu_ptr() \
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_this_cpu_ptr((const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
+
+#define ARM64_SIM_BPF_CALL_bpf_strncmp() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_strncmp((const char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2)))
+
 #define ARM64_SIM_BPF_CALL_bpf_ringbuf_output() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_output((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 

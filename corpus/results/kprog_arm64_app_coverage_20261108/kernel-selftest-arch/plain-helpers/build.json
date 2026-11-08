@@ -1,0 +1,151 @@
+{
+  "utc": "2026-11-08T22:24:02.119072+00:00",
+  "helpers": [
+    {
+      "id": 131,
+      "name": "bpf_ringbuf_reserve"
+    },
+    {
+      "id": 132,
+      "name": "bpf_ringbuf_submit"
+    },
+    {
+      "id": 133,
+      "name": "bpf_ringbuf_discard"
+    },
+    {
+      "id": 154,
+      "name": "bpf_this_cpu_ptr"
+    },
+    {
+      "id": 182,
+      "name": "bpf_strncmp"
+    }
+  ],
+  "identity_rows": 88,
+  "existing_identity_host": "90cases OK",
+  "existing_typed_helper_host": "164cases/0failures",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+        "--check"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cc",
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-Ikprog/formal",
+        "kprog/formal/oracles/test_arm64_helper_idents_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/plain-helpers/identity-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/plain-helpers/identity-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cc",
+        "-include",
+        "kprog/formal/oracles/arm64_entry_environment_host.h",
+        "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+        "-include",
+        "kprog/formal/oracles/arm64_exclusive_choice_host.h",
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-Ikprog/formal",
+        "-Ikprog/arm64",
+        "-Ikprog",
+        "-Ivendor/libbpf/src",
+        "kprog/formal/oracles/test_arm64_helper_call_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/plain-helpers/helper-abi-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/plain-helpers/helper-abi-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.Arm64HelperIdents"
+      ],
+      "cwd": "/workspaces/repository/kprog/formal",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--target",
+        "aarch64-unknown-linux-gnu",
+        "--manifest-path",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml",
+        "--target-dir",
+        "/workspaces/repository/kprog/arm64/build/app-native-link"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cmake",
+        "--build",
+        "runner/build-arm64-llvmbpf",
+        "--target",
+        "micro_exec",
+        "native_loader_dso",
+        "trusted-native-loader",
+        "trusted-service-client",
+        "-j2"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 2
+    },
+    {
+      "command": [
+        "cmake",
+        "--build",
+        "runner/build-arm64-llvmbpf",
+        "--target",
+        "micro_exec",
+        "native_loader_shared",
+        "trusted-native-loader",
+        "trusted-service-client",
+        "--parallel",
+        "2"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    }
+  ],
+  "binaries": {
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "96342a06df9bff168a19ce3497d41c15f253b10088221e359c098c031b20e9a1",
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": "3473c5f07ca6228042ddd4f4446ac73417a02eed15debd1e101bafc6c0c0f0ae",
+    "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "e0bbcacd552d1976145f768bdcccb788e0f45f8cb8651fc5e373dde85a6500fc",
+    "runner/build-arm64-llvmbpf/native_loader/trusted-service-client": "ed8d6d9e2d30128dd55df7401858ed1b020e8b4ddeaa213f8aef28c8c0fcd155"
+  },
+  "runtime_admission_additions": 0
+}

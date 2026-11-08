@@ -63,8 +63,12 @@ inductive Helper
   | bpf_ktime_get_boot_ns
   | bpf_seq_write
   | bpf_ringbuf_output
+  | bpf_ringbuf_reserve
+  | bpf_ringbuf_submit
+  | bpf_ringbuf_discard
   | bpf_copy_from_user
   | bpf_redirect_neigh
+  | bpf_this_cpu_ptr
   | bpf_redirect_peer
   | bpf_get_current_task_btf
   | bpf_ktime_get_coarse_ns
@@ -74,6 +78,7 @@ inductive Helper
   | bpf_get_attach_cookie
   | bpf_task_pt_regs
   | bpf_loop
+  | bpf_strncmp
   | bpf_get_func_arg
   | bpf_get_func_ret
   | bpf_get_func_arg_cnt
@@ -148,8 +153,12 @@ def id : Helper -> Nat
   | .bpf_ktime_get_boot_ns => 125
   | .bpf_seq_write => 127
   | .bpf_ringbuf_output => 130
+  | .bpf_ringbuf_reserve => 131
+  | .bpf_ringbuf_submit => 132
+  | .bpf_ringbuf_discard => 133
   | .bpf_copy_from_user => 148
   | .bpf_redirect_neigh => 152
+  | .bpf_this_cpu_ptr => 154
   | .bpf_redirect_peer => 155
   | .bpf_get_current_task_btf => 158
   | .bpf_ktime_get_coarse_ns => 160
@@ -159,6 +168,7 @@ def id : Helper -> Nat
   | .bpf_get_attach_cookie => 174
   | .bpf_task_pt_regs => 175
   | .bpf_loop => 181
+  | .bpf_strncmp => 182
   | .bpf_get_func_arg => 183
   | .bpf_get_func_ret => 184
   | .bpf_get_func_arg_cnt => 185
@@ -232,8 +242,12 @@ def name : Helper -> String
   | .bpf_ktime_get_boot_ns => "bpf_ktime_get_boot_ns"
   | .bpf_seq_write => "bpf_seq_write"
   | .bpf_ringbuf_output => "bpf_ringbuf_output"
+  | .bpf_ringbuf_reserve => "bpf_ringbuf_reserve"
+  | .bpf_ringbuf_submit => "bpf_ringbuf_submit"
+  | .bpf_ringbuf_discard => "bpf_ringbuf_discard"
   | .bpf_copy_from_user => "bpf_copy_from_user"
   | .bpf_redirect_neigh => "bpf_redirect_neigh"
+  | .bpf_this_cpu_ptr => "bpf_this_cpu_ptr"
   | .bpf_redirect_peer => "bpf_redirect_peer"
   | .bpf_get_current_task_btf => "bpf_get_current_task_btf"
   | .bpf_ktime_get_coarse_ns => "bpf_ktime_get_coarse_ns"
@@ -243,6 +257,7 @@ def name : Helper -> String
   | .bpf_get_attach_cookie => "bpf_get_attach_cookie"
   | .bpf_task_pt_regs => "bpf_task_pt_regs"
   | .bpf_loop => "bpf_loop"
+  | .bpf_strncmp => "bpf_strncmp"
   | .bpf_get_func_arg => "bpf_get_func_arg"
   | .bpf_get_func_ret => "bpf_get_func_ret"
   | .bpf_get_func_arg_cnt => "bpf_get_func_arg_cnt"

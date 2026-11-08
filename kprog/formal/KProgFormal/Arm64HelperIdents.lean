@@ -2,7 +2,7 @@ import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 83 BPF helper ids with the
+/-- Independent enumeration of the encoder's 88 BPF helper ids with the
 helper name each one denotes, in id-sorted order. Written out by hand so it
 shares no structure with the generated table. -/
 def helperIdentsSpec : List (Nat × String) := [
@@ -43,13 +43,15 @@ def helperIdentsSpec : List (Nat × String) := [
   (124, "bpf_sk_assign"),
   (125, "bpf_ktime_get_boot_ns"), (127, "bpf_seq_write"),
   (130, "bpf_ringbuf_output"),
+  (131, "bpf_ringbuf_reserve"), (132, "bpf_ringbuf_submit"),
+  (133, "bpf_ringbuf_discard"),
   (148, "bpf_copy_from_user"), (152, "bpf_redirect_neigh"),
-  (155, "bpf_redirect_peer"),
+  (154, "bpf_this_cpu_ptr"), (155, "bpf_redirect_peer"),
   (158, "bpf_get_current_task_btf"), (160, "bpf_ktime_get_coarse_ns"),
   (161, "bpf_ima_inode_hash"), (163, "bpf_check_mtu"),
   (173, "bpf_get_func_ip"),
   (174, "bpf_get_attach_cookie"), (175, "bpf_task_pt_regs"),
-  (181, "bpf_loop"),
+  (181, "bpf_loop"), (182, "bpf_strncmp"),
   (183, "bpf_get_func_arg"), (184, "bpf_get_func_ret"),
   (185, "bpf_get_func_arg_cnt"), (186, "bpf_get_retval"),
   (188, "bpf_xdp_get_buff_len"),
@@ -100,12 +102,13 @@ def allHelperIdents : List GeneratedArm64HelperIdents.Helper := [
   .bpf_sk_assign,
   .bpf_ktime_get_boot_ns, .bpf_seq_write,
   .bpf_ringbuf_output,
+  .bpf_ringbuf_reserve, .bpf_ringbuf_submit, .bpf_ringbuf_discard,
   .bpf_copy_from_user, .bpf_redirect_neigh,
-  .bpf_redirect_peer,
+  .bpf_this_cpu_ptr, .bpf_redirect_peer,
   .bpf_get_current_task_btf, .bpf_ktime_get_coarse_ns,
   .bpf_ima_inode_hash, .bpf_check_mtu, .bpf_get_func_ip,
   .bpf_get_attach_cookie, .bpf_task_pt_regs,
-  .bpf_loop,
+  .bpf_loop, .bpf_strncmp,
   .bpf_get_func_arg, .bpf_get_func_ret,
   .bpf_get_func_arg_cnt, .bpf_get_retval,
   .bpf_xdp_get_buff_len,
