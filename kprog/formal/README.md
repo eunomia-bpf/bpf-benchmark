@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-53 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
+56 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
@@ -60,7 +60,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Forty-one direct, ten generic and two branch token bodies have semantic
+Forty-four direct, ten generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -76,6 +76,11 @@ Memory INC/DEC/NEG/NOT and classic ROR also compose their captured read,
 generated result and flags, observed store and precise fault effects.
 Memory CMP/TEST also compose packed/whole displacement fields, numeric
 register operands and complete six-flag/read/fault effects.
+Ordinary/scalar/signed loads also bind source/target widths, AUX defaulting
+and full effective-address fields through canonical MOV/extension and the
+unified dispatcher/token step. Their numeric destination retains low lanes,
+RSP offsets and former STACK aliases under the stated physical-memory,
+provenance, native-normalization and compiler/ABI interfaces.
 Memory ADD/ADC/SUB/SBB/AND/OR/XOR/SHL/SHR/SAR/ROL compose the same
 full-frame read/modify/write and fault law for immediate and register tokens.
 Memory-source ADD/ADC/SUB/SBB/AND/OR/XOR/IMUL also retain captured
