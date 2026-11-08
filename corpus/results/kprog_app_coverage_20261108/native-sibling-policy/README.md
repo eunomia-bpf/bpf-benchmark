@@ -1,0 +1,3 @@
+# Native sibling-call compiler policy before submission
+
+Both whole BCC and Katran native producers compile from the same application C and helper ABI with the current generic division pass. The control retains canonical O3 and sibling-call suppression; the candidate enables the compiler sibling-call optimization in P before submission. Every native object and proof-mode closure, executable section byte count/hash, compiler log and dependency source capture accompanies this measurement. Current production flags retain their definition. Kernel loads0/native executions0 here; whole verified loading, matching work and R timing determine the performance observation. This experiment adds runtime admission predicates0.
