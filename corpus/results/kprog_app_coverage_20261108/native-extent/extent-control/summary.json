@@ -1,0 +1,53 @@
+{
+  "utc": "2026-11-08T15:49:56.212843+00:00",
+  "replay_exit": 0,
+  "source_adoption": false,
+  "records": [
+    {
+      "case": "small",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/small.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+        "started": "2026-11-08T15:49:50.747221+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/extent-control/runtime/requests/1.success.tar.gz",
+        "finished": "2026-11-08T15:49:52.599271+00:00"
+      },
+      "compiled": true,
+      "native_hash_matches": true
+    },
+    {
+      "case": "medium",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/extent-control/medium.native.o",
+        "0",
+        "2"
+      ],
+      "exit": 0,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "2325ad17685273e1c7d91328c34f5c1f617fe3c96c15eecd09dc9639385fafcc",
+        "started": "2026-11-08T15:49:52.664315+00:00",
+        "prog_id": 8,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/native-extent/extent-control/runtime/requests/2.success.tar.gz",
+        "finished": "2026-11-08T15:49:55.592626+00:00"
+      },
+      "compiled": true,
+      "native_hash_matches": true
+    }
+  ]
+}
