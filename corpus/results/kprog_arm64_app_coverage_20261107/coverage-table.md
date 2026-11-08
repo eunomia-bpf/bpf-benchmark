@@ -42,3 +42,13 @@ artifacts. Cilium's zero-request identity flags remain false. Tetragon's one
 request has matching kernel/worker/receipt native bytes and six artifact hashes;
 its six baseline stressors return0. OTel and Tracee runtime queues continue,
 followed by the Cilium virtual-clock and guarded-module Katran queues.
+
+## Closed resource and instruction-clock cohorts
+
+The existing generic application archive reader joins each published coverage field, phase measurement, request artifact and native byte identity in closed-runtime-increment.json. Original cohort rows retain their source/boot epochs.
+
+| Application / publication | Baseline resident / BPF calls | Requests | Generated / compiled / bound | Recorded class |
+| --- | ---: | ---: | ---: | --- |
+| otel / bfaeaf240 | 12 / 163,901 | 2 | 2 / 1 / 1 | guest_oom_clang |
+| tracee / 7e35f5cb6 | 151 / 161,369 | 2 | 2 / 2 / 1 | scalar_pointer_verifier_refusal |
+| cilium / 4aa04fec4 | 62 / 124,884 | 1 | 0 / 0 / 0 | helper_identity_domain |
