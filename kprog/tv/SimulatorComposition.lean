@@ -1,3 +1,4 @@
+import BPF
 import Composition
 import KProgFormal.Refinement.X86Dispatcher
 
@@ -367,3 +368,84 @@ end KProgTV.SimulatorComposition
 #print axioms KProgTV.SimulatorComposition.actual_program_effects_checked
 
 #print axioms KProgTV.SimulatorComposition.actual_program_effects_from_kernel_copy
+
+namespace KProgTV.SimulatorComposition
+open KProgFormal KProgFormal.Reference KProgFormal.Refinement
+open KProgFormal.Refinement.X86NumericAddress KProgFormal.Refinement.X86Dispatcher
+
+/-- Actual little-endian BPF CALL -1 emitted by the existing unresolved path. -/
+def unresolvedReturnBytes : Array Reference.Byte := #[0x85, 0, 0, 0, 0xff, 0xff, 0xff, 0xff]
+def unresolvedReturnInstruction : BPF.Instruction := ⟨0x85, 0, 0, 0, 0xffffffff⟩
+
+theorem unresolved_return_decodes :
+    BPF.decode unresolvedReturnBytes 0 = .ok unresolvedReturnInstruction := by rfl
+
+/-- The byte interpreter preserves the platform's rejected-helper result.
+Stock-verifier rejection itself belongs to the trusted verifier interface. -/
+theorem unresolved_return_call_error (environment : BPF.Environment) (state : BPF.State)
+    (message : String)
+    (rejected : environment.helperCall unresolvedReturnInstruction state = .error message) :
+    BPF.execute environment unresolvedReturnBytes state unresolvedReturnInstruction = .error message := by
+  simp [BPF.execute, unresolvedReturnInstruction]
+  have canonical : ({ code := 133, dst := 0, src := 0, offset := 0#16, imm := 0xffffffff#32 } : BPF.Instruction) = unresolvedReturnInstruction := by rfl
+  rw [canonical, rejected]
+  rfl
+
+/-- O4 carries both alternatives through the compiled-B/link transport law.
+The unresolved alternative retains the complete captured RET prefix. -/
+theorem compiled_return_default_preserved
+    (environment : Artifact → EntryEnvironment.Environment) (frame : Artifact → EntryEnvironment.Frame)
+    (arena : Artifact → Reference.Word) (targets : Artifact → List Reference.Word)
+    (compiled : Artifact → RegisterState → ReturnDispatchResult)
+    (preserved : ∀ a state, compiled a state = generatedReturnDispatch (environment a) (frame a) (arena a) state (targets a))
+    (a : Artifact) (state : RegisterState)
+    (unmatched : (targets a).contains (returnStackWord (environment a) (frame a) (arena a) state) = false) :
+    compiled a state = .unresolved (returnLabelFrame (environment a) (frame a) (arena a) state) := by
+  rw [preserved]
+  exact return_dispatch_default _ _ _ _ _ unmatched
+
+/-- Existing verifier rejection of a reached unresolved edge derives table
+membership for an entered RET from acceptance. Every artifact and invocation is quantified. -/
+theorem accepted_return_selects_continuation
+    (environment : Artifact → EntryEnvironment.Environment) (frame : Artifact → EntryEnvironment.Frame)
+    (arena : Artifact → Reference.Word) (targets : Artifact → List Reference.Word)
+    (compiled : Artifact → RegisterState → ReturnDispatchResult)
+    (preserved : ∀ a state, compiled a state = generatedReturnDispatch (environment a) (frame a) (arena a) state (targets a))
+    (accepted : Artifact → Prop) (entered : Artifact → RegisterState → Prop)
+    (unresolvedRejected : ∀ a state effect, accepted a → entered a state → compiled a state = .unresolved effect → False)
+    (a : Artifact) (state : RegisterState) (acceptance : accepted a) (entry : entered a state) :
+    (targets a).contains (returnStackWord (environment a) (frame a) (arena a) state) = true := by
+  cases member : (targets a).contains (returnStackWord (environment a) (frame a) (arena a) state) with
+  | true => rfl
+  | false =>
+      exact False.elim (unresolvedRejected a state _ acceptance entry
+        (compiled_return_default_preserved environment frame arena targets compiled preserved a state member))
+
+/-- Accepted linked RET transports the canonical saved-word read, SP advance,
+complete architectural frame and continuation under explicit memory/ISA and
+compiled edge/rejection premises. Outer invocation ABI remains separate. -/
+theorem accepted_compiled_return_native_step
+    (environment : Artifact → EntryEnvironment.Environment) (frame : Artifact → EntryEnvironment.Frame)
+    (arena : Artifact → Reference.Word) (targets : Artifact → List Reference.Word)
+    (compiled : Artifact → RegisterState → ReturnDispatchResult)
+    (preserved : ∀ a state, compiled a state = generatedReturnDispatch (environment a) (frame a) (arena a) state (targets a))
+    (accepted : Artifact → Prop) (entered : Artifact → RegisterState → Prop)
+    (unresolvedRejected : ∀ a state effect, accepted a → entered a state → compiled a state = .unresolved effect → False)
+    (a : Artifact) (state : RegisterState) (acceptance : accepted a) (entry : entered a state) (nextPc : Reference.Word)
+    (readable : permitted state.raw.memory.readable (registerValue (environment a) (frame a) (arena a) state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth
+      (returnStackWord (environment a) (frame a) (arena a) state) = true) :
+    compiled a state = .label (Reference.X86.step (.returnNear 0 nextPc)
+      (nativeRegisters (environment a) (frame a) (arena a) state)) := by
+  have member := accepted_return_selects_continuation environment frame arena targets compiled preserved accepted entered
+    unresolvedRejected a state acceptance entry
+  rw [preserved, return_dispatch_body_matches]
+  simp only [specializedReturnDispatch, member, ↓reduceIte]
+  exact congrArg ReturnDispatchResult.label (return_label_frame_refines _ _ _ _ nextPc readable canonical)
+
+end KProgTV.SimulatorComposition
+#print axioms KProgTV.SimulatorComposition.unresolved_return_decodes
+#print axioms KProgTV.SimulatorComposition.unresolved_return_call_error
+#print axioms KProgTV.SimulatorComposition.compiled_return_default_preserved
+#print axioms KProgTV.SimulatorComposition.accepted_return_selects_continuation
+#print axioms KProgTV.SimulatorComposition.accepted_compiled_return_native_step

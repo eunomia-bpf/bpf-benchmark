@@ -43,9 +43,12 @@ include sequential byte effects and the fresh caller-clobber frame; their
 native call/ABI and physical memory relations remain explicit. Two helper token
 wrappers prove full64-bit sparse ID routing, pre-call capture, result/memory/events
 and fresh caller/callee-frame laws over a returning helper-effect interface;
-typed arguments, native ABI and successful tail transfer remain explicit. Internal
-RET includes its finite continuation switch; outer invocation/return-slot,
-physical memory/provenance and C/compiler correspondence remain explicit.
+typed arguments, native ABI and successful tail transfer remain explicit. Internal RET includes a total label/unresolved continuation result, with
+complete captured read/SP advance in both alternatives. O2 covers its default;
+O4 carries CALL -1 decode/error semantics and derives case membership for
+accepted entered states under explicit compiled-edge/stock rejection premises.
+Outer invocation/return-slot, physical memory/provenance, native-to-B entry
+coverage and C/compiler correspondence remain explicit.
 
 Architectural profiles are stated in the reference and theorem premises:
 x86 near control uses 48/57-bit canonical addresses with CET disabled, and

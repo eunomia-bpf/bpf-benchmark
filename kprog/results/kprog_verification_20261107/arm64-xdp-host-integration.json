@@ -13484,6 +13484,38 @@
       "NativeLinkLiteral.ReadOnly.image_write_preserved"
     ]
   },
+  "ret_unresolved_default_transport": {
+    "archive_block_sha256": "6d0329c1f1c1ce145402447b5c2ba00e398275b0ebbceda91f05dd7ef6985200",
+    "archive_entries": 35,
+    "archive_file": "kprog/results/kprog_verification_20261107/ret-unresolved-default.log.gz",
+    "domain": "All finite continuation tables and captured64-bit return words; resolved and unresolved results retain complete captured read/SP-advance/frame. Every ignored RET token field is arbitrary. The legacy selected-only projection and every previous theorem are retained.",
+    "implementation": "Coordinator-approved default calls the existing unresolved-indirect helper. Actual little-endian CALL -1 bytes decode and preserve a rejected helper-call result. Acceptance selects a continuation for entered RET states under explicit compiled-edge transport and stock rejection premises.",
+    "integrated_dispatcher_and_composition_exit": 0,
+    "premises": "Saved-word read permission, canonical native target, native source-label/PC and physical frame/ABI correspondence, compiled edge retention, accepted-B entry/reachability transport and stock verifier rejection of reached CALL -1. Outer invocation/context/low32 return and complete compiler/definedness closure remain explicit.",
+    "producer": {
+      "helper_declaration": "if has_indirect or subfunctions",
+      "observed_default": "default: __x86_sim_unresolved_indirect_target();",
+      "path": "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "sha256": "5fcca582ce5307b491515b03a017e6e9a579a2a89972a2cfe31bf72f61eeed3f",
+      "source_head": "a5a58034063f6ff6c78ce93eb3cea7fd8f963a46",
+      "worktree_status": "MM kprog/x86/micro-prog/generate_micro_sim_proofs.py"
+    },
+    "runtime_admission_additions": 0,
+    "standalone_O2_exit": 0,
+    "standalone_O4_exit": 0,
+    "theorems": [
+      "X86Dispatcher.return_dispatch_body_matches",
+      "X86Dispatcher.return_dispatch_legacy_projection",
+      "X86Dispatcher.return_dispatch_effect",
+      "X86Dispatcher.return_dispatch_token_body_matches",
+      "X86Dispatcher.return_dispatch_token_default",
+      "SimulatorComposition.unresolved_return_decodes",
+      "SimulatorComposition.unresolved_return_call_error",
+      "SimulatorComposition.compiled_return_default_preserved",
+      "SimulatorComposition.accepted_return_selects_continuation",
+      "SimulatorComposition.accepted_compiled_return_native_step"
+    ]
+  },
   "return_route_focused": {
     "archive_block_sha256": "98b43f626b36e1fa05de751f69b7057524dfe903d58268a1ae014848b3882af6",
     "commands": [

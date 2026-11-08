@@ -4821,10 +4821,10 @@ theorem return_label_simulator_token_native_matches (env : EntryEnvironment.Envi
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
-/-- Source emission expands the finite continuation table into case/goto
-arms. The saved word is sampled at the old stack offset; each selected arm
-observes the same completed read/advance transfer. An exhausted table denotes
-the source fallthrough, whose subsequent control retains a separate relation. -/
+/-- Selected-label projection of finite case/goto emission. Each selected
+arm retains the captured word/read/advance transfer. Table exhaustion projects
+the unresolved default to none; generatedReturnDispatch below retains its
+complete outcome and frame. -/
 def generatedReturnSwitchBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Reference.Word) (state : RegisterState) : List Reference.Word → Option (Transition Reference.X86.State)
   | [] => none
@@ -5261,3 +5261,130 @@ theorem pointer_simulator_token_native_matches (env : EntryEnvironment.Environme
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
 end KProgFormal.Refinement.X86Dispatcher
+
+namespace KProgFormal.Refinement.X86Dispatcher
+open Reference X86NumericAddress
+
+/-- RET continuation dispatch retains its captured transfer for each word.
+The unresolved alternative denotes the existing unresolved-indirect call edge. -/
+inductive ReturnDispatchResult where
+  | label (effect : Transition Reference.X86.State)
+  | unresolved (effect : Transition Reference.X86.State)
+
+def ReturnDispatchResult.effect : ReturnDispatchResult → Transition Reference.X86.State
+  | .label effect | .unresolved effect => effect
+
+/-- Projection onto the legacy selected-label interface. -/
+def ReturnDispatchResult.selected : ReturnDispatchResult → Option (Transition Reference.X86.State)
+  | .label effect => some effect | .unresolved _ => none
+
+def generatedReturnDispatch (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) : List Reference.Word → ReturnDispatchResult
+  | [] => .unresolved (returnLabelFrame env frame arena state)
+  | label :: rest =>
+      if returnStackWord env frame arena state = label then
+        .label ⟨nativeRegisters env frame arena (registerPc (advanceStack state 8) label),
+          returnStackReads env frame arena state, none⟩
+      else generatedReturnDispatch env frame arena state rest
+
+def specializedReturnDispatch (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) : ReturnDispatchResult :=
+  if targets.contains (returnStackWord env frame arena state) then
+    .label (returnLabelFrame env frame arena state)
+  else .unresolved (returnLabelFrame env frame arena state)
+
+theorem return_dispatch_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    generatedReturnDispatch env frame arena state targets =
+      specializedReturnDispatch env frame arena state targets := by
+  induction targets with
+  | nil => rfl
+  | cons label rest ih =>
+      by_cases selected : returnStackWord env frame arena state = label
+      · simp [generatedReturnDispatch, specializedReturnDispatch, List.contains_cons,
+          selected, returnLabelFrame]
+      · simp only [generatedReturnDispatch, if_neg selected, ih]
+        simp [specializedReturnDispatch, List.contains_cons, selected, Ne.symm selected]
+
+theorem return_dispatch_default (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word)
+    (unmatched : targets.contains (returnStackWord env frame arena state) = false) :
+    generatedReturnDispatch env frame arena state targets =
+      .unresolved (returnLabelFrame env frame arena state) := by
+  rw [return_dispatch_body_matches]
+  simp only [specializedReturnDispatch, unmatched, Bool.false_eq_true, ↓reduceIte]
+
+theorem return_dispatch_selected (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    generatedReturnDispatch env frame arena state targets = .label (returnLabelFrame env frame arena state) ↔
+      targets.contains (returnStackWord env frame arena state) = true := by
+  rw [return_dispatch_body_matches]
+  simp only [specializedReturnDispatch]
+  split <;> simp_all
+
+theorem return_dispatch_unresolved (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    generatedReturnDispatch env frame arena state targets = .unresolved (returnLabelFrame env frame arena state) ↔
+      targets.contains (returnStackWord env frame arena state) = false := by
+  rw [return_dispatch_body_matches]
+  simp only [specializedReturnDispatch]
+  split <;> simp_all
+
+theorem return_dispatch_legacy_projection (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    (generatedReturnDispatch env frame arena state targets).selected =
+      generatedReturnSwitchBody env frame arena state targets := by
+  rw [return_dispatch_body_matches, return_switch_body_matches]
+  unfold specializedReturnDispatch specializedReturnSwitch
+  split <;> rfl
+
+/-- Both alternatives retain the complete captured read/advance transfer.
+The unresolved alternative subsequently takes its verifier-rejected call edge. -/
+theorem return_dispatch_effect (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    (generatedReturnDispatch env frame arena state targets).effect = returnLabelFrame env frame arena state := by
+  rw [return_dispatch_body_matches]
+  unfold specializedReturnDispatch
+  split <;> rfl
+
+/-- O2 composes the existing RET token prefix with both switch alternatives.
+Every ignored token field and every finite continuation table is quantified. -/
+def specializedReturnDispatchToken (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
+    Option ReturnDispatchResult :=
+  (specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state).map
+    (fun effect => if targets.contains (returnStackWord env frame arena state) then .label effect else .unresolved effect)
+
+theorem return_dispatch_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
+    specializedReturnDispatchToken env frame arena current state targets flags aux dst src value nextPc =
+      some (generatedReturnDispatch env frame arena state targets) := by
+  rw [return_dispatch_body_matches]
+  simp only [specializedReturnDispatchToken, specializedReturnLabelStep, ↓reduceIte,
+    returnLabelRegisters, Option.map_some, specializedReturnDispatch]
+  split <;> rfl
+
+theorem return_dispatch_token_default (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
+    (unmatched : targets.contains (returnStackWord env frame arena state) = false) :
+    specializedReturnDispatchToken env frame arena current state targets flags aux dst src value nextPc =
+      some (.unresolved (returnLabelFrame env frame arena state)) := by
+  rw [return_dispatch_token_body_matches, return_dispatch_default env frame arena state targets unmatched]
+
+theorem return_dispatch_captured_native_step (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) (nextPc : Reference.Word)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
+    (generatedReturnDispatch env frame arena state targets).effect =
+      Reference.X86.step (.returnNear 0 nextPc) (nativeRegisters env frame arena state) := by
+  rw [return_dispatch_effect]
+  exact return_label_frame_refines env frame arena state nextPc readable canonical
+
+end KProgFormal.Refinement.X86Dispatcher
+#print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_body_matches
+#print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_token_body_matches
+#print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_token_default
+#print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_captured_native_step

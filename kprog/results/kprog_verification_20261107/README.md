@@ -5143,3 +5143,22 @@ retain state differences. SHIFTX memory has72 equal register/flag/XMM/memory
 observations and a PC-1 displacement-byte difference; REP retains48
 element/whole-instruction differences. Exact source and certificate diagnostics
 stay in the [original archive](reference-x86-acl2-87.log.gz).
+
+### RET default and universal O2/O4 transport
+
+`return_dispatch_token_body_matches` covers every finite continuation table,
+64-bit saved word and ignored RET field. A matching case and an exhausted
+table produce explicit label/unresolved results with the same complete
+captured read, SP advance and architectural frame. The selected-only legacy
+projection and all earlier theorems remain present.
+
+`unresolved_return_decodes` and `unresolved_return_call_error` cover actual
+little-endian CALL -1 bytes and error propagation. `compiled_return_default_preserved`
+carries the default through the compiled-B/link interface. For accepted B and
+an entered RET, `accepted_return_selects_continuation` derives case membership
+from compiled-edge preservation and stock unresolved-call rejection. The
+canonical successor theorem additionally uses saved-word readability and
+canonical target premises. Native-to-B entry/reachability, physical frame and
+outer invocation ABI, complete compiler/definedness and stock-verifier soundness
+remain explicit interfaces. [Original proof/source records](ret-unresolved-default.log.gz)
+retain the producer working-source identity separately from its publication.
