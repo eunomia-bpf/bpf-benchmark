@@ -749,6 +749,14 @@ static inline long bpf_ima_file_hash(struct file *file, void *dst, __u32 size)
   ora_arguments[2] = (__u64)(uintptr_t)size;
   return (long)(uintptr_t)ora_raw_result(193U);
 }
+static inline void * bpf_kptr_xchg(void *dst, void *ptr)
+{
+  ora_called = 194U;
+  ora_argc = 2U;
+  ora_arguments[0] = (__u64)(uintptr_t)dst;
+  ora_arguments[1] = (__u64)(uintptr_t)ptr;
+  return (void *)(uintptr_t)ora_raw_result(194U);
+}
 static inline void * bpf_map_lookup_percpu_elem(void *map, const void *key, __u32 cpu)
 {
   ora_called = 195U;
@@ -1143,6 +1151,10 @@ static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u6
     out[1] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[1]);
     out[2] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[2]);
     return 3U;
+  case 194ULL:
+    out[0] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[1]);
+    return 2U;
   case 195ULL:
     out[0] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[0]);
     out[1] = (__u64)(uintptr_t)((const void *)(uintptr_t)raw[1]);
@@ -1235,13 +1247,14 @@ static inline __u64 ora_expected_result(__u64 id)
   case 190ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(190U));
   case 191ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(191U));
   case 193ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(193U));
+  case 194ULL: return (__u64)(uintptr_t)((void *)(uintptr_t)ora_raw_result(194U));
   case 195ULL: return (__u64)(uintptr_t)((void *)(uintptr_t)ora_raw_result(195U));
   default: return 0;
   }
 }
 static inline unsigned ora_pointer_result(__u64 id)
 {
-  return id == 1ULL || id == 85ULL || id == 95ULL || id == 99ULL || id == 158ULL || id == 195ULL;
+  return id == 1ULL || id == 85ULL || id == 95ULL || id == 99ULL || id == 158ULL || id == 194ULL || id == 195ULL;
 }
 static inline unsigned ora_pointer_arguments(__u64 id)
 {
@@ -1327,6 +1340,7 @@ static inline unsigned ora_pointer_arguments(__u64 id)
   case 190ULL: return 5U;
   case 191ULL: return 13U;
   case 193ULL: return 3U;
+  case 194ULL: return 3U;
   case 195ULL: return 3U;
   default: return 0;
   }
