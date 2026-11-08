@@ -108,3 +108,6 @@ output directory and yields a symbol-version mismatch.
 `trusted-native-loader` must be rebuilt from `kprog/trusted_loader.cpp` when
 `native_loader.cpp` changes; a stale binary looks for a `blob%u` interface the
 current module does not create.
+## AArch64 entrypoints
+
+The same compiler and submission scripts select ARM through --arch arm64. The compiler reads output/include/vmlinux.h dumped from the retained ARM kernel BTF and uses the corpus Armv8.1-LSE ABI. The guest submission selects the existing ARM micro_exec, helper82 worker and native-link entry-resource binary. The x86 defaults retain their original paths/flags. The [ARM support receipt](../../../corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/README.md) records the1917/657 population,123 corrected macro entry names, x86 before/after byte equality and nine original ARM C entry builds. R retains actual sweep ownership and annotation agreement accounting.

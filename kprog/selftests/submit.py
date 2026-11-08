@@ -2,7 +2,7 @@
 """Submit the compiled selftest programs through the five-step path.
 
 `selftests.py` enumerates the kernel's annotated programs and compiles the C
-ones to native x86-64.  This script takes those objects, loads the matching
+ones to the selected native ISA.  This script takes those objects, loads the matching
 BPF program the way an application does, and submits it through the trusted
 native path, then compares the outcome with the kernel's own annotation.
 
@@ -21,7 +21,7 @@ gives the loader an `original_prog_fd` and a source bytecode to bind
 against, with `--native-program` naming the object compiled from the same
 source.
 
-Usage: submit.py [--table DIR] [--out DIR] [--limit N] [--only NAME]
+Usage: submit.py [--arch x86|arm64] [--table DIR] [--out DIR] [--limit N] [--only NAME]
 """
 
 import argparse
@@ -70,7 +70,14 @@ def start_service(arch=1):
     The kernel end queues a submission and waits for a registered service to
     specialize it, so without one every load ends in ENOTCONN.
     """
-    endpoint = pathlib.Path("/sys/kernel/debug/bpf_x86_native_lab/specializer")
+    target = {1: "x86", 2: "arm64"}[arch]
+    endpoint = pathlib.Path("/sys/kernel/debug/bpf_" + target + "_native_lab/specializer")
+    linker = (ROOT / "kprog/x86/native_lab/native_link/target/release/native-link"
+              if arch == 1 else ROOT / "kprog/arm64/build/app-native-link/"
+              "aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources")
+    loader = (ROOT / "kprog/libnativeloader/build/trusted-native-loader"
+              if arch == 1 else ROOT / "kprog/arm64/build/"
+              "kernel-selftest-helpers/loader/trusted-native-loader")
     if not endpoint.exists():
         return None, None
     state = pathlib.Path(tempfile.mkdtemp(prefix="trusted-"))
@@ -79,10 +86,7 @@ def start_service(arch=1):
          "--arch", str(arch), "--endpoint", str(endpoint),
          "--state", str(state),
          "--native-link",
-         str(ROOT / "kprog/x86/native_lab/native_link/target/release/"
-             "native-link"),
-         "--loader", str(ROOT / "kprog/libnativeloader/build/"
-                             "trusted-native-loader")],
+         str(linker), "--loader", str(loader)],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     line = proc.stdout.readline()
     try:
@@ -127,13 +131,17 @@ def program_listing(micro_exec, obj):
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--table", default=str(DEFAULT_TABLE))
+    ap.add_argument("--arch", default="x86")
     ap.add_argument("--out", default=str(ROOT / "kprog/selftests/results"))
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", default="")
     ap.add_argument("--micro-exec",
-                    default=str(ROOT / "runner/build-llvmbpf/micro_exec"))
+                    default=None)
     args = ap.parse_args(argv[1:])
 
+    if args.micro_exec is None:
+        args.micro_exec = str(ROOT / {"x86": "runner/build-llvmbpf/micro_exec",
+                                     "arm64": "runner/build-arm64-llvmbpf/micro_exec"}[args.arch])
     table = pathlib.Path(args.table) / "programs.json"
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -148,7 +156,7 @@ def main(argv):
     if args.limit:
         work = work[:args.limit]
 
-    service, _ = start_service()
+    service, _ = start_service({"x86": 1, "arm64": 2}[args.arch])
     if service is None:
         print("no trusted service: the kernel endpoint is absent",
               file=sys.stderr)

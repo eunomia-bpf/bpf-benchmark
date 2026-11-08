@@ -1,0 +1,2296 @@
+{
+  "utc": "2026-11-08T12:42:09.549579+00:00",
+  "population": {
+    "utc": "2026-11-08T12:37:03.515717+00:00",
+    "before": 1917,
+    "after": 1917,
+    "c_before": 657,
+    "c_after": 657,
+    "renamed": [
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 547,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "trusted_cgroup_ptr_sleepable",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 547,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 819,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "trusted_cgroup_ptr_non_sleepable",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 819,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 1093,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "use_css_iter_non_sleepable",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 1093,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 1471,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "use_css_iter_sleepable_missing_rcu_lock",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 1471,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 1943,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "use_css_iter_sleepable_with_rcu_lock",
+          "section": "lsm.s/socket_connect",
+          "kind": "c",
+          "offset": 1943,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 2384,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "use_bpf_cgroup_ancestor",
+          "section": "lsm/socket_connect",
+          "kind": "c",
+          "offset": 2384,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgroup_read_xattr.c",
+          "program": "BPF_PROG",
+          "section": "cgroup/sendmsg4",
+          "kind": "c",
+          "offset": 2767,
+          "expect": "success"
+        },
+        "after": {
+          "file": "cgroup_read_xattr.c",
+          "program": "cgroup_skb",
+          "section": "cgroup/sendmsg4",
+          "kind": "c",
+          "offset": 2767,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 669,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_untrusted",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 669,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 1129,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_no_null_check",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 1129,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 1529,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_fp",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 1529,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "kretprobe/cgroup_destroy_locked",
+          "kind": "c",
+          "offset": 1953,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_unsafe_kretprobe",
+          "section": "kretprobe/cgroup_destroy_locked",
+          "kind": "c",
+          "offset": 1953,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 2328,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_trusted_walked",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 2328,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 2732,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_null",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 2732,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3089,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_acquire_unreleased",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3089,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3383,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_xchg_unreleased",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3383,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3773,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_rcu_get_release",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 3773,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4213,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_release_untrusted",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4213,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4589,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_release_fp",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4589,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4898,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_release_null",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 4898,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 5697,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cgrp_kfunc_failure.c",
+          "program": "cgrp_kfunc_release_unacquired",
+          "section": "tp_btf/cgroup_mkdir",
+          "kind": "c",
+          "offset": 5697,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 790,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_alloc_no_release",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 790,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1065,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_alloc_double_release",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1065,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1404,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_acquire_wrong_cpumask",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1404,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1736,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_mutate_cpumask",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1736,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2059,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_insert_remove_no_release",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2059,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2531,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_cpumask_null",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2531,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2761,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_global_mask_out_of_rcu",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2761,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3387,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_global_mask_no_null_check",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3387,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3961,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_global_mask_rcu_no_null_check",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3961,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4558,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_invalid_nested_array",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4558,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4972,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_populate_invalid_destination",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4972,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "cpumask_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5334,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "cpumask_failure.c",
+          "program": "test_populate_invalid_source",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5334,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "dummy_st_ops_fail.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops.s/test_2",
+          "kind": "c",
+          "offset": 243,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "dummy_st_ops_fail.c",
+          "program": "test_unsupported_field_sleepable",
+          "section": "struct_ops.s/test_2",
+          "kind": "c",
+          "offset": 243,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "dynptr_fail.c",
+          "program": "BPF_PROG",
+          "section": "fentry/skb_tx_error",
+          "kind": "c",
+          "offset": 31905,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "dynptr_fail.c",
+          "program": "skb_invalid_ctx_fentry",
+          "section": "fentry/skb_tx_error",
+          "kind": "c",
+          "offset": 31905,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "dynptr_fail.c",
+          "program": "BPF_PROG",
+          "section": "fexit/skb_tx_error",
+          "kind": "c",
+          "offset": 32131,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "dynptr_fail.c",
+          "program": "skb_invalid_ctx_fexit",
+          "section": "fexit/skb_tx_error",
+          "kind": "c",
+          "offset": 32131,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_acquire.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 225,
+          "expect": "success"
+        },
+        "after": {
+          "file": "nested_acquire.c",
+          "program": "test_nested_acquire_nonzero",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 225,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_acquire.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 490,
+          "expect": "success"
+        },
+        "after": {
+          "file": "nested_acquire.c",
+          "program": "test_nested_acquire_zero",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 490,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_trust_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 589,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "nested_trust_failure.c",
+          "program": "test_invalid_nested_user_cpus",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 589,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_trust_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 895,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "nested_trust_failure.c",
+          "program": "test_invalid_skb_field",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 895,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_trust_success.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 436,
+          "expect": "success"
+        },
+        "after": {
+          "file": "nested_trust_success.c",
+          "program": "test_read_cpumask",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 436,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_trust_success.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 606,
+          "expect": "success"
+        },
+        "after": {
+          "file": "nested_trust_success.c",
+          "program": "test_skb_field",
+          "section": "tp_btf/tcp_probe",
+          "kind": "c",
+          "offset": 606,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "nested_trust_success.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 776,
+          "expect": "success"
+        },
+        "after": {
+          "file": "nested_trust_success.c",
+          "program": "test_nested_offset",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 776,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 465,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_1",
+          "section": "?fentry/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 465,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 900,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_2",
+          "section": "?fentry/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 900,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 1359,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_3",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 1359,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 1855,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_4",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 1855,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2113,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_5",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2113,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2350,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_6",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2350,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2654,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_7",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2654,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "percpu_alloc_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2967,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "percpu_alloc_fail.c",
+          "program": "test_array_map_8",
+          "section": "?fentry.s/bpf_fentry_test1",
+          "kind": "c",
+          "offset": 2967,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "refcounted_kptr.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 11304,
+          "expect": "success"
+        },
+        "after": {
+          "file": "refcounted_kptr.c",
+          "program": "rbtree_sleepable_rcu",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 11304,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "refcounted_kptr.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 11968,
+          "expect": "success"
+        },
+        "after": {
+          "file": "refcounted_kptr.c",
+          "program": "rbtree_sleepable_rcu_no_explicit_rcu_lock",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 11968,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "refcounted_kptr_fail.c",
+          "program": "BPF_PROG",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 2120,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "refcounted_kptr_fail.c",
+          "program": "rbtree_fail_sleepable_lock_across_rcu",
+          "section": "?fentry.s/bpf_testmod_test_read",
+          "kind": "c",
+          "offset": 2120,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "sock_destroy_prog_fail.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/tcp_destroy_sock",
+          "kind": "c",
+          "offset": 235,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "sock_destroy_prog_fail.c",
+          "program": "trace_tcp_destroy_sock",
+          "section": "tp_btf/tcp_destroy_sock",
+          "kind": "c",
+          "offset": 235,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "struct_ops_kptr_return_fail__invalid_scalar.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 409,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "struct_ops_kptr_return_fail__invalid_scalar.c",
+          "program": "kptr_return_fail__invalid_scalar",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 409,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "struct_ops_kptr_return_fail__local_kptr.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 428,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "struct_ops_kptr_return_fail__local_kptr.c",
+          "program": "kptr_return_fail__local_kptr",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 428,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "struct_ops_kptr_return_fail__nonzero_offset.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 412,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "struct_ops_kptr_return_fail__nonzero_offset.c",
+          "program": "kptr_return_fail__nonzero_offset",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 412,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "struct_ops_kptr_return_fail__wrong_type.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 421,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "struct_ops_kptr_return_fail__wrong_type.c",
+          "program": "kptr_return_fail__wrong_type",
+          "section": "struct_ops/test_return_ref_kptr",
+          "kind": "c",
+          "offset": 421,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "struct_ops_refcounted_fail__ref_leak.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/test_refcounted",
+          "kind": "c",
+          "offset": 284,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "struct_ops_refcounted_fail__ref_leak.c",
+          "program": "refcounted_fail__ref_leak",
+          "section": "struct_ops/test_refcounted",
+          "kind": "c",
+          "offset": 284,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 643,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_untrusted",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 643,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1119,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_fp",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 1119,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "kretprobe/free_task",
+          "kind": "c",
+          "offset": 1581,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_unsafe_kretprobe",
+          "section": "kretprobe/free_task",
+          "kind": "c",
+          "offset": 1581,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "kretprobe/free_task",
+          "kind": "c",
+          "offset": 1999,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_unsafe_kretprobe_rcu",
+          "section": "kretprobe/free_task",
+          "kind": "c",
+          "offset": 1999,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2509,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_null",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2509,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2881,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_unreleased",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 2881,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3180,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_xchg_unreleased",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3180,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3579,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_acquire_release_no_null_check",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3579,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3963,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_release_untrusted",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 3963,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4339,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_release_fp",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4339,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4672,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_release_null",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4672,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5475,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_release_unacquired",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5475,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5766,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_from_pid_no_null_check",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 5766,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 6135,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_from_vpid_no_null_check",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 6135,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "lsm/task_free",
+          "kind": "c",
+          "offset": 6507,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_from_lsm_task_free",
+          "section": "lsm/task_free",
+          "kind": "c",
+          "offset": 6507,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 6840,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_access_comm1",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 6840,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7051,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_access_comm2",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7051,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7266,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_access_comm3",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7266,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "fentry/__set_task_comm",
+          "kind": "c",
+          "offset": 7473,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_access_comm4",
+          "section": "fentry/__set_task_comm",
+          "kind": "c",
+          "offset": 7473,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "task_kfunc_failure.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7832,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "task_kfunc_failure.c",
+          "program": "task_kfunc_release_in_map",
+          "section": "tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 7832,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "test_kfunc_dynptr_param.c",
+          "program": "BPF_PROG",
+          "section": "?lsm.s/bpf",
+          "kind": "c",
+          "offset": 848,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "test_kfunc_dynptr_param.c",
+          "program": "not_valid_dynptr",
+          "section": "?lsm.s/bpf",
+          "kind": "c",
+          "offset": 848,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "test_kfunc_dynptr_param.c",
+          "program": "BPF_PROG",
+          "section": "?lsm.s/bpf",
+          "kind": "c",
+          "offset": 1146,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "test_kfunc_dynptr_param.c",
+          "program": "not_ptr_to_stack",
+          "section": "?lsm.s/bpf",
+          "kind": "c",
+          "offset": 1146,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "test_tp_btf_nullable.c",
+          "program": "BPF_PROG",
+          "section": "tp_btf/bpf_testmod_test_nullable_bare_tp",
+          "kind": "c",
+          "offset": 178,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "test_tp_btf_nullable.c",
+          "program": "handle_tp_btf_nullable_bare1",
+          "section": "tp_btf/bpf_testmod_test_nullable_bare_tp",
+          "kind": "c",
+          "offset": 178,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "unsupported_ops.c",
+          "program": "BPF_PROG",
+          "section": "struct_ops/unsupported_ops",
+          "kind": "c",
+          "offset": 252,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "unsupported_ops.c",
+          "program": "unsupported_ops",
+          "section": "struct_ops/unsupported_ops",
+          "kind": "c",
+          "offset": 252,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_bits_iter.c",
+          "program": "BPF_PROG",
+          "section": "iter.s/cgroup",
+          "kind": "c",
+          "offset": 550,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_bits_iter.c",
+          "program": "no_destroy",
+          "section": "iter.s/cgroup",
+          "kind": "c",
+          "offset": 550,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_bits_iter.c",
+          "program": "BPF_PROG",
+          "section": "iter/cgroup",
+          "kind": "c",
+          "offset": 847,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_bits_iter.c",
+          "program": "next_uninit",
+          "section": "iter/cgroup",
+          "kind": "c",
+          "offset": 847,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_bits_iter.c",
+          "program": "BPF_PROG",
+          "section": "iter/cgroup",
+          "kind": "c",
+          "offset": 1126,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_bits_iter.c",
+          "program": "destroy_uninit",
+          "section": "iter/cgroup",
+          "kind": "c",
+          "offset": 1126,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_const.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/bprm_committed_creds",
+          "kind": "c",
+          "offset": 1878,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_const.c",
+          "program": "bprm",
+          "section": "lsm.s/bprm_committed_creds",
+          "kind": "c",
+          "offset": 1878,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_global_ptr_args.c",
+          "program": "BPF_PROG",
+          "section": "?tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4060,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_global_ptr_args.c",
+          "program": "trusted_destroy_fail",
+          "section": "?tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4060,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_global_ptr_args.c",
+          "program": "BPF_PROG",
+          "section": "?tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4569,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_global_ptr_args.c",
+          "program": "trusted_acq_rel",
+          "section": "?tp_btf/task_newtask",
+          "kind": "c",
+          "offset": 4569,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_global_subprogs.c",
+          "program": "BPF_PROG",
+          "section": "?lsm/bpf",
+          "kind": "c",
+          "offset": 7004,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_global_subprogs.c",
+          "program": "arg_tag_ctx_lsm",
+          "section": "?lsm/bpf",
+          "kind": "c",
+          "offset": 7004,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_global_subprogs.c",
+          "program": "BPF_PROG",
+          "section": "?struct_ops/test_1",
+          "kind": "c",
+          "offset": 7201,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_global_subprogs.c",
+          "program": "arg_tag_ctx_struct_ops",
+          "section": "?struct_ops/test_1",
+          "kind": "c",
+          "offset": 7201,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 681,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "task_kfunc_raw_tp",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 681,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 778,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "task_kfunc_syscall",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 778,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 877,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "task_kfunc_tracepoint",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 877,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 982,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "task_kfunc_perf_event",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 982,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 1414,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cgrp_kfunc_raw_tp",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 1414,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 1511,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cgrp_kfunc_syscall",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 1511,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 1610,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cgrp_kfunc_tracepoint",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 1610,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 1715,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cgrp_kfunc_perf_event",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 1715,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 2198,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cpumask_kfunc_raw_tp",
+          "section": "raw_tp",
+          "kind": "c",
+          "offset": 2198,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 2301,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cpumask_kfunc_syscall",
+          "section": "syscall",
+          "kind": "c",
+          "offset": 2301,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 2406,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cpumask_kfunc_tracepoint",
+          "section": "tracepoint",
+          "kind": "c",
+          "offset": 2406,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "BPF_PROG",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 2517,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_kfunc_prog_types.c",
+          "program": "cpumask_kfunc_perf_event",
+          "section": "perf_event",
+          "kind": "c",
+          "offset": 2517,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_lsm.c",
+          "program": "BPF_PROG",
+          "section": "lsm/mmap_file",
+          "kind": "c",
+          "offset": 3330,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "section": "lsm/mmap_file",
+          "kind": "c",
+          "offset": 3330,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_lsm.c",
+          "program": "BPF_PROG",
+          "section": "lsm/mmap_file",
+          "kind": "c",
+          "offset": 3615,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_lsm.c",
+          "program": "null_check",
+          "section": "lsm/mmap_file",
+          "kind": "c",
+          "offset": 3615,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 248,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "get_task_exe_file_and_put_kfunc_from_current_sleepable",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 248,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm/file_open",
+          "kind": "c",
+          "offset": 508,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "get_task_exe_file_and_put_kfunc_from_current_non_sleepable",
+          "section": "lsm/file_open",
+          "kind": "c",
+          "offset": 508,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/task_alloc",
+          "kind": "c",
+          "offset": 789,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "get_task_exe_file_and_put_kfunc_from_argument",
+          "section": "lsm.s/task_alloc",
+          "kind": "c",
+          "offset": 789,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/inode_getattr",
+          "kind": "c",
+          "offset": 1051,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "path_d_path_from_path_argument",
+          "section": "lsm.s/inode_getattr",
+          "kind": "c",
+          "offset": 1051,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1241,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "path_d_path_from_file_argument",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1241,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_accept.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/inode_rename",
+          "kind": "c",
+          "offset": 1735,
+          "expect": "success"
+        },
+        "after": {
+          "file": "verifier_vfs_accept.c",
+          "program": "inode_rename",
+          "section": "lsm.s/inode_rename",
+          "kind": "c",
+          "offset": 1735,
+          "expect": "success"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 280,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "get_task_exe_file_kfunc_null",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 280,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/inode_getxattr",
+          "kind": "c",
+          "offset": 607,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "get_task_exe_file_kfunc_fp",
+          "section": "lsm.s/inode_getxattr",
+          "kind": "c",
+          "offset": 607,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1049,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "get_task_exe_file_kfunc_untrusted",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1049,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1569,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "get_task_exe_file_kfunc_unreleased",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1569,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1850,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "put_file_kfunc_unacquired",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 1850,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 2077,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_null",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 2077,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/task_alloc",
+          "kind": "c",
+          "offset": 2316,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_untrusted_from_argument",
+          "section": "lsm.s/task_alloc",
+          "kind": "c",
+          "offset": 2316,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 2686,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_untrusted_from_current",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 2686,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 3097,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_type_mismatch",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 3097,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 3398,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_invalid_buf_sz",
+          "section": "lsm.s/file_open",
+          "kind": "c",
+          "offset": 3398,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "fentry/vfs_open",
+          "kind": "c",
+          "offset": 3941,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "path_d_path_kfunc_non_lsm",
+          "section": "fentry/vfs_open",
+          "kind": "c",
+          "offset": 3941,
+          "expect": "failure"
+        }
+      },
+      {
+        "before": {
+          "file": "verifier_vfs_reject.c",
+          "program": "BPF_PROG",
+          "section": "lsm.s/inode_rename",
+          "kind": "c",
+          "offset": 4250,
+          "expect": "failure"
+        },
+        "after": {
+          "file": "verifier_vfs_reject.c",
+          "program": "inode_rename",
+          "section": "lsm.s/inode_rename",
+          "kind": "c",
+          "offset": 4250,
+          "expect": "failure"
+        }
+      }
+    ]
+  },
+  "x86_mtu_before": {
+    "programs": 1,
+    "c": 1,
+    "asm": 0,
+    "failure": 0,
+    "success": 1,
+    "files": 1,
+    "files_compiled": 1,
+    "programs_compiled": 1,
+    "entries_present": 1
+  },
+  "x86_mtu_after": {
+    "programs": 1,
+    "c": 1,
+    "asm": 0,
+    "failure": 0,
+    "success": 1,
+    "files": 1,
+    "files_compiled": 1,
+    "programs_compiled": 1,
+    "entries_present": 1
+  },
+  "x86_allocated_sections": [
+    {
+      "object": "verifier_mtu__tc_uninit_mtu.bpf.o",
+      "allocated_sections_equal": true
+    },
+    {
+      "object": "verifier_mtu__tc_uninit_mtu.native.o",
+      "allocated_sections_equal": true
+    }
+  ],
+  "arm_selected": [
+    {
+      "file": "verifier_const",
+      "counts": {
+        "programs": 12,
+        "c": 8,
+        "asm": 4,
+        "failure": 6,
+        "success": 6,
+        "files": 1,
+        "files_compiled": 1,
+        "programs_compiled": 8,
+        "entries_present": 8
+      },
+      "c_companion_bpf_objects": 8
+    },
+    {
+      "file": "verifier_mtu",
+      "counts": {
+        "programs": 1,
+        "c": 1,
+        "asm": 0,
+        "failure": 0,
+        "success": 1,
+        "files": 1,
+        "files_compiled": 1,
+        "programs_compiled": 1,
+        "entries_present": 1
+      },
+      "c_companion_bpf_objects": 1
+    }
+  ],
+  "arm_full_corpus": {
+    "phase": "running",
+    "output": "kprog/arm64/build/kernel-selftests-current/programs.json",
+    "controller": "/workspaces/.agent-state/kprog-lanes/A/kernel-selftest-arch/build.sh"
+  },
+  "submission_scope": "R runs the same annotation sweep in the ARM guest using --arch arm64, paired loader/linker and existing host compiler transport"
+}

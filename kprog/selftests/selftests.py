@@ -9,7 +9,7 @@ are the ground truth this harness checks the native path against.
 
 What is measured, per program:
 
-  * whether it compiles to a native x86-64 object with the corpus toolchain;
+  * whether it compiles to a native target-ISA object with the corpus toolchain;
   * whether the five-step path accepts it (specialize, link, bind, verifier
     load, JIT) and, if it does, whether the kernel runs it;
   * whether that outcome agrees with the annotation.
@@ -24,7 +24,7 @@ body) are counted but skipped: they are BPF bytecode text, not C, so the
 native x86-64 compiler cannot express them.  They stay with the kernel's
 own test_progs.
 
-Usage: selftests.py [--progs DIR] [--out DIR] [--limit N] [--only NAME]
+Usage: selftests.py [--arch x86|arm64] [--progs DIR] [--out DIR] [--limit N] [--only NAME]
 """
 
 import argparse
@@ -73,7 +73,11 @@ def annotations(text):
                 or "__clobber" in body[:1200] else "c")
         # A program runs from its own `SEC(` to the next one's, which is
         # what a per-program compile comments out exactly.
-        out.append((section, am.group(3), attrs, kind, m.start()))
+        name = am.group(3)
+        if name in {"BPF_PROG", "BPF_PROG2", "BPF_KPROBE",
+                    "BPF_KRETPROBE", "BPF_KSYSCALL"}:
+            name = am.group(4).split(",", 1)[0].strip()
+        out.append((section, name, attrs, kind, m.start()))
     return out
 
 
@@ -139,12 +143,12 @@ def _section_of(head, name):
     return ""
 
 
-def compile_bpf(source, out, includes, clang):
+def compile_bpf(source, out, includes, clang, arch="x86"):
     """Compile one selftest to a BPF object, as an application loads it."""
     # `-c` keeps clang from invoking the host linker, which cannot relink a
     # BPF object (EM_BPF relocations).
     cmd = [clang, "-O2", "-g", "-target", "bpf", "-mcpu=v4", "-c",
-           "-D__TARGET_ARCH_x86"]
+           "-D__TARGET_ARCH_" + arch]
     for inc in includes:
         cmd += ["-I", str(inc)]
     # libbpf refuses an object with no `license` section; several selftests
@@ -164,16 +168,23 @@ def compile_bpf(source, out, includes, clang):
     return done.returncode == 0, done.stderr
 
 
-def compile_native(source, out, includes, clang):
-    """Compile one selftest to a native x86-64 object; returns (ok, stderr)."""
+def compile_native(source, out, includes, clang, arch="x86"):
+    """Compile one selftest to a native target-ISA object; returns (ok, stderr)."""
     # The kernel calls a native program with the BPF stack, so the native
     # frame must live inside the red zone's shadow and may not clobber the
     # FP/SIMD registers the BPF ABI leaves to the JIT: the corpus compiles
     # its native objects with `-mno-red-zone` and `-mgeneral-regs-only`
     # for the same reason.
+    arch_flags = {
+        "x86": ["-mno-red-zone"],
+        "arm64": ["--target=aarch64-linux-gnu", "-march=armv8.1-a+lse",
+                  "-mno-outline-atomics", "-ffixed-x18", "-ffixed-x26",
+                  "-ffixed-x27", "-ffixed-x28", "-fno-optimize-sibling-calls",
+                  "-mllvm", "-switch-to-lookup=false"],
+    }[arch]
     cmd = [clang, "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE",
-           "-D__TARGET_ARCH_x86", "-fms-extensions", "-fomit-frame-pointer",
-           "-mno-red-zone", "-mgeneral-regs-only",
+           "-D__TARGET_ARCH_" + arch, "-fms-extensions", "-fomit-frame-pointer",
+           *arch_flags, "-mgeneral-regs-only",
            "-fno-stack-protector", "-fno-asynchronous-unwind-tables",
            "-fno-unwind-tables", "-fno-jump-tables"]
     for inc in includes:
@@ -198,6 +209,7 @@ def symbols(obj):
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--progs", default=str(DEFAULT_PROGS))
+    ap.add_argument("--arch", default="x86")
     ap.add_argument("--out", default=str(ROOT / "kprog/selftests/build"))
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", default="")
@@ -212,11 +224,13 @@ def main(argv):
     # (`bpftool btf dump ... format c`), because the selftests use kernel
     # types the vendored bcc header predates -- bpf_rb_root,
     # bpf_res_spin_lock and the arena helpers.
-    includes = [bpf_dir, progs, ROOT / "kprog/selftests/include",
+    includes = [bpf_dir, progs, (out / "include" if args.arch == "arm64"
+                                  else ROOT / "kprog/selftests/include"),
                 bpf_dir / "tools" / "include",
                 bpf_dir / "tools" / "include" / "uapi",
                 ROOT / "vendor/libbpf/include/uapi", ROOT / "vendor/libbpf/src",
-                pathlib.Path("/usr/include/x86_64-linux-gnu")]
+                pathlib.Path({"x86": "/usr/include/x86_64-linux-gnu",
+                              "arm64": "/usr/aarch64-linux-gnu/include"}[args.arch])]
 
     rows = []
     per_file = {}
@@ -263,9 +277,9 @@ def main(argv):
         unit = only_program(src, per_file.get(src.name, []), r["program"],
                             out)
         obj = out / (src.stem + "__" + r["program"] + ".native.o")
-        ok, err = compile_native(unit, obj, includes, clang)
+        ok, err = compile_native(unit, obj, includes, clang, args.arch)
         bpf = out / (src.stem + "__" + r["program"] + ".bpf.o")
-        bpf_ok, bpf_err = (compile_bpf(unit, bpf, includes, clang) if ok
+        bpf_ok, bpf_err = (compile_bpf(unit, bpf, includes, clang, args.arch) if ok
                            else (False, "native compile failed"))
         compiled[(src.name, r["program"])] = dict(
             ok=ok, obj=str(obj) if ok else None,
