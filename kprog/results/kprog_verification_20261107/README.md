@@ -3998,3 +3998,10 @@ domain; physical memory, compiler/ABI and native-link correspondence retain
 their universal interfaces. The `x86_alu_source_token` receipt and
 `X86_ALU_SOURCE_TOKEN_V1` raw block retain224 source inputs and all diagnostics.
 O2 C-model totals are52/75 x86 (40direct/10generic/2branch) and71/71 ARM.
+
+### Published source full check 5c6ea621e
+
+`make check` on immutable published5c6ea621e exits0. All1163 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_5c6ea621e`. Every check retains its exact published source identity.

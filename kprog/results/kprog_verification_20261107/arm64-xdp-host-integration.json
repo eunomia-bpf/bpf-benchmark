@@ -4523,6 +4523,27 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_5c6ea621e": {
+    "actual_exit": 0,
+    "archive_block_sha256": "c365c469bacdcfeab1e62d84b198cc045c04c09056ec2fed642bfe8037a2871c",
+    "archive_marker": "=== FULL MAKE CHECK 5C6EA621E PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.cpu.jsonl.gz": "1f959aac3d43b0aecaa61bd40e5b80e94716677d1d6fdadf9cde55fcf945617e",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.head": "ce432963d7b7bb8bfdfe4464114e9de306fec1367e2248f3847f4675da5afaa4",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.launch.log": "f668778f7e54d58ce3ee9bf4417a2bdaa3f693fa183cd5e4bcdf0696804701c4",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.log": "7ec21a2c74efe24a4f245ed524b7141fab01c10d0653e5c745d587033c923153",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.pid": "64706e9820472d8e338ab0b566847d430f85bcbb71a98ed2968fb43cc348afa4",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.py": "d8bfdda2c86048b5cd0c6beb80e82ad451e5094317f6fc4e3f2ecda90515680e",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.sources": "4bf7bb265037d66e24a17d416047cbda6dbf5e8208db6efa7690f023cb61fc7d",
+      "/workspaces/.agent-state/kprog-lanes/V/alumem-full.state": "b4e8950aa402eeb034547152685f38626d4e25819f678dfe43c24d8f57d75bac"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "5c6ea621e70874e993784d8086a01a23aefa3f79",
+    "scope": "Complete formal make check of the exact published source tree 5c6ea621e70874e993784d8086a01a23aefa3f79. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1163
+  },
   "full_make_check_5c754": {
     "archive_block_sha256": "b50b8806657ce27fd993d132b269ef227385c56fb613f12291eaa6f2fb46baa7",
     "archived_inputs": {
