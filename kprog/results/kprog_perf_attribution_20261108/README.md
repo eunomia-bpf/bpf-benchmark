@@ -133,4 +133,95 @@ cheaper and single-configuration).
   a workload-shape fact, not a microbenchmark.
 - bcc's BPF time is 2.4 s against minute-scale workloads, so its ratio is
   insensitive to the native path by construction; that is a property of the
-  workload, not of the measurement.
+  workload, not of the measurement.## Why the 2026-05-29 numbers were faster
+
+The reproduction left the cause open. It is not the native code: the JIT
+arm of the same runs is slower than its reference too, and the JIT arm
+executes bytecode the native path never touches.
+
+Per-program `run_time_ns_delta / run_cnt_delta` from both arms of the same
+run, compared against the archived 2026-05-29 run for the same application
+(`kprog/perf/arm_moved.py`). Restricting to programs active in both arms of
+both runs keeps the work comparable:
+
+| app | archived run (JIT) | current run (JIT) | JIT x | native x | native beyond JIT |
+| --- | --- | --- | ---: | ---: | ---: |
+| tetragon | `x86_kvm_corpus_20260529_000413_418475` | `..._20261107_002003_274609` | 1.287 | 1.389 | 1.079 |
+| cilium | `x86_kvm_corpus_20260529_033517_489159` | `..._20261107_020659_029387` | 1.116 | 1.292 | 1.158 |
+| otelcol | `x86_kvm_corpus_20260529_021623_817446` | `..._20261107_024322_358412` | 1.518 | 1.691 | 1.114 |
+| katran | `x86_kvm_corpus_20260529_001204_890087` | `..._20261106_230835_743350` | 1.012 | 1.196 | 1.182 |
+
+`JIT x` is the median per-program increase in nanoseconds per invocation on
+the JIT arm; `native x` is the same on the native arm. `native beyond JIT`
+is their ratio, which is the part the native path is answerable for.
+
+Two facts follow:
+
+1. **Every arm got slower.** The JIT arm alone is 1.01x to 1.52x heavier per
+   invocation than its 2026-05-29 run. The native arm moves by almost the
+   same factor, so the reference's ratios came from a faster machine state,
+   not from faster native code.
+2. **The native-specific share is 8% to 18%.** After dividing out what the
+   JIT arm also lost, 1.079x to 1.182x remains attributable to the native
+   path.
+
+That is why cilium's reference 2.358x is now 1.229x: its native arm lost
+1.292x, but its JIT arm lost 1.116x, so the ratio collapses by most of the
+native factor while the absolute slowdown is common to both arms. The same
+shape explains otelcol (1.824x to 1.013x) where the JIT arm lost 1.518x.
+
+### The JIT arm, program by program
+
+The JIT arm is the control: the native path never touches its bytecode, so
+a change there comes from the machine, the kernel or the workload. Tetragon
+is the app with the most active programs, so its per-program JIT times
+show the shape directly:
+
+| program | 2026-05-29 ns/run | 2026-11-07 ns/run | change |
+| --- | ---: | ---: | ---: |
+| `event_execve` | 4,998.0 | 5,512.0 | 1.103 |
+| `event_exit_acct` | 1,395.3 | 2,315.8 | 1.660 |
+| `event_wake_up_n` | 1,734.2 | 3,312.2 | 1.910 |
+| `generic_kprobe_` | 838.0 | 1,078.2 | 1.287 |
+| `generic_rawtp_e` | 4,173.0 | 6,183.7 | 1.482 |
+| `generic_retkpro` | 53.5 | 52.4 | 0.981 |
+| `generic_tracepo` | 563.3 | 765.4 | 1.359 |
+| `tg_kp_bprm_comm` | 744.0 | 714.3 | 0.960 |
+
+Six of eight got slower by 1.10x to 1.91x and two got slightly faster, on
+bytecode the native path does not execute. The spread is per-program, so it
+is the workload's own timing, not a uniform clock or CPU change.
+
+### Two differences that were checked and ruled out
+
+The archived run records `enabled_passes` with fourteen bytecode passes
+(`noop, map_inline, const_prop, dce, rotate, cond_select, extract,
+endian_fusion, lea, ccmp, bulk_memory, prefetch, wide_mem, bounds_...`);
+the current runs record `enabled_passes: []`.  That looks like the cause,
+and it is not: a pass rewrites bytecode, and the JIT arm's
+`bytes_jited` is unchanged between the runs for every tetragon program
+(11,790 against 11,821 bytes for `event_execve`, 1,038 against 1,042 for
+`event_exit_acct`, 15,271 against 15,275 for `generic_retkpro`; the few
+bytes are a kernel-side encoding change).  The list is launcher metadata,
+and the bytecode both arms ran is the same.
+
+The corpus manifest path differs (`/home/yunwei37/workspace/...` against
+`/workspaces/repository/corpus/config/macro_apps.yaml`), but the file has
+not changed since 2026-05-20, before the reference, so the workload
+definition is identical.
+
+### What this means for the candidates
+
+The candidates act on the native path only, so they can recover at most the
+`native beyond JIT` column: 8% to 18% per application. Recovering the rest
+requires the shared cause — kernel, workload or measurement state — to be
+restored, and that cause is outside the native compile.
+
+### Caveats
+
+- The comparison uses the programs active in both arms of both runs: 7 for
+  tetragon, 6 for cilium, 2 for otelcol, 1 for katran. Those are the
+  programs the workloads exercise, not the programs the applications load,
+  and a run with a different workload shape matches fewer of them.
+- `run_time_ns_delta` covers every CPU and the whole sample window, so it
+  measures the work each program did, not a single invocation in isolation.
