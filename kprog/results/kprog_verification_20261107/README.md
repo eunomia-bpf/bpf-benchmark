@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32) | 2/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2) | 3/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
@@ -5032,3 +5032,16 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_2dafc658c`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-2dafc658c.log.gz](full-make-check-2dafc658c.log.gz).
+
+### Compiled BSWAP token and full BPF frame
+
+The production dispatcher BSWAP arm is compiled at both architectural widths.
+`BswapCertificate.compiled_frame` and `compiled_execution` quantify over the
+complete incoming BPF register file, memory, permissions, ghost indices and
+fresh-word stream, with input in R1, PC0 and halted=false. R0/R1 receive the
+canonical byte-list reversal; every other register and all memory are preserved.
+The exact return has PC26, visit+23, the original exclusive index, no events
+and no fault. The combined85 certificate retains all83 CMOV/SETCC functions
+with identical bytes. The [original component evidence](compiled-bswap.log.gz)
+retains preprocessing, actual ELF/arrays and proof logs. Physical invocation
+ABI, architectural register mapping and compiler embedding remain interfaces.

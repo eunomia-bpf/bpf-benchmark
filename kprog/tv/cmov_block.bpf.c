@@ -139,3 +139,19 @@ SETCC_UNIT(tv_setcc_hi_c12, 8, 12)
 SETCC_UNIT(tv_setcc_hi_c13, 8, 13)
 SETCC_UNIT(tv_setcc_hi_c14, 8, 14)
 SETCC_UNIT(tv_setcc_hi_c15, 8, 15)
+
+/* Production dispatcher BSWAP units: both architectural operand widths. */
+#define BSWAP_UNIT(BITS, WIDTH) \
+__attribute__((section("tv/bswap" #BITS), used)) \
+__u64 tv_bswap##BITS(__u64 old) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    X86_SIM_L_EXEC(X86_OP_BSWAP, X86_RAX, 0, WIDTH, 0, 0); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+BSWAP_UNIT(32, X86_WIDTH_32)
+BSWAP_UNIT(64, X86_WIDTH_64)

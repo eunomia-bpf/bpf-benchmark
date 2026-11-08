@@ -4013,3 +4013,130 @@ end KProgTV.SetccCertificate
 
 #print axioms KProgTV.SetccCertificate.compiled_all_conditions
 #print axioms KProgTV.SetccCertificate.compiled_execution
+
+namespace KProgTV.BswapCertificate
+open KProgFormal.Reference KProgTV.BPF KProgTV.BPFPath.InputBurst
+set_option maxRecDepth 100000
+set_option maxHeartbeats 1600000
+
+def environment (choices : Nat → Word) : Environment where
+  unspecifiedInput := fun n => .ok (choices n)
+  immediate := fun _ _ _ => .error "external immediate"
+  helperCall := fun _ _ => .error "external helper"
+  helper := fun _ _ _ => .error "external helper"
+
+def compiled : X86.BzhiWidth → Array Byte
+  | .w32 => Compiled.tv_bswap32
+  | .w64 => Compiled.tv_bswap64
+
+def positions : List Nat := inputPositions 0 8 (8 :: inputPositions 9 15 [24, 25])
+
+def outcome (width : X86.BzhiWidth) (s : State) : Transition State :=
+  ⟨{ s with
+      regs := (fun r => if r = 0 ∨ r = 1 then X86.reverseBytes (s.regs 1) width.bytes else s.regs r)
+      pc := 26
+      halted := true
+      unspecifiedVisit := s.unspecifiedVisit + 23 }, [], none⟩
+
+private theorem reverse_4 (v : Word) :
+    littleEndian 64 (BPF.valueBytes v 4).reverse = X86.reverseBytes v 4 := by
+  simp [BPF.valueBytes, X86.reverseBytes, KProgFormal.Reference.valueBytes,
+    List.range_succ, littleEndian]
+  unfold Word at *
+  bv_decide
+private theorem reverse_8 (v : Word) :
+    littleEndian 64 (BPF.valueBytes v 8).reverse = X86.reverseBytes v 8 := by
+  simp [BPF.valueBytes, X86.reverseBytes, KProgFormal.Reference.valueBytes,
+    List.range_succ, littleEndian]
+  unfold Word at *
+  bv_decide
+
+@[simp] private theorem burst_32_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_bswap32
+        (inputPositions 0 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_bswap32 rest
+          (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 0
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_bswap32 0 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_32_9 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_bswap32
+        (inputPositions 9 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 9 then BPFPath.evaluate (environment choices) Compiled.tv_bswap32 rest
+          (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 9
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_bswap32 9 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_64_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_bswap64
+        (inputPositions 0 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_bswap64 rest
+          (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 0
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_bswap64 0 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_64_9 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_bswap64
+        (inputPositions 9 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 9 then BPFPath.evaluate (environment choices) Compiled.tv_bswap64 rest
+          (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 9
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_bswap64 9 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+/-- The actual clang output changes only R0/R1 and the stated PC/visit/return
+fields. Every other BPF register and every memory/permission/ghost field is
+arbitrary and preserved. The unit input is in R1. -/
+theorem compiled_frame (width : X86.BzhiWidth) (choices : Nat → Word) (s : State)
+    (active : s.halted = false) (position : s.pc = 0) :
+    BPFPath.evaluate (environment choices) (compiled width) positions s = .ok (outcome width s) := by
+  cases width <;>
+    simp [compiled, positions, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      afterInputs, active, position, BPF.execute, BPF.source, BPF.alu, BPF.setReg,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      outcome, X86.BzhiWidth.bytes, reverse_4, reverse_8, Nat.add_assoc]
+  all_goals
+    congr 2
+    funext r
+    by_cases zero : r = 0 <;> by_cases one : r = 1 <;> simp_all
+
+/-- Soundness uses the existing checked byte decoder, not a forced path. -/
+theorem compiled_execution (width : X86.BzhiWidth) (choices : Nat → Word) (s : State)
+    (active : s.halted = false) (position : s.pc = 0) :
+    Execution (BPFPath.instructionStep (environment choices) (compiled width)) s []
+      (outcome width s).state :=
+  BPFPath.evaluate_sound _ _ _ _ _ (compiled_frame width choices s active position)
+end KProgTV.BswapCertificate
+#print axioms KProgTV.BswapCertificate.compiled_frame
+#print axioms KProgTV.BswapCertificate.compiled_execution
