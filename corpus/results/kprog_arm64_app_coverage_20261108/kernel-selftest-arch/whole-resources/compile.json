@@ -1,11 +1,11 @@
 {
-  "utc": "2026-11-08T17:11:10.989026+00:00",
+  "utc": "2026-11-08T17:11:59.546425+00:00",
   "compile_command": [
     "taskset",
     "-c",
     "12-15",
     "python3",
-    "/workspaces/.agent-state/kprog-lanes/A/bpf34/whole-resources/source/kprog/selftests/selftests.py",
+    "/workspaces/.agent-state/kprog-lanes/A/bpf34/whole-resources/compile.py",
     "--arch",
     "arm64",
     "--only",
@@ -15,16 +15,18 @@
   ],
   "compile_exit": 0,
   "counts": {
-    "programs": 0,
-    "c": 0,
+    "programs": 20,
+    "c": 20,
     "asm": 0,
-    "failure": 0,
+    "failure": 20,
     "success": 0,
-    "files": 0,
-    "files_compiled": 0,
-    "programs_compiled": 0,
-    "entries_present": 0
+    "files": 1,
+    "files_compiled": 1,
+    "programs_compiled": 19,
+    "entries_present": 19
   },
-  "resource_objects": [],
+  "resource_objects": [
+    "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail.bpf.o"
+  ],
   "source_scope": "Original complete source supplies BPF resource/program context; isolated native entries retain C bodies; all programs autoloadfalse."
 }
