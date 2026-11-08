@@ -12,12 +12,14 @@ The same exclusive component now includes complete failed-iteration State/GPR/ba
 
 The [exclusive prefix/backedge interface](exclusive-prefix-composition/backedge-summary.json) also carries four universal PC equations, including exact failed-cycle re-entry for the native-12-byte CBNZ operand and64-bit wrapping PCs. All11axiom audits and the57-source target build exit0.
 
-[Generic ARM fresh compiler profile](host-compile/README.md) adds thirteen passing transport/profile controls and exact allocated-byte/relocation identity for two accepted QEMU fixtures, preserving the existing ARM O2 profile and2270guest header identities. Captured runtime consumption follows original OTel/skb.
+[Generic ARM fresh compiler profile](host-compile/README.md) adds thirteen passing transport/profile controls and exact allocated-byte/relocation identity for two accepted QEMU fixtures, preserving the existing ARM O2 profile and2270guest header identities. Captured runtime consumption follows each private application epoch.
 
-The [captured host-compiler application successor](host-compile/queue-plan.json) joins34generic native-only controls with the retained original OTel/skb epoch, then whole Cilium/Tracee/OTel. Exact80source/ARM O2/sysroot and per-cohort broker lifecycle identities accompany the concrete launch sources.
+The [active host-compiler application launch](../kprog_arm64_app_coverage_20261107/xdp-byte-helpers/app-launch.json) runs whole Cilium and Tracee sequentially on8-11 alongside original OTel16-19. Canonical helper adoption and the later host-compiled OTel retain the original OTel/skb dependency. Exact80source/ARM O2/sysroot and per-cohort broker lifecycle identities accompany launch1fda0417d.
 
 [Universal register-ADD retry composition](exclusive-register-composition/README.md) connects the actual operand/shift, complete state/event/fault frame and failed-cycle backedge. Seven laws,98canonical source files, the combined Exclusive/Dispatcher/Stlxr build and axiom audits exit0.
 
-[Matched host-compiler runtime](host-compile/safety/README.md) records the complete34generic suite:4positive native executions and30layered refusals, risk accepted/executed0/0. Immutable joins match34native identities and21compiler receipts. The host-compiler Cilium/Tracee/OTel launchb9e8e586 follows the original OTel/skb epoch.
+[Matched host-compiler runtime](host-compile/safety/README.md) records the complete34generic suite:4positive native executions and30layered refusals, risk accepted/executed0/0. Immutable joins match34native identities and21compiler receipts. The current host-compiler launch1fda0417d supplies separate private source and CPU epochs for Cilium/Tracee alongside original OTel.
 
 [Matched whole BCC/Tetragon successor](host-compile/application-pair-launch.json) follows the private Cilium/Tracee CPU release at8-11. Original OTel16-19 and canonical helper adoption preserve their source epochs. Source80/runtime3283 identities and complete original workload selectors accompany the concrete launch.
+
+[Universal register-ADD failure prefixes](exclusive-register-prefix/README.md) compose arbitrary finite dynamic visits with independently supplied exclusive inputs, complete state/events/firstfault and disjoint GPR/base preservation. Five laws and98canonical sources build with Exclusive/Dispatcher/Stlxr at exit0; five axiom audits retain the established dependency set. Native CFG/compiled/platform/scoped progress integration continues through the universal interface.
