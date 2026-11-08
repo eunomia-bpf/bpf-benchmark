@@ -1,0 +1,96 @@
+{
+  "created": "2026-11-08T13:29:17.574156+00:00",
+  "hosts": [
+    {
+      "name": "host-before",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-Wno-builtin-macro-redefined",
+        "-include",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-environment.h",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-before.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-driver.c",
+        "/workspaces/repository/kprog/selftests/build/test_global_func2__global_func2.native.o",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-before"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "host-after",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-Wno-builtin-macro-redefined",
+        "-include",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-environment.h",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-after.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-driver.c",
+        "/workspaces/repository/kprog/selftests/build/test_global_func2__global_func2.native.o",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/host-after"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "compiler": {
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I/workspaces/repository/kprog/x86",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/global-func2-after.c",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/call-edge-copies/global-func2-after.bpf.o"
+    ],
+    "exit": 0,
+    "wall_seconds": 9.662880805321038,
+    "sections": [
+      {
+        "name": "tc",
+        "instructions": 1301,
+        "maximum_fp_minus_offset": 1008
+      }
+    ]
+  },
+  "layout": [
+    {
+      "name": "global-func2",
+      "copies": 5,
+      "original_native_labels": 79
+    },
+    {
+      "name": "tetragon",
+      "copies": 17,
+      "original_native_labels": 2439
+    }
+  ],
+  "native_sha256": "d34d9646d48fa7ead3d4120f255301ef124c6aa7c625643c3d9a0a724c59b275",
+  "source_adoption": 0,
+  "runtime_admission_additions": 0
+}
