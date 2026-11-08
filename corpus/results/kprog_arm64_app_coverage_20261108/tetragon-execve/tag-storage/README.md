@@ -1,0 +1,7 @@
+Generic AArch64 numeric tag-word storage
+
+The simulator stores its private numeric tag words in ordinary local C storage. This two-qualifier change lets clang propagate known tag bytes and remove redundant updates. The raw native byte arena, pointer payload operations, architectural fault arms and control dispatch retain their current expressions. Every program consumes the same representation.
+
+Four existing UBSan routing hosts pass6,885,971 scenes:3,843,515write-lane,2,814,832arena,167,480stack-arm and60,144read-tag cases. The existing29microprograms and negative artifact compile through the owning Makefile at exit0. The existing34case QEMU cohort16fc6cb01 uses the exact candidate header, including byte atomics and approved architectural faults:4matching native controls,28stock-verifier rejections and2generation rejections. The captured complete Tetragon compiler cohort separately measures13,441to12,706BPF instructions and400to384maximum frame offset; its original source/native/compiler epoch accompanies this result.
+
+summary.json carries source relations, actual counts and original compiler commands. check.log.gz and inputs.tar.gz retain the actual checks and source/binary/compiler inputs. The byte-source complete Tetragon launch7ba0177e0 keeps its captured snapshot; a serial successor consumes this tag source after that cohort closes. V owns universal ghost-storage/compiler preservation. Runtime admission additions:0.

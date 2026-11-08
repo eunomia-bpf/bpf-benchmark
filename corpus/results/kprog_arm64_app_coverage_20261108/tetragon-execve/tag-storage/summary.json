@@ -1,0 +1,133 @@
+{
+  "utc": "2026-11-08T13:50:28.149791+00:00",
+  "source_scope": "Two private numeric tag-word volatile qualifiers; raw native-memory/payload operations retained",
+  "candidate_sha256": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c",
+  "checks": {
+    "exit": 0,
+    "ubsan_hosts": [
+      {
+        "name": "stack_write_lanes",
+        "cases": 3843515
+      },
+      {
+        "name": "stack_arena",
+        "cases": 2814832
+      },
+      {
+        "name": "stack_arm",
+        "cases": 167480
+      },
+      {
+        "name": "stack_read_tag_source",
+        "cases": 60144
+      }
+    ],
+    "micro_compiled": 29,
+    "negative_compiled": 1
+  },
+  "qemu_isa_cohort": {
+    "publication": "16fc6cb01fb1ace432a29664c5fdddfb08c7acf8",
+    "source_header_equal": true,
+    "valid_native": 4,
+    "stock_verifier_rejected": 28,
+    "generation_rejected": 2
+  },
+  "captured_compiler_cohort": {
+    "utc": "2026-11-08T12:49:28.009511+00:00",
+    "source_scope": "Identical captured P and generated instruction C bodies; numeric private tag-word volatility and existing proof compiler optimization level",
+    "rows": [
+      {
+        "label": "baseline",
+        "opt": "O2",
+        "returncode": 0,
+        "command": [
+          "clang-18",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "-I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+          "-I/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/tetragon-layout/source/kprog/arm64",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/baseline.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/baseline-O2.bpf.o"
+        ],
+        "wall_seconds": 28.141625558026135,
+        "max_rss_kib": 1795912,
+        "max_fp_minus_offset": 400,
+        "allocated_sections_match_original": true,
+        "bpf_exec_insns": 13441
+      },
+      {
+        "label": "tags",
+        "opt": "O2",
+        "returncode": 0,
+        "command": [
+          "clang-18",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "-I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+          "-I/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/tetragon-layout/source/kprog/arm64",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/tags.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/tags-O2.bpf.o"
+        ],
+        "wall_seconds": 29.30625125998631,
+        "max_rss_kib": 1794992,
+        "max_fp_minus_offset": 384,
+        "allocated_sections_match_original": false,
+        "bpf_exec_insns": 12706
+      },
+      {
+        "label": "tags",
+        "opt": "O3",
+        "returncode": 0,
+        "command": [
+          "clang-18",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "--sysroot=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root",
+          "-I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+          "-I/workspaces/.agent-state/kprog-lanes/A/design-only/lse-input/tetragon-layout/source/kprog/arm64",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/tags.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/tetragon-execve/tags-O3.bpf.o"
+        ],
+        "wall_seconds": 29.014237674884498,
+        "max_rss_kib": 1795232,
+        "max_fp_minus_offset": 384,
+        "allocated_sections_match_original": false,
+        "bpf_exec_insns": 12706
+      }
+    ]
+  },
+  "runtime_admission_additions": 0,
+  "whole_application": "Byte source launch7ba0177e0 retains its own snapshot; the tag source successor follows that actual terminal cohort"
+}

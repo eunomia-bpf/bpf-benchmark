@@ -206,9 +206,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 /* Packed tag words retain verifier-known bits across field updates. */
 typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define ARM64_SIM_TAG_STORAGE_BYTES(CAPACITY) ((KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)+7U)&~7U)
-#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
+#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
 #define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
-#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
+#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
 #ifndef ARM64_SIM_STACK_PAYLOAD_WORDS
 #define ARM64_SIM_STACK_PAYLOAD_WORDS KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)
 #endif
