@@ -1,0 +1,49 @@
+{
+  "native_make_exit": 0,
+  "source_edit": "65e7f7a0b original4frame counted loop",
+  "native_policy": "generic pre-submit -Os candidate, current production flags retained",
+  "model_source": "0818f5677 current RAW/named helpers",
+  "native_executions": 0,
+  "generation": [
+    {
+      "label": "original-O3-native-current-model",
+      "native_sha256": "29274b50d9d12c10ad33e04683d1438105ddd96032f057aafa4e324ab1cc4ac0",
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/original-O3-native-current-model/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/original-O3-native-current-model/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/original-O3-native-current-model/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "perf_unwind_native",
+        "native_sha256": "29274b50d9d12c10ad33e04683d1438105ddd96032f057aafa4e324ab1cc4ac0"
+      },
+      "stage": "compiled",
+      "compiled_sections": [
+        {
+          "name": "perf_event",
+          "instructions": 12803,
+          "max_direct_frame_displacement": 560
+        }
+      ]
+    },
+    {
+      "label": "Os-native-current-model",
+      "native_sha256": "877832554ad85c7e53ed4bd86b31fa5d8a71606e245b81b61041b66e86a399c5",
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/Os-native-current-model/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/Os-native-current-model/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/otel-native-size/Os-native-current-model/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "perf_unwind_native",
+        "native_sha256": "877832554ad85c7e53ed4bd86b31fa5d8a71606e245b81b61041b66e86a399c5"
+      },
+      "stage": "compiled",
+      "compiled_sections": [
+        {
+          "name": "perf_event",
+          "instructions": 10216,
+          "max_direct_frame_displacement": 576
+        }
+      ]
+    }
+  ]
+}
