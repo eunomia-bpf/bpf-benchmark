@@ -55,6 +55,9 @@ decoding/encoding, and the C/BPF compilation path. Entry ABI, physical
 memory/provenance, exclusive monitor/order/site identity and native address
 transport are caller/platform interfaces. The ledger distinguishes proved
 model laws, finite oracle/hardware evidence and complete-check outcomes.
+The generic readonly finite-case law also composes object identity and shifted
+aliases with canonical memory reads; final byte transfer transports its frozen
+image premise. Physical symbol/map lifetime and C/compiler transport stay explicit.
 [Composition](../tv/Composition.lean) and the
 [artifact work](../tv/README.md) track the generic link/compiler obligations.
 

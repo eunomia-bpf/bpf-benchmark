@@ -229,6 +229,40 @@ theorem finalized_movabs_decode (patches : List Patch) (storage final : Memory)
   rw [finalized_decode patches storage final scratchBase finalBase total offset 10 copied fits state pc]
   exact NativeLinkMovabs.table_movabs_decode patches (view storage (scratchBase-finalBase)) separated valid state dst target member header retained
 
+/-- Exact-byte transfer carries the frozen object image to its linked base.
+Readability and initialization are supplied by the receiving allocator/copy. -/
+theorem readonly_image_transfer (source destination : Memory)
+    (sourceBase destinationBase : Word) (data : List Byte)
+    (copied : Transfer source destination sourceBase destinationBase data.length)
+    (image : NativeLinkLiteral.ReadOnly.Image data sourceBase source)
+    (readable : ∀ i<data.length,
+      destination.readable (destinationBase+BitVec.ofNat 64 i)=true)
+    (initialized : ∀ i<data.length,
+      destination.initialized (destinationBase+BitVec.ofNat 64 i)=true) :
+    NativeLinkLiteral.ReadOnly.Image data destinationBase destination := by
+  intro i bounded
+  exact ⟨(copied i bounded).trans (image i bounded).1,
+    readable i bounded,initialized i bounded⟩
+
+/-- The actual linked bytes supply the C finite-copy law after final transfer.
+The original alias address and canonical read observation are preserved. -/
+theorem readonly_transferred_load (source destination : Memory)
+    (sourceBase destinationBase alias displacement : Word) (data : List Byte)
+    (width : Nat)
+    (copied : Transfer source destination sourceBase destinationBase data.length)
+    (image : NativeLinkLiteral.ReadOnly.Image data sourceBase source)
+    (readable : ∀ i<data.length,
+      destination.readable (destinationBase+BitVec.ofNat 64 i)=true)
+    (initialized : ∀ i<data.length,
+      destination.initialized (destinationBase+BitVec.ofNat 64 i)=true) :
+    NativeLinkLiteral.ReadOnly.objectLoad data destinationBase
+      (alias-destinationBase+displacement) width destination=
+      readMemory destination (alias+displacement)
+        (NativeLinkLiteral.ReadOnly.loadWidth width) := by
+  rw [NativeLinkLiteral.ReadOnly.object_load_matches _ _ _ _ _
+    (readonly_image_transfer _ _ _ _ _ copied image readable initialized),
+    NativeLinkLiteral.ReadOnly.alias_address]
+
 end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.translated_difference
 #print axioms KProgTV.NativeLinkFinalImage.store_view
@@ -250,3 +284,6 @@ end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.transfer_subrange
 #print axioms KProgTV.NativeLinkFinalImage.copy_pipeline
 #print axioms KProgTV.NativeLinkFinalImage.transfer_after_table
+
+#print axioms KProgTV.NativeLinkFinalImage.readonly_image_transfer
+#print axioms KProgTV.NativeLinkFinalImage.readonly_transferred_load

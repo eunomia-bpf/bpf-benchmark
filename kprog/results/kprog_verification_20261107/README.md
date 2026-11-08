@@ -4883,3 +4883,18 @@ identities, original proof attempts and trusted reduction axioms. Register
 renaming, whole architectural frame, invocation ABI and physical compiler
 embedding remain the explicit interface to the generic simulator. The existing
 `cmov-check` target joins the single formal `make check` entry point.
+
+### Readonly object link component
+
+`NativeLinkLiteral.ReadOnly.data_load_matches` proves the finite C case model
+reads the same canonical bytes for arbitrary object lists, compile-time object
+choices and shifted aliases. All1/2/4/8-byte widths and the existing width0
+eight-byte default retain value, initialization, ordered read and default fault
+observations. Object identities and linked bases stay distinct. The final-image
+transfer theorem supplies the frozen byte image after exact copy, with receiving
+allocation/readability/initialization explicit. The existing final-image component
+passes, and the new laws use `propext` and `Quot.sound`. The receipt
+`readonly_finite_c_load_preservation` links C's18650-read evidence and exact
+production source epoch. Generator/C compilation, native/proof symbol-map
+transport, permissions/lifetime and persistence of frozen images remain the
+interfaces needed for the complete O4 block relation.

@@ -195,6 +195,143 @@ theorem literal_size_arithmetic (offset : BitVec 32) : offset.toNat+8<2^64 := by
   have bound := offset.isLt
   omega
 
+namespace ReadOnly
+open KProgFormal.Reference
+
+/-- Exact width/offset cases emitted by readonly_load_declarations. -/
+def casesFor (data : List Byte) : List (Nat × Nat) :=
+  [1,2,4,8].flatMap (fun width =>
+    (List.range (data.length+1-width)).map (fun offset => (offset,width)))
+
+theorem case_domain (data : List Byte) (offset width : Nat) :
+    (offset,width) ∈ casesFor data ↔
+      width ∈ ([1,2,4,8] : List Nat) ∧ offset+width≤data.length := by
+  simp only [casesFor,List.mem_flatMap,List.mem_map,List.mem_range,
+    Prod.mk.injEq]
+  constructor
+  · rintro ⟨w,member,i,bound,⟨same,eq⟩⟩
+    subst w; subst i
+    have positive : 0<width := by
+      have choices : width=1 ∨ width=2 ∨ width=4 ∨ width=8 := by simpa using member
+      omega
+    exact ⟨member,by omega⟩
+  · rintro ⟨member,bound⟩
+    exact ⟨width,member,offset,by omega,rfl,rfl⟩
+
+/-- Zero-initialized uint64_t followed by the selected fixed-size memcpy. -/
+def copiedBytes (data : List Byte) (offset bytes : Nat) : List Byte :=
+  (List.range bytes).map (fun i => (data[offset+i]?).getD 0)
+
+/-- Immutable object bytes, permission and initialization at their linked base.
+The surrounding program relation carries this image through guest transitions. -/
+def Image (data : List Byte) (base : Word) (memory : Memory) : Prop :=
+  ∀ i, i<data.length →
+    memory.value (base+BitVec.ofNat 64 i)=(data[i]?).getD 0 ∧
+    memory.readable (base+BitVec.ofNat 64 i)=true ∧
+    memory.initialized (base+BitVec.ofNat 64 i)=true
+
+theorem byte_address (base offset : Word) (i : Nat) :
+    base+offset+BitVec.ofNat 64 i=base+BitVec.ofNat 64 (offset.toNat+i) := by
+  simp [BitVec.ofNat_add,BitVec.ofNat_toNat,BitVec.add_assoc]
+
+theorem copied_bytes (data : List Byte) (base offset : Word) (memory : Memory)
+    (image : Image data base memory) (width : Nat)
+    (fits : offset.toNat+width≤data.length) :
+    copiedBytes data offset.toNat width=bytesAt memory (base+offset) width := by
+  unfold copiedBytes bytesAt
+  apply List.map_congr_left
+  intro i inside
+  have bound : i<width := List.mem_range.mp inside
+  rw [byte_address]
+  exact (image (offset.toNat+i) (by omega)).1.symm
+
+theorem image_readable (data : List Byte) (base offset : Word) (memory : Memory)
+    (image : Image data base memory) (width : Nat)
+    (fits : offset.toNat+width≤data.length) :
+    permitted memory.readable (base+offset) width=true := by
+  apply List.all_eq_true.mpr
+  intro i inside
+  have bound : i<width := List.mem_range.mp inside
+  rw [byte_address]
+  exact (image (offset.toNat+i) (by omega)).2.1
+
+theorem image_initialized (data : List Byte) (base offset : Word) (memory : Memory)
+    (image : Image data base memory) (width : Nat)
+    (fits : offset.toNat+width≤data.length) :
+    initializedAt memory (base+offset) width=true := by
+  apply List.all_eq_true.mpr
+  intro i inside
+  have bound : i<width := List.mem_range.mp inside
+  rw [byte_address]
+  exact (image (offset.toNat+i) (by omega)).2.2
+
+def loadWidth (width : Nat) : Nat := if width=0 then 8 else width
+
+/-- Finite C switch cases return copied bytes; the C default uses its ordinary
+memory operation. Effects here are the architectural observation of that read. -/
+def objectLoad (data : List Byte) (base offset : Word) (width : Nat)
+    (memory : Memory) : Except Fault (Word × Event) :=
+  if (offset.toNat,width) ∈ casesFor data then
+    let copied := copiedBytes data offset.toNat width
+    .ok (littleEndian 64 copied,.memory .read (base+offset) copied true)
+  else readMemory memory (base+offset) (loadWidth width)
+
+/-- Every finite case and its ordinary default implement the same canonical read. -/
+theorem object_load_matches (data : List Byte) (base offset : Word) (width : Nat)
+    (memory : Memory) (image : Image data base memory) :
+    objectLoad data base offset width memory=readMemory memory (base+offset) (loadWidth width) := by
+  unfold objectLoad
+  split
+  next selected =>
+    have domain := (case_domain data offset.toNat width).mp selected
+    have fits := domain.2
+    have cases : width=1 ∨ width=2 ∨ width=4 ∨ width=8 := by simpa using domain.1
+    have effective : loadWidth width=width := by simp only [loadWidth,if_neg (by omega : width≠0)]
+    rw [effective]
+    rw [readMemory,image_readable data base offset memory image width fits,if_pos rfl]
+    unfold wordAt
+    rw [←copied_bytes data base offset memory image width fits,
+      image_initialized data base offset memory image width fits]
+  next => rfl
+
+/-- The production alias adjustment retains the original pointer arithmetic. -/
+theorem alias_address (base alias displacement : Word) :
+    base+(alias-base+displacement)=alias+displacement := by
+  rw [←BitVec.add_assoc,BitVec.add_comm base (alias-base),BitVec.sub_add_cancel]
+
+structure Object where
+  base : Word
+  data : List Byte
+
+/-- __builtin_constant_p chooses an object representation. Each choice keeps its
+own symbol identity and offset, including shifted aliases and default loads. -/
+def dataLoad (memory : Memory) (alias displacement : Word) (width : Nat)
+    (constantChoice : Object → Bool) : List Object → Except Fault (Word × Event)
+  | [] => readMemory memory (alias+displacement) (loadWidth width)
+  | object::rest =>
+    if constantChoice object then
+      objectLoad object.data object.base (alias-object.base+displacement) width memory
+    else dataLoad memory alias displacement width constantChoice rest
+
+/-- Universal over object count, bytes, base choices and aliases. Production
+read widths are1/2/4/8 bytes; raw width0 retains the existing8-byte default.
+The image relation is the link premise; C/compiler and physical map transport
+connect this mathematical finite-case law to each implementation stage. -/
+theorem data_load_matches (objects : List Object) (memory : Memory)
+    (alias displacement : Word) (width : Nat) (constantChoice : Object → Bool)
+    (images : ∀ object ∈ objects, Image object.data object.base memory) :
+    dataLoad memory alias displacement width constantChoice objects=
+      readMemory memory (alias+displacement) (loadWidth width) := by
+  induction objects with
+  | nil => rfl
+  | cons object rest ih =>
+    simp only [dataLoad]
+    split
+    · rw [object_load_matches _ _ _ _ _ (images object List.mem_cons_self),alias_address]
+    · exact ih (fun object inside => images object (List.mem_cons_of_mem _ inside))
+
+end ReadOnly
+
 end KProgTV.NativeLinkLiteral
 
 #print axioms KProgTV.NativeLinkLiteral.map_id_encoding
@@ -216,3 +353,7 @@ end KProgTV.NativeLinkLiteral
 #print axioms KProgTV.NativeLinkLiteral.literal_read
 #print axioms KProgTV.NativeLinkLiteral.checked_literal_range_rejected
 #print axioms KProgTV.NativeLinkLiteral.checked_literal_placeholder_rejected
+
+#print axioms KProgTV.NativeLinkLiteral.ReadOnly.case_domain
+#print axioms KProgTV.NativeLinkLiteral.ReadOnly.object_load_matches
+#print axioms KProgTV.NativeLinkLiteral.ReadOnly.data_load_matches
