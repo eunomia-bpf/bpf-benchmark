@@ -270,16 +270,14 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 
 #define ARM64_SIM_ENTRY_SKB(CTX)                                            \
 	struct arm64_sim_skb_abi __a64_sim_abi = {                         \
-		.data_end = (void *)(long)(CTX)->data_end,                 \
-		.data = (void *)(long)(CTX)->data,                         \
 	};                                                               \
 	struct __sk_buff *__a64_sim_skb_ctx = (CTX);                      \
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
 	__a64_sim_helper_ctx = (void *)(CTX);                             \
-	__a64_sim_helper_abi_base = &__a64_sim_abi;                       \
-	__a64_x0.ptr = &__a64_sim_abi;                                    \
+	__a64_sim_helper_abi_base = bpf_cast_to_kern_ctx((void *)(CTX));                       \
+	__a64_x0.ptr = __a64_sim_helper_abi_base;                                    \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
@@ -848,6 +846,49 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
     } else __a64_xdp_value = KPROG_ARM64_LOAD_BYTES_OFFSET(ARM64_SIM_L_READ_REG_PTR(BASE), (OFF), (WIDTH)); \
     __a64_xdp_value; })
 
+#if defined(__bpf__) || defined(__BPF__)
+extern void *bpf_cast_to_kern_ctx(void *) __ksym;
+#define ARM64_SIM_L_SKB_STORE_ACCESS(BITS, CTX, OFF, VALUE) \
+ do { if (__builtin_constant_p(OFF)) \
+  asm volatile("*(u" #BITS " *)(%0 + %1) = %2" : : "r"(CTX), "i"(OFF), "r"(VALUE) : "memory"); \
+ else KPROG_ARM64_STORE_ACCESS(BITS, (__u8 *)(CTX) + (OFF), VALUE); } while (0)
+#else
+static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
+#define ARM64_SIM_L_SKB_STORE_ACCESS(BITS, CTX, OFF, VALUE) \
+ KPROG_ARM64_STORE_ACCESS(BITS, (__u8 *)(CTX) + (OFF), VALUE)
+#endif
+/* Kernel-context addresses retain native identity. Packet and qdisc cb fields
+ * select the corresponding live verifier context access at the native width. */
+#define ARM64_SIM_L_SKB_OFFSET(BASE, OFF) \
+ ((__s64)((__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u64)(long)__a64_sim_helper_abi_base + (__u64)(OFF)))
+#define ARM64_SIM_L_SKB_FIELD(CTX, FIELD) \
+ ({ __u64 __a64_sf_value; KPROG_ARM64_LOAD_ACCESS_OFFSET(32, (CTX), (__s64)__builtin_offsetof(struct __sk_buff, FIELD), __a64_sf_value); __a64_sf_value; })
+#define ARM64_SIM_L_SKB_READ(BASE, OFF, WIDTH) \
+ ({ __s64 __a64_sr_off = ARM64_SIM_L_SKB_OFFSET((BASE), (OFF)); \
+    struct __sk_buff *__a64_sr_ctx = __a64_sim_helper_ctx; \
+    __u64 __a64_sr_value; \
+    if (((__a64_sr_off >= ARM64_SKB_DATA_OFF && __a64_sr_off <= ARM64_SKB_DATA_OFF + 8 - (WIDTH)) || \
+         (__a64_sr_off >= ARM64_SKB_DATA_END_OFF && __a64_sr_off <= ARM64_SKB_DATA_END_OFF + 8 - (WIDTH)))) { \
+      __s64 __a64_sr_lane; \
+      if (__a64_sr_off >= ARM64_SKB_DATA_OFF) { __a64_sr_value=ARM64_SIM_L_SKB_FIELD(__a64_sr_ctx,data); __a64_sr_lane=__a64_sr_off-ARM64_SKB_DATA_OFF; } \
+      else { __a64_sr_value=ARM64_SIM_L_SKB_FIELD(__a64_sr_ctx,data_end); __a64_sr_lane=__a64_sr_off-ARM64_SKB_DATA_END_OFF; } \
+      if ((WIDTH) != ARM64_WIDTH_64) __a64_sr_value=KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_XDP_NUMERIC(__a64_sr_value) >> (__a64_sr_lane*8), (WIDTH)); \
+    } else if (__a64_sr_off >= ARM64_SKB_CB_OFF && __a64_sr_off <= ARM64_SKB_CB_OFF + 20 - (WIDTH)) \
+      __a64_sr_value=KPROG_ARM64_LOAD_BYTES_OFFSET(__a64_sr_ctx, __a64_sr_off-ARM64_SKB_CB_OFF+(__s64)__builtin_offsetof(struct __sk_buff,cb), (WIDTH)); \
+    else __a64_sr_value=KPROG_ARM64_LOAD_BYTES_OFFSET(ARM64_SIM_L_READ_REG_PTR(BASE),(OFF),(WIDTH)); \
+    __a64_sr_value; })
+#define ARM64_SIM_L_SKB_WRITE(BASE, OFF, WIDTH, VALUE) \
+ do { __s64 __a64_sw_off=ARM64_SIM_L_SKB_OFFSET((BASE),(OFF)); \
+      __u64 __a64_sw_value=KPROG_ARM64_APPLY_WIDTH((VALUE),(WIDTH)); \
+      if (__a64_sw_off >= ARM64_SKB_CB_OFF && __a64_sw_off <= ARM64_SKB_CB_OFF + 20 - (WIDTH)) { \
+       __s64 __a64_sw_ctx_off=__a64_sw_off-ARM64_SKB_CB_OFF+__builtin_offsetof(struct __sk_buff,cb); \
+       if ((WIDTH)==ARM64_WIDTH_64) ARM64_SIM_L_SKB_STORE_ACCESS(64,__a64_sim_helper_ctx,__a64_sw_ctx_off,__a64_sw_value); \
+       else if ((WIDTH)==ARM64_WIDTH_32) ARM64_SIM_L_SKB_STORE_ACCESS(32,__a64_sim_helper_ctx,__a64_sw_ctx_off,__a64_sw_value); \
+       else if ((WIDTH)==ARM64_WIDTH_16) ARM64_SIM_L_SKB_STORE_ACCESS(16,__a64_sim_helper_ctx,__a64_sw_ctx_off,__a64_sw_value); \
+       else ARM64_SIM_L_SKB_STORE_ACCESS(8,__a64_sim_helper_ctx,__a64_sw_ctx_off,__a64_sw_value); \
+      } else ARM64_SIM_L_STORE_ADDR((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE)+(OFF),(WIDTH),__a64_sw_value); \
+ } while (0)
+
 #define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
 	({                                                                 \
 		__s64 __a64_mrd_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
@@ -857,6 +898,8 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
 		if (__a64_sim_is_xdp && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
             __a64_mrd_value = ARM64_SIM_L_XDP_READ((BASE), __a64_mrd_off, (WIDTH)); \
+        } else if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
+            __a64_mrd_value = ARM64_SIM_L_SKB_READ((BASE), __a64_mrd_off, (WIDTH)); \
         } else switch (__a64_mrd_src) {                                 \
 		case KPROG_ARM64_MEM_SRC_STACK: {                        \
 		__u8 __a64_mrd_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
@@ -910,7 +953,7 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 		}                                                        \
 		case KPROG_ARM64_MEM_TAG_ABI:                            \
 			__a64_mrt_value_tag = __a64_sim_abi_kind == ARM64_SIM_ABI_KIND_RAW ? ARM64_SIM_TAG_ABI : KPROG_ABI_LOAD_TAG(          \
-				__a64_sim_abi_kind, (__a64_sim_is_xdp ? (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)__a64_sim_helper_ctx) : 0) + __a64_mrt_off,           \
+				__a64_sim_abi_kind, ((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) ? (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)(__a64_sim_is_xdp ? __a64_sim_helper_ctx : __a64_sim_helper_abi_base)) : 0) + __a64_mrt_off,           \
 				ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET,   \
 				ARM64_SIM_TAG_PACKET_END);                    \
 			break;                                             \
@@ -947,7 +990,9 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 		__u8 __a64_mwr_tag = ARM64_SIM_L_REG_TAG(BASE);          \
 		__u8 __a64_mwr_arm = KPROG_ARM64_MEM_WRITE_ARM(          \
 			((BASE) == ARM64_SP), __a64_mwr_tag);            \
-		if (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \
+		if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_mwr_tag == ARM64_SIM_TAG_ABI) { \
+            ARM64_SIM_L_SKB_WRITE((BASE), __a64_mwr_off, (WIDTH), (VALUE)); \
+        } else if (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \
 		__u8 __a64_mwr_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
 			(BASE) == ARM64_SP);                             \
 		__s64 __a64_mwr_base =                               \
@@ -1777,10 +1822,6 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 
 #define ARM64_SIM_RET()                                                     \
 	do {                                                               \
-		if (__a64_sim_skb_ctx) {                                   \
-			__a64_sim_skb_ctx->cb[0] = __a64_sim_abi.cb[0];    \
-			__a64_sim_skb_ctx->cb[1] = __a64_sim_abi.cb[1];    \
-		}                                                          \
 		return (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \
 	} while (0)
 

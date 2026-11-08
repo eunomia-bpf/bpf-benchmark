@@ -34,3 +34,5 @@ replay continues in the detached fidelity job identified by summary.json.
 Current application guests retain their source epoch while that review runs.
 
 Completed differential collection: Make exit0, 807 forms/826368 canonical cases. Exact compiled sources/static ELF, every result row, diagnostics and trace identity accompany the fidelity archives. The current source epoch remains captured through adoption.
+
+The production ARM simulator now adopts this live skb projection after the captured application sequence closes. The generic component uses the actual kernel-context address and live packet/cb access paths. Complete application successors consume this production source in their captured epochs.
