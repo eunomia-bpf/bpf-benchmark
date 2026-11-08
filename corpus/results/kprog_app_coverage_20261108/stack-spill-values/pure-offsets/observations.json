@@ -1,0 +1,25 @@
+{
+  "created": "2026-11-08T11:53:05.861603+00:00",
+  "exits": {
+    "component": 0,
+    "host": 0,
+    "safety": 0,
+    "micro": 2
+  },
+  "sections": [
+    {
+      "section": "tc",
+      "instructions": 8849,
+      "maximum_fp_minus_offset": 376
+    }
+  ],
+  "safety": {
+    "valid_executed": 9,
+    "verifier_rejected": 27,
+    "specialization_rejected": 2
+  },
+  "safety_rows": 38,
+  "micro_outputs": [],
+  "production_source_changed": false,
+  "source_sha256": "dbe7c13982d16c0d5540c3acefbd2e0728c48c9ee3c25b05bcc31eabb9e29ce6"
+}
