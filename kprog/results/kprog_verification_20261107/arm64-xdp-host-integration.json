@@ -1452,6 +1452,178 @@
       "stable_input_count": 175
     }
   },
+  "arm64_sparse_tag_domain": {
+    "actual_library_exit": 0,
+    "actual_standalone_exit": 0,
+    "archive_block_sha256": "28b6be3aa5f21e1bd1a14c5852f63111626f431f3586286542482565c36887c4",
+    "archive_file": "kprog/results/kprog_verification_20261107/arm64-ghost-domain.log.gz",
+    "archive_marker": "=== SPARSE TAG DOMAIN AND PACKED WORD REFINEMENT V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-base.json": {
+        "bytes": 213,
+        "sha256": "960d845f843ae787561db3413576ee90f8610a5913f27d4b07c8cbd225855b8f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-lake.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-lake.log": {
+        "bytes": 5286,
+        "sha256": "992e70059bca34df0de663ea314155748e78224e17422663b8e5b318aeb59f79"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt1.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt1.log": {
+        "bytes": 1894,
+        "sha256": "24b439275d0d159bea8cd4590de01631faa7cfa55d8ceab2429772d7f1ee383d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt2.log": {
+        "bytes": 1299,
+        "sha256": "91e3235f5ee52d0904ed49b6c189aa7ecd8d00dbb0e72215dec6886aaf48cd73"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt3.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt3.log": {
+        "bytes": 1569,
+        "sha256": "42e486c142e0ad376749c2de3669f8bc132a162cf19aadad1b6ed15dbf8e2d6a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt4.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-attempt4.log": {
+        "bytes": 1457,
+        "sha256": "ac04791bf4ff0bb8b8a45bc095b45f1c378d202c8b839e51f1c776547ecf3d76"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-logical-only.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof-logical-only.log": {
+        "bytes": 450,
+        "sha256": "fa3af3c8b0d5cf0bab6bfaddd2adf8c593e31abf5d14a868715cf8be42d4eb46"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof.log": {
+        "bytes": 1094,
+        "sha256": "4f3f0d868f70db92ba96abced3ee07b9cb050b48d7cdbc476448431b576ac891"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-proof.py": {
+        "bytes": 456,
+        "sha256": "172c484d4ed754c8b24a139335db0d28b0d114b8752840a9cce0153cd1746f10"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source-attempt1.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source-attempt1.log": {
+        "bytes": 264,
+        "sha256": "3047401cca42e9629ec392fda0f4249edd2d717dde7f0274c398ed96c5e9334d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source-attempt1.state": {
+        "bytes": 57,
+        "sha256": "05cc67f7f51944447aa080852573487c578ce129fad61e46f929e5e0e5aa27d5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source.log": {
+        "bytes": 313,
+        "sha256": "98c3cefcb458c87f11058f015bbd4a166b1a70fc2e33fb0343921b05614ad6b9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source.py": {
+        "bytes": 2684,
+        "sha256": "3200fba14747213dd77d877e2041d394325d4182188f333de2c2e6f974a424d9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-source.state": {
+        "bytes": 128,
+        "sha256": "f528f76a42ea8e888a61129f1012f3ae5fbb72b5c0dec26e09d861c03d96a3e0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress-attempt1.lean": {
+        "bytes": 10248,
+        "sha256": "a0d181644b2dc033094bf1bec2fe703ef973df2aa21f65b7e99d2cf3084bb057"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress-attempt2.lean": {
+        "bytes": 10280,
+        "sha256": "38ac6cb1f9440e5cefbd1d04efc1aa8fc581b20aa5824ff1ff0cdcdc52a33788"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress-attempt3.lean": {
+        "bytes": 12360,
+        "sha256": "0f587b4d3a6bf5e923b1f3b5564a5ecfa1ef3e9b3135eae5b3fff6be669d6732"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress-attempt4.lean": {
+        "bytes": 14113,
+        "sha256": "27960946da7a997d4368298fd6eb5196195b25b73be5cd58e593c757879499de"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress-logical-only.lean": {
+        "bytes": 10356,
+        "sha256": "d4ef51919bae5f44ec4dbfb51852ac9796aec4aa51b2d4b0a46994525d18ecbe"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress.base.lean": {
+        "bytes": 3603,
+        "sha256": "1ec7b51b4a56e59432c79a253c506f65671b870c6cde17cae3c3f32b45560279"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress.lean": {
+        "bytes": 14115,
+        "sha256": "c06204183abcf39274866fc45e66ad8459f997cc8093af74057afbf7c895b4e2"
+      },
+      "/workspaces/repository/kprog/arm64/arm64_sim.h": {
+        "bytes": 5173,
+        "sha256": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+      },
+      "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": {
+        "bytes": 138539,
+        "sha256": "a17311474ea46c0b09dbe3df581b396f6c05c23c7cdacb6bb534f5aa50bd28cb"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64NumericAddress.lean": {
+        "bytes": 14115,
+        "sha256": "c06204183abcf39274866fc45e66ad8459f997cc8093af74057afbf7c895b4e2"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 926616,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/ghost-domain-work/Arm64NumericAddress.olean",
+        "sha256": "d6025557c7e7bd2206c9a1a8864a4ab40f3943a69a69c73d87cc526bc7ed00ae"
+      }
+    ],
+    "domain": "All64-bit slot indices and byte tags, arbitrary retained Boolean domain/backing table, every finite store/clear/sequential-copy history. Packed primitive quantifies arbitrary64-bit words, byte tags and full64-bit word-base/lane indices.",
+    "lean_toolchain": "leanprover/lean4:v4.19.0",
+    "premises": "Supported: omitted source slots start scalar0. Covered: a possible nonzero store destination is retained; a retained copy source implies its destination is retained. These are universal proof premises, not executable checks, certificates or admission gates. Opaque domain retains all slots and discharges Covered for every action.",
+    "production_header_snapshot": {
+      "equals_head": true,
+      "head": "50d3386691d524be19e486b18511bacbc5744317",
+      "sha256": "a17311474ea46c0b09dbe3df581b396f6c05c23c7cdacb6bb534f5aa50bd28cb"
+    },
+    "remaining_interface": "Derive Supported and Covered from the actual Python CFG transfer/join/helper producer once for all programs. Connect sparse allocation and C pointer alignment/aliasing/volatile ordering/clang bytes to this representation. Guest bytes, permissions and pointer payloads remain separate. No complete compiler/native ABI theorem claimed.",
+    "result": "Read-zero/write-elision sparse table commutes with complete dense metadata execution; every resulting lookup agrees. Numeric packed GET/SET changes exactly one byte, preserves all other packed bytes, and refines one whole byte-tag-array store using exact masked word-base/lane decomposition.",
+    "source_commit": "50d3386691d524be19e486b18511bacbc5744317",
+    "source_sha256": "c06204183abcf39274866fc45e66ad8459f997cc8093af74057afbf7c895b4e2",
+    "theorems": [
+      "GhostDomain.step_refines",
+      "GhostDomain.run_refines",
+      "GhostDomain.supported_run_refines",
+      "GhostDomain.opaque_run",
+      "GhostDomain.packed_write_byte_frame",
+      "GhostDomain.packed_store_refines"
+    ]
+  },
   "arm64_vector_token_bodies": {
     "c_domain": "Nine tokens, pair and FMOV FLAGS0/4/8, fixed-width/reduction FLAGS0/1/2/4/8/16/255, all32 FMOV banks and255 default, pre/post flags, index presence, five shifts, both displacement signs and all16 NZCV inputs. Complete register/tag/vector/NZCV/memory snapshots and independent entire-buffer pair/D/Q store bytes agree; exclusive calls stay0. Earlier scalar/memory case domains continue unchanged.",
     "diagnostics": "Initial redundant tactic diagnostics retained separately from the final accepted checks.",

@@ -83,6 +83,11 @@ initialization/replacement is erased through finite save/invalidate/frame/clear
 histories and complete lookup traversals, retaining active STACK pointers.
 This metadata C-model law leaves C definedness and compiler/physical ABI explicit.
 
+Arm64NumericAddress also proves sparse tag-table store/clear/copy preservation
+under explicit initial-support and producer-domain coverage premises, plus
+packed-word whole-byte-table store refinement. Actual CFG producer soundness
+and C/clang storage correspondence remain explicit interfaces.
+
 ## Run
 
 ```sh

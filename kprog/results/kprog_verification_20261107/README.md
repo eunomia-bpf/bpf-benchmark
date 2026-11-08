@@ -5059,3 +5059,17 @@ retains source, failed and passing proof attempts and the full build log.
 Raw guest memory is separate. This C-model erasure result does not establish
 C definedness of an uninitialized read, actual clang path preservation, or
 physical pointer/native ABI correspondence.
+
+### Sparse private tag domain and packed storage
+
+`Arm64NumericAddress.GhostDomain` proves read-zero/write-elision storage
+preserves every complete tag lookup through arbitrary finite store, clear and
+sequential-copy histories. Omitted initial slots must be scalar, and the domain
+must cover every possible tag-producing store/copy. Full storage discharges
+the opaque case. Packed-word GET/SET has an exact whole byte-table store law:
+the selected byte changes and all others remain intact, over full64-bit indices.
+The existing library build exits0. [Original evidence](arm64-ghost-domain.log.gz)
+retains all proof attempts, final source and build output. Producer soundness
+for the Python CFG transfer/join/helper analysis, actual sparse allocation,
+C alignment/aliasing/volatile ordering and clang/ABI transport remain explicit.
+These are proof premises; no runtime predicate or per-program certificate is added.
