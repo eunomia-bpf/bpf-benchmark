@@ -1,0 +1,31 @@
+{
+  "source": [
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "before_sha256": "4ea969da15d0e77793ade6911dfa7274e148cb42587a013365d77a9d9fcbf9c0",
+      "sha256": "8318a76d393dd0fd083cb8abbef83e8af8d301aa05a6489f311f7e22ffcd884c"
+    },
+    {
+      "path": "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "before_sha256": "3f35952259ab078688ec2d6169149d0aa42af183454033fdd4b5c27831c9d03a",
+      "sha256": "fe5ce924f2cf6bae672ad265f481cd31b8d6faae18489240788994bbeba0e4f5"
+    },
+    {
+      "path": "kprog/x86/README.md",
+      "before_sha256": "88f9c130c9976079033c8f51f0169b750a58e369ca1f65b8b4327309e9347c99",
+      "sha256": "9edf61546749ff271acf21142055f69d7ce49017612b2c6c7dd60b70cd50d5a1"
+    }
+  ],
+  "exit": 0,
+  "host_cases": 18650,
+  "host_differences": 0,
+  "micro_rows": 30,
+  "sections": {
+    "raw_tracepoint/trusted": {
+      "bytes": 91560,
+      "instructions": 11445,
+      "sha256": "af5a3b7aa29e23f71e9023f175717e915660f32fb0f954bdda73eea565777821"
+    }
+  },
+  "experimental_and_c_copy_executable_bytes_equal": true
+}

@@ -1568,6 +1568,57 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
     return "\n".join(lines)
 
 
+def readonly_load_declarations(objects: list[tuple[str, bytes]]) -> list[str]:
+    """Represent immutable native bytes as finite C values at their exact offsets.
+
+    The compile-time base choice preserves object identity. Each unrepresented
+    address or access width retains the ordinary memory operation.
+    """
+    lines = []
+    for name, data in objects:
+        lines.extend([
+            f"static __always_inline __u64 {name}_value(__u64 offset, __u8 width)",
+            "{", "\tswitch (width) {",
+        ])
+        for width in (1, 2, 4, 8):
+            lines.append(f"\tcase {width}: switch (offset) {{")
+            for offset in range(len(data) - width + 1):
+                lines.extend([
+                    f"\tcase {offset}: {{",
+                    "\t\t__u64 value = 0;",
+                    f"\t\t__builtin_memcpy(&value, {name} + {offset}, {width});",
+                    '\t\t__asm__("" : "+r"(value));',
+                    "\t\treturn value;", "\t}",
+                ])
+            lines.append("\t} break;")
+        lines.extend([
+            "\t}",
+            f"\treturn KPROG_X86_MEM_LOAD((const __u8 *){name} + offset, width);",
+            "}", "",
+        ])
+    if objects:
+        lines.extend([
+            "#undef X86_SIM_L_NATIVE_DATA_LOAD",
+            "#define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \\",
+            "({ const void *__x86_ro_base = (BASE); __u64 __x86_ro_off = (OFF); \\",
+            "   __u8 __x86_ro_width = (WIDTH); __u64 __x86_ro_value; \\",
+        ])
+        for name, _ in objects:
+            lines.extend([
+                "   if (__builtin_constant_p((__u64)(long)__x86_ro_base - "
+                f"(__u64)(long){name})) \\",
+                f"       __x86_ro_value = {name}_value("
+                f"(__u64)(long)__x86_ro_base - (__u64)(long){name} + "
+                "__x86_ro_off, __x86_ro_width); else \\",
+            ])
+        lines.extend([
+            "       __x86_ro_value = KPROG_X86_MEM_LOAD("
+            "KPROG_PTR_ADD64_BITS(__x86_ro_base, __x86_ro_off), __x86_ro_width); \\",
+            "   __x86_ro_value; })", "",
+        ])
+    return lines
+
+
 def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None,
                    kind: str = "xdp",
@@ -1729,6 +1780,7 @@ def render_program(name: str, insns: list[NativeInsn],
                      + json.dumps(metadata) + ';')
         lines.append("")
     rodata_objects = []
+    readonly_values = []
     for index, (symbol, ident) in enumerate(rodata_idents.items()):
         value = rodata16[symbol]
         if not isinstance(value, bytes):
@@ -1739,6 +1791,7 @@ def render_program(name: str, insns: list[NativeInsn],
         section_name = f".rodata.native.{index}"
         values = ", ".join(f"0x{byte:02x}" for byte in value)
         lines.append(f'static const __u8 {ident}[{len(value)}] SEC("{section_name}") __attribute__((aligned(16))) = {{{values}}};')
+        readonly_values.append((ident, value))
         rodata_objects.append(dict(proof_section=section_name, proof_symbol=ident,
                                    native_symbol=symbol, size=len(value)))
     if rodata_idents:
@@ -1746,6 +1799,7 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append('static const char __x86_rodata_metadata[] SEC(".native_lab.rodata") = '
                      + json.dumps(metadata) + ';')
         lines.append("")
+    lines.extend(readonly_load_declarations(readonly_values))
     lines.extend([
         section,
         f"int {name}_x86_sim_xdp({ctx_type}ctx)",

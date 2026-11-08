@@ -415,3 +415,11 @@ The local readonly-link resolver carries zero-size labels through their whole
 section identity and original displacement in both proof and kernel modes.
 Typed objects retain their exact extents; common PC32 regression vectors compare
 full bytes, object identity and final decoded addresses across both routes.
+
+
+Generated immutable-object reads carry the declared native bytes through finite
+C offset/width cases. Each case obtains its value through a fixed-size C copy
+from the exact object offset. The compile-time base choice preserves the
+object identity; every remaining address uses the ordinary raw memory read.
+The [readonly-value measurements](../../corpus/results/kprog_app_coverage_20261108/readonly-values/README.md)
+retain byte observations, compiled artifacts and the whole-application frontier.

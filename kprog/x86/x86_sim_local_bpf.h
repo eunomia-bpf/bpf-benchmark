@@ -724,6 +724,11 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 #define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH) KPROG_X86_MEM_LOAD((ADDR), (WIDTH))
 
+#ifndef X86_SIM_L_NATIVE_DATA_LOAD
+#define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \
+	X86_SIM_L_LOAD_ADDR(KPROG_PTR_ADD64_BITS((BASE), (OFF)), (WIDTH))
+#endif
+
 #if defined(__BPF__) || defined(__bpf__)
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
 #else
@@ -1134,8 +1139,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					x86_store_imm_disp(IMM) : x86_simm(IMM), \
 					__x86_l_read_mem_width);         \
 			else                                             \
-				__x86_l_value = X86_SIM_L_LOAD_ADDR(       \
-					(void *)(long)__x86_l_addr,       \
+				__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD( \
+					__x86_l_base_ptr, __x86_l_disp,       \
 					__x86_l_read_mem_width);          \
 			break;                                           \
 		}                                                         \
@@ -1210,8 +1215,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 						__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 				else                                      \
-					__x86_l_value = X86_SIM_L_LOAD_ADDR( \
-						(void *)(long)__x86_l_addr, __x86_l_mem_width); \
+					__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD( \
+					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width); \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
 					__x86_l_value, __x86_l_write_width);\
 				break;                                    \
@@ -1234,8 +1239,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 			else                                             \
-				__x86_l_value = X86_SIM_L_LOAD_ADDR(       \
-					(void *)(long)__x86_l_addr, __x86_l_mem_width); \
+				__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD( \
+					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width); \
 			if ((OP) == X86_OP_MOVSX_LOAD)                    \
 				__x86_l_value = x86_sign_extend(           \
 					__x86_l_value, __x86_l_mem_width);  \
