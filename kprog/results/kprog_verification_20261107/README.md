@@ -18,12 +18,13 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 3/75 | 0/71 |
-| O2 C-model token-body equality | 66/75 | 71/71 |
+| Pointer-load body model / prefix equality | 2/75 | 0/71 |
+| O2 C-model token-body equality | 68/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 66 x86 O2 equalities cover46 direct bodies, seventeen generic calls and three
+The 68 x86 O2 equalities cover48 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
 RET now composes its internal SUB_RET saved64word read, rawRSP+8 and full
@@ -31,7 +32,9 @@ frame through an extended dispatcher and branch-token equality. The emitted
 finite continuation switch now composes the same selected-case step. Its coverage
 remains partial while the outer invocation, low32RAX/context copy and linked
 continuation relations are connected. Eight pseudo operations require
-environment/native-link binding. ARM conditional
+environment/native-link binding. Two pointer-load direct bodies additionally
+have complete raw-frame/tag equality through their production prefix; the
+ordinary extended dispatcher retains its66-token scope. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
 immediate-body gate through unified ExecBinding, source and invocation emission.
@@ -4411,3 +4414,32 @@ Every raw/numeric/tag register, stack byte, modeled flag and vector lane is
 compared under UBSan. Exact published cdca2680d production C dependencies,
 new sources, commands, six axiom outputs, logs and binary are archived under
 `x86_return_continuation_switch`.
+
+### x86 map-pointer and helper-ID token bodies
+
+Six universal laws compose both literal pointer-load bodies with their
+production L_EXEC prefix. The complete raw frame, original alias cells and
+full tag function persist; AUX bit0 selects map-object5/map-value6 and the
+helper-ID7 scalar64 preparation is absorbed by the final pointer write.
+All16 destinations are included. The numeric observation records actual RSP
+rawIMM/observedIMM+nativeStackBase; ordinary GPRs refine a resolved immediate64
+move. Native symbol/helper-ID address transport, RSP normalization,
+provenance/environment/compiler and the ordinary extended dispatcher retain
+explicit interfaces. C-model O2 totals are68 x86 (48direct/17generic/3branch)
+and71 ARM; the ordinary x86 extended dispatcher retains66 tokens.
+
+The existing pointer contract oracle retains1342 cases and adds2097152
+production UBSan frames across both literal and interpreter paths, all16
+destinations, eight64-bit words, eight AUX patterns, four ignored FLAGS bytes,
+64 incoming flag combinations and two tag profiles. Every numeric/raw/tag
+register, stack byte, vector and flag is compared. The existing Makefile
+recipe adds the production header include paths and the established UBSan
+flags. Exact immutable db581dd6d C dependencies and all new proof sources,
+commands, diagnostics and binaries are archived under `x86_pointer_load_tokens`.
+
+The immutable cdca2680d full check exits2 at the ARM entry-context fixture's
+two SKB tag expectations. Its1171 Git sources, log and actual failure are
+retained under `full_make_check_cdca2680d_failure`. The fixture now seeds its
+existing helper ABI base from the same declared ABI pointer: captured old1
+and fixed0 retain all15 values/tags and expected results. The successor full
+check keeps its own source identity and actual outcome.

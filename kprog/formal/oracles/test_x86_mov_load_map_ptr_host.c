@@ -620,6 +620,70 @@ static unsigned part5(void)
 	return cases;
 }
 
+/* Whole production pointer-load frames, alongside the retained table oracle. */
+#undef X86_WIDTH_8
+#undef X86_WIDTH_16
+#undef X86_WIDTH_32
+#undef X86_WIDTH_64
+#undef X86_REG_NONE
+#undef X86_RSP
+#undef X86_OP_MOV_LOAD_MAP_PTR
+#undef X86_OP_MOV_LOAD_HELPER_ID
+#undef X86_OP_MOVBE_LOAD
+#undef X86_OP_UNRELATED
+#undef X86_SIM_TAG_SCALAR
+#undef X86_SIM_TAG_ABI
+#undef X86_SIM_TAG_PACKET
+#undef X86_SIM_TAG_PACKET_END
+#undef X86_SIM_TAG_STACK
+#undef X86_SIM_TAG_MAP_PTR
+#undef X86_SIM_TAG_MAP_VALUE
+#undef X86_SIM_TAG_HELPER_ID
+
+#include <stdlib.h>
+#define X86_SIM_ENABLE_STACK 1
+#include "../x86/x86_sim_local_bpf.h"
+static unsigned long production_frames;
+static void production_pointer_frame(unsigned op,unsigned dst,__u32 aux,__u8 flags,__u64 value,unsigned fs,unsigned profile,unsigned direct)
+{
+ X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=0;
+ __u64 raw[16],numeric[16];__u8 tags[16],memory[X86_SIM_STACK_BYTES];
+ __x86_native_stack_base=0x123456789abcdef0ULL;
+ for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++)__x86_stack_mem.b[i]=memory[i]=(__u8)(137*i+19+profile);
+ for(unsigned r=0;r<16;r++){
+  __u8 tag=(r+3*profile)%8;
+  void *ptr=tag==4?(void *)&__x86_stack_mem.b[(r*3+profile)%56]:(void *)(long)(0x1122334455667788ULL+r*0x102030405ULL);
+  X86_SIM_L_WRITE_REG_PTR_TAG(r,ptr,tag);
+ }
+ __x86_rsp.ptr=(void *)(long)-32;
+ __x86_cf=!!(fs&1);__x86_pf=!!(fs&2);__x86_af=!!(fs&4);__x86_zf=!!(fs&8);__x86_sf=!!(fs&16);__x86_of=!!(fs&32);
+ __x86_xmm0_lo=0x0123456789abcdefULL;__x86_xmm0_hi=0xfedcba9876543210ULL;
+ for(unsigned r=0;r<16;r++){raw[r]=(__u64)(long)X86_SIM_L_REG_VALUE(r);numeric[r]=X86_SIM_L_READ_REG(r);tags[r]=X86_SIM_L_REG_TAG(r);}
+ if(direct)X86_SIM_L_EXEC_PTR_LOAD(op,dst,aux,value);
+ else X86_SIM_L_EXEC(op,dst,flags^0xffU,flags,aux,value);
+ const __u8 selected_tag=op==0x2cU?((aux&1)?6:5):7;
+ for(unsigned r=0;r<16;r++){
+  __u64 expected_raw=r==dst?value:raw[r];
+  __u64 expected_numeric=r==dst?(r==4?value+__x86_native_stack_base:value):numeric[r];
+  __u8 expected_tag=r==dst?selected_tag:tags[r];
+  if((__u64)(long)X86_SIM_L_REG_VALUE(r)!=expected_raw||X86_SIM_L_READ_REG(r)!=expected_numeric||X86_SIM_L_REG_TAG(r)!=expected_tag){
+   fprintf(stderr,"pointer frame op=%x dst=%u r=%u aux=%x flags=%u direct=%u\n",op,dst,r,aux,flags,direct);mismatches++;return;
+  }
+ }
+ for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++)if(__x86_stack_mem.b[i]!=memory[i]){mismatches++;return;}
+ if(__x86_xmm0_lo!=0x0123456789abcdefULL||__x86_xmm0_hi!=0xfedcba9876543210ULL||__x86_cf!=!!(fs&1)||__x86_pf!=!!(fs&2)||__x86_af!=!!(fs&4)||__x86_zf!=!!(fs&8)||__x86_sf!=!!(fs&16)||__x86_of!=!!(fs&32)){mismatches++;return;}
+ production_frames++;
+}
+static void production_pointer_frames(void)
+{
+ const __u64 values[]={0,1,0xffffffffULL,0x100000000ULL,0x7fffffffffffffffULL,0x8000000000000000ULL,0xffffffffffffffffULL,0x1234567887654321ULL};
+ const __u32 auxs[]={0,1,2,3,0xffffffffU,0xfffffffeU,0x80000000U,0x80000001U};
+ const __u8 flags[]={0,1,8,255};
+ for(unsigned op=0x2c;op<=0x2d;op++)for(unsigned dst=0;dst<16;dst++)for(unsigned a=0;a<8;a++)for(unsigned f=0;f<4;f++)for(unsigned n=0;n<8;n++)for(unsigned fs=0;fs<64;fs++)for(unsigned profile=0;profile<2;profile++)for(unsigned direct=0;direct<2;direct++)
+  production_pointer_frame(op,dst,auxs[a],flags[f],values[n],fs,profile,direct);
+ printf("x86 pointer-load production full frames: %lu cases\n",production_frames);
+}
+
 int main(void)
 {
 	unsigned total = 0U;
@@ -645,6 +709,8 @@ int main(void)
 	total += part4();
 	oracle_restore_pristine();
 	total += part5();
+
+	production_pointer_frames();
 
 	if (mismatches) {
 		printf("x86 mov_load_map_ptr/helper_id handler host cross-check: FAIL (%u)\n",

@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-66 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
+68 x86 register/control/memory/pointer tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host with BMI1/BMI2 and POPCNT:
@@ -60,7 +60,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Forty-six direct, seventeen generic and three branch token bodies have semantic
+Forty-eight direct, seventeen generic and three branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -196,3 +196,11 @@ The same internal RET body composes the source-emitted finite continuation
 switch for arbitrary tables and saved words. Successful case selection has
 token-body equality and canonical-step composition; exhausted-table source
 fallthrough and native address transport retain their explicit interfaces.
+
+Two pointer-load direct tokens additionally have whole raw-frame and provenance
+equality through the pointer prefix: AUX bit0 selects map-object/value tags,
+and the helper-ID scalar64 preparation is absorbed by its final pointer write.
+The numeric frame records actual RSP offset observation; ordinary GPRs refine
+a resolved immediate64 move. Native symbol/helper address transport, RSP
+normalization, full environment/compiler correspondence and integration with
+the extended ordinary dispatcher retain explicit interfaces.

@@ -99,6 +99,7 @@ static __u8 abi_tag_at(__u8 kind, __s64 off)
 
 	__a64_sim_abi_kind = kind;
 	__a64_x0.ptr = &__a64_sim_abi;
+	__a64_sim_helper_abi_base = &__a64_sim_abi;
 	__a64_x0_tag = ARM64_SIM_TAG_ABI;
 	(void)__a64_stack_tag;
 	return ARM64_SIM_L_MEM_READ_TAG(ARM64_X0, ARM64_REG_NONE, 0, off, 0,

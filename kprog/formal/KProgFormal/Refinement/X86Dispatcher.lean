@@ -1,3 +1,4 @@
+import KProgFormal.Generated.GeneratedX86PtrWrite
 import KProgFormal.X86BranchEmit
 import KProgFormal.Generated.GeneratedX86MemAux
 import KProgFormal.Generated.GeneratedX86Specialization
@@ -4910,5 +4911,129 @@ theorem return_switch_native_matches (env : EntryEnvironment.Environment) (frame
   refine ⟨returnLabelFrame env frame arena state, (return_switch_selected env frame arena state targets).2 member, ?_⟩
   exact successors_match _ _ nativeAfter _ nativeStep
     (return_label_frame_step_refines env frame arena state nextPc readable canonical)
+
+/-- Pointer-load writes retain the literal raw pointer bits and their selected
+provenance. RSP's raw cell remains an offset in the numeric observation; its
+native-link interpretation is an explicit interface. -/
+def pointerLoadTag (op : GeneratedX86PtrWrite.Op) (aux : BitVec 32) : Byte :=
+  BitVec.ofNat 8 ((GeneratedX86PtrWrite.sourceTagCode
+    (op == .movLoadMapPtr) (op == .movLoadHelperId) (aux.getLsbD 0)).getD 255)
+
+def pointerWriteCell (state : RegisterState) (dst : Register) (value : Reference.Word) : RegisterState :=
+  ⟨{ state.raw with gpr := fun r => if r = dst then value else state.raw.gpr r },
+    fun r => if r = dst then false else state.stack r⟩
+
+/-- The helper-ID body performs its scalar64 write before the final pointer
+write; the map-pointer body performs the final write directly. -/
+def generatedPointerLoad (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (tags : Register → Byte)
+    (op : GeneratedX86PtrWrite.Op) (dst : Register) (aux : BitVec 32) (value nextPc : Reference.Word) :
+    RegisterState × (Register → Byte) :=
+  let before := if GeneratedX86PtrWrite.width64 op then
+      writeRegister env frame arena state .w64 (.low dst) value else state
+  (registerPc (pointerWriteCell before dst value) nextPc,
+    fun r => if r = dst then pointerLoadTag op aux else tags r)
+
+/-- The final pointer write absorbs the helper-ID scalar preparation, including
+its RSP normalization. Every other raw cell and tag retains its input value. -/
+def specializedPointerLoad (state : RegisterState) (tags : Register → Byte)
+    (op : GeneratedX86PtrWrite.Op) (dst : Register) (aux : BitVec 32) (value nextPc : Reference.Word) :
+    RegisterState × (Register → Byte) :=
+  (registerPc (pointerWriteCell state dst value) nextPc,
+    fun r => if r = dst then pointerLoadTag op aux else tags r)
+
+theorem pointer_load_tag_fields (aux : BitVec 32) :
+    pointerLoadTag .movLoadMapPtr aux = (if aux.getLsbD 0 then 6 else 5) ∧
+      pointerLoadTag .movLoadHelperId aux = 7 := by
+  unfold pointerLoadTag
+  cases aux.getLsbD 0 <;> exact ⟨rfl, rfl⟩
+
+theorem pointer_load_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (tags : Register → Byte)
+    (op : GeneratedX86PtrWrite.Op) (dst : Register) (aux : BitVec 32) (value nextPc : Reference.Word) :
+    generatedPointerLoad env frame arena state tags op dst aux value nextPc =
+      specializedPointerLoad state tags op dst aux value nextPc := by
+  cases op
+  · rfl
+  · simp only [generatedPointerLoad, specializedPointerLoad, GeneratedX86PtrWrite.width64, ↓reduceIte,
+      pointerWriteCell, writeRegister, registerPc]
+    congr 1
+    congr 1
+    congr 1
+    all_goals funext r
+    all_goals by_cases selected : r = dst <;> simp [selected, Reference.X86.RegisterSlice.reg]
+
+/-- Numeric observation of the literal pointer write includes the actual RSP
+base addition and every other materialized input cell. -/
+theorem pointer_load_numeric_frame (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (dst : Register) (value nextPc : Reference.Word) :
+    nativeRegisters env frame arena (registerPc (pointerWriteCell state dst value) nextPc) =
+      { nativeRegisters env frame arena state with
+        gpr := fun r => if r = dst then (if r = 4 then value + EntryEnvironment.base env frame .stack else value)
+          else registerValue env frame arena state r,
+        pc := nextPc } := by
+  simp only [native_register_pc, nativeRegisters, pointerWriteCell]
+  congr 1
+  funext r
+  by_cases selected : r = dst
+  · subst r
+    simp [registerValue, registerPc]
+  · simp [registerValue, registerPc, selected]
+
+/-- For ordinary destination GPRs, the same numeric write is the canonical
+64-bit immediate move. Source-symbol/helper resolution supplies its native
+value; that environment correspondence retains its separate link relation. -/
+theorem pointer_load_move_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (dst : Register) (value nextPc : Reference.Word)
+    (ordinary : dst ≠ 4) :
+    (⟨nativeRegisters env frame arena (registerPc (pointerWriteCell state dst value) nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.move .w64 (.register (.low dst)) (.immediate value) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [pointer_load_numeric_frame]
+  simp only [Reference.X86.step, Reference.X86.moveStep, Reference.X86.scalarRead,
+    Reference.X86.scalarWrite, Reference.X86.RegisterSlice.reg,
+    List.append_nil]
+  congr 1
+  congr 1
+  funext r
+  by_cases selected : r = dst
+  · subst r
+    simp [ordinary, register_write64]
+  · simp [selected, nativeRegisters]
+
+def pointerLoadToken : GeneratedX86PtrWrite.Op → GeneratedX86Specialization.Op
+  | .movLoadMapPtr => .movLoadMapPtr
+  | .movLoadHelperId => .movLoadHelperId
+
+theorem pointer_load_token_identity (op : GeneratedX86PtrWrite.Op) :
+    GeneratedX86Specialization.dispatch (pointerLoadToken op) = .directMacro ∧
+      GeneratedX86Specialization.tokenName (pointerLoadToken op) =
+        GeneratedX86Opcode.define (match op with | .movLoadMapPtr => .movLoadMapPtr | .movLoadHelperId => .movLoadHelperId) := by
+  cases op <;> decide
+
+/-- Both direct tokens share the pointer-load prefix of L_EXEC. Arbitrary
+FLAGS/SRC bytes are ignored by that production prefix. -/
+def pointerLoadPrefix (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (tags : Register → Byte) (code : Nat)
+    (_flags _src dst : Byte) (aux : BitVec 32) (value nextPc : Reference.Word) :
+    Option (RegisterState × (Register → Byte)) := do
+  let destination ← registerOf dst
+  if code = GeneratedX86Opcode.code .movLoadMapPtr then
+    pure (generatedPointerLoad env frame arena state tags .movLoadMapPtr destination aux value nextPc)
+  else if code = GeneratedX86Opcode.code .movLoadHelperId then
+    pure (generatedPointerLoad env frame arena state tags .movLoadHelperId destination aux value nextPc)
+  else none
+
+theorem pointer_load_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (tags : Register → Byte)
+    (op : GeneratedX86PtrWrite.Op) (dst : Register) (flags src : Byte) (aux : BitVec 32)
+    (value nextPc : Reference.Word) :
+    pointerLoadPrefix env frame arena state tags
+      (GeneratedX86Opcode.code (match op with | .movLoadMapPtr => .movLoadMapPtr | .movLoadHelperId => .movLoadHelperId))
+      flags src (registerByte dst) aux value nextPc =
+      some (specializedPointerLoad state tags op dst aux value nextPc) := by
+  cases op <;> simp [pointerLoadPrefix, register_of_byte,
+    GeneratedX86Opcode.code, pointer_load_body_matches]
 
 end KProgFormal.Refinement.X86Dispatcher

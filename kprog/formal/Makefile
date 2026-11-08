@@ -410,7 +410,7 @@ check:
 	./build/test_x86_movbe_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_movbe_route_host.c -o build/test_x86_movbe_route_host
 	./build/test_x86_movbe_route_host
-	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host
+	$(CC) -Wall -Wextra -O2 -mno-red-zone -fsanitize=undefined -fno-sanitize-recover=all -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host
 	./build/test_x86_mov_load_map_ptr_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_xmm0_host.c -o build/test_x86_xmm0_host
 	./build/test_x86_xmm0_host
