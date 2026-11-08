@@ -1,0 +1,29 @@
+{
+  "utc": "2026-11-08T12:57:53.599281+00:00",
+  "compiler_exit": 0,
+  "counts": {
+    "programs": 1917,
+    "c": 657,
+    "asm": 1260,
+    "failure": 916,
+    "success": 1001,
+    "files": 105,
+    "files_compiled": 59,
+    "programs_compiled": 382,
+    "entries_present": 380
+  },
+  "companion_bpf_objects": 378,
+  "source_commit": "a23d54b07423ceb1f20c129c7c4c098b1060f1aa",
+  "scope": "Complete existing657-C upstream annotated source compiler cohort; R owns actual kernel submission and annotation agreement",
+  "native_entry_absent": [
+    {
+      "file": "verifier_gotol.c",
+      "program": "dummy_test"
+    },
+    {
+      "file": "verifier_sdiv.c",
+      "program": "dummy_test"
+    }
+  ],
+  "inputs_header_sha256": "b6358a878293eff0a4b41101258d0727cce4c4b8cd162ddf74df998fcefdbc4f"
+}
