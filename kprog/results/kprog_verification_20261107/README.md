@@ -4222,3 +4222,10 @@ covers62/75 (46direct/14generic/2branch); ARM C-model O2 covers71/71.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_13ac4f9d7`. Every check retains its exact published source identity.
+
+### Published source full check d08e1d626
+
+`make check` on immutable publishedd08e1d626 exits0. All1169 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_d08e1d626`. Every check retains its exact published source identity.
