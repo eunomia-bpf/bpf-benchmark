@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <string_view>
 #include <unistd.h>
 
 int main(int argc, char **argv)
@@ -10,12 +11,18 @@ int main(int argc, char **argv)
     int source = -1;
     native_loader::LoadedProgram loaded;
     try {
-        if (argc != 2) throw std::runtime_error("native ELF argument required");
+        if (argc < 2 || argc > 3) throw std::runtime_error("usage: client native.o [xdp|tc]");
+        bpf_prog_type type = BPF_PROG_TYPE_XDP;
+        if (argc == 3) {
+            const std::string_view selected(argv[2]);
+            if (selected == "tc") type = BPF_PROG_TYPE_SCHED_CLS;
+            else if (selected != "xdp") throw std::runtime_error("control types: xdp, tc");
+        }
         bpf_insn code[2]{};
         code[0].code = BPF_ALU64 | BPF_MOV | BPF_K; code[0].imm = 2;
         code[1].code = BPF_JMP | BPF_EXIT;
         bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
-        source = bpf_prog_load(BPF_PROG_TYPE_XDP,"service_source","GPL",code,2,&opts);
+        source = bpf_prog_load(type,"service_source","GPL",code,2,&opts);
         if (source < 0) throw std::runtime_error("load original BPF control");
         if (setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF","1",1) ||
             setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF","1",1))
