@@ -1,0 +1,1503 @@
+{
+  "counts": {
+    "catalog_rows": 3,
+    "attempted": 3,
+    "submitted": 3,
+    "installed": 0,
+    "verifier_rejected": 0,
+    "generation_failed": 3,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 0,
+    "failure_agrees": 0,
+    "failure_installed": 0,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  },
+  "programs": [
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 13,
+          "source_func_type_id": 753,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 2,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 3,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 4,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 5,
+            "value_offset": null
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 6,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 8,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 10,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 12,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 14,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 16,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 18,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 20,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 22,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 24,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 26,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 28,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 29,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 31,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 32,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 34,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 35,
+            "value_offset": null
+          },
+          {
+            "name": "substring_map",
+            "map_id": 36,
+            "value_offset": null
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 37,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 38,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 39,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 40,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 41,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 42,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 43,
+            "value_offset": null
+          },
+          {
+            "name": "execve_val",
+            "map_id": 44,
+            "value_offset": null
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 45,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 46,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 47,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 48,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 49,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 50,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 51,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 52,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 53,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 54,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 55,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 56,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 57,
+            "value_offset": null
+          },
+          {
+            "name": "data_heap",
+            "map_id": 58,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 60,
+            "value_offset": null
+          },
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 60,
+            "value_offset": 0
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 60,
+            "value_offset": 1
+          },
+          {
+            "name": "ENV_VARS_ENABLED",
+            "map_id": 60,
+            "value_offset": 2
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 61,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tracepoint/sys_execve",
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 2
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 3
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 4
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 5
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 6
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 8
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 10
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 12
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 14
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 16
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 18
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 20
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 22
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 24
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 26
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 28
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 29
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 31
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 32
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 34
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 35
+          },
+          {
+            "name": "substring_map",
+            "map_id": 36
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 37
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 38
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 39
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 40
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 41
+          },
+          {
+            "name": "execve_map",
+            "map_id": 42
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 43
+          },
+          {
+            "name": "execve_val",
+            "map_id": 44
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 45
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 46
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 47
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 48
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 49
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 50
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 51
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 52
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 53
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 54
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 55
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 56
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 57
+          },
+          {
+            "name": "data_heap",
+            "map_id": 58
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 60
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 61
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-8pk9xkl7",
+        "attach_target_resolution": null
+      },
+      "request_id": 1,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+        "started": "1970-01-01T00:01:58.990033+00:00",
+        "status": -5,
+        "error": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 48, in specialize\n    run([native_link, \"--input\", native, \"--symbol\", entry_symbol,\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 42, in run\n    result = subprocess.run(command, text=True, capture_output=True)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/lib/python3.12/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/1.failure.tar.gz",
+        "finished": "1970-01-01T00:02:15.660099+00:00"
+      },
+      "diagnostic": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+      "file": "bpf_execve_event.c",
+      "program": "event_execve",
+      "section": "tracepoint/sys_execve",
+      "expect": "success",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 5, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 13, \"source_func_type_id\": 753, \"token_present\": 0}, \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 2, \"value_offset\": null}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 3, \"value_offset\": null}, {\"name\": \"tcpmon_map\", \"map_id\": 4, \"value_offset\": null}, {\"name\": \"tg_rb_events\", \"map_id\": 5, \"value_offset\": null}, {\"name\": \"buffer_heap_map\", \"map_id\": 6, \"value_offset\": null}, {\"name\": \"string_maps_0\", \"map_id\": 8, \"value_offset\": null}, {\"name\": \"string_maps_1\", \"map_id\": 10, \"value_offset\": null}, {\"name\": \"string_maps_2\", \"map_id\": 12, \"value_offset\": null}, {\"name\": \"string_maps_3\", \"map_id\": 14, \"value_offset\": null}, {\"name\": \"string_maps_4\", \"map_id\": 16, \"value_offset\": null}, {\"name\": \"string_maps_5\", \"map_id\": 18, \"value_offset\": null}, {\"name\": \"string_maps_6\", \"map_id\": 20, \"value_offset\": null}, {\"name\": \"string_maps_7\", \"map_id\": 22, \"value_offset\": null}, {\"name\": \"string_maps_8\", \"map_id\": 24, \"value_offset\": null}, {\"name\": \"string_maps_9\", \"map_id\": 26, \"value_offset\": null}, {\"name\": \"string_maps_10\", \"map_id\": 28, \"value_offset\": null}, {\"name\": \"string_maps_heap\", \"map_id\": 29, \"value_offset\": null}, {\"name\": \"string_prefix_maps\", \"map_id\": 31, \"value_offset\": null}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 32, \"value_offset\": null}, {\"name\": \"string_postfix_maps\", \"map_id\": 34, \"value_offset\": null}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 35, \"value_offset\": null}, {\"name\": \"substring_map\", \"map_id\": 36, \"value_offset\": null}, {\"name\": \"policy_conf\", \"map_id\": 37, \"value_offset\": null}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 38, \"value_offset\": null}, {\"name\": \"tg_conf_map\", \"map_id\": 39, \"value_offset\": null}, {\"name\": \"tg_binary_heap\", \"map_id\": 40, \"value_offset\": null}, {\"name\": \"tg_parents_bin\", \"map_id\": 41, \"value_offset\": null}, {\"name\": \"execve_map\", \"map_id\": 42, \"value_offset\": null}, {\"name\": \"execve_map_stats\", \"map_id\": 43, \"value_offset\": null}, {\"name\": \"execve_val\", \"map_id\": 44, \"value_offset\": null}, {\"name\": \"execve_heap\", \"map_id\": 45, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 46, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 47, \"value_offset\": null}, {\"name\": \"tg_stats_map\", \"map_id\": 48, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 49, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 50, \"value_offset\": null}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 51, \"value_offset\": null}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 52, \"value_offset\": null}, {\"name\": \"cgroup_rate_map\", \"map_id\": 53, \"value_offset\": null}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 54, \"value_offset\": null}, {\"name\": \"throttle_heap_map\", \"map_id\": 55, \"value_offset\": null}, {\"name\": \"tg_mbset_map\", \"map_id\": 56, \"value_offset\": null}, {\"name\": \"tg_mbset_gen\", \"map_id\": 57, \"value_offset\": null}, {\"name\": \"data_heap\", \"map_id\": 58, \"value_offset\": null}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 60, \"value_offset\": null}, {\"name\": \"CONFIG_ITER_NUM\", \"map_id\": 60, \"value_offset\": 0}, {\"name\": \"PARENTS_MAP_ENABLED\", \"map_id\": 60, \"value_offset\": 1}, {\"name\": \"ENV_VARS_ENABLED\", \"map_id\": 60, \"value_offset\": 2}, {\"name\": \".rodata.str1.1\", \"map_id\": 61, \"value_offset\": null}]}, \"resources\": {\"section\": \"tracepoint/sys_execve\", \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 2}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 3}, {\"name\": \"tcpmon_map\", \"map_id\": 4}, {\"name\": \"tg_rb_events\", \"map_id\": 5}, {\"name\": \"buffer_heap_map\", \"map_id\": 6}, {\"name\": \"string_maps_0\", \"map_id\": 8}, {\"name\": \"string_maps_1\", \"map_id\": 10}, {\"name\": \"string_maps_2\", \"map_id\": 12}, {\"name\": \"string_maps_3\", \"map_id\": 14}, {\"name\": \"string_maps_4\", \"map_id\": 16}, {\"name\": \"string_maps_5\", \"map_id\": 18}, {\"name\": \"string_maps_6\", \"map_id\": 20}, {\"name\": \"string_maps_7\", \"map_id\": 22}, {\"name\": \"string_maps_8\", \"map_id\": 24}, {\"name\": \"string_maps_9\", \"map_id\": 26}, {\"name\": \"string_maps_10\", \"map_id\": 28}, {\"name\": \"string_maps_heap\", \"map_id\": 29}, {\"name\": \"string_prefix_maps\", \"map_id\": 31}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 32}, {\"name\": \"string_postfix_maps\", \"map_id\": 34}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 35}, {\"name\": \"substring_map\", \"map_id\": 36}, {\"name\": \"policy_conf\", \"map_id\": 37}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 38}, {\"name\": \"tg_conf_map\", \"map_id\": 39}, {\"name\": \"tg_binary_heap\", \"map_id\": 40}, {\"name\": \"tg_parents_bin\", \"map_id\": 41}, {\"name\": \"execve_map\", \"map_id\": 42}, {\"name\": \"execve_map_stats\", \"map_id\": 43}, {\"name\": \"execve_val\", \"map_id\": 44}, {\"name\": \"execve_heap\", \"map_id\": 45}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 46}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 47}, {\"name\": \"tg_stats_map\", \"map_id\": 48}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 49}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 50}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 51}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 52}, {\"name\": \"cgroup_rate_map\", \"map_id\": 53}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 54}, {\"name\": \"throttle_heap_map\", \"map_id\": 55}, {\"name\": \"tg_mbset_map\", \"map_id\": 56}, {\"name\": \"tg_mbset_gen\", \"map_id\": 57}, {\"name\": \"data_heap\", \"map_id\": 58}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 60}, {\"name\": \".rodata.str1.1\", \"map_id\": 61}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-8pk9xkl7\", \"attach_target_resolution\": null}, \"request_id\": 1, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 1, \"source_prog_id\": 0, \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"started\": \"1970-01-01T00:01:58.990033+00:00\", \"status\": -5, \"error\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 48, in specialize\\n    run([native_link, \\\"--input\\\", native, \\\"--symbol\\\", entry_symbol,\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 42, in run\\n    result = subprocess.run(command, text=True, capture_output=True)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 548, in run\\n    with Popen(*popenargs, **kwargs) as process:\\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1026, in __init__\\n    self._execute_child(args, executable, preexec_fn, close_fds,\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1955, in _execute_child\\n    raise child_exception_type(errno_num, err_msg, err_filename)\\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/1.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:15.660099+00:00\"}, \"diagnostic\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\"}\n",
+      "stderr": "libbpf: Error in bpf_create_map_xattr(execve_calls): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_maps_heap): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_prefix_maps.inner): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_postfix_maps.inner): -EINVAL. Retrying without BTF.\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event__event_execve.native.o",
+        "{\"file\": \"bpf_execve_event.c\", \"program\": \"event_execve\", \"section\": \"tracepoint/sys_execve\", \"body\": \"c\", \"expect\": \"success\", \"path\": \"/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c\", \"compiled\": true, \"entry\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event_v61.bpf.o\"}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 23,
+          "source_func_type_id": 292,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 63,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 64,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 65,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 66,
+            "value_offset": null
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 67,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 69,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 71,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 73,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 75,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 77,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 79,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 81,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 83,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 85,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 87,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 89,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 90,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 92,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 93,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 95,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 96,
+            "value_offset": null
+          },
+          {
+            "name": "substring_map",
+            "map_id": 97,
+            "value_offset": null
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 98,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 99,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 100,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 101,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 102,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 103,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 104,
+            "value_offset": null
+          },
+          {
+            "name": "execve_val",
+            "map_id": 105,
+            "value_offset": null
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 106,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 107,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 108,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 109,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 110,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 111,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 112,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 113,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 114,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 115,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 116,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 117,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 118,
+            "value_offset": null
+          },
+          {
+            "name": "data_heap",
+            "map_id": 119,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 121,
+            "value_offset": null
+          },
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 121,
+            "value_offset": 0
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 121,
+            "value_offset": 1
+          },
+          {
+            "name": "ENV_VARS_ENABLED",
+            "map_id": 121,
+            "value_offset": 2
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 122,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tracepoint",
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 63
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 64
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 65
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 66
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 67
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 69
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 71
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 73
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 75
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 77
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 79
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 81
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 83
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 85
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 87
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 89
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 90
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 92
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 93
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 95
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 96
+          },
+          {
+            "name": "substring_map",
+            "map_id": 97
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 98
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 99
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 100
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 101
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 102
+          },
+          {
+            "name": "execve_map",
+            "map_id": 103
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 104
+          },
+          {
+            "name": "execve_val",
+            "map_id": 105
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 106
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 107
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 108
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 109
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 110
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 111
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 112
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 113
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 114
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 115
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 116
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 117
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 118
+          },
+          {
+            "name": "data_heap",
+            "map_id": 119
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 121
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 122
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-_fnnbzfg",
+        "attach_target_resolution": null
+      },
+      "request_id": 2,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+        "started": "1970-01-01T00:02:42.567282+00:00",
+        "status": -5,
+        "error": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 48, in specialize\n    run([native_link, \"--input\", native, \"--symbol\", entry_symbol,\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 42, in run\n    result = subprocess.run(command, text=True, capture_output=True)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/lib/python3.12/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/2.failure.tar.gz",
+        "finished": "1970-01-01T00:02:57.006609+00:00"
+      },
+      "diagnostic": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+      "file": "bpf_execve_event.c",
+      "program": "execve_rate",
+      "section": "tracepoint",
+      "expect": "success",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 5, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 23, \"source_func_type_id\": 292, \"token_present\": 0}, \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 63, \"value_offset\": null}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 64, \"value_offset\": null}, {\"name\": \"tcpmon_map\", \"map_id\": 65, \"value_offset\": null}, {\"name\": \"tg_rb_events\", \"map_id\": 66, \"value_offset\": null}, {\"name\": \"buffer_heap_map\", \"map_id\": 67, \"value_offset\": null}, {\"name\": \"string_maps_0\", \"map_id\": 69, \"value_offset\": null}, {\"name\": \"string_maps_1\", \"map_id\": 71, \"value_offset\": null}, {\"name\": \"string_maps_2\", \"map_id\": 73, \"value_offset\": null}, {\"name\": \"string_maps_3\", \"map_id\": 75, \"value_offset\": null}, {\"name\": \"string_maps_4\", \"map_id\": 77, \"value_offset\": null}, {\"name\": \"string_maps_5\", \"map_id\": 79, \"value_offset\": null}, {\"name\": \"string_maps_6\", \"map_id\": 81, \"value_offset\": null}, {\"name\": \"string_maps_7\", \"map_id\": 83, \"value_offset\": null}, {\"name\": \"string_maps_8\", \"map_id\": 85, \"value_offset\": null}, {\"name\": \"string_maps_9\", \"map_id\": 87, \"value_offset\": null}, {\"name\": \"string_maps_10\", \"map_id\": 89, \"value_offset\": null}, {\"name\": \"string_maps_heap\", \"map_id\": 90, \"value_offset\": null}, {\"name\": \"string_prefix_maps\", \"map_id\": 92, \"value_offset\": null}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 93, \"value_offset\": null}, {\"name\": \"string_postfix_maps\", \"map_id\": 95, \"value_offset\": null}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 96, \"value_offset\": null}, {\"name\": \"substring_map\", \"map_id\": 97, \"value_offset\": null}, {\"name\": \"policy_conf\", \"map_id\": 98, \"value_offset\": null}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 99, \"value_offset\": null}, {\"name\": \"tg_conf_map\", \"map_id\": 100, \"value_offset\": null}, {\"name\": \"tg_binary_heap\", \"map_id\": 101, \"value_offset\": null}, {\"name\": \"tg_parents_bin\", \"map_id\": 102, \"value_offset\": null}, {\"name\": \"execve_map\", \"map_id\": 103, \"value_offset\": null}, {\"name\": \"execve_map_stats\", \"map_id\": 104, \"value_offset\": null}, {\"name\": \"execve_val\", \"map_id\": 105, \"value_offset\": null}, {\"name\": \"execve_heap\", \"map_id\": 106, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 107, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 108, \"value_offset\": null}, {\"name\": \"tg_stats_map\", \"map_id\": 109, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 110, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 111, \"value_offset\": null}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 112, \"value_offset\": null}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 113, \"value_offset\": null}, {\"name\": \"cgroup_rate_map\", \"map_id\": 114, \"value_offset\": null}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 115, \"value_offset\": null}, {\"name\": \"throttle_heap_map\", \"map_id\": 116, \"value_offset\": null}, {\"name\": \"tg_mbset_map\", \"map_id\": 117, \"value_offset\": null}, {\"name\": \"tg_mbset_gen\", \"map_id\": 118, \"value_offset\": null}, {\"name\": \"data_heap\", \"map_id\": 119, \"value_offset\": null}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 121, \"value_offset\": null}, {\"name\": \"CONFIG_ITER_NUM\", \"map_id\": 121, \"value_offset\": 0}, {\"name\": \"PARENTS_MAP_ENABLED\", \"map_id\": 121, \"value_offset\": 1}, {\"name\": \"ENV_VARS_ENABLED\", \"map_id\": 121, \"value_offset\": 2}, {\"name\": \".rodata.str1.1\", \"map_id\": 122, \"value_offset\": null}]}, \"resources\": {\"section\": \"tracepoint\", \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 63}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 64}, {\"name\": \"tcpmon_map\", \"map_id\": 65}, {\"name\": \"tg_rb_events\", \"map_id\": 66}, {\"name\": \"buffer_heap_map\", \"map_id\": 67}, {\"name\": \"string_maps_0\", \"map_id\": 69}, {\"name\": \"string_maps_1\", \"map_id\": 71}, {\"name\": \"string_maps_2\", \"map_id\": 73}, {\"name\": \"string_maps_3\", \"map_id\": 75}, {\"name\": \"string_maps_4\", \"map_id\": 77}, {\"name\": \"string_maps_5\", \"map_id\": 79}, {\"name\": \"string_maps_6\", \"map_id\": 81}, {\"name\": \"string_maps_7\", \"map_id\": 83}, {\"name\": \"string_maps_8\", \"map_id\": 85}, {\"name\": \"string_maps_9\", \"map_id\": 87}, {\"name\": \"string_maps_10\", \"map_id\": 89}, {\"name\": \"string_maps_heap\", \"map_id\": 90}, {\"name\": \"string_prefix_maps\", \"map_id\": 92}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 93}, {\"name\": \"string_postfix_maps\", \"map_id\": 95}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 96}, {\"name\": \"substring_map\", \"map_id\": 97}, {\"name\": \"policy_conf\", \"map_id\": 98}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 99}, {\"name\": \"tg_conf_map\", \"map_id\": 100}, {\"name\": \"tg_binary_heap\", \"map_id\": 101}, {\"name\": \"tg_parents_bin\", \"map_id\": 102}, {\"name\": \"execve_map\", \"map_id\": 103}, {\"name\": \"execve_map_stats\", \"map_id\": 104}, {\"name\": \"execve_val\", \"map_id\": 105}, {\"name\": \"execve_heap\", \"map_id\": 106}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 107}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 108}, {\"name\": \"tg_stats_map\", \"map_id\": 109}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 110}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 111}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 112}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 113}, {\"name\": \"cgroup_rate_map\", \"map_id\": 114}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 115}, {\"name\": \"throttle_heap_map\", \"map_id\": 116}, {\"name\": \"tg_mbset_map\", \"map_id\": 117}, {\"name\": \"tg_mbset_gen\", \"map_id\": 118}, {\"name\": \"data_heap\", \"map_id\": 119}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 121}, {\"name\": \".rodata.str1.1\", \"map_id\": 122}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-_fnnbzfg\", \"attach_target_resolution\": null}, \"request_id\": 2, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 2, \"source_prog_id\": 0, \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"started\": \"1970-01-01T00:02:42.567282+00:00\", \"status\": -5, \"error\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 48, in specialize\\n    run([native_link, \\\"--input\\\", native, \\\"--symbol\\\", entry_symbol,\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 42, in run\\n    result = subprocess.run(command, text=True, capture_output=True)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 548, in run\\n    with Popen(*popenargs, **kwargs) as process:\\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1026, in __init__\\n    self._execute_child(args, executable, preexec_fn, close_fds,\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1955, in _execute_child\\n    raise child_exception_type(errno_num, err_msg, err_filename)\\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/2.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:57.006609+00:00\"}, \"diagnostic\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\"}\n",
+      "stderr": "libbpf: Error in bpf_create_map_xattr(execve_calls): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_maps_heap): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_prefix_maps.inner): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_postfix_maps.inner): -EINVAL. Retrying without BTF.\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event__execve_rate.native.o",
+        "{\"file\": \"bpf_execve_event.c\", \"program\": \"execve_rate\", \"section\": \"tracepoint\", \"body\": \"c\", \"expect\": \"success\", \"path\": \"/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c\", \"compiled\": true, \"entry\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event_v61.bpf.o\"}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 33,
+          "source_func_type_id": 301,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 124,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 125,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 126,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 127,
+            "value_offset": null
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 128,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 130,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 132,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 134,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 136,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 138,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 140,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 142,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 144,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 146,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 148,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 150,
+            "value_offset": null
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 151,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 153,
+            "value_offset": null
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 154,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 156,
+            "value_offset": null
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 157,
+            "value_offset": null
+          },
+          {
+            "name": "substring_map",
+            "map_id": 158,
+            "value_offset": null
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 159,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 160,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 161,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 162,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 163,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 164,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 165,
+            "value_offset": null
+          },
+          {
+            "name": "execve_val",
+            "map_id": 166,
+            "value_offset": null
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 167,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 168,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 169,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 170,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 171,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 172,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 173,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 174,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 175,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 176,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 177,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 178,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 179,
+            "value_offset": null
+          },
+          {
+            "name": "data_heap",
+            "map_id": 180,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 182,
+            "value_offset": null
+          },
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 182,
+            "value_offset": 0
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 182,
+            "value_offset": 1
+          },
+          {
+            "name": "ENV_VARS_ENABLED",
+            "map_id": 182,
+            "value_offset": 2
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 183,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tracepoint",
+        "maps": [
+          {
+            "name": "execve_calls",
+            "map_id": 124
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 125
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 126
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 127
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 128
+          },
+          {
+            "name": "string_maps_0",
+            "map_id": 130
+          },
+          {
+            "name": "string_maps_1",
+            "map_id": 132
+          },
+          {
+            "name": "string_maps_2",
+            "map_id": 134
+          },
+          {
+            "name": "string_maps_3",
+            "map_id": 136
+          },
+          {
+            "name": "string_maps_4",
+            "map_id": 138
+          },
+          {
+            "name": "string_maps_5",
+            "map_id": 140
+          },
+          {
+            "name": "string_maps_6",
+            "map_id": 142
+          },
+          {
+            "name": "string_maps_7",
+            "map_id": 144
+          },
+          {
+            "name": "string_maps_8",
+            "map_id": 146
+          },
+          {
+            "name": "string_maps_9",
+            "map_id": 148
+          },
+          {
+            "name": "string_maps_10",
+            "map_id": 150
+          },
+          {
+            "name": "string_maps_heap",
+            "map_id": 151
+          },
+          {
+            "name": "string_prefix_maps",
+            "map_id": 153
+          },
+          {
+            "name": "string_prefix_maps_heap",
+            "map_id": 154
+          },
+          {
+            "name": "string_postfix_maps",
+            "map_id": 156
+          },
+          {
+            "name": "string_postfix_maps_heap",
+            "map_id": 157
+          },
+          {
+            "name": "substring_map",
+            "map_id": 158
+          },
+          {
+            "name": "policy_conf",
+            "map_id": 159
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 160
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 161
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 162
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 163
+          },
+          {
+            "name": "execve_map",
+            "map_id": 164
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 165
+          },
+          {
+            "name": "execve_val",
+            "map_id": 166
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 167
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 168
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 169
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 170
+          },
+          {
+            "name": "tg_cgrps_tracking_map",
+            "map_id": 171
+          },
+          {
+            "name": "tg_cgrps_tracking_heap",
+            "map_id": 172
+          },
+          {
+            "name": "tg_cgrps_msg_heap",
+            "map_id": 173
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 174
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 175
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 176
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 177
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 178
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 179
+          },
+          {
+            "name": "data_heap",
+            "map_id": 180
+          },
+          {
+            "name": "bpf_exec.rodata",
+            "map_id": 182
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 183
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-xzgcnq8y",
+        "attach_target_resolution": null
+      },
+      "request_id": 3,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 3,
+        "source_prog_id": 0,
+        "native_sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+        "started": "1970-01-01T00:03:19.871893+00:00",
+        "status": -5,
+        "error": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 48, in specialize\n    run([native_link, \"--input\", native, \"--symbol\", entry_symbol,\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 42, in run\n    result = subprocess.run(command, text=True, capture_output=True)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/lib/python3.12/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/3.failure.tar.gz",
+        "finished": "1970-01-01T00:03:31.070076+00:00"
+      },
+      "diagnostic": "[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'",
+      "file": "bpf_execve_event.c",
+      "program": "execve_send",
+      "section": "tracepoint",
+      "expect": "success",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 5, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 33, \"source_func_type_id\": 301, \"token_present\": 0}, \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 124, \"value_offset\": null}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 125, \"value_offset\": null}, {\"name\": \"tcpmon_map\", \"map_id\": 126, \"value_offset\": null}, {\"name\": \"tg_rb_events\", \"map_id\": 127, \"value_offset\": null}, {\"name\": \"buffer_heap_map\", \"map_id\": 128, \"value_offset\": null}, {\"name\": \"string_maps_0\", \"map_id\": 130, \"value_offset\": null}, {\"name\": \"string_maps_1\", \"map_id\": 132, \"value_offset\": null}, {\"name\": \"string_maps_2\", \"map_id\": 134, \"value_offset\": null}, {\"name\": \"string_maps_3\", \"map_id\": 136, \"value_offset\": null}, {\"name\": \"string_maps_4\", \"map_id\": 138, \"value_offset\": null}, {\"name\": \"string_maps_5\", \"map_id\": 140, \"value_offset\": null}, {\"name\": \"string_maps_6\", \"map_id\": 142, \"value_offset\": null}, {\"name\": \"string_maps_7\", \"map_id\": 144, \"value_offset\": null}, {\"name\": \"string_maps_8\", \"map_id\": 146, \"value_offset\": null}, {\"name\": \"string_maps_9\", \"map_id\": 148, \"value_offset\": null}, {\"name\": \"string_maps_10\", \"map_id\": 150, \"value_offset\": null}, {\"name\": \"string_maps_heap\", \"map_id\": 151, \"value_offset\": null}, {\"name\": \"string_prefix_maps\", \"map_id\": 153, \"value_offset\": null}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 154, \"value_offset\": null}, {\"name\": \"string_postfix_maps\", \"map_id\": 156, \"value_offset\": null}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 157, \"value_offset\": null}, {\"name\": \"substring_map\", \"map_id\": 158, \"value_offset\": null}, {\"name\": \"policy_conf\", \"map_id\": 159, \"value_offset\": null}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 160, \"value_offset\": null}, {\"name\": \"tg_conf_map\", \"map_id\": 161, \"value_offset\": null}, {\"name\": \"tg_binary_heap\", \"map_id\": 162, \"value_offset\": null}, {\"name\": \"tg_parents_bin\", \"map_id\": 163, \"value_offset\": null}, {\"name\": \"execve_map\", \"map_id\": 164, \"value_offset\": null}, {\"name\": \"execve_map_stats\", \"map_id\": 165, \"value_offset\": null}, {\"name\": \"execve_val\", \"map_id\": 166, \"value_offset\": null}, {\"name\": \"execve_heap\", \"map_id\": 167, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 168, \"value_offset\": null}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 169, \"value_offset\": null}, {\"name\": \"tg_stats_map\", \"map_id\": 170, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 171, \"value_offset\": null}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 172, \"value_offset\": null}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 173, \"value_offset\": null}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 174, \"value_offset\": null}, {\"name\": \"cgroup_rate_map\", \"map_id\": 175, \"value_offset\": null}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 176, \"value_offset\": null}, {\"name\": \"throttle_heap_map\", \"map_id\": 177, \"value_offset\": null}, {\"name\": \"tg_mbset_map\", \"map_id\": 178, \"value_offset\": null}, {\"name\": \"tg_mbset_gen\", \"map_id\": 179, \"value_offset\": null}, {\"name\": \"data_heap\", \"map_id\": 180, \"value_offset\": null}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 182, \"value_offset\": null}, {\"name\": \"CONFIG_ITER_NUM\", \"map_id\": 182, \"value_offset\": 0}, {\"name\": \"PARENTS_MAP_ENABLED\", \"map_id\": 182, \"value_offset\": 1}, {\"name\": \"ENV_VARS_ENABLED\", \"map_id\": 182, \"value_offset\": 2}, {\"name\": \".rodata.str1.1\", \"map_id\": 183, \"value_offset\": null}]}, \"resources\": {\"section\": \"tracepoint\", \"maps\": [{\"name\": \"execve_calls\", \"map_id\": 124}, {\"name\": \"execve_msg_heap_map\", \"map_id\": 125}, {\"name\": \"tcpmon_map\", \"map_id\": 126}, {\"name\": \"tg_rb_events\", \"map_id\": 127}, {\"name\": \"buffer_heap_map\", \"map_id\": 128}, {\"name\": \"string_maps_0\", \"map_id\": 130}, {\"name\": \"string_maps_1\", \"map_id\": 132}, {\"name\": \"string_maps_2\", \"map_id\": 134}, {\"name\": \"string_maps_3\", \"map_id\": 136}, {\"name\": \"string_maps_4\", \"map_id\": 138}, {\"name\": \"string_maps_5\", \"map_id\": 140}, {\"name\": \"string_maps_6\", \"map_id\": 142}, {\"name\": \"string_maps_7\", \"map_id\": 144}, {\"name\": \"string_maps_8\", \"map_id\": 146}, {\"name\": \"string_maps_9\", \"map_id\": 148}, {\"name\": \"string_maps_10\", \"map_id\": 150}, {\"name\": \"string_maps_heap\", \"map_id\": 151}, {\"name\": \"string_prefix_maps\", \"map_id\": 153}, {\"name\": \"string_prefix_maps_heap\", \"map_id\": 154}, {\"name\": \"string_postfix_maps\", \"map_id\": 156}, {\"name\": \"string_postfix_maps_heap\", \"map_id\": 157}, {\"name\": \"substring_map\", \"map_id\": 158}, {\"name\": \"policy_conf\", \"map_id\": 159}, {\"name\": \"tg_errmetrics_map\", \"map_id\": 160}, {\"name\": \"tg_conf_map\", \"map_id\": 161}, {\"name\": \"tg_binary_heap\", \"map_id\": 162}, {\"name\": \"tg_parents_bin\", \"map_id\": 163}, {\"name\": \"execve_map\", \"map_id\": 164}, {\"name\": \"execve_map_stats\", \"map_id\": 165}, {\"name\": \"execve_val\", \"map_id\": 166}, {\"name\": \"execve_heap\", \"map_id\": 167}, {\"name\": \"tg_execve_joined_info_map\", \"map_id\": 168}, {\"name\": \"tg_execve_joined_info_map_stats\", \"map_id\": 169}, {\"name\": \"tg_stats_map\", \"map_id\": 170}, {\"name\": \"tg_cgrps_tracking_map\", \"map_id\": 171}, {\"name\": \"tg_cgrps_tracking_heap\", \"map_id\": 172}, {\"name\": \"tg_cgrps_msg_heap\", \"map_id\": 173}, {\"name\": \"tg_cgtracker_map\", \"map_id\": 174}, {\"name\": \"cgroup_rate_map\", \"map_id\": 175}, {\"name\": \"cgroup_rate_options_map\", \"map_id\": 176}, {\"name\": \"throttle_heap_map\", \"map_id\": 177}, {\"name\": \"tg_mbset_map\", \"map_id\": 178}, {\"name\": \"tg_mbset_gen\", \"map_id\": 179}, {\"name\": \"data_heap\", \"map_id\": 180}, {\"name\": \"bpf_exec.rodata\", \"map_id\": 182}, {\"name\": \".rodata.str1.1\", \"map_id\": 183}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-xzgcnq8y\", \"attach_target_resolution\": null}, \"request_id\": 3, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 3, \"source_prog_id\": 0, \"native_sha256\": \"aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9\", \"started\": \"1970-01-01T00:03:19.871893+00:00\", \"status\": -5, \"error\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 48, in specialize\\n    run([native_link, \\\"--input\\\", native, \\\"--symbol\\\", entry_symbol,\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 42, in run\\n    result = subprocess.run(command, text=True, capture_output=True)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 548, in run\\n    with Popen(*popenargs, **kwargs) as process:\\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1026, in __init__\\n    self._execute_child(args, executable, preexec_fn, close_fds,\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 1955, in _execute_child\\n    raise child_exception_type(errno_num, err_msg, err_filename)\\nPermissionError: [Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4/3.failure.tar.gz\", \"finished\": \"1970-01-01T00:03:31.070076+00:00\"}, \"diagnostic\": \"[Errno 13] Permission denied: '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'\"}\n",
+      "stderr": "libbpf: Error in bpf_create_map_xattr(execve_calls): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_maps_heap): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_prefix_maps.inner): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_postfix_maps.inner): -EINVAL. Retrying without BTF.\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/service-state/trusted-b57pwhm4",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event__execve_send.native.o",
+        "{\"file\": \"bpf_execve_event.c\", \"program\": \"execve_send\", \"section\": \"tracepoint\", \"body\": \"c\", \"expect\": \"success\", \"path\": \"/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c\", \"compiled\": true, \"entry\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event_v61.bpf.o\"}"
+      ]
+    }
+  ],
+  "skipped": [],
+  "invocation": {
+    "table": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current",
+    "arch": "arm64",
+    "out": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-_0ueaqbf/out",
+    "limit": 0,
+    "only": "",
+    "micro_exec": null
+  },
+  "source_scope": "Direct load-only native P with source_prog_id 0; maps/BTF and installed-stage agreement"
+}
