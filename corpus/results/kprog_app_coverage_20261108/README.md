@@ -9,7 +9,7 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [005356](tetragon-typed-read/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [005903](tracee-typed-read/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [013224](tracee-fixed-stack/README.md) |
 
 Current serial trials: whole Tracee uses the generic fixed-RSP-offset candidate on12GiB/eightvCPU/20-23, followed by the complete Tetragon resource retry and new-kernel Cilium. The [OTel fixed-RSP batch012120](otel-fixed-stack/README.md) closes with3generated/compiled and2bound requests, reaching an8-byte proof-stack write at R10-520. Generic exact-width private-stack stores now receive byte/JIT/host and full-source checks. Every completed valid batch retains commands, native hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
 

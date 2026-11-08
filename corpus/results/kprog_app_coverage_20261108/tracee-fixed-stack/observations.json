@@ -1,0 +1,20 @@
+{
+  "baseline_resident": 151,
+  "generated": 6,
+  "compiled": 6,
+  "accepted_bound": 5,
+  "verifier_rejections": 1,
+  "verifier_class": "bpf_probe_read R2 length range",
+  "processed_instructions": 2938,
+  "total_states": 106,
+  "peak_states": 101,
+  "max_states_per_insn": 4,
+  "terminal_native_hashes_checked": 6,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "b9aca7b623b7b348776109150bcd101e58b4347432f1ddca8890b06aaf1535eb",
+    "service.tar.gz": "366d61e9956269974dfdb1e8da8a04e69bd0bd5a160551ebf6ba694488b7e461",
+    "launch.tar.gz": "f62bbef48d167e1a0c114b93f61e0053fe3f16c47bb88c55ea45fb47d944cc50",
+    "result.tar.gz": "7f1e8e06897f71a14dbf04c36f567e6b58a70c2439c6e776a42cff3b58dae50f"
+  }
+}
