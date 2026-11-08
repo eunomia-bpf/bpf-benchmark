@@ -79,6 +79,17 @@ records the combined crate regression and QEMU generation-bound control, with
 native retval2 and matching kernel-owned request identities. Its exact loader,
 client, DSO and linker build inputs accompany the runtime archive.
 
+The LSE atomic family covers LDADD/STADD, LDSET/STSET and LDCLR/STCLR,
+including acquire/release suffixes and the zero-register store aliases. Each
+operation captures its source and address before returning the old memory value,
+updates the native byte extent, and scalarizes the written private-memory tags.
+The approved incoming-SP alignment predicate applies to the shared body. The
+[current component receipt](../../corpus/results/kprog_arm64_app_coverage_20261108/bitwise-lse/README.md)
+records 11,520 host C-model observations and successful 32/64-bit BPF compilation.
+The 8/16-bit C-model observations agree; those BPF atomic builtins reach clang
+18's subword-atomic lowering diagnostic. The complete Tetragon QEMU epoch and
+the universal operation theorems retain their own result records.
+
 ## Smoke
 
 ```bash

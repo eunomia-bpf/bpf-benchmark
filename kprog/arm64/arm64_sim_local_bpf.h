@@ -1342,26 +1342,27 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_alu_result, __a64_alu_width);\
 	} while (0)
 
-/* LDADD returns the pre-update value; operands precede destination writeback.
+/* LSE atomic RMW returns the pre-update value; operands precede destination writeback.
  * Arm Instruction Set Reference 100076, section D3.6. */
-#define ARM64_SIM_L_LDADD(DST, SRC, BASE, WIDTH, AUX) \
+#define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
  do { \
         ARM64_SIM_L_SP_ALIGNMENT(BASE); \
     void *__a64_la_addr = ARM64_SIM_L_HELPER_ARG_PTR(BASE); \
     __u64 __a64_la_add = ARM64_SIM_L_READ_REG(SRC); \
+    if (COMPLEMENT) __a64_la_add = ~__a64_la_add; \
     __u32 __a64_la_mem_aux = ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0); \
     __u8 __a64_la_tag = ARM64_SIM_L_MEM_READ_TAG((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, (WIDTH)); \
     int __a64_la_acquire = ((AUX) & 1U) && (DST) != ARM64_XZR; \
     int __a64_la_order = ((AUX) & 2U) ? (__a64_la_acquire ? __ATOMIC_ACQ_REL : __ATOMIC_RELEASE) : (__a64_la_acquire ? __ATOMIC_ACQUIRE : __ATOMIC_RELAXED); \
     __u64 __a64_la_old; \
     if ((WIDTH) == ARM64_WIDTH_64) \
-        __a64_la_old = __atomic_fetch_add((__u64 *)__a64_la_addr, __a64_la_add, __a64_la_order); \
+        __a64_la_old = FETCH((__u64 *)__a64_la_addr, __a64_la_add, __a64_la_order); \
     else if ((WIDTH) == ARM64_WIDTH_32) \
-        __a64_la_old = __atomic_fetch_add((__u32 *)__a64_la_addr, (__u32)__a64_la_add, __a64_la_order); \
+        __a64_la_old = FETCH((__u32 *)__a64_la_addr, (__u32)__a64_la_add, __a64_la_order); \
     else if ((WIDTH) == ARM64_WIDTH_16) \
-        __a64_la_old = __atomic_fetch_add((__u16 *)__a64_la_addr, (__u16)__a64_la_add, __a64_la_order); \
+        __a64_la_old = FETCH((__u16 *)__a64_la_addr, (__u16)__a64_la_add, __a64_la_order); \
     else \
-        __a64_la_old = __atomic_fetch_add((__u8 *)__a64_la_addr, (__u8)__a64_la_add, __a64_la_order); \
+        __a64_la_old = FETCH((__u8 *)__a64_la_addr, (__u8)__a64_la_add, __a64_la_order); \
     __u64 __a64_la_payload = ARM64_SIM_L_MEM_PAYLOAD((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
     ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE), ARM64_SIM_L_REG_TAG(BASE), 0, ARM64_SIM_TAG_SCALAR, (WIDTH), 0); \
     if (ARM64_SIM_L_LOAD_TAG_PRESERVE(ARM64_OP_LOAD, __a64_la_tag, (WIDTH))) \
@@ -1582,7 +1583,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				ARM64_SIM_L_REG_TAG(SRC));                  \
 			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_LDADD) {                         \
-			ARM64_SIM_L_LDADD((DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+			ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_add, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+        } else if ((OP) == ARM64_OP_LDSET) { \
+            ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_or, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+        } else if ((OP) == ARM64_OP_LDCLR) { \
+            ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 		} else if (KPROG_ARM64_STLXR_HANDLED(OP)) {                \
 			/* Arm DATAOVERLAP and BASEOVERLAP for STXR/STLXR. */ \
             if ((DST) == (SRC) || ((SRC2) != ARM64_SP && (DST) == (SRC2))) \

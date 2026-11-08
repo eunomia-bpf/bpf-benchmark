@@ -72,6 +72,8 @@
 #define ARM64_OP_CSETM 0x44U
 #define ARM64_OP_CSNEG 0x45U
 #define ARM64_OP_LDADD 0x46U
+#define ARM64_OP_LDSET 0x47U
+#define ARM64_OP_LDCLR 0x48U
 #define ARM64_OP_RET 0xffU
 
 #include "../formal/generated/arm64_decode.h"

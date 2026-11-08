@@ -215,14 +215,14 @@ def collect_layout(insns, targets, decode):
 
 
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
-        if op in {'ldaddalb', 'ldaddah', 'ldaddlb', 'ldaddalh', 'staddlb', 'ldaddab', 'ldadd', 'ldaddh', 'ldaddlh', 'ldaddb', 'staddh', 'staddl', 'staddlh', 'ldaddl', 'ldadda', 'staddb', 'ldaddal', 'stadd'}:
+        if op in {'ldadd', 'ldadda', 'ldaddab', 'ldaddah', 'ldaddal', 'ldaddalb', 'ldaddalh', 'ldaddb', 'ldaddh', 'ldaddl', 'ldaddlb', 'ldaddlh', 'ldclr', 'ldclra', 'ldclrab', 'ldclrah', 'ldclral', 'ldclralb', 'ldclralh', 'ldclrb', 'ldclrh', 'ldclrl', 'ldclrlb', 'ldclrlh', 'ldset', 'ldseta', 'ldsetab', 'ldsetah', 'ldsetal', 'ldsetalb', 'ldsetalh', 'ldsetb', 'ldseth', 'ldsetl', 'ldsetlb', 'ldsetlh', 'stadd', 'staddb', 'staddh', 'staddl', 'staddlb', 'staddlh', 'stclr', 'stclrb', 'stclrh', 'stclrl', 'stclrlb', 'stclrlh', 'stset', 'stsetb', 'stseth', 'stsetl', 'stsetlb', 'stsetlh'}:
             mem = decode.parse_mem(args, memory_index)
             location = address(mem)
             width = 8 if op.endswith('b') else 16 if op.endswith('h') else ri(args[0])[1]
             value, pointer = load(location, width)
             may_payload = location in incoming.ghost_memory if type(location) is int else True
             store(location, width, 0, False, may_payload=False)
-            if not op.startswith('stadd'):
+            if not op.startswith('st'):
                 write(args[1], value, pointer, may_payload=may_payload)
         elif memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
