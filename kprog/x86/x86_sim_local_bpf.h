@@ -249,7 +249,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 #define X86_SIM_L_SV_PTR_NAME_(I) __x86_stack_value_ptr_##I
 #define X86_SIM_L_SV_TAG(I) X86_SIM_L_SV_TAG_NAME_(I)
 #define X86_SIM_L_SV_PTR(I) X86_SIM_L_SV_PTR_NAME_(I)
-#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I);
+#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I)=0;
 #define X86_SIM_L_DECLARE_STACK_VALUES() X86_SIM_STACK_VALUE_WORDS(X86_SIM_L_SV_DECLARE)
 #define X86_SIM_L_SV_EACH(OP) X86_SIM_STACK_VALUE_WORDS(OP)
 #else
@@ -257,7 +257,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 #define X86_SIM_L_SV_PTR(I) __x86_stack_value_ptrs[(I)]
 #define X86_SIM_L_DECLARE_STACK_VALUES() \
     __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
-    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]
+    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
 #define X86_SIM_L_SV_EACH(OP) \
     _Pragma("unroll") \
     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }
