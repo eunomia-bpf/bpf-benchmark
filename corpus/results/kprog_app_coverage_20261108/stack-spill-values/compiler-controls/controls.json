@@ -1,0 +1,186 @@
+{
+  "make_exit": 0,
+  "domain": "committed canonical header; relative simulator include was not redirected by the initial wrapper",
+  "rows": [
+    {
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "compile_s": 20.351847216952592,
+      "object_sha256": "9183a52496c1dacc82450e9c2db00704a32db5b58456ecd7bfbb0d3740d1cda4",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c"
+    },
+    {
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "compile_s": 23.9582440671511,
+      "object_sha256": "0d82aa07691039cef8999ac91f2da7b2e90fa306b5030b14f5cf20801fc33349",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c"
+    },
+    {
+      "name": "bitmap_popcount_scan",
+      "compile_s": 19.522116304840893,
+      "object_sha256": "f5f083c8eaf70d9780f2489828820b5451cda96c861adf08fcdedeaf6d2e7221",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bitmap_popcount_scan.bpf.c"
+    },
+    {
+      "name": "bpf_local_call_fanout_dispatch",
+      "compile_s": 48.11965913884342,
+      "object_sha256": "b90d7773f479b182d1d64ca2cfcf9dadd686b12d33a668fa442f8d51c3995886",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c"
+    },
+    {
+      "name": "bpftrace_comm_key_fnv_hash",
+      "compile_s": 26.507269714958966,
+      "object_sha256": "55224504a890af16c18dcd7260ff4661d7e47e7af33a3143228e0523cfa0dc80",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c"
+    },
+    {
+      "name": "bpftrace_string_search_prefix_scan",
+      "compile_s": 8.422745850868523,
+      "object_sha256": "3fdff4fa70d71cbad797a3ff2cbfc17b2e472d668a4783b467006b71f953cbda",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/bpftrace_string_search_prefix_scan.bpf.c"
+    },
+    {
+      "name": "cgroup_skb_hash_chain",
+      "compile_s": 10.937092460226268,
+      "object_sha256": "a5f5454516587945f4aab0b156b08ef92ac97518e850b055c6d60c118e99d5e8",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cgroup_skb_hash_chain.bpf.c"
+    },
+    {
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "compile_s": 18.089400650002062,
+      "object_sha256": "1e3613bd2dc2c7db186dfd4c7195d892b1c730019fb00eec9478a7148b2b4d7d",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c"
+    },
+    {
+      "name": "cilium_policy_guard_tree_filter",
+      "compile_s": 20.3474278151989,
+      "object_sha256": "74cbb17950d0fb87db0ab16fa0811de56cc254ee50adbb0db4e0308696d4ed6b",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_policy_guard_tree_filter.bpf.c"
+    },
+    {
+      "name": "cilium_socket_lb_service_select",
+      "compile_s": 22.991697705816478,
+      "object_sha256": "413f3c97392c42f53fdbffa3ea73e4a253f6a53e620f8e6fc8b3f18f69a932e7",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/cilium_socket_lb_service_select.bpf.c"
+    },
+    {
+      "name": "flow_5tuple_rss_hash",
+      "compile_s": 34.5651746019721,
+      "object_sha256": "c7d90bd9a8a97ab4d1c489ae1c49fffb7807de8495fb66f1fda9df19942cc983",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/flow_5tuple_rss_hash.bpf.c"
+    },
+    {
+      "name": "flow_record_field_scan",
+      "compile_s": 23.872260046191514,
+      "object_sha256": "8e8f7dbd733827f49b8a0db46a52dd53dca056f9480f2b2de337e0d3cc17403c",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/flow_record_field_scan.bpf.c"
+    },
+    {
+      "name": "katran_lb_consistent_hash_select",
+      "compile_s": 77.36455926578492,
+      "object_sha256": "b87388d0258013137a615bc6b41adbeccf17dcfc6757e1f520d620d503990fb0",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c"
+    },
+    {
+      "name": "otel_stack_frame_unwind_scan",
+      "compile_s": 16.194588476791978,
+      "object_sha256": "5d720b901fb6c77443eb3921c6a10cc922669ec133ec35d5e7451fda0d4757e0",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/otel_stack_frame_unwind_scan.bpf.c"
+    },
+    {
+      "name": "packed_header_bitfield_decode",
+      "compile_s": 43.7315463507548,
+      "object_sha256": "cf99722b9c44eab9291c1bb889d3de40b834a4103a4aba4110430e312a9dc1d7",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c"
+    },
+    {
+      "name": "packet_checksum_fold",
+      "compile_s": 8.859246095176786,
+      "object_sha256": "109fadd10c75affb13fa014c87f788e3628b004aea68affea15af6ff01b5509d",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_checksum_fold.bpf.c"
+    },
+    {
+      "name": "packet_record_bounds_window",
+      "compile_s": 22.049379338975996,
+      "object_sha256": "9ae4560563fc3d694b5a58b95958b7436ff377cc296ed2883e4d922abe6594a4",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_record_bounds_window.bpf.c"
+    },
+    {
+      "name": "packet_toeplitz_rss_hash",
+      "compile_s": 26.064048521686345,
+      "object_sha256": "393cb3e49c501d7ef1403093a80a4b489320c97e827b6826fdc2b336fac3a85c",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_toeplitz_rss_hash.bpf.c"
+    },
+    {
+      "name": "packet_vlan_tcpopt_parser",
+      "compile_s": 52.73661035532132,
+      "object_sha256": "348a6049c2c91df420a78f6ce002ff37309cca7571d1975b46a4cd518b61e20d",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/packet_vlan_tcpopt_parser.bpf.c"
+    },
+    {
+      "name": "payload_prefix_memcmp_scan",
+      "compile_s": 17.830240699928254,
+      "object_sha256": "043492722cc0fbd33011f57eb8f4bf4f929e216a7fdefd1e4d96787213b8e626",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/payload_prefix_memcmp_scan.bpf.c"
+    },
+    {
+      "name": "simple",
+      "compile_s": 1.13710402790457,
+      "object_sha256": "9789b679d16b92096085ca2a92ccc7fb92ed217061cbd3604a4a03630d6aabea",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/simple.bpf.c"
+    },
+    {
+      "name": "simple_packet",
+      "compile_s": 1.0505115929991007,
+      "object_sha256": "96582ec3ffb7aa66fe511551437c129cd2e4e101b9376458ba3a5dd95c19bd38",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/simple_packet.bpf.c"
+    },
+    {
+      "name": "siphash_rotate64_mixer",
+      "compile_s": 47.74319614795968,
+      "object_sha256": "4061593539031211bb36afa24e6b1dc2b70f74162c1cfccab2a87ff5eb045eef",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c"
+    },
+    {
+      "name": "sorted_rule_binary_search",
+      "compile_s": 4.009306944906712,
+      "object_sha256": "3135eefe9c503cbabfa92c0f0d5b935a4037c3a42529a4980a52d9f85a4a3362",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/sorted_rule_binary_search.bpf.c"
+    },
+    {
+      "name": "tc_packet_checksum_fold",
+      "compile_s": 8.955419766716659,
+      "object_sha256": "c19953fa21906de309295986930fcf6e7ccc34440bc06a22668cedb7dfb621a8",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tc_packet_checksum_fold.bpf.c"
+    },
+    {
+      "name": "tetragon_process_event_arg_filter",
+      "compile_s": 33.08631075872108,
+      "object_sha256": "b2db466d0304a03ed4bec6e121b777e8e316177a8d7234f2d5da512623eaebce",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c"
+    },
+    {
+      "name": "trace_event_type_switch_dispatch",
+      "compile_s": 7.694219552446157,
+      "object_sha256": "3cdaf9640ff10cb31e1fe9171a4fa638853524fd99497e943b18abd465898029",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/trace_event_type_switch_dispatch.bpf.c"
+    },
+    {
+      "name": "tracee_http_method_prefix_detect",
+      "compile_s": 13.290262752212584,
+      "object_sha256": "923f08316ec6371674bb0067f0a682138fdb104281d6b95c681d49fd00c44409",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tracee_http_method_prefix_detect.bpf.c"
+    },
+    {
+      "name": "tracee_syscall_name_table_lookup",
+      "compile_s": 19.247062142007053,
+      "object_sha256": "b3355a14f3f5ba37a3b43bfa89041c3feee3d4cbe68c478e4eb0760345e4c51b",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/tracee_syscall_name_table_lookup.bpf.c"
+    },
+    {
+      "name": "unchecked_packet_read",
+      "compile_s": 0.24491331912577152,
+      "object_sha256": "975b180772fff88a31d1dd23be3f32a4962fbbbe630aefd5bbca4355b88976bd",
+      "source": "/workspaces/repository/kprog/x86/micro-prog/unchecked_packet_read.bpf.c"
+    }
+  ]
+}
