@@ -49,6 +49,7 @@
       "compiled": true,
       "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader', 'load', '4', '4', '339', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-stack-values/trusted-xp1bmswr/requests/request-dyu0ans8/generated/request.native.o', 'execve_send', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-stack-values/trusted-xp1bmswr/requests/request-dyu0ans8/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-stack-values/trusted-xp1bmswr/requests/request-dyu0ans8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/canonical-runtime/native-link', '0', '0', '0', '0', '0', '0', 'CONFIG_ITER_NUM', '3683', '0', 'PARENTS_MAP_ENABLED', '3683', '1', 'buffer_heap_map', '3665', 'null', 'data_heap', '3684', 'null', 'execve_map', '3552', 'null', 'execve_msg_heap_map', '3663', 'null', 'tcpmon_map', '3558', 'null', 'tg_binary_heap', '3662', 'null', 'tg_conf_map', '3551', 'null', 'tg_errmetrics_map', '3562', 'null', 'tg_mbset_map', '3560', 'null', 'tg_parents_bin', '3664', 'null', 'tg_rb_events', '3563', 'null', 'tg_stats_map', '3559', 'null']' returned non-zero exit status 1.",
       "verifier_excerpt": [
+        "The sequence of 8193 jumps is too complex.",
         "processed 246573 insns (limit 1000000) max_states_per_insn 4 total_states 2297 peak_states 2297 mark_read 0"
       ]
     }
