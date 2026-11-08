@@ -3025,4 +3025,54 @@ theorem call_label_frame_step_refines (env : Environment) (frame : Frame) (arena
   rw [call_label_frame_refines env frame arena state target savedReturn canonical writable]
   exact ⟨rfl, rfl, rfl⟩
 
+/-- SUB_RET samples the full saved word at the old stack offset before
+advancing RSP and entering the emitted return-label dispatcher. -/
+def returnStackWord (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) : NativeWord :=
+  GeneratedX86MemAccess.load
+    (fun i => state.raw.memory.value (registerValue env frame arena state 4 + BitVec.ofNat 64 i)) .w64
+
+def returnStackReads (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) : List Event :=
+  [.memory .read (registerValue env frame arena state 4)
+    (bytesAt state.raw.memory (registerValue env frame arena state 4) 8)
+    (initializedAt state.raw.memory (registerValue env frame arena state 4) 8)]
+
+def returnLabelFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) : Transition Reference.X86.State :=
+  ⟨nativeRegisters env frame arena
+    (registerPc (advanceStack state 8) (returnStackWord env frame arena state)),
+    returnStackReads env frame arena state, none⟩
+
+theorem return_label_frame_success (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) :
+    returnLabelFrame env frame arena state =
+      X86Call.returnSuccess (returnStackWord env frame arena state)
+        (returnStackReads env frame arena state) (nativeRegisters env frame arena state) := by
+  simp only [returnLabelFrame, X86Call.returnSuccess, native_register_pc, native_advance_stack]
+  rfl
+
+/-- Readability and canonicality are ISA/profile premises. The emitted C
+body is the direct load/advance/goto sequence. -/
+theorem return_label_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (nextPc : NativeWord)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
+    returnLabelFrame env frame arena state =
+      Reference.X86.step (.returnNear 0 nextPc) (nativeRegisters env frame arena state) := by
+  rw [return_label_frame_success]
+  apply X86Call.return_success_refines
+  · simp only [X86Scalar.read, Reference.X86.ScalarWidth.bytes, nativeRegisters,
+      readable, ↓reduceIte, X86Scalar.handlerWidth, returnStackWord, returnStackReads]
+  · exact canonical
+
+theorem return_label_frame_step_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (nextPc : NativeWord)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
+    Reference.X86.Step (.returnNear 0 nextPc) (nativeRegisters env frame arena state)
+      (returnLabelFrame env frame arena state) := by
+  rw [return_label_frame_refines env frame arena state nextPc readable canonical]
+  exact ⟨rfl, rfl, rfl⟩
+
 end KProgFormal.Refinement.X86NumericAddress

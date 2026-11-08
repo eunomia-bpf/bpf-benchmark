@@ -4680,4 +4680,144 @@ theorem call_label_simulator_token_native_matches (env : EntryEnvironment.Enviro
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
+/-- The subroutine RET emission samples the saved word, advances raw RSP
+and selects its continuation label. The outer invocation exit retains its
+separate low32 accumulator/context-copy relation. -/
+def returnLabelRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (_flags : Byte) (_aux : BitVec 32) (_dst _src : Byte)
+    (_value _nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  if code = GeneratedX86Opcode.code .ret then some (returnLabelFrame env frame arena state) else none
+
+inductive ReturnLabelBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | ret (readable : permitted nativeState.memory.readable (nativeState.gpr 4) 8 = true)
+      (canonical : Reference.X86.canonicalTarget nativeState.addressWidth
+        (GeneratedX86MemAccess.load (fun i => nativeState.memory.value (nativeState.gpr 4 + BitVec.ofNat 64 i)) .w64) = true) :
+      ReturnLabelBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .ret)
+        (.returnNear 0 nextPc)
+
+theorem return_label_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : ReturnLabelBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, returnLabelRegisters env frame arena code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | ret readable canonical =>
+      exact ⟨_, by simp only [returnLabelRegisters, if_pos rfl, ↓reduceIte],
+        return_label_frame_step_refines env frame arena state nextPc readable canonical⟩
+
+def dispatchReturnLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match dispatchCallLabelStep env frame arena current code flags aux dst src value nextPc state with
+  | some result => some result
+  | none => returnLabelRegisters env frame arena code flags aux dst src value nextPc state
+
+theorem before_return_label_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) :
+    dispatchCallLabelStep env frame arena current (GeneratedX86Opcode.code .ret) flags aux dst src value nextPc state = none := rfl
+
+inductive ReturnLabelStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | earlier (code : Nat) (native : Reference.X86.Instruction)
+      (fields : CallLabelStepBinding flags aux dst src value nextPc nativeState code native) :
+      ReturnLabelStepBinding flags aux dst src value nextPc nativeState code native
+  | memory (code : Nat) (native : Reference.X86.Instruction)
+      (fields : ReturnLabelBinding flags aux dst src value nextPc nativeState code native) :
+      ReturnLabelStepBinding flags aux dst src value nextPc nativeState code native
+
+theorem return_label_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, dispatchReturnLabelStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | earlier fields =>
+      obtain ⟨actual, dispatched, refined⟩ := call_label_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      exact ⟨actual, by simp only [dispatchReturnLabelStep, dispatched], refined⟩
+  | memory fields =>
+      obtain ⟨actual, dispatched, refined⟩ := return_label_registers_refine env frame arena code flags aux dst src value nextPc state native fields
+      cases fields
+      exact ⟨actual, by rw [dispatchReturnLabelStep, before_return_label_none]; exact dispatched, refined⟩
+
+/-- This RET token interpretation covers the emitted SUB_RET branch.
+The source emission relation selects this body for a subroutine return. -/
+def specializedReturnLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  if token = .ret then returnLabelRegisters env frame arena (GeneratedX86Opcode.code .ret) flags aux dst src value nextPc state
+  else specializedCallLabelStep env frame arena current token flags aux dst src value nextPc state
+
+def returnLabelStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
+  if token = .ret then some .ret else callLabelStepTokenOpcode token
+
+theorem return_label_step_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (selected : returnLabelStepTokenOpcode token = some opcode) :
+    (GeneratedX86Specialization.dispatch token = .directMacro ∨
+      GeneratedX86Specialization.dispatch token = .genericRunOp ∨
+      GeneratedX86Specialization.dispatch token = .branchHandler) ∧
+      GeneratedX86Specialization.tokenName token = GeneratedX86Opcode.define opcode := by
+  cases token <;> simp only [returnLabelStepTokenOpcode, callLabelStepTokenOpcode, repMemoryStepTokenOpcode, xmmMemoryStepTokenOpcode, observedMemoryStepTokenOpcode,
+    bitMemoryStepTokenOpcode, bmiMemoryStepTokenOpcode, loadStepTokenOpcode, imulStepTokenOpcode,
+    sourceStepTokenOpcode, memoryStepTokenOpcode, stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+private theorem earlier_token_excludes_return_label (token : GeneratedX86Specialization.Op)
+    (opcode : GeneratedX86Opcode.Op) (selected : callLabelStepTokenOpcode token = some opcode) :
+    GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .ret := by
+  cases token <;> simp only [callLabelStepTokenOpcode, repMemoryStepTokenOpcode, xmmMemoryStepTokenOpcode, observedMemoryStepTokenOpcode, bitMemoryStepTokenOpcode,
+    bmiMemoryStepTokenOpcode, loadStepTokenOpcode, imulStepTokenOpcode, sourceStepTokenOpcode,
+    memoryStepTokenOpcode, stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+theorem return_label_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (selected : returnLabelStepTokenOpcode token = some opcode) :
+    specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state =
+      dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+  by_cases copy : token = .ret
+  · subst token
+    simp only [returnLabelStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
+    subst opcode
+    rw [specializedReturnLabelStep, if_pos rfl, dispatchReturnLabelStep, before_return_label_none]
+  · have earlier : callLabelStepTokenOpcode token = some opcode := by
+      simpa only [returnLabelStepTokenOpcode, copy, ↓reduceIte] using selected
+    have different := earlier_token_excludes_return_label token opcode earlier
+    simp only [specializedReturnLabelStep, copy, ↓reduceIte]
+    rw [call_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    unfold dispatchReturnLabelStep
+    cases dispatched : dispatchCallLabelStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      simp [dispatched, returnLabelRegisters, different]
+
+theorem return_label_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : returnLabelStepTokenOpcode token = some opcode)
+    (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) :
+    ∃ actual, specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  rw [return_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
+  exact return_label_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+
+theorem return_label_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : returnLabelStepTokenOpcode token = some opcode)
+    (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refined⟩ := return_label_simulator_token_step_refines env frame arena current token opcode
+    flags aux dst src value nextPc state native selected binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
+
 end KProgFormal.Refinement.X86Dispatcher

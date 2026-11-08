@@ -26,8 +26,11 @@ specialization token also has its own row.
 The 66 x86 O2 equalities cover46 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining x86 reference-family RET handler has a partial model proof; eight
-pseudo operations require environment/native-link binding. ARM conditional
+RET now composes its internal SUB_RET saved64word read, rawRSP+8 and full
+frame through an extended dispatcher and branch-token equality. Its coverage
+remains partial while the outer invocation, low32RAX/context copy and linked
+continuation relations are connected. Eight pseudo operations require
+environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
 immediate-body gate through unified ExecBinding, source and invocation emission.
@@ -4361,3 +4364,29 @@ Original full log,1171 Git-verified source pins, actual exits, both oracle
 binaries and captured sources are archived under
 `ARM64_LIVE_SKB_ROUTE_FIXTURE_V1`. The private source exports are retired;
 complete checks keep their individual source identities.
+
+### Internal x86 RET frame and token
+
+The SUB_RET body reads its complete saved word before advancing raw RSP by
+eight. Three numeric-frame laws and seven dispatcher/token laws compose that
+transition with the canonical near-return step and every preceding token.
+Readable stack and canonical target are ISA premises. The source emission
+selects the internal body; finite continuation labels, native-PC and physical
+memory/compiler transport, outer low32RAX/context copy and invocation ABI
+remain explicit functional interfaces. RET retains partial coverage and the
+complete-token total remains66 x86 plus71 ARM.
+
+The existing CALL/RET oracle retains13 routes and26624 CALL frames and adds
+189696 UBSan SUB_RET frames:13 saved words, all57 legal eight-byte stack
+positions,64 flag combinations and4 tag profiles. It compares every raw and
+numeric GPR/tag, every stack byte, vector and flags. Both aligned-word and
+unaligned byte-ladder reads are exercised. Source epochs, commands, axiom
+output, raw logs and binary are archived under `x86_subroutine_return_token`.
+The preceding immutable CALL full check ec6a4eccd exited2 at the earlier
+ARM skb fixture assertions; its1171 Git source hashes and original outcome
+are retained under `full_make_check_ec6a4eccd_failure`. The corrected a391
+full check progressed to the ARM RET token oracle and exited2 at its legacy
+cb-copy expectation. Its1171 Git sources and complete failure remain under
+`full_make_check_a391b0ebd_failure`. The existing ARM RET oracle now follows
+live-context preservation: original1/fixed0 across the same9437184 cases,
+with routing, return value and complete frame comparisons retained.

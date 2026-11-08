@@ -184,3 +184,10 @@ advance, eight-byte stack write and linked target label with the same numeric
 frame and extended dispatcher. Canonical target and successful stack access
 are ISA premises. Step(e) functional linking supplies code-coordinate/native-PC
 and return-slot correspondence; compiler/invocation/ABI remain explicit.
+
+The x86 internal SUB_RET body additionally composes its full64 saved-word
+load, ordered read, rawRSP+8 and complete preserved frame through the unified
+dispatcher and branch-token equality. Readable-stack and canonical-target
+premises describe the ISA domain. Source-label/native-PC, physical memory,
+compiler and outer low32RAX/context-copy/invocation relations retain their
+explicit step(e) interfaces. The partial RET rows track this internal body.

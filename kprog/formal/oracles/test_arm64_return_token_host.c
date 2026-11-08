@@ -51,7 +51,7 @@ static __u32 execute(unsigned src,unsigned tag,__u64 target,unsigned table,unsig
  ARM64_SIM_L_DECLARE_STATE();ARM64_SIM_L_DECLARE_STACK();
  (void)&__a64_stack;(void)&__a64_stack_payload;(void)&__a64_stack_tag;
  struct arm64_sim_skb_abi __a64_sim_abi={};
- struct __sk_buff *__a64_sim_skb_ctx=skb?&context:NULL;
+ __a64_sim_helper_ctx=skb?&context:NULL;
  for(unsigned i=0;i<31;i++){__a64_cells[i]->x=0x1122334455667788ULL+i*0x102030405ULL;*__a64_tag_cells[i]=0;}
  const __u64 values[]={0,1,0xffffffffULL,0x100000000ULL,0x8000000000000000ULL,0xffffffffffffffffULL,0x1234567887654321ULL,0xfedcba9876543210ULL};
  const unsigned tags[]={0,4,9,10};
@@ -99,7 +99,7 @@ int main(void)
   if(expected==0){
    __u64 value=want.regs[0];if(want.tags[0]==4){value+=stack_base;input_count++;}else if(want.tags[0]==10){value+=return_base;input_count++;}
    if(out.value!=(__u32)value){fprintf(stderr,"value src=%u tag=%u pattern=%u got=%u want=%u\n",src,tag,pattern,out.value,(__u32)value);return 1;}
-   if(skb){memcpy(want.context+__builtin_offsetof(struct __sk_buff,cb),want.mirror,2*sizeof(__u32));}
+   /* RET preserves the live context and the separate ABI mirror. */
    outer++;
   }else if(expected==1){if(out.target!=target||out.value!=0xa0b0c0d0U)return 1;internal++;}
   else rejections++;
