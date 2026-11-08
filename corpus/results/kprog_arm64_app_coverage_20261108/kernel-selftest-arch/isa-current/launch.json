@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-08T16:55:56.800184+00:00",
+  "source": "ordered5c7a/exactextent88a/currenthelperlinker",
+  "cases": 34,
+  "guest_memory": "2GiB",
+  "cpus": "12-15",
+  "producer": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "aarch64-linux-gnu-g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-O2",
+      "-D__EXPORTED_HEADERS__",
+      "-DNATIVE_LINK_PATH=\"/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link\"",
+      "-I/workspaces/repository/vendor/linux-framework/include/uapi",
+      "-I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include",
+      "/workspaces/repository/kprog/fidelity/bound_probe.cpp",
+      "/workspaces/.agent-state/kprog-lanes/A/bpf34/isa-current/libnative_loader.a",
+      "/workspaces/.agent-state/kprog-lanes/A/bpf34/isa-current/libbpf.a",
+      "-static",
+      "-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+      "-lelf",
+      "-lz",
+      "-lzstd",
+      "-ldl",
+      "-pthread",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/A/bpf34/isa-current/build/bound-probe"
+    ],
+    "build_exit": 0,
+    "source_sha256": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+    "before_sha256": "1b2ecf5763d7647c0baf6b8121b320494cfbf043edc23ddea5038d0694b2424f",
+    "producer_sha256": "40820840119760dd4821fe166058d9bd7e0c97ffcf9598787567b5dc46632d01"
+  },
+  "runtime_admission_additions": 0
+}
