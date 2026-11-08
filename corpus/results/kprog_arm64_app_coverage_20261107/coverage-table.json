@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T05:16:12.507163+00:00",
+    "as_of_utc": "2026-11-08T05:33:54.389538+00:00",
     "scope": "Completed whole-application successor cohorts on captured pre-migration runtimes; baseline resident snapshot, received service IDs and source/object counts retain separate denominators.",
     "applications": [
       {
@@ -205,22 +205,26 @@
       },
       {
         "application": "Cilium",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/cilium-clock-replay/replay/trusted-arm64-cilium-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/cilium/trusted-arm64-cilium-result/coverage.json",
         "baseline_resident": 62,
-        "service_source_ids": 1,
-        "generated": 0,
-        "compiled": 0,
+        "service_source_ids": 3,
+        "generated": 2,
+        "compiled": 2,
         "stages": {
-          "specialization_failed": 1
+          "bound_accepted": 1,
+          "verifier_rejected": 1,
+          "transport_failed": 1
         },
         "failure_classes": {
-          "helper_189_finite_target_generation": 1
+          "context_access_alignment": 1,
+          "kernel_facts_estale": 1
         },
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/cilium-clock-replay/replay/trusted-arm64-cilium-result/run-20261108T012315509298Z.tar.gz",
-        "raw_archive_sha256": "94707b3ba5d48c68f829ad0e1b8734ecd9fcacb42b862ad734fbc800baac77bb"
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/cilium/trusted-arm64-cilium-result/run-20261108T041032941967Z.tar.gz",
+        "raw_archive_sha256": "693688e43f222456440aae8263200d9c00bbd7515fdf442ddbaef773b2f78a62",
+        "baseline_bpf_calls": 126222
       },
       {
         "application": "Tetragon",

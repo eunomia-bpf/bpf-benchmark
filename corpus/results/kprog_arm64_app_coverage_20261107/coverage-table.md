@@ -65,13 +65,13 @@ Current successor 2026-11-08T05:16:12.507163+00:00: stack byte-arm safety94c23b6
 
 Captured complete-application cohorts from the retained pre-migration runtime follow. Baseline resident counts are the final JIT workload snapshots; service source IDs count actual received native requests. Generated and compiled B counts come from each cohort's recorded source/object presence. Each application links its coverage JSON and adjacent complete raw runtime archive. Startup errors retain the exact frontier reached by that whole-application attempt.
 
-| Application | Baseline resident | Service source IDs | B generated / compiled | Verifier accepted | Specialization failures | Verifier refusals | Observed cause | Whole app |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| [BCC](bcc-full-start-coverage.json) | 23 | 19 | 19 / 19 | 16 | 0 | 3 | 3 exclusive retry loops | error |
-| [OTel](otel-memory-replay/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json) | 12 | 2 | 2 / 2 | 1 | 0 | 1 | 1 unaligned stack load | error |
-| [Cilium](cilium-clock-replay/replay/trusted-arm64-cilium-result/coverage.json) | 62 | 1 | 0 / 0 | 0 | 1 | 0 | 1 helper189 finite-target generation | error |
-| [Tetragon](tetragon-startup-replay/replay/trusted-arm64-tetragon-result/coverage.json) | 157 | 1 | 1 / 1 | 0 | 0 | 1 | 1 exclusive retry loop | error |
-| [Katran](helper-guard-runtime/replay/trusted-arm64-katran-result/coverage.json) | 1 | 1 | 1 / 1 | 1 | 0 | 0 | 0 | ok |
-| [Tracee](entry-resource-scope/tracee-replay/trusted-arm64-tracee-result/coverage.json) | 151 | 2 | 2 / 2 | 1 | 0 | 1 | 1 scalar context memory access | error |
+| Application | Baseline resident | Service source IDs | B generated / compiled | Verifier accepted | Specialization failures | Verifier refusals | Kernel request failures | Observed cause | Whole app |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| [BCC](bcc-full-start-coverage.json) | 23 | 19 | 19 / 19 | 16 | 0 | 3 | 0 | 3 exclusive retry loops | error |
+| [OTel](otel-memory-replay/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json) | 12 | 2 | 2 / 2 | 1 | 0 | 1 | 0 | 1 unaligned stack load | error |
+| [Cilium](xdp-byte-helpers/applications/cilium/trusted-arm64-cilium-result/coverage.json) | 62 | 3 | 2 / 2 | 1 | 0 | 1 | 1 | 1 context alignment; 1 kernel request ESTALE | error |
+| [Tetragon](tetragon-startup-replay/replay/trusted-arm64-tetragon-result/coverage.json) | 157 | 1 | 1 / 1 | 0 | 0 | 1 | 0 | 1 exclusive retry loop | error |
+| [Katran](helper-guard-runtime/replay/trusted-arm64-katran-result/coverage.json) | 1 | 1 | 1 / 1 | 1 | 0 | 0 | 0 | 0 | ok |
+| [Tracee](entry-resource-scope/tracee-replay/trusted-arm64-tracee-result/coverage.json) | 151 | 2 | 2 / 2 | 1 | 0 | 1 | 0 | 1 scalar context memory access | error |
 
-Katran completes both workload arms; its [same-work record](helper-guard-runtime/replay/trusted-arm64-katran-result/same-work.json) retains24,000baseline and25,473native packets with phase-local packet/BPF/receiver counter agreement. Current Cilium has one fresh accepted request in its active whole-app cohort; its terminal coverage will join the completed-cohort table. The generic XDP buffer helper, Tracee CORE helper and stack byte-arm fixes have captured component results and pending whole-app consumption. C shared five-step publication precedes the new ARM BCC/Katran/34-case migration replays. QEMU measurements describe functional behavior.
+Katran completes both workload arms; its [same-work record](helper-guard-runtime/replay/trusted-arm64-katran-result/same-work.json) retains24,000baseline and25,473native packets with phase-local packet/BPF/receiver counter agreement. Cilium closes d81268950 with one accepted request, one stock verifier context-alignment refusal and one kernel-facts ESTALE before generation. Tracee is the active whole-app successor at8-11. The generic XDP buffer helper, Tracee CORE helper and stack byte-arm fixes have captured component results and pending whole-app consumption. C shared five-step publication precedes the new ARM BCC/Katran/34-case migration replays. QEMU measurements describe functional behavior.
