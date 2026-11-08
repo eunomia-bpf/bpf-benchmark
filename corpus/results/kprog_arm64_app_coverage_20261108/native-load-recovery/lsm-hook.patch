@@ -1,0 +1,5 @@
+--- a/include/linux/lsm_hook_defs.h
++++ b/include/linux/lsm_hook_defs.h
+@@ -199 +199 @@
+-LSM_HOOK(int, 0, mmap_file, struct file *file, unsigned long reqprot,
++LSM_HOOK(int, 0, mmap_file, struct file *file__nullable, unsigned long reqprot,
