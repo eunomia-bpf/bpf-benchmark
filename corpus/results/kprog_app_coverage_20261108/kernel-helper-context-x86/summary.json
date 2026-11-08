@@ -1,0 +1,107 @@
+{
+  "utc": "2026-11-08T16:06:53.369358+00:00",
+  "build_exit": 0,
+  "replay_exit": 0,
+  "inputs": {
+    "kprog/libnativeloader/build/trusted-native-loader": "63712baad073627ad6525f03d6905a09e5801fcf2f925869ccd84815ca23eb31",
+    "kprog/libnativeloader/build/libnative_loader.a": "8fba413d87482123ebb49e2dec9c03f6960f5fb843acd2e3407d654e1370bdac",
+    "kprog/libnativeloader/src/native_loader.cpp": "6ed8f21e92a722c0d3cc53ed76b9e32d895b8f6593c7a72b533b3b3cdd8cd6cf",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "a78f9362aee792bbd4af4157ef68ca246df08e3a8978994851d45e3b4abc75f8",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196",
+    "kprog/x86/native_lab/native_link/target/release/native-link": "ac8cc7601dbbac98cb277fb81653a2d88c4ef5d3029a040cc88a8913c2e767d2"
+  },
+  "records": [
+    {
+      "name": "verifier_const__tcx5",
+      "symbol": "tcx5",
+      "annotation": "success",
+      "native.o": "/workspaces/repository/kprog/selftests/build/verifier_const__tcx5.native.o",
+      "native.o_sha256": "8c9f1ab8a76ab3687662449379d45d6b6b0c5d2002b96d28ee4595a579312ecb",
+      "bpf.o": "/workspaces/repository/kprog/selftests/build/verifier_const__tcx5.bpf.o",
+      "bpf.o_sha256": "1e8f15ed3627e9e0ece929199ece94300ea3563d0f2f82e19537ed138b423e29",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/probe",
+        "/workspaces/repository/kprog/selftests/build/verifier_const__tcx5.bpf.o",
+        "/workspaces/repository/kprog/selftests/build/verifier_const__tcx5.native.o",
+        "tcx5"
+      ],
+      "producer_exit": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "8c9f1ab8a76ab3687662449379d45d6b6b0c5d2002b96d28ee4595a579312ecb",
+        "started": "2026-11-08T16:05:29.310399+00:00",
+        "prog_id": 5,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/requests/1.success.tar.gz",
+        "finished": "2026-11-08T16:05:31.473267+00:00"
+      },
+      "native_executions": 0,
+      "generated": true,
+      "compiled": true,
+      "native_hash_matches": true
+    },
+    {
+      "name": "verifier_const__tcx6",
+      "symbol": "tcx6",
+      "annotation": "success",
+      "native.o": "/workspaces/repository/kprog/selftests/build/verifier_const__tcx6.native.o",
+      "native.o_sha256": "00049133aed4ad72d914412563f844533f8318ea35cf871b5d97d058efa0c64b",
+      "bpf.o": "/workspaces/repository/kprog/selftests/build/verifier_const__tcx6.bpf.o",
+      "bpf.o_sha256": "f4e838696b2d519cace698715a03ed51c106bc1762690cf40731f9e2e2fee354",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/probe",
+        "/workspaces/repository/kprog/selftests/build/verifier_const__tcx6.bpf.o",
+        "/workspaces/repository/kprog/selftests/build/verifier_const__tcx6.native.o",
+        "tcx6"
+      ],
+      "producer_exit": 0,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "00049133aed4ad72d914412563f844533f8318ea35cf871b5d97d058efa0c64b",
+        "started": "2026-11-08T16:05:31.539645+00:00",
+        "prog_id": 10,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/requests/2.success.tar.gz",
+        "finished": "2026-11-08T16:05:32.637186+00:00"
+      },
+      "native_executions": 0,
+      "generated": true,
+      "compiled": true,
+      "native_hash_matches": true
+    },
+    {
+      "name": "verifier_mtu__tc_uninit_mtu",
+      "symbol": "tc_uninit_mtu",
+      "annotation": "success",
+      "native.o": "/workspaces/repository/kprog/selftests/build/verifier_mtu__tc_uninit_mtu.native.o",
+      "native.o_sha256": "a8b94ab7225ad888e1d52f6108f275701c3b666cde9bd2e8731d79887e73744b",
+      "bpf.o": "/workspaces/repository/kprog/selftests/build/verifier_mtu__tc_uninit_mtu.bpf.o",
+      "bpf.o_sha256": "5898a61c115595bf5a47873aab282a3e71f03d18afb90980c7048eda6ff981a6",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/probe",
+        "/workspaces/repository/kprog/selftests/build/verifier_mtu__tc_uninit_mtu.bpf.o",
+        "/workspaces/repository/kprog/selftests/build/verifier_mtu__tc_uninit_mtu.native.o",
+        "tc_uninit_mtu"
+      ],
+      "producer_exit": 0,
+      "request": {
+        "request_id": 3,
+        "source_prog_id": 0,
+        "native_sha256": "a8b94ab7225ad888e1d52f6108f275701c3b666cde9bd2e8731d79887e73744b",
+        "started": "2026-11-08T16:05:32.691480+00:00",
+        "prog_id": 13,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-helper-context-x86/requests/3.success.tar.gz",
+        "finished": "2026-11-08T16:05:33.786559+00:00"
+      },
+      "native_executions": 0,
+      "generated": true,
+      "compiled": true,
+      "native_hash_matches": true
+    }
+  ],
+  "native_executions": 0
+}
