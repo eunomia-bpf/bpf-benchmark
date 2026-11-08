@@ -1,0 +1,25 @@
+{
+  "cases": 38,
+  "counts": {
+    "valid_executed": 9,
+    "verifier_rejected": 22,
+    "loader_rejected": 1,
+    "specialization_rejected": 6
+  },
+  "native_sha_matches": 38,
+  "unsafe_native_accepted": 0,
+  "unsafe_native_executed": 0,
+  "guest_exit": 0,
+  "module_sha256": "bb38537701ae06af25b8d2fc0d27b2e8a7855f2875d88b8f290c6bec069e4c57",
+  "archive_sha256": "d8196235283d51b93da50fa6e4d85fd19ca8f2434e1ced580249758dcaf2521b",
+  "kernel_profile": {
+    "module_links": 842,
+    "image_sha256": "9883d5c3af53325bfccc303a3da01ef1e11c19847a7353bee153b025aabd7427",
+    "config_sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+    "system_map_sha256": "5b92199d0e6aab902de5d9d7c11097cdfb745b1c601f0528c5dcd00f6486c70a",
+    "original_image_sha256": "9883d5c3af53325bfccc303a3da01ef1e11c19847a7353bee153b025aabd7427",
+    "module_profile": "standard INSTALL_MOD_STRIP=1 then normal module signing; allocated sections, BTF, modinfo, versions and normalized runtime relocations equal for every module"
+  },
+  "module_bundle": "842 compact standard modules; runtime sections/BTF/relocations preserved",
+  "runtime": "fresh standalone guest on retained minimal kernel tree; one initial registered service"
+}
