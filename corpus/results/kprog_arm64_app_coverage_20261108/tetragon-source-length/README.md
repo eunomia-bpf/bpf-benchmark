@@ -1,0 +1,5 @@
+Tetragon local path-read length
+
+The original read_exe operation keeps its existing255-byte cap and byte mask in a local scalar, stores the same value in heap_exe.len and supplies that scalar to probe_read. An empty compiler asm register constraint keeps the existing mask explicit. Source definitions, helper arguments, path output/error processing and the existing counted path loop retain their behavior. Both native and upstream JIT baseline compile the same edited process.h, bpf_d_path.h and main C bytes; both actual compiler exits are0.
+
+The preceding original-resource component reached the stock verifier after116359instructions/1268states. Its native helper argument reloaded heap_exe.len from the map after the bounded store, and B exposed the fullu32 range. The new native sequence at0x918 uses AND w1,w8,0xff, storesw1 at0x91c and calls the same helper at0x924. The initial shared barrier_var declaration diagnostic and corrected compiler logs are retained. Runtime predicates, numerical bounds and admission additions:0. Actual QEMU load and full-application work continue in their own records.

@@ -708,6 +708,7 @@ read_exe(struct task_struct *task, struct heap_exe *exe)
 	const struct path *path = __builtin_preserve_access_index(&file->f_path);
 	__u64 offset = 0;
 	__u64 revlen = STRING_POSTFIX_MAX_LENGTH - 1;
+	__u32 len;
 
 	// we need to walk the complete 4096 len dentry in order to have an accurate
 	// matching on the prefix operators, even if we only keep a subset of that
@@ -724,10 +725,13 @@ read_exe(struct task_struct *task, struct heap_exe *exe)
 	// buffer used by d_path_local can contain up to MAX_BUF_LEN i.e. 4096 we
 	// only keep the first 255 chars for our needs (we sacrifice one char to the
 	// verifier for the > 0 check)
-	if (exe->len > BINARY_PATH_MAX_LEN - 1)
-		exe->len = BINARY_PATH_MAX_LEN - 1;
-	exe->len &= 0xff;
-	with_errmetrics(probe_read, exe->buf, exe->len, buffer);
+	len = exe->len;
+	if (len > BINARY_PATH_MAX_LEN - 1)
+		len = BINARY_PATH_MAX_LEN - 1;
+	asm volatile("" : "+r"(len));
+	len &= 0xff;
+	exe->len = len;
+	with_errmetrics(probe_read, exe->buf, len, buffer);
 	if (revlen < STRING_POSTFIX_MAX_LENGTH)
 		with_errmetrics(probe_read, exe->end, revlen, (char *)(buffer + offset));
 	return exe->len;

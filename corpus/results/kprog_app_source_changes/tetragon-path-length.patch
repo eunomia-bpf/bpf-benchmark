@@ -1,0 +1,16 @@
+--- a/vendor/bpf/tetragon/bpf/lib/process.h
++++ b/vendor/bpf/tetragon/bpf/lib/process.h
+@@ -710,0 +711 @@ read_exe(struct task_struct *task, struct heap_exe *exe)
++	__u32 len;
+@@ -727,4 +728,7 @@ read_exe(struct task_struct *task, struct heap_exe *exe)
+-	if (exe->len > BINARY_PATH_MAX_LEN - 1)
+-		exe->len = BINARY_PATH_MAX_LEN - 1;
+-	exe->len &= 0xff;
+-	with_errmetrics(probe_read, exe->buf, exe->len, buffer);
++	len = exe->len;
++	if (len > BINARY_PATH_MAX_LEN - 1)
++		len = BINARY_PATH_MAX_LEN - 1;
++	asm volatile("" : "+r"(len));
++	len &= 0xff;
++	exe->len = len;
++	with_errmetrics(probe_read, exe->buf, len, buffer);
