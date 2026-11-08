@@ -1,22 +1,17 @@
-"""Native ABI dependency analysis, not an instruction-value interpreter.
+"""Collect native stack extents and pointer payload layout for specialization.
 
-Concrete zero initializers cannot stand for unspecified incoming/call-clobbered
-state. Track which bits are independent of that state, allowing blind private
-callee saves while rejecting observations of unspecified values.
+The simulator represents architectural entry/helper state in B. This analysis
+supplies the private stack geometry and finite call/return layout.
 """
 from collections import deque
 from dataclasses import dataclass
 import re
 
-from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_idents, helper_prototypes
+from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_idents
 
 FULL = (1 << 64) - 1
 N, Z, C, V = 1, 2, 4, 8
 ALL_FLAGS = N | Z | C | V
-CC_FLAGS = {'eq': Z, 'ne': Z, 'cs': C, 'hs': C, 'cc': C, 'lo': C,
-            'mi': N, 'pl': N, 'vs': V, 'vc': V, 'hi': C | Z, 'ls': C | Z,
-            'ge': N | V, 'lt': N | V, 'gt': N | V | Z, 'le': N | V | Z,
-            'al': 0, 'nv': 0}
 
 
 @dataclass(frozen=True)
@@ -39,7 +34,7 @@ class State:
     maxima: tuple[int | None, ...]
 
 
-def check_definedness(insns, targets, linked_exit, decode):
+def collect_layout(insns, targets, decode):
     def ri(operand):
         operand = operand.lower()
         if operand in {'sp', 'wsp'}:
@@ -101,10 +96,6 @@ def check_definedness(insns, targets, linked_exit, decode):
             return (1 << (parsed[1] if parsed else 64)) - 1
         return state.defined[parsed[0]] & ((1 << parsed[1]) - 1)
 
-    def need(state, operand, where):
-        parsed = ri(operand)
-        if parsed and mask(state, operand) != (1 << parsed[1]) - 1:
-            raise ValueError(f'undefined native ABI register {operand} at {where}')
 
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
@@ -122,9 +113,6 @@ def check_definedness(insns, targets, linked_exit, decode):
 
     def push(context, addr, state):
         if addr is None:
-            if context or type(state.aliases[31]) is not int or state.aliases[31] != 0:
-                raise ValueError('native entry return has an unbalanced stack pointer')
-            need(state, 'w7' if linked_exit else 'w0', 'native entry return')
             return
         if addr not in by_addr:
             raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')
@@ -169,8 +157,6 @@ def check_definedness(insns, targets, linked_exit, decode):
 
         def address(mem):
             base, index = raw(mem.base), raw(mem.index)
-            need(incoming, base, where)
-            if index is not None: need(incoming, index, where)
             origin = incoming.aliases[ri(base)[0]]
             if index is not None:
                 return False if origin is False else None
@@ -207,8 +193,6 @@ def check_definedness(insns, targets, linked_exit, decode):
                         payload_slots.add(destination)
                         ghost_memory.add(destination)
             if isinstance(location, PointerAlternatives):
-                if location.external and value & ((1 << width)-1) != (1 << width)-1:
-                    raise ValueError(f'undefined native ABI value escapes private stack at {where}')
                 for target in location.offsets:
                     for position in list(pointers):
                         if position < target + width//8 and position + 8 > target:
@@ -218,8 +202,6 @@ def check_definedness(insns, targets, linked_exit, decode):
                         if byte != 255: opaque[target+index] = byte
                 return
             if type(location) is not int:
-                if value & ((1 << width)-1) != (1 << width)-1:
-                    raise ValueError(f'undefined native ABI value escapes private stack at {where}')
                 return
             for position in list(pointers):
                 if position < location + width//8 and position + 8 > location:
@@ -230,49 +212,17 @@ def check_definedness(insns, targets, linked_exit, decode):
                 else: opaque[location+index] = byte
             if width == 64: pointers[location] = pointer
 
-        def condition(cc):
-            required = CC_FLAGS[cc]
-            if incoming.flags & required != required:
-                raise ValueError(f'undefined native ABI flags at {where}')
 
-        if op.startswith('b.'):
-            condition(op.split('.')[1])
-        elif op in {'csel', 'cinc', 'cinv', 'csinc', 'csinv', 'csneg', 'cneg', 'cset', 'csetm', 'ccmp'}:
-            condition(args[-1])
-        elif op in {'cbz', 'cbnz'}:
-            need(incoming, args[0], where)
-        elif op in {'tbz', 'tbnz'}:
-            bit = 1 << decode.parse_imm(args[1])
-            if mask(incoming, args[0]) & bit != bit:
-                raise ValueError(f'undefined native ABI register {args[0]} at {where}')
 
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
         if memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
-            if op in {'stxr', 'stlxr'}:
-                status, source = ri(args[0])[0], ri(args[1])[0]
-                base = ri(raw(mem.base))[0]
-                if status == source or (mem.base != 'ARM64_SP' and status == base):
-                    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')
             # LDPOVERLAP permits UNDEF/NOP as well as unknown data. A later
             # overwrite does not make the native instruction safe to admit.
-            if op == 'ldp' and args[0] == args[1]:
-                raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')
             # GPR base/data overlap with writeback can also decode as UNDEF.
             # SP and ZR share an encoding number but are distinct registers.
-            if mem.flags and mem.base != 'ARM64_SP':
-                base = ri(raw(mem.base))[0]
-                data = args[:2] if op in {'ldp', 'stp'} else args[:1]
-                if any(ri(operand)[0] == base for operand in data):
-                    raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')
             # Kernel entry SP is 16-byte aligned and SCTLR_EL1.SA is enabled.
             # CheckSPAlignment uses the old SP, before address/writeback.
-            if mem.base == 'ARM64_SP':
-                sp = incoming.aliases[31]
-                if type(sp) is not int:
-                    raise ValueError(f'native SP alignment unresolved at {where}')
-                if sp % 16:
-                    raise ValueError(f'native SP alignment fault at {where}')
             location = address(mem)
             loads = op.startswith('ld')
             pair = op in {'ldp', 'stp'}
@@ -366,16 +316,11 @@ def check_definedness(insns, targets, linked_exit, decode):
                 if bits[ri(args[0])[0]] & (1 << (width-1)): flags |= N
                 if bits[ri(args[0])[0]] & ((1 << width)-1) == (1 << width)-1: flags |= Z
         elif op in {'csel', 'csinc', 'csinv', 'csneg'}:
-            need(incoming, args[1], where); need(incoming, args[2], where)
             left, right = ri(args[1]), ri(args[2])
             a = incoming.aliases[left[0]] if left and left[0] is not None else False
             b = incoming.aliases[right[0]] if right and right[0] is not None else False
             write(args[0], pointer=joined_pointer(a, b) if op == 'csel' else None)
         elif op not in {'bl', 'blr', 'br', 'ret', 'b', 'nop'} and not op.startswith('b.') and op not in {'cbz','cbnz','tbz','tbnz'}:
-            reads = args if op in {'cmp','cmn','tst','ccmp'} else args[1:]
-            zero = op in {'eor','sub','subs','cmp'} and len(args)>1 and args[-1] == args[-2] and ri(args[-1])
-            for operand in reads:
-                if ri(operand) and not zero: need(incoming, operand, where)
             if op in {'cmp','cmn','adds','subs','ands','bics','tst','ccmp'}: flags = ALL_FLAGS
             if args and ri(args[0]) and op not in {'cmp','cmn','tst','ccmp'}:
                 write(args[0])
@@ -397,15 +342,6 @@ def check_definedness(insns, targets, linked_exit, decode):
             if insn.reloc_symbol in {'memcpy','memset'}: names.append(insn.reloc_symbol)
             if insn.reloc_symbol and not names:
                 raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')
-            for name in names:
-                if name in {'memcpy','memset'}:
-                    for reg in ['x0','x2','x1' if name=='memcpy' else 'w1']: need(incoming,reg,where)
-                    continue
-                parameters = helper_prototypes()[name].arguments
-                for index, parameter in enumerate([] if parameters=='void' else parameters.split(',')):
-                    if parameter.strip() == '...': break
-                    narrow = '*' not in parameter and any(t in parameter.split() for t in ('__u32','__s32','int'))
-                    need(incoming, ('w' if narrow else 'x')+str(index), where)
             if names:
                 effects=[]
                 for name in names:
@@ -423,7 +359,7 @@ def check_definedness(insns, targets, linked_exit, decode):
                             if source_arg is not None:
                                 source=incoming.aliases[source_arg]
                                 if source is None:
-                                    raise ValueError(f'native helper source stack relation unresolved at {where}')
+                                    layout_unknown = True
                                 origins = source.offsets if isinstance(source, PointerAlternatives) else {source} if type(source) is int else set()
                                 for origin in origins:
                                     for position, value in state.opaque.items():
@@ -478,13 +414,9 @@ def check_definedness(insns, targets, linked_exit, decode):
                     constants[30]=None
                     push(context, next_pc, State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants),tuple(ghost),frozenset(ghost_memory),tuple(maxima)))
                 else:
-                    if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
-                        raise ValueError(f'native ABI tail return has an unbalanced stack pointer at {where}')
-                    need(state,'x30',where)
                     result = State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants),tuple(ghost),frozenset(ghost_memory),tuple(maxima))
                     if context:
                         for parent, continuation in returns.get(context,set()): push(parent,continuation,result)
-                    else: need(result,'w0',where)
             code = [value for kind,value in choices if kind == 'code']
             if op == 'bl' and not names: code = [decode.branch_target(args[0])]
             for target in code:
@@ -494,8 +426,6 @@ def check_definedness(insns, targets, linked_exit, decode):
                 ghost[30] = False
                 maxima[30] = None
                 child = context+(addr,) if addr not in context else context[:context.index(addr)+1]
-                if type(state.aliases[31]) is not int:
-                    raise ValueError(f'native call stack relation unresolved at {where}')
                 entry_sp.setdefault(child,set()).add(state.aliases[31])
                 edge = context, next_pc
                 if edge not in returns.setdefault(child,set()):
@@ -503,14 +433,9 @@ def check_definedness(insns, targets, linked_exit, decode):
                     queue.extend(key for key in states if key[0]==child and by_addr[key[1]].mnemonic=='ret')
                 push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers,state.constants,tuple(ghost),frozenset(ghost_memory),tuple(maxima)))
         elif op == 'ret':
-            if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
-                raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')
-            need(state, args[0] if args else 'x30', where)
             if context:
                 for parent, continuation in returns.get(context,set()): push(parent, continuation, state)
-            else: need(state,'w0',where)
         elif op == 'br':
-            need(state,args[0],where)
             for kind,target in targets.get(addr,()):
                 if kind == 'code': push(context,target,state)
         elif op == 'b': push(context,decode.branch_target(args[0]),state)

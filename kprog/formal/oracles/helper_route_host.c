@@ -281,26 +281,28 @@ static __u8 pattern_tag(unsigned i)
 		for (__cs_i = 0; __cs_i < 31U; __cs_i++) {                  \
 			__u64 __cs_got = 0;                                \
 			__u8 __cs_tag = 0U;               \
+			__u64 __cs_want = __cs_i > 0 && __cs_i < 19 ? 0 : mreg[__cs_i]; \
+			__u8 __cs_want_tag = __cs_i > 0 && __cs_i < 19 ? 0 : mtag[__cs_i]; \
 			switch (__cs_i) {                                  \
 			ARM64_SIM_L_FOR_EACH_GPR(COMPARE_GOT)               \
 			default: break;                                    \
 			}                                                  \
 			cases++;                                           \
-			if (__cs_got != mreg[__cs_i]) {                    \
+			if (__cs_got != __cs_want) {                    \
 				printf("MISMATCH %s reg%u: got 0x%llx "     \
 				       "want 0x%llx\n", (VIA),             \
 				       (unsigned)__cs_i,                   \
 				       (unsigned long long)__cs_got,       \
-				       (unsigned long long)mreg[__cs_i]);  \
+				       (unsigned long long)__cs_want);  \
 				failures++;                                \
 				return;                                    \
 			}                                                  \
 			cases++;                                           \
-			if (__cs_tag != mtag[__cs_i]) {                    \
+			if (__cs_tag != __cs_want_tag) {                    \
 				printf("MISMATCH %s reg%u tag: got %u "     \
 				       "want %u\n", (VIA),                 \
 				       (unsigned)__cs_i, __cs_tag,         \
-				       mtag[__cs_i]);                      \
+				       __cs_want_tag);                      \
 				failures++;                                \
 				return;                                    \
 			}                                                  \

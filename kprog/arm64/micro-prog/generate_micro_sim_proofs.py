@@ -21,7 +21,7 @@ from generated_arm64_helper_idents import HELPER_IDENTS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "kprog"))
-from arm64_abi import check_definedness
+from arm64_abi import collect_layout
 OUT_DIR = Path(__file__).resolve().parent
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
 STAGE2_PROGRAMS = REPO_ROOT / "kprog" / "test"
@@ -928,15 +928,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     trusted_names = set()
     if trusted_map_bindings:
         from trusted_generation import elf_symbol, c_symbol_aliases
-    for binding in trusted_map_bindings:
-        if set(binding) != {"native_symbol", "value_offset"}:
-            raise ValueError("trusted map binding requires native_symbol/value_offset")
-        symbol, offset = binding["native_symbol"], binding["value_offset"]
-        if elf_symbol(symbol) in trusted_names:
-            raise ValueError("invalid/duplicate trusted native map symbol")
-        if offset is not None and (type(offset) is not int or not 0 <= offset <= 0xffffffff):
-            raise ValueError("trusted map value offset must be null or u32")
-        trusted_names.add(symbol)
+    trusted_names = {binding["native_symbol"] for binding in trusted_map_bindings}
     trusted_idents = c_symbol_aliases([b["native_symbol"] for b in trusted_map_bindings], "__arm64_trusted_map_") if trusted_map_bindings else {}
     rodata16 = {symbol: value for symbol, value in rodata16.items() if symbol not in trusted_names}
     source_map_bindings = source_map_bindings or []
@@ -948,28 +940,14 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         source_pointers[symbol] = (offset is not None, trusted_idents[symbol])
     proof_symbols = set()
     for binding in source_map_bindings:
-        if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
-            raise ValueError("source-map binding fields must be explicit")
         native, proof = binding["native_symbol"], binding["proof_symbol"]
-        if any(not isinstance(item, str) or re.fullmatch(r"[A-Za-z_]\w*", item) is None for item in (native, proof)):
-            raise ValueError("source-map symbols must be C identifiers")
-        if native in source_pointers or proof in proof_symbols or type(binding["kind"]) is not int or binding["kind"] not in {1, 2}:
-            raise ValueError("duplicate source-map symbol or invalid source kind")
-        if type(binding["source_insn"]) is not int or binding["source_insn"] < 0:
-            raise ValueError("source-map instruction index must be nonnegative")
         offset = binding["value_offset"]
-        if type(offset) is not int or not 0 <= offset <= 0xffffffff or (binding["kind"] == 1 and offset):
-            raise ValueError("source-map value offset is invalid")
         source_pointers[native] = (binding["kind"] == 2, f"({proof} + {offset}ULL)")
         proof_symbols.add(proof)
     functions = OrderedDict((fn, [replace(insn, source_pointer=source_pointers[insn.reloc_symbol])
         if insn.reloc_symbol in source_pointers else insn for insn in body]) for fn, body in functions.items())
     all_insns = [insn for fn in functions.values() for insn in fn]
     referenced = {insn.reloc_symbol for insn in all_insns}
-    if {binding["native_symbol"] for binding in source_map_bindings} - referenced:
-        raise ValueError("source-map binding has no native address relocation")
-    if any(insn.source_pointer is not None and insn.mnemonic not in {"adrp", "ldr"} for insn in all_insns):
-        raise ValueError("source-map binding requires an explicit GOT address/load pair")
     all_addrs = {insn.addr for insn in all_insns}
     next_by_addr = {
         insns[index].addr: insns[index + 1].addr
@@ -977,7 +955,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for index in range(len(insns) - 1)
     }
     targets_by_addr = indirect_targets(all_insns)
-    stack_min, stack_max, payload_offsets = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
+    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])
     returns_by_addr = return_targets(all_insns, targets_by_addr)
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
                           if insn.mnemonic in {"bl", "blr"})

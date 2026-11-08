@@ -153,3 +153,5 @@ record the universal alias equation, operation-specific refinement and focused
 C/Lean checks. Existing label6/7 bodies retain their implementation.
 
 The [generic fresh compiler profile](../../corpus/results/kprog_arm64_app_coverage_20261108/host-compile/README.md) retains ARM O2/BPFv4/4096-byte settings and the captured guest header sysroot. Thirteen transport/profile controls pass, including complete allocated-section and relocation identity for two accepted QEMU helper fixtures. The captured private source epoch supports subsequent whole-application memory-capacity runs.
+
+The [canonical five-step adoption](../../corpus/results/kprog_arm64_app_coverage_20261108/canonical-adoption/README.md) represents unspecified entry/helper state through kind6, preserves the x30 return coordinate, and uses layout-only collection plus request-field decoding. Existing stack/CB byte representations and80helper identities join this source. Four UBSan stack hosts pass6,885,971cases, skb142,080cases,29micro generation/compile and the helper/frame controls pass; a fresh QEMU native control returns2. The recorded architecture-fault predicate case follows operator Notices.

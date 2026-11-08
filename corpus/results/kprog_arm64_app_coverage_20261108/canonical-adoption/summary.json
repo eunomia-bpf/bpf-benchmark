@@ -1,0 +1,94 @@
+{
+  "utc": "2026-11-08T07:52:41.487714+00:00",
+  "priority": 1,
+  "scope": "Canonical ARM kind6 entry/helper representation, layout-only collector, metadata admission retirement and retained byte/cb memory representation",
+  "results": {
+    "component": 0,
+    "micros": 0,
+    "generate-final": 0,
+    "helper-route": 0,
+    "control": 0
+  },
+  "stack_host_cases": 6885971,
+  "skb_host_cases": 142080,
+  "micro_sources": 29,
+  "micro_compiled": 29,
+  "helper_call_ret_cases": 13,
+  "helper_abi_cases": 154,
+  "entry_context_cases": 15,
+  "helper_route_cases": 18770,
+  "prior_frame_expectations": {
+    "helper_abi_cases": 154,
+    "helper_abi_differences": 2926,
+    "route_scene_differences": 76
+  },
+  "source_pins": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "f68e19f82e74478c251a36f1ba8a97f2b0793d3a14e9890b1b2fefdd4949456b",
+    "kprog/arm64/micro-prog/arm64_abi.py": "b9b8bb3727ea5b63ee013962ec4c4c856a67241ff8ed3201ec1c2ba07dfc5cdb",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "8e2a29c5e4eda69b9d22be7ad618b1411a38fc8af68e7990eadbb3d4c2bcc38c",
+    "kprog/formal/oracles/test_arm64_helper_call_host.c": "0a8f85e0c310cb67285d2eaf2f2dcedb2ad522eb932716b4cfde26959758eeab",
+    "kprog/formal/oracles/helper_route_host.c": "2621d169fca820c40f9be3981ced0bc29a040420c88f8be7406e69161d67c0dc"
+  },
+  "layout_collector_lines": {
+    "before": 521,
+    "after": 446
+  },
+  "final_generation_identity": {
+    "identical": true,
+    "sources": 29
+  },
+  "fresh_qemu": {
+    "summary": "corpus/results/kprog_arm64_app_coverage_20261108/canonical-adoption/control/trusted-arm64-service-result/summary.json",
+    "host_ok": true,
+    "guest_exit": 0,
+    "qemu_exit": 0,
+    "compiler_exit": 0,
+    "guest": {
+      "ok": true,
+      "arch": "arm64",
+      "case": "control",
+      "started": "1970-01-01T00:00:12.793330+00:00",
+      "returncode": 0,
+      "original_prog_id": 3,
+      "native_prog_id": 4,
+      "retval": 2,
+      "prebuilt_proof": false,
+      "receipt": {
+        "request_id": 1,
+        "source_prog_id": 3,
+        "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+        "started": "1970-01-01T00:00:32.054976+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-yjivxdpy/requests/1.success.tar.gz",
+        "finished": "1970-01-01T00:00:42.975354+00:00"
+      },
+      "finished": "1970-01-01T00:00:43.542728+00:00"
+    }
+  },
+  "runtime_checks_added": 0,
+  "architecture_fault_predicates": "existing operator Notices case pending",
+  "whole_app_source": "retained immutable remaining-source",
+  "diffstat": " kprog/arm64/arm64_sim_local_bpf.h                  | 200 +++++++++++++++++++--\n kprog/arm64/micro-prog/arm64_abi.py                |  87 +--------\n .../arm64/micro-prog/generate_micro_sim_proofs.py  |  28 +--\n kprog/formal/oracles/helper_route_host.c           |  10 +-\n kprog/formal/oracles/test_arm64_helper_call_host.c |   3 +-\n 5 files changed, 203 insertions(+), 125 deletions(-)\n",
+  "retired_layout_admission_expressions": [
+    "raise ValueError(f'undefined native ABI register {operand} at {where}')",
+    "raise ValueError('native entry return has an unbalanced stack pointer')",
+    "raise ValueError(f'undefined native ABI flags at {where}')",
+    "raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')",
+    "raise ValueError(f'undefined native ABI value escapes private stack at {where}')",
+    "raise ValueError(f'undefined native ABI value escapes private stack at {where}')",
+    "raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')",
+    "raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')",
+    "raise ValueError(f'native SP alignment unresolved at {where}')",
+    "raise ValueError(f'native SP alignment fault at {where}')",
+    "raise ValueError(f'native call stack relation unresolved at {where}')",
+    "raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')",
+    "raise ValueError(f'native ABI tail return has an unbalanced stack pointer at {where}')",
+    "raise ValueError(f'undefined native ABI register {args[0]} at {where}')",
+    "raise ValueError(f'native helper source stack relation unresolved at {where}')"
+  ],
+  "retained_layout_generation_errors": [
+    "raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')",
+    "raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')"
+  ]
+}

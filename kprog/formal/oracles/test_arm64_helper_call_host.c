@@ -869,11 +869,12 @@ static void * bpf_map_lookup_percpu_elem(void * arg0, const void * arg1, __u32 a
         __a64_n=0; __a64_z=1; __a64_c=1; __a64_v=0; \
         ARM64_SIM_BPF_CALL_##NAME(); \
         if (calls!=1 || seen_id!=helper_id || __a64_x0.x!=(__u64)(unsigned long)(RESULT)RETURN_BITS \
-            || __a64_x0_tag!=(TAG) || __a64_n!=0 || __a64_z!=1 || __a64_c!=1 || __a64_v!=0) failures++; \
+            || __a64_x0_tag!=(TAG) || __a64_n!=0 || __a64_z!=0 || __a64_c!=0 || __a64_v!=0) failures++; \
         for (unsigned i=1; i<31; i++) { \
             __u64 want = stack_mode && ((MASK) & (1ULL<<i)) ? (__u64)-8LL : value_for(i); \
             if (stack_mode && (int)i==(SIZE_ARG)) want=8; \
             __u8 tag = stack_mode && ((MASK) & (1ULL<<i)) ? ARM64_SIM_TAG_STACK : ARM64_SIM_TAG_SCALAR; \
+            if (i < 19) { want=0; tag=ARM64_SIM_TAG_SCALAR; } \
             if (ARM64_SIM_L_READ_REG(i)!=want || ARM64_SIM_L_REG_TAG(i)!=tag) failures++; \
         } \
         if (__a64_sp != 0 || __a64_lr != 0 || __a64_v0 != 0 || __a64_v0_hi != 0) failures++; \
