@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T08:03:19.585492+00:00",
+    "as_of_utc": "2026-11-08T08:43:27.538503+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -191,27 +191,27 @@
       },
       {
         "application": "OTel",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/otelcol-ebpf-profiler/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
         "baseline_resident": 12,
-        "service_source_ids": 2,
-        "generated": 2,
-        "compiled": 2,
+        "service_source_ids": 3,
+        "generated": 3,
+        "compiled": 3,
         "stages": {
-          "verifier_accepted_installed": 1,
+          "verifier_accepted_installed": 2,
           "verifier_rejected": 1
         },
         "failure_classes": {
-          "stack_load_alignment": 1
+          "bpf_stack_extent": 1
         },
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/xdp-byte-helpers/applications/otelcol-ebpf-profiler/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T065959207988Z.tar.gz",
-        "raw_archive_sha256": "fbe3a66ea660fc53973ebc82f885253d5e9ea1b13e1b2dec6d6641eb171b77da",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T074944818655Z.tar.gz",
+        "raw_archive_sha256": "8de657769d253d6a29315295195344fe80ffe3bb0270bbd2d65148148ae5ea78",
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "captured_pre_migration_helper_epoch",
-        "baseline_bpf_calls": 194601
+        "runtime_epoch": "five_step_e2d3_captured_385d5095c",
+        "baseline_bpf_calls": 159954
       },
       {
         "application": "Cilium",

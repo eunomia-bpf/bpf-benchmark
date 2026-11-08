@@ -12,10 +12,10 @@
     "proof_generated": 3,
     "stages": {
       "verifier_accepted_installed": 2,
-      "loader_rejected": 1
+      "verifier_rejected": 1
     },
     "failure_causes": {
-      "see_exact_load_stderr": 1
+      "bpf_stack_extent": 1
     },
     "requests": [
       {
@@ -58,8 +58,8 @@
         "native_sha256": "53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1",
         "entry": "perf_unwind_native",
         "status": -5,
-        "stage": "loader_rejected",
-        "cause": "see_exact_load_stderr",
+        "stage": "verifier_rejected",
+        "cause": "bpf_stack_extent",
         "proof_generated": true,
         "source_generated": true,
         "prog_id": null,
@@ -552,6 +552,7 @@
         }
       }
     ],
-    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts.",
+    "classification_note": "The stock verifier reports invalid write to stack R10 off=-576 size=8; this receipt refines the prior generic loader class."
   }
 }
