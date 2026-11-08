@@ -44822,6 +44822,21 @@
     "source_epoch": "b084c95ac084ba05f1fe0a9e0347a2aab2349dff",
     "x86_c_model_bodies": 68
   },
+  "x86_ret_live_context_preservation": {
+    "archive_compressed_prefix_bytes": 95459288,
+    "archive_compressed_prefix_sha256": "7497929ccf8728ac733afecd99ea9274fa70854523193d876269c61b42616247",
+    "archive_entries": 3,
+    "archive_marker": "X86_RET_LIVE_CONTEXT_V1",
+    "archive_raw_bytes": 339535,
+    "archive_raw_sha256": "20844043566d51c65a1172fd745ee89c43b858df2c75d9d2a96d5bc7bbd2beff",
+    "call_full_frame_cases": 26624,
+    "component_make_exit": 0,
+    "oracle_source_sha256": "dfd9598497654a6cb2812d83d4969ad4076066c2ba1d4703757e31f05ed9a2e4",
+    "route_cases": 13,
+    "scope": "Existing RET fixture initializes live context CB words and observes preservation across the low32RAX return. CALL/SUB_RET stack/register/flag/vector and continuation checks retain their original domains.",
+    "sub_ret_full_frame_cases": 569088,
+    "ubsan": true
+  },
   "x86_return_continuation_switch": {
     "archive_compressed_prefix_bytes": 83121716,
     "archive_compressed_prefix_sha256": "2abda4cd61e0ba0fde5b3f2dcb60920c40c26030c434f145d135bdee90f720e7",

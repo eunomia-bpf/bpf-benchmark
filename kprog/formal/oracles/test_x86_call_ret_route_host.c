@@ -26,8 +26,8 @@
  *     dispatch label;
  *   - the round trip is exact for addresses whose bytes are all distinct, so a
  *     width or endianness slip shows;
- *   - RET returns the low word of the accumulator and copies the ABI control
- *     block into the skb context when one is installed;
+ *   - RET returns the low word of the accumulator and preserves the live skb
+ *     control block;
  *   - SUB_JMP and SUB_JCC select the same targets as JMP and JCC, which is
  *     what makes them aliases rather than variants -- driven in *both* the
  *     taken and the not-taken direction, since a conditional degraded to an
@@ -138,7 +138,7 @@ dispatch:
 /* X86_SIM_X86_RET returns from the calling function, so it needs its own. */
 /* X86_SIM_X86_RET ends in a `return` from the calling function, so the
  * driving scope has to be inside the probe: it declares the state, plants rax
- * and the ABI cb words, and the returned value is the function's result. */
+ * and the live cb words, and the returned value is the function's result. */
 static __u32 probe_ret_value(__u64 rax_value, struct __sk_buff *ctx,
 			      __u32 cb0, __u32 cb1)
 {
@@ -146,8 +146,8 @@ static __u32 probe_ret_value(__u64 rax_value, struct __sk_buff *ctx,
 
 	__x86_rax.ptr = (void *)(long)rax_value;
 	__x86_sim_skb_ctx = ctx;
-	__x86_sim_abi.cb[0] = cb0;
-	__x86_sim_abi.cb[1] = cb1;
+	ctx->cb[0] = cb0;
+	ctx->cb[1] = cb1;
 	X86_SIM_X86_RET();
 	return 0;
 }
@@ -386,9 +386,7 @@ int main(void)
 
 	/* X86_SIM_X86_RET returns the low word of rax -- the program's return
 	 * value -- so a truncation or a wrong register shows here. It also
-	 * copies the ABI cb words into the skb context when one is present;
-	 * that path is exercised by installing a context whose cb words start
-	 * at sentinels. */
+	 * preserves the live skb cb words installed in the probe. */
 	{
 		static struct __sk_buff skb;
 		__u32 got;

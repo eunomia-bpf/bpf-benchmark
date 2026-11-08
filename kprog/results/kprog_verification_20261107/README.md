@@ -4752,3 +4752,9 @@ cases pass with UBSan, preserving register/tag/flag, CB and return-value
 observations. Archive `x86_route_live_skb_fixture` retains the original full
 log/actual2, all1258 verified root-source hashes and component outcome.
 The next full check records its own published source epoch.
+
+The related call/return oracle now initializes live CB words and observes
+their preservation across RET. Its13 existing route cases,26624 CALL frame
+cases and569088 SUB_RET frame/switch cases pass with UBSan. The separate
+zeroed ABI mirror remains present, so a stale-mirror write changes the observed
+context. Receipt `x86_ret_live_context_preservation` retains this component.
