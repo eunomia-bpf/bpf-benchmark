@@ -936,3 +936,11 @@ step(d), where the stock verifier decides B. The18,432 CPU comparisons,
 nine primary BPF variants, nine fault-marker objects and two narrow-result
 controls remain and pass. Original e12 full Make exit2 and all1263 source
 hashes remain in the verification ledger alongside the retained tool's exit0.
+
+### Canonical AArch64 source adoption
+
+Canonical publication `f434f46a2` adopts the recorded kind6 entry/helper state, x30 outer-return coordinate, layout-only analysis and request-field decoding. The80helper identity domain and byte-tag/O2 storage stay current. The prior module refusal ledger retains its72removal/55functional-keep decisions. Remaining generation errors identify missing handlers, malformed CFG targets and unresolved finite call geometry; instruction coverage work owns their closure.
+
+Existing helper-frame assertions now follow the kind6 host choice for X1 through X18 and NZCV; typed argument/identity/result, callee-register and arena comparisons remain. Four UBSan stack hosts pass6,885,971cases, skb142,080cases,29micro generation/compile,13call/return,154helper ABI,15entry-context and18,770helper-route observations. A fresh paired-runtime QEMU request generates, compiles, passes the stock verifier, installs and executes native code with retval2 and host/guest/compiler/QEMU exits0. The final layout-only textual reduction preserves all29generated C sources and reduces the collector from521to446lines. [Canonical source, commands and raw receipts](../../../corpus/results/kprog_arm64_app_coverage_20261108/canonical-adoption/README.md) carry the measured source epochs.
+
+Runtime admission additions total0. The existing architectural SP-alignment/overlap predicate case remains with the operator under Notices. Current whole Tetragon/OTel/Cilium/Tracee execution retains its immutable captured source. R can use the canonical ARM source plus the paired `kprog/arm64/build/design-only` Image/modules/loader for kernel-selftest continuation.
