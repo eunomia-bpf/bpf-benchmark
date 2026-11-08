@@ -18,7 +18,7 @@ typedef signed long long __s64;
 #include <stdlib.h>
 #include <string.h>
 static __u64 scratch[64], choice, choice_site;
-static unsigned calls;
+static unsigned calls, faults;
 unsigned long native_lab_exclusive_failure_choice(unsigned site)
 {
  if (site != choice_site) abort();
@@ -29,11 +29,14 @@ static void arm64_sim_unsupported_opcode(void) { abort(); }
 struct snapshot {
  __u64 regs[31], vectors[64], source, data, sp, lr;
  __u8 tags[31], flags[4], bytes[sizeof(scratch)];
- unsigned calls;
+ unsigned calls, faults;
 };
 #define SAVE_REG(R,N) out->regs[R]=__a64_##N.x; out->tags[R]=__a64_##N##_tag;
 #define SEED_REG(R,N) __a64_##N.x=0x98fedcba76543210ULL+(R)*0x102030405ULL;
 #define DIRECT(OP) ARM64_SIM_DIRECT_##OP(dst,src,index,255,flags,aux,imm)
+/* Capture the existing architectural fault arm before instruction effects. */
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() ({ faults++; goto observe_fault; })
 static void run(struct snapshot *out, unsigned token, int direct, unsigned reg,
                 unsigned flags, unsigned mode, unsigned indexed, unsigned shift,
                 unsigned negative)
@@ -56,7 +59,7 @@ static void run(struct snapshot *out, unsigned token, int direct, unsigned reg,
  __u64 imm=token==5?choice_site:negative?(__u64)-8:8;
  unsigned widths[]={ARM64_OP_LOAD,ARM64_OP_STORE,ARM64_OP_LDRSB,ARM64_OP_LDRSH,ARM64_OP_LDRSW,ARM64_OP_STLXR};
  unsigned op=widths[token];
- memset(out,0,sizeof(*out)); calls=0;
+ memset(out,0,sizeof(*out)); calls=0; faults=0;
  out->source=ARM64_SIM_L_READ_REG(src);
  if(direct) {
   switch(token) {
@@ -69,14 +72,18 @@ static void run(struct snapshot *out, unsigned token, int direct, unsigned reg,
    default: abort();
   }
  } else ARM64_SIM_L_EXEC(op,dst,src,index,255,flags,aux,imm);
+observe_fault:
  ARM64_SIM_L_FOR_EACH_GPR(SAVE_REG)
  for(unsigned i=0;i<32;i++) { out->vectors[i*2]=__a64_vectors[i].lo; out->vectors[i*2+1]=__a64_vectors[i].hi; }
  out->sp=(__u64)__a64_sp; out->lr=__a64_lr;
  out->flags[0]=__a64_n; out->flags[1]=__a64_z; out->flags[2]=__a64_c; out->flags[3]=__a64_v;
- out->data=ARM64_SIM_L_READ_REG(reg);out->calls=calls;
+ out->data=ARM64_SIM_L_READ_REG(reg);out->calls=calls;out->faults=faults;
  memcpy(out->bytes,scratch,sizeof(scratch));
  (void)__a64_sim_abi_kind;
 }
+
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() arm64_sim_unsupported_opcode()
 
 #define SCALAR_DIRECT(OP) ARM64_SIM_DIRECT_##OP(dst,src,src2,src3,flags,aux,imm)
 static const unsigned scalar_ops[]={ARM64_OP_NOP,ARM64_OP_MOV_IMM,ARM64_OP_MOV_REG,ARM64_OP_MOVK,ARM64_OP_ALU_REG,ARM64_OP_SHIFT_IMM,ARM64_OP_SHIFT_REG,ARM64_OP_MADD,ARM64_OP_MSUB,ARM64_OP_MUL,ARM64_OP_UMULL,ARM64_OP_UDIV,ARM64_OP_MVN,ARM64_OP_NEG,ARM64_OP_EXTR,ARM64_OP_BITFIELD,ARM64_OP_REV,ARM64_OP_REV16,ARM64_OP_SXTH,ARM64_OP_CMP_IMM,ARM64_OP_CMP_REG,ARM64_OP_TST_IMM,ARM64_OP_TST_REG,ARM64_OP_CCMP_IMM,ARM64_OP_CCMP_REG,ARM64_OP_CSEL,ARM64_OP_CINC,ARM64_OP_CSET,ARM64_OP_ADRP_GOT,ARM64_OP_ADRP_RODATA,ARM64_OP_TST_BIC_REG,ARM64_OP_ANDS_REG,ARM64_OP_UMULH,ARM64_OP_SXTW,ARM64_OP_SUBS_IMM,ARM64_OP_ADDS_IMM,ARM64_OP_SUBS_REG,ARM64_OP_CMN_IMM,ARM64_OP_CINV,ARM64_OP_ORN_REG,ARM64_OP_ANDS_IMM,ARM64_OP_CMN_REG,ARM64_OP_UMADDL,ARM64_OP_SXTB,ARM64_OP_CSINV,ARM64_OP_CSINC,ARM64_OP_SMADDL,ARM64_OP_CNEG,ARM64_OP_ADDS_REG,ARM64_OP_BICS_REG,ARM64_OP_CSETM,ARM64_OP_CSNEG};
@@ -278,10 +285,12 @@ int main(void)
    int delta=negative?-8:8;
    unsigned address=128+(token==5?0:((mode&1)?delta:0)+(indexed?(1<<shift):0)+(mode?0:delta));
    __u64 source=a.source+((token==1 && reg==4 && (mode&1))?delta:0);
-   if(token==1 || (token==5 && !choice)) for(unsigned i=0;i<width;i++) expected[address+i]=(__u8)(source>>(i*8));
+   if(!a.faults && (token==1 || (token==5 && !choice))) for(unsigned i=0;i<width;i++) expected[address+i]=(__u8)(source>>(i*8));
    if(memcmp(expected,a.bytes,sizeof(expected))) { fprintf(stderr,"byte store token=%u width=%u\n",token,width);return 1; }
-   if(a.calls!=(token==5)) return 1;
-   if(token==5 && reg!=31 && reg!=255 && a.data!=(choice!=0)) return 1;
+   unsigned expected_fault=(token==1 && reg==4 && mode) ||
+                           (token==5 && (reg==1 || reg==4));
+   if(a.faults!=expected_fault || a.calls!=(token==5 && !expected_fault)) return 1;
+   if(token==5 && !expected_fault && reg!=31 && reg!=255 && a.data!=(choice!=0)) return 1;
    cases++;
   }
  }

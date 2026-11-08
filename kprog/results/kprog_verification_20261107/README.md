@@ -4839,3 +4839,19 @@ and3108 control-flow cases, all passing. Archive `x86_manual_memory_fixture_envi
 retains the original full result/all1258 verified root-source hashes, complete
 62-source survey and four corrected component logs. The next full check carries
 its own fixed source identity.
+
+### Live SKB and approved fault fixture profiles
+
+The immutable full check of `a8b58dfae75a8b8827c5189711c4599a59070704` exits2 in the
+MOV_LOAD fixture's two SKB packet-tag scenes. The fixture now provides its live
+helper ABI base and an actual SKB context for packet/data-end values. All713
+original cases pass with UBSan. The later162 existing C compile/run pairs were
+collected together:158 pass directly, and four repaired fixtures pass their
+collected reruns. Cross-ISA helpers retain separate host identity names; their
+10 tag and1004143 differential cases pass. ARM token snapshots now observe
+the approved writeback-store and exclusive-status overlap faults before effects:
+53728 memory,2885376 scalar and188160 vector cases pass with UBSan. Every
+original case table and loop domain is retained. Archive `live_skb_and_approved_fault_fixtures`
+contains the original full result/all1258 verified source hashes, complete
+suffix survey and corrected logs. Live Workspace diagnostic epochs and the next
+immutable full check keep their own source identities.

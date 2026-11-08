@@ -6963,6 +6963,78 @@
     "source_drift": [],
     "stop_sha256": "6a9c1ee32919154cda9d68f2033856603cc029af2054ed577318cc5a14485d93"
   },
+  "live_skb_and_approved_fault_fixtures": {
+    "archive_compressed_prefix_bytes": 96249656,
+    "archive_compressed_prefix_sha256": "f8d18af0b01443d9a912a170ffd26a0bbd98d39c077dd49f54ce2046d0596fcc",
+    "archive_entries": 189,
+    "archive_marker": "LIVE_SKB_AND_APPROVED_FAULT_FIXTURES_V1",
+    "archive_raw_bytes": 3551254,
+    "archive_raw_sha256": "b33b6b4bb4f756443348e7cc728a9a4b4f917e99b660a826f8998e6f413d9d12",
+    "case_tables_and_loop_domains_preserved": true,
+    "changes": {
+      "kprog/formal/oracles/cross_isa_differential_host.c": {
+        "corrected_sha256": "9a23e0b23fbd30611d0308ed91e12f4e82c15733c8942eff2f2ce6be3da246ce",
+        "original_sha256": "45533f8c98e9b70933aece04c09da54d6eea4354abdc361eafec0a32f49563af"
+      },
+      "kprog/formal/oracles/cross_isa_tag_host.c": {
+        "corrected_sha256": "211cc2e56e0f35b703fb28dde1f605f3f2d84ecfdbf90b63459dedd8820293cf",
+        "original_sha256": "880eb99178e2b8a18174f89e6703029ae7c81dc2533e84562d2236cf16d329a8"
+      },
+      "kprog/formal/oracles/test_arm64_memory_tokens_host.c": {
+        "corrected_sha256": "9f09fd3409d8148e3d423a881c3bf31b3c583f3d47405e192404fd8e76e9ee57",
+        "original_sha256": "8739349abe4a99588109de75bd884f8a72db5f21d5f3072d82c8ef80e2e8ce70"
+      },
+      "kprog/formal/oracles/test_x86_mov_load_route_host.c": {
+        "corrected_sha256": "140c5386d6ace4ef835338a0ee3fbc7a6930d323c9e7fcba2a0627485c9020ae",
+        "original_sha256": "cd6c8a9d9f2ea9f01459a09d224f61fb46ba659bd2b330503042153e1197180e"
+      }
+    },
+    "corrected_component_cases": {
+      "arm_memory_tokens": 53728,
+      "arm_scalar_tokens": 2885376,
+      "arm_vector_tokens": 188160,
+      "cross_isa_differential": 1004143,
+      "cross_isa_tags": 10,
+      "mov_load": 713
+    },
+    "corrected_components": [
+      {
+        "component": 0,
+        "exit": 0
+      },
+      {
+        "component": 34,
+        "exit": 0
+      },
+      {
+        "component": 35,
+        "exit": 0
+      },
+      {
+        "component": 81,
+        "exit": 0
+      }
+    ],
+    "every_exported_root_source_sha_verified": true,
+    "existing_suffix_components": 162,
+    "full_actual_exit": 2,
+    "full_epoch": "a8b58dfae75a8b8827c5189711c4599a59070704",
+    "full_root_git_sources": 1258,
+    "full_stop": "Makefile380: two manual-state SKB MOV_LOAD cases require the live helper ABI base and actual context packet fields.",
+    "original_suffix_failures": [
+      0,
+      34,
+      35,
+      81
+    ],
+    "original_suffix_passes": 158,
+    "production_source_sha256": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "26c6606d10ab603092339c1595f243ce7cdc2566459842308c737f3e886942b4",
+      "kprog/x86/x86_sim_local_bpf.h": "8318a76d393dd0fd083cb8abbef83e8af8d301aa05a6489f311f7e22ffcd884c"
+    },
+    "scope": "Live Workspace suffix diagnostics and corrected existing fixtures; the immutable full check retains its separate published source manifest. ARM modeled faults use the approved writeback-store and exclusive-status overlap classes.",
+    "ubsan_mov_load_and_arm_memory_tokens": true
+  },
   "memory_oracle_frame_repair": {
     "archive_compressed_prefix_bytes": 87812325,
     "archive_compressed_prefix_sha256": "638536fa19119acaaeaa1c9fa2af795385af0c3d2e5e93ba5eebce1334cde387",

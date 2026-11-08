@@ -145,6 +145,10 @@ static void check_load(const char *what, __u8 op, __u8 dst, __u8 src,
 	X86_SIM_L_DECLARE_STATE();
 	X86_SIM_L_DECLARE_STACK();
 	__u8 __x86_sim_abi_kind = (__u8)kind;
+	struct __sk_buff live_skb = { .data = 0x12345678U,
+				      .data_end = 0x9abcdef0U };
+	__x86_sim_helper_abi_base = heap;
+	__x86_sim_helper_ctx = &live_skb;
 	(void)__x86_cf;
 	(void)__x86_zf;
 	(void)__x86_sf;
@@ -190,7 +194,12 @@ static void check_load(const char *what, __u8 op, __u8 dst, __u8 src,
 		want_tag = X86_SIM_TAG_SCALAR;
 	} else if (op == X86_OP_MOV_LOAD && mem == X86_WIDTH_64 &&
 		   width == X86_WIDTH_64 && base_tag == X86_SIM_TAG_ABI) {
-		want_bits = model_ptr_load(heap, off);
+		if (kind == KPROG_ABI_KIND_SKB && off == KPROG_ABI_SKB_DATA_OFF)
+			want_bits = live_skb.data;
+		else if (kind == KPROG_ABI_KIND_SKB && off == KPROG_ABI_SKB_DATA_END_OFF)
+			want_bits = live_skb.data_end;
+		else
+			want_bits = model_ptr_load(heap, off);
 		want_tag = dst == X86_RSP ? X86_SIM_TAG_SCALAR : model_abi_tag(kind, off);
 	} else {
 		__u64 v = model_load(heap, off, mem);

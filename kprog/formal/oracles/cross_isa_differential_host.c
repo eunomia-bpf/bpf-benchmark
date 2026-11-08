@@ -35,7 +35,10 @@
 #define X86_SIM_ENABLE_STACK 1
 
 #include "arm64_sim_local_bpf.h"
+/* Each ISA header retains its host context-cast identity helper. */
+#define bpf_cast_to_kern_ctx x86_host_cast_to_kern_ctx
 #include "x86_sim_local_bpf.h"
+#undef bpf_cast_to_kern_ctx
 
 #include <stdio.h>
 
