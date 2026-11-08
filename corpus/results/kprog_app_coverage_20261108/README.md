@@ -1,6 +1,6 @@
-# x86 application continuation, November8 UTC
+# x86 application coverage, November8 UTC
 
-The table records the latest closed complete-application attempts. Baseline resident counts and each observed terminal service request retain distinct domains. The whole upstream application starts unchanged, and failure rows identify the exact point reached. BCC and Katran complete the generation-bound arm and have paired R timing; the four application frontiers continue below.
+The table records the latest closed complete-application attempt. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the generation-bound arm and have R timing ownership. The remaining four applications continue through the frontiers below.
 
 | Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
@@ -11,27 +11,9 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [013224](tracee-fixed-stack/README.md) |
 
-Current whole-application frontiers are OTel proof-stack depth, Tracee helper length, Tetragon stack/jump complexity and Cilium pruned-helper resource identity. The generic typed private-stack representation completes byte/JIT/host checks and full-source compiles; whole-application successors consume the merged MOV_LOAD fidelity correction. Complete matching kernel modules and the38-case native-only safety suite retain separate receipts.
+Current detached work consumes the generic typed private-stack profile with the published MOV_LOAD fidelity correction: complete OTel, Tracee and Tetragon run serially on12GiB/eightvCPU/20-23. The Cilium successor then runs the existing38-case native-only suite and the complete original application in separate fresh guests, using the generic pruned-map-helper binding correction and the matching compact kernel module tree. Each guest registers one trusted service. Actual terminal receipts determine coverage and acceptance.
 
-The [OTel aligned private-stack batch001743](otel-stack-aligned/README.md) freshly binds read_task_struct and perf_unwind_stop and continues from perf_unwind_native instruction exploration,1000001instructions/66042states. The [generic proof kfunc loader](proof-kfunc/README.md) passes20BTF/site/prototype controls and the exact original CiliumELF/matching kernelBTF call. Its whole-application successor follows Tracee serially.
-
-The [Tracee aligned-stack batch002731](tracee-stack-aligned/README.md) retains6fresh generation/compilation and5bound loads, reaching sys_exit_submit helper-size range checking after3458instructions/151states. Allterminal native hashes and source pins reconcile. The whole Cilium kfunc successor is running; generic typed-read OTel/Tetragon/Tracee successors follow it serially.
-
-The [generic narrow register-read representation](typed-read-identity/README.md) passes10width/lane forms and655360BPF-JIT/host/byte observations. Its32-bit read emits a verifier-visible MOV32, and8/16-bit reads emit exact masks. The whole-OTel source compile and serial OTel/Tetragon/Tracee runtime trials retain their separate completion records.
-
-The [Cilium kfunc batch003807](cilium-kfunc/README.md) freshly generates/compiles2requests and binds1, then reaches libbpf-normalized extern linkage at the next TC proof. The common loader successor reads original declarations from the same ELF snapshot and retains the kernel prototype matcher.
-
-The [whole OTel typed-read batch004333](otel-typed-read/README.md) preserves3fresh generation/compilation and2bound loads and reaches1000001verifier instructions/65666states. The complete fixed-input result continues from control/state exploration. Whole Tetragon is now active, followed by Tracee and then the Cilium original-BTF successor.
-
-The [whole Tetragon typed-read batch005356](tetragon-typed-read/README.md) freshly generates/compiles5requests and binds4; execve_send reaches8193jumps/179285instructions/1930states. All5terminal native hashes and source pins reconcile. Tracee follows in the same serial source epoch.
-
-The [whole Tracee typed-read batch005903](tracee-typed-read/README.md) freshly generates/compiles6requests and binds5; sys_exit_submit reaches helper length checking at3502instructions/151states. All6terminal native hashes and source pins reconcile. Whole Cilium now consumes the captured paired kfunc transport build; generic fixed-RSP-offset successors follow it serially.
-
-The [whole Cilium original-BTF batch010928](cilium-original-btf/README.md) freshly generates/compiles2requests and binds1. The TC request now passes loader/BTF/transport checks and reaches kernel native-region call identity before0processedinstructions. Both terminal native hashes/source pins reconcile; canonical-vmlinux guard validation and a private kernel/module build follow.
-
-The [explicit-RSP displacement component](stack-fixed-offsets/README.md) passes45forms/184320BPF-JIT, UBSan host and independent byte observations. Complete original Tetragon and OTel sources compile to1355and10439BPF instructions, respectively; prior typed-read epochs retain4826and40034. These are completed mechanism/compiler measurements. Whole-application verifier, behavior and timing results follow their actual terminal batches.
-
-Recorded verifier frontiers retain their separate native entries and candidate epochs:
+Recorded frontiers retain their separate entries and candidate epochs:
 
 | Application / entry | Recorded frontier | Complete batch |
 | --- | --- | --- |
@@ -40,7 +22,12 @@ Recorded verifier frontiers retain their separate native entries and candidate e
 | Tetragon / execve_send |8193-jump sequence | [005356](tetragon-typed-read/README.md) |
 | Tracee / sys_exit_submit | probe_read length range | [013224](tracee-fixed-stack/README.md) |
 | Cilium / tail_handle_ipv4_from_host | kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
+| Cilium / tail_drop_notify | native relocation identity for pruned internal hash lookup;809instructions/14states | [021801](cilium-matched-runtime/README.md) |
 
-Each row remains verification work until its complete application cohort passes. The new registered-kfunc kernel has separate safety/runtime and environment receipts.
+The [Cilium matched-module cohort](cilium-matched-runtime/README.md) completes its original baseline and reaches resource binding after symbolic verification. The [generic callback correction](dead-map-helper-binding/README.md) passes614400source-extracted ASan/UBSan controls and the matching x86 module build. Whole-application replay supplies its next acceptance receipt.
 
-The [Cilium matched-module batch021801](cilium-matched-runtime/README.md) reaches native relocation binding after809symbolic instructions. The [registered-kfunc38-case safety suite](kfunc-native-only-safety/README.md) executes9positive controls and rejects29unsafe submissions. Both retain exact kernel/service/native identities and independent outcome domains.
+The [registered-kfunc native-only suite](kfunc-native-only-safety/README.md) executes9positive controls and refuses29unsafe submissions:22verifier,6specializer,1loader. All38native archive hashes reconcile. Unsafe fixtures use load-only producer commands; positives execute bound TEST_RUN with matching outputs.
+
+The [kernel and matching module records](kernel-kfunc-binding/README.md) preserve the registered-kfunc verifier profile, complete build,842module identities and exact runtime-section/BTF/relocation comparisons after standard strip/sign. Runtime image/config/module links remain available after the duplicate private guard build was retired; the shared incremental kernel cache retains its ownership.
+
+Earlier complete attempts preserve the progression through [OTel aligned stack](otel-stack-aligned/README.md), [typed reads](otel-typed-read/README.md), [explicit RSP offsets](stack-fixed-offsets/README.md), [Tracee aligned stack](tracee-stack-aligned/README.md), [Tracee typed reads](tracee-typed-read/README.md), [Cilium original BTF](proof-kfunc-original-btf/README.md), [paired kfunc transport](proof-kfunc-transport/README.md) and the current table's raw cohorts. Universal ISA/token/link laws supply safety; captured component measurements and whole-application outcomes each retain their own evidence domain.

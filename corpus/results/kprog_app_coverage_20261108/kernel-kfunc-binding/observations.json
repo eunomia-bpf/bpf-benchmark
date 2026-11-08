@@ -30,5 +30,32 @@
     "archive": "compact-modules.tar.gz",
     "archive_bytes": 32567829,
     "archive_sha256": "91d6c47678d37be59a83e543c77d7915166342bccb6fefc1e10b34d48b94af64"
+  },
+  "runtime_kernel": {
+    "retired_at": "2026-11-08T03:02:08.772354+00:00",
+    "target": "/workspaces/.agent-state/kprog-lanes/C/kernel-kfunc-binding/build",
+    "logical_bytes": 9507639575,
+    "open_refs": [],
+    "runtime_kernel": "/workspaces/.agent-state/kprog-lanes/C/kernel-kfunc-binding/runtime-kernel",
+    "runtime": {
+      "module_links": 842,
+      "image_sha256": "9883d5c3af53325bfccc303a3da01ef1e11c19847a7353bee153b025aabd7427",
+      "config_sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+      "system_map_sha256": "5b92199d0e6aab902de5d9d7c11097cdfb745b1c601f0528c5dcd00f6486c70a",
+      "original_image_sha256": "9883d5c3af53325bfccc303a3da01ef1e11c19847a7353bee153b025aabd7427",
+      "module_profile": "standard INSTALL_MOD_STRIP=1 then normal module signing; allocated sections, BTF, modinfo, versions and normalized runtime relocations equal for every module"
+    },
+    "preserved": [
+      "canonical shared x86 warm build",
+      "image and matching compact842modules",
+      "native module original and new callback module",
+      "kernel BTF",
+      "public build and module archives",
+      "source/command/log identities"
+    ],
+    "post_retirement_dry_run_exit": 0,
+    "archive": "runtime-kernel.tar.gz",
+    "archive_sha256": "f60e99127ab49e6360619d429ec4a7c1186a13aa465b9f9a7bb5b8c7ee56b19b",
+    "archive_bytes": 18411359
   }
 }
