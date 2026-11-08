@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-08T23:24:00.724683+00:00",
+  "build_publication": "7d3821fef293d8357bea8a61b677cc040c591c07",
+  "native_objects": {
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o": "6e6e64388be7afc8eabd9851b41d1a04eb28f860543976aac4070737c2dfc063",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/lsm_check.native.o": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/kprobe_check.native.o": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/source_map.native.o": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_0.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_1.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_2.native.o": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_3.native.o": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_4.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_5.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_6.native.o": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+    "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_7.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5"
+  },
+  "embedded_binary_sha256": "d312418772f6fe1b4dee5676d18c5e9f6498ca91f26e6038bffbdb2077b758f2",
+  "paired_bpf_sha256": "2e4e7a851b1e98e28f04a3f247d395fe930fa927f56cc80951dd9e8509292381",
+  "predecessor": "same-copy BCC/Katran serial apps",
+  "scope": "Full original Tracee recipe; all existing native manifest entries and paired embedded BPF retained;88-helper model;8GiB16-19",
+  "runtime_admission_additions": 0
+}
