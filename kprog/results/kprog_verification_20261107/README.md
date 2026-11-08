@@ -4687,3 +4687,14 @@ selector/arena comparisons retain their layouts while the historical
 LOAD_BYTES macro-name assumption is retired. The immutable094b9e4c4 full
 check's actual Make exit2, all targeted commands/sources and intermediate
 Lean diagnostics are retained in `returning_helper_token_wrappers`.
+
+### Singleton dispatcher caller frame
+
+The immutable7dfd83504 full check returned Make exit2 at eleven historical
+caller-preservation expectations in the singleton dispatcher oracle. Its four
+memory-call and seven supported register-helper scenes now apply the host's
+zero-valued kind6 caller frame. Return values/tags, callee registers, return
+address, complete arena and heap comparisons remain; the original default-arm
+case retains its full preserved-state comparison. All582existing cases pass
+UBSan. Full command, actual2 outcome, Git source manifest, dependency pins and
+original/final oracle data are retained in `dispatch_singleton_caller_frame`.

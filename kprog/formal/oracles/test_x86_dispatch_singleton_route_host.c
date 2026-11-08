@@ -867,6 +867,22 @@ static void alu_flags_into(struct snap *b, unsigned alu, __u8 seed_cf,
 	}
 }
 
+/* The host kind6 profile supplies zero for each caller word. */
+static void model_helper_clobbers(struct snap *b)
+{
+    static const unsigned caller[] = {
+        X86_RCX, X86_RDX, X86_RSI, X86_RDI, X86_R8, X86_R9, X86_R10, X86_R11,
+    };
+    unsigned i;
+
+    for (i = 0; i < sizeof(caller) / sizeof(caller[0]); i++) {
+        b->x[caller[i]] = 0;
+        b->t[caller[i]] = X86_SIM_TAG_SCALAR;
+    }
+    b->cf = b->zf = b->sf = b->of = 0;
+    b->xmm0_lo = b->xmm0_hi = 0;
+}
+
 /* callMemcpy/callMemset/callMemcpyReg/callMemsetReg: the shared block-step,
  * one byte at a time, with the kind, count-source and bound selectors folded
  * into the caller's argument tuple. Both RSI readings happen before the loop,
@@ -902,6 +918,7 @@ static void model_callmem(int is_copy, int is_reg, __u64 imm, struct snap *b)
 	}
 	b->x[X86_RAX] = b->x[X86_RDI];
 	b->t[X86_RAX] = b->t[X86_RDI];
+    model_helper_clobbers(b);
 }
 
 /* CALL_REG selects a public-ABI host callee by its sparse Linux ID. */
@@ -914,6 +931,7 @@ static void model_callreg(unsigned src, struct snap *b)
     if (ora_x86_armed(id)) {
         b->x[X86_RAX] = result;
         b->t[X86_RAX] = ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR;
+        model_helper_clobbers(b);
     }
 }
 
