@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles26 closed service batches across all six
-application names. All104 terminal requests preserve byte equality between the
+One generic archive reader reconciles29 closed service batches across all six
+application names. All105 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain100
-generated sources,98 compiled objects and83 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain101
+generated sources,99 compiled objects and83 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -486,6 +486,28 @@ or10,896 bytes. The actual selected request reaches the original helper-origin
 diagnostic at0x9ab. The timing context and raw shim/metadata/result captures remain
 separate from the later functional slot-join cohorts.
 
+## ARM startup successors
+
+The three added cohorts use immutable published ARM coverage, runtime archives,
+source summaries and identity audits. Their12 artifact pins bring the total to93.
+arm-startup-successor-increment.json checks preservation of the prior26 cohorts,
+104 request rows, original failure stream,81 pins, work observations and source
+identity vectors.
+
+| ARM batch | Requests | Generated | Compiled | Bound | Application boundary |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Cilium225318 | 0 | 0 | 0 | 0 | gops HOME filesystem |
+| Cilium230103 | 0 | 0 | 0 | 0 | endpoint-generation330-second deadline |
+| Tetragon231024 | 1 | 1 | 1 | 0 | verifier exclusive-retry loop |
+
+The Cilium audits retain request_count0 and recorded identity-match flag false;
+the reader checks that exact empty-request domain and the empty identity rows.
+Tetragon retains one identity row with six artifact hashes,157 baseline resident
+counters and25,136 BPF calls. Its six baseline stressor components return0.
+One new compiled request reaches the existing shared BCC/Tetragon retry frontier.
+The collector keeps original workloads, application outcomes and full errors.
+Active successor runtime queues continue under A's current lane state.
+
 ## Source identity and reproduction
 
 The first six published cohorts use immutable Git blobs at
@@ -502,7 +524,7 @@ use4adeb4807bb26eddd57324799eb79d9dc0118d56. The later Tetragon223215 metadata, 
 071476a17f6526ef706404743ca19049201ed5e1. The later ARM OTel215656 coverage, raw archive, summary and identity audit use
 24e3a1477d4f6f84b4ccb5b2c30426a0871b7091. The five later resource/CMP cohorts use
 2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c and
-8e32cc4ebcf3d3a251f0875a02a46df6008d45a5. Eighty-one published metadata/archive
+8e32cc4ebcf3d3a251f0875a02a46df6008d45a5. Ninety-three published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 

@@ -46,6 +46,11 @@ ARM_COHORTS=[
  ('katran','arm64_functional_185947',ARM_ROOT+'trusted-arm64-katran-result/coverage.json',
   ARM_ROOT+'trusted-arm64-katran-result/run-20261107T185947373335Z.tar.gz'),
 ]
+ARM_SUCCESSOR_COHORTS=[
+ ('cilium','arm64_functional_225318','cilium-writable-root/replay/trusted-arm64-cilium-result','67a9420988b128be65cecb9909599aee86d709b1'),
+ ('cilium','arm64_functional_230103','cilium-writable-root/home-replay/trusted-arm64-cilium-result','ed5f63c652efa2e33c9cbeff3c4a54309493c832'),
+ ('tetragon','arm64_functional_231024','tetragon-startup-replay/replay/trusted-arm64-tetragon-result','1350ca763f38637bac2db4e95b1bf804ba11d831'),
+]
 def normalized_stage(stage):
     return 'bound' if stage=='bound_accepted' else stage
 
@@ -163,7 +168,8 @@ def recorded_application_work(payload,metadata,batch_records,run_summary,identit
     plans=[];artifact_matches=0
     if identity_audit is not None:
         assert identity_audit['archive_sha256']==sha(payload)
-        assert identity_audit['identity_errors']==[] and identity_audit['all_recorded_identities_match']
+        assert identity_audit['identity_errors']==[]
+        assert identity_audit['all_recorded_identities_match']==bool(expected)
         assert identity_audit['completed_requests_or_cases']==len(expected)
         audited={row['request_id']:row for row in identity_audit['request_identities']}
         assert set(audited)=={row['request_id'] for row in expected}
@@ -291,11 +297,18 @@ def main():
        ARM_ROOT+'readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T215656632646Z.tar.gz')]
     cases += [(app,batch,BASE+directory+'/coverage.json',BASE+directory+'/service.tar.gz')
               for app,batch,directory,publication in RESOURCE_COHORTS]
+    arm_successor_publications={batch:publication for app,batch,directory,publication in ARM_SUCCESSOR_COHORTS}
+    for app,batch,directory,publication in ARM_SUCCESSOR_COHORTS:
+        directory=ARM_ROOT+directory+'/'
+        raw=subprocess.check_output(['git','ls-tree','--name-only',publication,directory],cwd=ROOT,text=True)
+        archives=[path for path in raw.splitlines() if Path(path).name.startswith('run-') and path.endswith('.tar.gz')]
+        assert len(archives)==1
+        cases.append((app,batch,directory+'coverage.json',archives[0]))
     resource_publications={batch:publication for app,batch,directory,publication in RESOURCE_COHORTS}
     arm_pass_batches={row[1] for row in ARM_COHORTS}
     batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=resource_publications[batch] if batch in resource_publications else ARM_READONLY_PUBLICATION if batch=='arm64_functional_215656' else MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=arm_successor_publications[batch] if batch in arm_successor_publications else resource_publications[batch] if batch in resource_publications else ARM_READONLY_PUBLICATION if batch=='arm64_functional_215656' else MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -376,7 +389,7 @@ def main():
                 work_observations[batch]=recorded_application_work(payload,metadata,batch_records,
                     json.loads(published(str(Path(service_path).with_name('summary.json')),publication)),
                     json.loads(published(str(Path(service_path).with_name('native-identity-audit.json')),publication))
-                    if batch=='arm64_functional_215656' else None)
+                    if batch=='arm64_functional_215656' or batch in arm_successor_publications else None)
                 published_requests={row['request_id']:row for row in metadata['requests']}
                 for actual in [failure for failure in failures if failure['batch']==batch]:
                     recorded=published_requests[actual['request_id']]
@@ -450,7 +463,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION,ARM_READONLY_PUBLICATION,RESOURCE_PUBLICATION,SCOPED_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION,ARM_READONLY_PUBLICATION,RESOURCE_PUBLICATION,SCOPED_PUBLICATION]+list(arm_successor_publications.values()),batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),

@@ -22,3 +22,23 @@ Katran completes guest/application execution with one bound request. [Its work r
 | Tracee | Native-link tail-map plan | 1 |
 
 Cilium and Tetragon failures occur during application startup; their request counts stay zero. Each application row in coverage-table.json links the complete runtime coverage and original archive hash.
+
+## Closed startup successors
+
+The original six first-pass rows retain their cohort identities. The generic
+[application batch reader](../../../kprog/results/kprog_fidelity_20261107/application-batches/README.md)
+now also reconciles the following closed ARM runtime epochs with their complete
+archives, published identity audits and raw workload measurements.
+
+| ARM application / epoch | Baseline resident / BPF calls | Requests | Generated / compiled / bound | Recorded boundary |
+| --- | ---: | ---: | ---: | --- |
+| Cilium225318 | 0 / 0 | 0 | 0 / 0 / 0 | gops HOME filesystem |
+| Cilium230103 | 0 / 0 | 0 | 0 / 0 / 0 | endpoint-generation330-second deadline |
+| Tetragon231024 | 157 / 25,136 | 1 | 1 / 1 / 0 | verifier exclusive-retry loop |
+
+[The increment](../../../kprog/results/kprog_fidelity_20261107/application-batches/arm-startup-successor-increment.json)
+retains the prior26-cohort/104-request collection and joins12 additional published
+artifacts. Cilium's zero-request identity flags remain false. Tetragon's one
+request has matching kernel/worker/receipt native bytes and six artifact hashes;
+its six baseline stressors return0. OTel and Tracee runtime queues continue,
+followed by the Cilium virtual-clock and guarded-module Katran queues.

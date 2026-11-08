@@ -174,5 +174,16 @@
     "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
     "/workspaces/.agent-state/kprog-lanes/C/scoped-resource-replay/tracee__monitor/native-link-readonly-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
     "/workspaces/.agent-state/kprog-lanes/C/scoped-resource-replay/tracee__monitor/trusted-native-loader": "ebd3d0660613e71e4319f7565d817c2cb63c7f1a8b81baf894534d4e8f5bcb62"
+  },
+  "21d36125ccae87ed0d38dc9bcf86210fb7b37e64234342d11209a46d9494999c": {
+    "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+    "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "/workspaces/repository/kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+    "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "9c05c0b6577d502c09502cd55a4050585a048ed7c698dca7da8dc8eea3cae895",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents": "a437397a861322ae476be40a059268ed20006bf21cfb0b6403905f7c827a28f8",
+    "/workspaces/repository/kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-native-loader": "e6ec9ea7d8d6de43875b72c710a5d8a0148f8f1e717e3ffbd8b28fa33cb467bd"
   }
 }
