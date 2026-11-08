@@ -115,3 +115,5 @@ BCC real-event successor584ae11ac retains all23 generated/compiled/verifier-acce
 | [Tetragon](../kprog_arm64_app_coverage_20261108/lse-tetragon/trusted-arm64-tetragon-result/coverage.json) | 161 | 3 | 3 / 3 | 2 | third body stackoffset-792 | baseline23944calls; native startup records the stack error |
 
 BCC block_rq_insert uses the upstream optional -Q attachment path; its current command uses default arguments. The remaining merge hook keeps its zero observation. Tetragon LSE replaces the earlier exclusive-retry frontier with the current private-storage frontier. Each cohort retains its complete raw archive and source epoch.
+
+Cilium async-endpoint successor closes with62JIT-baseline rows and17540BPF calls. Native configuration compilation exits with signal:killed before service submission; the latest-terminal-attempt JSON retains0requests and its exact raw archive alongside the earlier native-stage row. Signal/OOM/context-cancellation attribution continues from the captured compiler and kernel logs.
