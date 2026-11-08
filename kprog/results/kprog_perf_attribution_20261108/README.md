@@ -292,3 +292,28 @@ The two modes disagree in sign (0.978x against 1.009x) on one program with
 three 30 s samples each, so Katran's native arm sits at parity with its JIT
 arm and the run-to-run spread is larger than the difference. This matches
 the reproduction's Katran figure (1.018x) within that spread.
+
+### Per-program time, paired with the site counts
+
+The split the counters support is per program: how much of an
+application's BPF time each program takes, and which site kinds that
+program contains. Cilium's native arm and tracee's JIT arm, which is the
+arm tracee's native path is compared against:
+
+| app | program | runs | ns/run | share of BPF time |
+| --- | --- | ---: | ---: | ---: |
+| cilium | `cil_from_containe` (a) | 423,392,270 | 449.1 | 52.5% |
+| cilium | `cil_from_containe` (b) | 448,504,995 | 384.1 | 47.5% |
+| tracee | `tracepoint__raw_syscalls` | 142,667,766 | 520.6 | 27.9% |
+| tracee | `trace_sys_enter` | 142,667,775 | 432.2 | 23.1% |
+| tracee | `trace_sys_exit` | 142,667,772 | 426.6 | 22.8% |
+
+Two cilium programs carry 52.5% and 47.5% of its BPF time; the other six
+are active but their measured time rounds to zero, which is what a
+`containerd` workload's packet path looks like when it is exercised through
+only two of them. Three tracee programs carry 74% of theirs in the JIT arm.
+
+A change to those programs is what moves the application ratio, which is why
+the candidate ordering follows the programs: an optimization in the two
+cilium container programs covers all of its measurable BPF time, and one in
+the three tracee syscall programs covers 74%.
