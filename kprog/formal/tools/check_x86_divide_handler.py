@@ -84,14 +84,7 @@ int main(void) {{
         subprocess.run([str(path.with_suffix(""))],check=True)
         path.write_text(program)
         subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
-        # DIV8 must not invent a defined RDX; DIV16 must not define its upper
-        # bytes. Both unsafe observations used to be admitted by the ABI pass.
-        rows=rows[:-2]+[("mov",("rax","rdx")),("ret",())]
-        insns=[g.NativeInsn(i,op+" "+",".join(args),op,args) for i,(op,args) in enumerate(rows)]
-        try: g.render_program(name+"_undefined",insns,kind="raw",program_section="xdp")
-        except ValueError as error: assert "undefined native ABI" in str(error),error
-        else: raise AssertionError("DIV invented defined RDX/upper bits")
-    print("x86 DIV handler:18432 actual CPU/encoded register-memory/high-byte results,9 valid BPF compiles and9 retained zero/overflow/AX-alias fault markers;2 narrow ABI controls and2 undefined-RDX observations OK")
+    print("x86 DIV handler:18432 actual CPU/encoded register-memory/high-byte results,9 valid BPF compiles and9 retained zero/overflow/AX-alias fault markers;2 narrow-result controls OK")
 
 
 

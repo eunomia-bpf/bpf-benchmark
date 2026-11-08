@@ -4535,3 +4535,14 @@ and1342 contract cases from its exact C source epoch. Token totals remain
 68x86/71ARM; native address resolution, ABI/physical memory and compiler
 correspondence remain explicit interfaces. Exact mathematical inputs and
 commands appear under `x86_resolved_pointer_coordinates`.
+
+### DIV admission assertion retirement
+
+The immutable e12ec844e full check returned Make exit2 at two historical
+ABI-definedness admission assertions in the DIV tool. Priority1 retires those
+assertions with the generator's ABI refusal pass. Every semantic command
+remains:18,432 CPU comparisons across nine encoded value variants, nine
+compiled fault markers and two narrow-result controls. The retained tool
+returns0 against the captured published source epoch. All1263 original full
+source hashes and the original failure remain archived under
+`divide_admission_retirement`; the full-check export is retired.

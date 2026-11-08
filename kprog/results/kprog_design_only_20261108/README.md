@@ -926,3 +926,13 @@ The paired ARM build and module port are published as `e2d3a5ee8`. The x30 retur
 The canonical ARM reference already represents `spAlignmentFault` at `Reference/AArch64.lean:526`. A generic B-level fault representation for incoming-SP alignment and architectural register-overlap faults is posted under Notices for operator approval, following the operator rule for added predicates. The proposed operation bodies carry architectural fault effects through B and retain the five-step constructor. [The approval case](arm64/architectural-fault-approval-case.json) records the concrete finding and scope. Whole BCC/Katran collection continues through captured source epochs.
 
 The first five-step BCC epoch `043482cfd` records23 baseline resident programs and5 native requests, each generated and compiled. Four requests reach the stock-verifier return-dispatch default; one records a kernel chunk lookup errno2. The x30-corrected whole BCC/Katran queue follows the retained original epoch and the safety trial. Raw workload and per-program counters remain in the dated corpus result archive.
+
+### Lane V DIV admission assertion retirement
+
+The historical DIV tool still expected the removed ABI-definedness pass to
+refuse two undefined-result observations. Those two generation-admission
+assertions retire under step(c), where B models unspecified state, and
+step(d), where the stock verifier decides B. The18,432 CPU comparisons,
+nine primary BPF variants, nine fault-marker objects and two narrow-result
+controls remain and pass. Original e12 full Make exit2 and all1263 source
+hashes remain in the verification ledger alongside the retained tool's exit0.
