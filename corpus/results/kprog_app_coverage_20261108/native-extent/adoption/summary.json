@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-08T15:56:10.692777+00:00",
+  "source_adoption": true,
+  "stages": {
+    "check": 0,
+    "image": 0,
+    "module": 0
+  },
+  "source_sha256": {
+    "kprog/tv/native-proof-regions.patch": "f08d38c07b9608e2f3d62c8e5b85426a3beb1c583a3fb3ab8be184560146b2e6",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7"
+  },
+  "runtime_sha256": {
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196"
+  },
+  "private_control_publication": "197d8052f5d7913b22a9bd80ca9b8d9e36496167"
+}

@@ -18,7 +18,6 @@
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
 #include "native_lab_trusted.h"
-#define NATIVE_LAB_MAX_BLOB_BYTES 128
 #define NATIVE_LAB_RELOC_HELPER_CALL_REL32 1
 #define NATIVE_LAB_ABI_RBX 1U
 #define NATIVE_LAB_ABI_R13 2U
@@ -275,7 +274,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
     .owner = THIS_MODULE, .max_insn_cnt = U32_MAX,
-    .native_proof = true, .max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
+    .native_proof = true,
     .instantiate_insn = instantiate_native_lab, .emit_x86 = emit_native_lab_x86,
 };
 static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = { &bpf_x86_native_lab_desc };

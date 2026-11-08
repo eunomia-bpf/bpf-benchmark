@@ -312,3 +312,91 @@ diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
 +			return -EINVAL;
 +		max_insns = kinsn->max_emit_bytes / sizeof(*scratch);
 +	}
+
+diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
+--- a/arch/x86/net/bpf_jit_comp.c
++++ b/arch/x86/net/bpf_jit_comp.c
+@@ -579,7 +579,8 @@
+ 
+ static int emit_kinsn_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
+ 				const struct bpf_insn *insn, bool emit,
+-				const u8 *final_ip)
++				const u8 *final_ip, u8 **native_image,
++				int *native_len)
+ {
+ 	const struct bpf_kinsn *kinsn;
+ 	u8 scratch[BPF_MAX_INSN_SIZE];
+@@ -593,6 +594,27 @@
+ 		return ret;
+ 	if (!kinsn || !kinsn->emit_x86)
+ 		return -EOPNOTSUPP;
++	if (kinsn->native_proof) {
++		ret = kinsn->emit_x86(NULL, &off, false, payload, bpf_prog, NULL);
++		if (ret < 0)
++			return ret;
++		*native_len = off;
++		if (!emit)
++			return 0;
++		*native_image = kvzalloc(off, GFP_KERNEL);
++		if (!*native_image)
++			return -ENOMEM;
++		off = 0;
++		ret = kinsn->emit_x86(*native_image, &off, true, payload,
++				      bpf_prog, final_ip);
++		if (ret < 0) {
++			kvfree(*native_image);
++			*native_image = NULL;
++			return ret;
++		}
++		*native_len = off;
++		return 0;
++	}
+ 	if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE)
+ 		return -E2BIG;
+ 
+@@ -1813,8 +1835,8 @@
+ 		s64 jmp_offset;
+ 		s16 insn_off;
+ 		u8 jmp_cond;
+-		u8 *func;
+-		int nops;
++		u8 *func, *native_image = NULL;
++		int nops, native_len = -1;
+ 
+ 		if (priv_frame_ptr) {
+ 			if (src_reg == BPF_REG_FP)
+@@ -2561,7 +2583,8 @@
+ 			if (src_reg == BPF_PSEUDO_KINSN_CALL) {
+ 				err = emit_kinsn_desc_call(&prog, bpf_prog, insn,
+ 							    !!rw_image,
+-							    image ? ip : NULL);
++							    image ? ip : NULL,
++							    &native_image, &native_len);
+ 				if (err)
+ 					return err;
+ 				break;
+@@ -2882,8 +2905,8 @@
+ 			return -EINVAL;
+ 		}
+ 
+-		ilen = prog - temp;
+-		if (ilen > BPF_MAX_INSN_SIZE) {
++		ilen = native_len >= 0 ? native_len : prog - temp;
++		if (native_len < 0 && ilen > BPF_MAX_INSN_SIZE) {
+ 			pr_err("bpf_jit: fatal insn size error\n");
+ 			return -EFAULT;
+ 		}
+@@ -2900,10 +2923,12 @@
+ 			if (unlikely(proglen + ilen > oldproglen ||
+ 				     proglen + ilen != addrs[i])) {
+ 				pr_err("bpf_jit: fatal error\n");
++				kvfree(native_image);
+ 				return -EFAULT;
+ 			}
+-			memcpy(rw_image + proglen, temp, ilen);
++			memcpy(rw_image + proglen, native_image ? native_image : temp, ilen);
+ 		}
++		kvfree(native_image);
+ 		proglen += ilen;
+ 		addrs[i] = proglen;
+ 		prog = temp;
