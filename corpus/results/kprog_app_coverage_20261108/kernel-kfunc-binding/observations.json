@@ -21,5 +21,14 @@
   "matched_kernel_release": "7.0.0-rc2+",
   "matched_modules_archive_sha256": "2b20247508f135f5e7c827a70a5808473357c0b5726a52f24ab897bf1d477062",
   "module_payload_packaging": "module identity/build records published; compact strip/sign runtime bundle follows",
-  "retained_debug_archive_sha256": "db42d13241b72e182985d9e4ffaf7ecf6cb980136cf5d867145996b926efe530"
+  "retained_debug_archive_sha256": "db42d13241b72e182985d9e4ffaf7ecf6cb980136cf5d867145996b926efe530",
+  "compact_modules": {
+    "modules": 842,
+    "before_bytes": 1562052954,
+    "compact_bytes": 120223042,
+    "scope": "standard INSTALL_MOD_STRIP=1 then normal module signing; allocated sections, BTF, modinfo, versions and normalized runtime relocations equal for every module",
+    "archive": "compact-modules.tar.gz",
+    "archive_bytes": 32567829,
+    "archive_sha256": "91d6c47678d37be59a83e543c77d7915166342bccb6fefc1e10b34d48b94af64"
+  }
 }
