@@ -1,3 +1,4 @@
+import BPFPlatform
 import Composition
 import PrivateSpills
 import BPFPath
@@ -407,3 +408,111 @@ end KProgTV.PrivateSpillProjection
 #print axioms KProgTV.PrivateSpillProjection.reloaded_after_frame
 
 #print axioms KProgTV.PrivateSpillProjection.spill_body_reload_projected_block
+
+namespace KProgTV.PrivateSpillProjection
+open KProgFormal.Reference
+
+/-- Actual returning CALL retains a caller-owned read under the helper's
+local memory footprint. Map/helper effects, result and clobbers remain real;
+physical/native ABI and proof of that footprint are explicit premises. -/
+theorem returning_helper_owned_read
+    (environment : BPF.Environment) (program : Array Byte) (state : BPF.State)
+    (instruction : BPF.Instruction) (call : BPF.HelperCall) (effect : BPF.HelperResult)
+    (opcode : instruction.code = 0x85) (source : instruction.src = 0 ∨ instruction.src = 2)
+    (resolved : environment.helperCall instruction state = .ok call)
+    (returned : environment.helper call (BPF.helperArguments call state) state.memory = .ok effect)
+    (actual : Transition BPF.State)
+    (observed : BPF.execute environment program state instruction = .ok actual)
+    (owned : Word → Bool) (frame : PrivateSpills.FrameOn owned state.memory effect.memory)
+    (address : Word) (count : Nat)
+    (inside : ∀ index < count, owned (address + BitVec.ofNat 64 index) = true) :
+    readMemory actual.state.memory address count = readMemory state.memory address count := by
+  have frameState := BPFPlatform.returning_helper_frame environment program state instruction call effect
+    opcode source resolved returned actual observed
+  rw [frameState.2.1]
+  exact PrivateSpills.frame_on_read owned state.memory effect.memory frame address count inside
+
+/-- A real LDXDW after the helper reloads the saved word from the preserved
+bytes. The address uses a callee-preserved BPF register, and all helper memory
+outside the caller-owned region may change. -/
+theorem returning_helper_owned_reload
+    (environment : BPF.Environment) (program : Array Byte) (state : BPF.State)
+    (instruction : BPF.Instruction) (call : BPF.HelperCall) (effect : BPF.HelperResult)
+    (opcode : instruction.code = 0x85) (source : instruction.src = 0 ∨ instruction.src = 2)
+    (resolved : environment.helperCall instruction state = .ok call)
+    (returned : environment.helper call (BPF.helperArguments call state) state.memory = .ok effect)
+    (actual : Transition BPF.State)
+    (observed : BPF.execute environment program state instruction = .ok actual)
+    (owned : Word → Bool) (frame : PrivateSpills.FrameOn owned state.memory effect.memory)
+    (address saved : Word) (event : Event)
+    (inside : ∀ index < 8, owned (address + BitVec.ofNat 64 index) = true)
+    (read : readMemory state.memory address 8 = .ok (saved,event))
+    (load : BPF.Instruction) (loadCode : load.code = 0x79)
+    (base : BPF.Register) (preserved : 6 ≤ base.val)
+    (loadBase : load.src = base.val) (destination : load.dst ≠ 10)
+    (atAddress : state.regs base + load.offset.signExtend 64 = address) :
+    BPF.execute environment program actual.state load = .ok
+      ⟨BPF.setReg { actual.state with pc := actual.state.pc+1 } load.dst saved,[event],none⟩ := by
+  have frameState := BPFPlatform.returning_helper_frame environment program state instruction call effect
+    opcode source resolved returned actual observed
+  have memoryRead := (returning_helper_owned_read environment program state instruction call effect
+    opcode source resolved returned actual observed owned frame address 8 inside).trans read
+  have sameBase : actual.state.regs base = state.regs base := frameState.2.2.2.2.2.2.2.2.1 base preserved
+  have afterAddress : actual.state.regs base + load.offset.signExtend 64 = address := by
+    rw [sameBase]
+    exact atAddress
+  simp [BPF.execute,loadCode,loadBase,destination,base.isLt,BPF.load,BPF.setReg,
+    afterAddress,memoryRead,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+end KProgTV.PrivateSpillProjection
+#print axioms KProgTV.PrivateSpillProjection.returning_helper_owned_read
+#print axioms KProgTV.PrivateSpillProjection.returning_helper_owned_reload
+
+namespace KProgTV.PrivateSpillProjection
+open KProgFormal.Reference
+
+/-- The decoded final program really executes the helper followed by the
+owned reload. Complete ordered helper effects and the actual read remain. -/
+theorem returning_helper_owned_reload_execution
+    (environment : BPF.Environment) (program : Array Byte) (state : BPF.State)
+    (instruction : BPF.Instruction) (call : BPF.HelperCall) (effect : BPF.HelperResult)
+    (opcode : instruction.code = 0x85) (source : instruction.src = 0 ∨ instruction.src = 2)
+    (resolved : environment.helperCall instruction state = .ok call)
+    (returned : environment.helper call (BPF.helperArguments call state) state.memory = .ok effect)
+    (actual : Transition BPF.State)
+    (observed : BPF.execute environment program state instruction = .ok actual)
+    (owned : Word → Bool) (frame : PrivateSpills.FrameOn owned state.memory effect.memory)
+    (address saved : Word) (event : Event)
+    (inside : ∀ index < 8, owned (address + BitVec.ofNat 64 index) = true)
+    (read : readMemory state.memory address 8 = .ok (saved,event))
+    (load : BPF.Instruction) (loadCode : load.code = 0x79)
+    (base : BPF.Register) (preserved : 6 ≤ base.val)
+    (loadBase : load.src = base.val) (destination : load.dst ≠ 10)
+    (atAddress : state.regs base + load.offset.signExtend 64 = address)
+    (active : state.halted = false) (position : 0 ≤ state.pc)
+    (callDecoded : BPF.decode program state.pc.toNat = .ok instruction)
+    (loadDecoded : BPF.decode program actual.state.pc.toNat = .ok load) :
+    Execution (BPFPath.instructionStep environment program) state (actual.events ++ [event])
+      (BPF.setReg { actual.state with pc := actual.state.pc+1 } load.dst saved) := by
+  have frameState := BPFPlatform.returning_helper_frame environment program state instruction call effect
+    opcode source resolved returned actual observed
+  have afterActive : actual.state.halted = false := frameState.2.2.2.1.trans active
+  have afterPosition : 0 ≤ actual.state.pc := by
+    rw [frameState.2.2.1]
+    omega
+  have firstStep : BPF.step environment program state = .ok actual := by
+    simp [BPF.step,active,Int.not_lt.mpr position,callDecoded,observed]
+  have first : BPFPath.instructionStep environment program state actual.events actual.state :=
+    ⟨actual,firstStep,rfl,rfl⟩
+  have loaded := returning_helper_owned_reload environment program state instruction call effect
+    opcode source resolved returned actual observed owned frame address saved event inside read
+    load loadCode base preserved loadBase destination atAddress
+  have secondStep : BPF.step environment program actual.state = .ok
+      ⟨BPF.setReg { actual.state with pc := actual.state.pc+1 } load.dst saved,[event],none⟩ := by
+    simp [BPF.step,afterActive,Int.not_lt.mpr afterPosition,loadDecoded,loaded]
+  have second : BPFPath.instructionStep environment program actual.state [event]
+      (BPF.setReg { actual.state with pc := actual.state.pc+1 } load.dst saved) :=
+    ⟨_,secondStep,rfl,rfl⟩
+  simpa only [List.append_nil] using Execution.next first (Execution.next second (Execution.refl _))
+
+end KProgTV.PrivateSpillProjection
+#print axioms KProgTV.PrivateSpillProjection.returning_helper_owned_reload_execution

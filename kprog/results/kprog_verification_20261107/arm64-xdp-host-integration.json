@@ -15075,6 +15075,193 @@
     },
     "utc": "2026-11-08T22:49:12.124004+00:00"
   },
+  "helper_caller_private_frame": {
+    "actual_existing_integration_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "95db47b36f0bb41603b3eeb833c9164497ed872841e409444f142823f2e165a6",
+    "archive_file": "kprog/results/kprog_verification_20261107/helper-private-frame.log.gz",
+    "archive_marker": "=== HELPER CALLER PRIVATE FRAME V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-base.json": {
+        "bytes": 289,
+        "sha256": "42c6fef8953fd77ea679058a735441b05b2b3dd6a7a635d365b7a22ffe335367"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-integrated.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-integrated.log": {
+        "bytes": 6341,
+        "sha256": "251c3604beb2f9826da5aaba1de81f2038f7548dd9725b80b2774bce75a0c756"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-integrated.py": {
+        "bytes": 419,
+        "sha256": "5c7fe19d055cc392d67556b02a7450c5e4c4a1c88a325c18ff19cfa74756088a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.exit.attempt2": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.exit.attempt3": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.exit.attempt4": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.log": {
+        "bytes": 3521,
+        "sha256": "835f864923359eea8803c9e234291091b3fd2e0cb1924125bc3638de1535ac1d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.log.attempt1": {
+        "bytes": 2658,
+        "sha256": "300d9071a8029d997b7a659224222579465d63f98734698f55452c79c83cc812"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.log.attempt2": {
+        "bytes": 2797,
+        "sha256": "ef38264f8850471390a6cc37eda0d2cd140267f24c1ec9816fbc9d75ea1672f2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.log.attempt3": {
+        "bytes": 2206,
+        "sha256": "6739d33fb2d059e0e9f6827f029fb25b76ebb072bc33c28c1586d70369f2a51e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.log.attempt4": {
+        "bytes": 7011,
+        "sha256": "5b8b4083b1e37ffe826adb4517227785f4ae1d0bb52bca3996d8130bc29fd1ac"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-proof.py": {
+        "bytes": 573,
+        "sha256": "fc41750095854e5c6ab04e123ecdf97370a104ed16a72d2afb2ea4b22acb420d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpillProjection.attempt4.lean": {
+        "bytes": 31645,
+        "sha256": "0ea706000ecc4dd3aa16ebb14977f28e4405f3732e45cb23c48bc44f82ba51ca"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpillProjection.lean": {
+        "bytes": 31656,
+        "sha256": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpills.attempt1.lean": {
+        "bytes": 17488,
+        "sha256": "83e9daa00b0122826dcef755d86aa3141e80de0d95b61424eeecf2d810c1c9aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpills.attempt2.lean": {
+        "bytes": 17443,
+        "sha256": "f3bdb5fc11bfcd05eef917c6b895a4d6bf299136bebe3c74074d86b5e795b8fc"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpills.attempt3.lean": {
+        "bytes": 17509,
+        "sha256": "dd461d7413680f614d22c9376423f334978c8d86a5f0f3196169f731169782e0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpills.lean": {
+        "bytes": 17516,
+        "sha256": "71f5f078198aabb622e33b03aece7fbf67df389ab47cbcedf0670b060a328081"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPath.lean": {
+        "bytes": 13188,
+        "sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      "/workspaces/repository/kprog/tv/BPFPlatform.lean": {
+        "bytes": 13594,
+        "sha256": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48"
+      },
+      "/workspaces/repository/kprog/tv/Composition.lean": {
+        "bytes": 18251,
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45077,
+        "sha256": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpillProjection.lean": {
+        "bytes": 31656,
+        "sha256": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037"
+      },
+      "/workspaces/repository/kprog/tv/PrivateSpills.lean": {
+        "bytes": 17516,
+        "sha256": "71f5f078198aabb622e33b03aece7fbf67df389ab47cbcedf0670b060a328081"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 186440,
+        "sha256": "7d2cec0272ab384b74e6443490395a655215a65f160e4c08caaf7a4fa9d2cfd3"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 1170608,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpillProjection.olean",
+        "sha256": "5036a2246a6d50fa074c0f821478d0e2bd18f23ac9a069b63cc9ed0a891aa838"
+      },
+      {
+        "bytes": 1531632,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/helperframe-work/PrivateSpills.olean",
+        "sha256": "f2282741fefcdaf924c775efd419001224c740f0dc188ed163c031c8bf100fe9"
+      }
+    ],
+    "effect_scope": "Actual map mutations, all helper/atomic/fault effects and the helper identity/arguments/result event remain; the theorem does not assume total memory equality. Only caller-owned read preservation is derived, and typed pointer/tag/lifetime closure stays an implementation interface.",
+    "existing_integration_command": "make -C kprog/tv private-spill-projection-check",
+    "native_executions": 0,
+    "native_stack_boundary": "The preserved allocated caller region excludes the native return-address slot RSP-8 and callee/interrupt storage below SP. Ghost tag erasure below SP does not prove raw bytes there unchanged or replace native CALL/return semantics. A helper that writes an output buffer in the owned region must retain those actual writes rather than assume the frame.",
+    "premises": [
+      "Real helper identity/arity/effect resolution, arbitrary actual result/memory/events and caller clobbers.",
+      "All selected slot bytes are owned and covered by the supplied helper memory FrameOn relation; selected kernel helper/mapops must discharge that footprint.",
+      "Saved read before the helper is actual; an actual prior spill derives it with PrivateSpills.spill_read.",
+      "Reload address uses a preserved BPF R6..R10 register and actual signed offset; target register is not R10.",
+      "Final-program call and load decode at actual PCs, incoming execution is active, and PC is nonnegative.",
+      "Native entry/RSP mapping, native CALL return-slot write and return/SP restoration, callee writes below SP, private allocation/object ownership, pointer representative provenance/lifetime, native/compiler/link transport remain explicit."
+    ],
+    "result": "FrameOn retains value/readable/writable/initialized at selected owned bytes while all other memory may change. Reflexivity/transitivity and arbitrary finite disjoint actual write histories derive this frame; exact reads retain successful values/initialization/events or the same read fault. Actual BPF returning CALL preserves an owned read under the real helper footprint, and a real LDXDW through callee-preserved R6..R10 reloads the saved bits. Decoded final-program CALL/LDXDW Execution composes with the entire helper trace followed by the actual read event.",
+    "runtime_admission_additions": 0,
+    "scope": "Once-for-all O4 memory/frame laws and actual returning CALL followed by actual LDXDW. No per-program proof or runtime predicate.",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/BPFPlatform.lean": "c928baf9a07b03b4d3cce879e610093edc87ee5357e72ed8d7a041baf3678a48",
+      "kprog/tv/Composition.lean": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771",
+      "kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+      "kprog/tv/PrivateSpillProjection.lean": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037",
+      "kprog/tv/PrivateSpills.lean": "71f5f078198aabb622e33b03aece7fbf67df389ab47cbcedf0670b060a328081",
+      "kprog/x86/x86_sim_local_bpf.h": "7d2cec0272ab384b74e6443490395a655215a65f160e4c08caaf7a4fa9d2cfd3"
+    },
+    "theorems": [
+      "KProgTV.PrivateSpills.frame_on_refl",
+      "KProgTV.PrivateSpills.frame_on_trans",
+      "KProgTV.PrivateSpills.frame_on_read",
+      "KProgTV.PrivateSpills.frame_on_store",
+      "KProgTV.PrivateSpills.frame_on_stores",
+      "KProgTV.PrivateSpillProjection.returning_helper_owned_read",
+      "KProgTV.PrivateSpillProjection.returning_helper_owned_reload",
+      "KProgTV.PrivateSpillProjection.returning_helper_owned_reload_execution"
+    ],
+    "utc": "2026-11-08T23:20:02.290429+00:00"
+  },
   "helper_route_caller_frame": {
     "archive_compressed_prefix_bytes": 92269053,
     "archive_compressed_prefix_sha256": "cbd664ba7e805024fc056d74e7d2bb4f3480d7af4671ea752ea56bb6faf816e7",

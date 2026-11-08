@@ -143,6 +143,10 @@ Existing build caches are reused. Generator checks compare locked numeric contra
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.
 
+Caller-owned helper frames preserve exact saved reads through disjoint memory
+effects; actual returning BPF CALL/LDXDW Execution retains the full helper/read
+trace. Selected helper footprint, pointer lifetime and native ABI stay explicit.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.

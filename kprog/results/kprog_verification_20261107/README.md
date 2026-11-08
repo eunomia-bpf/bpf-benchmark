@@ -5373,3 +5373,24 @@ annotation discrepancy remains recorded; all observations are load-only.
 Physical entry still includes the paired nullability contract, and the
 generic protected-load/native-fault correspondence remains open. No model
 or runtime admission change is made.
+
+### Returning helpers and caller-owned saved slots
+
+Five `PrivateSpills.FrameOn` laws preserve selected caller-owned bytes,
+permissions and initialization through arbitrary finite disjoint actual
+writes, while allowing all other memory to change. Exact reads retain their
+value/events/initialization or the same fault. Three `PrivateSpillProjection`
+laws carry that local helper footprint through actual returning BPF CALL,
+then actual LDXDW and decoded final-program Execution. Saved bits are restored
+through a preserved BPF address register; every ordered helper effect and
+the actual read event remain. Existing `private-spill-projection-check` passes.
+[Original evidence](helper-private-frame.log.gz) includes sources, failed proof
+attempts, passing proofs, commands and source hashes.
+
+The selected helper/mapops footprint and complete slot ownership/liveness
+are premises. Native entry/RSP, the return-address slot at RSP-8, callee
+writes below SP and actual return/SP restoration need their physical ABI
+relation. Pointer representative provenance/lifetime and compiler/link
+transport remain explicit. Current below-SP ghost erasure alone does not
+establish raw-byte preservation there. Output-buffer helpers retain their
+actual allocated-frame writes. No runtime check, gate or model change is added.

@@ -280,3 +280,92 @@ theorem read_disjoint_stores (memory : Memory) (address : Word) (count : Nat)
         (apart write (by simp))
 end KProgTV.PrivateSpills
 #print axioms KProgTV.PrivateSpills.read_disjoint_stores
+
+namespace KProgTV.PrivateSpills
+open KProgFormal.Reference
+
+/-- A helper may change all memory outside the selected caller-owned bytes.
+This is a proof relation, not a runtime predicate or a claim that the helper
+is globally read-only. Permissions and initialization belong to the frame. -/
+def FrameOn (owned : Word → Bool) (before after : Memory) : Prop :=
+  ∀ address, owned address = true →
+    after.value address = before.value address ∧
+    after.readable address = before.readable address ∧
+    after.writable address = before.writable address ∧
+    after.initialized address = before.initialized address
+
+theorem frame_on_refl (owned : Word → Bool) (memory : Memory) :
+    FrameOn owned memory memory := by
+  intro address inside
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
+theorem frame_on_trans (owned : Word → Bool) (first middle last : Memory)
+    (left : FrameOn owned first middle) (right : FrameOn owned middle last) :
+    FrameOn owned first last := by
+  intro address inside
+  obtain ⟨v,r,w,i⟩ := left address inside
+  obtain ⟨v',r',w',i'⟩ := right address inside
+  exact ⟨v'.trans v,r'.trans r,w'.trans w,i'.trans i⟩
+
+/-- Exact successful reads, initialization observations and read faults all
+survive a local helper frame; addresses retain architectural wraparound. -/
+theorem frame_on_read (owned : Word → Bool) (before after : Memory)
+    (frame : FrameOn owned before after) (address : Word) (count : Nat)
+    (inside : ∀ index < count, owned (address + BitVec.ofNat 64 index) = true) :
+    readMemory after address count = readMemory before address count := by
+  have bytes : bytesAt after address count = bytesAt before address count := by
+    apply List.map_congr_left
+    intro index member
+    exact (frame _ (inside index (List.mem_range.mp member))).1
+  have readable : permitted after.readable address count = permitted before.readable address count := by
+    apply Bool.eq_iff_iff.mpr
+    simp only [permitted,List.all_eq_true]
+    constructor
+    · intro allowed index member
+      rw [←(frame _ (inside index (List.mem_range.mp member))).2.1]
+      exact allowed index member
+    · intro allowed index member
+      rw [(frame _ (inside index (List.mem_range.mp member))).2.1]
+      exact allowed index member
+  have initialized : initializedAt after address count = initializedAt before address count := by
+    apply Bool.eq_iff_iff.mpr
+    simp only [initializedAt,permitted,List.all_eq_true]
+    constructor
+    · intro allowed index member
+      rw [←(frame _ (inside index (List.mem_range.mp member))).2.2.2]
+      exact allowed index member
+    · intro allowed index member
+      rw [(frame _ (inside index (List.mem_range.mp member))).2.2.2]
+      exact allowed index member
+  simp only [readMemory,wordAt,bytes,readable,initialized]
+
+/-- An actual disjoint write can mutate helper/map memory while retaining all
+caller-owned bytes and permissions; no such write is erased from the trace. -/
+theorem frame_on_store (owned : Word → Bool) (memory : Memory)
+    (destination value : Word) (count : Nat)
+    (apart : ∀ address, owned address = true → ¬(address-destination).toNat < count) :
+    FrameOn owned memory (storeMemory memory destination value count) := by
+  intro address inside
+  simp only [storeMemory,apart address inside,ite_false]
+  exact ⟨True.intro,True.intro,True.intro,True.intro⟩
+
+theorem frame_on_stores (owned : Word → Bool) (memory : Memory)
+    (writes : List (Word × Word × Nat))
+    (apart : ∀ write ∈ writes, ∀ address, owned address = true →
+      ¬(address-write.1).toNat < write.2.2) :
+    FrameOn owned memory (writes.foldl (fun current write =>
+      storeMemory current write.1 write.2.1 write.2.2) memory) := by
+  induction writes generalizing memory with
+  | nil => exact frame_on_refl owned memory
+  | cons write rest ih =>
+      simp only [List.foldl_cons]
+      exact frame_on_trans owned memory _ _
+        (frame_on_store owned memory write.1 write.2.1 write.2.2
+          (apart write (by simp)))
+        (ih _ (fun item member => apart item (List.mem_cons_of_mem _ member)))
+end KProgTV.PrivateSpills
+#print axioms KProgTV.PrivateSpills.frame_on_refl
+#print axioms KProgTV.PrivateSpills.frame_on_trans
+#print axioms KProgTV.PrivateSpills.frame_on_read
+#print axioms KProgTV.PrivateSpills.frame_on_store
+#print axioms KProgTV.PrivateSpills.frame_on_stores
