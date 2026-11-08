@@ -1,0 +1,591 @@
+{
+  "utc": "2026-11-08T15:20:20.106011+00:00",
+  "scope": "Read-only join of actual service archives to the full captured companion-stage catalog; native SHA joins retain installed outcomes before client warmup",
+  "publication": "fe1d7487e9407176af2f0f13ad532ed844e0ec0c",
+  "archive": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/runner-current/full/trusted-arm64-service-result/run-20261108T143204850652Z.tar.gz",
+  "archive_sha256": "ee828d44897c790a28561c2a517d758260c5fc9fde94af417a5aa1498db37fd2",
+  "counts": {
+    "catalog_rows": 380,
+    "shared_client_counts": {
+      "submitted": 78,
+      "skipped": 302,
+      "ran": 1,
+      "refused": 12,
+      "not-reached": 65,
+      "failure": 2,
+      "failure_agrees": 2,
+      "success": 11,
+      "success_agrees": 1
+    },
+    "service_requests": 20,
+    "stages": {
+      "installed": 8,
+      "stock_verifier_rejected": 7,
+      "native_load_rejected": 5
+    },
+    "generated": 20,
+    "compiled": 20,
+    "installed_expected_failure": 6,
+    "installed_with_test_run_error": 7
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "entry": "size_not_bpf_dw",
+      "native_sha256": "577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23",
+      "source_prog_id": 155,
+      "native_prog_id": 156,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/1.success.tar.gz",
+      "request_archive_sha256": "ea264bdc6b1537a5e2f4696030a1132ce64f8b8b281986f8b481cd40c2b5a7d1",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "size_not_bpf_dw",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 2,
+      "entry": "non_const_var_off",
+      "native_sha256": "ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d",
+      "source_prog_id": 161,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/2.failure.tar.gz",
+      "request_archive_sha256": "788e4c0400c5ecc0ca01410d615b652426359db7de96bf7f3a1dd20cce59be4f",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 206 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=11227",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=3 blob_bytes=116 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356",
+        "retained_map_info=6:id=255:type=2:name=array_map"
+      ],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "non_const_var_off",
+          "expect": "failure",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 3,
+      "entry": "misaligned_access_write",
+      "native_sha256": "857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126",
+      "source_prog_id": 170,
+      "native_prog_id": 171,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/3.success.tar.gz",
+      "request_archive_sha256": "3c907134a422ce1c50079890e7ea622caf853acb2bfaf8f3e5726f472aec120e",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_write",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 4,
+      "entry": "misaligned_access_read",
+      "native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b",
+      "source_prog_id": 176,
+      "native_prog_id": 177,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/4.success.tar.gz",
+      "request_archive_sha256": "d16beb5e0ff8e64cd8258a55e6b24c2f54fc94043c4ff5c7535868c8e8b349d0",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_read",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 5,
+      "entry": "reject_var_off_store",
+      "native_sha256": "1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1",
+      "source_prog_id": 182,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/5.failure.tar.gz",
+      "request_archive_sha256": "2e189245d3a47d6b6ba8b554c758acac3ddee5c6cb751c4fa30619158f4b445d",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 208 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=11376",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=3 blob_bytes=124 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356",
+        "retained_map_info=6:id=259:type=2:name=array_map"
+      ],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_var_off_store",
+          "expect": "failure",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 6,
+      "entry": "reject_bad_type_match",
+      "native_sha256": "7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9",
+      "source_prog_id": 187,
+      "native_prog_id": 188,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/6.success.tar.gz",
+      "request_archive_sha256": "9351d00b9886d2c309137869bbc5a9c0a8e7614fa94e96b1eeb7e77cf3d9eb28",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_bad_type_match",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 7,
+      "entry": "reject_untrusted_store_to_ref",
+      "native_sha256": "77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0",
+      "source_prog_id": 209,
+      "native_prog_id": 210,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/7.success.tar.gz",
+      "request_archive_sha256": "e70586e64144d9d6b2f8f97a53d5fc407eee2c16c6142158d273fec229581756",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_untrusted_store_to_ref",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 8,
+      "entry": "reject_indirect_global_func_access",
+      "native_sha256": "e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2",
+      "source_prog_id": 223,
+      "native_prog_id": 224,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/8.success.tar.gz",
+      "request_archive_sha256": "2fde56e8c9252cfff8148a2e8e1dafa553a856ba6785ece1084275f4f1c54482",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "map_kptr_fail.c",
+          "program": "reject_indirect_global_func_access",
+          "expect": "failure",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    },
+    {
+      "request_id": 9,
+      "entry": "global_func16",
+      "native_sha256": "8997f4474606dd180d28bf5bba505ce9960d34445b79c9838d081abe8f432c0c",
+      "source_prog_id": 271,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/9.failure.tar.gz",
+      "request_archive_sha256": "cd250a26a00fb4960842b07a3cca9cc296a3f5916db20957f0a5808449f23cbb",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 113 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=5871",
+        "invalid read from stack off -4+0 size 1",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=8 blob_bytes=52 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356"
+      ],
+      "source_matches": [
+        {
+          "file": "test_global_func16.c",
+          "program": "global_func16",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 10,
+      "entry": "global_func2",
+      "native_sha256": "09c8a8ef2ef40f0784e56afb8cafedd4d385734dde7114ff4fe4617c0d39eb93",
+      "source_prog_id": 281,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/10.failure.tar.gz",
+      "request_archive_sha256": "2e827f4df6d0b87762121c9ec2f062715482a1433006b5c3557259dafb1a8295",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 34 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=1971",
+        "invalid write to stack R10 off=-624 size=8",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=3 blob_bytes=308 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=7 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356"
+      ],
+      "source_matches": [
+        {
+          "file": "test_global_func2.c",
+          "program": "global_func2",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 11,
+      "entry": "global_func4",
+      "native_sha256": "213c6f47bbd76e8c3bdceb23fd20cd295d2e4aa3ed4c22eed531690783edf86c",
+      "source_prog_id": 290,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/11.failure.tar.gz",
+      "request_archive_sha256": "ec467080da6d076eb3a27951fc1e3ad7cdbbfeb4c07b1e3f5c3d08c2735a8edc",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 113 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=6230",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=3 blob_bytes=164 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356"
+      ],
+      "source_matches": [
+        {
+          "file": "test_global_func4.c",
+          "program": "global_func4",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 12,
+      "entry": "global_func8",
+      "native_sha256": "e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7",
+      "source_prog_id": 308,
+      "native_prog_id": 309,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/12.success.tar.gz",
+      "request_archive_sha256": "fe658a6f5796552d4bd306284dad5da56088727b574145663b14ced1ead9da53",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "test_global_func8.c",
+          "program": "global_func8",
+          "expect": "success",
+          "client_outcome": "ran",
+          "client_returncode": 0,
+          "client_stderr": ""
+        }
+      ]
+    },
+    {
+      "request_id": 13,
+      "entry": "global_func9",
+      "native_sha256": "915c77aeba5fa6b9fc9163aa7bab731d3ec7de4556b0c0030a2333ca39b402f1",
+      "source_prog_id": 316,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/13.failure.tar.gz",
+      "request_archive_sha256": "2acd0e0fb6cc6a32b0a95ff458011607dc4630483db6bc108db300167b613116",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 117 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=6635",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=8 blob_bytes=444 reloc_records=4 reloc_bytes=64 chunks=1 proof_bound=1 callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356",
+        "retained_map_info=10:id=272:type=2:name=map"
+      ],
+      "source_matches": [
+        {
+          "file": "test_global_func9.c",
+          "program": "global_func9",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 14,
+      "entry": "tcx2",
+      "native_sha256": "c6cbabe7b9119382749302dfb314af3ce153598f8ec59c2a73c94336944a9318",
+      "source_prog_id": 331,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/14.failure.tar.gz",
+      "request_archive_sha256": "d59ab497ad761dec02852f05056e19e41666cbc8b8cdd4f48e7b04fecf11178b",
+      "generated": true,
+      "compiled": true,
+      "stage": "native_load_rejected",
+      "verifier_processed": [],
+      "diagnostics": [
+        "trusted-native-loader: native-link kernel failed (rc=1)"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_const.c",
+          "program": "tcx2",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 15,
+      "entry": "tcx3",
+      "native_sha256": "47fea5b2035d82fa2802f92e7d2aa279829d28b64c513b2da0e8a78456c58bb0",
+      "source_prog_id": 338,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/15.failure.tar.gz",
+      "request_archive_sha256": "d6a7f30e5bf77cee433c5de5146f1655a595b83fd290d99d19007d773c12d828",
+      "generated": true,
+      "compiled": true,
+      "stage": "native_load_rejected",
+      "verifier_processed": [],
+      "diagnostics": [
+        "trusted-native-loader: native-link kernel failed (rc=1)"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_const.c",
+          "program": "tcx3",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 16,
+      "entry": "tcx5",
+      "native_sha256": "c6a6e425ea7945f715d2b688e2c4159c888ccfd33e23b21ab379871928f3cfdb",
+      "source_prog_id": 350,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/16.failure.tar.gz",
+      "request_archive_sha256": "0c2355b09cf3adb195bb0defc27a44f20a3f00a2bb26abaa115f8ce61cebbfe4",
+      "generated": true,
+      "compiled": true,
+      "stage": "native_load_rejected",
+      "verifier_processed": [],
+      "diagnostics": [
+        "trusted-native-loader: native-link kernel failed (rc=1)"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_const.c",
+          "program": "tcx5",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 17,
+      "entry": "tcx6",
+      "native_sha256": "81401780393cff5dc41f44dac94648128e9c432a37b39271d13075dca72a3bae",
+      "source_prog_id": 357,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/17.failure.tar.gz",
+      "request_archive_sha256": "c684e821acf54e5f1fcb0131a5c628441b5f3856e6ae41cd3c391a9fc2a5b58e",
+      "generated": true,
+      "compiled": true,
+      "stage": "native_load_rejected",
+      "verifier_processed": [],
+      "diagnostics": [
+        "trusted-native-loader: native-link kernel failed (rc=1)"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_const.c",
+          "program": "tcx6",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 18,
+      "entry": "tc_uninit_mtu",
+      "native_sha256": "4d7a1538c1a545f8717f14ba9470df4a7f6a2fc79063589a0464e344d555c0f0",
+      "source_prog_id": 368,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/18.failure.tar.gz",
+      "request_archive_sha256": "d4b698c4308ecb21b1e17476a8a4574a9c8bbfdfdf28ba560f9026fb5dc2ce84",
+      "generated": true,
+      "compiled": true,
+      "stage": "native_load_rejected",
+      "verifier_processed": [],
+      "diagnostics": [
+        "trusted-native-loader: native-link kernel failed (rc=1)"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_mtu.c",
+          "program": "tc_uninit_mtu",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 19,
+      "entry": "test_sched_cls",
+      "native_sha256": "ed845cb0c023a9bf2f7981d484e8da127057906b19c8c258ac8b2ec2d5462ba1",
+      "source_prog_id": 374,
+      "native_prog_id": null,
+      "status": -5,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/19.failure.tar.gz",
+      "request_archive_sha256": "915deba9b2587c546ae90ccd6fe1105b139bf83fe4c1b43d6de749eb3620c0ca",
+      "generated": true,
+      "compiled": true,
+      "stage": "stock_verifier_rejected",
+      "verifier_processed": [
+        "processed 110 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0"
+      ],
+      "diagnostics": [
+        "stub verifier_log_size=262144 log_true_size=6111",
+        "5,233,1601214,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel",
+        "native_lab stub context: prog_type=3 blob_bytes=212 reloc_records=7 reloc_bytes=112 chunks=1 proof_bound=1 callee_saved_mask=7 tail_call_reachable=0 retained_map_fds=3 relocated_map_ids=3 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356",
+        "retained_map_info=8:id=320:type=15:name=sockmap,9:id=322:type=2:name=verifier.bss,10:id=319:type=18:name=sockhash"
+      ],
+      "source_matches": [
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sched_cls",
+          "expect": "success",
+          "client_outcome": "refused",
+          "client_returncode": 1,
+          "client_stderr": "trusted specializer refused native program: Input/output error\n"
+        }
+      ]
+    },
+    {
+      "request_id": 20,
+      "entry": "test_xdp",
+      "native_sha256": "b3d2711c3e707b4e6d9ba791ad6650bb074c45e35524fa65d95b620abac30b2e",
+      "source_prog_id": 381,
+      "native_prog_id": 382,
+      "status": 0,
+      "request_archive": "run/service-state/trusted-3z2ybhjk/20.success.tar.gz",
+      "request_archive_sha256": "b5cd79cf8740871de4dabd2ccda1f6c6cbe3224c36900d48f74459afd0ea05e4",
+      "generated": true,
+      "compiled": true,
+      "stage": "installed",
+      "verifier_processed": [],
+      "diagnostics": [],
+      "source_matches": [
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_xdp",
+          "expect": "success",
+          "client_outcome": "not-reached",
+          "client_returncode": 1,
+          "client_stderr": "warmup test_run failed: Invalid argument\n"
+        }
+      ]
+    }
+  ]
+}
