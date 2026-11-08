@@ -4464,8 +4464,8 @@ hygiene and oracle-composition checks exit0. This mathematical composition
 reuses the source-pinned2097152 production pointer frames and1342 retained
 contract cases from `x86_pointer_load_tokens`; their C source remains the
 published d816e27e8 oracle and db581dd6d production dependencies. The formal
-README is reduced from1602 to459 words, linking detailed scopes and source
-receipts in this ledger and the theorem statements.
+README is a short entry point linking detailed scopes and source receipts in
+this ledger and the theorem statements.
 
 The immutable db581dd6d full check exited2 at its earlier ARM entry-context
 fixture's missing helper ABI base, preserving two SKB tag diagnostics and all
