@@ -1,0 +1,23 @@
+{
+  "source": "e532845ab three inlining attributes",
+  "paired_compiler": "d4d905b6c",
+  "runtime": "dc120/88 helpers/88a Image",
+  "terminal": "e88f2b62a",
+  "failures": [
+    {
+      "archive_member": "run/service-state/trusted-ys321u9p/1.failure.tar.gz",
+      "entry": "event_execve",
+      "diagnostics": [
+        "invalid write to stack R10 off=-536 size=8",
+        "processed 134 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0"
+      ]
+    },
+    {
+      "archive_member": "run/service-state/trusted-ys321u9p/3.failure.tar.gz",
+      "entry": "execve_send",
+      "diagnostics": [
+        "processed 668277 insns (limit 1000000) max_states_per_insn 4 total_states 6807 peak_states 6807 mark_read 0"
+      ]
+    }
+  ]
+}
