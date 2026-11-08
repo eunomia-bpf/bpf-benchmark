@@ -1,0 +1,1169 @@
+{
+  "counts": {
+    "catalog_rows": 20,
+    "attempted": 19,
+    "submitted": 15,
+    "installed": 6,
+    "verifier_rejected": 3,
+    "generation_failed": 6,
+    "compilation_failed": 0,
+    "resource_failed": 4,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 9,
+    "failure_agrees": 3,
+    "failure_installed": 6,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  },
+  "programs": [
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 12,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 1,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 1
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-8rb9hhg_",
+        "attach_target_resolution": null
+      },
+      "request_id": 1,
+      "status": 0,
+      "prog_id": 4,
+      "service": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23",
+        "started": "1970-01-01T00:00:27.150513+00:00",
+        "prog_id": 4,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/1.success.tar.gz",
+        "finished": "1970-01-01T00:00:39.060092+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "size_not_bpf_dw",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 12, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 1, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 1}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-8rb9hhg_\", \"attach_target_resolution\": null}, \"request_id\": 1, \"status\": 0, \"prog_id\": 4, \"service\": {\"request_id\": 1, \"source_prog_id\": 0, \"native_sha256\": \"577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23\", \"started\": \"1970-01-01T00:00:27.150513+00:00\", \"prog_id\": 4, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/1.success.tar.gz\", \"finished\": \"1970-01-01T00:00:39.060092+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"size_not_bpf_dw\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 559, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__size_not_bpf_dw.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "verifier_rejected",
+      "native_sha256": "ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 22,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 2,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 2
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-81lag7v4",
+        "attach_target_resolution": null
+      },
+      "request_id": 2,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d",
+        "started": "1970-01-01T00:00:47.961431+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '2', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/request.native.o', 'non_const_var_off', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '22', '32', 'array_map', '2', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '2', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/request.native.o', 'non_const_var_off', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '22', '32', 'array_map', '2', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/2.failure.tar.gz",
+        "finished": "1970-01-01T00:01:06.030121+00:00"
+      },
+      "diagnostic": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=11991\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\nstub insns=0:code=183,dst=0,src=3,off=17,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (bf) r7 = r0                      ; R0=scalar(id=1) R7=scalar(id=1)\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (b7) r0 = 2                       ; R0=scalar()\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (b7) r0 = 2                       ; R0=scalar()\n28: (b7) r0 = 2                       ; R0=scalar()\n29: (b7) r0 = 2                       ; R0=scalar()\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (b7) r0 = 2                       ; R0=scalar()\n32: (b7) r0 = 2                       ; R0=scalar()\n33: (b7) r0 = 2                       ; R0=scalar()\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r0 = 2                       ; R0=scalar()\n51: (b7) r0 = 2                       ; R0=scalar()\n52: (b7) r0 = 2                       ; R0=scalar()\n53: (b7) r0 = 2                       ; R0=scalar()\n54: (b7) r0 = 2                       ; R0=scalar()\n55: (b7) r0 = 2                       ; R0=scalar()\n56: (b7) r0 = 2                       ; R0=scalar()\n57: (b7) r0 = 2                       ; R0=scalar()\n58: (b7) r0 = 2                       ; R0=scalar()\n59: (b7) r0 = 2                       ; R0=scalar()\n60: (b7) r0 = 2                       ; R0=scalar()\n61: (b7) r0 = 2                       ; R0=scalar()\n62: (b7) r0 = 2                       ; R0=scalar()\n63: (b7) r0 = 2                       ; R0=scalar()\n64: (b7) r0 = 2                       ; R0=scalar()\n65: (b7) r0 = 2                       ; R0=scalar()\n66: (b7) r0 = 2                       ; R0=scalar()\n67: (b7) r0 = 2                       ; R0=scalar()\n68: (b7) r0 = 2                       ; R0=scalar()\n69: (b7) r0 = 2                       ; R0=scalar()\n70: (b7) r0 = 2                       ; R0=scalar()\n71: (b7) r0 = 2                       ; R0=scalar()\n72: (b7) r0 = 2                       ; R0=scalar()\n73: (b7) r0 = 2                       ; R0=scalar()\n74: (b7) r0 = 2                       ; R0=scalar()\n75: (b7) r0 = 2                       ; R0=scalar()\n76: (b7) r0 = 2                       ; R0=scalar()\n77: (b7) r0 = 2                       ; R0=scalar()\n78: (b7) r0 = 2                       ; R0=scalar()\n79: (b7) r0 = 2                       ; R0=scalar()\n80: (b7) r0 = 2                       ; R0=scalar()\n81: (b7) r0 = 2                       ; R0=scalar()\n82: (b7) r0 = 2                       ; R0=scalar()\n83: (b7) r0 = 2                       ; R0=scalar()\n84: (b7) r0 = 2                       ; R0=scalar()\n85: (b7) r0 = 2                       ; R0=scalar()\n86: (b7) r0 = 2                       ; R0=scalar()\n87: (b7) r0 = 2                       ; R0=scalar()\n88: (b7) r0 = 2                       ; R0=scalar()\n89: (b7) r0 = 2                       ; R0=scalar()\n90: (b7) r0 = 2                       ; R0=scalar()\n91: (b7) r0 = 2                       ; R0=scalar()\n92: (b7) r0 = 2                       ; R0=scalar()\n93: (b7) r0 = 2                       ; R0=scalar()\n94: (b7) r0 = 2                       ; R0=scalar()\n95: (b7) r0 = 2                       ; R0=scalar()\n96: (b7) r0 = 2                       ; R0=scalar()\n97: (b7) r0 = 2                       ; R0=scalar()\n98: (b7) r0 = 2                       ; R0=scalar()\n99: (7a) *(u64 *)(r10 -48) = 0        ; R10=fp0 fp-48=0\n100: (85) call bpf_cast_to_kern_ctx#69129     ; R0=trusted_ptr_sk_buff()\n101: (bf) r6 = r0                     ; R0=trusted_ptr_sk_buff() R6=trusted_ptr_sk_buff()\n102: (b7) r0 = 2                      ; R0=scalar()\n103: (b7) r0 = 2                      ; R0=scalar()\n104: (7b) *(u64 *)(r10 -16) = r0      ; R0=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\n105: (7a) *(u64 *)(r10 -40) = 0       ; R10=fp0 fp-40=0\n106: (79) r1 = *(u64 *)(r10 -48)      ; R1=0 R10=fp0 fp-48=0\n107: (57) r1 &= -16711681             ; R1=0\n108: (47) r1 |= 655360                ; R1=0xa0000\n109: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n110: (7b) *(u64 *)(r10 -8) = r7       ; R7=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n111: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n113: (79) r2 = *(u64 *)(r10 -48)      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\n114: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\n115: (7b) *(u64 *)(r10 -48) = r2      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\n116: (79) r1 = *(u64 *)(r10 -48)      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n117: (57) r1 &= -65281                ; R1=0xa0000\n118: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n119: (72) *(u8 *)(r10 -20) = 0        ; R10=fp0 fp-24=???0????\n120: (72) *(u8 *)(r10 -19) = 0        ; R10=fp0 fp-24=??00????\n121: (72) *(u8 *)(r10 -18) = 0        ; R10=fp0 fp-24=?000????\n122: (72) *(u8 *)(r10 -17) = 0        ; R10=fp0 fp-24=0000????\n123: (b7) r2 = -20                    ; R2=-20\n124: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n125: (07) r1 += -32                   ; R1=fp-32\n126: (0f) r2 += r1                    ; R1=fp-32 R2=fp-52\n127: (07) r2 += 32                    ; R2=fp-20\n128: (18) r1 = 0xffff000005ded400     ; R1=map_ptr(map=array_map,ks=4,vs=32)\n130: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=array_map,ks=4,vs=32)\n131: (bf) r1 = r0                     ; R0=map_value(map=array_map,ks=4,vs=32) R1=map_value(map=array_map,ks=4,vs=32)\n132: (b7) r0 = 2                      ; R0=scalar()\n133: (b7) r0 = 2                      ; R0=scalar()\n134: (b7) r0 = 2                      ; R0=scalar()\n135: (b7) r0 = 2                      ; R0=scalar()\n136: (b7) r0 = 2                      ; R0=scalar()\n137: (b7) r0 = 2                      ; R0=scalar()\n138: (b7) r0 = 2                      ; R0=scalar()\n139: (b7) r0 = 2                      ; R0=scalar()\n140: (b7) r0 = 2                      ; R0=scalar()\n141: (b7) r0 = 2                      ; R0=scalar()\n142: (b7) r0 = 2                      ; R0=scalar()\n143: (b7) r0 = 2                      ; R0=scalar()\n144: (b7) r0 = 2                      ; R0=scalar()\n145: (b7) r0 = 2                      ; R0=scalar()\n146: (b7) r0 = 2                      ; R0=scalar()\n147: (b7) r0 = 2                      ; R0=scalar()\n148: (b7) r0 = 2                      ; R0=scalar()\n149: (b7) r0 = 2                      ; R0=scalar()\n150: (b7) r0 = 2                      ; R0=scalar()\n151: (b7) r0 = 2                      ; R0=scalar()\n152: (b7) r0 = 2                      ; R0=scalar()\n153: (b7) r0 = 2                      ; R0=scalar()\n154: (b7) r0 = 2                      ; R0=scalar()\n155: (b7) r0 = 2                      ; R0=scalar()\n156: (b7) r0 = 2                      ; R0=scalar()\n157: (b7) r0 = 2                      ; R0=scalar()\n158: (b7) r0 = 2                      ; R0=scalar()\n159: (b7) r0 = 2                      ; R0=scalar()\n160: (b7) r0 = 2                      ; R0=scalar()\n161: (b7) r0 = 2                      ; R0=scalar()\n162: (b7) r0 = 2                      ; R0=scalar()\n163: (b7) r0 = 2                      ; R0=scalar()\n164: (b7) r0 = 2                      ; R0=scalar()\n165: (b7) r0 = 2                      ; R0=scalar()\n166: (b7) r0 = 2                      ; R0=scalar()\n167: (b7) r0 = 2                      ; R0=scalar()\n168: (b7) r0 = 2                      ; R0=scalar()\n169: (b7) r0 = 2                      ; R0=scalar()\n170: (b7) r0 = 2                      ; R0=scalar()\n171: (b7) r0 = 2                      ; R0=scalar()\n172: (b7) r0 = 2                      ; R0=scalar()\n173: (b7) r0 = 2                      ; R0=scalar()\n174: (b7) r0 = 2                      ; R0=scalar()\n175: (b7) r0 = 2                      ; R0=scalar()\n176: (b7) r0 = 2                      ; R0=scalar()\n177: (b7) r0 = 2                      ; R0=scalar()\n178: (b7) r0 = 2                      ; R0=scalar()\n179: (b7) r0 = 2                      ; R0=scalar()\n180: (b7) r0 = 2                      ; R0=scalar()\n181: (b7) r0 = 2                      ; R0=scalar()\n182: (b7) r0 = 2                      ; R0=scalar()\n183: (b7) r0 = 2                      ; R0=scalar()\n184: (b7) r0 = 2                      ; R0=scalar()\n185: (b7) r0 = 2                      ; R0=scalar()\n186: (b7) r0 = 2                      ; R0=scalar()\n187: (b7) r0 = 2                      ; R0=scalar()\n188: (b7) r0 = 2                      ; R0=scalar()\n189: (b7) r0 = 2                      ; R0=scalar()\n190: (b7) r0 = 2                      ; R0=scalar()\n191: (b7) r0 = 2                      ; R0=scalar()\n192: (b7) r0 = 2                      ; R0=scalar()\n193: (b7) r0 = 2                      ; R0=scalar()\n194: (b7) r0 = 2                      ; R0=scalar()\n195: (b7) r0 = 2                      ; R0=scalar()\n196: (b7) r0 = 2                      ; R0=scalar()\n197: (b7) r0 = 2                      ; R0=scalar()\n198: (b7) r0 = 2                      ; R0=scalar()\n199: (b7) r0 = 2                      ; R0=scalar()\n200: (b7) r0 = 2                      ; R0=scalar()\n201: (b7) r0 = 2                      ; R0=scalar()\n202: (b7) r0 = 2                      ; R0=scalar()\n203: (b7) r0 = 2                      ; R0=scalar()\n204: (b7) r0 = 2                      ; R0=scalar()\n205: (b7) r0 = 2                      ; R0=scalar()\n206: (b7) r0 = 2                      ; R0=scalar()\n207: (b7) r0 = 2                      ; R0=scalar()\n208: (b7) r0 = 2                      ; R0=scalar()\n209: (b7) r0 = 2                      ; R0=scalar()\n210: (b7) r0 = 2                      ; R0=scalar()\n211: (b7) r0 = 2                      ; R0=scalar()\n212: (b7) r0 = 2                      ; R0=scalar()\n213: (b7) r0 = 2                      ; R0=scalar()\n214: (b7) r0 = 2                      ; R0=scalar()\n215: (b7) r0 = 2                      ; R0=scalar()\n216: (b7) r0 = 2                      ; R0=scalar()\n217: (b7) r0 = 2                      ; R0=scalar()\n218: (15) if r1 == 0x0 goto pc+9      ; R1=map_value(map=array_map,ks=4,vs=32)\n219: (61) r2 = *(u32 *)(r6 +16)\ncannot access ptr member dev with moff 0 in struct (anon) with off 0 size 4\nprocessed 218 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=3 blob_bytes=116 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\nretained_map_info=5:id=2:type=2:name=array_map\nnative_blob_diag: fnv64=f74ffd48a8183422 word_count=29 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=104 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=116 final_size_matches=1\nchunk_bytes=0:116\nreloc_targets=104:0x2\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "file": "map_kptr_fail.c",
+      "program": "non_const_var_off",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"verifier_rejected\", \"native_sha256\": \"ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 22, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 2, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 2}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-81lag7v4\", \"attach_target_resolution\": null}, \"request_id\": 2, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 2, \"source_prog_id\": 0, \"native_sha256\": \"ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d\", \"started\": \"1970-01-01T00:00:47.961431+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '2', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/request.native.o', 'non_const_var_off', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '22', '32', 'array_map', '2', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '2', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/request.native.o', 'non_const_var_off', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-645ma58t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '22', '32', 'array_map', '2', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/2.failure.tar.gz\", \"finished\": \"1970-01-01T00:01:06.030121+00:00\"}, \"diagnostic\": \"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\\ndiagnostic BPF_PROG_LOAD: Permission denied\\nstub verifier_log_size=262144 log_true_size=11991\\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\\nstub insns=0:code=183,dst=0,src=3,off=17,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\\nverifier log:\\n0: R1=ctx() R10=fp0\\n0: (b7) r0 = 2                        ; R0=scalar()\\n1: (b7) r0 = 2                        ; R0=scalar()\\n2: (b7) r0 = 2                        ; R0=scalar()\\n3: (b7) r0 = 2                        ; R0=scalar()\\n4: (b7) r0 = 2                        ; R0=scalar()\\n5: (b7) r0 = 2                        ; R0=scalar()\\n6: (b7) r0 = 2                        ; R0=scalar()\\n7: (b7) r0 = 2                        ; R0=scalar()\\n8: (b7) r0 = 2                        ; R0=scalar()\\n9: (b7) r0 = 2                        ; R0=scalar()\\n10: (b7) r0 = 2                       ; R0=scalar()\\n11: (b7) r0 = 2                       ; R0=scalar()\\n12: (b7) r0 = 2                       ; R0=scalar()\\n13: (b7) r0 = 2                       ; R0=scalar()\\n14: (b7) r0 = 2                       ; R0=scalar()\\n15: (b7) r0 = 2                       ; R0=scalar()\\n16: (b7) r0 = 2                       ; R0=scalar()\\n17: (b7) r0 = 2                       ; R0=scalar()\\n18: (b7) r0 = 2                       ; R0=scalar()\\n19: (b7) r0 = 2                       ; R0=scalar()\\n20: (bf) r7 = r0                      ; R0=scalar(id=1) R7=scalar(id=1)\\n21: (b7) r0 = 2                       ; R0=scalar()\\n22: (b7) r0 = 2                       ; R0=scalar()\\n23: (b7) r0 = 2                       ; R0=scalar()\\n24: (b7) r0 = 2                       ; R0=scalar()\\n25: (b7) r0 = 2                       ; R0=scalar()\\n26: (b7) r0 = 2                       ; R0=scalar()\\n27: (b7) r0 = 2                       ; R0=scalar()\\n28: (b7) r0 = 2                       ; R0=scalar()\\n29: (b7) r0 = 2                       ; R0=scalar()\\n30: (b7) r0 = 2                       ; R0=scalar()\\n31: (b7) r0 = 2                       ; R0=scalar()\\n32: (b7) r0 = 2                       ; R0=scalar()\\n33: (b7) r0 = 2                       ; R0=scalar()\\n34: (b7) r0 = 2                       ; R0=scalar()\\n35: (b7) r0 = 2                       ; R0=scalar()\\n36: (b7) r0 = 2                       ; R0=scalar()\\n37: (b7) r0 = 2                       ; R0=scalar()\\n38: (b7) r0 = 2                       ; R0=scalar()\\n39: (b7) r0 = 2                       ; R0=scalar()\\n40: (b7) r0 = 2                       ; R0=scalar()\\n41: (b7) r0 = 2                       ; R0=scalar()\\n42: (b7) r0 = 2                       ; R0=scalar()\\n43: (b7) r0 = 2                       ; R0=scalar()\\n44: (b7) r0 = 2                       ; R0=scalar()\\n45: (b7) r0 = 2                       ; R0=scalar()\\n46: (b7) r0 = 2                       ; R0=scalar()\\n47: (b7) r0 = 2                       ; R0=scalar()\\n48: (b7) r0 = 2                       ; R0=scalar()\\n49: (b7) r0 = 2                       ; R0=scalar()\\n50: (b7) r0 = 2                       ; R0=scalar()\\n51: (b7) r0 = 2                       ; R0=scalar()\\n52: (b7) r0 = 2                       ; R0=scalar()\\n53: (b7) r0 = 2                       ; R0=scalar()\\n54: (b7) r0 = 2                       ; R0=scalar()\\n55: (b7) r0 = 2                       ; R0=scalar()\\n56: (b7) r0 = 2                       ; R0=scalar()\\n57: (b7) r0 = 2                       ; R0=scalar()\\n58: (b7) r0 = 2                       ; R0=scalar()\\n59: (b7) r0 = 2                       ; R0=scalar()\\n60: (b7) r0 = 2                       ; R0=scalar()\\n61: (b7) r0 = 2                       ; R0=scalar()\\n62: (b7) r0 = 2                       ; R0=scalar()\\n63: (b7) r0 = 2                       ; R0=scalar()\\n64: (b7) r0 = 2                       ; R0=scalar()\\n65: (b7) r0 = 2                       ; R0=scalar()\\n66: (b7) r0 = 2                       ; R0=scalar()\\n67: (b7) r0 = 2                       ; R0=scalar()\\n68: (b7) r0 = 2                       ; R0=scalar()\\n69: (b7) r0 = 2                       ; R0=scalar()\\n70: (b7) r0 = 2                       ; R0=scalar()\\n71: (b7) r0 = 2                       ; R0=scalar()\\n72: (b7) r0 = 2                       ; R0=scalar()\\n73: (b7) r0 = 2                       ; R0=scalar()\\n74: (b7) r0 = 2                       ; R0=scalar()\\n75: (b7) r0 = 2                       ; R0=scalar()\\n76: (b7) r0 = 2                       ; R0=scalar()\\n77: (b7) r0 = 2                       ; R0=scalar()\\n78: (b7) r0 = 2                       ; R0=scalar()\\n79: (b7) r0 = 2                       ; R0=scalar()\\n80: (b7) r0 = 2                       ; R0=scalar()\\n81: (b7) r0 = 2                       ; R0=scalar()\\n82: (b7) r0 = 2                       ; R0=scalar()\\n83: (b7) r0 = 2                       ; R0=scalar()\\n84: (b7) r0 = 2                       ; R0=scalar()\\n85: (b7) r0 = 2                       ; R0=scalar()\\n86: (b7) r0 = 2                       ; R0=scalar()\\n87: (b7) r0 = 2                       ; R0=scalar()\\n88: (b7) r0 = 2                       ; R0=scalar()\\n89: (b7) r0 = 2                       ; R0=scalar()\\n90: (b7) r0 = 2                       ; R0=scalar()\\n91: (b7) r0 = 2                       ; R0=scalar()\\n92: (b7) r0 = 2                       ; R0=scalar()\\n93: (b7) r0 = 2                       ; R0=scalar()\\n94: (b7) r0 = 2                       ; R0=scalar()\\n95: (b7) r0 = 2                       ; R0=scalar()\\n96: (b7) r0 = 2                       ; R0=scalar()\\n97: (b7) r0 = 2                       ; R0=scalar()\\n98: (b7) r0 = 2                       ; R0=scalar()\\n99: (7a) *(u64 *)(r10 -48) = 0        ; R10=fp0 fp-48=0\\n100: (85) call bpf_cast_to_kern_ctx#69129     ; R0=trusted_ptr_sk_buff()\\n101: (bf) r6 = r0                     ; R0=trusted_ptr_sk_buff() R6=trusted_ptr_sk_buff()\\n102: (b7) r0 = 2                      ; R0=scalar()\\n103: (b7) r0 = 2                      ; R0=scalar()\\n104: (7b) *(u64 *)(r10 -16) = r0      ; R0=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\\n105: (7a) *(u64 *)(r10 -40) = 0       ; R10=fp0 fp-40=0\\n106: (79) r1 = *(u64 *)(r10 -48)      ; R1=0 R10=fp0 fp-48=0\\n107: (57) r1 &= -16711681             ; R1=0\\n108: (47) r1 |= 655360                ; R1=0xa0000\\n109: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n110: (7b) *(u64 *)(r10 -8) = r7       ; R7=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\\n111: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\\n113: (79) r2 = *(u64 *)(r10 -48)      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\\n114: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\\n115: (7b) *(u64 *)(r10 -48) = r2      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\\n116: (79) r1 = *(u64 *)(r10 -48)      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n117: (57) r1 &= -65281                ; R1=0xa0000\\n118: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n119: (72) *(u8 *)(r10 -20) = 0        ; R10=fp0 fp-24=???0????\\n120: (72) *(u8 *)(r10 -19) = 0        ; R10=fp0 fp-24=??00????\\n121: (72) *(u8 *)(r10 -18) = 0        ; R10=fp0 fp-24=?000????\\n122: (72) *(u8 *)(r10 -17) = 0        ; R10=fp0 fp-24=0000????\\n123: (b7) r2 = -20                    ; R2=-20\\n124: (bf) r1 = r10                    ; R1=fp0 R10=fp0\\n125: (07) r1 += -32                   ; R1=fp-32\\n126: (0f) r2 += r1                    ; R1=fp-32 R2=fp-52\\n127: (07) r2 += 32                    ; R2=fp-20\\n128: (18) r1 = 0xffff000005ded400     ; R1=map_ptr(map=array_map,ks=4,vs=32)\\n130: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=array_map,ks=4,vs=32)\\n131: (bf) r1 = r0                     ; R0=map_value(map=array_map,ks=4,vs=32) R1=map_value(map=array_map,ks=4,vs=32)\\n132: (b7) r0 = 2                      ; R0=scalar()\\n133: (b7) r0 = 2                      ; R0=scalar()\\n134: (b7) r0 = 2                      ; R0=scalar()\\n135: (b7) r0 = 2                      ; R0=scalar()\\n136: (b7) r0 = 2                      ; R0=scalar()\\n137: (b7) r0 = 2                      ; R0=scalar()\\n138: (b7) r0 = 2                      ; R0=scalar()\\n139: (b7) r0 = 2                      ; R0=scalar()\\n140: (b7) r0 = 2                      ; R0=scalar()\\n141: (b7) r0 = 2                      ; R0=scalar()\\n142: (b7) r0 = 2                      ; R0=scalar()\\n143: (b7) r0 = 2                      ; R0=scalar()\\n144: (b7) r0 = 2                      ; R0=scalar()\\n145: (b7) r0 = 2                      ; R0=scalar()\\n146: (b7) r0 = 2                      ; R0=scalar()\\n147: (b7) r0 = 2                      ; R0=scalar()\\n148: (b7) r0 = 2                      ; R0=scalar()\\n149: (b7) r0 = 2                      ; R0=scalar()\\n150: (b7) r0 = 2                      ; R0=scalar()\\n151: (b7) r0 = 2                      ; R0=scalar()\\n152: (b7) r0 = 2                      ; R0=scalar()\\n153: (b7) r0 = 2                      ; R0=scalar()\\n154: (b7) r0 = 2                      ; R0=scalar()\\n155: (b7) r0 = 2                      ; R0=scalar()\\n156: (b7) r0 = 2                      ; R0=scalar()\\n157: (b7) r0 = 2                      ; R0=scalar()\\n158: (b7) r0 = 2                      ; R0=scalar()\\n159: (b7) r0 = 2                      ; R0=scalar()\\n160: (b7) r0 = 2                      ; R0=scalar()\\n161: (b7) r0 = 2                      ; R0=scalar()\\n162: (b7) r0 = 2                      ; R0=scalar()\\n163: (b7) r0 = 2                      ; R0=scalar()\\n164: (b7) r0 = 2                      ; R0=scalar()\\n165: (b7) r0 = 2                      ; R0=scalar()\\n166: (b7) r0 = 2                      ; R0=scalar()\\n167: (b7) r0 = 2                      ; R0=scalar()\\n168: (b7) r0 = 2                      ; R0=scalar()\\n169: (b7) r0 = 2                      ; R0=scalar()\\n170: (b7) r0 = 2                      ; R0=scalar()\\n171: (b7) r0 = 2                      ; R0=scalar()\\n172: (b7) r0 = 2                      ; R0=scalar()\\n173: (b7) r0 = 2                      ; R0=scalar()\\n174: (b7) r0 = 2                      ; R0=scalar()\\n175: (b7) r0 = 2                      ; R0=scalar()\\n176: (b7) r0 = 2                      ; R0=scalar()\\n177: (b7) r0 = 2                      ; R0=scalar()\\n178: (b7) r0 = 2                      ; R0=scalar()\\n179: (b7) r0 = 2                      ; R0=scalar()\\n180: (b7) r0 = 2                      ; R0=scalar()\\n181: (b7) r0 = 2                      ; R0=scalar()\\n182: (b7) r0 = 2                      ; R0=scalar()\\n183: (b7) r0 = 2                      ; R0=scalar()\\n184: (b7) r0 = 2                      ; R0=scalar()\\n185: (b7) r0 = 2                      ; R0=scalar()\\n186: (b7) r0 = 2                      ; R0=scalar()\\n187: (b7) r0 = 2                      ; R0=scalar()\\n188: (b7) r0 = 2                      ; R0=scalar()\\n189: (b7) r0 = 2                      ; R0=scalar()\\n190: (b7) r0 = 2                      ; R0=scalar()\\n191: (b7) r0 = 2                      ; R0=scalar()\\n192: (b7) r0 = 2                      ; R0=scalar()\\n193: (b7) r0 = 2                      ; R0=scalar()\\n194: (b7) r0 = 2                      ; R0=scalar()\\n195: (b7) r0 = 2                      ; R0=scalar()\\n196: (b7) r0 = 2                      ; R0=scalar()\\n197: (b7) r0 = 2                      ; R0=scalar()\\n198: (b7) r0 = 2                      ; R0=scalar()\\n199: (b7) r0 = 2                      ; R0=scalar()\\n200: (b7) r0 = 2                      ; R0=scalar()\\n201: (b7) r0 = 2                      ; R0=scalar()\\n202: (b7) r0 = 2                      ; R0=scalar()\\n203: (b7) r0 = 2                      ; R0=scalar()\\n204: (b7) r0 = 2                      ; R0=scalar()\\n205: (b7) r0 = 2                      ; R0=scalar()\\n206: (b7) r0 = 2                      ; R0=scalar()\\n207: (b7) r0 = 2                      ; R0=scalar()\\n208: (b7) r0 = 2                      ; R0=scalar()\\n209: (b7) r0 = 2                      ; R0=scalar()\\n210: (b7) r0 = 2                      ; R0=scalar()\\n211: (b7) r0 = 2                      ; R0=scalar()\\n212: (b7) r0 = 2                      ; R0=scalar()\\n213: (b7) r0 = 2                      ; R0=scalar()\\n214: (b7) r0 = 2                      ; R0=scalar()\\n215: (b7) r0 = 2                      ; R0=scalar()\\n216: (b7) r0 = 2                      ; R0=scalar()\\n217: (b7) r0 = 2                      ; R0=scalar()\\n218: (15) if r1 == 0x0 goto pc+9      ; R1=map_value(map=array_map,ks=4,vs=32)\\n219: (61) r2 = *(u32 *)(r6 +16)\\ncannot access ptr member dev with moff 0 in struct (anon) with off 0 size 4\\nprocessed 218 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\\n\\nkernel log tail:\\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\\n\\nnative_lab stub context: prog_type=3 blob_bytes=116 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\\nretained_map_info=5:id=2:type=2:name=array_map\\nnative_blob_diag: fnv64=f74ffd48a8183422 word_count=29 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=104 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=116 final_size_matches=1\\nchunk_bytes=0:116\\nreloc_targets=104:0x2\\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__non_const_var_off.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"non_const_var_off\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 811, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__non_const_var_off.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "e476444f08bf146690a2bb04b140b078dd989904ce755a928ed9e39f075f2277",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 32,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 3,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 3
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-q69o_g69",
+        "attach_target_resolution": null
+      },
+      "request_id": 3,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 3,
+        "source_prog_id": 0,
+        "native_sha256": "e476444f08bf146690a2bb04b140b078dd989904ce755a928ed9e39f075f2277",
+        "started": "1970-01-01T00:01:12.891017+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '3', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/request.native.o', 'non_const_var_off_kptr_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '32', '32', 'array_map', '3', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '3', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/request.native.o', 'non_const_var_off_kptr_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '32', '32', 'array_map', '3', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/3.failure.tar.gz",
+        "finished": "1970-01-01T00:01:22.346054+00:00"
+      },
+      "diagnostic": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=non_const_var_off_kptr_xchg (88 bytes), 1 reachable symbol(s) total\n  - non_const_var_off_kptr_xchg (vaddr 0x0, 88 bytes) [entry]\nError: arm64 helper call bpf_kptr_xchg has no helper address\n\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.proof.o --symbol non_const_var_off_kptr_xchg --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.link-plan.json\n",
+      "file": "map_kptr_fail.c",
+      "program": "non_const_var_off_kptr_xchg",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"e476444f08bf146690a2bb04b140b078dd989904ce755a928ed9e39f075f2277\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 32, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 3, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 3}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-q69o_g69\", \"attach_target_resolution\": null}, \"request_id\": 3, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 3, \"source_prog_id\": 0, \"native_sha256\": \"e476444f08bf146690a2bb04b140b078dd989904ce755a928ed9e39f075f2277\", \"started\": \"1970-01-01T00:01:12.891017+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '3', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/request.native.o', 'non_const_var_off_kptr_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '32', '32', 'array_map', '3', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '3', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/request.native.o', 'non_const_var_off_kptr_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '32', '32', 'array_map', '3', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/3.failure.tar.gz\", \"finished\": \"1970-01-01T00:01:22.346054+00:00\"}, \"diagnostic\": \"trusted-native-loader: native-link kernel failed (rc=1)\\nstderr:\\nnative-link: arm64 entry=non_const_var_off_kptr_xchg (88 bytes), 1 reachable symbol(s) total\\n  - non_const_var_off_kptr_xchg (vaddr 0x0, 88 bytes) [entry]\\nError: arm64 helper call bpf_kptr_xchg has no helper address\\n\\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.proof.o --symbol non_const_var_off_kptr_xchg --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-kq6w7ib8/generated/kernel-link/d574f17bfbc772b7.tmp.528.528.link-plan.json\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__non_const_var_off_kptr_xchg.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"non_const_var_off_kptr_xchg\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 1138, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__non_const_var_off_kptr_xchg.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 42,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 4,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 4
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-nhypvqa8",
+        "attach_target_resolution": null
+      },
+      "request_id": 4,
+      "status": 0,
+      "prog_id": 14,
+      "service": {
+        "request_id": 4,
+        "source_prog_id": 0,
+        "native_sha256": "857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126",
+        "started": "1970-01-01T00:01:25.640968+00:00",
+        "prog_id": 14,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/4.success.tar.gz",
+        "finished": "1970-01-01T00:01:30.533584+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "misaligned_access_write",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 42, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 4, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 4}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-nhypvqa8\", \"attach_target_resolution\": null}, \"request_id\": 4, \"status\": 0, \"prog_id\": 14, \"service\": {\"request_id\": 4, \"source_prog_id\": 0, \"native_sha256\": \"857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126\", \"started\": \"1970-01-01T00:01:25.640968+00:00\", \"prog_id\": 14, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/4.success.tar.gz\", \"finished\": \"1970-01-01T00:01:30.533584+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__misaligned_access_write.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"misaligned_access_write\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 1490, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__misaligned_access_write.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 52,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 5,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 5
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-3p64vnkr",
+        "attach_target_resolution": null
+      },
+      "request_id": 5,
+      "status": 0,
+      "prog_id": 18,
+      "service": {
+        "request_id": 5,
+        "source_prog_id": 0,
+        "native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b",
+        "started": "1970-01-01T00:01:34.561512+00:00",
+        "prog_id": 18,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/5.success.tar.gz",
+        "finished": "1970-01-01T00:01:43.840154+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "misaligned_access_read",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 52, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 5, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 5}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-3p64vnkr\", \"attach_target_resolution\": null}, \"request_id\": 5, \"status\": 0, \"prog_id\": 18, \"service\": {\"request_id\": 5, \"source_prog_id\": 0, \"native_sha256\": \"dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b\", \"started\": \"1970-01-01T00:01:34.561512+00:00\", \"prog_id\": 18, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/5.success.tar.gz\", \"finished\": \"1970-01-01T00:01:43.840154+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__misaligned_access_read.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"misaligned_access_read\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 1766, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__misaligned_access_read.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "verifier_rejected",
+      "native_sha256": "1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 62,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 6,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 6
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-s_cayawe",
+        "attach_target_resolution": null
+      },
+      "request_id": 6,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 6,
+        "source_prog_id": 0,
+        "native_sha256": "1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1",
+        "started": "1970-01-01T00:01:47.741044+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '6', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/request.native.o', 'reject_var_off_store', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '62', '32', 'array_map', '6', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '6', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/request.native.o', 'reject_var_off_store', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '62', '32', 'array_map', '6', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/6.failure.tar.gz",
+        "finished": "1970-01-01T00:01:57.762293+00:00"
+      },
+      "diagnostic": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=12140\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\nstub insns=0:code=183,dst=0,src=3,off=17,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (bf) r7 = r0                      ; R0=scalar(id=1) R7=scalar(id=1)\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (b7) r0 = 2                       ; R0=scalar()\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (b7) r0 = 2                       ; R0=scalar()\n28: (b7) r0 = 2                       ; R0=scalar()\n29: (b7) r0 = 2                       ; R0=scalar()\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (b7) r0 = 2                       ; R0=scalar()\n32: (b7) r0 = 2                       ; R0=scalar()\n33: (b7) r0 = 2                       ; R0=scalar()\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r0 = 2                       ; R0=scalar()\n51: (b7) r0 = 2                       ; R0=scalar()\n52: (b7) r0 = 2                       ; R0=scalar()\n53: (b7) r0 = 2                       ; R0=scalar()\n54: (b7) r0 = 2                       ; R0=scalar()\n55: (b7) r0 = 2                       ; R0=scalar()\n56: (b7) r0 = 2                       ; R0=scalar()\n57: (b7) r0 = 2                       ; R0=scalar()\n58: (b7) r0 = 2                       ; R0=scalar()\n59: (b7) r0 = 2                       ; R0=scalar()\n60: (b7) r0 = 2                       ; R0=scalar()\n61: (b7) r0 = 2                       ; R0=scalar()\n62: (b7) r0 = 2                       ; R0=scalar()\n63: (b7) r0 = 2                       ; R0=scalar()\n64: (b7) r0 = 2                       ; R0=scalar()\n65: (b7) r0 = 2                       ; R0=scalar()\n66: (b7) r0 = 2                       ; R0=scalar()\n67: (b7) r0 = 2                       ; R0=scalar()\n68: (b7) r0 = 2                       ; R0=scalar()\n69: (b7) r0 = 2                       ; R0=scalar()\n70: (b7) r0 = 2                       ; R0=scalar()\n71: (b7) r0 = 2                       ; R0=scalar()\n72: (b7) r0 = 2                       ; R0=scalar()\n73: (b7) r0 = 2                       ; R0=scalar()\n74: (b7) r0 = 2                       ; R0=scalar()\n75: (b7) r0 = 2                       ; R0=scalar()\n76: (b7) r0 = 2                       ; R0=scalar()\n77: (b7) r0 = 2                       ; R0=scalar()\n78: (b7) r0 = 2                       ; R0=scalar()\n79: (b7) r0 = 2                       ; R0=scalar()\n80: (b7) r0 = 2                       ; R0=scalar()\n81: (b7) r0 = 2                       ; R0=scalar()\n82: (b7) r0 = 2                       ; R0=scalar()\n83: (b7) r0 = 2                       ; R0=scalar()\n84: (b7) r0 = 2                       ; R0=scalar()\n85: (b7) r0 = 2                       ; R0=scalar()\n86: (b7) r0 = 2                       ; R0=scalar()\n87: (b7) r0 = 2                       ; R0=scalar()\n88: (b7) r0 = 2                       ; R0=scalar()\n89: (b7) r0 = 2                       ; R0=scalar()\n90: (b7) r0 = 2                       ; R0=scalar()\n91: (b7) r0 = 2                       ; R0=scalar()\n92: (b7) r0 = 2                       ; R0=scalar()\n93: (b7) r0 = 2                       ; R0=scalar()\n94: (b7) r0 = 2                       ; R0=scalar()\n95: (b7) r0 = 2                       ; R0=scalar()\n96: (b7) r0 = 2                       ; R0=scalar()\n97: (b7) r0 = 2                       ; R0=scalar()\n98: (b7) r0 = 2                       ; R0=scalar()\n99: (7a) *(u64 *)(r10 -48) = 0        ; R10=fp0 fp-48=0\n100: (85) call bpf_cast_to_kern_ctx#69129     ; R0=trusted_ptr_sk_buff()\n101: (bf) r6 = r0                     ; R0=trusted_ptr_sk_buff() R6=trusted_ptr_sk_buff()\n102: (b7) r0 = 2                      ; R0=scalar()\n103: (b7) r0 = 2                      ; R0=scalar()\n104: (7b) *(u64 *)(r10 -16) = r0      ; R0=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\n105: (7a) *(u64 *)(r10 -40) = 0       ; R10=fp0 fp-40=0\n106: (79) r1 = *(u64 *)(r10 -48)      ; R1=0 R10=fp0 fp-48=0\n107: (57) r1 &= -16711681             ; R1=0\n108: (47) r1 |= 655360                ; R1=0xa0000\n109: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n110: (7b) *(u64 *)(r10 -8) = r7       ; R7=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n111: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n113: (79) r2 = *(u64 *)(r10 -48)      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\n114: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\n115: (7b) *(u64 *)(r10 -48) = r2      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\n116: (79) r1 = *(u64 *)(r10 -48)      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n117: (57) r1 &= -65281                ; R1=0xa0000\n118: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\n119: (72) *(u8 *)(r10 -20) = 0        ; R10=fp0 fp-24=???0????\n120: (72) *(u8 *)(r10 -19) = 0        ; R10=fp0 fp-24=??00????\n121: (72) *(u8 *)(r10 -18) = 0        ; R10=fp0 fp-24=?000????\n122: (72) *(u8 *)(r10 -17) = 0        ; R10=fp0 fp-24=0000????\n123: (b7) r2 = -20                    ; R2=-20\n124: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n125: (07) r1 += -32                   ; R1=fp-32\n126: (0f) r2 += r1                    ; R1=fp-32 R2=fp-52\n127: (07) r2 += 32                    ; R2=fp-20\n128: (18) r1 = 0xffff000005c36200     ; R1=map_ptr(map=array_map,ks=4,vs=32)\n130: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=array_map,ks=4,vs=32)\n131: (bf) r1 = r0                     ; R0=map_value(map=array_map,ks=4,vs=32) R1=map_value(map=array_map,ks=4,vs=32)\n132: (b7) r0 = 2                      ; R0=scalar()\n133: (b7) r0 = 2                      ; R0=scalar()\n134: (b7) r0 = 2                      ; R0=scalar()\n135: (b7) r0 = 2                      ; R0=scalar()\n136: (b7) r0 = 2                      ; R0=scalar()\n137: (b7) r0 = 2                      ; R0=scalar()\n138: (b7) r0 = 2                      ; R0=scalar()\n139: (b7) r0 = 2                      ; R0=scalar()\n140: (b7) r0 = 2                      ; R0=scalar()\n141: (b7) r0 = 2                      ; R0=scalar()\n142: (b7) r0 = 2                      ; R0=scalar()\n143: (b7) r0 = 2                      ; R0=scalar()\n144: (b7) r0 = 2                      ; R0=scalar()\n145: (b7) r0 = 2                      ; R0=scalar()\n146: (b7) r0 = 2                      ; R0=scalar()\n147: (b7) r0 = 2                      ; R0=scalar()\n148: (b7) r0 = 2                      ; R0=scalar()\n149: (b7) r0 = 2                      ; R0=scalar()\n150: (b7) r0 = 2                      ; R0=scalar()\n151: (b7) r0 = 2                      ; R0=scalar()\n152: (b7) r0 = 2                      ; R0=scalar()\n153: (b7) r0 = 2                      ; R0=scalar()\n154: (b7) r0 = 2                      ; R0=scalar()\n155: (b7) r0 = 2                      ; R0=scalar()\n156: (b7) r0 = 2                      ; R0=scalar()\n157: (b7) r0 = 2                      ; R0=scalar()\n158: (b7) r0 = 2                      ; R0=scalar()\n159: (b7) r0 = 2                      ; R0=scalar()\n160: (b7) r0 = 2                      ; R0=scalar()\n161: (b7) r0 = 2                      ; R0=scalar()\n162: (b7) r0 = 2                      ; R0=scalar()\n163: (b7) r0 = 2                      ; R0=scalar()\n164: (b7) r0 = 2                      ; R0=scalar()\n165: (b7) r0 = 2                      ; R0=scalar()\n166: (b7) r0 = 2                      ; R0=scalar()\n167: (b7) r0 = 2                      ; R0=scalar()\n168: (b7) r0 = 2                      ; R0=scalar()\n169: (b7) r0 = 2                      ; R0=scalar()\n170: (b7) r0 = 2                      ; R0=scalar()\n171: (b7) r0 = 2                      ; R0=scalar()\n172: (b7) r0 = 2                      ; R0=scalar()\n173: (b7) r0 = 2                      ; R0=scalar()\n174: (b7) r0 = 2                      ; R0=scalar()\n175: (b7) r0 = 2                      ; R0=scalar()\n176: (b7) r0 = 2                      ; R0=scalar()\n177: (b7) r0 = 2                      ; R0=scalar()\n178: (b7) r0 = 2                      ; R0=scalar()\n179: (b7) r0 = 2                      ; R0=scalar()\n180: (b7) r0 = 2                      ; R0=scalar()\n181: (b7) r0 = 2                      ; R0=scalar()\n182: (b7) r0 = 2                      ; R0=scalar()\n183: (b7) r0 = 2                      ; R0=scalar()\n184: (b7) r0 = 2                      ; R0=scalar()\n185: (b7) r0 = 2                      ; R0=scalar()\n186: (b7) r0 = 2                      ; R0=scalar()\n187: (b7) r0 = 2                      ; R0=scalar()\n188: (b7) r0 = 2                      ; R0=scalar()\n189: (b7) r0 = 2                      ; R0=scalar()\n190: (b7) r0 = 2                      ; R0=scalar()\n191: (b7) r0 = 2                      ; R0=scalar()\n192: (b7) r0 = 2                      ; R0=scalar()\n193: (b7) r0 = 2                      ; R0=scalar()\n194: (b7) r0 = 2                      ; R0=scalar()\n195: (b7) r0 = 2                      ; R0=scalar()\n196: (b7) r0 = 2                      ; R0=scalar()\n197: (b7) r0 = 2                      ; R0=scalar()\n198: (b7) r0 = 2                      ; R0=scalar()\n199: (b7) r0 = 2                      ; R0=scalar()\n200: (b7) r0 = 2                      ; R0=scalar()\n201: (b7) r0 = 2                      ; R0=scalar()\n202: (b7) r0 = 2                      ; R0=scalar()\n203: (b7) r0 = 2                      ; R0=scalar()\n204: (b7) r0 = 2                      ; R0=scalar()\n205: (b7) r0 = 2                      ; R0=scalar()\n206: (b7) r0 = 2                      ; R0=scalar()\n207: (b7) r0 = 2                      ; R0=scalar()\n208: (b7) r0 = 2                      ; R0=scalar()\n209: (b7) r0 = 2                      ; R0=scalar()\n210: (b7) r0 = 2                      ; R0=scalar()\n211: (b7) r0 = 2                      ; R0=scalar()\n212: (b7) r0 = 2                      ; R0=scalar()\n213: (b7) r0 = 2                      ; R0=scalar()\n214: (b7) r0 = 2                      ; R0=scalar()\n215: (b7) r0 = 2                      ; R0=scalar()\n216: (b7) r0 = 2                      ; R0=scalar()\n217: (b7) r0 = 2                      ; R0=scalar()\n218: (15) if r1 == 0x0 goto pc+13     ; R1=map_value(map=array_map,ks=4,vs=32)\n219: (79) r2 = *(u64 *)(r1 +8)        ; R1=map_value(map=array_map,ks=4,vs=32) R2=scalar()\n220: (15) if r2 == 0x0 goto pc+11     ; R2=scalar(umin=1)\n221: (61) r3 = *(u32 *)(r6 +16)\ncannot access ptr member dev with moff 0 in struct (anon) with off 0 size 4\nprocessed 220 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=3 blob_bytes=124 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\nretained_map_info=5:id=6:type=2:name=array_map\nnative_blob_diag: fnv64=abd7cd0ce8d3a6d0 word_count=31 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=112 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=124 final_size_matches=1\nchunk_bytes=0:124\nreloc_targets=112:0x6\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_var_off_store",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"verifier_rejected\", \"native_sha256\": \"1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 62, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 6, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 6}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-s_cayawe\", \"attach_target_resolution\": null}, \"request_id\": 6, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 6, \"source_prog_id\": 0, \"native_sha256\": \"1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1\", \"started\": \"1970-01-01T00:01:47.741044+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '6', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/request.native.o', 'reject_var_off_store', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '62', '32', 'array_map', '6', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '6', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/request.native.o', 'reject_var_off_store', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-yyy2adb8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '62', '32', 'array_map', '6', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/6.failure.tar.gz\", \"finished\": \"1970-01-01T00:01:57.762293+00:00\"}, \"diagnostic\": \"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\\ndiagnostic BPF_PROG_LOAD: Permission denied\\nstub verifier_log_size=262144 log_true_size=12140\\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\\nstub insns=0:code=183,dst=0,src=3,off=17,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\\nverifier log:\\n0: R1=ctx() R10=fp0\\n0: (b7) r0 = 2                        ; R0=scalar()\\n1: (b7) r0 = 2                        ; R0=scalar()\\n2: (b7) r0 = 2                        ; R0=scalar()\\n3: (b7) r0 = 2                        ; R0=scalar()\\n4: (b7) r0 = 2                        ; R0=scalar()\\n5: (b7) r0 = 2                        ; R0=scalar()\\n6: (b7) r0 = 2                        ; R0=scalar()\\n7: (b7) r0 = 2                        ; R0=scalar()\\n8: (b7) r0 = 2                        ; R0=scalar()\\n9: (b7) r0 = 2                        ; R0=scalar()\\n10: (b7) r0 = 2                       ; R0=scalar()\\n11: (b7) r0 = 2                       ; R0=scalar()\\n12: (b7) r0 = 2                       ; R0=scalar()\\n13: (b7) r0 = 2                       ; R0=scalar()\\n14: (b7) r0 = 2                       ; R0=scalar()\\n15: (b7) r0 = 2                       ; R0=scalar()\\n16: (b7) r0 = 2                       ; R0=scalar()\\n17: (b7) r0 = 2                       ; R0=scalar()\\n18: (b7) r0 = 2                       ; R0=scalar()\\n19: (b7) r0 = 2                       ; R0=scalar()\\n20: (bf) r7 = r0                      ; R0=scalar(id=1) R7=scalar(id=1)\\n21: (b7) r0 = 2                       ; R0=scalar()\\n22: (b7) r0 = 2                       ; R0=scalar()\\n23: (b7) r0 = 2                       ; R0=scalar()\\n24: (b7) r0 = 2                       ; R0=scalar()\\n25: (b7) r0 = 2                       ; R0=scalar()\\n26: (b7) r0 = 2                       ; R0=scalar()\\n27: (b7) r0 = 2                       ; R0=scalar()\\n28: (b7) r0 = 2                       ; R0=scalar()\\n29: (b7) r0 = 2                       ; R0=scalar()\\n30: (b7) r0 = 2                       ; R0=scalar()\\n31: (b7) r0 = 2                       ; R0=scalar()\\n32: (b7) r0 = 2                       ; R0=scalar()\\n33: (b7) r0 = 2                       ; R0=scalar()\\n34: (b7) r0 = 2                       ; R0=scalar()\\n35: (b7) r0 = 2                       ; R0=scalar()\\n36: (b7) r0 = 2                       ; R0=scalar()\\n37: (b7) r0 = 2                       ; R0=scalar()\\n38: (b7) r0 = 2                       ; R0=scalar()\\n39: (b7) r0 = 2                       ; R0=scalar()\\n40: (b7) r0 = 2                       ; R0=scalar()\\n41: (b7) r0 = 2                       ; R0=scalar()\\n42: (b7) r0 = 2                       ; R0=scalar()\\n43: (b7) r0 = 2                       ; R0=scalar()\\n44: (b7) r0 = 2                       ; R0=scalar()\\n45: (b7) r0 = 2                       ; R0=scalar()\\n46: (b7) r0 = 2                       ; R0=scalar()\\n47: (b7) r0 = 2                       ; R0=scalar()\\n48: (b7) r0 = 2                       ; R0=scalar()\\n49: (b7) r0 = 2                       ; R0=scalar()\\n50: (b7) r0 = 2                       ; R0=scalar()\\n51: (b7) r0 = 2                       ; R0=scalar()\\n52: (b7) r0 = 2                       ; R0=scalar()\\n53: (b7) r0 = 2                       ; R0=scalar()\\n54: (b7) r0 = 2                       ; R0=scalar()\\n55: (b7) r0 = 2                       ; R0=scalar()\\n56: (b7) r0 = 2                       ; R0=scalar()\\n57: (b7) r0 = 2                       ; R0=scalar()\\n58: (b7) r0 = 2                       ; R0=scalar()\\n59: (b7) r0 = 2                       ; R0=scalar()\\n60: (b7) r0 = 2                       ; R0=scalar()\\n61: (b7) r0 = 2                       ; R0=scalar()\\n62: (b7) r0 = 2                       ; R0=scalar()\\n63: (b7) r0 = 2                       ; R0=scalar()\\n64: (b7) r0 = 2                       ; R0=scalar()\\n65: (b7) r0 = 2                       ; R0=scalar()\\n66: (b7) r0 = 2                       ; R0=scalar()\\n67: (b7) r0 = 2                       ; R0=scalar()\\n68: (b7) r0 = 2                       ; R0=scalar()\\n69: (b7) r0 = 2                       ; R0=scalar()\\n70: (b7) r0 = 2                       ; R0=scalar()\\n71: (b7) r0 = 2                       ; R0=scalar()\\n72: (b7) r0 = 2                       ; R0=scalar()\\n73: (b7) r0 = 2                       ; R0=scalar()\\n74: (b7) r0 = 2                       ; R0=scalar()\\n75: (b7) r0 = 2                       ; R0=scalar()\\n76: (b7) r0 = 2                       ; R0=scalar()\\n77: (b7) r0 = 2                       ; R0=scalar()\\n78: (b7) r0 = 2                       ; R0=scalar()\\n79: (b7) r0 = 2                       ; R0=scalar()\\n80: (b7) r0 = 2                       ; R0=scalar()\\n81: (b7) r0 = 2                       ; R0=scalar()\\n82: (b7) r0 = 2                       ; R0=scalar()\\n83: (b7) r0 = 2                       ; R0=scalar()\\n84: (b7) r0 = 2                       ; R0=scalar()\\n85: (b7) r0 = 2                       ; R0=scalar()\\n86: (b7) r0 = 2                       ; R0=scalar()\\n87: (b7) r0 = 2                       ; R0=scalar()\\n88: (b7) r0 = 2                       ; R0=scalar()\\n89: (b7) r0 = 2                       ; R0=scalar()\\n90: (b7) r0 = 2                       ; R0=scalar()\\n91: (b7) r0 = 2                       ; R0=scalar()\\n92: (b7) r0 = 2                       ; R0=scalar()\\n93: (b7) r0 = 2                       ; R0=scalar()\\n94: (b7) r0 = 2                       ; R0=scalar()\\n95: (b7) r0 = 2                       ; R0=scalar()\\n96: (b7) r0 = 2                       ; R0=scalar()\\n97: (b7) r0 = 2                       ; R0=scalar()\\n98: (b7) r0 = 2                       ; R0=scalar()\\n99: (7a) *(u64 *)(r10 -48) = 0        ; R10=fp0 fp-48=0\\n100: (85) call bpf_cast_to_kern_ctx#69129     ; R0=trusted_ptr_sk_buff()\\n101: (bf) r6 = r0                     ; R0=trusted_ptr_sk_buff() R6=trusted_ptr_sk_buff()\\n102: (b7) r0 = 2                      ; R0=scalar()\\n103: (b7) r0 = 2                      ; R0=scalar()\\n104: (7b) *(u64 *)(r10 -16) = r0      ; R0=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\\n105: (7a) *(u64 *)(r10 -40) = 0       ; R10=fp0 fp-40=0\\n106: (79) r1 = *(u64 *)(r10 -48)      ; R1=0 R10=fp0 fp-48=0\\n107: (57) r1 &= -16711681             ; R1=0\\n108: (47) r1 |= 655360                ; R1=0xa0000\\n109: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n110: (7b) *(u64 *)(r10 -8) = r7       ; R7=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\\n111: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\\n113: (79) r2 = *(u64 *)(r10 -48)      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\\n114: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\\n115: (7b) *(u64 *)(r10 -48) = r2      ; R2=0xa0000 R10=fp0 fp-48=0xa0000\\n116: (79) r1 = *(u64 *)(r10 -48)      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n117: (57) r1 &= -65281                ; R1=0xa0000\\n118: (7b) *(u64 *)(r10 -48) = r1      ; R1=0xa0000 R10=fp0 fp-48=0xa0000\\n119: (72) *(u8 *)(r10 -20) = 0        ; R10=fp0 fp-24=???0????\\n120: (72) *(u8 *)(r10 -19) = 0        ; R10=fp0 fp-24=??00????\\n121: (72) *(u8 *)(r10 -18) = 0        ; R10=fp0 fp-24=?000????\\n122: (72) *(u8 *)(r10 -17) = 0        ; R10=fp0 fp-24=0000????\\n123: (b7) r2 = -20                    ; R2=-20\\n124: (bf) r1 = r10                    ; R1=fp0 R10=fp0\\n125: (07) r1 += -32                   ; R1=fp-32\\n126: (0f) r2 += r1                    ; R1=fp-32 R2=fp-52\\n127: (07) r2 += 32                    ; R2=fp-20\\n128: (18) r1 = 0xffff000005c36200     ; R1=map_ptr(map=array_map,ks=4,vs=32)\\n130: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=array_map,ks=4,vs=32)\\n131: (bf) r1 = r0                     ; R0=map_value(map=array_map,ks=4,vs=32) R1=map_value(map=array_map,ks=4,vs=32)\\n132: (b7) r0 = 2                      ; R0=scalar()\\n133: (b7) r0 = 2                      ; R0=scalar()\\n134: (b7) r0 = 2                      ; R0=scalar()\\n135: (b7) r0 = 2                      ; R0=scalar()\\n136: (b7) r0 = 2                      ; R0=scalar()\\n137: (b7) r0 = 2                      ; R0=scalar()\\n138: (b7) r0 = 2                      ; R0=scalar()\\n139: (b7) r0 = 2                      ; R0=scalar()\\n140: (b7) r0 = 2                      ; R0=scalar()\\n141: (b7) r0 = 2                      ; R0=scalar()\\n142: (b7) r0 = 2                      ; R0=scalar()\\n143: (b7) r0 = 2                      ; R0=scalar()\\n144: (b7) r0 = 2                      ; R0=scalar()\\n145: (b7) r0 = 2                      ; R0=scalar()\\n146: (b7) r0 = 2                      ; R0=scalar()\\n147: (b7) r0 = 2                      ; R0=scalar()\\n148: (b7) r0 = 2                      ; R0=scalar()\\n149: (b7) r0 = 2                      ; R0=scalar()\\n150: (b7) r0 = 2                      ; R0=scalar()\\n151: (b7) r0 = 2                      ; R0=scalar()\\n152: (b7) r0 = 2                      ; R0=scalar()\\n153: (b7) r0 = 2                      ; R0=scalar()\\n154: (b7) r0 = 2                      ; R0=scalar()\\n155: (b7) r0 = 2                      ; R0=scalar()\\n156: (b7) r0 = 2                      ; R0=scalar()\\n157: (b7) r0 = 2                      ; R0=scalar()\\n158: (b7) r0 = 2                      ; R0=scalar()\\n159: (b7) r0 = 2                      ; R0=scalar()\\n160: (b7) r0 = 2                      ; R0=scalar()\\n161: (b7) r0 = 2                      ; R0=scalar()\\n162: (b7) r0 = 2                      ; R0=scalar()\\n163: (b7) r0 = 2                      ; R0=scalar()\\n164: (b7) r0 = 2                      ; R0=scalar()\\n165: (b7) r0 = 2                      ; R0=scalar()\\n166: (b7) r0 = 2                      ; R0=scalar()\\n167: (b7) r0 = 2                      ; R0=scalar()\\n168: (b7) r0 = 2                      ; R0=scalar()\\n169: (b7) r0 = 2                      ; R0=scalar()\\n170: (b7) r0 = 2                      ; R0=scalar()\\n171: (b7) r0 = 2                      ; R0=scalar()\\n172: (b7) r0 = 2                      ; R0=scalar()\\n173: (b7) r0 = 2                      ; R0=scalar()\\n174: (b7) r0 = 2                      ; R0=scalar()\\n175: (b7) r0 = 2                      ; R0=scalar()\\n176: (b7) r0 = 2                      ; R0=scalar()\\n177: (b7) r0 = 2                      ; R0=scalar()\\n178: (b7) r0 = 2                      ; R0=scalar()\\n179: (b7) r0 = 2                      ; R0=scalar()\\n180: (b7) r0 = 2                      ; R0=scalar()\\n181: (b7) r0 = 2                      ; R0=scalar()\\n182: (b7) r0 = 2                      ; R0=scalar()\\n183: (b7) r0 = 2                      ; R0=scalar()\\n184: (b7) r0 = 2                      ; R0=scalar()\\n185: (b7) r0 = 2                      ; R0=scalar()\\n186: (b7) r0 = 2                      ; R0=scalar()\\n187: (b7) r0 = 2                      ; R0=scalar()\\n188: (b7) r0 = 2                      ; R0=scalar()\\n189: (b7) r0 = 2                      ; R0=scalar()\\n190: (b7) r0 = 2                      ; R0=scalar()\\n191: (b7) r0 = 2                      ; R0=scalar()\\n192: (b7) r0 = 2                      ; R0=scalar()\\n193: (b7) r0 = 2                      ; R0=scalar()\\n194: (b7) r0 = 2                      ; R0=scalar()\\n195: (b7) r0 = 2                      ; R0=scalar()\\n196: (b7) r0 = 2                      ; R0=scalar()\\n197: (b7) r0 = 2                      ; R0=scalar()\\n198: (b7) r0 = 2                      ; R0=scalar()\\n199: (b7) r0 = 2                      ; R0=scalar()\\n200: (b7) r0 = 2                      ; R0=scalar()\\n201: (b7) r0 = 2                      ; R0=scalar()\\n202: (b7) r0 = 2                      ; R0=scalar()\\n203: (b7) r0 = 2                      ; R0=scalar()\\n204: (b7) r0 = 2                      ; R0=scalar()\\n205: (b7) r0 = 2                      ; R0=scalar()\\n206: (b7) r0 = 2                      ; R0=scalar()\\n207: (b7) r0 = 2                      ; R0=scalar()\\n208: (b7) r0 = 2                      ; R0=scalar()\\n209: (b7) r0 = 2                      ; R0=scalar()\\n210: (b7) r0 = 2                      ; R0=scalar()\\n211: (b7) r0 = 2                      ; R0=scalar()\\n212: (b7) r0 = 2                      ; R0=scalar()\\n213: (b7) r0 = 2                      ; R0=scalar()\\n214: (b7) r0 = 2                      ; R0=scalar()\\n215: (b7) r0 = 2                      ; R0=scalar()\\n216: (b7) r0 = 2                      ; R0=scalar()\\n217: (b7) r0 = 2                      ; R0=scalar()\\n218: (15) if r1 == 0x0 goto pc+13     ; R1=map_value(map=array_map,ks=4,vs=32)\\n219: (79) r2 = *(u64 *)(r1 +8)        ; R1=map_value(map=array_map,ks=4,vs=32) R2=scalar()\\n220: (15) if r2 == 0x0 goto pc+11     ; R2=scalar(umin=1)\\n221: (61) r3 = *(u32 *)(r6 +16)\\ncannot access ptr member dev with moff 0 in struct (anon) with off 0 size 4\\nprocessed 220 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\\n\\nkernel log tail:\\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\\n\\nnative_lab stub context: prog_type=3 blob_bytes=124 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\\nretained_map_info=5:id=6:type=2:name=array_map\\nnative_blob_diag: fnv64=abd7cd0ce8d3a6d0 word_count=31 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=112 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=124 final_size_matches=1\\nchunk_bytes=0:124\\nreloc_targets=112:0x6\\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_var_off_store.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_var_off_store\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 2027, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_var_off_store.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 72,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 7,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 7
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-p5ym9xw2",
+        "attach_target_resolution": null
+      },
+      "request_id": 7,
+      "status": 0,
+      "prog_id": 25,
+      "service": {
+        "request_id": 7,
+        "source_prog_id": 0,
+        "native_sha256": "7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9",
+        "started": "1970-01-01T00:02:00.950517+00:00",
+        "prog_id": 25,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/7.success.tar.gz",
+        "finished": "1970-01-01T00:02:07.973590+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "reject_bad_type_match",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 72, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 7, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 7}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-p5ym9xw2\", \"attach_target_resolution\": null}, \"request_id\": 7, \"status\": 0, \"prog_id\": 25, \"service\": {\"request_id\": 7, \"source_prog_id\": 0, \"native_sha256\": \"7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9\", \"started\": \"1970-01-01T00:02:00.950517+00:00\", \"prog_id\": 25, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/7.success.tar.gz\", \"finished\": \"1970-01-01T00:02:07.973590+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_bad_type_match.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_bad_type_match\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 2479, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_bad_type_match.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "b5f28e3d0f146d75b6610229b5433b916eda940c76a34a38559c50b1f7a60070",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 82,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 8,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 8
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-4dc48ohy",
+        "attach_target_resolution": null
+      },
+      "request_id": 8,
+      "status": -22,
+      "prog_id": 0,
+      "service": {
+        "request_id": 8,
+        "source_prog_id": 0,
+        "native_sha256": "b5f28e3d0f146d75b6610229b5433b916eda940c76a34a38559c50b1f7a60070",
+        "started": "1970-01-01T00:02:16.220962+00:00",
+        "status": -22,
+        "error": "invalid indirect target scalar:0x9a at 0x28",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0x9a at 0x28\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/8.failure.tar.gz",
+        "finished": "1970-01-01T00:02:17.180148+00:00"
+      },
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x28",
+      "file": "map_kptr_fail.c",
+      "program": "marked_as_untrusted_or_null",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"b5f28e3d0f146d75b6610229b5433b916eda940c76a34a38559c50b1f7a60070\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 82, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 8, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 8}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-4dc48ohy\", \"attach_target_resolution\": null}, \"request_id\": 8, \"status\": -22, \"prog_id\": 0, \"service\": {\"request_id\": 8, \"source_prog_id\": 0, \"native_sha256\": \"b5f28e3d0f146d75b6610229b5433b916eda940c76a34a38559c50b1f7a60070\", \"started\": \"1970-01-01T00:02:16.220962+00:00\", \"status\": -22, \"error\": \"invalid indirect target scalar:0x9a at 0x28\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 53, in specialize\\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 966, in render_program\\n    targets_by_addr = indirect_targets(all_insns)\\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 794, in indirect_targets\\n    raise ValueError(f\\\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\\\")\\nValueError: invalid indirect target scalar:0x9a at 0x28\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/8.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:17.180148+00:00\"}, \"diagnostic\": \"invalid indirect target scalar:0x9a at 0x28\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__marked_as_untrusted_or_null.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"marked_as_untrusted_or_null\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 2900, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__marked_as_untrusted_or_null.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "866ed1cce7d0aaf966cba2c00c792f5d913cebc22def24ca6e6960038313cb45",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 92,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 9,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 9
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-c8qmb1t5",
+        "attach_target_resolution": null
+      },
+      "request_id": 9,
+      "status": -22,
+      "prog_id": 0,
+      "service": {
+        "request_id": 9,
+        "source_prog_id": 0,
+        "native_sha256": "866ed1cce7d0aaf966cba2c00c792f5d913cebc22def24ca6e6960038313cb45",
+        "started": "1970-01-01T00:02:25.041008+00:00",
+        "status": -22,
+        "error": "invalid indirect target scalar:0x9a at 0x30",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0x9a at 0x30\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/9.failure.tar.gz",
+        "finished": "1970-01-01T00:02:26.015099+00:00"
+      },
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x30",
+      "file": "map_kptr_fail.c",
+      "program": "inherit_untrusted_on_walk",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"866ed1cce7d0aaf966cba2c00c792f5d913cebc22def24ca6e6960038313cb45\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 92, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 9, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 9}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-c8qmb1t5\", \"attach_target_resolution\": null}, \"request_id\": 9, \"status\": -22, \"prog_id\": 0, \"service\": {\"request_id\": 9, \"source_prog_id\": 0, \"native_sha256\": \"866ed1cce7d0aaf966cba2c00c792f5d913cebc22def24ca6e6960038313cb45\", \"started\": \"1970-01-01T00:02:25.041008+00:00\", \"status\": -22, \"error\": \"invalid indirect target scalar:0x9a at 0x30\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 53, in specialize\\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 966, in render_program\\n    targets_by_addr = indirect_targets(all_insns)\\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 794, in indirect_targets\\n    raise ValueError(f\\\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\\\")\\nValueError: invalid indirect target scalar:0x9a at 0x30\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/9.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:26.015099+00:00\"}, \"diagnostic\": \"invalid indirect target scalar:0x9a at 0x30\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__inherit_untrusted_on_walk.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"inherit_untrusted_on_walk\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 3588, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__inherit_untrusted_on_walk.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "3e0ab21a871e2e2ef0c6a6a90cf0032d90375a72352d914df562c7122f60b614",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 102,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 10,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 10
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-cv5eimju",
+        "attach_target_resolution": null
+      },
+      "request_id": 10,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 10,
+        "source_prog_id": 0,
+        "native_sha256": "3e0ab21a871e2e2ef0c6a6a90cf0032d90375a72352d914df562c7122f60b614",
+        "started": "1970-01-01T00:02:31.957745+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/request.native.o', 'reject_kptr_xchg_on_unref', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '102', '32', 'array_map', '10', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/request.native.o', 'reject_kptr_xchg_on_unref', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '102', '32', 'array_map', '10', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/10.failure.tar.gz",
+        "finished": "1970-01-01T00:02:37.767357+00:00"
+      },
+      "diagnostic": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=reject_kptr_xchg_on_unref (60 bytes), 1 reachable symbol(s) total\n  - reject_kptr_xchg_on_unref (vaddr 0x0, 60 bytes) [entry]\nError: arm64 helper call bpf_kptr_xchg has no helper address\n\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.proof.o --symbol reject_kptr_xchg_on_unref --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.link-plan.json\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_kptr_xchg_on_unref",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"3e0ab21a871e2e2ef0c6a6a90cf0032d90375a72352d914df562c7122f60b614\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 102, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 10, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 10}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-cv5eimju\", \"attach_target_resolution\": null}, \"request_id\": 10, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 10, \"source_prog_id\": 0, \"native_sha256\": \"3e0ab21a871e2e2ef0c6a6a90cf0032d90375a72352d914df562c7122f60b614\", \"started\": \"1970-01-01T00:02:31.957745+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/request.native.o', 'reject_kptr_xchg_on_unref', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '102', '32', 'array_map', '10', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '10', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/request.native.o', 'reject_kptr_xchg_on_unref', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '102', '32', 'array_map', '10', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/10.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:37.767357+00:00\"}, \"diagnostic\": \"trusted-native-loader: native-link kernel failed (rc=1)\\nstderr:\\nnative-link: arm64 entry=reject_kptr_xchg_on_unref (60 bytes), 1 reachable symbol(s) total\\n  - reject_kptr_xchg_on_unref (vaddr 0x0, 60 bytes) [entry]\\nError: arm64 helper call bpf_kptr_xchg has no helper address\\n\\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.proof.o --symbol reject_kptr_xchg_on_unref --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-2yk91gb1/generated/kernel-link/70dc4f7d728f1b5b.tmp.564.564.link-plan.json\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_kptr_xchg_on_unref.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_kptr_xchg_on_unref\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 3990, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_kptr_xchg_on_unref.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "5582c0e677daf01a50c33f72f155028ed85bc3a668a4bec94ff3d7f6c5f29ef9",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 112,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 11,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 11
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-aperrr5b",
+        "attach_target_resolution": null
+      },
+      "request_id": 11,
+      "status": -22,
+      "prog_id": 0,
+      "service": {
+        "request_id": 11,
+        "source_prog_id": 0,
+        "native_sha256": "5582c0e677daf01a50c33f72f155028ed85bc3a668a4bec94ff3d7f6c5f29ef9",
+        "started": "1970-01-01T00:02:53.590952+00:00",
+        "status": -22,
+        "error": "invalid indirect target scalar:0x9a at 0x28",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0x9a at 0x28\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/11.failure.tar.gz",
+        "finished": "1970-01-01T00:02:56.305106+00:00"
+      },
+      "diagnostic": "invalid indirect target scalar:0x9a at 0x28",
+      "file": "map_kptr_fail.c",
+      "program": "mark_ref_as_untrusted_or_null",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"5582c0e677daf01a50c33f72f155028ed85bc3a668a4bec94ff3d7f6c5f29ef9\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 112, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 11, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 11}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-aperrr5b\", \"attach_target_resolution\": null}, \"request_id\": 11, \"status\": -22, \"prog_id\": 0, \"service\": {\"request_id\": 11, \"source_prog_id\": 0, \"native_sha256\": \"5582c0e677daf01a50c33f72f155028ed85bc3a668a4bec94ff3d7f6c5f29ef9\", \"started\": \"1970-01-01T00:02:53.590952+00:00\", \"status\": -22, \"error\": \"invalid indirect target scalar:0x9a at 0x28\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 193, in serve\\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/trusted_specializer.py\\\", line 53, in specialize\\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 966, in render_program\\n    targets_by_addr = indirect_targets(all_insns)\\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\\\", line 794, in indirect_targets\\n    raise ValueError(f\\\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\\\")\\nValueError: invalid indirect target scalar:0x9a at 0x28\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/11.failure.tar.gz\", \"finished\": \"1970-01-01T00:02:56.305106+00:00\"}, \"diagnostic\": \"invalid indirect target scalar:0x9a at 0x28\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__mark_ref_as_untrusted_or_null.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"mark_ref_as_untrusted_or_null\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 4262, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__mark_ref_as_untrusted_or_null.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 122,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 12,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 12
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-z2eomjnf",
+        "attach_target_resolution": null
+      },
+      "request_id": 12,
+      "status": 0,
+      "prog_id": 41,
+      "service": {
+        "request_id": 12,
+        "source_prog_id": 0,
+        "native_sha256": "77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0",
+        "started": "1970-01-01T00:03:00.061093+00:00",
+        "prog_id": 41,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/12.success.tar.gz",
+        "finished": "1970-01-01T00:03:07.142522+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "reject_untrusted_store_to_ref",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 122, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 12, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 12}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-z2eomjnf\", \"attach_target_resolution\": null}, \"request_id\": 12, \"status\": 0, \"prog_id\": 41, \"service\": {\"request_id\": 12, \"source_prog_id\": 0, \"native_sha256\": \"77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0\", \"started\": \"1970-01-01T00:03:00.061093+00:00\", \"prog_id\": 41, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/12.success.tar.gz\", \"finished\": \"1970-01-01T00:03:07.142522+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_untrusted_store_to_ref.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_untrusted_store_to_ref\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 4545, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_untrusted_store_to_ref.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "6e420a1c4e0da1385ac3a15ccf677d82db643037924390b811d991737e6ffc07",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 132,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 13,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 13
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-_p0s5mjk",
+        "attach_target_resolution": null
+      },
+      "request_id": 13,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 13,
+        "source_prog_id": 0,
+        "native_sha256": "6e420a1c4e0da1385ac3a15ccf677d82db643037924390b811d991737e6ffc07",
+        "started": "1970-01-01T00:03:14.100966+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/request.native.o', 'reject_untrusted_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '132', '32', 'array_map', '13', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/request.native.o', 'reject_untrusted_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '132', '32', 'array_map', '13', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/13.failure.tar.gz",
+        "finished": "1970-01-01T00:03:20.580088+00:00"
+      },
+      "diagnostic": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: arm64 entry=reject_untrusted_xchg (60 bytes), 1 reachable symbol(s) total\n  - reject_untrusted_xchg (vaddr 0x0, 60 bytes) [entry]\nError: arm64 helper call bpf_kptr_xchg has no helper address\n\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.proof.o --symbol reject_untrusted_xchg --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.link-plan.json\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_untrusted_xchg",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"generation_failed\", \"native_sha256\": \"6e420a1c4e0da1385ac3a15ccf677d82db643037924390b811d991737e6ffc07\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 132, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 13, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 13}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-_p0s5mjk\", \"attach_target_resolution\": null}, \"request_id\": 13, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 13, \"source_prog_id\": 0, \"native_sha256\": \"6e420a1c4e0da1385ac3a15ccf677d82db643037924390b811d991737e6ffc07\", \"started\": \"1970-01-01T00:03:14.100966+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/request.native.o', 'reject_untrusted_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '132', '32', 'array_map', '13', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '13', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/request.native.o', 'reject_untrusted_xchg', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '132', '32', 'array_map', '13', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/13.failure.tar.gz\", \"finished\": \"1970-01-01T00:03:20.580088+00:00\"}, \"diagnostic\": \"trusted-native-loader: native-link kernel failed (rc=1)\\nstderr:\\nnative-link: arm64 entry=reject_untrusted_xchg (60 bytes), 1 reachable symbol(s) total\\n  - reject_untrusted_xchg (vaddr 0x0, 60 bytes) [entry]\\nError: arm64 helper call bpf_kptr_xchg has no helper address\\n\\ncommand: /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link --input /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.proof.o --symbol reject_untrusted_xchg --mode kernel --output /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.blob.bin --output-relocs /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.relocs.bin --output-map-patches /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.map-patches.tsv --output-abi /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.abi.tsv --output-data-layout /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.data-layout.json --link-plan /workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-xt5jzyl9/generated/kernel-link/aa7964d87968f118.tmp.579.579.link-plan.json\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_untrusted_xchg.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_untrusted_xchg\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 4941, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_untrusted_xchg.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "resource_failed",
+      "native_sha256": "effcfe6cf4c8caebcacb180d5fc27c4ee384368a690b136f08ca60d4a317da9f",
+      "error": "[Errno 22] maps/BTF object load: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object load: Invalid argument\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_bad_type_xchg",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 1,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"resource_failed\", \"native_sha256\": \"effcfe6cf4c8caebcacb180d5fc27c4ee384368a690b136f08ca60d4a317da9f\", \"error\": \"[Errno 22] maps/BTF object load: Invalid argument\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 302, in direct\\n    metadata, fds, details = resources.load(row[\\\"bpf_object\\\"])\\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 194, in load\\n    self.ok(self.lib.bpf_object__load(self.obj), \\\"maps/BTF object load\\\")\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 165, in ok\\n    raise OSError(-rc, operation + \\\": \\\" + os.strerror(-rc))\\nOSError: [Errno 22] maps/BTF object load: Invalid argument\\n\"}\n",
+      "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_bad_type_xchg.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_bad_type_xchg\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 5263, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_bad_type_xchg.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "resource_failed",
+      "native_sha256": "2bfa7b56f6f68e3a97b68b75982be258119b8f9bc113d1dea201a4a1b0310e4f",
+      "error": "[Errno 22] maps/BTF object load: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object load: Invalid argument\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_member_of_ref_xchg",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 1,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"resource_failed\", \"native_sha256\": \"2bfa7b56f6f68e3a97b68b75982be258119b8f9bc113d1dea201a4a1b0310e4f\", \"error\": \"[Errno 22] maps/BTF object load: Invalid argument\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 302, in direct\\n    metadata, fds, details = resources.load(row[\\\"bpf_object\\\"])\\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 194, in load\\n    self.ok(self.lib.bpf_object__load(self.obj), \\\"maps/BTF object load\\\")\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 165, in ok\\n    raise OSError(-rc, operation + \\\": \\\" + os.strerror(-rc))\\nOSError: [Errno 22] maps/BTF object load: Invalid argument\\n\"}\n",
+      "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_member_of_ref_xchg.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_member_of_ref_xchg\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 5720, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_member_of_ref_xchg.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "verifier_rejected",
+      "native_sha256": "64af489a73c7fac2b4b2b15feb0a72d4e92f5a102e2243597cf80e520026aeaa",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 31,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 144,
+          "source_func_type_id": 32,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 14,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "syscall",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 14
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-cnmzktla",
+        "attach_target_resolution": null
+      },
+      "request_id": 14,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 14,
+        "source_prog_id": 0,
+        "native_sha256": "64af489a73c7fac2b4b2b15feb0a72d4e92f5a102e2243597cf80e520026aeaa",
+        "started": "1970-01-01T00:03:41.817827+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/request.native.o', 'reject_indirect_helper_access', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '31', '1', '144', '32', 'array_map', '14', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/request.native.o', 'reject_indirect_helper_access', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '31', '1', '144', '32', 'array_map', '14', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/14.failure.tar.gz",
+        "finished": "1970-01-01T00:03:48.530057+00:00"
+      },
+      "diagnostic": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=137\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\nSyscall programs can only be sleepable\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=31 blob_bytes=108 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\nretained_map_info=5:id=14:type=2:name=array_map\nnative_blob_diag: fnv64=133edd881d982497 word_count=27 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=96 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=108 final_size_matches=1\nchunk_bytes=0:108\nreloc_targets=64:0xffff8000802f16e8,96:0xe\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n",
+      "file": "map_kptr_fail.c",
+      "program": "reject_indirect_helper_access",
+      "section": "?syscall",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"verifier_rejected\", \"native_sha256\": \"64af489a73c7fac2b4b2b15feb0a72d4e92f5a102e2243597cf80e520026aeaa\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 31, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 144, \"source_func_type_id\": 32, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 14, \"value_offset\": null}]}, \"resources\": {\"section\": \"syscall\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 14}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-cnmzktla\", \"attach_target_resolution\": null}, \"request_id\": 14, \"status\": -5, \"prog_id\": 0, \"service\": {\"request_id\": 14, \"source_prog_id\": 0, \"native_sha256\": \"64af489a73c7fac2b4b2b15feb0a72d4e92f5a102e2243597cf80e520026aeaa\", \"started\": \"1970-01-01T00:03:41.817827+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/request.native.o', 'reject_indirect_helper_access', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '31', '1', '144', '32', 'array_map', '14', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 208, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '14', '0', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/request.native.o', 'reject_indirect_helper_access', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/request-mr51uobm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '31', '1', '144', '32', 'array_map', '14', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/14.failure.tar.gz\", \"finished\": \"1970-01-01T00:03:48.530057+00:00\"}, \"diagnostic\": \"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\\ndiagnostic BPF_PROG_LOAD: Invalid argument\\nstub verifier_log_size=262144 log_true_size=137\\nstub fd_array_cnt=3 fd_array=0:6,1:6,2:5\\nstub insns=0:code=183,dst=0,src=3,off=16,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\\nverifier log:\\nSyscall programs can only be sleepable\\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\\n\\nkernel log tail:\\n4,240,1339263,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\\n5,241,1339274,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\\n\\nnative_lab stub context: prog_type=31 blob_bytes=108 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\\nretained_map_info=5:id=14:type=2:name=array_map\\nnative_blob_diag: fnv64=133edd881d982497 word_count=27 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=96 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=108 final_size_matches=1\\nchunk_bytes=0:108\\nreloc_targets=64:0xffff8000802f16e8,96:0xe\\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\\n\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_indirect_helper_access.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_indirect_helper_access\", \"section\": \"?syscall\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 6159, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_indirect_helper_access.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 3,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 154,
+          "source_func_type_id": 34,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 15,
+            "value_offset": null
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc",
+        "maps": [
+          {
+            "name": "array_map",
+            "map_id": 15
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-8ifykki0",
+        "attach_target_resolution": null
+      },
+      "request_id": 15,
+      "status": 0,
+      "prog_id": 55,
+      "service": {
+        "request_id": 15,
+        "source_prog_id": 0,
+        "native_sha256": "e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2",
+        "started": "1970-01-01T00:03:52.181295+00:00",
+        "prog_id": 55,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/15.success.tar.gz",
+        "finished": "1970-01-01T00:04:00.330078+00:00"
+      },
+      "diagnostic": "",
+      "file": "map_kptr_fail.c",
+      "program": "reject_indirect_global_func_access",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 0,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"installed\", \"native_sha256\": \"e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2\", \"context\": {\"version\": 1, \"load_context\": {\"prog_type\": 3, \"expected_attach_type\": 0, \"prog_flags\": 0, \"prog_ifindex\": 0, \"attach_btf_id\": 0, \"attach_btf_obj_id\": 0, \"attach_prog_id\": 0, \"gpl_compatible\": 1, \"source_btf_id\": 154, \"source_func_type_id\": 34, \"token_present\": 0}, \"maps\": [{\"name\": \"array_map\", \"map_id\": 15, \"value_offset\": null}]}, \"resources\": {\"section\": \"tc\", \"maps\": [{\"name\": \"array_map\", \"map_id\": 15}], \"pin_root\": \"/sys/fs/bpf/kprog-selftest-8ifykki0\", \"attach_target_resolution\": null}, \"request_id\": 15, \"status\": 0, \"prog_id\": 55, \"service\": {\"request_id\": 15, \"source_prog_id\": 0, \"native_sha256\": \"e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2\", \"started\": \"1970-01-01T00:03:52.181295+00:00\", \"prog_id\": 55, \"status\": 0, \"artifact_archive\": \"/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf/15.success.tar.gz\", \"finished\": \"1970-01-01T00:04:00.330078+00:00\"}, \"diagnostic\": \"\"}\n",
+      "stderr": "",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_indirect_global_func_access.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"reject_indirect_global_func_access\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 6525, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__reject_indirect_global_func_access.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "resource_failed",
+      "native_sha256": "f5a149bdc63a1020a926288fe1fbf5e76d645911f272fb000cc1afd269e2a8cd",
+      "error": "[Errno 22] maps/BTF object load: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object load: Invalid argument\n",
+      "file": "map_kptr_fail.c",
+      "program": "kptr_xchg_ref_state",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 1,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"resource_failed\", \"native_sha256\": \"f5a149bdc63a1020a926288fe1fbf5e76d645911f272fb000cc1afd269e2a8cd\", \"error\": \"[Errno 22] maps/BTF object load: Invalid argument\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 302, in direct\\n    metadata, fds, details = resources.load(row[\\\"bpf_object\\\"])\\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 194, in load\\n    self.ok(self.lib.bpf_object__load(self.obj), \\\"maps/BTF object load\\\")\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 165, in ok\\n    raise OSError(-rc, operation + \\\": \\\" + os.strerror(-rc))\\nOSError: [Errno 22] maps/BTF object load: Invalid argument\\n\"}\n",
+      "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__kptr_xchg_ref_state.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"kptr_xchg_ref_state\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 6805, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__kptr_xchg_ref_state.bpf.o\", \"entry\": true}"
+      ]
+    },
+    {
+      "source_prog_id": 0,
+      "stage": "resource_failed",
+      "native_sha256": "ab7542f3dbaa9ff29a37135a6c3c4a83d28087fa1c68269d585efbcc0765f251",
+      "error": "[Errno 22] maps/BTF object load: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object load: Invalid argument\n",
+      "file": "map_kptr_fail.c",
+      "program": "kptr_xchg_possibly_null",
+      "section": "?tc",
+      "expect": "failure",
+      "returncode": 1,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"resource_failed\", \"native_sha256\": \"ab7542f3dbaa9ff29a37135a6c3c4a83d28087fa1c68269d585efbcc0765f251\", \"error\": \"[Errno 22] maps/BTF object load: Invalid argument\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 302, in direct\\n    metadata, fds, details = resources.load(row[\\\"bpf_object\\\"])\\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 194, in load\\n    self.ok(self.lib.bpf_object__load(self.obj), \\\"maps/BTF object load\\\")\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 165, in ok\\n    raise OSError(-rc, operation + \\\": \\\" + os.strerror(-rc))\\nOSError: [Errno 22] maps/BTF object load: Invalid argument\\n\"}\n",
+      "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/service-state/trusted-t5_we1qf",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__kptr_xchg_possibly_null.native.o",
+        "{\"file\": \"map_kptr_fail.c\", \"program\": \"kptr_xchg_possibly_null\", \"section\": \"?tc\", \"body\": \"c\", \"expect\": \"failure\", \"offset\": 7179, \"path\": \"/workspaces/repository/vendor/linux-framework/tools/testing/selftests/bpf/progs/map_kptr_fail.c\", \"compiled\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/map_kptr_fail__kptr_xchg_possibly_null.bpf.o\", \"entry\": true}"
+      ]
+    }
+  ],
+  "skipped": [],
+  "invocation": {
+    "table": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current",
+    "arch": "arm64",
+    "out": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-s7h3ag5o/out",
+    "limit": 0,
+    "only": "",
+    "micro_exec": null
+  },
+  "source_scope": "Direct load-only native P with source_prog_id 0; maps/BTF and installed-stage agreement"
+}
