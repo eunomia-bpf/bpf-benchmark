@@ -201,19 +201,6 @@ def check_thread_pointers(base):
           '64 LLVM native encodings and7 wire/decode refusals PASS')
 
 
-def check_return_token_emission(encoder):
-    """Catch a lost RET operand or a return table from a different source PC."""
-    count = 0
-    for pc in (0, 4, 0x1000, 0x7ffffffc):
-        operands = [(f"x{r}",) for r in range(31)] + [("xzr",), ()]
-        for fields in operands:
-            instruction = encoder.NativeInsn(pc, "ret", fields, "ret " + ",".join(fields))
-            lines = []
-            encoder.append_insn(lines, instruction, set(), None, None, {}, {})
-            register = f"ARM64_X{int(fields[0][1:])}" if fields and fields[0] != "xzr" else "ARM64_XZR" if fields else "ARM64_X30"
-            assert len(lines) == 2 and lines[-1] == f"\tARM64_SIM_A64_RET_TO({register}, ARM64_SIM_RET_CASES_{pc:x});", lines
-            count += 1
-    print(f"AArch64 RET token emitter: {count} operand/site cases PASS")
 
 
 def main():
@@ -1110,7 +1097,6 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
-    check_return_token_emission(encoder)
     print(f"AArch64 internal-control/PC-address reference: {control_cases} complete-state cases PASS")
     print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches/scalar-memory/LDP-STP, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 

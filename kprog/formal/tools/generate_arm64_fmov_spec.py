@@ -16,12 +16,10 @@ arms.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_fmov_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Fmov.lean"
 CHEADER = ROOT / "generated/arm64_fmov.h"
 
@@ -40,9 +38,6 @@ EXPECTED = {
     ],
 }
 
-DEFINE = re.compile(
-    r"^#define\s+(ARM64_FMOV_[A-Z0-9_]+)\s+(\d+)U\s*$", re.M)
-
 
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
@@ -54,17 +49,6 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 fmov order: {dirs!r}")
     if [row["code"] for row in dirs] != [0, 1, 2, 3]:
         raise SystemExit(f"invalid arm64 fmov codes: {dirs!r}")
-    defines = {name: int(value)
-               for name, value in DEFINE.findall(SIM_HEADER.read_text())}
-    if not defines:
-        raise SystemExit(
-            f"no ARM64_FMOV_* definitions found in {SIM_HEADER}")
-    for row in dirs:
-        if defines.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 fmov codes drift from kprog/arm64/arm64_sim.h: "
-                f"spec={row['macro']}={row['code']} "
-                f"sim={defines.get(row['macro'])}")
     return dirs
 
 

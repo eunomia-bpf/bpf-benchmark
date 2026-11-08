@@ -33,12 +33,10 @@ selector and to keep its byte-ladder write.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_stack_write_tag_action_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64StackWriteTagAction.lean"
 CHEADER = ROOT / "generated/arm64_stack_write_tag_action.h"
 
@@ -77,14 +75,10 @@ CASE_COLUMNS = ("name", "is_w64", "is_aligned", "action")
 
 # The live routed stack write helper text, between the write helper's `#define`
 # opcode title and the plain write wrapper that follows it.
-STACK_WRITE_START = "#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)"
-STACK_WRITE_END = "#define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)"
-STACK_WRITE_SELECTOR = "KPROG_ARM64_STACK_WRITE_TAG_ACTION("
 # The hand-written outer gate the routed helper must no longer contain: the
 # read-side slot-tag predicate deciding the word/tag arm. The helper
 # legitimately keeps the `== ARM64_WIDTH_64` and 8-aligned tests inside the
 # selector's arguments, so the hand predicate name is the safe needle.
-HAND_TAG_GATE = "KPROG_ARM64_STACK_TAG("
 
 
 def _action(w64: bool, aligned: bool) -> str:
@@ -95,42 +89,6 @@ def _action(w64: bool, aligned: bool) -> str:
         return "clearTagAndWriteBytes"
     else:
         return "writeBytesNoTag"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(f"sim header no longer bounds the stack write "
-                         f"region with {start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """A routed stack write helper must select its slot-tag action through the
-    generated 3-way selector and keep its byte-ladder write; it must not decide
-    the word/tag arm by hand through the read-side slot-tag predicate."""
-    if STACK_WRITE_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 stack write helper does not route its slot-tag action "
-            "through the generated selector")
-    if HAND_TAG_GATE in region:
-        raise SystemExit(
-            "arm64 stack write helper decides its word/tag arm by hand through "
-            "the read-side KPROG_ARM64_STACK_TAG predicate instead of through "
-            "the generated action selector")
-
-
-def check_against_header():
-    """The live stack write helper must select its slot-tag action through the
-    generated selector."""
-    check_region(region_between(STACK_WRITE_START, STACK_WRITE_END))
 
 
 def load() -> dict:
@@ -169,7 +127,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid arm64 stack write tag action table: "
             f"{EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

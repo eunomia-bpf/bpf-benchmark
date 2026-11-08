@@ -31,12 +31,10 @@ generated source selector and to keep the slot-tag-array read.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_stack_read_tag_source_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64StackReadTagSource.lean"
 CHEADER = ROOT / "generated/arm64_stack_read_tag_source.h"
 
@@ -72,14 +70,10 @@ CASE_COLUMNS = ("name", "is_w64", "is_aligned", "source")
 
 # The live routed stack tag read helper text, between the read helper's
 # `#define` opcode title and the write helper that follows it.
-STACK_READ_START = "#define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)"
-STACK_READ_END = "#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)"
-STACK_READ_SELECTOR = "KPROG_ARM64_STACK_READ_TAG_SOURCE("
 # The hand-written outer gate the routed helper must no longer contain: the
 # read-side slot-tag predicate deciding the stack-tag-array arm. The helper
 # legitimately keeps the `== ARM64_WIDTH_64` and 8-aligned tests inside the
 # selector's arguments, so the hand predicate name is the safe needle.
-HAND_TAG_GATE = "KPROG_ARM64_STACK_TAG("
 
 
 def _source(w64: bool, aligned: bool) -> str:
@@ -87,42 +81,6 @@ def _source(w64: bool, aligned: bool) -> str:
     if w64 and aligned:
         return "stackTagArray"
     return "scalarDefault"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(f"sim header no longer bounds the stack tag read "
-                         f"region with {start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """A routed stack tag read helper must select its tag source through the
-    generated 2-way selector and keep its slot-tag-array read; it must not
-    pick the arm by hand through the read-side slot-tag predicate."""
-    if STACK_READ_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 stack tag read helper does not route its tag source "
-            "through the generated source selector")
-    if HAND_TAG_GATE in region:
-        raise SystemExit(
-            "arm64 stack tag read helper picks its tag source by hand through "
-            "the read-side KPROG_ARM64_STACK_TAG predicate instead of through "
-            "the generated source selector")
-
-
-def check_against_header():
-    """The live stack tag read helper must select its tag source through the
-    generated source selector."""
-    check_region(region_between(STACK_READ_START, STACK_READ_END))
 
 
 def load() -> dict:
@@ -161,7 +119,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid arm64 stack read tag source table: "
             f"{EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

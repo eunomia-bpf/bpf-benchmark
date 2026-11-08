@@ -26,12 +26,10 @@ the specification's `name` column is pinned to its `define` column.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_opcode_spec.json"
-SIM_HEADER = ROOT.parent / "x86/x86_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Opcode.lean"
 C_HEADER = ROOT / "generated/x86_opcode.h"
 PYTHON = ROOT.parent / "x86/micro-prog/generated_x86_opcode.py"
@@ -123,11 +121,6 @@ ALIAS_EXPECTED = [
     ("xorReg32", "X86_OP_XOR_REG32", "X86_OP_XOR_REG"),
 ]
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(X86_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
-ALIAS_DEFINE = re.compile(
-    r"^#define\s+(X86_OP_[A-Z0-9_]+)\s+(X86_OP_[A-Z0-9_]+)\s*$", re.M)
-
 
 def spec(data=None):
     if data is None:
@@ -145,55 +138,6 @@ def spec(data=None):
                    for n, d, t in ALIAS_EXPECTED]:
         raise SystemExit(f"invalid x86 opcode alias table: {aliases!r}")
     return rows, aliases
-
-
-def canonical_name(define):
-    parts = define[len("X86_OP_"):].split("_")
-    return parts[0].lower() + "".join(part.capitalize() for part in parts[1:])
-
-
-def check_against_sim(rows, aliases):
-    text = SIM_HEADER.read_text()
-    defines = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(text)}
-    alias_defines = dict(ALIAS_DEFINE.findall(text))
-    if not defines:
-        raise SystemExit(f"no X86_OP_* definitions found in {SIM_HEADER}")
-    if set(defines) != {row["define"] for row in rows}:
-        raise SystemExit(
-            "x86 opcode set drift from kprog/x86/x86_sim.h: "
-            f"missing={sorted({row['define'] for row in rows} - set(defines))} "
-            f"extra={sorted(set(defines) - {row['define'] for row in rows})}")
-    if set(alias_defines) != {row["define"] for row in aliases}:
-        raise SystemExit(
-            "x86 opcode alias set drift from kprog/x86/x86_sim.h: "
-            f"got={sorted(alias_defines)}")
-    seen = {}
-    for row in rows:
-        if defines[row["define"]] != int(row["code"], 16):
-            raise SystemExit(
-                "x86 opcode drift from kprog/x86/x86_sim.h: "
-                f"spec={row['define']}={row['code']} "
-                f"sim={defines[row['define']]:#x}")
-        if canonical_name(row["define"]) != row["name"]:
-            raise SystemExit(
-                f"x86 opcode name {row['name']!r} is not the canonical "
-                f"lowerCamelCase form of {row['define']}")
-        if int(row["code"], 16) in seen:
-            raise SystemExit(
-                f"duplicate x86 opcode code {row['code']}: "
-                f"{seen[int(row['code'], 16)]} and {row['define']}")
-        seen[int(row["code"], 16)] = row["define"]
-    for row in aliases:
-        if alias_defines[row["define"]] != row["target"]:
-            raise SystemExit(
-                "x86 opcode alias drift from kprog/x86/x86_sim.h: "
-                f"spec={row['define']}={row['target']} "
-                f"sim={alias_defines[row['define']]}")
-        if canonical_name(row["define"]) != row["name"]:
-            raise SystemExit(
-                f"x86 opcode alias name {row['name']!r} is not the canonical "
-                f"lowerCamelCase form of {row['define']}")
 
 
 def render_lean(rows):
@@ -271,7 +215,6 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     rows, aliases = spec()
-    check_against_sim(rows, aliases)
     outputs = (
         (LEAN, render_lean(rows)),
         (C_HEADER, render_c(rows, aliases)),

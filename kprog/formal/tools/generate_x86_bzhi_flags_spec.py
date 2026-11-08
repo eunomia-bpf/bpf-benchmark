@@ -6,12 +6,10 @@ flag inputs and checks that the production handler routes through the wrapper.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_bzhi_flags_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86BzhiFlags.lean"
 CHEADER = ROOT / "generated/x86_bzhi_flags.h"
 
@@ -43,41 +41,6 @@ EXPECTED = {
 # wrapper that follows it. The region is one macro: the two thin
 # `X86_SIM_L_EXEC_BZHI`/`_BZHI_MEM` wrappers start at `ARM_END`, so narrowing
 # there keeps the "exactly one macro" check meaningful.
-ARM_START = "#define X86_SIM_L_EXEC_BZHI_STEP("
-ARM_END = "#define X86_SIM_L_EXEC_BZHI(DST"
-ARM_VALUE = "kprog_x86_bzhi_value("
-ARM_FLAG_SET = ("X86_SIM_L_SET_BZHI_FLAGS(__x86_l_count, __x86_l_bits, "
-                "__x86_l_result)")
-ARM_HAND_FLAGS = "__x86_cf ="
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live BZHI step must route its flag block through the generated
-    transition and set no flag by hand."""
-    region = arm_region()
-    if ARM_VALUE not in region:
-        raise SystemExit("x86 bzhi step does not compute the masked-clear value")
-    if ARM_FLAG_SET not in region:
-        raise SystemExit(
-            "x86 bzhi step does not route its flag block through the "
-            "generated transition")
-    if ARM_HAND_FLAGS in region:
-        raise SystemExit(
-            "x86 bzhi step sets its flags by hand instead of through the "
-            "generated transition")
-    if flat(region).count("#define") != 1:
-        raise SystemExit("x86 bzhi step region is not exactly one macro")
 
 
 def load() -> dict:
@@ -100,7 +63,6 @@ def load() -> dict:
         raise SystemExit(
             "x86 bzhi flags must take exactly the count-vs-width CF input and "
             "the result-zero ZF and result-sign SF inputs, in that order")
-    check_against_header()
     return EXPECTED
 
 

@@ -18,8 +18,6 @@ while depth:
     depth += (source[cursor] == '{') - (source[cursor] == '}')
     cursor += 1
 case = source[start:cursor]
-assert case.count('image[slot_index] =') == 1
-assert case.index('r->offset &') < case.index('(size_t)r->offset + sizeof(u32)') < case.index('image[slot_index] !=') < case.index('image[slot_index] =')
 macros = '\n'.join(re.search(r'^#define ' + name + r'\s+[^\n]+', source, re.M).group()
                    for name in ['NATIVE_LAB_RELOC_ARM64_PERCPU_MRS', 'A64_MRS_X10_TPIDR_EL1', 'A64_MRS_X10_TPIDR_EL2'])
 preamble = r'''

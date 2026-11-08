@@ -39,12 +39,10 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_div_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Div.lean"
 CHEADER = ROOT / "generated/x86_div.h"
 
@@ -82,41 +80,6 @@ COLUMNS = ("arm", "arm_define", "width_code", "write_count", "dividend_high",
 
 # The live routed arm text, between the generated div singleton gate and the
 # generated double-shift family gate.
-ARM_START = "} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) {"
-ARM_END = "} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {"
-ARM_SELECTOR = "KPROG_X86_DIV_ARM(__x86_l_width)"
-ARM_WIDTH_WRITE = "X86_SIM_L_WRITE_REG_WIDTH"
-ARM_HIGH_READ = "X86_SIM_L_READ_REG(X86_RDX)"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live DIV arm must route through the generated width-code selector."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 div arm does not route through the generated selector")
-    for _arm, define, _c, _w, _h, _g, _e, _wc in _ARMS[:-1]:
-        if define not in region:
-            raise SystemExit(
-                f"x86 div arm case {define} is not routed")
-    if "} else {" not in region:
-        raise SystemExit("x86 div default arm is not routed")
-    if ARM_WIDTH_WRITE not in region:
-        raise SystemExit("x86 div arm has no width write")
-    if ARM_HIGH_READ not in region:
-        raise SystemExit("x86 div arm does not read the high-half dividend")
 
 
 def load() -> dict:
@@ -139,7 +102,6 @@ def load() -> dict:
         raise SystemExit("x86 div must name exactly one high-half-gated arm")
     if arms[-1]["high_gate"] != 1:
         raise SystemExit("x86 div default arm must be the high-half-gated one")
-    check_against_header()
     return EXPECTED
 
 

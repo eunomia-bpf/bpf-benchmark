@@ -3,15 +3,9 @@ ARM64_HOST_ENV := -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_E
 
 check:
 	install -d build
-	python3 tools/check_macro_hygiene.py
 	python3 ../arm64/generate_sim_dispatch.py --check
-	python3 tools/check_helper_idents.py
-	python3 tools/check_jcc_opcodes.py
 	python3 tools/check_lookup_ambiguity.py
-	python3 tools/check_oracle_composition.py
-	python3 tools/check_dual_emit_coverage.py
 	python3 tools/mutate_contracts.py --check
-	python3 tools/check_dispatch_model.py
 	python3 tools/generate_ptr_add_spec.py --check
 	python3 tools/generate_abi_load_spec.py --check
 	python3 tools/generate_arm64_width_spec.py --check

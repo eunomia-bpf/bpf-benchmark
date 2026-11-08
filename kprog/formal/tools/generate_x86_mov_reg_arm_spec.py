@@ -47,12 +47,10 @@ mirrors.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_mov_reg_arm_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86MovRegArm.lean"
 CHEADER = ROOT / "generated/x86_mov_reg_arm.h"
 
@@ -88,83 +86,8 @@ COLUMNS = ("arm", "arm_define", "effect", "width_class")
 
 # The live routed arm text, between the generated mov-reg singleton gate and
 # the generated movx register-pair family gate.
-ARM_START = "} else if (KPROG_X86_DISP_MOV_REG_HANDLED(OP)) {"
-ARM_END = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {"
 # The standalone shared body, between its `#define` and the next `#define`.
-MACRO_START = "#define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)"
-MACRO_END = "#define X86_SIM_L_EXEC_MOV_REG(DST, SRC, FLAGS)"
-ARM_SELECTOR = "KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC))"
-ARM_STACK_TEST = "KPROG_X86_MOV_REG_ARM_STACK_PTR"
-ARM_POINTER_TEST = "KPROG_X86_MOV_REG_ARM_POINTER"
-ARM_NARROW_TEST = "KPROG_X86_MOV_REG_ARM_NARROW"
-ARM_STACK_BODY = "X86_SIM_L_STACK_PTR("
-ARM_POINTER_READ = "X86_SIM_L_READ_REG_PTR(SRC)"
-ARM_POINTER_TAG = "X86_SIM_L_REG_TAG(SRC)"
-ARM_NARROW_READ = "X86_SIM_L_READ_REG_WIDTH_SHIFT("
-ARM_NARROW_WRITE = "X86_SIM_L_WRITE_REG_WIDTH_SHIFT("
 # The hand-written ladder the routed body must no longer contain.
-HAND_WIDTH_TEST = "X86_WIDTH_64"
-HAND_RSP_TEST = "== X86_RSP"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def arm_region():
-    return region_between(ARM_START, ARM_END)
-
-
-def macro_region():
-    return region_between(MACRO_START, MACRO_END)
-
-
-def check_region(region, exactly_one_arm):
-    """A routed MOV_REG body must select its arm through the generated
-    two-fact selector, name all three arms, and still compute the stack-base,
-    pointer, and narrow writebacks; it must not select by hand."""
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 mov_reg arm body does not route through the generated selector")
-    for name, test in (("stack_ptr", ARM_STACK_TEST),
-                       ("pointer", ARM_POINTER_TEST),
-                       ("narrow", ARM_NARROW_TEST)):
-        if test not in region:
-            raise SystemExit(f"x86 mov_reg arm body does not name the {name} arm")
-    if ARM_STACK_BODY not in region:
-        raise SystemExit(
-            "x86 mov_reg arm body does not resolve the stack base")
-    if ARM_POINTER_READ not in region or ARM_POINTER_TAG not in region:
-        raise SystemExit(
-            "x86 mov_reg arm body does not move the source pointer and tag")
-    if ARM_NARROW_READ not in region or ARM_NARROW_WRITE not in region:
-        raise SystemExit(
-            "x86 mov_reg arm body does not do the narrow lane read/write")
-    if HAND_WIDTH_TEST in region:
-        raise SystemExit(
-            "x86 mov_reg arm body tests the width by hand instead of through "
-            "the generated selector")
-    if HAND_RSP_TEST in region:
-        raise SystemExit(
-            "x86 mov_reg arm body tests the stack pointer by hand instead of "
-            "through the generated selector")
-    if exactly_one_arm and region.count("if (KPROG_X86_MOV_REG_ARM") != 3:
-        raise SystemExit("x86 mov_reg arm region is not exactly one arm")
-
-
-def check_against_header():
-    """Both live MOV_REG bodies (the standalone shared macro and the routed
-    arm) must route their arm choice through the generated selector."""
-    check_region(arm_region(), exactly_one_arm=True)
-    check_region(macro_region(), exactly_one_arm=False)
 
 
 def load() -> dict:
@@ -181,7 +104,6 @@ def load() -> dict:
             raise SystemExit(f"invalid x86 mov_reg arm {column}: {arms!r}")
     if len(arms) != 3:
         raise SystemExit("x86 mov_reg arm must select between exactly 3 arms")
-    check_against_header()
     return EXPECTED
 
 

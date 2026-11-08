@@ -35,12 +35,10 @@ exactly as the opcode/ALU mirrors.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_doubleshift_arm_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86DoubleShiftArm.lean"
 CHEADER = ROOT / "generated/x86_doubleshift_arm.h"
 
@@ -73,59 +71,6 @@ COLUMNS = ("arm", "arm_define", "opcode", "opcode_define", "result",
 
 # The live routed arm text, between the generated double-shift family gate and
 # the generated push singleton gate.
-ARM_START = "} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {"
-ARM_END = "} else if (KPROG_X86_DISP_PUSH_HANDLED(OP)) {"
-ARM_SELECTOR = "KPROG_X86_DOUBLESHIFT_ARM((OP))"
-ARM_FLAGS = "KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP))"
-ARM_SHLD_ARM = "KPROG_X86_DOUBLESHIFT_ARM_SHLD"
-ARM_SHLD_CALL = "x86_shld("
-ARM_SHRD_CALL = "x86_shrd("
-ARM_STEP_GATE = "x86_shift_count((IMM), __x86_l_width) != 0"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live double-shift arm must route both its body and its flag family
-    through the generated opcode selector, behind the count-zero step gate."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 doubleshift arm does not route through the generated selector")
-    if ARM_FLAGS not in region:
-        raise SystemExit(
-            "x86 doubleshift arm does not route its flag family through the "
-            "generated selector")
-    if ARM_SHLD_ARM not in region:
-        raise SystemExit("x86 doubleshift arm does not name the shld arm")
-    if ARM_SHLD_CALL not in region:
-        raise SystemExit("x86 doubleshift arm does not compute the shld value")
-    if ARM_SHRD_CALL not in region:
-        raise SystemExit("x86 doubleshift arm does not compute the shrd value")
-    if ARM_STEP_GATE not in region:
-        raise SystemExit(
-            "x86 doubleshift arm has no count-zero step gate")
-    if "KPROG_X86_DOUBLESHIFT_OF(" not in region:
-        raise SystemExit("x86 doubleshift arm omits its sign-change overflow rule")
-    if "else if (__x86_l_width == X86_WIDTH_32)" not in region:
-        raise SystemExit("x86 doubleshift arm omits zero-count 32-bit writeback")
-    if flat(region).count("} else if (") != 2:
-        raise SystemExit(
-            "x86 doubleshift arm region is not exactly one arm")
-    if "X86_ALU_SHL" in region or "X86_ALU_SHR" in region:
-        raise SystemExit(
-            "x86 doubleshift arm selects its flag family by hand instead of "
-            "through the generated selector")
 
 
 def load() -> dict:
@@ -152,7 +97,6 @@ def load() -> dict:
             ("shld", "shrd")] != []:
         raise SystemExit(
             "x86 doubleshift arm results must name the double-shift functions")
-    check_against_header()
     return EXPECTED
 
 

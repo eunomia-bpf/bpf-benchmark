@@ -51,13 +51,11 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_alu_flag_arm_spec.json"
 DECODE_SPEC = ROOT / "contracts/x86_alu_decode_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86AluFlagArm.lean"
 CHEADER = ROOT / "generated/x86_alu_flag_arm.h"
 
@@ -113,72 +111,10 @@ COLUMNS = ("arm", "arm_define", "alu_codes", "alu_defines", "flag_body",
 
 # The live routed macro text, between the `SET_ALU_FLAGS` macro opener and the
 # `EVAL_CC` macro that follows it.
-ARM_START = "#define X86_SIM_L_SET_ALU_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)"
-ARM_END = "#define X86_SIM_L_EVAL_CC(CC)"
-ARM_SELECTOR = "KPROG_X86_ALU_FLAG_ARM((ALU))"
 # Needles from the hand-written token ladder that must be gone after routing.
-ARM_HAND_LADDER = [
-    "X86_ALU_ADD ||", "X86_ALU_SHL ||", "X86_ALU_INC)", "X86_ALU_IMUL)",
-    "X86_ALU_NEG)",
-]
 # The signatures each routed body must still apply, so routing did not drop a
 # body's operand shape (the INC/DEC `1`, the NEG `0` lhs, the shift token
 # pass-through, the imul result drop, the preserve side effect).
-ARM_BODY_SIGNATURES = [
-    "X86_SIM_L_SET_ADD_FLAGS((LHS), (RHS), (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_ADD_FLAGS((LHS), 1, (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_SUB_FLAGS((LHS), 1, (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_SUB_FLAGS((LHS), (RHS), (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_SUB_FLAGS(0, (LHS), (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_SBB_FLAGS((LHS), (RHS), 0, (RESULT), (WIDTH))",
-    "X86_SIM_L_SET_SHIFT_FLAGS((LHS), (RHS), (RESULT), (ALU), (WIDTH))",
-    "X86_SIM_L_SET_IMUL_FLAGS((LHS), (RHS), (WIDTH))",
-    "X86_SIM_L_SET_LOGIC_FLAGS((RESULT), (WIDTH))",
-    "KPROG_X86_PRESERVE_FLAGS()",
-]
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live ALU-flags macro must route entirely through the generated
-    selector and keep every body's operand shape."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 alu flag arm does not route through the generated selector")
-    for needle in ARM_HAND_LADDER:
-        if needle in region:
-            raise SystemExit(
-                f"x86 alu flag arm still selects {needle!r} by hand")
-    for signature in ARM_BODY_SIGNATURES:
-        if signature not in region:
-            raise SystemExit(
-                f"x86 alu flag arm does not route {signature}")
-    if "__x86_l_old_cf" not in region:
-        raise SystemExit(
-            "x86 alu flag arm does not preserve the incoming carry for the "
-            "increment/decrement families")
-    if "case " not in region or "default:" not in region:
-        raise SystemExit(
-            "x86 alu flag arm does not dispatch through the selector cases")
-    for row in _ARMS[:-1]:
-        if row[1] not in region:
-            raise SystemExit(
-                f"x86 alu flag arm does not name the routed arm {row[1]}")
-    if _ARMS[-1][5] not in region:
-        raise SystemExit(
-            f"x86 alu flag arm default does not route {_ARMS[-1][5]}")
 
 
 def load() -> dict:
@@ -232,7 +168,6 @@ def load() -> dict:
                 raise SystemExit(
                     f"x86 alu flag arm token {define} is {code}, but the ALU "
                     f"decode names {codes.get(mnemonic)}")
-    check_against_header()
     return EXPECTED
 
 

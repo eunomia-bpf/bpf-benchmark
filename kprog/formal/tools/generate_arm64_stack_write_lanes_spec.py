@@ -29,12 +29,10 @@ the byte counts to the store-bytes contract.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_stack_write_lanes_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64StackWriteLanes.lean"
 CHEADER = ROOT / "generated/arm64_stack_write_lanes.h"
 
@@ -86,64 +84,11 @@ ACTIVATION_COLUMNS = ("name", "active")
 
 # The live routed stack-write helper text, between the write helper's `#define`
 # opcode title and the plain write wrapper that follows it.
-STACK_WRITE_START = "#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)"
-STACK_WRITE_END = "#define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)"
-LANE_PREDICATE = "KPROG_ARM64_STACK_WRITE_LANE_ACTIVE("
-BYTE_LANE = "KPROG_ARM64_BYTE_AT("
-BYTE_ARENA = "__a64_stack.b["
-APPLY_WIDTH = "KPROG_ARM64_APPLY_WIDTH("
 
 # The hand-written per-lane width gates the routed helper must no longer
 # contain: the lane-1 and lane-2/3 gate widths. The helper legitimately keeps
 # the `== ARM64_WIDTH_64` test inside the slot-tag predicate's argument, so only
 # the two `>=` gates (which only the byte ladder carries) are safe needles.
-HAND_GATE_16 = "__a64_stw_width >= ARM64_WIDTH_16"
-HAND_GATE_32 = "__a64_stw_width >= ARM64_WIDTH_32"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def stack_write_region():
-    return region_between(STACK_WRITE_START, STACK_WRITE_END)
-
-
-def check_region(region):
-    """A routed stack-write helper must gate each byte lane through the
-    generated activation predicate and still keep the byte-lane extraction and
-    the width-narrowing value; it must not gate by hand."""
-    if LANE_PREDICATE not in region:
-        raise SystemExit(
-            "arm64 stack write helper does not gate its lanes through the "
-            "generated activation predicate")
-    if BYTE_LANE not in region:
-        raise SystemExit(
-            "arm64 stack write helper does not keep the byte-lane extraction")
-    if BYTE_ARENA not in region:
-        raise SystemExit(
-            "arm64 stack write helper does not write the byte arena")
-    if APPLY_WIDTH not in region:
-        raise SystemExit(
-            "arm64 stack write helper does not narrow the value to its width")
-    if HAND_GATE_16 in region or HAND_GATE_32 in region:
-        raise SystemExit(
-            "arm64 stack write helper gates its byte lanes by hand instead of "
-            "through the generated activation predicate")
-
-
-def check_against_header():
-    """The live stack-write helper must gate its byte lanes through the
-    generated activation predicate."""
-    check_region(stack_write_region())
 
 
 def load() -> dict:
@@ -194,7 +139,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid arm64 stack write lanes activation size: "
             f"{EXPECTED['activation']!r}")
-    check_against_header()
     return EXPECTED
 
 

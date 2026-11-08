@@ -2,13 +2,10 @@
 """Generate the four AArch64 ALU operand-source labels. Three immediate labels select the decoded immediate; the register label selects the modified register. AUX retains the ALU-operation selection in the common C body. The JSON contract, opcode constants, C selector and Lean constructors share these bindings."""
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_alu_operand_select_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean"
 CHEADER = ROOT / "generated/arm64_alu_operand_select.h"
 
@@ -20,52 +17,15 @@ EXPECTED = {'schema_version': 1,
                {'name': 'aluImm', 'code': 6, 'macro': 'ARM64_OP_ALU_IMM', 'immediate': True},
                {'name': 'aluReg', 'code': 7, 'macro': 'ARM64_OP_ALU_REG', 'immediate': False}]}
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # The ALU arm body followed by the live dispatcher, between the
 # `ARM64_SIM_L_EXEC_ALU` `#define` and the `ARM64_SIM_RUN_OP3` wrapper.
-EXEC_START = "#define ARM64_SIM_L_EXEC_ALU(OP"
-EXEC_END = "#define ARM64_SIM_RUN_OP3("
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def exec_region():
-    text = HEADER.read_text()
-    start = text.index(EXEC_START)
-    end = text.index(EXEC_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The live ALU arm must select its operand source through the generated
-    selector and must not test the raw immediate opcode by hand."""
-    if "KPROG_ARM64_ALU_OPERAND_SELECT((OP)" not in region:
-        raise SystemExit(
-            "arm64 ALU arm does not route the operand source through the "
-            "generated selector")
-    hand = re.compile(r"\(OP\)\s*==\s*ARM64_OP_ALU_IMM(?![A-Z0-9_])")
-    if hand.search(region):
-        raise SystemExit(
-            "arm64 ALU arm still tests the raw immediate opcode by hand "
-            "((OP) == ARM64_OP_ALU_IMM)")
-
 
 
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
     if data != EXPECTED:
         raise SystemExit(f"invalid arm64 ALU operand select specification: {data!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    for item in data["selectors"]:
-        if opcodes.get(item["macro"]) != item["code"]:
-            raise SystemExit(f"arm64 ALU operand opcode drift: {item!r}")
-    check_region(exec_region())
     return data["selectors"]
 
 

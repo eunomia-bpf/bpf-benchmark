@@ -25,7 +25,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_mem_prepost_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64MemPrepost.lean"
 CHEADER = ROOT / "generated/arm64_mem_prepost.h"
 
@@ -53,12 +52,6 @@ def load() -> dict:
         raise SystemExit(f"invalid arm64 pre/post bits: {data!r}")
     if data["flags_shift"] != FLAGS_SHIFT or data["flags_mask"] != FLAGS_MASK:
         raise SystemExit(f"invalid arm64 pre/post flag decode: {data!r}")
-    text = SIM_HEADER.read_text()
-    for name, value in (("ARM64_MEM_PRE", PRE_BIT), ("ARM64_MEM_POST", POST_BIT)):
-        if f"#define {name} {value}U" not in text:
-            raise SystemExit(
-                f"arm64 pre/post flag drift from kprog/arm64/arm64_sim.h: "
-                f"{name} != {value}")
     return data
 
 

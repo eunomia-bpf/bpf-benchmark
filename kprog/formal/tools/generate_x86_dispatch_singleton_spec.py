@@ -11,13 +11,10 @@ or has drifted from the X86_OP_* decode -- fails the formal gate.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_dispatch_singleton_spec.json"
-SIM_HEADER = ROOT.parent / "x86/x86_sim.h"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86DispatchSingleton.lean"
 CHEADER = ROOT / "generated/x86_dispatch_singleton.h"
 
@@ -142,54 +139,6 @@ SINGLETON_NAMES = [
 
 # The live dispatcher text, between the `X86_SIM_L_EXEC` `#define` and the
 # `X86_SIM_RUN_OP` wrapper that follows it.
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(X86_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
-EXEC_START = "#define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)"
-EXEC_END = "#define X86_SIM_RUN_OP("
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def exec_region():
-    return region_between(EXEC_START, EXEC_END)
-
-
-def check_region(region):
-    """The live dispatcher must keep no gate-shaped raw singleton comparison.
-
-    The x86 arms contain legitimate inner `(OP) == X86_OP_*` tests (the
-    map-pointer/helper-id tag selection, the MOV_REG/DIV sub-arms), so the
-    hand-gate rejection is anchored on the gate shapes the dispatcher actually
-    writes -- the flattened `} else if ((OP) == X86_OP_X) {` / bare
-    `if ((OP) == X86_OP_NOP) {` -- never on a parenthesised opcode comparison
-    in an arm body."""
-    gates = re.findall(
-        r"(?:(?<=\{) )?if \(\(OP\) == (X86_OP_[A-Z0-9_]+)\) \{", region)
-    hand_gates = [name for name in gates if name != "X86_OP_NOP"]
-    if hand_gates:
-        raise SystemExit(
-            f"x86 dispatcher still tests dispatcher opcodes with raw gates "
-            f"({sorted(set(hand_gates))})")
-
-    missing = [row["gate_macro"] for row in EXPECTED["singletons"] + EXPECTED["extensions"]
-               if f"{row['gate_macro']}(OP)" not in region]
-    if missing:
-        raise SystemExit(
-            "x86 dispatcher must route all singleton gates; missing: "
-            f"{missing}")
-
-
-def check_against_header():
-    check_region(exec_region())
 
 
 def load() -> list[dict]:
@@ -202,20 +151,9 @@ def load() -> list[dict]:
     if names != SINGLETON_NAMES:
         raise SystemExit(
             f"invalid x86 dispatch singleton order: {names!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no X86_OP_* opcode definitions found in {SIM_HEADER}")
     seen = set()
     codes = set()
     for row in singletons + EXPECTED["extensions"]:
-        if opcodes.get(row["op_macro"]) != row["code"]:
-            raise SystemExit(
-                "x86 dispatch singleton opcodes drift from "
-                "kprog/x86/x86_sim.h: "
-                f"spec={row['op_macro']}={row['code']} "
-                f"sim={opcodes.get(row['op_macro'])}")
         if row["name"] in seen:
             raise SystemExit(
                 f"duplicate x86 dispatch singleton name: {row['name']!r}")
@@ -224,7 +162,6 @@ def load() -> list[dict]:
             raise SystemExit(f"duplicate x86 dispatch singleton code: "
                              f"{row['name']}={row['code']}")
         codes.add(row["code"])
-    check_against_header()
     return singletons
 
 

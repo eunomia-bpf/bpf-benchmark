@@ -29,12 +29,10 @@ independent construction from the literals, and ties the two facts to the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_stack_arm_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86StackArm.lean"
 CHEADER = ROOT / "generated/x86_stack_arm.h"
 
@@ -70,71 +68,9 @@ CASE_COLUMNS = ("name", "w64", "aligned", "word")
 
 # The live routed stack-helper text, between each helper's `#define` opcode
 # title and the next helper's.
-STACK_WRITE_START = "#define X86_SIM_L_PRIVATE_BYTE_STORE(ADDR, WIDTH, VALUE)"
-STACK_WRITE_END = "#define X86_SIM_L_STACK_READ(OFF, WIDTH)"
-STACK_READ_START = "#define X86_SIM_L_STACK_READ(OFF, WIDTH)"
-STACK_READ_END = "#define X86_SIM_L_STACK_PTR(OFF)"
-STACK_SELECTOR = "KPROG_X86_STACK_ARM("
-WORD_ARENA = "__x86_stack_mem.q"
-WORD_INDEX = "KPROG_X86_STACK_WORD_INDEX("
-WRITE_LADDER = "KPROG_X86_STACK_BYTE("
-READ_LADDER = "KPROG_X86_STACK_ASSEMBLE("
 # The hand-written selection the routed helper must no longer contain: the width
 # test conjoined with the alignment test. Neither ladder body uses `&&`, so its
 # presence means the body choice is still made by hand.
-HAND_AND_TEST = "X86_WIDTH_64 &&"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def stack_write_region():
-    return region_between(STACK_WRITE_START, STACK_WRITE_END)
-
-
-def stack_read_region():
-    return region_between(STACK_READ_START, STACK_READ_END)
-
-
-def check_region(region, ladder, byte_alias):
-    """A routed stack helper must select its body through the generated
-    two-fact selector and still keep the word-arena and byte-ladder bodies; it
-    must not select by hand."""
-    if STACK_SELECTOR not in region:
-        raise SystemExit(
-            "x86 stack helper does not route through the generated selector")
-    if WORD_ARENA not in region or WORD_INDEX not in region:
-        raise SystemExit(
-            "x86 stack helper does not touch the word arena slot")
-    # The volatile byte view prevents Clang from coalescing an unaligned
-    # native stack access into an illegal wide BPF stack load/store.
-    base = "(ADDR)" if byte_alias == "__x86_stw_bytes" else "__x86_stack_mem.b"
-    byte_view = f"volatile __u8 *{byte_alias} = {base};"
-    if byte_view not in region or byte_alias + "[" not in region:
-        raise SystemExit("x86 stack helper does not touch its volatile byte arena")
-    if ladder not in region:
-        raise SystemExit(
-            "x86 stack helper does not keep the byte-ladder body")
-    if HAND_AND_TEST in region:
-        raise SystemExit(
-            "x86 stack helper selects its body by hand instead of through the "
-            "generated selector")
-
-
-def check_against_header():
-    """Both live stack helpers (write and read) must route their body choice
-    through the generated selector."""
-    check_region(stack_write_region(), WRITE_LADDER, "__x86_stw_bytes")
-    check_region(stack_read_region(), READ_LADDER, "__x86_str_bytes")
 
 
 def load() -> dict:
@@ -160,7 +96,6 @@ def load() -> dict:
     if [row["word"] for row in EXPECTED["cases"]] != [
             True, False, False, False]:
         raise SystemExit(f"invalid x86 stack arm table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

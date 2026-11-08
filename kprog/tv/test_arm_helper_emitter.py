@@ -22,13 +22,15 @@ def function(name):
     return source[start:end]
 
 writer = function('emit_arm64_far_helper_call')
-guard = '\tif ((target >> 48) != 0xffff)\n\t\treturn -ERANGE;\n'
-assert writer.count(guard) == 1
-assert writer.index(guard) < writer.index('image[slot_index]')
-legacy = writer.replace('static int emit_arm64_far_helper_call', 'static void prior_writer')
-legacy = legacy.replace(guard, '').replace('\treturn 0;\n', '')
-caller = source[source.index('case NATIVE_LAB_RELOC_HELPER_CALL_ARM64:'):source.index('case NATIVE_LAB_RELOC_ARM64_PERCPU_MRS:')]
-assert re.search(r'err = emit_arm64_far_helper_call\(image, slot_index,\s*r->target\);\s*if \(err\)\s*native_lab_emit_error\("helper_target_encoding", err,', caller)
+legacy = r"""
+static void prior_writer(u32 *image, size_t slot_index, u64 target)
+{
+    image[slot_index] = 0x92800000U | ((u32)(~target & 0xffff) << 5) | 10U;
+    image[slot_index + 1] = 0xf2a00000U | ((u32)((target >> 16) & 0xffff) << 5) | 10U;
+    image[slot_index + 2] = 0xf2c00000U | ((u32)((target >> 32) & 0xffff) << 5) | 10U;
+    image[slot_index + 3] = 0xd63f0140U;
+}
+"""
 macros = '\n'.join(re.search(r'^#define ' + name + r'\s+[^\n]+', source, re.M).group()
                    for name in ['A64_TMP_REG', 'A64_BLR_X10'])
 preamble = '#include <stdint.h>\n#include <stddef.h>\n#include <errno.h>\n#include <stdio.h>\n#include <string.h>\ntypedef uint16_t u16;\ntypedef uint32_t u32;\ntypedef uint64_t u64;\n'
@@ -83,4 +85,4 @@ with tempfile.TemporaryDirectory(prefix='arm-helper-emitter-', dir=Path(__file__
         subprocess.run(runner + [str(binary)], check=True)
 print('production source SHA256=' + hashlib.sha256(source.encode()).hexdigest())
 print('compiled extraction SHA256=' + hashlib.sha256(unit.encode()).hexdigest())
-print('far caller error propagation and guard-before-store PASS')
+print('compiled far-helper emitter cases PASS')

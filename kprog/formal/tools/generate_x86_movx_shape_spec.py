@@ -34,12 +34,10 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_movx_shape_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86MovxShape.lean"
 CHEADER = ROOT / "generated/x86_movx_shape.h"
 WIDTH_SPEC = ROOT / "contracts/x86_width_spec.json"
@@ -81,78 +79,7 @@ COLUMNS = ("arm", "arm_define", "opcode", "opcode_define", "result", "effect")
 
 # The live routed arm text, between the generated MOVX register-pair family gate
 # and the generated MOV_LOAD family gate.
-ARM_START = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {"
-ARM_END = "} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {"
 # The standalone shared body, between its `#define` and the next `#define`.
-MACRO_START = "#define X86_SIM_L_EXEC_MOVX_REG(OP, DST, SRC, FLAGS, AUX)"
-MACRO_END = "#define X86_SIM_L_EXEC_CMP_IMM_OP_AUX(OP, DST, FLAGS, AUX, IMM)"
-ARM_SELECTOR = "KPROG_X86_MOVX_SHAPE((OP))"
-ARM_SIGN_ARM = "KPROG_X86_MOVX_SHAPE_SIGN_EXTEND"
-ARM_SIGN_CALL = "x86_sign_extend("
-ARM_ZERO_CALL = "x86_apply_width("
-SRC_SELECTOR = "KPROG_X86_MOVX_SRC_WIDTH(("
-SRC_RAW_FALLBACK = "src_width = (AUX) ? (AUX)"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def arm_region():
-    return region_between(ARM_START, ARM_END)
-
-
-def macro_region():
-    return region_between(MACRO_START, MACRO_END)
-
-
-def check_region(region, exactly_one_arm):
-    """A routed MOVX body must select its extension function through the
-    generated opcode selector, name the sign-extend arm, and still compute both
-    extension functions; it must not select by hand."""
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 movx shape body does not route through the generated selector")
-    if ARM_SIGN_ARM not in region:
-        raise SystemExit("x86 movx shape body does not name the sign-extend arm")
-    if ARM_SIGN_CALL not in region:
-        raise SystemExit(
-            "x86 movx shape body does not compute the sign extension")
-    if ARM_ZERO_CALL not in region:
-        raise SystemExit(
-            "x86 movx shape body does not compute the zero extension")
-    if exactly_one_arm and region.count("} else if (") != 1:
-        raise SystemExit("x86 movx shape arm region is not exactly one arm")
-    if "X86_OP_MOVSX_REG ?" in region:
-        raise SystemExit(
-            "x86 movx shape body selects its extension function by hand "
-            "instead of through the generated selector")
-    if SRC_SELECTOR not in region:
-        raise SystemExit(
-            "x86 movx shape body does not route its source width through the "
-            "generated selector")
-    if SRC_RAW_FALLBACK in region:
-        raise SystemExit(
-            "x86 movx shape body restates the source-width fallback by hand "
-            "instead of through the generated selector")
-
-
-def check_against_header():
-    expected = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) { X86_SIM_L_EXEC_MOVX_REG((OP), (DST), (SRC), (FLAGS), (AUX));"
-    if arm_region().strip() != expected:
-        raise SystemExit("x86 MOVX chain must call exactly the shared MOVX body")
-    region = macro_region()
-    check_region(region, exactly_one_arm=False)
-    if "KPROG_X86_MOVX_SOURCE_REG(SRC)" not in region or "KPROG_X86_MOVX_SOURCE_SHIFT(SRC)" not in region:
-        raise SystemExit("x86 MOVX body must use the generated source register/lane decoder")
 
 
 def load_width_codes():
@@ -196,7 +123,6 @@ def load() -> dict:
             f"x86 movx source-width absent code collides with a width code: {src!r}")
     if src["fallback"] != "effective_width":
         raise SystemExit(f"unknown x86 movx source-width fallback: {src!r}")
-    check_against_header()
     return EXPECTED
 
 

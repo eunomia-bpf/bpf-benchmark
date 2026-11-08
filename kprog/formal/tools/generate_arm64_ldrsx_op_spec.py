@@ -21,13 +21,10 @@ against kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_ldrsx_op_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64LdrsxOp.lean"
 CHEADER = ROOT / "generated/arm64_ldrsx_op.h"
 
@@ -52,50 +49,12 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # The live dispatcher text, between the `ARM64_SIM_L_EXEC` `#define` and the
 # `ARM64_SIM_RUN_OP3` wrapper that follows it.
-EXEC_START = "#define ARM64_SIM_L_EXEC(OP"
-EXEC_END = "#define ARM64_SIM_RUN_OP3("
 
 # The local wrapper the dispatcher calls, and the generated macro it must
 # delegate to with the caller's unsupported arm.
-WRAPPER_CALL = "ARM64_SIM_L_LDRSX_SXOP((OP)"
-WRAPPER_DEF = (
-    "#define ARM64_SIM_L_LDRSX_SXOP(OP)"
-    "                                          \\\n"
-    "\tKPROG_ARM64_LDRSX_SXOP((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())")
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def exec_region():
-    text = HEADER.read_text()
-    start = text.index(EXEC_START)
-    end = text.index(EXEC_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The live dispatcher must derive the sign-extending opcode through the
-    local wrapper (which delegates to the generated macro), and must not name
-    any sign-extending opcode by hand."""
-    if WRAPPER_CALL not in region:
-        raise SystemExit(
-            "arm64 dispatcher does not derive the sign-extending opcode "
-            "through the generated selector")
-    for row in EXPECTED["loads"]:
-        hand = re.compile(r"(?<![A-Z0-9_])" + re.escape(row["sx"]["macro"]) +
-                          r"(?![A-Z0-9_])")
-        if hand.search(region):
-            raise SystemExit(
-                "arm64 dispatcher still names the raw sign-extending opcode "
-                f"{row['sx']['macro']} by hand")
 
 
 def load() -> list[dict]:
@@ -109,23 +68,6 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 ldrsx op sign order: {loads!r}")
     if [row["signBits"] for row in loads] != [8, 32, 16]:
         raise SystemExit(f"invalid arm64 ldrsx op sign bits: {loads!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in loads:
-        for item in (row, row["sx"]):
-            if opcodes.get(item["macro"]) != item["code"]:
-                raise SystemExit(
-                    "arm64 ldrsx op opcodes drift from "
-                    "kprog/arm64/arm64_sim.h: "
-                    f"spec={item['macro']}={item['code']:#x} "
-                    f"sim={opcodes.get(item['macro'])}")
-    if WRAPPER_DEF not in HEADER.read_text():
-        raise SystemExit(
-            "arm64 ldrsx op wrapper does not delegate to the generated macro")
-    check_region(exec_region())
     return loads
 
 

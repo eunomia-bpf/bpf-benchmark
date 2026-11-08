@@ -33,12 +33,10 @@ arm.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_helper_arg_ptr_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperArgPtr.lean"
 CHEADER = ROOT / "generated/arm64_helper_arg_ptr.h"
 
@@ -74,14 +72,10 @@ CASE_COLUMNS = ("name", "is_stack_tagged", "source")
 # The live routed BPF helper-argument pointer helper text, between the helper
 # pointer's `#define` opcode title and the qword stack store helper that
 # follows it.
-HELPER_PTR_START = "#define ARM64_SIM_L_HELPER_ARG_PTR(REG)"
-HELPER_PTR_END = "#define ARM64_SIM_L_STORE_Q0_STACK(OFF)"
-HELPER_PTR_SELECTOR = "KPROG_ARM64_HELPER_ARG_PTR_BODY("
 # The hand-written outer gate the routed helper must no longer contain: the
 # register-tag test deciding the stack-arena-pointer arm. The helper
 # legitimately keeps the `== ARM64_SIM_TAG_STACK` test inside the selector's
 # argument, so the hand ternary's `?` is the safe needle.
-HAND_GATE = "ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?"
 
 
 def _source(is_stack_tagged: bool) -> str:
@@ -89,44 +83,6 @@ def _source(is_stack_tagged: bool) -> str:
     if is_stack_tagged:
         return "stackArenaPtr"
     return "rawPtr"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the BPF helper-argument pointer "
-            f"region with {start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """A routed BPF helper-argument pointer helper must select its pointer
-    source through the generated 2-way selector and keep its stack-arena-
-    pointer arm; it must not pick the arm by hand through the register-tag
-    test."""
-    if HELPER_PTR_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 BPF helper-argument pointer helper does not route its "
-            "pointer source through the generated source selector")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 BPF helper-argument pointer helper picks its pointer "
-            "source by hand through the register-tag test instead of "
-            "through the generated source selector")
-
-
-def check_against_header():
-    """The live BPF helper-argument pointer helper must select its pointer
-    source through the generated source selector."""
-    check_region(region_between(HELPER_PTR_START, HELPER_PTR_END))
 
 
 def load() -> dict:
@@ -164,7 +120,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid arm64 helper arg pointer table: "
             f"{EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

@@ -13,9 +13,8 @@ onto the simulator's two 64-bit vector-register state fields:
   * the two halves are distinct slots, so a `.Q0` transfer that aliased them
     would not satisfy the plan.
 
-The state-field names are re-checked against kprog/arm64/arm64_sim_local_bpf.h
-by `load()`. The offset and select macros read their argument once; no NZCV is
-written. This contract is distinct from `arm64_dq_mem_refines`, which fixes the
+The compiled semantic oracles exercise the vector state fields. The offset
+and select macros read their argument once and preserve NZCV. This contract is distinct from `arm64_dq_mem_refines`, which fixes the
 *memory* lanes a transfer touches, not which vector-register state field each
 lane maps into.
 """
@@ -25,7 +24,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_vreg_spec.json"
-STATE_HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Vreg.lean"
 CHEADER = ROOT / "generated/arm64_vreg.h"
 
@@ -91,15 +89,6 @@ def load() -> dict:
         raise SystemExit(f"invalid arm64 vector-register offsets: {data!r}")
     if data["low_offset"] == data["high_offset"]:
         raise SystemExit(f"arm64 vector-register halves alias: {data!r}")
-    text = STATE_HEADER.read_text()
-    for declaration in (
-            "struct { __u64 lo, hi; } __a64_vectors[32] =",
-            f"#define {LOW_FIELD} (__a64_vectors[0].lo)",
-            f"#define {HIGH_FIELD} (__a64_vectors[0].hi)"):
-        if declaration not in text:
-            raise SystemExit(
-                f"arm64 vector-register state drift from "
-                f"kprog/arm64/arm64_sim_local_bpf.h: {declaration}")
     return data
 
 

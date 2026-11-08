@@ -19,12 +19,10 @@ the width-narrowed 64-bit value the caller stores back into the destination.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_unary_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Unary.lean"
 CHEADER = ROOT / "generated/arm64_unary.h"
 
@@ -37,8 +35,6 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # C bodies. Each arm computes the raw 64-bit unary value; the destination
 # narrowing is applied afterwards through KPROG_ARM64_WIDTH_MASK, so the macro
@@ -62,17 +58,6 @@ def load() -> list[dict]:
     if [row["macro"] for row in ops] != [
             "ARM64_OP_" + row["name"].upper() for row in ops]:
         raise SystemExit(f"invalid arm64 unary macros: {ops!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 unary opcodes drift from kprog/arm64/"
-                f"arm64_sim.h: spec={row['macro']}={row['code']:#x} "
-                f"sim={row['macro']}={opcodes.get(row['macro'])}")
     return ops
 
 

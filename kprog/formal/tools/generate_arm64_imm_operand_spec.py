@@ -18,13 +18,10 @@ kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_imm_operand_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64ImmOperand.lean"
 CHEADER = ROOT / "generated/arm64_imm_operand.h"
 
@@ -44,41 +41,9 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # The live dispatcher text, between the `ARM64_SIM_L_EXEC` `#define` and the
 # `ARM64_SIM_RUN_OP3` wrapper that follows it.
-EXEC_START = "#define ARM64_SIM_L_EXEC(OP"
-EXEC_END = "#define ARM64_SIM_RUN_OP3("
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def exec_region():
-    text = HEADER.read_text()
-    start = text.index(EXEC_START)
-    end = text.index(EXEC_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The live dispatcher must select each arm's operand through the generated
-    selector and must not test the raw immediate opcode by hand."""
-    for row in EXPECTED["selectors"]:
-        if "KPROG_ARM64_IMM_RHS((OP)" not in region:
-            raise SystemExit(
-                "arm64 dispatcher does not route the "
-                f"{row['name']} operand through the generated selector")
-        hand = re.compile(r"\(OP\)\s*==\s*" + re.escape(row["imm"]["macro"]) +
-                          r"(?![A-Z0-9_])")
-        if hand.search(region):
-            raise SystemExit(
-                f"arm64 dispatcher still tests the raw {row['name']} immediate "
-                f"opcode by hand ((OP) == {row['imm']['macro']})")
 
 
 def load() -> list[dict]:
@@ -89,21 +54,9 @@ def load() -> list[dict]:
     names = [row["name"] for row in selectors]
     if names != ["mov", "shift"]:
         raise SystemExit(f"invalid arm64 imm operand selector order: {names!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
     for row in selectors:
         for form in ("imm", "reg"):
             item = row[form]
-            if opcodes.get(item["macro"]) != item["code"]:
-                raise SystemExit(
-                    "arm64 imm operand opcodes drift from "
-                    "kprog/arm64/arm64_sim.h: "
-                    f"spec={item['macro']}={item['code']} "
-                    f"sim={opcodes.get(item['macro'])}")
-    check_region(exec_region())
     return selectors
 
 

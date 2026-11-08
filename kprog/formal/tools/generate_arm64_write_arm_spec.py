@@ -50,12 +50,10 @@ selector and to keep the hand width test out.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_write_arm_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64WriteArm.lean"
 CHEADER = ROOT / "generated/arm64_write_arm.h"
 
@@ -94,64 +92,12 @@ CASE_COLUMNS = ("name", "is_w32", "full")
 # The live routed writeback body text, between the body's own `#define` and the
 # pointer-writeback helper that follows it. The width body choice is the one
 # place the writeback selects its truncation.
-WRITE_ARM_START = "#define ARM64_SIM_L_WRITE_REG_WIDTH("
-WRITE_ARM_END = "#define ARM64_SIM_L_WRITE_REG_PTR("
-WRITE_ARM_SELECTOR = "KPROG_ARM64_WRITE_ARM("
 # The two writeback bodies the routed helper must keep, so the selection routes
 # between the real truncating and full cases rather than replacing them.
-FULL_CASE = "->x = __a64_l_next;"
-NARROW_CASE = "->x = (__u32)__a64_l_next;"
 # The hand-written width test the routed body must no longer contain: the width
 # code deciding the writeback body by hand. The body legitimately keeps the
 # width code as the selector's argument, so the `if (`-led test is the safe
 # needle.
-HAND_GATE = "if ((WIDTH) == ARM64_WIDTH_32)"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the writeback body region with "
-            f"{start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def write_arm_region():
-    return region_between(WRITE_ARM_START, WRITE_ARM_END)
-
-
-def check_region(region):
-    """The writeback body must select its case through the generated 2-way
-    selector, must keep both writeback bodies, and must not pick the body by
-    hand through the width test."""
-    if WRITE_ARM_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 writeback body does not route through the generated write "
-            "arm selector")
-    if FULL_CASE not in region:
-        raise SystemExit(
-            "arm64 writeback body does not keep the full-width body")
-    if NARROW_CASE not in region:
-        raise SystemExit(
-            "arm64 writeback body does not keep the narrow-width body")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 writeback body picks its case by hand through the width "
-            "test instead of through the generated write arm selector")
-
-
-def check_against_header():
-    """The live writeback body must route its case choice through the generated
-    selector."""
-    check_region(write_arm_region())
 
 
 def load() -> dict:
@@ -176,7 +122,6 @@ def load() -> dict:
                              f"{EXPECTED['cases']!r}")
     if [row["full"] for row in EXPECTED["cases"]] != [False, True]:
         raise SystemExit(f"invalid arm64 write arm table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

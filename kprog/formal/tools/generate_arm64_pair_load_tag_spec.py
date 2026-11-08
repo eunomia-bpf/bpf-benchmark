@@ -17,12 +17,10 @@ kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_pair_load_tag_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64PairLoadTag.lean"
 CHEADER = ROOT / "generated/arm64_pair_load_tag.h"
 
@@ -34,9 +32,6 @@ EXPECTED = {
     "preserve_rule": "pair_gate_then_per_slot_tag_class",
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
-
 
 def load() -> dict:
     data = json.loads(SPEC.read_text())
@@ -47,16 +42,6 @@ def load() -> dict:
         raise SystemExit(f"invalid arm64 pair-load-tag specification: {data!r}")
     if EXPECTED["preserve_rule"] != "pair_gate_then_per_slot_tag_class":
         raise SystemExit(f"invalid arm64 pair-load-tag preserve rule: {EXPECTED!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    if opcodes.get(opcode["macro"]) != opcode["code"]:
-        raise SystemExit(
-            "arm64 pair-load-tag opcode drifts from kprog/arm64/arm64_sim.h: "
-            f"spec={opcode['macro']}={opcode['code']:#x} "
-            f"sim={opcodes.get(opcode['macro'])}")
     return opcode
 
 

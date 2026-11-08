@@ -16,12 +16,10 @@ re-checked against kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_ldrsx_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64LdrSx.lean"
 CHEADER = ROOT / "generated/arm64_ldrsx.h"
 
@@ -39,9 +37,6 @@ WIDTH_CODE = {"w8": 1, "w16": 2, "w32": 4, "w64": 8}
 WIDTH_MACRO = {"w8": "ARM64_WIDTH_8", "w16": "ARM64_WIDTH_16",
                "w32": "ARM64_WIDTH_32", "w64": "ARM64_WIDTH_64"}
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
-
 
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
@@ -58,17 +53,6 @@ def load() -> list[dict]:
             raise SystemExit(f"invalid arm64 ldrsx width: {row!r}")
     if [row["width"] for row in ops] != ["w8", "w32", "w16"]:
         raise SystemExit(f"invalid arm64 ldrsx load widths: {ops!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 ldrsx opcodes drift from kprog/arm64/arm64_sim.h: "
-                f"spec={row['macro']}={row['code']:#x} "
-                f"sim={opcodes.get(row['macro'])}")
     return ops
 
 

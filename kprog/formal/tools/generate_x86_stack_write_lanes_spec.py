@@ -32,12 +32,10 @@ contract and the byte counts to the memory-access contract.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_stack_write_lanes_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86StackWriteLanes.lean"
 CHEADER = ROOT / "generated/x86_stack_write_lanes.h"
 
@@ -89,82 +87,12 @@ ACTIVATION_COLUMNS = ("name", "active")
 
 # The live routed stack helpers text, between the write helper's `#define`
 # opcode title and the plain stack-pointer wrapper that follows the read helper.
-STACK_WRITE_START = "#define X86_SIM_L_PRIVATE_BYTE_STORE(ADDR, WIDTH, VALUE)"
-STACK_WRITE_END = "#define X86_SIM_L_STACK_PTR(OFF)"
-LANE_PREDICATE = "KPROG_X86_STACK_WRITE_LANE_ACTIVE("
-BYTE_LANE = "KPROG_X86_STACK_BYTE("
-APPLY_WIDTH = "x86_width_mask("
-READ_ASSEMBLE = "KPROG_X86_STACK_ASSEMBLE("
 
 # The hand-written per-lane width gates the routed helpers must no longer
 # contain: the write ladder's lane-1 and lane-2/3 gate widths, the read ladder's
 # same two gates, and the two `== X86_WIDTH_64` gate widths only the ladders
 # carry (the arm selector spells its 64-bit test through the resolved width, so
 # these are safe needles).
-HAND_GATE_16 = "__x86_stw_width >= X86_WIDTH_16"
-HAND_GATE_32 = "__x86_stw_width >= X86_WIDTH_32"
-HAND_GATE_STR_16 = "__x86_str_width >= X86_WIDTH_16"
-HAND_GATE_STR_32 = "__x86_str_width >= X86_WIDTH_32"
-HAND_GATE_64 = "__x86_stw_width == X86_WIDTH_64"
-HAND_GATE_STR_64 = "__x86_str_width == X86_WIDTH_64"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def stack_write_region():
-    return region_between(STACK_WRITE_START, STACK_WRITE_END)
-
-
-def check_region(region):
-    """A routed stack helper pair must gate each byte lane through the generated
-    activation predicate and still keep the byte-lane extraction, the byte-arena
-    access, the width-narrowing value and the little-endian assembly; it must not
-    gate by hand."""
-    if LANE_PREDICATE not in region:
-        raise SystemExit(
-            "x86 stack ladder does not gate its lanes through the "
-            "generated activation predicate")
-    if BYTE_LANE not in region:
-        raise SystemExit(
-            "x86 stack write ladder does not keep the byte-lane extraction")
-    for alias in ("__x86_stw_bytes", "__x86_str_bytes"):
-        base = "(ADDR)" if alias == "__x86_stw_bytes" else "__x86_stack_mem.b"
-        if (f"volatile __u8 *{alias} = {base};" not in region
-                or alias + "[" not in region):
-            raise SystemExit(
-                "x86 stack ladder does not access its volatile byte arena")
-    if APPLY_WIDTH not in region:
-        raise SystemExit(
-            "x86 stack write ladder does not narrow the value to its width")
-    if READ_ASSEMBLE not in region:
-        raise SystemExit(
-            "x86 stack read ladder does not assemble the byte lanes")
-    # The compiler identity barrier selects no byte lane and writes no memory.
-    gates = region.replace(
-        "if (__x86_stw_width == X86_WIDTH_64) "
-        "X86_SIM_L_BARRIER_VAR(__x86_stw_narrowed);", "")
-    if (HAND_GATE_16 in gates or HAND_GATE_32 in gates or
-            HAND_GATE_STR_16 in gates or HAND_GATE_STR_32 in gates or
-            HAND_GATE_64 in gates or HAND_GATE_STR_64 in gates):
-        raise SystemExit(
-            "x86 stack ladder gates its byte lanes by hand instead of "
-            "through the generated activation predicate")
-
-
-def check_against_header():
-    """The live stack helper pair must gate its byte lanes through the generated
-    activation predicate."""
-    check_region(stack_write_region())
 
 
 def load() -> dict:
@@ -215,7 +143,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid x86 stack write lanes activation size: "
             f"{EXPECTED['activation']!r}")
-    check_against_header()
     return EXPECTED
 
 

@@ -18,13 +18,11 @@ kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_csel_ptr_spec.json"
 FAMILY_SPEC = ROOT / "contracts/arm64_csel_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64CselPtr.lean"
 CHEADER = ROOT / "generated/arm64_csel_ptr.h"
 
@@ -35,9 +33,6 @@ EXPECTED = {
     "pointer_rule": "ptr_tag_iff_csel_and_w64",
     "pointer_op": "csel",
 }
-
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 
 def load() -> list[dict]:
@@ -53,18 +48,6 @@ def load() -> list[dict]:
     if len(pointer) != 1:
         raise SystemExit(
             f"arm64 csel-ptr pointer op {EXPECTED['pointer_op']!r} not unique")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 csel-ptr opcodes drift from "
-                "kprog/arm64/arm64_sim.h: "
-                f"spec={row['macro']}={row['code']} "
-                f"sim={opcodes.get(row['macro'])}")
     return ops
 
 

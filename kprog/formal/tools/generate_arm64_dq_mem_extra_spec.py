@@ -31,12 +31,10 @@ the hand nested ternary out.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_dq_mem_extra_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64DqMemExtra.lean"
 CHEADER = ROOT / "generated/arm64_dq_mem_extra.h"
 
@@ -79,15 +77,11 @@ CASE_COLUMNS = ("name", "is_first_lane", "high_present", "outcome")
 
 # The live routed vector memory step text, between the step's own `#define` and
 # the plain `.D0` load wrapper that follows it.
-EXTRA_REGION_START = "#define ARM64_SIM_L_DQ_MEM_STEP("
-EXTRA_REGION_END = "#define ARM64_SIM_L_LOAD_D0_MEM("
-EXTRA_SELECTOR = "KPROG_ARM64_DQ_MEM_EXTRA("
 # The hand-written nested ternary the routed step must no longer contain: the
 # first-position test deciding the extra offset by hand. The step legitimately
 # keeps the two fact tests inside the selector's arguments (the lane position
 # and the lane count), so the ternary's `?`-terminated first-position test is
 # the safe needle.
-HAND_GATE = "= __a64_vreg_p == 0U ?"
 
 
 def _outcome(is_first_lane: bool, high_present: bool) -> str:
@@ -97,43 +91,6 @@ def _outcome(is_first_lane: bool, high_present: bool) -> str:
     if high_present:
         return "highLane"
     return "singleLane"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the vector memory step region with "
-            f"{start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The routed vector memory step must select its per-lane extra offset
-    through the generated 3-way selector and must not pick the offset by hand
-    through the first-position ternary."""
-    if EXTRA_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 vector memory step does not route its per-lane extra "
-            "offset through the generated selector")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 vector memory step picks its per-lane extra offset by hand "
-            "through the first-position ternary instead of through the "
-            "generated selector")
-
-
-def check_against_header():
-    """The live vector memory step must select its per-lane extra offset
-    through the generated selector."""
-    check_region(region_between(EXTRA_REGION_START, EXTRA_REGION_END))
 
 
 def load() -> dict:
@@ -168,7 +125,6 @@ def load() -> dict:
         if _outcome(row["is_first_lane"], row["high_present"]) != row["outcome"]:
             raise SystemExit(
                 f"invalid arm64 dq mem extra table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

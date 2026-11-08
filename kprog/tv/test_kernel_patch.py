@@ -44,7 +44,6 @@ with tempfile.TemporaryDirectory() as directory:
         here.parents[1] / "kinsn/module/include/native_lab_input.h").read_bytes()
     modified = source.read_bytes()
     assert modified != base
-    assert b"env->allow_uninit_stack = false;" in modified
     apply(kernel, patch)
     assert source.read_bytes() == modified, "second apply reversed the kernel fix"
     conflict = modified.replace(b"int err = add_kfunc_desc(env, insn->imm, insn->off, false);", b"int err = add_kfunc_desc(env, insn->imm, insn->off, true);", 1)

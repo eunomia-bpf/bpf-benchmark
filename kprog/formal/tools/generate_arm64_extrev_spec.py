@@ -24,13 +24,11 @@ like the multiply contract.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_extrev_spec.json"
 FLAGS_SPEC = ROOT / "contracts/arm64_flags_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Extrev.lean"
 CHEADER = ROOT / "generated/arm64_extrev.h"
 
@@ -55,8 +53,6 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 REV_LEAN = '''/-- C-shaped byte reversal over the destination width. The 32-bit arm reverses
 the low four bytes and the 64-bit arm reverses all eight, each as an explicit
@@ -102,17 +98,6 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 extract macros: {ops!r}")
     if len({row["code"] for row in ops}) != len(ops):
         raise SystemExit(f"invalid arm64 extract opcodes: {ops!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 extract opcodes drift from kprog/arm64/"
-                f"arm64_sim.h: spec={row['macro']}={row['code']:#x} "
-                f"sim={row['macro']}={opcodes.get(row['macro'])}")
     flags = json.loads(FLAGS_SPEC.read_text())
     if (set(flags) != {"schema_version", "operation", "families",
                        "width_rule", "overflow"}

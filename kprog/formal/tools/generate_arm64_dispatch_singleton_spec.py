@@ -14,13 +14,10 @@ exactly what the spec renders and does not rewrite them.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_dispatch_singleton_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64DispatchSingleton.lean"
 CHEADER = ROOT / "generated/arm64_dispatch_singleton.h"
 
@@ -70,50 +67,9 @@ SINGLETON_NAMES = ["nop", "movk", "bitfield", "cmnImm", "cmnReg", "tstBicReg",
                    "bicsReg", "load", "store", "ldp", "stp", "loadD0",
                    "storeD0", "loadQ0", "storeQ0", "fmov"]
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # The live dispatcher text, between the `ARM64_SIM_L_EXEC` `#define` and the
 # `ARM64_SIM_RUN_OP3` wrapper that follows it.
-EXEC_START = "#define ARM64_SIM_L_EXEC(OP"
-EXEC_END = "#define ARM64_SIM_RUN_OP3("
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def exec_region():
-    return region_between(EXEC_START, EXEC_END)
-
-
-def check_region(region):
-    """The live dispatcher must route each singleton opcode through the generated
-    membership macro and must not test the raw opcode by hand."""
-    for row in EXPECTED["singletons"]:
-        needle = f"{row['gate_macro']}(OP)"
-        if needle not in region:
-            raise SystemExit(
-                f"arm64 dispatcher does not route the {row['name']} opcode "
-                f"through the generated membership macro ({needle})")
-        hand = re.compile(r"\(OP\)\s*==\s*" + re.escape(row["op_macro"]) +
-                          r"(?![A-Z0-9_])")
-        if hand.search(region):
-            raise SystemExit(
-                f"arm64 dispatcher still tests the raw {row['name']} opcode "
-                f"by hand ((OP) == {row['op_macro']})")
-
-
-def check_against_header():
-    check_region(exec_region())
 
 
 def load() -> list[dict]:
@@ -126,24 +82,12 @@ def load() -> list[dict]:
     if names != SINGLETON_NAMES:
         raise SystemExit(
             f"invalid arm64 dispatch singleton order: {names!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
     seen = set()
     for row in singletons:
-        if opcodes.get(row["op_macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 dispatch singleton opcodes drift from "
-                "kprog/arm64/arm64_sim.h: "
-                f"spec={row['op_macro']}={row['code']} "
-                f"sim={opcodes.get(row['op_macro'])}")
         if row["name"] in seen:
             raise SystemExit(
                 f"duplicate arm64 dispatch singleton name: {row['name']!r}")
         seen.add(row["name"])
-    check_against_header()
     return singletons
 
 

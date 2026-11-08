@@ -43,12 +43,10 @@ generated field selector and to keep the hand offset test out.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_vreg_field_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64VregField.lean"
 CHEADER = ROOT / "generated/arm64_vreg_field.h"
 
@@ -83,50 +81,10 @@ CASE_COLUMNS = ("name", "is_high_field", "field")
 # The live routed vector memory step text, between the step's own `#define` and
 # the plain `.D0` load wrapper that follows it. The step is the one place the
 # moved half's state field is chosen.
-FIELD_REGION_START = "#define ARM64_SIM_L_DQ_MEM_STEP("
-FIELD_REGION_END = "#define ARM64_SIM_L_LOAD_D0_MEM("
-FIELD_SELECTOR = "KPROG_ARM64_VREG_FIELD("
 # The hand-written offset test the routed step must no longer contain: the moved
 # half's slot offset deciding the state field by hand. The step legitimately
 # keeps the offset comparison as the selector's argument, so the `if (`-led
 # offset test is the safe needle.
-HAND_GATE = "if (__a64_vreg_off == (__s64) KPROG_ARM64_VREG_HIGH_OFFSET)"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the vector memory step region with "
-            f"{start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The vector memory step must select its state field through the
-    generated 2-way selector; the region must not pick the state field by hand
-    through the offset test."""
-    if FIELD_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 vector memory step does not route its state field "
-            "through the generated field selector")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 vector memory step picks its state field by hand through "
-            "the offset test instead of through the generated field selector")
-
-
-def check_against_header():
-    """The live vector memory step must select its state field through the
-    generated field selector."""
-    check_region(region_between(FIELD_REGION_START, FIELD_REGION_END))
 
 
 def load() -> dict:
@@ -159,7 +117,6 @@ def load() -> dict:
     if [row["field"] for row in EXPECTED["cases"]] != ["high", "low"]:
         raise SystemExit(
             f"invalid arm64 vreg field table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

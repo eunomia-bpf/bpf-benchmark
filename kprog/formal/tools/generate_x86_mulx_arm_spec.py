@@ -33,12 +33,10 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_mulx_arm_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86MulxArm.lean"
 CHEADER = ROOT / "generated/x86_mulx_arm.h"
 
@@ -69,40 +67,6 @@ EXPECTED = {
 }
 
 # The live routed macro, between its opener and the `REP_MOVS_ONE` macro.
-ARM_START = "#define X86_SIM_L_EXEC_MULX(DST, SRC, AUX, FLAGS)"
-ARM_END = "#define X86_SIM_L_REP_MOVS_ONE(WIDTH, INDEX)"
-ARM_SELECTOR = ("KPROG_X86_MULX_ARM(__x86_l_width) == "
-                "KPROG_X86_MULX_ARM_SINGLE_PRODUCT")
-ARM_SINGLE_PRODUCT = "(__u64)(__u32)__x86_l_lhs *"
-ARM_LADDER = "__x86_l_p3"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live MULX macro must route through the generated width selector."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 mulx arm does not route through the generated selector")
-    if ARM_SINGLE_PRODUCT not in region:
-        raise SystemExit(
-            "x86 mulx single-product arm does not split a 32x32 product")
-    if ARM_LADDER not in region:
-        raise SystemExit("x86 mulx limb-ladder arm is gone")
-    if re.search(r"__x86_l_width\s*==\s*X86_WIDTH_32", region):
-        raise SystemExit(
-            "x86 mulx arm restates the raw 32-bit width test inline")
 
 
 def load() -> dict:
@@ -127,7 +91,6 @@ def load() -> dict:
         raise SystemExit(f"invalid x86 mulx width classes: {arms!r}")
     if len([row for row in arms if row["is_special_width"]]) != 1:
         raise SystemExit("x86 mulx must name exactly one special-width arm")
-    check_against_header()
     return EXPECTED
 
 

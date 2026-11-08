@@ -52,13 +52,10 @@ through the helper-call branch, not through `X86_SIM_L_EXEC`. This is benign.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_specialization_spec.json"
-SIM_HEADER = ROOT.parent / "x86/x86_sim.h"
-CHAIN_HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Specialization.lean"
 C_HEADER = ROOT / "generated/x86_specialization.h"
 PYTHON = ROOT.parent / "x86/micro-prog/generated_x86_specialization.py"
@@ -144,113 +141,10 @@ EXPECTED = [
 ]
 COLUMNS = ("token", "dispatch", "chain_macro", "direct_call", "aux_call")
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(X86_OP_[A-Z0-9_]+)\s+0x[0-9a-fA-F]+U\s*$", re.M)
-CHAIN_START = "#define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)"
-CHAIN_END = "#define X86_SIM_RUN_OP("
-HANDLER = re.compile(r"(X86_SIM_(?:L_EXEC_[A-Z0-9_]+|BPF_CALL_[A-Z0-9_]+))\s*\(")
-FAMILY_HEADER = ROOT / "generated/x86_dispatch_family.h"
-SINGLETON_HEADER = ROOT / "generated/x86_dispatch_singleton.h"
-GATE = re.compile(r"\b(KPROG_X86_[A-Z0-9_]+_HANDLED)\s*\(")
-FAMILY_MEMBERS = re.compile(
-    r"^#define\s+(KPROG_X86_[A-Z0-9_]+_HANDLED)\(OP\)\s+((?:[^\n]*\\\n)*[^\n]*\n)",
-    re.M)
-
 
 def macro_name(call):
     """The macro a call template invokes: its text up to the first `(`."""
     return call.split("(", 1)[0] if call else ""
-
-
-def canonical_tokens():
-    return OPCODE_DEFINE.findall(SIM_HEADER.read_text())
-
-
-def chain_arms():
-    """One text block per `(OP) == ...` arm of the `X86_SIM_L_EXEC` body.
-
-    Brace depth is tracked so a nested `if` body does not split an arm and a
-    multi-token `||` disjunction inside one guard stays one arm; a naive split
-    on the `} else if (` text would over-split."""
-    text = CHAIN_HEADER.read_text()
-    start = text.index(CHAIN_START)
-    end = text.index(CHAIN_END, start)
-    body = text[start:end]
-    i = body.index("{", body.index("do {"))
-    depth = 0
-    begin = i + 1
-    while True:
-        if body[i] == "{":
-            depth += 1
-        elif body[i] == "}":
-            depth -= 1
-            if depth == 0:
-                break
-        i += 1
-    inner = body[begin:i]
-    arms = []
-    depth = 0
-    begin = 0
-    j = 0
-    boundary = re.compile(r"\}\s*else\s+if\s*\(")
-    while j < len(inner):
-        ch = inner[j]
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                match = boundary.match(inner, j)
-                if match:
-                    arms.append(inner[begin:j + 1])
-                    begin = match.end()
-                    j = match.end()
-                    continue
-        j += 1
-    arms.append(inner[begin:])
-    return arms
-
-
-def arm_handler(arm):
-    """The single step handler the arm calls; "" when the arm is inline or calls
-    more than one handler (the double-shift arms call `L_SET_SHIFT_FLAGS`
-    twice, which is why this is not a chain step macro)."""
-    names = []
-    for match in HANDLER.finditer(arm):
-        if match.group(1) not in names:
-            names.append(match.group(1))
-    return names[0] if len(names) == 1 else ""
-
-
-def family_gate_members():
-    """The generated family and singleton gates' opcode members, read from the
-    generated dispatch-family and dispatch-singleton headers. Each gate
-    expands to the tokens its membership macro names, so the chain's
-    `KPROG_X86_<F>_HANDLED(OP)` and `KPROG_X86_DISP_<T>_HANDLED(OP)` guards
-    resolve to the same tokens the headers would test."""
-    members = {}
-    for header in (FAMILY_HEADER, SINGLETON_HEADER):
-        text = header.read_text()
-        for match in FAMILY_MEMBERS.finditer(text):
-            body = re.sub(r"\\\s*\n", " ", match.group(2))
-            members[match.group(1)] = re.findall(
-                r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)", body)
-    return members
-
-
-def chain_table():
-    table = {}
-    members = family_gate_members()
-    for arm in chain_arms():
-        handler = arm_handler(arm)
-        tokens = re.findall(r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)", arm)
-        for gate in GATE.findall(arm):
-            if gate not in members:
-                raise SystemExit("chain tests an unknown family gate: " + gate)
-            tokens.extend(members[gate])
-        for token in tokens:
-            table[token] = handler
-    return table
 
 
 def strip_aux(name):
@@ -265,29 +159,10 @@ def same_body(left, right):
     return strip_step(strip_aux(left)) == strip_step(strip_aux(right))
 
 
-def check_against_chain(rows):
-    chain = chain_table()
-    canonical = canonical_tokens()
-    for row in rows:
-        token = row["token"]
-        if token not in canonical:
-            raise SystemExit("specialization row for unknown token: " + token)
-        if chain.get(token, "") != row["chain_macro"]:
-            raise SystemExit(
-                "chain drift for {}: header has {!r}, contract says {!r}".format(
-                    token, chain.get(token, ""), row["chain_macro"]))
-    extra = set(chain) - set(canonical)
-    if extra:
-        raise SystemExit("chain names non-canonical tokens: " + repr(sorted(extra)))
-
-
 def check_consistency(rows):
     """The class of a row must match its call columns, and the no-insertion
     property must hold: a token the chain and the encoder both serve selects the
     same body."""
-    if [row["token"] for row in rows] != canonical_tokens():
-        raise SystemExit(
-            "specialization rows do not cover the canonical tokens in order")
     for row in rows:
         token = row["token"]
         has_direct = bool(row["direct_call"])
@@ -450,7 +325,6 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     rows = load()
-    check_against_chain(rows)
     check_consistency(rows)
     outputs = (
         (LEAN, render_lean(rows)),

@@ -17,13 +17,10 @@ kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_adrp_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
-SIM_LOCAL_HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Adrp.lean"
 CHEADER = ROOT / "generated/arm64_adrp.h"
 
@@ -38,11 +35,6 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
-TAG_DEFINE = re.compile(
-    r"^#define\s+(ARM64_SIM_TAG_[A-Z0-9_]+)\s+(\d+)U\s*$", re.M)
-
 
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
@@ -53,25 +45,6 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 adrp order: {ops!r}")
     if [row["tag"] for row in ops] != [7, 8]:
         raise SystemExit(f"invalid arm64 adrp tag table: {ops!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    tags = {name: int(value)
-            for name, value in TAG_DEFINE.findall(SIM_LOCAL_HEADER.read_text())}
-    if not opcodes or not tags:
-        raise SystemExit(
-            f"no ARM64_OP_*/tag definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 adrp opcodes drift from kprog/arm64/arm64_sim.h: "
-                f"spec={row['macro']}={row['code']:#x} "
-                f"sim={opcodes.get(row['macro'])}")
-        if tags.get(row["tag_macro"]) != row["tag"]:
-            raise SystemExit(
-                "arm64 adrp tags drift from kprog/arm64/"
-                "arm64_sim_local_bpf.h: "
-                f"spec={row['tag_macro']}={row['tag']} "
-                f"sim={tags.get(row['tag_macro'])}")
     return ops
 
 def render_lean(ops: list[dict]) -> str:

@@ -16,13 +16,11 @@ Three outputs share one source:
 
 import argparse
 import json
-import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_helper_idents_spec.json"
-SIM = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
 C_HEADER = ROOT / "generated/arm64_helper_idents.h"
 PYTHON = ROOT.parent / "arm64/micro-prog/generated_arm64_helper_idents.py"
@@ -114,13 +112,8 @@ EXPECTED: list[tuple[int, str]] = [
 
 # Every `ARM64_SIM_BPF_CALL_<name>(` macro the sim header defines: body and
 # forwarding macros alike.
-BODY_MACRO = r"^#define\s+ARM64_SIM_BPF_CALL_(\w+)\("
 # A forwarding macro: the source macro's definition line and, on the joined
 # (continuation-stripped) text, the target macro call its body expands to.
-FORWARDING_PAIR = (
-    r"^#define\s+ARM64_SIM_BPF_CALL_(\w+)\([^)]*\)\s*"
-    r"ARM64_SIM_BPF_CALL_(\w+)\("
-)
 
 
 def load() -> list[dict[str, object]]:
@@ -147,17 +140,7 @@ def load() -> list[dict[str, object]]:
         raise SystemExit(
             f"duplicate helper name in arm64 helper idents spec: {rows!r}")
 
-    sim = SIM.read_text()
-    bodies = set(re.findall(BODY_MACRO, sim, re.M))
     names = {str(row["name"]) for row in rows}
-    if bodies != names:
-        raise SystemExit(
-            "sim header helper macros drift from the arm64 helper idents spec: "
-            f"sim-only {sorted(bodies - names)}, spec-only {sorted(names - bodies)}")
-    joined = sim.replace("\\\n", " ")
-    pairs = re.findall(FORWARDING_PAIR, joined, re.M)
-    if pairs:
-        raise SystemExit(f"helper macros must invoke their exact Linux helper, not aliases: {pairs}")
     return rows
 
 

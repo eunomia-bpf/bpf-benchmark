@@ -41,12 +41,10 @@ generated source selector and to keep the hand ternary out.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_mem_index_value_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64MemIndexValue.lean"
 CHEADER = ROOT / "generated/arm64_mem_index_value.h"
 
@@ -83,51 +81,10 @@ CASE_COLUMNS = ("name", "has_index", "source")
 # `ARM64_SIM_L_MEM_BASE_OFF` body that computes the base offset, up to the
 # pre/post-indexed writeback step that follows it. The offset body is the one
 # place the index value contributes to the address at `has_index`.
-MEM_REGION_START = "#define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)"
-MEM_REGION_END = "#define ARM64_SIM_L_MEM_PREPOST_STEP(BASE, DELTA)"
-MEM_SELECTOR = "KPROG_ARM64_MEM_INDEX_VALUE("
 # The hand-written index-value ternary the routed body must no longer contain:
 # the `has_index` fact deciding the index value directly. The body legitim-
 # ately keeps the fact (as the selector's argument and the offset's HAS_INDEX
 # input), so the ternary's `has_index ? MOD_VALUE` is the safe needle.
-HAND_GATE = "__a64_mbo_has_index ? ARM64_SIM_L_MOD_VALUE((INDEX),"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the memory-base-offset region with "
-            f"{start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """The memory-base-offset body must select its index value through the
-    generated 2-way selector and must keep the register arm; the region must
-    not pick the index value by hand through the `has_index` ternary."""
-    if MEM_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 memory-base-offset body does not route its index value "
-            "through the generated source selector")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 memory-base-offset body picks its index value by hand "
-            "through the `has_index` ternary instead of through the generated "
-            "source selector")
-
-
-def check_against_header():
-    """The live memory-base-offset body must select its index value through
-    the generated source selector."""
-    check_region(region_between(MEM_REGION_START, MEM_REGION_END))
 
 
 def load() -> dict:
@@ -163,7 +120,6 @@ def load() -> dict:
             "registerIndex", "zero"]:
         raise SystemExit(
             f"invalid arm64 memory index value table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

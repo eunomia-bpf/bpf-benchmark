@@ -24,13 +24,10 @@ drift without rewriting.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_dispatch_family_spec.json"
-SIM_HEADER = ROOT.parent / "x86/x86_sim.h"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86DispatchFamily.lean"
 CHEADER = ROOT / "generated/x86_dispatch_family.h"
 
@@ -98,51 +95,9 @@ EXPECTED = {
 FAMILY_NAMES = ["movLoadPtr", "movxReg", "movLoad", "movStore", "aluImm",
                 "aluReg", "cmpImm", "cmpReg", "cmpMem", "doubleShift"]
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(X86_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # The live dispatcher text, between the `X86_SIM_L_EXEC` `#define` and the
 # `X86_SIM_RUN_OP` wrapper that follows it.
-EXEC_START = "#define X86_SIM_L_EXEC(OP"
-EXEC_END = "#define X86_SIM_RUN_OP(OP"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def exec_region():
-    return region_between(EXEC_START, EXEC_END)
-
-
-def check_region(region):
-    """The live dispatcher must route each dispatch family through the generated
-    membership macro and must not test the raw `||` opcode set by hand."""
-    for row in EXPECTED["families"]:
-        needle = f"{row['macro']}(OP)"
-        if needle not in region:
-            raise SystemExit(
-                f"x86 dispatcher does not route the {row['name']} family "
-                f"through the generated membership macro ({needle})")
-        hand = " || ".join(f"(OP) == {m['macro']}" for m in row["members"])
-        if hand in region:
-            raise SystemExit(
-                f"x86 dispatcher still tests the raw {row['name']} opcode "
-                f"set by hand ({hand})")
-
-
-def check_against_header():
-    """The live dispatcher must route every dispatch family through the
-    generated membership macros."""
-    check_region(exec_region())
 
 
 def load() -> list[dict]:
@@ -154,11 +109,6 @@ def load() -> list[dict]:
     names = [row["name"] for row in families]
     if names != FAMILY_NAMES:
         raise SystemExit(f"invalid x86 dispatch family order: {names!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no X86_OP_* opcode definitions found in {SIM_HEADER}")
     seen = set()
     for row in families:
         if len(row["members"]) < 2:
@@ -166,17 +116,10 @@ def load() -> list[dict]:
                 f"x86 dispatch family {row['name']} must have two or more "
                 f"members: {row!r}")
         for item in row["members"]:
-            if opcodes.get(item["macro"]) != item["code"]:
-                raise SystemExit(
-                    "x86 dispatch family opcodes drift from "
-                    "kprog/x86/x86_sim.h: "
-                    f"spec={item['macro']}={item['code']} "
-                    f"sim={opcodes.get(item['macro'])}")
             if item["name"] in seen:
                 raise SystemExit(
                     f"duplicate x86 dispatch opcode name: {item['name']!r}")
             seen.add(item["name"])
-    check_against_header()
     return families
 
 

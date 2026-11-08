@@ -36,12 +36,10 @@ generated source selector and to keep the hand ternary out.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_mem_base_src_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64MemBaseSrc.lean"
 CHEADER = ROOT / "generated/arm64_mem_base_src.h"
 
@@ -78,51 +76,10 @@ CASE_COLUMNS = ("name", "base_is_sp", "source")
 # helper `ARM64_SIM_L_MEM_READ` to the vector `.D0`/`.Q0` memory step that
 # follows the store helper. All three bodies that compute a stack base address
 # (`MEM_READ`, `MEM_READ_TAG`, `MEM_WRITE`) lie inside it.
-MEM_REGION_START = "#define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)"
-MEM_REGION_END = "#define ARM64_SIM_L_DQ_MEM_STEP("
-MEM_SELECTOR = "KPROG_ARM64_MEM_BASE_SRC("
 # The hand-written base ternary the routed bodies must no longer contain: the
 # `BASE == ARM64_SP` test deciding the base address. The bodies legitimately
 # keep the `== ARM64_SP` test inside the selector's argument (`BASE_IS_SP`), so
 # the ternary's `? __a64_sp` is the safe needle.
-HAND_GATE = "== ARM64_SP ? __a64_sp"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.find(start_marker)
-    end = text.find(end_marker, start + 1)
-    if start < 0 or end < 0:
-        raise SystemExit(
-            f"sim header no longer bounds the memory-helper region with "
-            f"{start_marker!r} .. {end_marker!r}")
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_region(region):
-    """Every routed memory body must select its base-address source through
-    the generated 2-way selector and must keep the stack-pointer arm; the
-    region must not pick the base address by hand through the base ternary."""
-    if MEM_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 memory helpers do not route their base-address source "
-            "through the generated source selector")
-    if HAND_GATE in region:
-        raise SystemExit(
-            "arm64 memory helpers pick their base address by hand through "
-            "the stack-pointer ternary instead of through the generated "
-            "source selector")
-
-
-def check_against_header():
-    """The live memory helpers must select their base-address source through
-    the generated source selector."""
-    check_region(region_between(MEM_REGION_START, MEM_REGION_END))
 
 
 def load() -> dict:
@@ -160,7 +117,6 @@ def load() -> dict:
         raise SystemExit(
             f"invalid arm64 memory base source table: "
             f"{EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

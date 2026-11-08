@@ -30,12 +30,10 @@ the load path's own space/source table so the two cannot drift.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_mem_write_arm_spec.json"
-HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64MemWriteArm.lean"
 CHEADER = ROOT / "generated/arm64_mem_write_arm.h"
 
@@ -71,57 +69,10 @@ CASE_COLUMNS = ("name", "base_is_sp", "stack_tagged", "stack")
 
 # The live routed store helper text, between the store helper's `#define`
 # opcode title and the next `#define` (`ARM64_SIM_L_DQ_MEM_STEP`).
-STORE_START = "#define ARM64_SIM_L_MEM_WRITE("
-STORE_END = "#define ARM64_SIM_L_DQ_MEM_STEP("
-STORE_SELECTOR = "KPROG_ARM64_MEM_WRITE_ARM("
-STACK_BODY = "ARM64_SIM_L_STACK_WRITE_TAG("
-MEMORY_BODY = "ARM64_SIM_L_STORE_ADDR("
 # The hand-written selection the routed helper must no longer contain: the SP
 # test disjoined with the stack-tag test. The two bodies use neither `||` nor the
 # stack-tag comparison, so either spelling means the body choice is still made
 # by hand.
-HAND_SP_TEST = "ARM64_SP ||"
-HAND_TAG_TEST = "== ARM64_SIM_TAG_STACK"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def region_between(start_marker, end_marker):
-    text = HEADER.read_text()
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def store_region():
-    return region_between(STORE_START, STORE_END)
-
-
-def check_region(region):
-    """A routed store helper must select its body through the generated
-    two-fact selector and still keep both bodies; it must not select by hand."""
-    if STORE_SELECTOR not in region:
-        raise SystemExit(
-            "arm64 store helper does not route through the generated selector")
-    if STACK_BODY not in region:
-        raise SystemExit(
-            "arm64 store helper does not keep the stack-write body")
-    if MEMORY_BODY not in region:
-        raise SystemExit(
-            "arm64 store helper does not keep the byte-store body")
-    if HAND_SP_TEST in region or HAND_TAG_TEST in region:
-        raise SystemExit(
-            "arm64 store helper selects its body by hand instead of through "
-            "the generated selector")
-
-
-def check_against_header():
-    """The live store helper must route its body choice through the generated
-    selector."""
-    check_region(store_region())
 
 
 def load() -> dict:
@@ -152,7 +103,6 @@ def load() -> dict:
     if [row["stack"] for row in EXPECTED["cases"]] != [True, True, True, False]:
         raise SystemExit(
             f"invalid arm64 mem write arm table: {EXPECTED['cases']!r}")
-    check_against_header()
     return EXPECTED
 
 

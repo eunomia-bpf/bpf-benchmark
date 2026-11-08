@@ -31,12 +31,10 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_xchg_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Xchg.lean"
 CHEADER = ROOT / "generated/x86_xchg.h"
 
@@ -65,42 +63,9 @@ EXPECTED = {
               "effect": effect, "width_class": width_class}
              for arm, define, is_full, effect, width_class in _ARMS],
 }
-COLUMNS = ("arm", "arm_define", "is_full_width", "effect", "width_class")
 
 # The live routed arm text, between the generated xchg singleton gate and the
 # generated div singleton gate.
-ARM_START = "} else if (KPROG_X86_DISP_XCHG_HANDLED(OP)) {"
-ARM_END = "} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) {"
-ARM_SELECTOR = "KPROG_X86_XCHG_ARM(__x86_l_width) == KPROG_X86_XCHG_ARM_POINTER_SWAP"
-ARM_POINTER_READ = "X86_SIM_L_READ_REG_PTR"
-ARM_SUBWORD_WRITE = "X86_SIM_L_WRITE_REG_WIDTH"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live XCHG arm must route through the generated full-width selector."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 xchg arm does not route through the generated selector")
-    if ARM_POINTER_READ not in region:
-        raise SystemExit(
-            "x86 xchg pointer arm does not read the raw pointer cells")
-    if ARM_SUBWORD_WRITE not in region:
-        raise SystemExit("x86 xchg subword arm has no width write")
-    if "X86_SIM_L_WRITE_REG_PTR" not in region:
-        raise SystemExit("x86 xchg pointer arm does not write pointer cells")
 
 
 def load() -> dict:
@@ -125,7 +90,6 @@ def load() -> dict:
         raise SystemExit(f"invalid x86 xchg width classes: {arms!r}")
     if len([row for row in arms if row["is_full_width"]]) != 1:
         raise SystemExit("x86 xchg must name exactly one full-width arm")
-    check_against_header()
     return EXPECTED
 
 

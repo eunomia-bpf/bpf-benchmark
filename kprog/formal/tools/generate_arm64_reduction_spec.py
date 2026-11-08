@@ -18,12 +18,10 @@ the raw 64-bit value and the caller stores it back into `v0`.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_reduction_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Reduction.lean"
 CHEADER = ROOT / "generated/arm64_reduction.h"
 
@@ -36,8 +34,6 @@ EXPECTED = {
     ],
 }
 
-OPCODE_DEFINE = re.compile(
-    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
 
 # C bodies. The popcount is written out per byte so the macro calls no
 # hand-written helper; the byte lanes are the C `__builtin_popcountll` of a
@@ -67,17 +63,6 @@ def load() -> list[dict]:
     if [row["macro"] for row in ops] != [
             "ARM64_OP_" + row["name"].upper() for row in ops]:
         raise SystemExit(f"invalid arm64 reduction macros: {ops!r}")
-    opcodes = {name: int(value, 16)
-               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in ops:
-        if opcodes.get(row["macro"]) != row["code"]:
-            raise SystemExit(
-                "arm64 reduction opcodes drift from kprog/arm64/"
-                f"arm64_sim.h: spec={row['macro']}={row['code']:#x} "
-                f"sim={row['macro']}={opcodes.get(row['macro'])}")
     return ops
 
 

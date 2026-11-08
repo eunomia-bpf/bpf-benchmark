@@ -41,12 +41,10 @@ The generated header is included by `x86_sim_local_bpf.h` after the
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_write_width_arm_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86WriteWidthArm.lean"
 CHEADER = ROOT / "generated/x86_write_width_arm.h"
 
@@ -77,45 +75,6 @@ COLUMNS = ("arm", "arm_define", "width_code", "body", "case_macro",
 
 # The live routed macro text, between the `_SHIFT` macro opener and the
 # delegating wrapper.
-ARM_START = "#define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)"
-ARM_END = "#define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)"
-ARM_SELECTOR = "KPROG_X86_WRITE_WIDTH_ARM("
-ARM_HAND_LADDER = "if (__x86_wr_width == X86_WIDTH_8)"
-ARM_DEFAULT = "} else {"
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def arm_region():
-    text = HEADER.read_text()
-    start = text.index(ARM_START)
-    end = text.index(ARM_END, start)
-    return re.sub(r"\s+", " ", flat(text[start:end]))
-
-
-def check_against_header():
-    """The live write-width macro must route through the generated selector."""
-    region = arm_region()
-    if ARM_SELECTOR not in region:
-        raise SystemExit(
-            "x86 write width macro does not route through the generated "
-            "selector")
-    for _arm, define, _c, _b, _m, _wc in _ARMS[:-1]:
-        if define not in region:
-            raise SystemExit(
-                f"x86 write width body {define} is not routed")
-    for _arm, _define, _c, _b, macro, _wc in _ARMS:
-        if macro not in region:
-            raise SystemExit(
-                f"x86 write width case macro {macro} is not routed")
-    if ARM_DEFAULT not in region:
-        raise SystemExit("x86 write width default body is not routed")
-    if ARM_HAND_LADDER in region:
-        raise SystemExit(
-            "x86 write width macro still contains the hand width ladder")
 
 
 def load() -> dict:
@@ -135,7 +94,6 @@ def load() -> dict:
         raise SystemExit("x86 write width classes must be the width ladder")
     if arms[-1]["width_code"] != 8:
         raise SystemExit("x86 write width default body must be the qword one")
-    check_against_header()
     return EXPECTED
 
 

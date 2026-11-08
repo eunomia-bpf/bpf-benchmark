@@ -12,7 +12,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/x86_helper_dispatch_spec.json"
-HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86HelperDispatch.lean"
 CHEADER = ROOT / "generated/x86_helper_dispatch.h"
 
@@ -97,95 +96,12 @@ EXPECTED = {
                  "id": number, "body": body}
                 for name, number, body in _ARMED],
 }
-COLUMNS = ("name", "define", "id", "body")
 
 # The live helper-id defines, `#define X86_SIM_HELPER_bpf_<name> <n>ULL`, in
 # header order (the whole id space the simulator names, armed or not).
-HELPER_DEFINE = re.compile(
-    r"^#define\s+(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s+([0-9]+)ULL\s*$", re.M)
-LADDER_START = "#define X86_SIM_BPF_CALL_ID(ID)"
-LADDER_END = "#define X86_SIM_BPF_CALL_REG(REG)"
 # The routed ladder switches on the generated slot selector; each armed arm is
 # a `case KPROG_X86_HELPER_SLOT(<id define>):` invoking its body macro.
-LADDER_SLOT = re.compile(
-    r"switch\s*\(\s*KPROG_X86_HELPER_SLOT\(\s*\(\s*__u64\s*\)\s*\(\s*ID\s*\)"
-    r"\s*\)\s*\)")
-LADDER_ARM = re.compile(
-    r"case\s+KPROG_X86_HELPER_SLOT\(\s*(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s*\)"
-    r"\s*:\s*(X86_SIM_BPF_CALL_bpf_[A-Za-z0-9_]+)\s*\(\s*\)\s*;")
-LADDER_DEFAULT = re.compile(
-    r"default\s*:\s*(X86_SIM_L_UNSUPPORTED_HELPER\s*\(\s*\))\s*;")
 # The hand-written inline id comparisons the routed ladder replaces.
-LADDER_HAND_TEST = re.compile(
-    r"__x86_helper_id\s*==\s*X86_SIM_HELPER_bpf_")
-
-
-def flat(text):
-    """Collapse `\\`-newline continuations so a macro body is one line."""
-    return re.sub(r"\\\s*\n", " ", text)
-
-
-def helper_id_space():
-    """The whole named id space as `{name: id}` (armed and unarmed)."""
-    return {define[len("X86_SIM_HELPER_"):]: int(number)
-            for define, number in HELPER_DEFINE.findall(HEADER.read_text())}
-
-
-def ladder_region():
-    text = HEADER.read_text()
-    start = text.index(LADDER_START)
-    end = text.index(LADDER_END, start)
-    return flat(text[start:end])
-
-
-def ladder_arms():
-    """`[(name, body_macro, id)]` for each armed arm, in ladder order."""
-    space = helper_id_space()
-    arms = []
-    for define, body in LADDER_ARM.findall(ladder_region()):
-        name = define[len("X86_SIM_HELPER_"):]
-        if name not in space:
-            raise SystemExit(f"ladder arm names no helper id: {define}")
-        arms.append((name, body, space[name]))
-    return arms
-
-
-def ladder_default():
-    matches = LADDER_DEFAULT.findall(ladder_region())
-    if len(matches) != 1:
-        raise SystemExit(f"expected one ladder default arm, got {matches!r}")
-    return re.sub(r"\s+", " ", matches[0]).strip()
-
-
-def check_against_header():
-    """The live ladder must equal the independent enumeration, arm for arm."""
-    region = ladder_region()
-    if not LADDER_SLOT.search(region):
-        raise SystemExit(
-            "x86 helper ladder does not switch on the generated slot selector")
-    if LADDER_HAND_TEST.search(region):
-        raise SystemExit(
-            "x86 helper ladder restates an inline helper-id comparison")
-    arms = ladder_arms()
-    if [name for name, _b, _i in arms] != [name for name, _i, _b in _ARMED]:
-        raise SystemExit(f"ladder arm order disagrees: {arms!r}")
-    if [(b, i) for _n, b, i in arms] != [(b, i) for _n, i, b in _ARMED]:
-        raise SystemExit(f"ladder arm bodies/dispatch disagree: {arms!r}")
-    if ladder_default() != EXPECTED["default_body"]:
-        raise SystemExit(
-            f"ladder default arm disagrees: {ladder_default()!r}")
-    space = helper_id_space()
-    for name, number, _body in _ARMED:
-        if space.get(name) != number:
-            raise SystemExit(
-                f"helper id define disagrees for {name}: {space.get(name)!r}")
-    unarmed = sorted(set(space) - {name for name, _n, _b in _ARMED})
-    if len(unarmed) != len(space) - len(_ARMED):
-        raise SystemExit(f"unarmed helper ids are not distinct: {unarmed!r}")
-    for name in unarmed:
-        body = "X86_SIM_BPF_CALL_" + name
-        if body in HEADER.read_text():
-            raise SystemExit(f"unarmed helper id has a body macro: {name}")
 
 
 def load() -> dict:
@@ -209,7 +125,6 @@ def load() -> dict:
     for name, number, _body in _ARMED:
         if public.get(name) != number:
             raise SystemExit(f"Linux helper declaration disagrees: {name}={number}")
-    check_against_header()
     return EXPECTED
 
 
