@@ -48,6 +48,29 @@ The 10 refusals are all `__success` programs, so they are the case the task
 calls a rejection to triage between the native compile and the simulator.  No
 `__failure` program ran, so this run reports no faithfulness defect.
 
+## Triage of the 10 refusals
+
+Each was read from the loader or generator output the service archived for its
+own request (`request/generated/commands.jsonl`, `request/error.json`).  Eight
+stop in generation, before a candidate exists; the other two are the stub's
+frame sharing the program's 512-byte stack.
+
+| program | cause | owner |
+| --- | --- | --- |
+| `tcx2`, `tcx3` | `unknown helper ID 105` in generation | C, coverage |
+| `tcx5`, `tcx6`, `tc_uninit_mtu` | `unknown helper ID 163` in generation | C, coverage |
+| `global_func4` | `PC32 zero-sized target` needs a readonly section | C, coverage |
+| `global_func2` | `invalid write to stack R10 off=-528` | stack budget |
+| `global_func16` | `invalid read from stack off -4+0` | stack model |
+| `test_sched_cls` | generator produced no candidate | C, coverage |
+
+Eight of the ten are generation failures, which the task classes as coverage.
+`global_func2`'s frame plus its 248-byte stack exceeds the kernel's 512 bytes
+once the stub's frame is added.  `global_func16` reads the stack slot at
+`-4` before writing it, and the verifier rejects an uninitialised read; the
+kernel marks this program `__success`, so the slot the kernel leaves readable
+is one the specializer's own trace does not model as initialised.
+
 ## Why 95 programs were skipped
 
 Every one of the 95 carries a program type the five-step stub does not
