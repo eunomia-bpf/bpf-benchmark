@@ -3786,3 +3786,36 @@ full `make check` separately passed with all1,140 source identities verified in
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_fe6049ac8`. Every check retains its exact published source identity.
+
+### Canonical ARM thread-pointer reads for kind4
+
+The single ARM reference now decodes MRS TPIDR_EL1/EL2 for all32 Xt fields.
+`State.threadPointer` supplies the resolved per-step CPU/EL/virtualization access
+profile. The wire interface requires explicit `thread_pointer_reads` values for
+MRS: each register carries a full64 value or an access-denial outcome. Successful
+reads equal same-value MOV64 in the complete modeled state; XZR discards the
+value while preserving SP. Access denial retains the incoming state and emits
+an identified system-register fault. The generic register module also proves
+decode, XZR, denial and EL-selection laws for T's kind4 composition. Current
+CPU/profile resolution, exception-entry syndrome/vector, per-CPU relocation and
+compiled/native-link correspondence retain their explicit production interfaces.
+
+Default incremental `lake build`, the existing general/ARM/exclusive/addressed
+reference checks, seven fresh V axiom audits and seven published T dependency
+modules pass. MRS checks execute1,280 complete-state/profile/fault observations,
+assemble64 native encodings independently with LLVM and exercise seven wire/
+decode refusal cases. All383 focused proof inputs stayed stable; two additional
+published C/Rust source pins match the production X10 words. Every original ARM
+reference code line and its decoder prefix remain exact; the original register
+module prefix remains exact. The source snapshots, initial diagnostics, final
+logs and executed reference binary are retained under
+`canonical_arm_thread_pointer_reference` in
+[the integration receipt](arm64-xdp-host-integration.json) and its gzip archive.
+
+The canonical ARM source is `082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56`;
+the executed reference binary is `f84cb2ecff4f0c68976e0c572d5b7e9fc15c3e7ab9cee7c17f39a2360d735a5a`.
+The75/71 numeric catalogs,49/3 C-model O2 token totals and selected replay totals
+retain their current domains. These two native system-register consumers
+provide the kind4 reference interface. The separately published full
+`make check` at `fe6049ac8` passed with all1,140 Git source identities verified
+in `full_make_check_fe6049ac8`.

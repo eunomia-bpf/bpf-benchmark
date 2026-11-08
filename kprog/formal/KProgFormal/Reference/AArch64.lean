@@ -49,6 +49,22 @@ def emptyExclusiveInputs : ExclusiveInputs :=
 def exclusiveCovers (monitor : ExclusiveMonitor) (physical : Word) (bytes : Nat) : Bool :=
   (physical - monitor.physicalStart).toNat + bytes ≤ monitor.bytes
 
+/-- Physical thread-pointer registers read by the kernel per-CPU sequence.
+Arm DDI0601 TPIDR_EL1/TPIDR_EL2 and DDI0602 MRS (register):
+https://support.arm.com/documentation/ddi0601/2025-03/AArch64-Registers/TPIDR-EL1--EL1-Software-Thread-ID-Register
+https://support.arm.com/documentation/ddi0601/2025-03/AArch64-Registers/TPIDR-EL2--EL2-Software-Thread-ID-Register
+Arm Compiler 6.21 section -mtp describes the EL-specific software TP values:
+https://documentation-service.arm.com/static/6526c59c9e189a266cef83fa
+The executing EL and virtualization/trap configuration supply the resolved
+read outcome. A permitted read supplies the physical register's full64 value;
+a denied access has its own architectural fault boundary. -/
+inductive ThreadPointerRegister | el1 | el2
+  deriving DecidableEq, Repr
+
+def ThreadPointerRegister.encoding : ThreadPointerRegister → Nat
+  | .el1 => 0xc684
+  | .el2 => 0xe682
+
 structure State where
   gpr : Gpr → Word
   sp : Word
@@ -66,6 +82,10 @@ structure State where
   /-- A default only preserves ordinary-instruction constructor compatibility.
   The wire interface requires explicit inputs before any exclusive instruction. -/
   exclusiveInputs : ExclusiveInputs := emptyExclusiveInputs
+  /-- Per-step system-register access profile. Each present value is supplied
+  by the current EL/CPU/platform binding; a missing value records access denial.
+  The executable interface requires this profile explicitly for MRS. -/
+  threadPointer : ThreadPointerRegister → Option Word := fun _ => none
 
 /-- Full architectural SIMD bank. The separate V0 field preserves the earlier
 reference interface; index31 is V31, unrelated to integer ZR/SP. -/
@@ -839,7 +859,17 @@ def ExclusiveStep (i : ExclusiveInstruction) (before : State) (after : Transitio
      | _ => True) ∧
     exclusiveStep i { before with exclusiveInputs := inputs } = after
 
+/-- MRS reads the resolved system-register input and writes Xt; encoding31
+selects XZR. SP, flags, memory, SIMD, monitor and profile inputs are retained. -/
+def readThreadPointerStep (source : ThreadPointerRegister) (dst : Register) (s : State) : Transition State :=
+  match s.threadPointer source with
+  | some value => ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
+  | none =>
+      let fault := Fault.systemRegister source.encoding
+      ⟨s, [.fault fault], some fault⟩
+
 inductive Instruction
+  | readThreadPointer (source : ThreadPointerRegister) (dst : Register)
   | exclusive (instruction : ExclusiveInstruction)
   | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
@@ -878,6 +908,7 @@ inductive Instruction
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
+  | .readThreadPointer source dst => readThreadPointerStep source dst s
   | .exclusive instruction => exclusiveStep instruction s
   | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
@@ -1181,6 +1212,8 @@ def decode (bytes : Array Byte) : Except String Instruction := do
     return .mul (.longMultiply true dst lhs rhs addend)
   if word &&& 0xffe0fc00 = 0x9bc07c00 then return .mul (.unsignedHigh dst lhs rhs)
   if word &&& 0x7fe0fc00 = 0x1ac00800 then return .mul (.unsignedDivide width dst lhs rhs)
+  if word &&& 0xffffffe0 = 0xd538d080 then return .readThreadPointer .el1 dst
+  if word &&& 0xffffffe0 = 0xd53cd040 then return .readThreadPointer .el2 dst
   throw "unrecognized AArch64 native opcode"
 
 end KProgFormal.Reference.AArch64

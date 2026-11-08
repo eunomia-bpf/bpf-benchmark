@@ -100,3 +100,10 @@ They distinguish focused proofs/oracles from complete make-check outcomes.
 The LEA raw register-frame core and address normalization are proved; its
 production-field/dispatcher/O2 connection uses the tested correction patch
 linked by the current coverage report.
+
+Canonical ARM thread-pointer reads cover native MRS TPIDR_EL1/EL2 and all32
+Xt fields. `thread_pointer_reads` supplies the resolved CPU/EL access profile;
+permitted reads retain full64 values, XZR discards the value, and denied reads
+retain the incoming state with an identified system-register fault. The generic
+register laws connect a permitted MRS to MOV-immediate and the selected
+per-CPU value; kind4 CPU/profile/relocation binding remains its caller interface.

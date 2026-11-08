@@ -124,12 +124,90 @@ def check_logical_immediates(base):
           f'{completed} complete states, {rejected} reserved-field rejects PASS')
 
 
+def check_thread_pointers(base):
+    """MRS decode/profile, full-state effects and XZR/fault regressions."""
+    binary = str(ROOT / '.lake/build/bin/reference')
+    fullmask = (1 << 64) - 1
+    forms = [(source, encoding, dst) for source, encoding in
+             [('el1', 0xD538D080), ('el2', 0xD53CD040)] for dst in range(32)]
+    with tempfile.TemporaryDirectory(prefix='arm64-mrs-') as tmp:
+        tmp = Path(tmp)
+        assembly = '.text\n' + ''.join(
+            f'mrs {"xzr" if dst == 31 else "x" + str(dst)}, tpidr_{source}\n'
+            for source, _, dst in forms)
+        (tmp / 'mrs.s').write_text(assembly)
+        subprocess.run(['clang-18', '--target=aarch64-linux-gnu', '-c', str(tmp / 'mrs.s'),
+                        '-o', str(tmp / 'mrs.o')], check=True)
+        subprocess.run(['llvm-objcopy-18', '-O', 'binary', '--only-section=.text',
+                        str(tmp / 'mrs.o'), str(tmp / 'mrs.bin')], check=True)
+        expected = b''.join((encoding | dst).to_bytes(4, 'little') for _, encoding, dst in forms)
+        assert (tmp / 'mrs.bin').read_bytes() == expected
+    completed = 0
+    with subprocess.Popen([binary], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, text=True, bufsize=1) as process:
+        for source, encoding, dst in forms:
+            for permitted in (True, False):
+                for value in (0, 1, 0x8000000000000000, fullmask, 0xFFFF8000ABCDEF01):
+                    for pc in (0x1000, fullmask - 1):
+                        request = copy.deepcopy(base)
+                        request['native_bytes'] = list((encoding | dst).to_bytes(4, 'little'))
+                        state = request['state']
+                        state.update(pc=pc, flags=0x12345678ABCDEF01,
+                                     vectors=[state['vector0']] + [(1 << 127) + i for i in range(1, 32)],
+                                     exclusive_monitor=dict(physical_start=0x4000, bytes=64),
+                                     thread_pointer_reads=dict(el1=0x1122334455667788, el2=0x8877665544332211))
+                        state['thread_pointer_reads'][source] = value if permitted else None
+                        expected = copy.deepcopy(state)
+                        if permitted:
+                            if dst < 31:
+                                expected['registers'][dst] = value
+                            expected.update(pc=(pc + 4) & fullmask, events=[], fault=None)
+                        else:
+                            fault = dict(kind='system_register', encoding=(encoding >> 5) & 0xFFFF)
+                            expected.update(events=[dict(kind='fault', fault=fault)], fault=fault)
+                        expected['defined_flags'] = fullmask
+                        process.stdin.write(json.dumps(request) + '\n')
+                        process.stdin.flush()
+                        line = process.stdout.readline()
+                        assert line, (request, process.stderr.read())
+                        actual = json.loads(line)
+                        assert actual == expected, (request, actual, expected)
+                        completed += 1
+        process.stdin.close()
+        assert process.wait() == 0, process.stderr.read()
+    # Explicit profile syntax catches invented default values and word truncation.
+    for profile, expected_error in [
+            ('absent', 'requires explicit thread_pointer_reads'),
+            ({'el1': 7}, 'el2'),
+            ({'el1': 1 << 64, 'el2': None}, 'outside the 64-bit range'),
+            ({'el1': -1, 'el2': 8}, 'reference:'),
+            ({'el1': True, 'el2': 8}, 'reference:')]:
+        request = copy.deepcopy(base)
+        request['native_bytes'] = list((0xD538D08A).to_bytes(4, 'little'))
+        if profile != 'absent':
+            request['state']['thread_pointer_reads'] = profile
+        output = subprocess.run([binary], input=json.dumps(request) + '\n', text=True,
+                                capture_output=True)
+        assert output.returncode == 1 and expected_error.lower() in output.stderr.lower(), (request, output)
+    # An adjacent writable system opcode and EL0 TP remain distinct native forms.
+    for word in (0xD518D08A, 0xD53BD04A):
+        request = copy.deepcopy(base)
+        request['native_bytes'] = list(word.to_bytes(4, 'little'))
+        request['state']['thread_pointer_reads'] = dict(el1=1, el2=2)
+        output = subprocess.run([binary], input=json.dumps(request) + '\n', text=True,
+                                capture_output=True)
+        assert output.returncode == 1 and 'unrecognized AArch64 native opcode' in output.stderr, (request, output)
+    print(f'AArch64 MRS thread-pointer reference: {completed} complete-state/profile/fault cases, '
+          '64 LLVM native encodings and7 wire/decode refusals PASS')
+
+
 def main():
     base = dict(isa="aarch64", state=dict(
         registers=[0xFEED000000000000 + i for i in range(31)] + [0x70001000],
         flags=0xF0000000, vector0=(1 << 127) + 17, pc=0x1000,
         memory=[dict(address=0x2000, value=0xA5, readable=True,
                      writable=False, initialized=False)]))
+    check_thread_pointers(base)
     check_logical_immediates(base)
     # Encoding words were independently assembled with GNU AArch64 as. Expected
     # results are fixed boundary examples, not an alternate ISA interpreter.

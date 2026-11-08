@@ -68,4 +68,67 @@ theorem write_refines (s : Reference.AArch64.State) (dst : Register)
   simp only [writeReg, Reference.AArch64.writeReg, write_selection,
     write_value_refines, beq_iff_eq]
 
+/-- Native MRS encoding, retaining every destination bit. -/
+def threadPointerBytes (source : Reference.AArch64.ThreadPointerRegister) (dst : Register) : Array Byte :=
+  let word := BitVec.ofNat 32 (0xd5200000 + 32 * source.encoding + dst.val)
+  #[word.setWidth 8, (word >>> 8).setWidth 8, (word >>> 16).setWidth 8, (word >>> 24).setWidth 8]
+
+theorem thread_pointer_decode (source : Reference.AArch64.ThreadPointerRegister) : ∀ (dst : Register),
+    Reference.AArch64.decode (threadPointerBytes source dst) = .ok (.readThreadPointer source dst) := by
+  have all : (List.finRange 32).all (fun dst =>
+      match Reference.AArch64.decode (threadPointerBytes source dst) with
+      | .ok instruction => decide (instruction = .readThreadPointer source dst)
+      | .error _ => false) = true := by
+    cases source <;> native_decide
+  intro dst
+  have member : dst ∈ List.finRange 32 := by
+    change dst ∈ List.ofFn (fun i : Fin 32 => i)
+    exact List.mem_ofFn.mpr ⟨dst, rfl⟩
+  have hit := List.all_eq_true.mp all dst member
+  cases decoded : Reference.AArch64.decode (threadPointerBytes source dst) with
+  | error message => simp [decoded] at hit
+  | ok instruction =>
+      have same : instruction = .readThreadPointer source dst := of_decide_eq_true (by simpa [decoded] using hit)
+      rw [same]
+
+/-- A successful system-register read has exactly the complete-state effect
+of a64 MOV-immediate with the same full64 word. Profile/CPU value binding is
+an explicit input for native-link kind4. -/
+theorem thread_pointer_read_refines (source : Reference.AArch64.ThreadPointerRegister)
+    (dst : Register) (value : Word) (s : Reference.AArch64.State)
+    (permitted : s.threadPointer source = some value) :
+    Reference.AArch64.step (.readThreadPointer source dst) s =
+      Reference.AArch64.step (.moveImmediate .w64 dst value) s := by
+  simp only [Reference.AArch64.step, Reference.AArch64.readThreadPointerStep, permitted]
+  have narrow : Reference.AArch64.narrow value .w64 = value := by
+    simp [Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+  rw [narrow]
+
+/-- Access denial retains the full incoming state and identifies the system
+register at the architectural fault boundary, including XZR destinations. -/
+theorem thread_pointer_denied (source : Reference.AArch64.ThreadPointerRegister)
+    (dst : Register) (s : Reference.AArch64.State) (denied : s.threadPointer source = none) :
+    Reference.AArch64.step (.readThreadPointer source dst) s =
+      ⟨s, [.fault (.systemRegister source.encoding)], some (.systemRegister source.encoding)⟩ := by
+  simp only [Reference.AArch64.step, Reference.AArch64.readThreadPointerStep, denied]
+
+/-- XZR discards a successful read while retaining SP and every other field. -/
+theorem thread_pointer_xzr (source : Reference.AArch64.ThreadPointerRegister)
+    (value : Word) (s : Reference.AArch64.State) (permitted : s.threadPointer source = some value) :
+    Reference.AArch64.step (.readThreadPointer source 31) s = ⟨{ s with pc := s.pc + 4 }, [], none⟩ := by
+  have registers : (fun i : Gpr => if i.val = (31 : Register).val then value else s.gpr i) = s.gpr := by
+    funext i
+    change (if i.val = 31 then value else s.gpr i) = s.gpr i
+    rw [if_neg (by omega)]
+  simp only [Reference.AArch64.step, Reference.AArch64.readThreadPointerStep, permitted,
+    Reference.AArch64.writeReg, registers]
+
+/-- The two kernel TP choices have the same complete canonical effect when
+both resolved reads carry the same CPU-local word. -/
+theorem thread_pointer_el_transport (dst : Register) (value : Word) (s : Reference.AArch64.State)
+    (el1 : s.threadPointer .el1 = some value) (el2 : s.threadPointer .el2 = some value) :
+    Reference.AArch64.step (.readThreadPointer .el1 dst) s =
+      Reference.AArch64.step (.readThreadPointer .el2 dst) s := by
+  simp only [Reference.AArch64.step, Reference.AArch64.readThreadPointerStep, el1, el2]
+
 end KProgFormal.Refinement.Arm64Register

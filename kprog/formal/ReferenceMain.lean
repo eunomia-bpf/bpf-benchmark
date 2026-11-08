@@ -81,6 +81,7 @@ private def faultJson : Fault → Json
   | .read a n => Json.mkObj [("kind", toJson "read"), ("address", number a.toNat), ("bytes", number n)]
   | .write a n => Json.mkObj [("kind", toJson "write"), ("address", number a.toNat), ("bytes", number n)]
   | .divide => Json.mkObj [("kind", toJson "divide")]
+  | .systemRegister encoding => Json.mkObj [("kind", toJson "system_register"), ("encoding", number encoding)]
   | .nonCanonical address => Json.mkObj [("kind", toJson "non_canonical"), ("address", number address.toNat)]
   | .spAlignment address => Json.mkObj [("kind", toJson "sp_alignment"), ("address", number address.toNat)]
   | .alignment address bytes => Json.mkObj [("kind", toJson "alignment"), ("address", number address.toNat), ("bytes", number bytes)]
@@ -168,6 +169,19 @@ private def monitorJson : Option AArch64.ExclusiveMonitor → Json
   | none => Json.null
   | some monitor => Json.mkObj [("physical_start", number monitor.physicalStart.toNat), ("bytes", number monitor.bytes)]
 
+private def parseThreadPointer (j : Json) : Except String (AArch64.ThreadPointerRegister → Option Word) := do
+  let parse (name : String) : Except String (Option Word) := do
+    let value ← j.getObjVal? name
+    if value == Json.null then return none
+    return some (← fieldWord j name)
+  let el1 ← parse "el1"
+  let el2 ← parse "el2"
+  pure (fun source => match source with | .el1 => el1 | .el2 => el2)
+
+private def threadPointerJson (profile : AArch64.ThreadPointerRegister → Option Word) : Json :=
+  Json.mkObj [("el1", match profile .el1 with | some value => number value.toNat | none => Json.null),
+    ("el2", match profile .el2 with | some value => number value.toNat | none => Json.null)]
+
 private def parseArmState (j : Json) (cells : Array InputCell) : Except String AArch64.State := do
   let rows ← (← j.getObjVal? "registers").getArr?
   let regs ← rows.mapM fun r => do
@@ -191,10 +205,13 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
     let exclusiveInputs ← match j.getObjVal? "exclusive_inputs" with
       | .error _ => pure AArch64.emptyExclusiveInputs
       | .ok value => parseExclusiveInputs value
+    let threadPointer : (AArch64.ThreadPointerRegister → Option Word) ← match j.getObjVal? "thread_pointer_reads" with
+      | .error _ => pure (fun (_ : AArch64.ThreadPointerRegister) => (none : Option Word))
+      | .ok value => parseThreadPointer value
     pure { gpr := fun r => regs[r.val]'(by omega)
            sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
            vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck, pairSingleAccess := pairSingleAccess,
-           exclusiveMonitor := exclusiveMonitor, exclusiveInputs := exclusiveInputs,
+           exclusiveMonitor := exclusiveMonitor, exclusiveInputs := exclusiveInputs, threadPointer := threadPointer,
            memory := memoryOfCells cells, pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
@@ -205,6 +222,9 @@ private def executeArm (request : Json) : Except String Json := do
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
   let instruction ← AArch64.decode bytes
   match instruction with
+    | .readThreadPointer .. =>
+        if !(state.getObjVal? "thread_pointer_reads").isOk then
+          throw "MRS requires explicit thread_pointer_reads access profile"
     | .exclusive operation =>
         if !(state.getObjVal? "exclusive_monitor").isOk then
           throw "exclusive instruction requires explicit monitor state"
@@ -227,6 +247,8 @@ private def executeArm (request : Json) : Except String Json := do
     | _ => pure ()
   let output := AArch64.step instruction initial
   let s := output.state
+  let threadPointerFields := if (state.getObjVal? "thread_pointer_reads").isOk then
+      [("thread_pointer_reads", threadPointerJson s.threadPointer)] else []
   let exclusiveFields := if (state.getObjVal? "exclusive_monitor").isOk then
       [("exclusive_monitor", monitorJson s.exclusiveMonitor)] else []
   let vectorFields := if (state.getObjVal? "vectors").isOk then
@@ -236,7 +258,7 @@ private def executeArm (request : Json) : Except String Json := do
       [("sp_alignment_check", toJson s.spAlignmentCheck)] else []
   let pairFields := if (state.getObjVal? "pair_single_access").isOk then
       [("pair_single_access", toJson s.pairSingleAccess)] else []
-  pure <| Json.mkObj (exclusiveFields ++ vectorFields ++ alignmentFields ++ pairFields ++ [
+  pure <| Json.mkObj (threadPointerFields ++ exclusiveFields ++ vectorFields ++ alignmentFields ++ pairFields ++ [
     ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
     ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
     ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),
