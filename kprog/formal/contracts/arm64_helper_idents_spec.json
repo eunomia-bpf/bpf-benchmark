@@ -76,6 +76,9 @@
     {"id": 184, "name": "bpf_get_func_ret"},
     {"id": 185, "name": "bpf_get_func_arg_cnt"},
     {"id": 186, "name": "bpf_get_retval"},
+    {"id": 188, "name": "bpf_xdp_get_buff_len"},
+    {"id": 189, "name": "bpf_xdp_load_bytes"},
+    {"id": 190, "name": "bpf_xdp_store_bytes"},
     {"id": 191, "name": "bpf_copy_from_user_task"},
     {"id": 193, "name": "bpf_ima_file_hash"},
     {"id": 195, "name": "bpf_map_lookup_percpu_elem"}

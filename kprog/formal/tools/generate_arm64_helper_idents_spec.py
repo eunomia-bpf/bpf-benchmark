@@ -27,7 +27,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
 C_HEADER = ROOT / "generated/arm64_helper_idents.h"
 PYTHON = ROOT.parent / "arm64/micro-prog/generated_arm64_helper_idents.py"
 
-# The encoder's 77 helper ids in the specification's id-sorted order, as the
+# The encoder's helper ids in the specification's id-sorted order, as the
 # encoder's `HELPER_IDENTS` table defines them.
 EXPECTED: list[tuple[int, str]] = [
     (1, "bpf_map_lookup_elem"),
@@ -104,6 +104,9 @@ EXPECTED: list[tuple[int, str]] = [
     (184, "bpf_get_func_ret"),
     (185, "bpf_get_func_arg_cnt"),
     (186, "bpf_get_retval"),
+    (188, "bpf_xdp_get_buff_len"),
+    (189, "bpf_xdp_load_bytes"),
+    (190, "bpf_xdp_store_bytes"),
     (191, "bpf_copy_from_user_task"),
     (193, "bpf_ima_file_hash"),
     (195, "bpf_map_lookup_percpu_elem"),

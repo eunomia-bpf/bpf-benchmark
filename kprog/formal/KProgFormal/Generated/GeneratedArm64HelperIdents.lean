@@ -76,6 +76,9 @@ inductive Helper
   | bpf_get_func_ret
   | bpf_get_func_arg_cnt
   | bpf_get_retval
+  | bpf_xdp_get_buff_len
+  | bpf_xdp_load_bytes
+  | bpf_xdp_store_bytes
   | bpf_copy_from_user_task
   | bpf_ima_file_hash
   | bpf_map_lookup_percpu_elem
@@ -155,6 +158,9 @@ def id : Helper -> Nat
   | .bpf_get_func_ret => 184
   | .bpf_get_func_arg_cnt => 185
   | .bpf_get_retval => 186
+  | .bpf_xdp_get_buff_len => 188
+  | .bpf_xdp_load_bytes => 189
+  | .bpf_xdp_store_bytes => 190
   | .bpf_copy_from_user_task => 191
   | .bpf_ima_file_hash => 193
   | .bpf_map_lookup_percpu_elem => 195
@@ -233,6 +239,9 @@ def name : Helper -> String
   | .bpf_get_func_ret => "bpf_get_func_ret"
   | .bpf_get_func_arg_cnt => "bpf_get_func_arg_cnt"
   | .bpf_get_retval => "bpf_get_retval"
+  | .bpf_xdp_get_buff_len => "bpf_xdp_get_buff_len"
+  | .bpf_xdp_load_bytes => "bpf_xdp_load_bytes"
+  | .bpf_xdp_store_bytes => "bpf_xdp_store_bytes"
   | .bpf_copy_from_user_task => "bpf_copy_from_user_task"
   | .bpf_ima_file_hash => "bpf_ima_file_hash"
   | .bpf_map_lookup_percpu_elem => "bpf_map_lookup_percpu_elem"

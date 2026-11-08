@@ -2,7 +2,7 @@ import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 77 BPF helper ids with the
+/-- Independent enumeration of the encoder's 80 BPF helper ids with the
 helper name each one denotes, in id-sorted order. Written out by hand so it
 shares no structure with the generated table. -/
 def helperIdentsSpec : List (Nat × String) := [
@@ -50,6 +50,9 @@ def helperIdentsSpec : List (Nat × String) := [
   (181, "bpf_loop"),
   (183, "bpf_get_func_arg"), (184, "bpf_get_func_ret"),
   (185, "bpf_get_func_arg_cnt"), (186, "bpf_get_retval"),
+  (188, "bpf_xdp_get_buff_len"),
+  (189, "bpf_xdp_load_bytes"),
+  (190, "bpf_xdp_store_bytes"),
   (191, "bpf_copy_from_user_task"), (193, "bpf_ima_file_hash"),
   (195, "bpf_map_lookup_percpu_elem"),
 ]
@@ -101,6 +104,9 @@ def allHelperIdents : List GeneratedArm64HelperIdents.Helper := [
   .bpf_loop,
   .bpf_get_func_arg, .bpf_get_func_ret,
   .bpf_get_func_arg_cnt, .bpf_get_retval,
+  .bpf_xdp_get_buff_len,
+  .bpf_xdp_load_bytes,
+  .bpf_xdp_store_bytes,
   .bpf_copy_from_user_task, .bpf_ima_file_hash,
   .bpf_map_lookup_percpu_elem,
 ]

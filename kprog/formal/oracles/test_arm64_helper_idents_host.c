@@ -27,18 +27,18 @@ static int failures;
 static unsigned long cases;
 
 /* The 77 row kernel ids, in the specification's id-sorted order. */
-static const int row_ids[77] = {
+static const int row_ids[80] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 	11, 12, 13, 14, 15, 16, 20, 21, 23, 25, 26,
 	27, 28, 31, 32, 33, 35, 36, 37, 38, 39, 43,
 	44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109,
 	112, 113, 114, 115, 118, 122, 124, 125, 127, 130, 148, 152,
-	155, 158, 160, 161, 173, 174, 175, 181, 183, 184, 185, 186, 191, 193,
+	155, 158, 160, 161, 173, 174, 175, 181, 183, 184, 185, 186, 188, 189, 190, 191, 193,
 	195,
 };
 
 /* The helper name each row kernel id denotes, in specification order. */
-static const char *const row_names[77] = {
+static const char *const row_names[80] = {
 	"bpf_map_lookup_elem", "bpf_map_update_elem",
 	"bpf_map_delete_elem", "bpf_probe_read",
 	"bpf_ktime_get_ns", "bpf_trace_printk",
@@ -68,11 +68,14 @@ static const char *const row_names[77] = {
 	"bpf_get_attach_cookie", "bpf_task_pt_regs", "bpf_loop",
 	"bpf_get_func_arg", "bpf_get_func_ret",
 	"bpf_get_func_arg_cnt", "bpf_get_retval",
+	"bpf_xdp_get_buff_len",
+	"bpf_xdp_load_bytes",
+	"bpf_xdp_store_bytes",
 	"bpf_copy_from_user_task", "bpf_ima_file_hash",
 	"bpf_map_lookup_percpu_elem",
 };
 
-#define ROW_COUNT 77U
+#define ROW_COUNT 80U
 
 /* The generated row selector must return each row kernel id's ordinal. */
 static void check_rows(void)
