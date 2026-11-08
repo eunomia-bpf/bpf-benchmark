@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-08T17:22:41.694801+00:00",
+  "command": [
+    "taskset",
+    "-c",
+    "12-15",
+    "make",
+    "-C",
+    "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache",
+    "ARCH=arm64",
+    "CROSS_COMPILE=aarch64-linux-gnu-",
+    "M=/workspaces/.agent-state/kprog-lanes/A/bpf34/testmod/source",
+    "modules",
+    "-j2"
+  ],
+  "phase": "build_finished",
+  "returncode": 0,
+  "modules": {},
+  "raw_resource_epoch": "62c3925eecc00f2544a34890a579355e40cde6db",
+  "cause": "Whole original object needs bpf_testmod kfunc declarations; original resource-only prelude reaches missing bpf_kfunc_call_test_acquire before native submission."
+}
