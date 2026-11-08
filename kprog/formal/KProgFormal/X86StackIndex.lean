@@ -111,3 +111,224 @@ end KProgFormal.X86StackCallFrame
 #print axioms KProgFormal.X86StackCallFrame.signed_offset_exact
 #print axioms KProgFormal.X86StackCallFrame.below_sp_index
 #print axioms KProgFormal.X86StackCallFrame.call_frame_tag_raw_sp
+
+namespace KProgFormal.X86StackGhost
+open X86StackCallFrame
+abbrev Address := BitVec 64
+abbrev Slot := BitVec 32
+
+/-- Private metadata from x86_sim_stack_value. Raw guest bytes and their
+initialization/permissions are separate from this table. Only tag4 permits
+reading the private STACK pointer representative; all other tags ignore it. -/
+structure Cell where
+  tag : BitVec 8
+  pointer : Address
+  deriving DecidableEq
+
+def Equivalent (a b : Cell) : Prop :=
+  a.tag = b.tag ∧ (a.tag = 4 → a.pointer = b.pointer)
+
+/-- Exact output of SV_READ_ONE for one slot. Width is the existing effective
+byte width, not a new admission predicate. A non-STACK result has pointer0. -/
+def readCell (index width : Address) (slot : Slot) (c : Cell) : Cell :=
+  if width = 8 ∧ index = slotStart slot ∧ c.tag ≠ 0 then
+    ⟨c.tag, if c.tag = 4 then c.pointer else 0⟩
+  else ⟨0, 0⟩
+
+/-- SV_SAVE_ONE writes the representative only for STACK, and writes the tag
+for every non-scalar full-width save at the slot's byte coordinate. -/
+def saveCell (index width pointer : Address) (tag : BitVec 8) (slot : Slot) (c : Cell) : Cell :=
+  if width = 8 ∧ tag ≠ 0 ∧ index = slotStart slot then
+    ⟨tag, if tag = 4 then pointer else c.pointer⟩
+  else c
+
+def clearCell (condition : Bool) (c : Cell) : Cell :=
+  if condition then { c with tag := 0 } else c
+
+/-- The existing wrapping byte-overlap policy is copied without strengthening
+its domain. This theorem concerns metadata erasure, not guest permissions. -/
+def eraseCell (index width : Address) (slot : Slot) (c : Cell) : Cell :=
+  clearCell ((index - slotStart slot).ult 8 || (slotStart slot - index).ult width) c
+
+def frameCell (capacity sp : Address) (slot : Slot) (c : Cell) : Cell :=
+  clearCell ((slotOffset capacity slot).slt sp) c
+
+theorem read_equivalent (a b : Cell) (same : Equivalent a b)
+    (index width : Address) (slot : Slot) :
+    readCell index width slot a = readCell index width slot b := by
+  rcases same with ⟨tags, pointers⟩
+  unfold readCell
+  by_cases stack : a.tag = 4
+  · have ptr := pointers stack
+    simp only [← tags, stack, ptr]
+  · simp only [← tags, stack, ↓reduceIte]
+
+theorem save_equivalent (a b : Cell) (same : Equivalent a b)
+    (index width pointer : Address) (tag : BitVec 8) (slot : Slot) :
+    Equivalent (saveCell index width pointer tag slot a)
+      (saveCell index width pointer tag slot b) := by
+  unfold saveCell
+  split
+  · constructor
+    · rfl
+    · intro stack
+      simp_all
+  · exact same
+
+theorem clear_equivalent (a b : Cell) (same : Equivalent a b) (condition : Bool) :
+    Equivalent (clearCell condition a) (clearCell condition b) := by
+  cases condition <;> simp [clearCell, Equivalent] at *
+  exact same
+
+theorem erase_equivalent (a b : Cell) (same : Equivalent a b)
+    (index width : Address) (slot : Slot) :
+    Equivalent (eraseCell index width slot a) (eraseCell index width slot b) :=
+  clear_equivalent a b same _
+
+theorem frame_equivalent (a b : Cell) (same : Equivalent a b)
+    (capacity sp : Address) (slot : Slot) :
+    Equivalent (frameCell capacity sp slot a) (frameCell capacity sp slot b) :=
+  clear_equivalent a b same _
+
+abbrev Table := Slot → Cell
+
+def TablesEquivalent (a b : Table) : Prop := ∀ slot, Equivalent (a slot) (b slot)
+
+inductive Action where
+  | save (index width pointer : Address) (tag : BitVec 8)
+  | erase (index width : Address)
+  | frame (capacity sp : Address)
+  | clear
+
+def applyAction (action : Action) (table : Table) : Table := fun slot =>
+  match action with
+  | .save index width pointer tag => saveCell index width pointer tag slot (table slot)
+  | .erase index width => eraseCell index width slot (table slot)
+  | .frame capacity sp => frameCell capacity sp slot (table slot)
+  | .clear => clearCell true (table slot)
+
+def run : List Action → Table → Table
+  | [], table => table
+  | action :: rest, table => run rest (applyAction action table)
+
+theorem action_preserves (a b : Table) (same : TablesEquivalent a b) (action : Action) :
+    TablesEquivalent (applyAction action a) (applyAction action b) := by
+  intro slot
+  cases action with
+  | save index width pointer tag => exact save_equivalent _ _ (same slot) index width pointer tag slot
+  | erase index width => exact erase_equivalent _ _ (same slot) index width slot
+  | frame capacity sp => exact frame_equivalent _ _ (same slot) capacity sp slot
+  | clear => exact clear_equivalent _ _ (same slot) true
+
+theorem run_preserves (a b : Table) (same : TablesEquivalent a b) (actions : List Action) :
+    TablesEquivalent (run actions a) (run actions b) := by
+  induction actions generalizing a b with
+  | nil => exact same
+  | cons action rest ih => exact ih _ _ (action_preserves a b same action)
+
+/-- Arbitrary symbolic inactive payloads and defined zero-initialized payloads
+have identical metadata observations after every finite sequence of the actual
+save/invalidate/frame/clear policies. This is a C-model erasure law; it does not
+claim that an uninitialized C read is defined or that clang preserves a path. -/
+theorem initialized_payloads_unobservable (arbitrary : Slot → Address) (actions : List Action)
+    (index width : Address) (slot : Slot) :
+    readCell index width slot (run actions (fun i => ⟨0, arbitrary i⟩) slot) =
+      readCell index width slot (run actions (fun _ => ⟨0, 0⟩) slot) := by
+  apply read_equivalent
+  apply run_preserves
+  intro i
+  simp [Equivalent]
+
+/-- More generally, every non-STACK payload can be replaced independently.
+All tag values, including non-scalar origins, remain unchanged. -/
+theorem inactive_payloads_unobservable (table : Table) (replacements : Slot → Address)
+    (actions : List Action) (index width : Address) (slot : Slot) :
+    readCell index width slot (run actions table slot) =
+      readCell index width slot
+        (run actions (fun i => if (table i).tag = 4 then table i
+          else { table i with pointer := replacements i }) slot) := by
+  apply read_equivalent
+  apply run_preserves
+  intro i
+  change Equivalent (table i) (if (table i).tag = (4 : BitVec 8) then table i
+    else { table i with pointer := replacements i })
+  split
+  · exact ⟨rfl, fun _ => rfl⟩
+  · rename_i inactive
+    exact ⟨rfl, fun active => False.elim (inactive active)⟩
+
+/-- The current read policy observes the complete pointer exactly when STACK
+is active, so active representatives cannot be erased by the relation. -/
+theorem active_pointer_retained (slot : Slot) (pointer : Address) :
+    readCell (slotStart slot) 8 slot ⟨4, pointer⟩ = ⟨4, pointer⟩ := by
+  simp [readCell]
+
+
+/-- Exact SV_READ_ONE accumulator update, including its retention of the
+previous pointer for a non-STACK tag. No uniqueness premise is needed. -/
+def readInto (index width : Address) (slot : Slot) (c result : Cell) : Cell :=
+  if width = 8 ∧ index = slotStart slot ∧ c.tag ≠ 0 then
+    ⟨c.tag, if c.tag = 4 then c.pointer else result.pointer⟩
+  else result
+
+theorem read_into_equivalent (a b : Cell) (same : Equivalent a b)
+    (index width : Address) (slot : Slot) (result : Cell) :
+    readInto index width slot a result = readInto index width slot b result := by
+  rcases same with ⟨tags, pointers⟩
+  unfold readInto
+  by_cases stack : a.tag = 4
+  · have ptr := pointers stack
+    simp only [← tags, stack, ptr]
+  · simp only [← tags, stack, ↓reduceIte]
+
+def readTable : List Slot → Address → Address → Table → Cell → Cell
+  | [], _, _, _, result => result
+  | slot :: rest, index, width, table, result =>
+      readTable rest index width table (readInto index width slot (table slot) result)
+
+/-- Every finite generated slot enumeration has the same whole lookup result.
+The proof permits arbitrary order and duplicate entries, so both array and
+named-cell unrolling instances are covered without a side condition. -/
+theorem read_table_equivalent (a b : Table) (same : TablesEquivalent a b)
+    (slots : List Slot) (index width : Address) (result : Cell) :
+    readTable slots index width a result = readTable slots index width b result := by
+  induction slots generalizing result with
+  | nil => rfl
+  | cons slot rest ih =>
+    simp only [readTable, read_into_equivalent (a slot) (b slot) (same slot)]
+    exact ih _
+
+theorem initialized_table_read_unobservable (arbitrary : Slot → Address)
+    (actions : List Action) (slots : List Slot) (index width : Address) :
+    readTable slots index width (run actions (fun i => ⟨0, arbitrary i⟩)) ⟨0, 0⟩ =
+      readTable slots index width (run actions (fun _ => ⟨0, 0⟩)) ⟨0, 0⟩ := by
+  apply read_table_equivalent
+  apply run_preserves
+  intro slot
+  simp [Equivalent]
+
+theorem inactive_table_read_unobservable (table : Table) (replacements : Slot → Address)
+    (actions : List Action) (slots : List Slot) (index width : Address) :
+    readTable slots index width (run actions table) ⟨0, 0⟩ =
+      readTable slots index width
+        (run actions (fun i => if (table i).tag = 4 then table i
+          else { table i with pointer := replacements i })) ⟨0, 0⟩ := by
+  apply read_table_equivalent
+  apply run_preserves
+  intro i
+  change Equivalent (table i) (if (table i).tag = (4 : BitVec 8) then table i
+    else { table i with pointer := replacements i })
+  split
+  · exact ⟨rfl, fun _ => rfl⟩
+  · rename_i inactive
+    exact ⟨rfl, fun active => False.elim (inactive active)⟩
+
+end KProgFormal.X86StackGhost
+#print axioms KProgFormal.X86StackGhost.run_preserves
+#print axioms KProgFormal.X86StackGhost.initialized_payloads_unobservable
+#print axioms KProgFormal.X86StackGhost.inactive_payloads_unobservable
+#print axioms KProgFormal.X86StackGhost.active_pointer_retained
+
+#print axioms KProgFormal.X86StackGhost.read_table_equivalent
+#print axioms KProgFormal.X86StackGhost.initialized_table_read_unobservable
+#print axioms KProgFormal.X86StackGhost.inactive_table_read_unobservable
