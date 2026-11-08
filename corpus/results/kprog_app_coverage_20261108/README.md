@@ -4,11 +4,11 @@ The table records the latest closed whole-application attempt, including setup a
 
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
-| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
+| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | 72 resident | 1 | 0 | 0 | 1: private compiler wrapper routed to closed prior broker | 0 | [canonical replay transport](skb-scalar-fields/README.md) |
+| Cilium | 60 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_host packetoff30/4 after208instructions/1state | [canonical scalar replay](skb-scalar-fields/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit probe-read helper length range after4310instructions/140states | [current MOVX cohort](movx-current/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
@@ -73,3 +73,5 @@ The [live kernel skb representation](skb-live-context/README.md) replaces padded
 The [complete live-context replay](skb-live-context/README.md) closes26/26BCC/Katran loads and both original workloads, preserving all26native input hashes. Katran native2454567BPF/VIP/LRU/TX equals2454279received+288RX-interface drops, with0LRUmisses. Current Cilium passes helper25context typing and reaches tc_index134byteAND at528instructions/7states.
 
 The [live scalar-field representation](skb-scalar-fields/README.md) retains217600UBSan full-state observations, actual29+1micro compilation and captured wholeCilium compilation. The initial four-field whole cohort closes2generated/1installed at packetoff18/2 after415instructions. The canonical three-field profile retains queue_mapping actual kernel access, following its distinct setter behavior. Earlier private micro up-to-date receipts are preserved as command outcomes; the current phony target supplies actual compile records.
+
+The [corrected canonical scalar replay](skb-scalar-fields/README.md) closes26/26BCC/Katran loads and both original workloads, with all26native hashes equal the prior scalar cohort. Cilium closes2generated/compiled and1installed, reaching packetoff30/4 after208instructions. Original closed-broker attempts remain alongside their corrected whole cohorts.

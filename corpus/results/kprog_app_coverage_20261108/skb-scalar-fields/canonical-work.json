@@ -1,0 +1,413 @@
+{
+  "counts": {
+    "native_requests": 26,
+    "generated": 26,
+    "compiled": 26,
+    "installed": 26,
+    "failed": 0
+  },
+  "matching_terminal_native_hashes": 26,
+  "same_native_hash_multiset": true,
+  "applications": {
+    "bcc/set": {
+      "status": "ok",
+      "error": "",
+      "baseline": {
+        "bpf_runs": 15017871,
+        "workload_returncode": 0,
+        "workload": {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "14801",
+            "--timeout",
+            "2s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/a7444c95"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 2.048118348999992,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [2089] setting to a 2 secs run per stressor\nstress-ng: info:  [2089] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2089] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2090] syscall: using method 'fast75'\nstress-ng: info:  [2090] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2090] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2090] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2090] syscall:                  pkey_get       66.5         62\nstress-ng: info:  [2090] syscall:                      time       81.0         65\nstress-ng: info:  [2090] syscall:                  pkey_set       93.5         92\nstress-ng: info:  [2090] syscall:              gettimeofday      101.5         78\nstress-ng: info:  [2090] syscall:                    getcpu      303.5        252\nstress-ng: info:  [2090] syscall:                 pkey_free      521.0        517\nstress-ng: info:  [2090] syscall:           set_robust_list      549.0        540\nstress-ng: info:  [2090] syscall:                    getgid      657.0        603\nstress-ng: info:  [2090] syscall:              timer_delete      660.5        652\nstress-ng: info:  [2090] syscall:                epoll_wait      692.5        636\nstress-ng: metrc: [2089] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2089]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2089] syscall             514      2.03      0.01      0.03       253.21       12495.14\nstress-ng: metrc: [2089] cap              352418      2.00      0.16      1.50    176209.11      211355.90\nstress-ng: metrc: [2089] set               27672      2.00      0.26      1.61     13835.92       14807.98\nstress-ng: metrc: [2089] sockfd           173130      2.00      0.11      1.40     86485.97      115238.38\nstress-ng: info:  [2089] skipped: 0\nstress-ng: info:  [2089] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2089] failed: 0\nstress-ng: info:  [2089] metrics untrustworthy: 0\nstress-ng: info:  [2089] successful run completed in 2.03 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      },
+      "post_rejit": {
+        "bpf_runs": 15119907,
+        "workload_returncode": 0,
+        "workload": {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "15825",
+            "--timeout",
+            "2s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/a7444c95"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 3.698992684000018,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [2571] setting to a 2 secs run per stressor\nstress-ng: info:  [2571] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2571] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2572] syscall: using method 'fast75'\nstress-ng: info:  [2572] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2572] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2572] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2572] syscall:                  pkey_get       69.5         68\nstress-ng: info:  [2572] syscall:                  pkey_set       89.5         87\nstress-ng: info:  [2572] syscall:              gettimeofday      114.5         85\nstress-ng: info:  [2572] syscall:                      time      199.0         63\nstress-ng: info:  [2572] syscall:                    getcpu      467.5        440\nstress-ng: info:  [2572] syscall:                 pkey_free      521.0        519\nstress-ng: info:  [2572] syscall:           set_robust_list      563.5        558\nstress-ng: info:  [2572] syscall:                epoll_wait      645.0        637\nstress-ng: info:  [2572] syscall:              timer_delete      689.0        674\nstress-ng: info:  [2572] syscall:                mq_setattr      703.5        667\nstress-ng: metrc: [2571] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2571]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2571] syscall             514      3.68      0.01      0.05       139.67        7758.61\nstress-ng: metrc: [2571] cap              371260      2.00      0.26      1.51    185626.53      209710.77\nstress-ng: metrc: [2571] set               28709      2.00      0.22      1.61     14354.18       15604.74\nstress-ng: metrc: [2571] sockfd           146582      2.01      0.10      1.32     73100.04      103640.89\nstress-ng: info:  [2571] skipped: 0\nstress-ng: info:  [2571] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2571] failed: 0\nstress-ng: info:  [2571] metrics untrustworthy: 0\nstress-ng: info:  [2571] successful run completed in 3.68 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      }
+    },
+    "katran": {
+      "status": "ok",
+      "error": "",
+      "baseline": {
+        "bpf_runs": 2318693,
+        "workload_returncode": 0,
+        "outcomes": {
+          "counters": {
+            "consistent_hash_drop": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "decap": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "drop": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "encap_fail": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "fallback_lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 2318693
+            },
+            "global_lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_ptb_v4": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_ptb_v6": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_too_big": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "lpm_src": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 2318693
+            },
+            "lru_miss": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "new_conn_rate": {
+              "bytes_or_v2": 3639751674,
+              "packets_or_v1": -97879
+            },
+            "pass": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "quic_icmp": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "remote_encap": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "total": {
+              "bytes_or_v2": 148396352,
+              "packets_or_v1": 2318693
+            },
+            "tx": {
+              "bytes_or_v2": 148396352,
+              "packets_or_v1": 2318693
+            },
+            "udp_flow_migration": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "vip_0": {
+              "bytes_or_v2": 115934650,
+              "packets_or_v1": 2318693
+            },
+            "xpop_decap_success": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            }
+          },
+          "interfaces": {
+            "load_balancer/katran0": {
+              "rx_bytes": 115934650,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 2318693,
+              "tx_bytes": 194770212,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 2318693
+            },
+            "real/real0": {
+              "rx_bytes": 194733840,
+              "rx_dropped": 433,
+              "rx_errors": 0,
+              "rx_packets": 2318260,
+              "tx_bytes": 0,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 0
+            },
+            "router/rtlb0": {
+              "rx_bytes": 194770212,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 2318693,
+              "tx_bytes": 115934650,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 2318693
+            },
+            "router/rtreal0": {
+              "rx_bytes": 0,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 0,
+              "tx_bytes": 194733840,
+              "tx_dropped": 433,
+              "tx_errors": 0,
+              "tx_packets": 2318260
+            }
+          },
+          "real_counters": {
+            "real_1": {
+              "bytes_or_v2": 115934650,
+              "packets_or_v1": 2318693
+            }
+          },
+          "reals_stats_map_ids": [
+            138
+          ],
+          "receiver": {
+            "rx_bytes": 194733840,
+            "rx_dropped": 433,
+            "rx_errors": 0,
+            "rx_packets": 2318260,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "stats_map_ids": [
+            131
+          ]
+        }
+      },
+      "post_rejit": {
+        "bpf_runs": 2418140,
+        "workload_returncode": 0,
+        "outcomes": {
+          "counters": {
+            "consistent_hash_drop": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "decap": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "drop": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "encap_fail": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "fallback_lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 2418140
+            },
+            "global_lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_ptb_v4": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_ptb_v6": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "icmp_too_big": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "lpm_src": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "lru": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 2418140
+            },
+            "lru_miss": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "new_conn_rate": {
+              "bytes_or_v2": 3599933675,
+              "packets_or_v1": -28042
+            },
+            "pass": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "quic_icmp": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "remote_encap": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "total": {
+              "bytes_or_v2": 154760960,
+              "packets_or_v1": 2418140
+            },
+            "tx": {
+              "bytes_or_v2": 154760960,
+              "packets_or_v1": 2418140
+            },
+            "udp_flow_migration": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            },
+            "vip_0": {
+              "bytes_or_v2": 120907000,
+              "packets_or_v1": 2418140
+            },
+            "xpop_decap_success": {
+              "bytes_or_v2": 0,
+              "packets_or_v1": 0
+            }
+          },
+          "interfaces": {
+            "load_balancer/katran0": {
+              "rx_bytes": 120907000,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 2418140,
+              "tx_bytes": 203123760,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 2418140
+            },
+            "real/real0": {
+              "rx_bytes": 203104440,
+              "rx_dropped": 230,
+              "rx_errors": 0,
+              "rx_packets": 2417910,
+              "tx_bytes": 0,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 0
+            },
+            "router/rtlb0": {
+              "rx_bytes": 203123760,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 2418140,
+              "tx_bytes": 120907000,
+              "tx_dropped": 0,
+              "tx_errors": 0,
+              "tx_packets": 2418140
+            },
+            "router/rtreal0": {
+              "rx_bytes": 0,
+              "rx_dropped": 0,
+              "rx_errors": 0,
+              "rx_packets": 0,
+              "tx_bytes": 203104440,
+              "tx_dropped": 230,
+              "tx_errors": 0,
+              "tx_packets": 2417910
+            }
+          },
+          "real_counters": {
+            "real_1": {
+              "bytes_or_v2": 120907000,
+              "packets_or_v1": 2418140
+            }
+          },
+          "reals_stats_map_ids": [
+            159
+          ],
+          "receiver": {
+            "rx_bytes": 203104440,
+            "rx_dropped": 230,
+            "rx_errors": 0,
+            "rx_packets": 2417910,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "stats_map_ids": [
+            152
+          ]
+        }
+      }
+    }
+  }
+}
