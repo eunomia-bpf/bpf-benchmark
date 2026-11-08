@@ -2,6 +2,8 @@
 
 The table records the latest closed whole-application attempt, including setup and compiler-transport outcomes. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the five-step native arm and have R timing ownership. The remaining four applications continue through the frontiers below.
 
+The OTel and Tetragon rows below cite the completed 07:00 whole-application cohort. The fresh original-application queue runs OTel, Tracee, then Tetragon (`tetragon/observer`, image `sha256:61077624ab8e63a5692e4f4d4a2796783adbcd0d4971e020041eb4876e85c121`) through the captured d963788c0 stack-spill model. Controller `/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/canonical-runtime/queue-next.py` retains one guest on CPUs20-23 with12GiB and the original two-second workload. Its terminal publishers archive each application and update its row here; queued native safety replays follow the same controller closure. The pending requests retain their measured stages until their terminal receipts arrive.
+
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
