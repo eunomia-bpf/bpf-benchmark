@@ -1,0 +1,19 @@
+{
+  "original_inputs": 55,
+  "stages": {
+    "compiled": 40,
+    "generation_failed": 15
+  },
+  "incremental_build_exit": 0,
+  "component_make_exit": 0,
+  "native_executions": 0,
+  "new_helper_ids": [
+    182,
+    199,
+    200,
+    201,
+    203
+  ],
+  "existing_symbol_new_body": 132,
+  "paired_kernel_return_sources": "kernel/bpf/ringbuf.c BPF_CALL_2 submit/discard and submit_dynptr/discard_dynptr return0"
+}

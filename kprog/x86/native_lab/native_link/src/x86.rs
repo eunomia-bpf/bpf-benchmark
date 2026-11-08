@@ -458,6 +458,11 @@ pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         197 => Some("bpf_dynptr_from_mem"),
         198 => Some("bpf_ringbuf_reserve_dynptr"),
         202 => Some("bpf_dynptr_write"),
+        182 => Some("bpf_strncmp"),
+        199 => Some("bpf_ringbuf_submit_dynptr"),
+        200 => Some("bpf_ringbuf_discard_dynptr"),
+        201 => Some("bpf_dynptr_read"),
+        203 => Some("bpf_dynptr_data"),
         _ => None,
     }
 }

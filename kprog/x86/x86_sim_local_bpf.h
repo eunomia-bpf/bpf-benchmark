@@ -3117,6 +3117,25 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_dynptr_write() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_write((const struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
 
+/* Paired kernel/bpf/ringbuf.c submit/discard helpers return architectural zero. */
+#define X86_SIM_BPF_CALL_bpf_strncmp() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_strncmp((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_ringbuf_submit() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+
+#define X86_SIM_BPF_CALL_bpf_ringbuf_submit_dynptr() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+
+#define X86_SIM_BPF_CALL_bpf_ringbuf_discard_dynptr() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_discard_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+
+#define X86_SIM_BPF_CALL_bpf_dynptr_read() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_read((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (const struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_dynptr_data() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_dynptr_data((const struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
 #define X86_SIM_BPF_CALL_ID(ID) \
 	do { \
 		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) { \
