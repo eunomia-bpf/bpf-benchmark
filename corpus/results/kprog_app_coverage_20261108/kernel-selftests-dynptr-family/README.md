@@ -1,0 +1,5 @@
+# Entire original239 x86 kernel C replay after dynptr helper extension
+
+All239 original native entries and annotations from ed803f22c retain bytes. All39 whole original resource BPF objects retain the successful60e37d894 compilation and full pointee BTF. Captured source includes generic RAW helper context identity a808041cc, generic named dynptr/per-CPU/strncmp bodies and common helper resolution. The callback and kfunc generation frontiers retain their actual stages. This epoch uses the same paired kernel/module and bpf_testmod, current warm worker/linker and current producer with every BPF program autoload=false; native P submits through source_prog_id0. Every request is load-only; native executions0.
+
+Command: `make -f /workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-dynptr-family/Makefile run` in a private captured-source mount namespace. Serial20-23/12GiB guest follows original38 RAW-context replay and the current paired application chain. Each resource/generation/compiler/verifier/install outcome joins the original annotation. Coordinator-classified native-compile differences retain raw installed stages. Runtime admission additions0.
