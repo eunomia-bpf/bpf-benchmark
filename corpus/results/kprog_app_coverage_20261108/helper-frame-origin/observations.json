@@ -1,0 +1,84 @@
+{
+  "created": "2026-11-08T14:03:18.518665+00:00",
+  "boundary": [
+    {
+      "name": "before",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/before.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/before"
+      ],
+      "compile_exit": 0,
+      "run_exit": 1
+    },
+    {
+      "name": "after",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/after.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/after"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "mov_hosts": [
+    {
+      "name": "named-host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/named-host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/named-host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "named-host-liveness",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/named-host-liveness.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/helper-frame-origin/named-host-liveness"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "micro_exit": 0,
+  "model_sha256": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a",
+  "runtime_admission_additions": 0
+}

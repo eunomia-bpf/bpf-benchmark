@@ -290,7 +290,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 /* Ordinary callees keep the caller's allocated frame. Ghost facts for older
  * deallocated slots disappear while their architectural bytes stay raw. */
 #define X86_SIM_L_SV_BELOW_SP_ONE(I) \
-    do { if ((__s64)((__u64)(I)*8U)-(__s64)(X86_SIM_STACK_BYTES-8U)<__x86_sv_sp) \
+    do { if ((__s64)((__u64)(I)*8U)-(__s64)X86_SIM_STACK_BYTES<__x86_sv_sp) \
              X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; } while(0);
 #define X86_SIM_L_STACK_VALUES_CALL_FRAME() \
     do { __s64 __x86_sv_sp=(__s64)(long)__x86_rsp.ptr; \
