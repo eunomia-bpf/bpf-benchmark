@@ -4741,3 +4741,14 @@ far-helper oracle compares the compiled production writer against independent
 ISA word encodings. Archive `source_spelling_retirement` retains the exact
 change list, source hashes and every generator outcome. The immutable full
 check of this commit has its own terminal receipt.
+
+### Live SKB route fixture
+
+The immutable full check of `c58fadcaad0bbe0142e2ed17d5ddc7b48a04b189` exits2 at the SKB
+entry/exit oracle, whose fixture carried the prior copied-context layout.
+The fixture now reads native packet fields208/80 and writes qdisc CB48/52
+through the current production readers/writers. Its existing7057 route
+cases pass with UBSan, preserving register/tag/flag, CB and return-value
+observations. Archive `x86_route_live_skb_fixture` retains the original full
+log/actual2, all1258 verified root-source hashes and component outcome.
+The next full check records its own published source epoch.

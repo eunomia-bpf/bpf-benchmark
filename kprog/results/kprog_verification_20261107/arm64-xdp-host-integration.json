@@ -45000,6 +45000,23 @@
     "selected": 204288,
     "ubsan_switch_frames": 569088
   },
+  "x86_route_live_skb_fixture": {
+    "archive_compressed_prefix_bytes": 95296664,
+    "archive_compressed_prefix_sha256": "071ff88c996f1b09b1fbd6815089a1699654bc899f7d2409b3404065c8877a95",
+    "archive_entries": 13,
+    "archive_marker": "X86_ROUTE_LIVE_SKB_FIXTURE_V1",
+    "archive_raw_bytes": 857018,
+    "archive_raw_sha256": "9b469b5055dd3c4a8b0b800a5b8624d776aa3d0771d5bd473c60df34ac90cbcc",
+    "component_cases": 7057,
+    "component_make_exit": 0,
+    "every_exported_root_source_sha_verified": true,
+    "full_actual_exit": 2,
+    "full_epoch": "c58fadcaad0bbe0142e2ed17d5ddc7b48a04b189",
+    "full_root_git_sources": 1258,
+    "oracle_source_sha256": "2344880dfef7b9b8bb75bc150802bc70d8e197e22394185690d8dbde817a25ec",
+    "scope": "Existing SKB entry/exit fixture observes live native packet fields208/80 and writes qdisc CB48/52 through production readers/writers. Register/tag/flag, return and CB observations retain their semantic role.",
+    "ubsan": true
+  },
   "x86_self_xor_register_frame": {
     "archive_block_sha256": "6af8e8c0b1a64b05629b8f4d0f3b318e5c48fb0aaab07908c84572b9d9a01046",
     "host_execution": "C owns concrete candidate CPU/compile evidence; no host test run or claimed by V for this proof-only change",

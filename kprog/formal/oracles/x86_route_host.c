@@ -6,7 +6,7 @@
  * X86_SIM_X86_JCC edges without touching these body lines, and the generated
  * cond/branch-emit/pushpop contracts are separate batteries):
  *
- *   X86_SIM_X86_RET()                 skb cb writeback + (u32)rax exit
+ *   X86_SIM_X86_RET()                 live skb cb effects + (u32)rax exit
  *   X86_SIM_X86_JMP                   unconditional goto routing
  *   X86_SIM_X86_JCC_IMPL(+BACKWARD)   forward/backward conditional routing
  *   X86_SIM_X86_CALL / SUB_RET        linked call over the stack slot + read/
@@ -466,8 +466,8 @@ x86_sim_ret_dispatch:
 	}
 }
 
-/* RET writeback scene: enter via ENTRY_SKB, paint the ABI cb lanes, assert
- * (u32)rax exit and that RET() copied cb[0]/cb[1] to the ctx. */
+/* RET scene: enter via ENTRY_SKB, write the live qdisc CB lanes through
+ * native offsets, then observe their effects and the (u32)rax exit. */
 static __u64 scene_skb_ret(void)
 {
 	unsigned i;
@@ -494,7 +494,7 @@ static __u64 scene_skb_ret(void)
 		       __x86_rdi_tag, X86_SIM_TAG_ABI);
 		return 0xDEAD0005ULL;
 	}
-	/* entry lanes: kind + ABI field copies */
+	/* Entry kind and current packet fields at kernel-native offsets. */
 	cases = cases + 1U;
 	if (__x86_sim_abi_kind != KPROG_ABI_KIND_SKB) {
 		printf("MISMATCH skb entry abi kind: got %u want %u\n",
@@ -502,8 +502,8 @@ static __u64 scene_skb_ret(void)
 		return 0xDEAD0009ULL;
 	}
 	cases = cases + 2U;
-	if (__x86_sim_abi.data != (void *)(long)skb_ctx.data ||
-	    __x86_sim_abi.data_end != (void *)(long)skb_ctx.data_end) {
+	if (X86_SIM_L_SKB_READ(X86_RDI, 208, X86_WIDTH_64) != skb_ctx.data ||
+	    X86_SIM_L_SKB_READ(X86_RDI, 80, X86_WIDTH_64) != skb_ctx.data_end) {
 		printf("MISMATCH skb entry abi fields\n");
 		return 0xDEAD000AULL;
 	}
@@ -522,11 +522,12 @@ static __u64 scene_skb_ret(void)
 			return 0xDEAD0001ULL;
 		}
 	}
-	/* exit paint: rax mirrors ABI content bytes through rax.ptr */
-	__x86_sim_abi.cb[0] = 0x0BADF00DU;
-	__x86_sim_abi.cb[1] = 0x0FEEDFACU;
+	/* qdisc_skb_cb.data begins at native skb offset48; each word
+	 * projects to the corresponding live __sk_buff.cb element. */
+	X86_SIM_L_SKB_WRITE(X86_RDI, 48, X86_WIDTH_32, 0x0BADF00DU);
+	X86_SIM_L_SKB_WRITE(X86_RDI, 52, X86_WIDTH_32, 0x0FEEDFACU);
 	RAX_SET(0x12ULL);
-	/* assert the exit value pre-RET (RET writes the ctx lanes) */
+	/* Observe the RAX exit value before RET. */
 	cases = cases + 1U;
 	if ((__u64)(long)__x86_rax.ptr != 0x12ULL) {
 		printf("MISMATCH skb exit rax: got 0x%llx want 0x12\n",
@@ -1645,13 +1646,13 @@ int main(void)
 		exit = (__u32)(unsigned long)scene_skb_ret();
 		cases = cases + 1U;
 		if (skb_ctx.cb[0] != 0x0BADF00DU) {
-			printf("FAIL skb cb0 writeback: got %u\n",
+			printf("FAIL skb live cb0: got %u\n",
 			       skb_ctx.cb[0]);
 			rc = 1;
 		}
 		cases = cases + 1U;
 		if (skb_ctx.cb[1] != 0x0FEEDFACU) {
-			printf("FAIL skb cb1 writeback: got %u\n",
+			printf("FAIL skb live cb1: got %u\n",
 			       skb_ctx.cb[1]);
 			rc = 1;
 		}
