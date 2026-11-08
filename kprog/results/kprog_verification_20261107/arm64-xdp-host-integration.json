@@ -1,4 +1,46 @@
 {
+  "arm64_helper_ident_completeness": {
+    "helper_count": 77,
+    "joined_helpers": {
+      "160": "bpf_ktime_get_coarse_ns",
+      "173": "bpf_get_func_ip"
+    },
+    "prior_archive_bytes": 67761488,
+    "prior_archive_sha256": "be111928302a931c194620af7e26b2b7c200e00d1103b231e7ebd7d37b6b1c75",
+    "raw_archive": "kprog/results/kprog_verification_20261107/arm64-xdp-host-integration.log.gz",
+    "raw_bytes": 303104,
+    "raw_entries": 22,
+    "raw_marker": "=== ARM64_HELPER_IDENT_COMPLETE_V1 ===",
+    "raw_sha256": "c0aec4eed73e504644a1b06348ee1c638fbbc1bb92aed7007b113c883e346e76",
+    "scope": "All generated helper constructors occur in the independent hand-written list, and every generated exact id/name pair occurs in its specification. The existing equality, unique-name and increasing-id laws retain their original theorem statements. These laws establish helper identity and enumeration coverage; helper ABI/effect/compiler/native-link preservation retain their universal interfaces.",
+    "sources": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb",
+      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "fd02214dff34fb5c47644be13571b46518b39258d403326754cc84096bc4003c",
+      "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "575e264924ed3e3116d0ddfe4cee6884eb12ad238c2f7748147340ab0adc360a",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "cce214ad0e4f7c10cafebb16cb0b2d909cd7cb4dd1dddb968191f61f74425fa9",
+      "kprog/formal/contracts/arm64_helper_idents_spec.json": "85b4cc8df0e061fe1b2ae30fa0ed894e1987061a7b44a7d456e78c56159c1713",
+      "kprog/formal/generated/arm64_helper_idents.h": "81c4c2b336844a72f381f2cd5b89d446c3d5f65784cda6843104274728a89c52",
+      "kprog/formal/tools/generate_arm64_helper_idents_spec.py": "2556d5f83cc8c6f1fdc47fa41da049239699f76e4eeadf3868c8e1d4d44b52a7"
+    },
+    "status": "proved-enumeration-completeness",
+    "theorems": [
+      "KProgFormal.helper_idents_refines",
+      "KProgFormal.helper_idents_names_nodup",
+      "KProgFormal.helper_idents_ids_strictly_increasing",
+      "KProgFormal.helper_idents_complete",
+      "KProgFormal.helper_idents_pair_complete"
+    ],
+    "validation": {
+      "axiom_audits": 5,
+      "axiom_placeholder_count": 0,
+      "default_lake_exit": 0,
+      "generator_check_exit": 0,
+      "pinned_lean_recheck_exit": 0,
+      "previous_theorem_statements": "byte-exact",
+      "stable_root_git_inputs": 8
+    }
+  },
   "arm64_memory_token_bodies": {
     "c_domain": "All six tokens; flags0/1/2/4/8 with W/X signed/exclusive outputs;34 data/status field choices including XZR/SP/absent; pre/post flag combinations; absent/present index; four shifts; positive/negative displacement; admitted exclusive0/1 at the exact site. Native load writeback overlaps retain canonical field validity. Whole register/tag/vector/NZCV snapshots, independent complete-buffer store bytes, source capture and helper call count agree.",
     "diagnostics": "Initial macro-wrapper, native writeback-field and exclusive outcome-domain diagnostics retained as controls; final run is identified separately by final source pins and actual exit0.",

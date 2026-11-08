@@ -2,7 +2,7 @@ import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 75 BPF helper ids with the
+/-- Independent enumeration of the encoder's 77 BPF helper ids with the
 helper name each one denotes, in id-sorted order. Written out by hand so it
 shares no structure with the generated table. -/
 def helperIdentsSpec : List (Nat × String) := [
@@ -44,7 +44,8 @@ def helperIdentsSpec : List (Nat × String) := [
   (130, "bpf_ringbuf_output"),
   (148, "bpf_copy_from_user"), (152, "bpf_redirect_neigh"),
   (155, "bpf_redirect_peer"),
-  (158, "bpf_get_current_task_btf"), (161, "bpf_ima_inode_hash"),
+  (158, "bpf_get_current_task_btf"), (160, "bpf_ktime_get_coarse_ns"),
+  (161, "bpf_ima_inode_hash"), (173, "bpf_get_func_ip"),
   (174, "bpf_get_attach_cookie"), (175, "bpf_task_pt_regs"),
   (181, "bpf_loop"),
   (183, "bpf_get_func_arg"), (184, "bpf_get_func_ret"),
@@ -94,7 +95,8 @@ def allHelperIdents : List GeneratedArm64HelperIdents.Helper := [
   .bpf_ringbuf_output,
   .bpf_copy_from_user, .bpf_redirect_neigh,
   .bpf_redirect_peer,
-  .bpf_get_current_task_btf, .bpf_ima_inode_hash,
+  .bpf_get_current_task_btf, .bpf_ktime_get_coarse_ns,
+  .bpf_ima_inode_hash, .bpf_get_func_ip,
   .bpf_get_attach_cookie, .bpf_task_pt_regs,
   .bpf_loop,
   .bpf_get_func_arg, .bpf_get_func_ret,
@@ -123,5 +125,17 @@ theorem helper_idents_ids_strictly_increasing :
     (List.zip helperIdentsSpec (List.tail helperIdentsSpec)).all
       (fun p => if p.1.1 < p.2.1 then true else false) = true := by
   native_decide
+
+/-- Every generated constructor participates in the independent comparison.
+Extending the generated helper type adds a constructor case to this law. -/
+theorem helper_idents_complete (helper : GeneratedArm64HelperIdents.Helper) :
+    helper ∈ allHelperIdents := by
+  cases helper <;> decide
+
+/-- Each generated helper's exact id/name pair occurs in the independent list. -/
+theorem helper_idents_pair_complete (helper : GeneratedArm64HelperIdents.Helper) :
+    (GeneratedArm64HelperIdents.id helper, GeneratedArm64HelperIdents.name helper) ∈ helperIdentsSpec := by
+  rw [helper_idents_refines]
+  exact List.mem_map.mpr ⟨helper, helper_idents_complete helper, rfl⟩
 
 end KProgFormal

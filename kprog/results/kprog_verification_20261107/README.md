@@ -4005,3 +4005,12 @@ O2 C-model totals are52/75 x86 (40direct/10generic/2branch) and71/71 ARM.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_5c6ea621e`. Every check retains its exact published source identity.
+
+ARM helper identity now has constructor-total enumeration and exact pair
+coverage: all77 generated constructors occur in the independent specification.
+The joined160/173 entries retain their generated id/name identity. The three
+existing equality/order/uniqueness theorem statements stay byte-exact; the
+default Lean build, five axiom audits and generator check pass. The source-pinned
+`arm64_helper_ident_completeness` receipt retains the eight actual inputs and
+`ARM64_HELPER_IDENT_COMPLETE_V1` raw block. Helper ABI/effect and compiled
+transport preservation retain their universal completion interfaces.
