@@ -12562,6 +12562,29 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1166
   },
+  "full_make_check_1b7d8c8f7": {
+    "actual_exit": 0,
+    "archive_block_sha256": "9060b7bcea415ecce608c8c3b6c81a88e12a400235c2ffe69cc3915c259f9836",
+    "archive_file": "kprog/results/kprog_verification_20261107/full-make-check-1b7d8c8f7.log.gz",
+    "archive_marker": "=== FULL MAKE CHECK 1B7D8C8F7 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.archive-writer.py": "34ed8bf72cf3ad1ebbb9b7a7f4c94823a4179a3f2c0bad53c956d7f67e19bc36",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.cpu.jsonl.gz": "4549cfd6ab3af0eebe9872ad2d7168e85cca368fb4be27822332ca720b34f952",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.head": "f86cf191fe5f02816bb2e9be8f9eec610d0242cb4189263c12b4f6670c79b517",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.launch.log": "8dc46b69ab5f194936371bfe604a930861bcc479b92e2d00e0f402afa98abd10",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.log": "9d48a4eef2071dbf8de11b2d54879498b150f9d15c7fd78b7131cab3826789e5",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.previous-failure.jsonl.gz": "316be855b79f3edcd958ad141da64cccee11eb52fbf4779790bee87a3dab2024",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.py": "78550636e3bd1c67b532ba304a17c02cede052c8d3dcde71ea562a6df831a92d",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.sources": "b206e5c71f0380716cc5e25f9d60c5d39dd66dbd3fe6d4c9e0911e0afb743dca",
+      "/workspaces/.agent-state/kprog-lanes/V/ud2-retry-full.state": "944e814491e7608408c4a2dd5fc57193f94d14ef7ef9e549d3c93e372f65bc18"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "1b7d8c8f74a203bfe9f0734face452b9059abe07",
+    "scope": "Complete formal make check of the exact published source tree 1b7d8c8f74a203bfe9f0734face452b9059abe07. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1259
+  },
   "full_make_check_231cbde41": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "967e0e84388b9c39b3e1517965fac6c0de1f01ef680cb25e8543297be0d9c357",

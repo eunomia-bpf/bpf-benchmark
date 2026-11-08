@@ -5313,3 +5313,12 @@ BPF baseline is separate evidence. No theorem, runtime check, gate, limit,
 fixup or relocation is added. The withdrawn post-verification optimization
 work remains stopped; native compile optimization before submission adds no
 new link step, and a new relocation kind would require its O4 law.
+
+### Published source full check 1b7d8c8f7
+
+`make check` on immutable published1b7d8c8f7 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_1b7d8c8f7`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-1b7d8c8f7.log.gz](full-make-check-1b7d8c8f7.log.gz).
