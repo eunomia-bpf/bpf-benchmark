@@ -225,3 +225,46 @@ restored, and that cause is outside the native compile.
   and a run with a different workload shape matches fewer of them.
 - `run_time_ns_delta` covers every CPU and the whole sample window, so it
   measures the work each program did, not a single invocation in isolation.
+## Call sites per program, from the native link plan
+
+The plan the native link writes for each program is the authority for which
+call sites a program has: `helpers` are helper calls, `lookup_sites` are
+map lookups, `update_sites` are map updates and `tail_call_maps` are
+tail-call targets. Everything else in the body is computation.
+`kprog/perf/call_sites.py` reads them.
+
+Cilium's 90 archived plans:
+
+| site kind | count |
+| --- | ---: |
+| helper calls | 8,192 |
+| map lookups | 1,051 |
+| map updates | 911 |
+| tail-call maps | 262 |
+
+Lookups by map kind: `call` 419, `percpu_hash` 279, `lru_hash` 164,
+`hash` 149, `percpu_array` 40. The median program reaches 91 helper calls.
+
+These are the sites each candidate acts on, so the candidate that covers a
+site kind covers that share of the program's call sites. A candidate's
+*time* share needs the per-site cost, which the run-time counters do not
+carry: `run_time_ns` is per program, and a program runs many call sites per
+invocation. The share below is therefore in call sites, and the per-program
+time share stays the one the earlier sections measure.
+
+| candidate | site kind it removes | sites covered |
+| --- | --- | ---: |
+| helper and map-lookup lowering in the native compile | helper calls, map lookups | 9,243 |
+| direct tail-call linking | tail-call maps | 262 |
+| subprogram inlining | call sites into reachable subprograms | in `resources` |
+| load-time constant specialization | map lookups against frozen maps | in `lookup_kinds` |
+| entry and return bridge | fixed per invocation | 1 per program |
+| compiler flags | the whole body | all |
+
+### Caveat
+
+`helpers` counts the helper names a program can reach, not the calls it makes
+per invocation, and a plan carries one program. To turn sites into time, the
+next measurement needs per-site sampling; the per-program
+`run_cnt_delta` and `run_time_ns_delta` the corpus records bound the total
+only.
