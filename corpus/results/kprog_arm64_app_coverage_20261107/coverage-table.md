@@ -75,3 +75,18 @@ Captured complete-application cohorts from the retained pre-migration runtime fo
 | [Tracee](entry-resource-scope/tracee-replay/trusted-arm64-tracee-result/coverage.json) | 151 | 2 | 2 / 2 | 1 | 0 | 1 | 0 | 1 scalar context memory access | error |
 
 Katran completes both workload arms; its [same-work record](helper-guard-runtime/replay/trusted-arm64-katran-result/same-work.json) retains24,000baseline and25,473native packets with phase-local packet/BPF/receiver counter agreement. Cilium closes d81268950 with one accepted request, one stock verifier context-alignment refusal and one kernel-facts ESTALE before generation. Tracee is the active whole-app successor at8-11. The generic XDP buffer helper, Tracee CORE helper and stack byte-arm fixes have captured component results and pending whole-app consumption. C shared five-step publication precedes the new ARM BCC/Katran/34-case migration replays. QEMU measurements describe functional behavior.
+
+## Closed five-step and helper cohorts, 2026-11-08T07:33:34.111936+00:00
+
+Each row retains its source/runtime epoch. Baseline resident programs count the workload snapshot; service source IDs count requests reached during native startup. The adjacent coverage JSON and complete raw archive carry every observed request and workload counter.
+
+| Application | Baseline resident | Service source IDs | Generated C / compiled B | Verifier accepted and installed | Specialization errors | Verifier errors | Request or loader errors | Cause | Whole app |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| [BCC](../kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-bcc-result/coverage.json) | 23 | 19 | 19 / 19 | 15 | 0 | 3 | 1 | 3 exclusive_retry_loop, 1 kernel_chunk_resource_lookup | error |
+| [OTel](xdp-byte-helpers/applications/otelcol-ebpf-profiler/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json) | 12 | 2 | 2 / 2 | 1 | 0 | 1 | 0 | 1 stack_load_alignment | error |
+| [Cilium](xdp-byte-helpers/applications/cilium/trusted-arm64-cilium-result/coverage.json) | 62 | 3 | 2 / 2 | 1 | 0 | 1 | 1 | 1 context_access_alignment, 1 kernel_facts_estale | error |
+| [Tetragon](tetragon-startup-replay/replay/trusted-arm64-tetragon-result/coverage.json) | 157 | 1 | 1 / 1 | 0 | 0 | 1 | 0 | 1 exclusive_retry_loop | error |
+| [Katran](../kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-katran-result/coverage.json) | 1 | 1 | 1 / 1 | 1 | 0 | 0 | 0 |  | ok |
+| [Tracee](xdp-byte-helpers/applications/tracee/trusted-arm64-tracee-result/coverage.json) | 151 | 3 | 3 / 3 | 2 | 0 | 1 | 0 | 1 bpf_stack_extent | error |
+
+Five-step Katran84907b44c completes with host/QEMU/guest/application success and one fresh native request. JIT/native work records13,605/20,865BPF calls with matching phase-local total/VIP/TX/LRU packet counts. Each phase has0LRU misses; receiver and interface deltas accompany the JSON. QEMU durations describe functional execution. BCC retains15installed requests,3exclusive-retry verifier errors and1kernel chunk-resource lookup error. Tracee retains2installed requests and its third request reaches the stock BPF stack extent at-520; this refines the earlier generic loader classification. OTel retains1installed request and its stack alignment error. The active five-step Tetragon/OTel/Cilium/Tracee queue has immutable launch385d5095c.
