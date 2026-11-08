@@ -1,0 +1,70 @@
+{
+  "created": "2026-11-08T13:31:04.391799+00:00",
+  "compiler": [
+    {
+      "name": "global-func2",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/rsp-displacement/global-func2.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/rsp-displacement/global-func2.bpf.o"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.932996466755867,
+      "sections": [
+        {
+          "name": "tc",
+          "instructions": 1167,
+          "maximum_fp_minus_offset": 1136
+        }
+      ]
+    },
+    {
+      "name": "tetragon",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/rsp-displacement/captured.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/rsp-displacement/tetragon.bpf.o"
+      ],
+      "exit": 0,
+      "wall_seconds": 411.4509890237823,
+      "sections": [
+        {
+          "name": "tracepoint/trusted/trusted",
+          "instructions": 15246,
+          "maximum_fp_minus_offset": 1272
+        }
+      ]
+    }
+  ],
+  "native_sha256": "75318ea561e4c3ae7820a52871288cf57bb60a4111628b9988384ff4aa81f304",
+  "source_adoption": 0,
+  "runtime_admission_additions": 0
+}
