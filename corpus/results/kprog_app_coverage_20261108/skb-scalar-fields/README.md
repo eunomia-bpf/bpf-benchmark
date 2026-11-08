@@ -15,7 +15,7 @@ The initial candidate also projects queue_mapping124/u16. Kernel filter.c shows 
 
 The initial private Makefiles have a micro target colliding with the repository micro directory. Their original logs retain `up to date` and make exit0. That receipt is a command outcome. The canonical private Makefile marks the existing micro target phony and executes the29positive plus1negative-native compiler sequence, whose original commands, object files and per-program outcomes appear in canonical-three-field.tar.gz. An initial private fixture edit omitted the array terminator; its compile error remains archived beside the corrected217600-observation execution.
 
-The whole original Cilium startup with the initial snapshot reaches a native boundary comparison `data + (len - data_len)`. Both length fields retain real kernel values; the stock verifier treats the sum as an ordinary packet pointer and reports `invalid access to packet, off=18 size=2`. Its2terminal native hashes match their captured inputs. The source-generation epoch and the kernel/runtime identities remain in the request and runtime archives.
+The whole original Cilium startup with the initial snapshot reaches a native boundary comparison `data + (len - data_len)`. Both length fields retain real kernel values; the stock verifier treats the sum as an ordinary packet pointer and reports `invalid access to packet, off=18 size=2`. Its2terminal native hashes match their captured inputs. The same original baseline records60resident BPF programs. The source-generation epoch and the kernel/runtime identities remain in the request and runtime archives.
 
 ```sh
 D=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps

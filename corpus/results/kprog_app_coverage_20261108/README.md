@@ -6,7 +6,7 @@ The table records the latest closed whole-application attempt, including setup a
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_nodeport_nat_ingress_ipv4 packetoff18/2 after415instructions | [scalar-field cohort](skb-scalar-fields/README.md) |
+| Cilium | 60 resident | 2 | 2 | 1 | 0 | 1: tail_nodeport_nat_ingress_ipv4 packetoff18/2 after415instructions | [scalar-field cohort](skb-scalar-fields/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit probe-read helper length range after4310instructions/140states | [current MOVX cohort](movx-current/README.md) |
