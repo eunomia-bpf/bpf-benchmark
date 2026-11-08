@@ -1,0 +1,1 @@
+Generic xdp-control native-only registered-service control. Guest exit0, host statusTrue, Make exit0, stages{"bound_accepted": 1}. Exact raw request/generated ELF/kfunc metadata and native execution identities accompany this coherent caller/worker epoch. Universal ABI/link and whole-application composition continue.
