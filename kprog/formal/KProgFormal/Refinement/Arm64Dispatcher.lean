@@ -4565,7 +4565,42 @@ theorem return_token_step_refines (nativeAddress : Word → Word) (outerReturn :
   exact invocation_emission_step_refines nativeAddress outerReturn tags (.inr (src, targets))
     sourceScalar sourceStack firstScalar secondScalar release failure native raw binding access environment pairAccess vectorAccess
 
+/-- The unified byte LDADD dispatcher selects the typed-kfunc C body.
+Its primitive/ABI ordering relation remains the platform interface. -/
+theorem exec_atomic_byte_kfunc (dst src base : Register) (flags : Byte)
+    (aux : BitVec 32) (src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool)
+    (s : Reference.AArch64.State)
+    (encoded : GeneratedArm64Width.effective flags.toNat = 1) :
+    dispatchExec atomicOpcode flags aux (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (memoryBaseCode base) src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (Arm64Atomic.byteKfuncBody 0 false dst src base s) := by
+  rw [atomic_reached, decode_memory_width flags .byte encoded]
+  change some (atomicByteBody .byte _ _ _ s) = _
+  rw [atomic_body_typed]
+  exact congrArg some (Arm64Atomic.byte_kfunc_add_body dst src base s).symm
+
+/-- The same binding covers LDSET/STSET and LDCLR/STCLR, including ZR/SP
+aliases through the existing byte-field decoder and register maps. -/
+theorem exec_logical_atomic_byte_kfunc (set : Bool) (dst src base : Register)
+    (flags : Byte) (aux : BitVec 32) (src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool)
+    (s : Reference.AArch64.State)
+    (encoded : GeneratedArm64Width.effective flags.toNat = 1) :
+    dispatchExec (logicalAtomicOpcode set) flags aux (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (memoryBaseCode base) src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (Arm64Atomic.byteKfuncBody (if set then 1 else 2) (!set) dst src base s) := by
+  rw [logical_atomic_reached, decode_memory_width flags .byte encoded]
+  change some (logicalAtomicByteBody set .byte _ _ _ s) = _
+  rw [logical_atomic_body_typed]
+  exact congrArg some (Arm64Atomic.byte_kfunc_logical_body set dst src base s).symm
+
 end KProgFormal.Refinement.Arm64Dispatcher
 
 #print axioms KProgFormal.Refinement.Arm64Dispatcher.exec_logical_atomic_refines
 #print axioms KProgFormal.Refinement.Arm64Dispatcher.logical_atomic_body_typed
+
+#print axioms KProgFormal.Refinement.Arm64Dispatcher.exec_atomic_byte_kfunc
+#print axioms KProgFormal.Refinement.Arm64Dispatcher.exec_logical_atomic_byte_kfunc

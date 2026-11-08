@@ -50,6 +50,10 @@ possible failure outcome. Concurrent memory behavior retains its physical
 profile obligations. The safety argument uses generic simulator, token and
 link-transformation theorems; historical per-program artifacts stay frozen.
 
+The typed byte atomic kfunc C model now composes ADD/SET/CLR operand truncation,
+old-value return and one-byte state commit through the unified dispatcher.
+Primitive ordering, kfunc identity/call ABI and compiler transport remain explicit.
+
 ## Trusted boundary
 
 The boundary includes Lean's kernel/toolchain and executable reduction bridge

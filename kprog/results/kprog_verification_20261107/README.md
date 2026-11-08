@@ -4976,3 +4976,18 @@ target passes with its explicit memory-lemma build dependency. Compiler layout,
 public/private separation, register liveness, intervening-body writes/control and
 physical/native invocation ABI remain the complete O4 interfaces. Original
 attempts and source identities are in `actual_bpf_spill_reload`.
+
+### ARM typed byte atomic kfunc model
+
+The numeric C model of A's `042ae2e50` byte primitive now composes with canonical
+LDADD/STADD, LDSET/STSET and LDCLR/STCLR, and with the unified dispatcher. The
+proof covers every old byte,64-bit operand and register/SP/ZR alias: u8 input
+truncation, exact old result, one-byte memory replacement, complete numeric
+register/state frame, PC and atomic old-byte event. Byte alignment follows from
+the canonical ISA; SP alignment and access permissions retain their stated
+premises. The original `lake build` completes379 jobs with the existing trusted
+axioms. A retains the separate kernel/service evidence at `042ae2e50`. Primitive
+atomicity/order and concurrency, kfunc identity/resolution/BPF call ABI, pointer
+tags and C/kernel/clang compiler correspondence remain explicit interfaces. The
+receipt `arm_typed_byte_kfunc_refinement` preserves exact production/model source
+hashes and original proof attempts.

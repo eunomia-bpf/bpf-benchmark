@@ -103,4 +103,159 @@ theorem logical_alignment_fault (set : Bool) (i : AtomicAddInstruction) (s : Sta
     step (.atomicLogical set i) s = ⟨s, [.fault fault], some fault⟩ := by
   simp only [step, atomicLogicalStep, atomicRmwStep, stackAlignment, failed]
 
+/-- Numeric C dispatch of bpf_arm64_native_lab_atomic8: the u64 argument is
+narrowed to u8 before the selected fetch primitive; its old result is u8. -/
+def byteFetchValue (operation : BitVec 32) (old : Byte) (argument : Word) : Byte :=
+  if operation = 0 then old + argument.setWidth 8
+  else if operation = 1 then old ||| argument.setWidth 8
+  else old &&& argument.setWidth 8
+
+theorem byte_fetch_add (old argument : Word) :
+    byteFetchValue 0 (old.setWidth 8) argument = (old + argument).setWidth 8 := by
+  simp only [byteFetchValue, ↓reduceIte]
+  unfold Word at *
+  bv_decide
+
+theorem byte_fetch_set (old argument : Word) :
+    byteFetchValue 1 (old.setWidth 8) argument = (atomicLogicalValue true old argument).setWidth 8 := by
+  simp only [byteFetchValue, atomicLogicalValue, ↓reduceIte]
+  unfold Word at *
+  bv_decide
+
+theorem byte_fetch_clear (old argument : Word) :
+    byteFetchValue 2 (old.setWidth 8) (~~~argument) = (atomicLogicalValue false old argument).setWidth 8 := by
+  simp only [byteFetchValue, atomicLogicalValue, ↓reduceIte]
+  unfold Word at *
+  bv_decide
+
+/-- One-byte stores depend precisely on the low byte, at wrapping addresses. -/
+theorem byte_store_congr (memory : Memory) (address first second : Word)
+    (same : first.setWidth 8 = second.setWidth 8) :
+    storeMemory memory address first 1 = storeMemory memory address second 1 := by
+  unfold storeMemory
+  congr 1
+  funext a
+  dsimp only
+  split
+  · rename_i inside
+    have zero : (a-address).toNat = 0 := by omega
+    simpa only [zero, Nat.mul_zero, BitVec.ushiftRight_zero] using same
+  · rfl
+
+theorem byte_word (memory : Memory) (address : Word) :
+    wordAt memory address 1 = (memory.value address).setWidth 64 := by
+  simp [wordAt, bytesAt, littleEndian, List.range_succ]
+
+theorem byte_loaded (memory : Memory) (address : Word) :
+    GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth .byte)
+      (wordAt memory address 8) = (memory.value address).setWidth 64 := by
+  rw [Arm64Memory.load_value, MemoryWidth.bytes, byte_word]
+
+/-- The typed byte primitive captures its incoming address, source and old
+byte before either memory or destination changes. Atomic indivisibility and
+ordering are the physical primitive interface, as for the wider fetch forms. -/
+def byteKfuncBody (operation : BitVec 32) (complement : Bool)
+    (dst src base : Register) (s : State) : Transition State :=
+  let address := Arm64Memory.baseValue s base
+  let source := Arm64Register.readReg s src
+  let argument := if complement then ~~~source else source
+  let old := s.memory.value address
+  let memory := storeMemory s.memory address
+    ((byteFetchValue operation old argument).setWidth 64) 1
+  ⟨{ Arm64Register.writeReg s dst (old.setWidth 64) .w32 with
+      memory := memory, pc := s.pc + 4 },
+    [.memory .atomic address (bytesAt s.memory address 1)
+      (initializedAt s.memory address 1)], none⟩
+
+/-- The byte kfunc ADD path implements the existing typed C body. -/
+theorem byte_kfunc_add_body (dst src base : Register) (s : State) :
+    byteKfuncBody 0 false dst src base s = body .byte dst src base s := by
+  unfold byteKfuncBody body bodyWith
+  dsimp only
+  rw [byte_loaded]
+  simp only [Bool.false_eq_true, ↓reduceIte, Arm64Memory.store_refines,
+    MemoryWidth.bytes, destinationWidth, Arm64Memory.loadResult,
+    Arm64Memory.valueWidth, GeneratedArm64Width.narrow, GeneratedArm64Width.mask]
+  have loaded (old : Byte) : BitVec.and (old.setWidth 64) (255#64) = old.setWidth 64 := by
+    change old.setWidth 64 &&& (255#64) = old.setWidth 64
+    unfold Byte at *
+    bv_decide
+  rw [loaded]
+  have memory :
+      storeMemory s.memory (Arm64Memory.baseValue s base)
+        ((byteFetchValue 0 (s.memory.value (Arm64Memory.baseValue s base))
+          (Arm64Register.readReg s src)).setWidth 64) 1 =
+      storeMemory s.memory (Arm64Memory.baseValue s base)
+        ((s.memory.value (Arm64Memory.baseValue s base)).setWidth 64 + Arm64Register.readReg s src) 1 := by
+    apply byte_store_congr
+    simp only [byteFetchValue, ↓reduceIte]
+    generalize s.memory.value (Arm64Memory.baseValue s base) = old
+    generalize Arm64Register.readReg s src = source
+    unfold Word Byte at *
+    bv_decide
+  rw [memory]
+
+/-- LDSET passes the uncomplemented source, LDCLR passes its complement and
+selects AND. Their whole byte-memory and register/PC frames match the C body. -/
+theorem byte_kfunc_logical_body (set : Bool) (dst src base : Register) (s : State) :
+    byteKfuncBody (if set then 1 else 2) (!set) dst src base s =
+      logicalBody set .byte dst src base s := by
+  unfold byteKfuncBody logicalBody bodyWith
+  dsimp only
+  rw [byte_loaded]
+  simp only [Arm64Memory.store_refines, MemoryWidth.bytes, destinationWidth,
+    Arm64Memory.loadResult, Arm64Memory.valueWidth,
+    GeneratedArm64Width.narrow, GeneratedArm64Width.mask]
+  have loaded (old : Byte) : BitVec.and (old.setWidth 64) (255#64) = old.setWidth 64 := by
+    change old.setWidth 64 &&& (255#64) = old.setWidth 64
+    unfold Byte at *
+    bv_decide
+  rw [loaded]
+  have memory :
+      storeMemory s.memory (Arm64Memory.baseValue s base)
+        ((byteFetchValue (if set then 1 else 2) (s.memory.value (Arm64Memory.baseValue s base))
+          (if !set then ~~~Arm64Register.readReg s src else Arm64Register.readReg s src)).setWidth 64) 1 =
+      storeMemory s.memory (Arm64Memory.baseValue s base)
+        (atomicLogicalValue set ((s.memory.value (Arm64Memory.baseValue s base)).setWidth 64)
+          (Arm64Register.readReg s src)) 1 := by
+    apply byte_store_congr
+    cases set <;> simp only [Bool.not_true, Bool.not_false, Bool.false_eq_true,
+      ↓reduceIte, byteFetchValue, atomicLogicalValue]
+    all_goals
+      generalize s.memory.value (Arm64Memory.baseValue s base) = old
+      generalize Arm64Register.readReg s src = source
+      unfold Word Byte at *
+      bv_decide
+  rw [memory]
+
+/-- Byte alignment follows from the canonical ISA; SP and access permissions
+remain the same premises as in the existing per-operation refinement. -/
+theorem byte_kfunc_add_refines (dst src base : Register) (acquire release : Bool) (s : State)
+    (stackAlignment : spAlignmentFault s base = none)
+    (readable : permitted s.memory.readable (memoryBase s base) 1 = true)
+    (writable : permitted s.memory.writable (memoryBase s base) 1 = true) :
+    byteKfuncBody 0 false dst src base s =
+      step (.atomicAdd ⟨.byte, acquire, release, dst, src, base⟩) s := by
+  rw [byte_kfunc_add_body]
+  refine body_refines (⟨.byte, acquire, release, dst, src, base⟩ : AtomicAddInstruction) s stackAlignment ?_ readable writable
+  simp [atomicAlignmentFault, MemoryWidth.bytes, Nat.mod_one]
+
+theorem byte_kfunc_logical_refines (set : Bool) (dst src base : Register)
+    (acquire release : Bool) (s : State)
+    (stackAlignment : spAlignmentFault s base = none)
+    (readable : permitted s.memory.readable (memoryBase s base) 1 = true)
+    (writable : permitted s.memory.writable (memoryBase s base) 1 = true) :
+    byteKfuncBody (if set then 1 else 2) (!set) dst src base s =
+      step (.atomicLogical set ⟨.byte, acquire, release, dst, src, base⟩) s := by
+  rw [byte_kfunc_logical_body]
+  refine logical_body_refines set (⟨.byte, acquire, release, dst, src, base⟩ : AtomicAddInstruction) s stackAlignment ?_ readable writable
+  simp [atomicAlignmentFault, MemoryWidth.bytes, Nat.mod_one]
+
+
 end KProgFormal.Refinement.Arm64Atomic
+
+
+#print axioms KProgFormal.Refinement.Arm64Atomic.byte_kfunc_add_body
+#print axioms KProgFormal.Refinement.Arm64Atomic.byte_kfunc_logical_body
+#print axioms KProgFormal.Refinement.Arm64Atomic.byte_kfunc_add_refines
+#print axioms KProgFormal.Refinement.Arm64Atomic.byte_kfunc_logical_refines

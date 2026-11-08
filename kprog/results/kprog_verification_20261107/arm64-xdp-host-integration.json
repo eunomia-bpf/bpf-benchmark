@@ -2678,6 +2678,132 @@
       "mul_route_host.c"
     ]
   },
+  "arm_typed_byte_kfunc_refinement": {
+    "actual_lake_build_exit": 0,
+    "actual_private_exit": 0,
+    "archive_block_sha256": "7504268947dd7de61d9cc291ab5d8bb5b1d1b7f65187cb1412aebc6bf75e5e8c",
+    "archive_compressed_prefix_bytes": 100063997,
+    "archive_compressed_prefix_sha256": "a917e9ed7b6b26762b2cb0aa7f3414061f8e9c91bf40f84aa3ee378541bf7297",
+    "archive_marker": "=== ARM TYPED BYTE KFUNC CANONICAL RMW REFINEMENT V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt1.lean": {
+        "bytes": 6344,
+        "sha256": "37d6ef8ce85c00f05cf74ea6bdb98b187d56911caf0ff081c4c266552b47f21e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt1.log": {
+        "bytes": 7154,
+        "sha256": "743ca0ddf9f8ddaa9cdce9cc0d595ce136e9df40f67ed1932821ad446b94e576"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt2.lean": {
+        "bytes": 6512,
+        "sha256": "0923927c436176279bec9448b89590d13a99ce0b0ed3494c22f613e356b9b339"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt2.log": {
+        "bytes": 12169,
+        "sha256": "67568dc1ef98109a2c2a6ceb0584d822ceba2c431fbac5f73a46396709c38056"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt3.lean": {
+        "bytes": 7813,
+        "sha256": "5b7fb080cbb7bbf00589af1a15790fd03e2d5ee6a8aaf692eb9b0e0f5912c5d4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-attempt3.log": {
+        "bytes": 5929,
+        "sha256": "f29356f5cc2eaab8ae30f3697089ee924ddeb165a531acec971caab8697fddb6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-main-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-main.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-main.log": {
+        "bytes": 1774,
+        "sha256": "792d3cf26cfdade35bb8d07d06943466bd21c75ad9a24871aed870ad1c83c559"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc-source.json": {
+        "bytes": 806,
+        "sha256": "6dea2b801498c266e20c10750fcfd5b32282181503d57a4ff077942aa451b5ba"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc.lean": {
+        "bytes": 7815,
+        "sha256": "ff06e4bded192fa13c8acbbd4f3aa1dde2905fc96a5d1759f6d8cfae6b36d324"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-byte-kfunc.log": {
+        "bytes": 566,
+        "sha256": "2dc4ab085d54ebf21f9a7f3fd2fe50d33c62d7a864f265fed8e68f9d72593e04"
+      },
+      "/workspaces/repository/kinsn/module/arm64/bpf_arm64_native_lab.c": {
+        "bytes": 21922,
+        "sha256": "7032970f989f9e68a70b6e22a37c8ee9f0b843b7ca81847125fc7982fdda6b45"
+      },
+      "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": {
+        "bytes": 138521,
+        "sha256": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3722,
+        "sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64Atomic.lean": {
+        "bytes": 13857,
+        "sha256": "f2bfa342820a507cf8b99dcf878858d18c3519bd8c08fd1e00772cad975a2738"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": {
+        "bytes": 331422,
+        "sha256": "944f7a21b4d9b2c5b0e41c00bb60f98df62a530143694c180698925f851daeef"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Refinement/Arm64Memory.lean": {
+        "bytes": 8455,
+        "sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc"
+      }
+    },
+    "command": "cd kprog/formal && lake build",
+    "completed_build_jobs": 379,
+    "conclusion": "Typed-byte C/kfunc model equals existing complete operation body and canonical ADD/SET/CLR byte step. Captured old byte is zero-extended, exactly one memory byte commits, PC+4, canonical atomic old-byte event, complete numeric state preserved elsewhere. Unified dispatcher selects the same typed-byte model.",
+    "premises": "SP alignment and readable/writable one-byte address; byte alignment follows from canonical ISA. Existing AUX/destination ordering profile applies.",
+    "production_commit": "042ae2e505a845f9826bb9373a765736f2d44777",
+    "production_sources": {
+      "kinsn/module/arm64/bpf_arm64_native_lab.c": "7032970f989f9e68a70b6e22a37c8ee9f0b843b7ca81847125fc7982fdda6b45",
+      "kprog/arm64/arm64_sim_local_bpf.h": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c"
+    },
+    "proof_axioms": [
+      "propext",
+      "Classical.choice",
+      "Lean.ofReduceBool",
+      "Quot.sound"
+    ],
+    "proof_sources": {
+      "kprog/formal/KProgFormal/Refinement/Arm64Atomic.lean": "f2bfa342820a507cf8b99dcf878858d18c3519bd8c08fd1e00772cad975a2738",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "944f7a21b4d9b2c5b0e41c00bb60f98df62a530143694c180698925f851daeef"
+    },
+    "remaining": "Physical atomic primitive indivisibility/order, concurrency, pointer/tag transport, kfunc identity/resolution, BPF caller ABI, C-model correspondence and kernel/C/clang compiler transport remain platform/implementation interfaces. This is a C-model refinement component, rather than whole compiled-B closure.",
+    "theorems": [
+      "Arm64Atomic.byte_fetch_add",
+      "Arm64Atomic.byte_fetch_set",
+      "Arm64Atomic.byte_fetch_clear",
+      "Arm64Atomic.byte_kfunc_add_body",
+      "Arm64Atomic.byte_kfunc_logical_body",
+      "Arm64Atomic.byte_kfunc_add_refines",
+      "Arm64Atomic.byte_kfunc_logical_refines",
+      "Arm64Dispatcher.exec_atomic_byte_kfunc",
+      "Arm64Dispatcher.exec_logical_atomic_byte_kfunc"
+    ],
+    "universal_domain": "Every old byte,64-bit source/register value, native register/SP/ZR alias and complete AArch64 state. Kernel u32 operation0 ADD/1 OR/otherwise AND and C u8 operand truncation are explicit."
+  },
   "canonical_arm_thread_pointer_reference": {
     "archive_block_sha256": "eb85a75856a22e27078b415a310998b16e274cdd65e7b758d9da49476490ca87",
     "archive_block_sha256_before_lossless_compaction": "30c55b713c9dcfcfb5d7a97275d473abb135a96e6e29e3c0d67afc8c2a928326",
