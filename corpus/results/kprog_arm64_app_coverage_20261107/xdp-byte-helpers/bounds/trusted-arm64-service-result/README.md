@@ -1,0 +1,1 @@
+Generic XDP byte-helper bounds control through the matched kernel-owned ARM service. Fresh generation/compile/verifier/binding/native execution returns2. Native fixtures call actual188/189/190 Linux helpers. Complete request/source/byte/verifier/runtime records accompany this control.
