@@ -5023,3 +5023,12 @@ retains sources, preprocessing, object/array hashes and original proof attempts.
 Its unit entry maps old RAX/flags to BPF R1/R2 and states initial scratch/frame
 values. Full architectural frame, register renaming, physical compiler embedding
 and production invocation ABI remain explicit interfaces.
+
+### Published source full check 2dafc658c
+
+`make check` on immutable published2dafc658c exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_2dafc658c`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-2dafc658c.log.gz](full-make-check-2dafc658c.log.gz).

@@ -7678,6 +7678,28 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_2dafc658c": {
+    "actual_exit": 0,
+    "archive_block_sha256": "0f675117f2a7161c4155b8bf3faea466d823d5363cf7b9d4d604b89a9aaa2e29",
+    "archive_file": "kprog/results/kprog_verification_20261107/full-make-check-2dafc658c.log.gz",
+    "archive_marker": "=== FULL MAKE CHECK 2DAFC658C PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.archive-writer.py": "34ed8bf72cf3ad1ebbb9b7a7f4c94823a4179a3f2c0bad53c956d7f67e19bc36",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.cpu.jsonl.gz": "b731797739454ae323e8279e9e58e55677e3943e0eadce504ac4c2ddd299a997",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.head": "3376eafa5289b327e04205ad70e77b0912db4975689dfa74801913435a12f8a2",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.launch.log": "0a02cd714399bb0ffb43892cbccf53ac41d384b816ba10f61d3a138eed110f25",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.log": "a684507b5fb057e24f0bdd8a4827269f99f691b84a493e77243d2b286c778477",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.py": "2eb49d997955e0bfa8dde728393c265486d6613f3d849c239dcbe8f77ddc7fa7",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.sources": "874a0be730f681c4c455714eaf0669a386dc4e14078bbc655cb3506f8ba63e0d",
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-setcc-full.state": "e4003a101865cc6fe071c00ef63a565b20153e939855ca057e2551ba8f4a339a"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "2dafc658c93e616917627b4962ab43d7fde4e8df",
+    "scope": "Complete formal make check of the exact published source tree 2dafc658c93e616917627b4962ab43d7fde4e8df. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1259
+  },
   "full_make_check_2ea4ef3f3": {
     "actual_exit": 0,
     "archive_block_sha256": "e0c480cabacf874358a6b5d1bb5b304beb50014fd51d239b4a53882aa21ac262",
