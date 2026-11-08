@@ -207,7 +207,7 @@ row retains its recorded source status.
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
-O4 coverage adds **20 universal transformation/composition rows** to
+O4 coverage adds **21 universal transformation/composition rows** to
 [coverage.tsv](coverage.tsv), alongside V's operation/token inventory.
 The five appended `o4_*` columns record preservation status, theorem,
 evidence, completion obligations and publication. `source-snapshot:` pins the
@@ -5415,3 +5415,29 @@ pointer lifetime, native-to-B ABI and event projection, compiler/link and entry
 remain explicit. These are x86 reference laws, not a completed physical helper
 ABI or an AArch64 result. Coverage statuses and operation totals stay unchanged;
 no runtime check, gate, validation or model change is added.
+
+### Authorized native load-fault recovery: pending
+
+The coordinator authorized exception-table recovery for native P loads while
+retaining submitted bytes. New `LOAD_FAULT_RECOVERY` is pending production and
+a universal platform law on both ISAs. Stock x86 clears the complete saved
+register and skips the recorded instruction length; ARM clears the selected
+saved X register and advances PC by4. The
+[source-pinned obligation](arm64-xdp-host-integration.json#load_fault_recovery_obligation)
+records exact handlers and the O3/O4 premises. Prior LSM observations are
+load-only and do not establish recovery execution.
+
+The reference premise must be an explicit protected-read platform relation
+above the raw ISA: an invalid BTF-pointer read may recover, so stock acceptance
+cannot imply absence of every raw read fault. The relation must preserve
+successful steps and match each recovered native state/trace with B, including
+final exception-site mapping and table lifetime. Current raw ISA and BPF
+MEM/MEMSX semantics do not supply that relation.
+
+A destination index alone does not discharge all load forms. x86 byte/word
+writeback preserves other destination bits, whereas the stock handler clears
+the full register; ARM pre/post-index writeback, implicit SP accesses,
+pair/vector/multiple accesses, ALU flags and exclusive/atomic state also need
+their actual fault-prefix relation. C/A own the production metadata/handler and
+actual NULL-BTF guest execution (guest survives and destination is zero).
+No new runtime gate or completed proof/replay is claimed.

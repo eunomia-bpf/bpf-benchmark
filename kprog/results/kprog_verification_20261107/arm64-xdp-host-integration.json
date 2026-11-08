@@ -15565,6 +15565,94 @@
     "scope": "Live Workspace suffix diagnostics and corrected existing fixtures; the immutable full check retains its separate published source manifest. ARM modeled faults use the approved writeback-store and exclusive-status overlap classes.",
     "ubsan_mov_load_and_arm_memory_tokens": true
   },
+  "load_fault_recovery_obligation": {
+    "authorized_decision": "- COORDINATOR DECISION FOR C/A/V 2026-11-08, top safety item (operator: \"\u8fd9\u79cd\u4e4b\u540e\u4f60\u81ea\u5df1\u51b3\u5b9a, \u4e0d\u8981\u95ee\u6211\"). V 2a891f9ba and A f55cf2f09 establish that the stock JIT gives a BTF-pointer load an exception-table entry whose handler clears the destination and resumes at the next instruction, B is verified under that behavior, and native P runs the same load as a plain instruction, so a fault there takes the kernel fault path. Native P gets the same recovery as the stock JIT. At step (e) the JIT registers an exception-table entry for every memory load in P, with the stock handler behavior, and P's bytes stay exactly as submitted. The service supplies the load sites (PC, length, destination register) from the decode it already performs. Owners: C for x86-64 and the shared code, A for AArch64, V for a new O4 row covering load-fault recovery and the reference-semantics premise for an invalid read through a BTF pointer. Test with a native program that loads through a NULL BTF pointer in a guest, on both ISAs: the guest stays up and the destination reads 0. Also for A: build the ARM kernel with the same upstream file__nullable hook argument name the x86 tree has, as an incremental build.",
+    "counts_and_existing_results": "Operation/token/replay totals and prior raw-fault/captured LSM observations retained. New row is pending, not a completed theorem or observed execution.",
+    "decision_sha256": "38e1e6ece749a3ebf65b81facf95f1e17525a2746f5e865fd6795c6e8f780248",
+    "nullable_native_guest_executions": {
+      "arm64": null,
+      "x86": null
+    },
+    "production_obligations": [
+      "The service decoder supplies exact final PC/site mapping, consumed instruction extent, physical destination(s) and actual write semantics. Relocation/helper expansion must transport every site to final text; lookup/handler registration/lifetime must correspond to the copied P.",
+      "Ordinary successful reads retain their actual decoded instruction and full state/ordered effects. Uncovered faults and non-read fault classes retain their actual behavior; no blanket swallowing or proof that any arbitrary fault is recoverable.",
+      "For a faulting load, metadata plus actual handler must reproduce complete B state, including partial-register lanes, extension, flags, base/writeback, SP, multiple destinations, earlier memory elements and control flow where present.",
+      "Single-destination full-register, non-writeback scalar load is the initial simple matching domain; its generalization to every enumerated memory-reading form is required by the coordinator every-load scope, with no invented generation gate.",
+      "BPFPlatform/native platform relation must connect PROBE_MEM zero/continue with actual native fixup and chosen event projection; current raw BPF.lean alone does not supply it. O3 verifierSound must refer to that protected-read profile rather than assume all raw reads are fault-free.",
+      "C/A actual NULL-BTF native guest execution must stay up, observe zero and retain source/P/B/kernel/module/table/handler identities; installation alone is not this execution evidence."
+    ],
+    "production_recovery_published": false,
+    "reference_premise": "Use an explicit platform-protected-read execution relation above the raw ISA. At an actually covered fault PC, physical table lookup/exception class/destination/continuation must implement the same recovered state and ordered observation as the verifier-facing B load. Invalid read through a BTF pointer is not assumed impossible from stock acceptance. Raw ISA .read fault and current BPF MEM/MEMSX fault semantics remain unchanged until that platform relation is proved.",
+    "runtime_admission_additions": 0,
+    "scope": "New O4 load-fault-recovery obligation on both ISAs. Exception metadata at step(e), same submitted P bytes; no per-program proof and no new admission check.",
+    "semantic_cases": {
+      "arm64_writeback": "Raw addressedMemoryStep suppresses base writeback on a fault. A recovered verifier-facing transfer may continue to base writeback; clearing Xt and PC+4 alone does not establish pre/post-index base equality.",
+      "implicit_and_multi_access": "RET/POP/LEAVE, memory-source ALU/CALL, REP MOVS, pair/vector/exclusive/atomic operations and loads with multiple physical accesses require the actual instruction-specific fault-prefix, destination(s), flags, SP/base/monitor and continuation relation. Single dst/length metadata is not by itself such a proof.",
+      "x86_partial_destination": "Reference scalarWriteValue preserves high bits for8/16-bit or high-byte destinations. With old0x1122334455667788, low8 zero gives0x1122334455667700 and low16 zero gives0x1122334455660000, whereas stock full64-bit pt_regs clearing gives0.32/64 full-destination zero does not have this mismatch. B write-width/source mapping must discharge it rather than infer all-load equality from a destination register index."
+    },
+    "source_commit": "e494b2b6ef1927a10cba590c4626cc01755a918d",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "numbered_excerpts": [
+          "538:def memoryStep (i : MemoryInstruction) (s : State) : Transition State :=\n539:  match spAlignmentFault s i.base with\n540:  | some fault => \u27e8s, [.fault fault], some fault\u27e9\n541:  | none =>\n542:      let address := memoryBase s i.base + i.offset\n543:      match i.transfer with\n544:      | .load dst signedTo =>\n545:          match readMemory s.memory address i.width.bytes with\n546:          | .error fault => \u27e8s, [.fault fault], some fault\u27e9\n547:          | .ok (value, event) =>\n548:              \u27e8{ writeReg s dst (memoryLoadValue i.width signedTo value) with pc := s.pc + 4 }, [event], none\u27e9\n549:      | .store src =>\n550:          match writeMemory s.memory address (readReg s src) i.width.bytes with\n551:          | .error fault => \u27e8s, [.fault fault], some fault\u27e9\n552:          | .ok (memory, event) => \u27e8{ s with memory := memory, pc := s.pc + 4 }, [event], none\u27e9",
+          "650:  deriving DecidableEq, Repr\n651:\n652:/-- Compute the offset and old base before any transfer. A fault suppresses\n653:writeback; both pre/post writeback commit only after the transfer succeeds. -/\n654:def addressedMemoryStep (i : AddressedMemoryInstruction) (s : State) : Transition State :=\n655:  let offset := memoryOffset s i.width.scale i.offset\n656:  let result := memoryStep \u27e8i.width, i.transfer, i.base,\n657:    if i.writeback = .post then 0 else offset\u27e9 s\n658:  if result.fault.isSome || i.writeback = .none then result\n659:  else { result with state := writeMemoryBase result.state i.base (memoryBase s i.base + offset) }\n660:"
+        ],
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "numbered_excerpts": [
+          "72:def readMemory (m : Memory) (address : Word) (bytes : Nat) :\n73:    Except Fault (Word \u00d7 Event) :=\n74:  if permitted m.readable address bytes then\n75:    .ok (wordAt m address bytes,\n76:      .memory .read address (bytesAt m address bytes) (initializedAt m address bytes))\n77:  else .error (.read address bytes)"
+        ],
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "kprog/formal/KProgFormal/Reference/X86.lean": {
+        "numbered_excerpts": [
+          "265:def writeValue (width : CmovWidth) (old value : Word) : Word :=\n266:  match width with\n267:  | .w16 => (old &&& 0xffffffffffff0000) ||| (value &&& 0xffff)\n268:  | .w32 => (value.setWidth 32).setWidth 64\n269:  | .w64 => value",
+          "503:def scalarWriteValue (old value : Word) (width : ScalarWidth) (slice : RegisterSlice) : Word :=\n504:  if width = .w32 then (value.setWidth 32).setWidth 64\n505:  else\n506:    let shift := slice.shift width\n507:    let mask := BitVec.ofNat 64 (2^width.bits - 1) <<< shift\n508:    (old &&& ~~~mask) ||| (((value.setWidth width.bits).setWidth 64) <<< shift)\n509:\n510:def scalarRead (s : State) (width : ScalarWidth) : ScalarSource \u2192 Except Fault (Word \u00d7 List Event)\n511:  | .register slice => .ok (scalarRegisterValue s width slice, [])\n512:  | .immediate value => .ok (value, [])\n513:  | .memory address => readSource s (.memory address) width.bytes\n514:\n515:def scalarWrite (s : State) (width : ScalarWidth) (destination : ScalarDestination) (value : Word) :\n516:    Except Fault (State \u00d7 List Event) :=\n517:  match destination with\n518:  | .register slice =>\n519:      .ok ({ s with gpr := fun r => if r = slice.reg then\n520:        scalarWriteValue (s.gpr r) value width slice else s.gpr r }, [])\n521:  | .memory address =>\n522:      match writeMemory s.memory address value width.bytes with\n523:      | .error fault => .error fault"
+        ],
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      "kprog/tv/BPF.lean": {
+        "numbered_excerpts": [
+          "145:def load (s : State) (dst : Register) (address : Word) (count : Nat)\n146:    (signed : Bool) : Transition State :=\n147:  match readMemory s.memory address count with\n148:  | .error reason => \u27e8s, [.fault reason], some reason\u27e9\n149:  | .ok (value, event) =>\n150:      let result := if signed then (value.setWidth (8 * count)).signExtend 64 else value\n151:      \u27e8setReg s dst result, [event], none\u27e9",
+          "262:    else if cls = 1 \u2227 (mode = 3 \u2228 mode = 4) then\n263:      if i.dst = 10 then throw \"BPF load overwrites frame pointer\"\n264:      if h : i.src < 11 then\n265:        let address := s.regs \u27e8i.src, h\u27e9 + i.offset.signExtend 64\n266:        let effect := load s i.dst address count (mode == 4)\n267:        pure { effect with state := if effect.fault.isSome then effect.state else { effect.state with pc := next.pc } }"
+        ],
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "kprog/tv/Composition.lean": {
+        "numbered_excerpts": [
+          "178:theorem native_effects_checked\n179:    {Native Proof : Type}\n180:    (native : Artifact \u2192 BlockStep Native)\n181:    (proof : Artifact \u2192 BlockStep Proof)\n182:    (related : Artifact \u2192 Native \u2192 Proof \u2192 Prop)\n183:    (accepted : Artifact \u2192 Prop)\n184:    (proofEntry : Artifact \u2192 Proof \u2192 Prop)\n185:    (checked : Artifact \u2192 Event \u2192 Prop)\n186:    (verifierSound : \u2200 a, accepted a \u2192 \u2200 p trace p', proofEntry a p \u2192\n187:      Execution (proof a) p trace p' \u2192 \u2200 event \u2208 trace, checked a event)\n188:    (validated executed : Artifact)\n189:    (binding : executed = validated)\n190:    (acceptance : accepted validated)\n191:    (tv : TranslationValidation (native validated) (proof validated)\n192:      (related validated))\n193:    {n p trace n'} (entry : related validated n p)\n194:    (admittedEntry : proofEntry validated p)\n195:    (run : Execution (native executed) n trace n') :\n196:    \u2200 event \u2208 trace, checked validated event := by\n197:  subst executed\n198:  obtain \u27e8last, matching, _\u27e9 := validated_execution tv entry run\n199:  exact verifierSound validated acceptance p trace last admittedEntry matching"
+        ],
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      "kprog/x86/x86_sim_local_bpf.h": {
+        "numbered_excerpts": [
+          "1225:#define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \\\n1226:\tdo {                                                               \\\n1227:\t\t__u8 __x86_l_write_width =                                 \\\n1228:\t\t\tKPROG_X86_MOV_LOAD_WRITE_WIDTH(FLAGS);             \\\n1229:\t\t__u8 __x86_l_mem_width =                                   \\\n1230:\t\t\tKPROG_X86_MOV_LOAD_MEM_WIDTH((FLAGS), (AUX));      \\\n1231:\t\t__u8 __x86_l_arm = KPROG_X86_MOV_LOAD_ARM(                 \\\n1232:\t\t\t(SRC) == X86_RSP, (OP) == X86_OP_MOV_LOAD,         \\\n1233:\t\t\t__x86_l_mem_width, __x86_l_write_width,            \\\n1234:\t\t\tX86_SIM_L_REG_TAG(SRC));                           \\\n1235:\t\t__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\\\n1236:        __s64 __x86_l_meta_disp=__x86_l_disp; \\\n1237:\t\tvoid *__x86_l_base_ptr = (void *)0;                      \\\n1238:\t\t__u64 __x86_l_value = 0;                                 \\\n1239:\t\tif (KPROG_X86_REG_PRESENT(SRC))                          \\\n1240:\t\t\t__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \\\n1241:\t\tif (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \\\n1242:\t\t\tX86_SIM_L_BARRIER_VAR(__x86_l_disp);              \\\n1243:\t\tvoid *__x86_l_addr = KPROG_X86_REG_PRESENT(SRC) ?         \\\n1244:\t\t\tKPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp) :         \\\n1245:\t\t\t(void *)(unsigned long)__x86_l_disp;              \\",
+          "1289:                X86_SIM_L_WRITE_REG_PTR_TAG((DST),__x86_mv_saved.tag==X86_SIM_TAG_STACK ? __x86_mv_saved.pointer : (void *)(long)__x86_l_value,__x86_mv_saved.tag); \\\n1290:            else X86_SIM_L_WRITE_REG_WIDTH((DST),__x86_l_value,__x86_l_write_width); \\\n1291:            break;                                           \\\n1292:\t\tcase KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \\\n1293:\t\t\tif (__x86_l_arm != KPROG_X86_MOV_LOAD_ARM_ABI_PTR) {\\\n1294:\t\t\t\tif (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE) \\\n1295:\t\t\t\t\t__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \\\n1296:\t\t\t\t\t\t__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \\\n1297:\t\t\t\telse                                      \\\n1298:\t\t\t\t\t__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD( \\\n1299:\t\t\t\t\t__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width); \\\n1300:\t\t\t\tX86_SIM_L_WRITE_REG_WIDTH((DST),          \\\n1301:\t\t\t\t\t__x86_l_value, __x86_l_write_width);\\\n1302:\t\t\t\tbreak;                                    \\"
+        ],
+        "sha256": "7d2cec0272ab384b74e6443490395a655215a65f160e4c08caaf7a4fa9d2cfd3"
+      },
+      "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": {
+        "numbered_excerpts": [
+          "1146:bool ex_handler_bpf(const struct exception_table_entry *ex,\n1147:\t\t    struct pt_regs *regs)\n1148:{\n1149:\tint dst_reg = FIELD_GET(BPF_FIXUP_REG_MASK, ex->fixup);\n1150:\ts16 off = FIELD_GET(BPF_FIXUP_OFFSET_MASK, ex->fixup);\n1151:\tint arena_reg = FIELD_GET(BPF_FIXUP_ARENA_REG_MASK, ex->fixup);\n1152:\tbool is_arena = !!(ex->fixup & BPF_ARENA_ACCESS);\n1153:\tbool is_write = (dst_reg == DONT_CLEAR);\n1154:\tunsigned long addr;\n1155:\n1156:\tif (is_arena) {\n1157:\t\taddr = regs->regs[arena_reg] + off;\n1158:\t\tbpf_prog_report_arena_violation(is_write, addr, regs->pc);\n1159:\t}\n1160:\n1161:\tif (dst_reg != DONT_CLEAR)\n1162:\t\tregs->regs[dst_reg] = 0;\n1163:\t/* Skip the faulting instruction */\n1164:\tregs->pc += AARCH64_INSN_SIZE;\n1165:\n1166:\treturn true;"
+        ],
+        "sha256": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7"
+      },
+      "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": {
+        "numbered_excerpts": [
+          "1534:bool ex_handler_bpf(const struct exception_table_entry *x, struct pt_regs *regs)\n1535:{\n1536:\tu32 reg = FIELD_GET(FIXUP_REG_MASK, x->fixup);\n1537:\tu32 insn_len = FIELD_GET(FIXUP_INSN_LEN_MASK, x->fixup);\n1538:\tbool is_arena = !!(x->fixup & FIXUP_ARENA_ACCESS);\n1539:\tbool is_write = (reg == DONT_CLEAR);\n1540:\tunsigned long addr;\n1541:\ts16 off;\n1542:\tu32 arena_reg;\n1543:\n1544:\tif (is_arena) {\n1545:\t\tarena_reg = FIELD_GET(FIXUP_ARENA_REG_MASK, x->fixup);\n1546:\t\toff = FIELD_GET(DATA_ARENA_OFFSET_MASK, x->data);\n1547:\t\taddr = *(unsigned long *)((void *)regs + arena_reg) + off;\n1548:\t\tbpf_prog_report_arena_violation(is_write, addr, regs->ip);\n1549:\t}\n1550:\n1551:\t/* jump over faulting load and clear dest register */\n1552:\tif (reg != DONT_CLEAR)\n1553:\t\t*(unsigned long *)((void *)regs + reg) = 0;\n1554:\tregs->ip += insn_len;\n1555:\n1556:\treturn true;"
+        ],
+        "sha256": "aaf3e6a0a062dc601e0e61f7c994232778ff5e6e524145ca6d8d7be142a0ba80"
+      }
+    },
+    "status": "pending-production-and-reference-law",
+    "stock_handler_behavior": {
+      "arm64": "EX_TYPE_BPF handler clears the full selected saved X register unless DONT_CLEAR and advances PC by4. Arena reporting is a separate flag/profile, not inferred for ordinary BTF loads.",
+      "x86": "EX_TYPE_BPF handler clears the full pt_regs destination word unless DONT_CLEAR and advances IP by recorded instruction length."
+    },
+    "universal_theorem": null,
+    "utc": "2026-11-08T23:33:32.945179+00:00"
+  },
   "lsm_context_nullability_entry_premise": {
     "current_workspace_source_excerpts": [
       {
