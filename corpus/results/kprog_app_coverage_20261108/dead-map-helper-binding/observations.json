@@ -1,0 +1,13 @@
+{
+  "controls": 614400,
+  "sanitizers": [
+    "ASan",
+    "UBSan"
+  ],
+  "control_exit": 0,
+  "module_build_exit": 0,
+  "archive_sha256": "e7ee4f875d7f5877b6335598e64acd89bd28506f7a422c47e4fe43c2e46425f9",
+  "runtime": "whole Cilium and native-only suite queued after current serial applications",
+  "visited": "exact verifier map_ptr_state and poison handling retained",
+  "dead": "seen0 after successful symbolic verification; helper-specific target resolves against kernel-owned used_maps operations, including internal generated hash lookup call"
+}

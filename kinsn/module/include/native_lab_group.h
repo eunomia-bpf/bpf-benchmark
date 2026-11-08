@@ -463,21 +463,16 @@ static int native_lab_emit_literal(const struct native_lab_reloc_record *reloc,
 
 /* Use the same map operations/generator as verifier do_misc_fixups, including
  * its generated internal hash lookup call. No second specialization table. */
-static int native_lab_map_helper_target(const struct bpf_verifier_env *env,
-					u32 index, u64 target)
+static int native_lab_map_operation_target(struct bpf_map *map, s32 func_id,
+					  u64 target)
 {
-	const struct bpf_insn_aux_data *aux = &env->insn_aux_data[index];
-	const struct bpf_insn *call = &env->prog->insnsi[index];
-	struct bpf_map *map = aux->map_ptr_state.map_ptr;
 	struct bpf_insn *generated;
 	bool found = false;
 	int count, i;
 
-	if (aux->map_ptr_state.poison || !map)
-		return false;
-	if (call->imm == BPF_FUNC_map_update_elem)
+	if (func_id == BPF_FUNC_map_update_elem)
 		return (unsigned long)map->ops->map_update_elem == target;
-	if (call->imm != BPF_FUNC_map_lookup_elem)
+	if (func_id != BPF_FUNC_map_lookup_elem)
 		return false;
 	if ((unsigned long)map->ops->map_lookup_elem == target)
 		return true;
@@ -499,6 +494,33 @@ static int native_lab_map_helper_target(const struct bpf_verifier_env *env,
 	if (count != -EOPNOTSUPP && (count <= 0 || count >= INSN_BUF_SIZE))
 		return -EFAULT;
 	return found;
+}
+
+/* Symbolic verification marks every reachable instruction. A pruned helper
+ * retains its static helper ID and kernel-owned map resources; its native
+ * target is resolved from those same map operations. Reachable calls retain
+ * their path-checked map identity and poison handling. */
+static int native_lab_map_helper_target(const struct bpf_verifier_env *env,
+                                        u32 index, u64 target)
+{
+	const struct bpf_insn_aux_data *aux = &env->insn_aux_data[index];
+	const struct bpf_insn *call = &env->prog->insnsi[index];
+	u32 i;
+
+	if (!aux->seen) {
+		for (i = 0; i < env->used_map_cnt; i++) {
+			int err = native_lab_map_operation_target(env->used_maps[i],
+							call->imm, target);
+
+			if (err)
+				return err;
+		}
+		return false;
+	}
+	if (aux->map_ptr_state.poison || !aux->map_ptr_state.map_ptr)
+		return false;
+	return native_lab_map_operation_target(aux->map_ptr_state.map_ptr,
+					      call->imm, target);
 }
 
 /* Called once for the final generation while all expanded proofs and resolved
