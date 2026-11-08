@@ -30,7 +30,7 @@
     },
     {
       "file": "common/buffer.h",
-      "selected_sha256": "d1f3266a8db0bf9baf21be49aaece56883573e8303e5c0c64cd5d23f24ce5b11",
+      "selected_sha256": "7f18e2378b20d5bb2e93a0c4683313f6218a823673f5ec2253f5dfc4e3652755",
       "prior_upstream_sha256": "c97b8b1009ef202d3ac82afc0ffdf59262752524973c2bcf9b69afce3f23d6e1"
     },
     {
@@ -174,5 +174,6 @@
     "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o": "1914c94f3eb8172a2df5433a35462ecd5a7ce468106ac9507d36c4f6b8f3d9aa",
     "vendor/build/.tracee-build/none/x86/dist/tracee.bpf.o": "e7c9f04aac2af77e2e436ba99ed7fc0a3db624fce904b47449bd9426f3d36e86",
     "vendor/build/x86/tracee/bin/tracee": "09a1d40124ddcea25ba783e7be2f04df9099ee01ae4da40edfe35f450ece021f"
-  }
+  },
+  "inventory_note": "The final selected-tree hashes correspond to the corrected source and paired Make0. source-inventory.initial.json retains the initial failed edit hashes."
 }
