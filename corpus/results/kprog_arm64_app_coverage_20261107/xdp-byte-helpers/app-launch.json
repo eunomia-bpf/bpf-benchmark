@@ -3280,7 +3280,6 @@
     "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "cdc910a8a08d13e5e421304149f4e7f28c2d724f40d5eac1a07124ab79eaecd1"
   },
   "scope": "Complete Cilium then Tracee original workload on the generic XDP helper epoch, coherent registered kfunc kernel and paired worker. Cilium instruction clock and Tracee wall clock retain their settings. Source/kernel/caller/native/application/workload epochs are pinned.",
-  "cpu_set": "16-19",
   "guest_memory_mib": 8192,
   "vcpus": 8,
   "predecessor_pid": 4109581,
@@ -3289,7 +3288,7 @@
     20644
   ],
   "component_commit": "f9335042dee1fcf2ae9075eabc15300cc59aac6a",
-  "utc": "2026-11-08T03:47:15.951723+00:00",
+  "utc": "2026-11-08T04:10:29.709901+00:00",
   "retired_waiting_controllers": [
     {
       "folder": "tracee-core-runtime",
@@ -3319,11 +3318,11 @@
     }
   ],
   "source_overlay_pins": {
-    "app-cilium-transport.py": "60d419e2471ca850a9727183706bf9fcdf69bad49db920d0dab5f4e668e6b2b3",
-    "app-tracee-transport.py": "f43e4231e38f9ef25d97098e71cfdeb587a510a3efbfc5db6f71eeb145f8e1d8",
+    "app-cilium-transport.py": "0a44a9240043558897fabcdf164065b47b137b3e3df2c1e22e604ec8d1c0af84",
+    "app-tracee-transport.py": "4ea17b555c09911481f52c544cf67630d99ffbb2b28c53ec39f5e1258334c73f",
     "app-cilium.sh": "3fb3185867f45f889117b545aa33bc3fc2e506406ae78b62d194b8abf78a0f5e",
     "app-tracee.sh": "3c39b6c95da9ea504a88395a6bbb8af0883f10042bbc6083268c7acaaf049650",
-    "app-run.py": "00b580828c583a292dfa43e4da4103f9a1935d1f4d70bcf9ab8551aa945db984",
+    "app-run.py": "5d13ddd8858733c6d72bf35024559d7aacc9f03ae41eb1cba061a0218af875b2",
     "tracee-manifest.json": "4eb159e50478c6a4a6d3f4ca1590753eb7c12c0abb673ae26e3375256dbaf528",
     "app-otelcol-ebpf-profiler-transport.py": "f43e4231e38f9ef25d97098e71cfdeb587a510a3efbfc5db6f71eeb145f8e1d8",
     "app-otelcol-ebpf-profiler.sh": "a8f04c7926e97da595e3b82ea06a989b41a63453afdd21f201e1e47525708d33"
@@ -3347,9 +3346,28 @@
       "archive_sha256": "153e7bbfaee551ce0425d1f7d678e17e4d5421d61daae6857cb2f3a48c64d876",
       "launch_commit": "a7fc616c31045634d57636fac952bf1b104aa2fb",
       "utc": "2026-11-08T03:47:15.822463+00:00"
+    },
+    {
+      "pid": 284744,
+      "status": {
+        "utc": "2026-11-08T03:47:18.736909+00:00",
+        "phase": "waiting_original_epoch",
+        "launch_commit": "b9e8e586e226089e11af5afaad65999d39104b2f",
+        "waiting_pid": 4109581
+      },
+      "command": "python3 /workspaces/.agent-state/kprog-lanes/A/xdp-byte-helpers/app-run.py ",
+      "archive_sha256": "aad8202c53ca9f5eaeda845ff13e47d03c4a0527415db0f04fe67b0767ae1f32",
+      "launch_commit": "b9e8e586e226089e11af5afaad65999d39104b2f",
+      "utc": "2026-11-08T04:10:29.655579+00:00"
     }
   ],
   "map_helper_build_commit": "9a30705c12d108cebd67f36fd0608ce7a61660f9",
   "host_compile_component_commit": "ec879f7128255a59589a7e4f88809b7aa7feb650",
-  "host_compile_safety_commit": "973d773c348d0ffaae27adce4fdbf3829f3555d7"
+  "host_compile_safety_commit": "973d773c348d0ffaae27adce4fdbf3829f3555d7",
+  "cpu_sets": {
+    "cilium": "8-11",
+    "tracee": "8-11",
+    "otelcol-ebpf-profiler": "16-19"
+  },
+  "schedule": "Private80-source Cilium and Tracee on8-11 alongside the original OTel16-19; canonical helper adoption and new OTel after originalskb4109581."
 }
