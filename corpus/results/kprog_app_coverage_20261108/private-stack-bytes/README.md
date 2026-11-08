@@ -12,7 +12,7 @@ The latest closed [Cilium metadata cohort](../xdp-metadata/README.md) exposes a 
 | Same MOV-store fixture with STACK constructor, UBSan | 1292621cases,0differences |
 | Existing micro compile controls | 29positive+1negative-native,exit0 |
 | Actual captured Cilium full generated source compile | exit0 |
-| Complete original Cilium successor | detached; terminal receipt follows |
+| Complete original Cilium successor | 5generated/compiled,4installed; stackoff-544/8 |
 
 The complete-state host observations total4104678. The retained first additional-fixture invocation records a Makefile command concatenation error; the corrected host invocation compiles and executes each fixture and returns0. Source/archive captures preserve that distinction. The micro wrapper substitutes only the model-header include, keeping the existing generated programs and compiler flags.
 
@@ -25,3 +25,7 @@ make -f /workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium
 ```
 
 `component.tar.gz` retains the exact candidate, base/patch, existing oracle snapshots and outputs, current captured source/BPF/compiler command, all compile-control outcomes, and the whole-application successor commands. Universal O2 representation reasoning belongs to the shared simulator/token line; complete-application generation and stock verification remain the coverage evidence.
+
+The complete original Cilium successor has closed. Its baseline resident census is62. The native restart submits `cil_xdp_entry`, `cil_host_policy`, `tail_ipv4_ct_ingress`, `cil_from_host` and `tail_handle_ipv4_cont`. All five generate and compile; the first four install. The last reaches stock-verifier `invalid write to stack R10 off=-544 size=8` after389instructions. All five terminal native hashes match their captured objects. This whole-startup receipt advances the current table to5generated/4installed, with the original application startup error and work counters retained. Dynamic upstream load order and entry inventory retain their actual per-cohort records.
+
+`service.tar.gz`, `result.tar.gz` and `coverage.json` preserve all five requests, generated C/BPF, stock-verifier logs, and the original corpus metadata/counters. `runtime.tar.gz` preserves the actual closed controller and guest commands. The current generic frontier joins Tetragon and OTel at private state/frame representation; measured stock-verifier limits remain the runtime decisions.

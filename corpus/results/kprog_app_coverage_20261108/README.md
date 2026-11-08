@@ -6,7 +6,7 @@ The table records the latest closed whole-application attempt, including setup a
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | 56 resident | 3 | 3 | 2 | 0 | 1: tail_handle_ipv4 misaligned stack off-156/8 after352instructions | [XDP metadata projection](xdp-metadata/README.md) |
+| Cilium | 62 resident | 5 | 5 | 4 | 0 | 1: tail_handle_ipv4_cont stackoff-544/8 after389instructions | [private-stack alias cohort](private-stack-bytes/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit readonly80-byte table offset1036/4 after3042instructions | [current runner cohort](tracee-current-runner/README.md) |
@@ -60,4 +60,4 @@ The [XDP metadata projection](xdp-metadata/README.md) maps the actual native xdp
 
 The [whole Tracee current-runner cohort](tracee-current-runner/README.md) reaches the stock verifier on all6generated/compiled requests and installs5. Its current source reaches readonly80-byte table indexing atoffset1036/4 after3042instructions and92states; the current-runner image waits for compile/load completion. The prior300second client-exit receipt retains its own source epoch.
 
-The [private-stack register-alias store representation](private-stack-bytes/README.md) reuses the existing byte ladder for scalar MOV stores while preserving pointer-wide and public memory operations. Existing4104678UBSan state observations and29+1micro compile controls pass, as does the captured wholeCilium source compile. The complete original Cilium successor runs with its immutable model snapshot; its terminal table follows.
+The [private-stack register-alias store representation](private-stack-bytes/README.md) reuses the existing byte ladder for scalar MOV stores while preserving pointer-wide and public memory operations. Existing4104678UBSan state observations and29+1micro compile controls pass, as does the captured wholeCilium source compile. The complete original Cilium successor closes5generated/compiled and4installed, reaching the proof-stack writeoff-544/8 after389instructions.
