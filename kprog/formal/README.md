@@ -21,7 +21,8 @@ The [Arm ASL state comparison](../results/kprog_verification_20261107/reference-
 records5016 agreeing observations across74 operation labels and explicit STLXR
 monitor profiles. LDADD adds1344 agreeing cases and stated atomic/compiler premises. It retains its source/binary
 identities and platform premises alongside the [x86 Sail comparison](../results/kprog_verification_20261107/reference-x86-sail.md),
-which records50 agreeing operation labels,14 model-stopped labels and an explicit
+which, together with the [direct ACL2 comparison](../results/kprog_verification_20261107/reference-x86-acl2.md),
+records52 agreeing operation labels,14 model-stopped labels and an explicit
 REP comparison difference with separate CPU evidence.
 
 Handler/dispatcher and specialized-token laws compose modeled registers,

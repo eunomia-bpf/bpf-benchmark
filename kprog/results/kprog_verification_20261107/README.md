@@ -23,7 +23,7 @@ specialization token also has its own row.
 | O2 C-model token-body equality | 72/75 | 74/74 |
 | Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
-| Upstream machine-model sampled architectural-state agreement | 50/75 | 74/74 selected profiles |
+| Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
 | Upstream model-differing operation rows | 1/75 | 1/74 explicit monitor profile |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
@@ -4942,3 +4942,13 @@ Original proof attempts, final source and command output are archived under
 `readonly_image_write_preservation`. Actual native/proof identity, physical
 permissions/map lifetime and helper/platform state effects retain their explicit
 interfaces. Full source b3d713f42 retains its separate complete PASS receipt.
+
+### Direct ACL2 observations
+
+The [direct ACL2 report](reference-x86-acl2.md) records576 inputs:48 XMM0
+MOVUPS/MOVAPS observations agree,480 inputs reach model instruction boundaries
+and48 REP observations retain their element/whole-instruction difference.
+This adds two sampled-agreeing labels, bringing the selected-epoch total to52.
+Original model certificate timestamp and wrapper warnings, inputs and setup
+epochs are retained. Executable comparisons and ACL2 certification remain
+separate evidence.
