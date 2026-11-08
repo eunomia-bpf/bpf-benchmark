@@ -105,7 +105,9 @@ The same fixture proves all32 SETCC condition/low-high-byte units and their actu
 decoded executions, with arbitrary old value/flags/fresh inputs and whole-memory preservation;
 BSWAP adds both32/64-bit widths with complete arbitrary BPF register/memory/ghost-frame
 preservation and actual decoded executions. Their scalar-register mapping,
-initial scratch state and invocation interface remain explicit. Existing build caches are reused. Generator checks compare locked numeric contracts
+initial scratch state and invocation interface remain explicit. MOV_REG adds7 scalar byte-lane/width units with arbitrary whole memory and both
+ghost indices; pointer/RSP frame and physical ABI embedding remain explicit.
+Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.
 

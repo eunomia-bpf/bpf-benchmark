@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2) | 3/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7) | 4/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 52/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 14/75 | 0/74 selected forms |
@@ -5082,3 +5082,16 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_963750cd7`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-963750cd7.log.gz](full-make-check-963750cd7.log.gz).
+
+### Compiled MOV_REG scalar lane and width units
+
+`RegisterMoveCertificate.compiled_all_variants` and `compiled_execution` cover
+all4 low/high byte source/destination pairs and16/32/64-bit scalar values.
+The actual production-dispatch clang units return canonical scalar read/write
+for arbitrary old RAX/source RDX, memory, fresh inputs and both ghost indices.
+Memory/exclusive state are preserved, visit advances23, and return has no fault
+or events. The combined92 certificate retains every original85 function byte
+and all7 standalone MOV unit bytes. [Original evidence](compiled-movreg.log.gz)
+retains preprocessing, actual ELF/arrays, scripts and proof logs. Pointer and
+RSP frame cases, architectural register mapping, physical ABI and compiler
+embedding remain explicit; scalar family counts do not establish full closure.
