@@ -182,14 +182,16 @@ static void check_load(const char *what, __u8 op, __u8 dst, __u8 src,
 		off += (__s64)(index_val << scale_log2);
 
 	if (src == X86_RSP) {
-		want_bits = model_write(dst_old,
-					model_stack_load(__x86_stack_mem.b,
-							 off, mem), width);
+		__u64 value = model_stack_load(__x86_stack_mem.b, off, mem);
+
+		if (op == X86_OP_MOVSX_LOAD)
+			value = model_sign_extend(value, mem);
+		want_bits = model_write(dst_old, value, width);
 		want_tag = X86_SIM_TAG_SCALAR;
 	} else if (op == X86_OP_MOV_LOAD && mem == X86_WIDTH_64 &&
 		   width == X86_WIDTH_64 && base_tag == X86_SIM_TAG_ABI) {
 		want_bits = model_ptr_load(heap, off);
-		want_tag = model_abi_tag(kind, off);
+		want_tag = dst == X86_RSP ? X86_SIM_TAG_SCALAR : model_abi_tag(kind, off);
 	} else {
 		__u64 v = model_load(heap, off, mem);
 

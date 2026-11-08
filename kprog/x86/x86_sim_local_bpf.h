@@ -1028,13 +1028,20 @@ extern void x86_sim_unmapped_xdp_read(void)
 					__x86_l_base_ptr, __x86_l_disp),    \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,     \
 				X86_SIM_TAG_PACKET_END);                   \
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),               \
-				(void *)(long)__x86_xdp_value, __x86_xdp_tag); \
+			if ((DST) == X86_RSP)                            \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
+					__x86_xdp_value, X86_WIDTH_64);    \
+			else                                             \
+				X86_SIM_L_WRITE_REG_PTR_TAG((DST),       \
+					(void *)(long)__x86_xdp_value, __x86_xdp_tag); \
 		} else switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_mem_width);                       \
+			if ((OP) == X86_OP_MOVSX_LOAD)                    \
+				__x86_l_value = x86_sign_extend(           \
+					__x86_l_value, __x86_l_mem_width);  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
 			break;                                           \
@@ -1054,9 +1061,13 @@ extern void x86_sim_unmapped_xdp_read(void)
 				__x86_sim_abi_kind, __x86_l_disp,          \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,    \
 				X86_SIM_TAG_PACKET_END);                   \
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
-				X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr),    \
-				__x86_l_ptr_tag);                        \
+			if ((DST) == X86_RSP)                             \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
+					(__u64)(long)X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr), X86_WIDTH_64); \
+			else                                              \
+				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
+					X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr), \
+					__x86_l_ptr_tag);                  \
 			break;                                           \
 		default:                                                 \
 			if (X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI && \

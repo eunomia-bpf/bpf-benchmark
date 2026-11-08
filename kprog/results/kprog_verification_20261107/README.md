@@ -4039,3 +4039,13 @@ O2 C-model totals are53/75 x86 (41direct/10generic/2branch) and71/71 ARM.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_234b8e8ef`. Every check retains its exact published source identity.
+
+The production MOV load source now sign-extends stack MOVSX values and
+normalizes loaded ABI/live-XDP pointers into numeric RSP offsets. Independent
+CPU controls reproduce both original discrepancies and the corrected values;
+the old source also triggers the live-XDP regression. The permanent oracle
+passes3,657,728 CPU/direct/interpreter cases plus2,432 live XDP RSP cases under
+UBSan. The713 existing route cases and actual BPF memory-width checks pass.
+`x86_mov_load_source_fix` and `X86_MOV_LOAD_SOURCE_FIX_V1` retain all83 source
+inputs, original diagnostics and final checks. The existing O1/O2 totals keep
+their domains as the load field/frame/dispatcher proof work continues.

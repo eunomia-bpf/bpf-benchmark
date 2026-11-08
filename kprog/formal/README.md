@@ -137,3 +137,8 @@ its existing generic dependencies. It composes the emitted four-byte word and
 final-code copy with canonical full-state/effect/fault preservation. The current
 CPU/profile, producer field/PC, executable lifetime and complete ABI/compiler
 bindings remain the surrounding production interfaces.
+
+The MOV memory oracle compares ordinary, scalar and signed loads with real
+x86 instructions over numeric RSP/STACK frames and ABI pointers. Stack MOVSX
+applies source-width sign extension; ABI and live XDP pointer loads to RSP
+normalize the loaded native value through the numeric stack writer.
