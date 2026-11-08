@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-08T03:01:39.248483+00:00",
+  "prior_iteration_commit": "3f6dd7a94f9a167d7be88fafd2a5ec2e0b4a25ee",
+  "source_before_sha256": "64bdba25c81c9dfa5f9453ea2127b46ac7afced05259399fb9a56673a90198a8",
+  "source_after_sha256": "d29f7cdb168a706c3e4e1c0a574d42ecc47f3b286f2a50cde24f65e14a4bda58",
+  "prior_module_body_preserved": true,
+  "make_exit": 0,
+  "source_files": 57,
+  "new_laws": [
+    "retry_cycle_failed_frame",
+    "retry_cycle_failed_other_gpr",
+    "retry_cycle_failed_base"
+  ],
+  "total_cycle_axiom_audits": 7,
+  "scope": "Failed C-model iterations preserve every State field outside data/status GPRs, reservation and PC; every other GPR and each separated GPR/SP base address remain exact. Canonical transfer uses the published cycle refinement premises."
+}

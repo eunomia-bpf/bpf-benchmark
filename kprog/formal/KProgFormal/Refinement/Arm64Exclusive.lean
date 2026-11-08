@@ -303,4 +303,69 @@ theorem retry_cycle_prefix_fault (width : Width) (acquire release : Bool) (statu
       retryPrefix width acquire value base increment s := by
   simp only [retryCycle, continueWith, failed]
 
+/-- A failed C-model iteration preserves the complete architectural frame
+outside its data/status registers, reservation and program counter. The cycle
+refinement transfers this equality to the canonical ISA under its premises. -/
+theorem retry_cycle_failed_frame (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word) (s : State) :
+    let result := retryCycleCore width acquire release true sourceScalar sourceStack
+      status value base increment displacement s
+    result.state = { s with gpr := result.state.gpr, exclusiveMonitor := result.state.exclusiveMonitor, pc := result.state.pc } := by
+  dsimp only
+  unfold retryCycleCore retryPrefixCore
+  unfold loadCore
+  cases loaded : Arm64Memory.read (accessWidth width) s.memory
+      (Arm64Memory.baseValue s base) with
+  | error fault => simp [loaded, continueWith]
+  | ok pair =>
+      rcases pair with ⟨word, event⟩
+      by_cases monitor : (!s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass) = true
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines, retrySuffixCore, storeCore, checkedState,
+          Arm64Register.write_refines, arithmeticImmediateStep, writeData,
+          step, branchStep, monitor, writeReg]
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines, retrySuffixCore, storeCore, checkedState,
+          Arm64Register.write_refines, arithmeticImmediateStep, writeData,
+          step, branchStep, monitor, writeReg]
+
+/-- Only the native data/status registers participate in a failed iteration's
+GPR updates, including aliases between those two registers. -/
+theorem retry_cycle_failed_other_gpr (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value other : Gpr)
+    (base : Register) (increment displacement : Word) (s : State)
+    (outsideValue : other.val ≠ value.val) (outsideStatus : other.val ≠ status.val) :
+    (retryCycleCore width acquire release true sourceScalar sourceStack
+      status value base increment displacement s).state.gpr other = s.gpr other := by
+  unfold retryCycleCore retryPrefixCore
+  unfold loadCore
+  cases loaded : Arm64Memory.read (accessWidth width) s.memory
+      (Arm64Memory.baseValue s base) with
+  | error fault => simp [loaded, continueWith]
+  | ok pair =>
+      rcases pair with ⟨word, event⟩
+      by_cases monitor : (!s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass) = true
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines, retrySuffixCore, storeCore, checkedState,
+          Arm64Register.write_refines, arithmeticImmediateStep, writeData,
+          step, branchStep, monitor, writeReg, outsideValue, outsideStatus]
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines, retrySuffixCore, storeCore, checkedState,
+          Arm64Register.write_refines, arithmeticImmediateStep, writeData,
+          step, branchStep, monitor, writeReg, outsideValue, outsideStatus]
+
+/-- A retry base distinct from data/status retains its complete address,
+including an SP base and every ordinary GPR base. -/
+theorem retry_cycle_failed_base (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base : Register) (increment displacement : Word) (s : State)
+    (outsideValue : base.val ≠ value.val) (outsideStatus : base.val ≠ status.val) :
+    memoryBase (retryCycleCore width acquire release true sourceScalar sourceStack
+      status value base increment displacement s).state base = memoryBase s base := by
+  by_cases general : base.val < 31
+  · simpa only [memoryBase, general, ↓reduceDIte] using
+      retry_cycle_failed_other_gpr width acquire release sourceScalar sourceStack
+        status value ⟨base.val, general⟩ base increment displacement s outsideValue outsideStatus
+  · have preserved := congrArg State.sp
+      (retry_cycle_failed_frame width acquire release sourceScalar sourceStack
+        status value base increment displacement s)
+    simpa only [memoryBase, general, ↓reduceDIte] using preserved
+
 end KProgFormal.Refinement.Arm64Exclusive
