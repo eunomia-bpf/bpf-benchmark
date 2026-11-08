@@ -151,22 +151,21 @@ def compile_bpf(source, out, includes, clang, arch="x86"):
            "-D__TARGET_ARCH_" + arch]
     for inc in includes:
         cmd += ["-I", str(inc)]
-    # libbpf refuses an object with no `license` section; several selftests
-    # omit it because the kernel's own runner supplies one out of band.  One
-    # wrapper includes both, because `-c` with several inputs cannot take a
-    # single -o.
+    # Keep the original source's type/header order. Add the upstream kfunc
+    # declarations immediately after its real libbpf helper declarations.
+    compatibility = pathlib.Path(out).parent / "resource-include"
+    for header in ("bpf_helpers.h", "bpf/bpf_helpers.h"):
+        wrapper = compatibility / header
+        wrapper.parent.mkdir(parents=True, exist_ok=True)
+        wrapper.write_text(
+            '#include_next <%s>\n#include "%s"\n' %
+            (header, DEFAULT_PROGS.parent / "bpf_kfuncs.h"))
+    cmd[1:1] = ["-I", str(compatibility)]
     stub = pathlib.Path(out).with_suffix(".license.c")
-    # The attribute is written out rather than including bpf_helpers.h,
-    # which would pull the host's /usr/include/bpf before the vendored
-    # headers and fail on `__u64`.
     stub.write_text(
         '__attribute__((section("license"), used))\n'
         'char __only_license[] = "GPL";\n'
-        '#include <vmlinux.h>\n'
-        '#include <bpf_helpers.h>\n'
-        '#include "%s"\n'
-        '#include "%s"\n' % (DEFAULT_PROGS.parent / "bpf_kfuncs.h",
-                               pathlib.Path(source).resolve()))
+        '#include "%s"\n' % pathlib.Path(source).resolve())
     cmd += [str(stub), "-o", str(out)]
     done = subprocess.run(cmd, capture_output=True, text=True)
     return done.returncode == 0, done.stderr
