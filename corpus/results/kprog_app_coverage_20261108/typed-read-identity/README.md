@@ -9,3 +9,6 @@ make -f /workspaces/.agent-state/kprog-lanes/C/typed-read-identity/Makefile shap
 ```
 
 `inputs.tar.gz` preserves exact mechanism sources/BPF/host/JIT executable, all case streams and the frozen whole-OTel C input. `checks.log.gz` covers completed mechanism commands. The full OTel source compile is a separate detached phase4099776; its terminal exit/object follows actual completion. Current Cilium runs first, then the queued entire OTel/Tetragon/Tracee trials consume this same generic representation serially. Production simulator headers retain their published epoch. The universal readAt value/lane interface remains the formal obligation.
+
+
+The complete frozen perf_unwind_native source compile now exits0. The current proof has40034BPF instructions versus39550in the prior aligned-stack epoch. DWARF source MD5 values match all13recorded file entries; exact compiler-file snapshots, object/source SHA256 and full output are retained in `whole-otel-compile.*`. The queued whole-app execution supplies the ensuing verifier/runtime result.
