@@ -1,6 +1,6 @@
 {
-  "utc": "2026-11-08T19:03:41.946071+00:00",
-  "paired_make_exit": 2,
+  "utc": "2026-11-08T19:06:56.780902+00:00",
+  "paired_make_exit": 0,
   "source_scope": "Both compiler frontends read the same complete vendor/bpf/tracee/pkg/ebpf/c tree through a private upstream directory mount; all prior source differences are captured in tracee-paired-c-tree.patch.",
   "inventory": [
     {
@@ -170,9 +170,9 @@
     }
   ],
   "files": {
-    "vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h": "d1f3266a8db0bf9baf21be49aaece56883573e8303e5c0c64cd5d23f24ce5b11",
-    "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o": "025fe5e116ed994767c7142510c7b744883b0911eafe584cd06add56f16c7cd1",
-    "vendor/build/.tracee-build/none/x86/dist/tracee.bpf.o": "315ef1aeb3f82d9a68af74e0db9aba3b3e061dbb3d0795638ee94da27c93dd89",
-    "vendor/build/x86/tracee/bin/tracee": "49a746fac45caecdf7d3b1a0ccf3f84df2fa25b6a9dd23337787b20d34b99e53"
+    "vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h": "7f18e2378b20d5bb2e93a0c4683313f6218a823673f5ec2253f5dfc4e3652755",
+    "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o": "1914c94f3eb8172a2df5433a35462ecd5a7ce468106ac9507d36c4f6b8f3d9aa",
+    "vendor/build/.tracee-build/none/x86/dist/tracee.bpf.o": "e7c9f04aac2af77e2e436ba99ed7fc0a3db624fce904b47449bd9426f3d36e86",
+    "vendor/build/x86/tracee/bin/tracee": "09a1d40124ddcea25ba783e7be2f04df9099ee01ae4da40edfe35f450ece021f"
   }
 }

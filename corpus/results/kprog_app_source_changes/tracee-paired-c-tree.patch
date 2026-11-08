@@ -9,19 +9,15 @@
  statfunc int signal_perf_submit(void *, controlplane_signal_t *);
  
  // FUNCTIONS
-@@ -94,13 +96,9 @@
-         return 0;
- 
+@@ -96,11 +98,7 @@
      // Save argument index (add 1 to offset later)
--    buf->args[buf->offset] = index;
--
+     buf->args[buf->offset] = index;
+ 
 -    // Force verifier to compare size register with a bound maximum
 -    asm volatile("if %[size] < %[max_size] goto +1;\n"
 -                 "%[size] = %[max_size];\n"
 -                 :
 -                 : [size] "r"(size), [max_size] "i"(MAX_ELEMENT_SIZE));
-+    buf->args[offset] = index;
-+
 +    update_min(size, MAX_ELEMENT_SIZE);
  
      u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr

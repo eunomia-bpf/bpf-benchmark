@@ -96,7 +96,7 @@ statfunc int save_to_submit_buf(args_buffer_t *buf, void *ptr, u32 size, u8 inde
         return 0;
 
     // Save argument index (add 1 to offset later)
-    buf->args[offset] = index;
+    buf->args[buf->offset] = index;
 
     update_min(size, MAX_ELEMENT_SIZE);
 

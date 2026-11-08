@@ -1,14 +1,5 @@
 --- a/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
 +++ b/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
-@@ -96,7 +96,7 @@
-         return 0;
- 
-     // Save argument index (add 1 to offset later)
--    buf->args[buf->offset] = index;
-+    buf->args[offset] = index;
- 
-     update_min(size, MAX_ELEMENT_SIZE);
- 
 @@ -278,29 +278,31 @@
  {
      // Data saved to submit buf: [index][size][ ... string ... ]
