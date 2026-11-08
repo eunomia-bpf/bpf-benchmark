@@ -87,3 +87,11 @@ The [generic C-copy whole Tracee cohort](readonly-c-loads/whole-tracee/README.md
 The [generic C-copy whole Tracee cohort](readonly-c-loads/whole-tracee-retry/README.md) retains every terminal request, the actual native inputs and raw phase work counters. Its generator emits the immutable-object C representation directly.
 
 The [generic PLT32 tail-jump repair](plt32-tail-jumps/README.md) restores the complete reachable function closure for6 kernel C entries. Its239-entry paired link scan,90Rust cases and29+1micro compilations retain full raw records. Fresh original global_func4 now reaches stock verification with8functions/70native bytes and exposes its __sk_buff/kernel-skb context-layout frontier; global_func8 installs through the same registered service.
+
+## Shared x86 native extent and kernel C helper continuation
+
+The [exact native extent source and fresh shared runtime controls](native-extent/adoption/README.md) use callback-sized emission storage and execute the original small and264-byte native inputs with retval2. Shared kernel/module incremental builds and patch regressions pass. The [original BCC/native-safety replay](native-extent/functional/README.md) closes25/25BCC installations with statusok,9positive native executions,27stock-verifier refusals and2generation coverage outcomes.
+
+The [original kernel C MTU cohort](kernel-helper-context-x86/README.md) submits tcx5,tcx6 andtc_uninit_mtu through source_prog_id0; all3generate,compile andstock-verify. Each probe requests loading, with native executions0. The fresh x86 worker/static/shared build and9existing service cases pass. LaneA retains the common contextual163 identity source ownership.
+
+The [Katran shared-image attempt](native-extent/shared-katran/README.md) records ip_tunnel BTF errno22 during baseline startup. A fresh shared-kernel guest loads the exact current ip_tunnel module successfully. The existing application image refreshes its kernel/module payload from that same shared build, and the original Katran replay continues with its established image content, native inputs and workload. Each terminal record carries its own application status, native-stage counts and work counters.
