@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-08T01:51:11.038138+00:00",
+  "canonical_patch": "kprog/tv/native-proof-regions.patch",
+  "before_sha256": "72b60b383dcda8b63a67ec3d7a5ffccebc9db560908a541a4d1adde2ec99235d",
+  "after_sha256": "8bbee47e9fdfc465ad110659da59033fc3769f5841585286708cb0a43cc588dc",
+  "kernel_verifier_sha256": "dd2001e91fbeb0e1bf15d2723ad9246d4b60723330acc2982c39f97cba19569f",
+  "base_git_blob": "97eb923617a4",
+  "source_roundtrip_equal": true,
+  "patch_parser_exit": 0,
+  "arm_build_commit": "30b8c570006962f9aaf48e819b36dc6c423673c4",
+  "x86_build_commit": "620edcf456eaf2fca069f17b0d423c4f9074e326",
+  "bound_xdp_commit": "aeb425c9c83b4f23bf9a66c949c72006ab018205",
+  "bound_tc_commit": "d91df13c0ea3624e04287fc6a2d6590a96cdc8e8",
+  "transport_commit": "fbfde2ae9783357adf3e4dd32fc21fb537517c3d",
+  "patch_whitespace_check": "Unified patch context syntax parsed by git apply; reconstructed C source and prose use ordinary git diff checks."
+}
