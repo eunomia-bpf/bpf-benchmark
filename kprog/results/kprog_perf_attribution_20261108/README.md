@@ -535,19 +535,31 @@ lookups 27.9%, updates 22.7%, tail calls 5.4% against the aggregate's
 Multiplying each category's site share by the BPF time those programs
 carry, the candidates rank as:
 
-| candidate | category it acts on | share of cilium BPF time |
-| --- | --- | ---: |
-| helper and map-lookup lowering in the native compile | map lookups, updates, deletes | **51%** |
-| load-time constant specialization (recompiling P from stable map contents) | the lookups that read frozen data | up to **28%** |
-| compiler flags | the whole body | all 100%, on the non-call instructions |
-| direct tail-call linking | tail calls | **5%** |
-| subprogram inlining | inlined-but-called bodies | needs the caller graph |
-| entry and return bridge | fixed per invocation | 1 bridge per invocation |
+| candidate | category it acts on | cilium | katran | bcc | tracee |
+| --- | --- | ---: | ---: | ---: | ---: |
+| helper and map-lookup lowering | map lookups, updates, deletes | 51.0% | **79.7%** | 28.6% | 14.5% |
+| constant specialization (recompiling P from frozen map contents) | the lookups that read stable data | 27.5% | 73.9% | 11.7% | 13.4% |
+| direct tail-call linking | tail calls | 4.3% | 0% | 0% | 0.1% |
+| compiler flags | the whole body | all | all | all | all |
+| subprogram inlining | inlined-but-called bodies | needs the caller graph | | | |
+| entry and return bridge | fixed per invocation | 1 per invocation | | | |
 
-Read in the order C should implement: map-lookup and helper lowering first
-(51% of the call sites), then constant specialization of the frozen-data
-lookups (up to 28%, and it is a subset of the first), then compiler flags
-across the body, with tail-call linking (5%) last among the call-site work.
+Read per application, the order is: map-lookup and helper lowering first,
+because it is the largest category in all four (14.5% to 79.7%); then
+constant specialization of the frozen-data lookups, which is a subset of the
+same sites; then compiler flags across the body; then tail-call linking,
+which only cilium takes up (4.3%).
+
+**The candidate the list is missing, with the share it would cover:** probe
+read lowering. `bpf_probe_read_kernel` is 77.0% of Tracee's call sites and
+32.1% of BCC's, and none of the six candidates touch it. In the kernel the
+helper copies from a virtual address with a bounds check; in the native
+compile the address is known and the copy is a bounds-checked `memcpy` over
+`BPF_FUNC_probe_read_kernel`'s address space, which is the same shape as the
+map-lookup lowering already planned. Adding it as a seventh candidate puts
+probe-read programs' largest category in scope, and it is the change that
+moves Tracee, whose BPF time is 2,158 s in the native arm against 2,516 s
+under the JIT.
 
 **The boundary, stated plainly:** these are site shares weighted by
 per-program BPF time, not cycle counts per site. A site's cost depends on
@@ -604,28 +616,44 @@ immediate, which `helper_ids.py` reads. 1,980 instructions, 196 call sites:
 `vfsstat` carries no helper calls at all, so seven of the eight objects
 contribute sites.
 
-### The three applications, side by side
+### Tracee's call sites
 
-The same measurement on the three applications the task names, so the
+Tracee's programs all come from one source
+(`vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c`), compiled to BPF the same
+way: 417,660 instructions, 34,119 call sites.
+
+| category | sites | share |
+| --- | ---: | ---: |
+| probe reads (`probe_read_*`) | 26,273 | **77.0%** |
+| map lookups | 4,555 | 13.4% |
+| map updates and deletes | 383 | 1.1% |
+| tail calls | 49 | 0.1% |
+| other helpers | 2,859 | 8.4% |
+
+### The four applications, side by side
+
+The same measurement on the four applications the task names, so the
 candidate order can be read per application rather than assumed shared:
 
-| category | cilium | katran | bcc |
-| --- | ---: | ---: | ---: |
-| map lookups | 27.5% | **73.9%** | 11.7% |
-| map updates and deletes | 23.6% | 5.8% | 16.8% |
-| tail calls | 4.3% | 0% | 0% |
-| packet reads (`skb`/`xdp_load_bytes`) | 14.8% | 0% | 0% |
-| packet stores (`skb_store_bytes`) | 8.7% | 0% | 0% |
-| probe reads (`probe_read_*`) | 0.2% | 0% | **32.1%** |
-| other helpers | 21.0% | 20.3% | 39.3% |
+| category | cilium | katran | bcc | tracee |
+| --- | ---: | ---: | ---: | ---: |
+| map lookups | 27.5% | **73.9%** | 11.7% | 13.4% |
+| map updates and deletes | 23.6% | 5.8% | 16.8% | 1.1% |
+| tail calls | 4.3% | 0% | 0% | 0.1% |
+| packet reads (`skb`/`xdp_load_bytes`) | 14.8% | 0% | 0% | 0% |
+| packet stores (`skb_store_bytes`) | 8.7% | 0% | 0% | 0% |
+| probe reads (`probe_read_*`) | 0.2% | 0% | 32.1% | **77.0%** |
+| other helpers | 21.0% | 20.3% | 39.3% | 8.4% |
 
-**The order is not the same for all three.** Katran is a map-lookup program
-(73.9%), so lookup lowering dominates there. BCC is a probe-read program
-(32.1%), so the map work is under a third of its sites and `probe_read_kernel`
-leads. Cilium is the balanced case, where map operations are half the sites
-and tail calls are the only ones with a dedicated linker candidate.
+**The order is not shared.** Katran is a map-lookup program (73.9%), so
+lookup lowering dominates there and covers nearly three quarters of its
+sites. Cilium is the balanced case: map operations are half its sites and
+it is the only one with tail calls worth linking (4.3%). BCC and Tracee are
+probe-read programs -- 32.1% and 77.0% -- where the map work the candidates
+address is 28.6% and 14.5% of their sites.
 
-That is the finding the table exists to give: C should lower map lookups
-first for Katran, and for BCC the same change covers 28.6% of its sites
-while the probe reads -- which no candidate in the list addresses -- are a
-larger share.
+That is the finding the table exists to give, and it changes what to expect:
+for Katran, lowering map lookups reaches most of the program. For Tracee and
+BCC, the largest single helper is `bpf_probe_read_kernel`, which **no
+candidate in the list addresses**; those two need a probe-read candidate
+before map lowering can move their ratios much.
