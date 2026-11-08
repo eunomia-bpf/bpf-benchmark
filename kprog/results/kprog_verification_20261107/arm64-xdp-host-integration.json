@@ -6837,6 +6837,26 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_463098bad": {
+    "actual_exit": 0,
+    "archive_block_sha256": "badf7a1a8f68250c688b9c4e5860264aefd063c9941d44e17768ee182355f082",
+    "archive_marker": "=== FULL MAKE CHECK 463098BAD PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.cpu.jsonl.gz": "f8f4ea9e819d14d158a0bbdef042772714efdfbdcdebd3fd5a9ed59a6ee7d4ff",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.head": "a29b5c405bcdd45fa35d0ef59cdd671474e375532cf6f4b3fe9b008a4a19d95d",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.launch.log": "94675e1797bbfc537bef5864070757fe09f69a361585521d2db8af415fdda850",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.log": "2c9d9bea6e828b19ead6d4446e54f854fcda8bd3ce3f6e68adfe526b7619f241",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.py": "b63cb054699bbd0faaacc7d984e68f4c5efea690914ddf9be9b2d902d713d900",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.sources": "2e0fa825cc18807231c6e44f1e0dfc6d497d46263c7b7297deda90510ea74ebb",
+      "/workspaces/.agent-state/kprog-lanes/V/logical-atomic-full.state": "272f83d9510b57ec710f1df2d8405a8331d6e057d029fe4ff0f997af7180a108"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "463098bad1c13f25c52e54f732af278c22e51d69",
+    "scope": "Complete formal make check of the exact published source tree 463098bad1c13f25c52e54f732af278c22e51d69. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1259
+  },
   "full_make_check_464cddd94": {
     "archive_block_sha256": "cd481c605c1c3f18df4ed844fb3d2139ac32e4c55a237e37b965663c957399f7",
     "archived_inputs": {

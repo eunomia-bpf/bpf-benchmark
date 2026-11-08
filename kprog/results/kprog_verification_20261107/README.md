@@ -4952,3 +4952,10 @@ This adds two sampled-agreeing labels, bringing the selected-epoch total to52.
 Original model certificate timestamp and wrapper warnings, inputs and setup
 epochs are retained. Executable comparisons and ACL2 certification remain
 separate evidence.
+
+### Published source full check 463098bad
+
+`make check` on immutable published463098bad exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_463098bad`. Every check retains its exact published source identity.
