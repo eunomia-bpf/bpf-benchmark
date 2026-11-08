@@ -1,0 +1,69 @@
+{
+  "utc": "2026-11-08T23:44:07.030228+00:00",
+  "scope": "Captured whole application attempts with current public-helper worker; actual stages and raw work retained",
+  "applications": {
+    "bcc": {
+      "requests": 19,
+      "installed": 16,
+      "failed": 3,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "failures": [
+        {
+          "request_id": 1,
+          "entry": "fentry_vfs_read",
+          "native_sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054",
+          "stage": "verifier_rejected",
+          "diagnostics": [
+            "102: (55) if r0 != 0x0 goto pc-3 infinite loop detected at insn 100",
+            "processed 127 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0"
+          ],
+          "archive_member": "run/requests/1.failure.tar.gz"
+        },
+        {
+          "request_id": 14,
+          "entry": "sys_exit",
+          "native_sha256": "fa652433960b83d59fb02dfa010f67fe42e6872105cfde816a08c33a6aada437",
+          "stage": "verifier_rejected",
+          "diagnostics": [
+            "infinite loop detected at insn 993",
+            "processed 611 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0"
+          ],
+          "archive_member": "run/requests/14.failure.tar.gz"
+        },
+        {
+          "request_id": 17,
+          "entry": "sched_switch",
+          "native_sha256": "4e9cfa0026a5c97d8a5173f707965bdb71c339e3fcda6f7b0ec7c7a4580b4f6f",
+          "stage": "verifier_rejected",
+          "diagnostics": [
+            "infinite loop detected at insn 1772",
+            "processed 1589 insns (limit 1000000) max_states_per_insn 0 total_states 23 peak_states 23 mark_read 0"
+          ],
+          "archive_member": "run/requests/17.failure.tar.gz"
+        }
+      ],
+      "application_error": "BCC tool vfsstat exited with rc=97"
+    },
+    "katran": {
+      "requests": 0,
+      "installed": 0,
+      "failed": 0,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "failures": [],
+      "application_error": "modprobe veth failed: modprobe: ERROR: could not insert 'veth': Invalid argument",
+      "bootstrap_diagnostics": [
+        "[    7.549643] BPF: \t type_id=63268 bits_offset=384",
+        "[    7.549903] BPF:  ",
+        "[    7.550021] BPF: Invalid name",
+        "[    7.550125] BPF: ",
+        "[   57.828903] BPF: [126287] ENUM (anon) ",
+        "[   57.829180] BPF: size=4 vlen=3",
+        "[   57.829321] BPF:  ",
+        "[   57.829397] BPF: Invalid name",
+        "[   57.829476] BPF: "
+      ]
+    }
+  }
+}

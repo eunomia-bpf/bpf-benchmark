@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-08T23:44:07.030228+00:00",
+  "source_archive": "run-20261108T233527302232Z.tar.gz",
+  "app": "katran",
+  "application_record": {
+    "app": "katran",
+    "baseline": null,
+    "error": "modprobe veth failed: modprobe: ERROR: could not insert 'veth': Invalid argument",
+    "post_rejit": null,
+    "rejit_result": null,
+    "runner": "katran",
+    "selected_workload": "xdp_pktgen",
+    "status": "error"
+  }
+}
