@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-08T05:46:56.187938+00:00",
+  "trigger_cohort": "d8126895041d70d571cd5faeb339c20727f467ff",
+  "classification_publication": "c69e23f4025ba94256576d5df4b6fdd8101146a0",
+  "scope": "Generic live skb cb read/write byte lanes in the existing native field window and four architectural widths.",
+  "existing_host_observations": 142080,
+  "host_and_bpf_compile_exit": 0,
+  "qemu": {
+    "qemu_exit": 0,
+    "commands_sent": true,
+    "guest_exit": 0,
+    "utc": "2026-11-08T05:44:42.225475+00:00"
+  },
+  "bpf_run": {
+    "retval": 31,
+    "duration": 795200
+  },
+  "source_files": 73,
+  "source_profile": "Captured80-helper profile plus established stack byte-arm candidate and its existing header closure.",
+  "new_checks_gates_limits_or_validations": 0,
+  "production_status": "Private candidate; canonical adoption and complete Cilium consumption follow C shared five-step migration and live application source epochs.",
+  "test_inputs": "Identical skb-live-projection host source, TC BPF source, packet/context bytes and compiler flags."
+}
