@@ -1,0 +1,12 @@
+{
+  "utc": "2026-11-08T10:12:18.388359+00:00",
+  "queue_controller_pid": 1675362,
+  "after_pid": 1671690,
+  "application_programs": 23,
+  "guest_memory_mib": 2048,
+  "guest_vcpus": 2,
+  "input": "Existing8IPv4+8IPv6, file fsync, added actual AIO FSYNC/FDATASYNC submissions,16MiB total512-byte libaio writes in4jobs/128depth",
+  "guest_owned_queue": "Existing scratch vda: scheduler none,nr_requests16; actual settings emitted in input log",
+  "model": "Canonical500abe542 architectural fault bodies",
+  "cause": "Three measured zero-counter hooks: BIOmerge,requestinsertion,vfsfsync"
+}
