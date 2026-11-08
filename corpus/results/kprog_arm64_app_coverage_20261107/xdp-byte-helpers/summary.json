@@ -4,12 +4,12 @@
   "finite_scalar_refusals": 4,
   "baseline_regressions": 3,
   "joined_dispatches": 1,
-  "lean_theorems": 4,
-  "lean_audits": 4,
+  "lean_theorems": 5,
+  "lean_audits": 5,
   "source_pins": {
     "kprog/arm64/arm64_sim_local_bpf.h": "875c1c270b137d9fdf56f0a3b069f9309992c80492b8abaaee1fb5e4b987b150",
     "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "a65fb8609273d464cf557908a738bdb005fe0732f72a9e846785dd3b1671722a",
-    "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "ca85097909d6e4ac72ce64ef79ce76c38d0b7fdde605b5c47811dc2bb2e03949",
+    "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "1dca8b517e771f659b644843e7e32b11ac2c3cf88a4e1e0caf90229553632655",
     "kprog/formal/oracles/test_arm64_helper_idents_host.c": "1492bd7ffb422642a8c3356b5376e6949f87be6bdf6849fb423fbf9cc4ccb46b",
     "kprog/formal/tools/generate_arm64_helper_idents_spec.py": "77cea1bb043b4bc358c30de339a4904f1c0b1a30335d37445428bdb57a1551d7",
     "kprog/formal/contracts/arm64_helper_idents_spec.json": "4901f427923ffc9fdb9cc40c10050beefba6eb60885e3ad2cad2c5435ce9b4a0",
@@ -32,5 +32,7 @@
       }
     }
   },
+  "prior_component_commit": "bd59ad7c0a70b067bcbe854a2b7f8e3c51a21aeb",
+  "formal_baseline_commit": "234b8e8ef",
   "production_status": "Candidate source with adoption after the captured original application and skb epochs."
 }
