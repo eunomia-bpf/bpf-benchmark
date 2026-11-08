@@ -81,6 +81,7 @@ private def faultJson : Fault → Json
   | .read a n => Json.mkObj [("kind", toJson "read"), ("address", number a.toNat), ("bytes", number n)]
   | .write a n => Json.mkObj [("kind", toJson "write"), ("address", number a.toNat), ("bytes", number n)]
   | .divide => Json.mkObj [("kind", toJson "divide")]
+  | .invalidOpcode => Json.mkObj [("kind", toJson "invalid_opcode")]
   | .systemRegister encoding => Json.mkObj [("kind", toJson "system_register"), ("encoding", number encoding)]
   | .nonCanonical address => Json.mkObj [("kind", toJson "non_canonical"), ("address", number address.toNat)]
   | .spAlignment address => Json.mkObj [("kind", toJson "sp_alignment"), ("address", number address.toNat)]

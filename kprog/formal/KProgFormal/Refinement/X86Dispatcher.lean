@@ -5388,3 +5388,29 @@ end KProgFormal.Refinement.X86Dispatcher
 #print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_token_body_matches
 #print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_token_default
 #print axioms KProgFormal.Refinement.X86Dispatcher.return_dispatch_captured_native_step
+
+namespace KProgFormal.Refinement.X86Dispatcher
+/-- The generated architectural-fault terminal has no native register or
+memory write before the fault. Scalar/tag/RSP coordinates retain the common
+entry representation; the compiled BPF fault prefix is proved separately. -/
+def architecturalFaultTerminal (reason : Reference.Fault)
+    (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : X86NumericAddress.RegisterState) :
+    Reference.Transition Reference.X86.State :=
+  ⟨X86NumericAddress.nativeRegisters env frame arena state, [.fault reason], some reason⟩
+
+theorem ud2_terminal_body_refines (env : EntryEnvironment.Environment)
+    (frame : EntryEnvironment.Frame) (arena : Reference.Word)
+    (state : X86NumericAddress.RegisterState) (nextPc : Reference.Word) :
+    architecturalFaultTerminal .invalidOpcode env frame arena state =
+      Reference.X86.step (.ud2 nextPc) (X86NumericAddress.nativeRegisters env frame arena state) := rfl
+
+theorem ud2_terminal_native_step (env : EntryEnvironment.Environment)
+    (frame : EntryEnvironment.Frame) (arena : Reference.Word)
+    (state : X86NumericAddress.RegisterState) (nextPc : Reference.Word) :
+    Reference.X86.Step (.ud2 nextPc) (X86NumericAddress.nativeRegisters env frame arena state)
+      (architecturalFaultTerminal .invalidOpcode env frame arena state) := by
+  exact Reference.X86.ud2_refines _ _
+end KProgFormal.Refinement.X86Dispatcher
+#print axioms KProgFormal.Refinement.X86Dispatcher.ud2_terminal_body_refines
+#print axioms KProgFormal.Refinement.X86Dispatcher.ud2_terminal_native_step

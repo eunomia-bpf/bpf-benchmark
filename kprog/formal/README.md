@@ -122,6 +122,10 @@ remain explicit.
 SHIFTX adds6 scalar width/count units with arbitrary counts and both SARX
 control paths; complete register/flag/tag frame and ABI embedding remain
 explicit.
+UD2 adds exact0f0b decode and an unchanged-state #UD terminal, plus the
+actual shared architectural-fault byte prefix and generic O2/O4 transport.
+Its12 ACL2 observations retain the explicit model RIP+2 profile difference.
+Compiler/link/entered-state and stock-soundness premises remain explicit.
 Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.

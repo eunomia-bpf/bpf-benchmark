@@ -26,6 +26,7 @@ inductive Fault
   | nonCanonical (address : Word)
   | spAlignment (address : Word)
   | alignment (address : Word) (bytes : Nat)
+  | invalidOpcode
   deriving DecidableEq, Repr
 
 /-- Guest effects only. Simulator spills are private implementation state.

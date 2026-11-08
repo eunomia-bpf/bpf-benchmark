@@ -1,4 +1,4 @@
-import BPF
+import BPFPath
 import Composition
 import KProgFormal.Refinement.X86Dispatcher
 
@@ -449,3 +449,99 @@ end KProgTV.SimulatorComposition
 #print axioms KProgTV.SimulatorComposition.compiled_return_default_preserved
 #print axioms KProgTV.SimulatorComposition.accepted_return_selects_continuation
 #print axioms KProgTV.SimulatorComposition.accepted_compiled_return_native_step
+
+namespace KProgTV.SimulatorComposition
+open KProgFormal KProgFormal.Reference
+
+/-- The shared #DE/#UD arm assembled from the production C macro. Its finite
+prefix ends at the faulting store, before the unreachable BPF EXIT. -/
+def architecturalFaultBytes : Array Reference.Byte :=
+  #[0xb7, 0, 0, 0, 0, 0, 0, 0, 0x7b, 0, 0, 0, 0, 0, 0, 0, 0x95, 0, 0, 0, 0, 0, 0, 0]
+
+def architecturalFaultPrefixState (state : BPF.State) : BPF.State :=
+  BPF.setReg { state with pc := 1 } 0 0
+
+theorem null_store_not_permitted (memory : Memory) (unmapped : memory.writable 0#64 = false) :
+    permitted memory.writable 0 8 = false := by
+  simp [permitted, List.range_succ, List.all_append, unmapped]
+
+theorem architectural_fault_prefix (environment : BPF.Environment) (state : BPF.State)
+    (active : state.halted = false) (atEntry : state.pc = 0)
+    (unmapped : state.memory.writable 0#64 = false) :
+    BPFPath.evaluate environment architecturalFaultBytes [0, 1] state =
+      .ok ⟨architecturalFaultPrefixState state, [.fault (.write 0 8)], some (.write 0 8)⟩ := by
+  have permission : permitted state.memory.writable 0#64 8 = false :=
+    null_store_not_permitted state.memory unmapped
+  simp [BPFPath.evaluate, BPF.execute, BPF.source, BPF.alu, BPF.store,
+    architecturalFaultBytes, architecturalFaultPrefixState, BPF.decode, littleEndian,
+    BPF.setReg, writeMemory, permission, active, atEntry,
+    Except.bind, Except.pure, Except.map, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem architectural_fault_execution (environment : BPF.Environment) (state : BPF.State)
+    (active : state.halted = false) (atEntry : state.pc = 0)
+    (unmapped : state.memory.writable 0#64 = false) :
+    Execution (BPFPath.instructionStep environment architecturalFaultBytes) state
+      [.fault (.write 0 8)] (architecturalFaultPrefixState state) :=
+  BPFPath.evaluate_sound _ _ _ _ _ (architectural_fault_prefix environment state active atEntry unmapped)
+
+/-- The scratch R0 write preserves memory, both ghost indices and every
+other BPF register. These fields transport through the physical ABI premise. -/
+theorem architectural_fault_prefix_frame (state : BPF.State) :
+    (architecturalFaultPrefixState state).memory = state.memory ∧
+    (architecturalFaultPrefixState state).unspecifiedVisit = state.unspecifiedVisit ∧
+    (architecturalFaultPrefixState state).exclusiveVisit = state.exclusiveVisit ∧
+    ∀ register : BPF.Register, register ≠ 0 →
+      (architecturalFaultPrefixState state).regs register = state.regs register := by
+  refine ⟨rfl, rfl, rfl, ?_⟩
+  intro register other
+  simp [architecturalFaultPrefixState, BPF.setReg, other]
+
+theorem ud2_complete (nextPc : Reference.Word) : CompleteOutputs (.ud2 nextPc) :=
+  ⟨by change (0xffffffffffffffff : Reference.Word) = BitVec.allOnes 64; decide,
+    by intro state; rfl⟩
+
+/-- The actual compiler/link prefix law transports the concrete decoded
+fault into a whole-artifact interpretation, for all entered native states. -/
+theorem compiled_architectural_fault_preserved
+    (environment : Artifact → BPF.Environment) (entry : Artifact → NativeState → BPF.State)
+    (entered : Artifact → NativeState → Prop)
+    (compiled : Artifact → NativeState → Except String (Transition BPF.State))
+    (preserved : ∀ a state, entered a state → compiled a state =
+      BPFPath.evaluate (environment a) architecturalFaultBytes [0, 1] (entry a state))
+    (active : ∀ a state, entered a state → (entry a state).halted = false)
+    (atEntry : ∀ a state, entered a state → (entry a state).pc = 0)
+    (unmapped : ∀ a state, entered a state → (entry a state).memory.writable 0#64 = false)
+    (a : Artifact) (state : NativeState) (reached : entered a state) :
+    compiled a state = .ok ⟨architecturalFaultPrefixState (entry a state),
+      [.fault (.write 0 8)], some (.write 0 8)⟩ := by
+  rw [preserved a state reached]
+  exact architectural_fault_prefix _ _ (active a state reached) (atEntry a state reached) (unmapped a state reached)
+
+/-- Stock-verifier soundness excludes an entered architectural-fault arm.
+Compiler/link preservation and native-to-B reachability remain explicit;
+this law introduces no runtime admission predicate. -/
+theorem accepted_architectural_fault_unreachable
+    (environment : Artifact → BPF.Environment) (entry : Artifact → NativeState → BPF.State)
+    (entered : Artifact → NativeState → Prop)
+    (compiled : Artifact → NativeState → Except String (Transition BPF.State))
+    (preserved : ∀ a state, entered a state → compiled a state =
+      BPFPath.evaluate (environment a) architecturalFaultBytes [0, 1] (entry a state))
+    (active : ∀ a state, entered a state → (entry a state).halted = false)
+    (atEntry : ∀ a state, entered a state → (entry a state).pc = 0)
+    (unmapped : ∀ a state, entered a state → (entry a state).memory.writable 0#64 = false)
+    (accepted : Artifact → Prop)
+    (verifierSound : ∀ a state effect, accepted a → entered a state →
+      compiled a state = .ok effect → effect.fault = none)
+    (a : Artifact) (state : NativeState) (acceptance : accepted a) : ¬entered a state := by
+  intro reached
+  have executionValue := compiled_architectural_fault_preserved environment entry entered compiled preserved
+    active atEntry unmapped a state reached
+  have impossible := verifierSound a state _ acceptance reached executionValue
+  cases impossible
+end KProgTV.SimulatorComposition
+#print axioms KProgTV.SimulatorComposition.architectural_fault_prefix
+#print axioms KProgTV.SimulatorComposition.architectural_fault_execution
+#print axioms KProgTV.SimulatorComposition.architectural_fault_prefix_frame
+#print axioms KProgTV.SimulatorComposition.ud2_complete
+#print axioms KProgTV.SimulatorComposition.compiled_architectural_fault_preserved
+#print axioms KProgTV.SimulatorComposition.accepted_architectural_fault_unreachable

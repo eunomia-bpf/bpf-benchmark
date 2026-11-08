@@ -884,6 +884,7 @@ inductive Instruction
   | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
       (count : Register) (nextPc : Word)
   | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
+  | ud2 (nextPc : Word)
   deriving DecidableEq, Repr
 
 /-- The encoded instruction's fall-through, independently of its chosen
@@ -895,10 +896,11 @@ def Instruction.fallthrough : Instruction → Word
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
   | .cmov _ _ _ _ next | .andn _ _ _ _ next | .byteSwap _ _ next
   | .movbeLoad _ _ _ next | .movbeStore _ _ _ next
-  | .bmiShift _ _ _ _ _ next | .bzhi _ _ _ _ next | .bt _ _ _ next => next
+  | .bmiShift _ _ _ _ _ next | .bzhi _ _ _ _ next | .bt _ _ _ next | .ud2 next => next
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .ud2 _ => ⟨s, [.fault .invalidOpcode], some .invalidOpcode⟩
   | .call source nextPc => callStep source nextPc s
   | .returnNear release _ => returnStep release s
   | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
@@ -1001,6 +1003,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .ud2 .. => 0xffffffffffffffff
   | .call .. | .returnNear .. | .leave64 .. => 0xffffffffffffffff
   | .repMovs .. => 0xffffffffffffffff
   | .xmm0Move .. => 0xffffffffffffffff
@@ -1229,6 +1232,7 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .branch cc (nextPc + offset) nextPc
   if first = 0x0f then
     let opcode ← byteAt bytes (count + 1)
+    if opcode = 0x0b then return .ud2 (← fallthrough s (count + 2))
     if opcode = 0xaf then
       let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
       let modrm ← byteAt bytes (count + 2)
@@ -1649,3 +1653,20 @@ theorem leave64_memory_flags (nextPc : Word) (s : State) :
   · exact ⟨rfl, rfl⟩
 
 end KProgFormal.Reference.X86
+
+namespace KProgFormal.Reference.X86
+/-- UD2 is an unconditional invalid-opcode fault before exception delivery.
+Its encoded extent is separate from the unchanged faulting PC/state. -/
+theorem ud2_step (nextPc : Word) (state : State) :
+    step (.ud2 nextPc) state = ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := rfl
+
+theorem ud2_decodes (state : State) :
+    decode #[0x0f, 0x0b] state = .ok (.ud2 (state.pc + 2)) := by rfl
+
+theorem ud2_refines (nextPc : Word) (state : State) :
+    Step (.ud2 nextPc) state ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := by
+  exact ⟨rfl, rfl, rfl⟩
+end KProgFormal.Reference.X86
+#print axioms KProgFormal.Reference.X86.ud2_step
+#print axioms KProgFormal.Reference.X86.ud2_decodes
+#print axioms KProgFormal.Reference.X86.ud2_refines

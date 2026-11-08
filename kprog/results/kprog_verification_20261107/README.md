@@ -29,6 +29,8 @@ specialization token also has its own row.
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
 | Additional explicit-monitor-only replay | 0 | 1/74 |
 | Numeric operations awaiting selected replay | 9/75 | 6/74 |
+| Additional direct UD2 reference/body terminal | 1/1 | 0 |
+| Actual shared architectural-fault BPF prefix | 1 | 0 |
 
 The [current Arm ASL comparison](reference-arm-asl.md) records5028 comparisons:
 5016 state observations agree across all74 labels, and12 STLXR inputs retain
@@ -5192,3 +5194,24 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_1075cb7f2`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-1075cb7f2.log.gz](full-make-check-1075cb7f2.log.gz).
+
+### UD2 architectural fault terminal
+
+The direct `0f0b` terminal follows [Intel SDM Vol.3A, Interrupt6](https://cdrdv2-public.intel.com/874240/325462-090-sdm-vol-1-2abcd-3abcd-4.pdf)
+with an unchanged faulting PC and complete architectural frame before exception delivery.
+`ud2_terminal_body_refines` and the literal three-instruction C-macro unit
+connect its C model to the shared #DE/#UD BPF fault arm. The actual decoded
+two-instruction prefix faults on the NULL store, preserves memory, both ghost
+indices and every other BPF register, and supplies the generic compiled/link
+transport and accepted-entry exclusion laws. Actual prefix embedding,
+native-to-B entered-state transport, the physical NULL-unmapped relation and
+stock-verifier soundness remain explicit premises. UD2 is recorded separately
+from the75 numeric-token catalog.
+
+The unchanged ACL28.7 model produces :UD with saved instruction address4096
+in all12 sampled states; all GPRs, RFLAGS, XMM0 and supplied memory match.
+Its source explicitly writes temporary RIP4098 before storing the fault,
+while the canonical pre-delivery PC remains4096. The ledger records this raw
+PC+2 profile difference. [Original evidence](ud2-fault-terminal.log.gz) keeps
+all source, binary identity, model warnings, observations and proof attempts.
+The new reference also reproduces all576 prior canonical JSON results exactly.
