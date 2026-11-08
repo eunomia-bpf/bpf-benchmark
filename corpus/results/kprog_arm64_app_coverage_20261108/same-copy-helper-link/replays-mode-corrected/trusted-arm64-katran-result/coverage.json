@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-08T23:51:16.495941+00:00",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T23:51:16.501053+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 0,
+    "distinct_source_prog_ids": 0,
+    "proof_generated": 0,
+    "stages": {},
+    "failure_causes": {},
+    "requests": [],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000048_331347/details/apps/katran.json",
+        "app": "katran",
+        "status": "error",
+        "error": "modprobe veth failed: modprobe: ERROR: could not insert 'veth': Invalid argument",
+        "phases": {
+          "baseline": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
