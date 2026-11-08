@@ -160,12 +160,12 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T10:59:11.844506+00:00",
+    "as_of_utc": "2026-11-08T11:24:47.275730+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
         "application": "BCC",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/coverage.json",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/coverage.json",
         "baseline_resident": 23,
         "service_source_ids": 23,
         "generated": 23,
@@ -177,13 +177,13 @@
         "application_status": [
           "ok"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/run-20261108T091305803531Z.tar.gz",
-        "raw_archive_sha256": "18eb1a1eba81e092324070e47fa25f9b224067554ac899cdee01a81a2954a4db",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/run-20261108T104956143024Z.tar.gz",
+        "raw_archive_sha256": "31170272ba221d22dc9f1fcc20c7389dcc596c41e417b5e0973a455288f2e09b",
         "host_ok": true,
         "guest_exit": 0,
-        "runtime_epoch": "five_step_e2d3_LSE_real_TCP_ext4_events_7671a362",
-        "baseline_bpf_calls": 183822,
-        "native_bpf_calls": 192059,
+        "runtime_epoch": "five_step_e2d3_LSE_bcc-execution-queued",
+        "baseline_bpf_calls": 441319,
+        "native_bpf_calls": 443267,
         "execution_counter_positive": {
           "baseline": 20,
           "native": 20
@@ -192,7 +192,25 @@
           "baseline": 3,
           "native": 3
         },
-        "work_counters": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/work-counters.json"
+        "work_counters": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/work-counters.json",
+        "execution_counter_rows": {
+          "baseline": {
+            "total": 23,
+            "positive": 21,
+            "zero": [
+              "blk_account_io_",
+              "block_rq_insert"
+            ]
+          },
+          "post_rejit": {
+            "total": 23,
+            "positive": 21,
+            "zero": [
+              "blk_account_io_",
+              "block_rq_insert"
+            ]
+          }
+        }
       },
       {
         "application": "OTel",
@@ -243,26 +261,27 @@
       },
       {
         "application": "Tetragon",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tetragon-result/coverage.json",
-        "baseline_resident": 163,
-        "service_source_ids": 1,
-        "generated": 1,
-        "compiled": 1,
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/lse-tetragon/trusted-arm64-tetragon-result/coverage.json",
+        "baseline_resident": 161,
+        "service_source_ids": 3,
+        "generated": 3,
+        "compiled": 3,
         "stages": {
+          "verifier_accepted_installed": 2,
           "verifier_rejected": 1
         },
         "failure_classes": {
-          "exclusive_retry_loop": 1
+          "bpf_stack_extent": 1
         },
         "application_status": [
           "error"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tetragon-result/run-20261108T072610331281Z.tar.gz",
-        "raw_archive_sha256": "a4503c8c6e2e2fc32a5faf6179cbde02175b872c9d9e898dc3be4ca5a71dd640",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/lse-tetragon/trusted-arm64-tetragon-result/run-20261108T104140291832Z.tar.gz",
+        "raw_archive_sha256": "da1368d9511a5c26b3eaaa42bf7256afd58f01f952ea94a1efdcb3797f50714c",
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "five_step_e2d3",
-        "baseline_bpf_calls": 29897
+        "runtime_epoch": "five_step_e2d3_LSE_lse-tetragon",
+        "baseline_bpf_calls": 23944
       },
       {
         "application": "Katran",

@@ -106,3 +106,12 @@ BCC real-event successor584ae11ac retains all23 generated/compiled/verifier-acce
 [Tracee 280edd626](../kprog_arm64_app_coverage_20261108/design-only-remaining/trusted-arm64-tracee-result/coverage.json) records151baseline resident rows,3fresh generated/compiled requests,2installed programs and1kernel native-chunk ENOENT loader error. Request3 spans guest seconds6944.609 to7368.327; the application reports its7200-second lifecycle deadline. Capsule abandonment is a candidate cause alongside the map-lookup path. The complete kernel/service/application logs retain that distinction. The earlier stack-offset receipt above keeps its captured source/runtime epoch.
 
 [BCC queued-input startup](../kprog_arm64_app_coverage_20261108/bcc-execution-queued/startup-libaio/summary.json) retains the first AIO library-resolution failure and full raw archive. The corrected successor uses the guest-installed libaio.so.1t64 and writes to its own result directory. The23accepted /20positive-program BCC cohort above remains the last completed two-start work comparison while this successor runs.
+
+## Current BCC and Tetragon terminal cohorts, 2026-11-08T11:24:47.275730+00:00
+
+| Application | Baseline resident | Requests | Generated / compiled | Installed | Verifier errors | Work |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| [BCC](../kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/README.md) | 23 | 23 | 23 / 23 | 23 | 0 | JIT/native441319/443267calls;21/23positive rows per phase |
+| [Tetragon](../kprog_arm64_app_coverage_20261108/lse-tetragon/trusted-arm64-tetragon-result/coverage.json) | 161 | 3 | 3 / 3 | 2 | third body stackoffset-792 | baseline23944calls; native startup records the stack error |
+
+BCC block_rq_insert uses the upstream optional -Q attachment path; its current command uses default arguments. The remaining merge hook keeps its zero observation. Tetragon LSE replaces the earlier exclusive-retry frontier with the current private-storage frontier. Each cohort retains its complete raw archive and source epoch.
