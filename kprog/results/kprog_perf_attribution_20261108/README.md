@@ -6,6 +6,20 @@ the BPF statistics the corpus run already collects (`bpf_stats` on,
 `run_cnt_delta`, `run_time_ns_delta`), with the JIT arm and the native arm
 of the same run. Nothing here is a new instrument.
 
+## Contents
+
+1. **Per-app totals, both arms** and **Where the time sits, by program** —
+   where BPF run time goes, per application.
+2. **What the numbers say about the candidates** — the share each
+   optimization covers.
+3. **Why the 2026-05-29 numbers were faster** — the question the operator
+   asked. Both arms moved; the native-specific remainder is 8% to 18%.
+4. **Call sites per program** — what each candidate acts on, from the link
+   plans.
+5. **Katran on the verified arm, 2026-11-08** — both stats modes.
+6. **Per-program time shares** paired with the site counts, and **the code
+   itself**, which is the measured bound where sampling is unavailable.
+
 Apps: katran, cilium, tetragon, tracee and bcc. The bcc figures come from
 `corpus/results/x86_kvm_corpus_20261108_064411_793882`, since the earlier
 bcc runs were cleaned up.
