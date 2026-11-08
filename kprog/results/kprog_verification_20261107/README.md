@@ -5358,3 +5358,18 @@ and every replay outcome are unchanged. `reference-x86-acl2.json` records
 the package hashes, per-package counts and original cleanup code/log/exit
 under `download_cache_retirement`. Shared incremental caches and active proof
 inputs remain intact. No simulator change or new check is introduced.
+
+### Matched stock LSM qualification follow-up
+
+C's [captured x86 pair](../../../corpus/results/kprog_app_coverage_20261108/kernel-selftests-expanded/lsm-qualification/README.md)
+rejects `no_null_check` on both original stock and native routes, and installs
+`null_check` on both. Its actual target71327 names `file__nullable`.
+A's [captured ARM comparison](../../../corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/stock-lsm/comparison.md)
+installs both original and native fixtures with target70008 naming `file`.
+The architecture stage difference follows these distinct kernel metadata
+qualifications. `matched_stock_lsm_qualification` pins both source records,
+actual kernel/BTF identities and eight unchanged outcomes. The ARM failure
+annotation discrepancy remains recorded; all observations are load-only.
+Physical entry still includes the paired nullability contract, and the
+generic protected-load/native-fault correspondence remains open. No model
+or runtime admission change is made.

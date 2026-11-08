@@ -3408,6 +3408,7 @@
     "finding": "Stock BTF protected reads may safely recover with zero and continue, whereas the same plain native MOV/LDR retains architectural fault behavior. Retaining both load addresses alone does not establish faithfulness.",
     "formal_boundary": "Canonical readMemory/read faults and x86 MOV/ARM scalar LDR preserve incoming state and fault. BPF.load/execute currently model MEM/MEMSX with a fault; PROBE_MEM protected zero/continue and the post-verifier recovery path are absent. A verifierSound premise forbidding these raw faults cannot be inferred from stock acceptance alone. UD2 explicit rejection-prefix laws do not cover implicit memory-load faults.",
     "installed_annotation": "d4a23b5b0 no_null_check remains installed/load-only with both reads; no native fault was triggered in this audit. Matched stock-BPF baseline is a separate C result.",
+    "matched_stock_baseline_followup": "matched_stock_lsm_qualification",
     "native_executions": 0,
     "new_theorems": 0,
     "o3_premise": "Stock acceptance concerns B under real verifier/JIT semantics and admitted entry states. It cannot establish absence of raw modeled read faults when BTF reads are protected. Physical entry/lifetime/permissions and every reachable plain native access must correspond for all legitimate hook invocations, including NULL file. Bounded indirect dispatch and finite unsafe-suite results do not discharge this obligation. This is not evidence of a stock-verifier defect.",
@@ -15455,6 +15456,7 @@
       "program": "no_null_check",
       "request_id": 260
     },
+    "matched_stock_baseline_followup": "matched_stock_lsm_qualification",
     "native_executions_by_this_audit": 0,
     "remaining_owner": "Coordinator/C/A qualify the actual paired-kernel context contract and complete source/binary epoch; V retains this explicit physical-entry/verifier premise in universal O1/O2/O4 composition.",
     "runtime_admission_additions": 0,
@@ -15465,6 +15467,133 @@
     "triage_sha256": "c312094a1ba6786dc28c74aedbae49188a95f9abace2c9bc8d32af85c2822e25",
     "triage_source": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/two-installed-annotations/triage.json",
     "utc": "2026-11-08T22:14:42.594326+00:00"
+  },
+  "matched_stock_lsm_qualification": {
+    "arm_runtime_btf_sha256": "5ecb19368498893d000bf482a2ff3f09493c62b065b2e7bf4a8089efb30b1b8b",
+    "finding": "Within each captured kernel, original stock and native routes have the same installed/rejected outcome for this pair. x86 target71327/file__nullable rejects no_null_check and installs null_check; ARM target70008/file installs both. The observed architecture stage difference follows the paired metadata qualification.",
+    "formal_consequence": "The physical entry relation must retain the real paired kernel BTF nullability and all legal invocations. This fixture does not instantiate a universal verifierSound or the generic protected-BTF-load/native-fault correspondence. ARM original __failure annotation disagreement is retained; stock and native execution counts remain zero.",
+    "native_execution_count": 0,
+    "rows": [
+      {
+        "arch": "ARM64",
+        "parameter": "file",
+        "path": "original stock BPF",
+        "program": "no_null_check",
+        "publication": "48cbe1bf9acb4c23573a397a1dddcd571aa3778e",
+        "stage": "installed",
+        "target_btf_id": 70008,
+        "verifier_log": "processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+      },
+      {
+        "arch": "ARM64",
+        "parameter": "file",
+        "path": "original stock BPF",
+        "program": "null_check",
+        "publication": "48cbe1bf9acb4c23573a397a1dddcd571aa3778e",
+        "stage": "installed",
+        "target_btf_id": 70008,
+        "verifier_log": "processed 7 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+      },
+      {
+        "arch": "ARM64",
+        "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+        "parameter": "file",
+        "path": "native source0",
+        "program": "no_null_check",
+        "publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+        "request_id": 260,
+        "stage": "installed",
+        "target_btf_id": 70008
+      },
+      {
+        "arch": "ARM64",
+        "native_sha256": "19dd519dd9375034c4af9f021d8a230218b882d65dfc1f5e345749e5b4bf1529",
+        "parameter": "file",
+        "path": "native source0",
+        "program": "null_check",
+        "publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+        "request_id": 261,
+        "stage": "installed",
+        "target_btf_id": 70008
+      },
+      {
+        "arch": "x86-64",
+        "parameter": "file__nullable",
+        "path": "original stock BPF",
+        "program": "no_null_check",
+        "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+        "stage": "load_rejected",
+        "target_btf_id": 71327
+      },
+      {
+        "arch": "x86-64",
+        "parameter": "file__nullable",
+        "path": "original stock BPF",
+        "program": "null_check",
+        "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+        "stage": "installed",
+        "target_btf_id": 71327
+      },
+      {
+        "arch": "x86-64",
+        "parameter": "file__nullable",
+        "path": "native source0",
+        "program": "no_null_check",
+        "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+        "stage": "verifier_rejected",
+        "target_btf_id": 71327
+      },
+      {
+        "arch": "x86-64",
+        "parameter": "file__nullable",
+        "path": "native source0",
+        "program": "null_check",
+        "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+        "stage": "installed",
+        "target_btf_id": 71327
+      }
+    ],
+    "runtime_admission_additions": 0,
+    "scope": "Actual load-only original-stock/native LSM qualification on the separately captured x86 and ARM kernels; no per-program theorem or execution.",
+    "sources": [
+      {
+        "path": "corpus/results/kprog_app_coverage_20261108/kernel-selftests-expanded/lsm-qualification/summary.json",
+        "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623",
+        "sha256": "a1431d5265d6646e596bc21a86177b7a8f8160337da020a5f299252747629bc8"
+      },
+      {
+        "path": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/stock-lsm/comparison.json",
+        "publication": "b8ef248ee9501cc2a458a7e89ed0277715b50211",
+        "sha256": "09c62d426d2ee0d131c5b3f5aa49f9eb06597cb98ec9f9bc8c9defeb77c97c9f"
+      }
+    ],
+    "stock_bpf_execution_count": 0,
+    "utc": "2026-11-08T23:13:35.592624+00:00",
+    "x86_kernel_image_sha256": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+    "x86_prototype": {
+      "id": 71327,
+      "name": "bpf_lsm_mmap_file",
+      "parameters": [
+        {
+          "name": "file__nullable",
+          "type_id": 349
+        },
+        {
+          "name": "reqprot",
+          "type_id": 96763
+        },
+        {
+          "name": "prot",
+          "type_id": 96763
+        },
+        {
+          "name": "flags",
+          "type_id": 96763
+        }
+      ],
+      "prototype": 35653
+    },
+    "x86_stock_original_object_sha256": "d5118f586c8d6d15867eb7efe147539d1f34b124a154fa80b9edd43688ca1054"
   },
   "memory_oracle_frame_repair": {
     "archive_compressed_prefix_bytes": 87812325,
