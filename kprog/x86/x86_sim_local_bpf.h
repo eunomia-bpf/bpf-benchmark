@@ -3105,6 +3105,18 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_kptr_xchg() \
 	X86_SIM_L_HELPER_POINTER_RESULT(bpf_kptr_xchg((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
+#define X86_SIM_BPF_CALL_bpf_this_cpu_ptr() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_this_cpu_ptr((const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_dynptr_from_mem() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_from_mem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_ringbuf_reserve_dynptr() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_reserve_dynptr((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_dynptr_write() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_write((const struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
 #define X86_SIM_BPF_CALL_ID(ID) \
 	do { \
 		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) { \

@@ -1,0 +1,5 @@
+# Original x86 kernel C dynptr helper coverage
+
+Linux helpers154 this_cpu_ptr,197 dynptr_from_mem,198 ringbuf_reserve_dynptr and202 dynptr_write acquire generic named x86 simulator bodies, native-link ID/name resolution and common loader address resolution. Arguments follow their vendored libbpf declarations and SysV registers; the existing typed-result and call-clobber representation applies. Production delta20lines in3files.
+
+Incremental static/shared/worker and release native-link builds exit0; existing service9cases pass. Replaying all55 original native entries whose first generation frontier was one of these IDs produces8 compiled B objects and47 later generation frontiers: helper203(17),201(5),199(9),182(1),200(7), plus8kfunc call targets. Native executions0. Every initial native byte, metadata, emitted C/B and command diagnostic is retained in component.tar.gz. The full239-source guest remains the application-independent acceptance measurement after the current serial application/safety chain. The existing70-slot legacy numeric dispatcher retains its separate formal epoch; actual finite generator calls select named bodies. Runtime admission additions0.

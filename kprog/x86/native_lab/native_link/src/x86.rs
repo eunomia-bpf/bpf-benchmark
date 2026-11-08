@@ -454,6 +454,10 @@ pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         193 => Some("bpf_ima_file_hash"),
         194 => Some("bpf_kptr_xchg"),
         195 => Some("bpf_map_lookup_percpu_elem"),
+        154 => Some("bpf_this_cpu_ptr"),
+        197 => Some("bpf_dynptr_from_mem"),
+        198 => Some("bpf_ringbuf_reserve_dynptr"),
+        202 => Some("bpf_dynptr_write"),
         _ => None,
     }
 }
