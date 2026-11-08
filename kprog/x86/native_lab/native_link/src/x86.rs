@@ -659,7 +659,7 @@ fn discover_reloc_reachable(
                 let Some(opcode_local_off) = local_patch_off.checked_sub(1) else {
                     continue;
                 };
-                if bytes.get(opcode_local_off as usize) != Some(&0xE8) {
+                if !matches!(bytes.get(opcode_local_off as usize), Some(0xE8 | 0xE9)) {
                     continue;
                 }
                 resolve_x86_plt32_defined_target(elf, &reloc)?
@@ -679,7 +679,7 @@ fn discover_reloc_reachable(
     Ok(())
 }
 
-fn x86_call_relocation_opcode_offsets(elf: &object::File, sym: &SymInfo) -> Result<HashSet<u64>> {
+fn x86_direct_relocation_opcode_offsets(elf: &object::File, sym: &SymInfo) -> Result<HashSet<u64>> {
     let section = elf
         .section_by_index(sym.section_index)
         .with_context(|| format!("section {:?}", sym.section_index))?;
@@ -699,7 +699,7 @@ fn x86_call_relocation_opcode_offsets(elf: &object::File, sym: &SymInfo) -> Resu
         let Some(opcode_local_off) = local_patch_off.checked_sub(1) else {
             continue;
         };
-        if bytes.get(opcode_local_off as usize) == Some(&0xE8) {
+        if matches!(bytes.get(opcode_local_off as usize), Some(0xE8 | 0xE9)) {
             out.insert(opcode_local_off);
         }
     }
@@ -713,7 +713,7 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
 
     while let Some(sym) = queue.pop() {
         let bytes = read_symbol_bytes(elf, &sym)?;
-        let call_relocation_opcode_offsets = x86_call_relocation_opcode_offsets(elf, &sym)?;
+        let direct_relocation_opcode_offsets = x86_direct_relocation_opcode_offsets(elf, &sym)?;
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         while decoder.can_decode() {
             let insn = decoder.decode();
@@ -729,7 +729,7 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
                 }
             }
             if matches!(insn.flow_control(), FlowControl::Call) {
-                if call_relocation_opcode_offsets.contains(&(insn.ip() - sym.address)) {
+                if direct_relocation_opcode_offsets.contains(&(insn.ip() - sym.address)) {
                     continue;
                 }
                 let target = insn.near_branch_target();
@@ -1377,6 +1377,7 @@ pub(super) fn rewrite_x86(
     for sym in included {
         let is_entry = symbol_key(sym) == symbol_key(entry);
         let bytes = read_symbol_bytes(elf, sym)?;
+        let direct_relocation_opcode_offsets = x86_direct_relocation_opcode_offsets(elf, sym)?;
         let entry_abi_strip = if is_entry {
             std::mem::take(&mut planned_entry_abi)
         } else {
@@ -1466,6 +1467,20 @@ pub(super) fn rewrite_x86(
                     &mut next_synthetic_ip, return_insn)?;
                 if is_entry { *kinds.last_mut().expect("tail return pushed") = Some(PatchKind::JmpEnd); }
                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                continue;
+            }
+
+            // The ELF target owns this displacement. Keep its rel32 field
+            // intact until relocation, and its placeholder distinct from an
+            // entry-epilogue jump or a decoded intra-symbol branch.
+            if insn.code() == Code::Jmp_rel32_64
+                && direct_relocation_opcode_offsets.contains(&local_ip)
+            {
+                insn.set_ip(local_ip);
+                insn.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
+                local.push(insn);
+                kinds.push(None);
+                insn_local_ip.push(local_ip);
                 continue;
             }
 
@@ -2583,9 +2598,9 @@ fn apply_elf_relocations(
             let local_patch_off = reloc_offset - layout.sym.address;
 
             match r_type {
-                // R_X86_64_PLT32 = 4: clang's `call helper`. Reloc offset
-                // points at the 4-byte disp32 field; the 0xE8 opcode is
-                // at offset-1.
+                // R_X86_64_PLT32 = 4: direct CALL or tail JMP. The
+                // relocation addresses the four-byte displacement after
+                // the E8/E9 opcode.
                 4 => {
                     let opcode_local_off = local_patch_off
                         .checked_sub(1)
@@ -2610,9 +2625,9 @@ fn apply_elf_relocations(
                         })?;
                     let new_opcode_off =
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
-                    if new_opcode_off + 5 > blob.len() || blob[new_opcode_off] != 0xE8 {
+                    if new_opcode_off + 5 > blob.len() || !matches!(blob[new_opcode_off], 0xE8 | 0xE9) {
                         bail!(
-                            "PLT32 reloc at {:#x} in {} did not encode as call rel32",
+                            "PLT32 reloc at {:#x} in {} did not encode as direct rel32",
                             local_patch_off,
                             layout.sym.name
                         );
@@ -4462,6 +4477,70 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn plt32_tail_chains_keep_reachable_symbols_and_rel32_fields() -> Result<()> {
+        for opcode in [0xe8, 0xe9] {
+            for reverse in [false, true] {
+                for section_target in [false, true] {
+                    let mut object = WriteObject::new(BinaryFormat::Elf,
+                        object::Architecture::X86_64, Endianness::Little);
+                    let text = object.section_id(StandardSection::Text);
+                    let root = object.add_section(Vec::new(), b"tc".to_vec(), SectionKind::Text);
+                    let (middle, leaf) = if reverse { (6, 0) } else { (0, 5) };
+                    let body = if reverse {
+                        vec![0xb8, 42, 0, 0, 0, 0xc3, 0xe9, 0, 0, 0, 0]
+                    } else { vec![0xe9, 0, 0, 0, 0, 0xb8, 42, 0, 0, 0, 0xc3] };
+                    object.append_section_data(text, &body, 1);
+                    let mut entry_bytes = vec![opcode, 0, 0, 0, 0];
+                    if opcode == 0xe8 { entry_bytes.push(0xc3); }
+                    object.append_section_data(root, &entry_bytes, 1);
+                    let mut targets = Vec::new();
+                    for (name, section, value, size) in [("entry", root, 0, entry_bytes.len() as u64),
+                        ("middle", text, middle, 5), ("leaf", text, leaf, 6)] {
+                        targets.push(object.add_symbol(WriteSymbol { name:name.as_bytes().to_vec(),
+                            value, size, kind:SymbolKind::Text, scope:SymbolScope::Linkage,
+                            weak:false, section:WriteSymbolSection::Section(section), flags:SymbolFlags::None }));
+                    }
+                    let section_symbol = object.section_symbol(text);
+                    for (section, offset, symbol, address) in [(root, 1, targets[1], middle),
+                        (text, middle + 1, targets[2], leaf)] {
+                        object.add_relocation(section, object::write::Relocation { offset,
+                            symbol:if section_target { section_symbol } else { symbol },
+                            addend:if section_target { address as i64 - 4 } else { -4 },
+                            flags:RelocationFlags::Elf { r_type:4 } })?;
+                    }
+                    let bytes = object.write()?;
+                    let elf = object::File::parse(bytes.as_slice())?;
+                    let entry = find_symbol_by_name(&elf, "entry")?;
+                    let included = discover_reachable(&elf, &entry)?;
+                    assert_eq!(included.iter().map(|s|s.name.as_str()).collect::<Vec<_>>(),
+                        vec!["entry", "middle", "leaf"]);
+                    let proof = rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),
+                        &HashSet::new(),&[],&HashMap::new(),&[],true,true,false)?;
+                    assert_eq!(proof.proof_relocs.len(), 2);
+                    let middle_offset = proof.proof_symbols.iter().find(|s|s.name=="middle").unwrap().offset;
+                    assert_eq!(proof.blob[0], opcode);
+                    assert_eq!(proof.blob[middle_offset as usize], 0xe9);
+                    for relocation in &proof.proof_relocs {
+                        assert!(relocation.offset + 4 <= proof.blob.len() as u64);
+                    }
+                    let linked = rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),
+                        &HashSet::new(),&[],&HashMap::new(),&[],false,true,false)?;
+                    let first = Decoder::new(64,&linked.blob,DecoderOptions::NONE).decode();
+                    assert_eq!(first.near_branch_target(), middle_offset);
+                    let second = Decoder::with_ip(64,&linked.blob[middle_offset as usize..],
+                        middle_offset,DecoderOptions::NONE).decode();
+                    assert_eq!(second.code(), Code::Jmp_rel32_64);
+                    let leaf_offset = proof.proof_symbols.iter().find(|s|s.name=="leaf").unwrap().offset;
+                    assert_eq!(second.near_branch_target(), leaf_offset);
+                    assert_eq!(&linked.blob[leaf_offset as usize..][..6], &[0xb8,42,0,0,0,0xc3]);
+                }
+            }
+        }
+        Ok(())
+    }
+
 
     #[test]
     fn readonly_label_extent_uses_canonical_section_and_offset() -> Result<()> {

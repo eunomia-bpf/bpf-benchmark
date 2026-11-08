@@ -1,0 +1,386 @@
+{
+  "utc": "2026-11-08T14:47:20.184478+00:00",
+  "rust_tests": 90,
+  "regression_vectors": 8,
+  "before_regression_exit": 2,
+  "after_regression_exit": 0,
+  "micro_compile_records": 30,
+  "micro_make_exit": 0,
+  "catalog": {
+    "total": 239,
+    "linkers": {
+      "before": "015a3096a647cc8b771cbd10e0606e00f1b36b2931cf6440adfd63a87b4c8117",
+      "after": "3961aee7764edb1752e9afe56d3d4343742a684c0f53714dc6bdbf1828ff8043"
+    },
+    "counts": {
+      "before": {
+        "generated": 161,
+        "generation_failed": 78
+      },
+      "after": {
+        "generated": 161,
+        "generation_failed": 78
+      }
+    },
+    "changed": [
+      {
+        "program": "global_func11",
+        "before": {
+          "exit": 0,
+          "text_bytes": 2,
+          "functions": [
+            "global_func11"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 35,
+          "functions": [
+            "global_func11",
+            "foo"
+          ]
+        }
+      },
+      {
+        "program": "global_func13",
+        "before": {
+          "exit": 0,
+          "text_bytes": 7,
+          "functions": [
+            "global_func13"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 40,
+          "functions": [
+            "global_func13",
+            "foo"
+          ]
+        }
+      },
+      {
+        "program": "global_func14",
+        "before": {
+          "exit": 0,
+          "text_bytes": 4,
+          "functions": [
+            "global_func14"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 37,
+          "functions": [
+            "global_func14",
+            "foo"
+          ]
+        }
+      },
+      {
+        "program": "global_func17",
+        "before": {
+          "exit": 0,
+          "text_bytes": 9,
+          "functions": [
+            "global_func17"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 32,
+          "functions": [
+            "global_func17",
+            "foo"
+          ]
+        }
+      },
+      {
+        "program": "global_func3",
+        "before": {
+          "exit": 0,
+          "text_bytes": 2,
+          "functions": [
+            "global_func3"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 75,
+          "functions": [
+            "global_func3",
+            "f8",
+            "f7",
+            "f6",
+            "f5",
+            "f4",
+            "f3",
+            "f2",
+            "f1"
+          ]
+        }
+      },
+      {
+        "program": "global_func4",
+        "before": {
+          "exit": 0,
+          "text_bytes": 2,
+          "functions": [
+            "global_func4"
+          ]
+        },
+        "after": {
+          "exit": 0,
+          "text_bytes": 70,
+          "functions": [
+            "global_func4",
+            "f7",
+            "f6",
+            "f5",
+            "f4",
+            "f3",
+            "f2",
+            "f1"
+          ]
+        }
+      }
+    ]
+  },
+  "components": [
+    {
+      "entry": "global_func2",
+      "native_sha256": "d34d9646d48fa7ead3d4120f255301ef124c6aa7c625643c3d9a0a724c59b275",
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func2/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func2/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func2",
+        "native_sha256": "d34d9646d48fa7ead3d4120f255301ef124c6aa7c625643c3d9a0a724c59b275"
+      },
+      "sections": [
+        {
+          "name": "tc",
+          "instructions": 1174
+        }
+      ],
+      "proof_symbols": [
+        {
+          "name": "global_func2",
+          "value": 0,
+          "size": 78
+        },
+        {
+          "name": "f1",
+          "value": 78,
+          "size": 54
+        },
+        {
+          "name": "f2",
+          "value": 132,
+          "size": 43
+        },
+        {
+          "name": "f3",
+          "value": 175,
+          "size": 70
+        }
+      ],
+      "text_bytes": 245,
+      "kernel_command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/debug/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func2/trusted_x86.proof.o",
+        "--symbol",
+        "global_func2",
+        "--mode",
+        "kernel",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func2/native.bin",
+        "--show"
+      ],
+      "kernel_exit": 1,
+      "compile_exit": 0
+    },
+    {
+      "entry": "global_func4",
+      "native_sha256": "8f1e134d6dbb3e85faf429fc647356d1e1ce5114820a9da00cfa7cbe94dc5a13",
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func4/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func4/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func4",
+        "native_sha256": "8f1e134d6dbb3e85faf429fc647356d1e1ce5114820a9da00cfa7cbe94dc5a13"
+      },
+      "sections": [
+        {
+          "name": "tc",
+          "instructions": 45
+        }
+      ],
+      "proof_symbols": [
+        {
+          "name": "global_func4",
+          "value": 0,
+          "size": 5
+        },
+        {
+          "name": "f7",
+          "value": 5,
+          "size": 5
+        },
+        {
+          "name": "f6",
+          "value": 10,
+          "size": 5
+        },
+        {
+          "name": "f5",
+          "value": 15,
+          "size": 5
+        },
+        {
+          "name": "f4",
+          "value": 20,
+          "size": 18
+        },
+        {
+          "name": "f3",
+          "value": 38,
+          "size": 14
+        },
+        {
+          "name": "f2",
+          "value": 52,
+          "size": 15
+        },
+        {
+          "name": "f1",
+          "value": 67,
+          "size": 3
+        }
+      ],
+      "text_bytes": 70,
+      "kernel_command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/debug/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func4/trusted_x86.proof.o",
+        "--symbol",
+        "global_func4",
+        "--mode",
+        "kernel",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func4/native.bin",
+        "--show"
+      ],
+      "kernel_exit": 0,
+      "compile_exit": 0
+    },
+    {
+      "entry": "global_func16",
+      "native_sha256": "eae981f2b4b0b759cba3ff2ed6f6104cf81d9a749d6848375c91f08dade79b07",
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func16/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func16/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func16",
+        "native_sha256": "eae981f2b4b0b759cba3ff2ed6f6104cf81d9a749d6848375c91f08dade79b07"
+      },
+      "sections": [
+        {
+          "name": "cgroup_skb/ingress",
+          "instructions": 44
+        }
+      ],
+      "proof_symbols": [
+        {
+          "name": "global_func16",
+          "value": 0,
+          "size": 30
+        },
+        {
+          "name": "foo",
+          "value": 30,
+          "size": 12
+        }
+      ],
+      "text_bytes": 42,
+      "kernel_command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/debug/native-link",
+        "--input",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func16/trusted_x86.proof.o",
+        "--symbol",
+        "global_func16",
+        "--mode",
+        "kernel",
+        "--output",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/roundtrip/global_func16/native.bin",
+        "--show"
+      ],
+      "kernel_exit": 0,
+      "compile_exit": 0
+    }
+  ],
+  "runtime": [
+    {
+      "entry": "global_func4",
+      "expect": "success",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/probe",
+        "/workspaces/repository/kprog/selftests/build/test_global_func4__global_func4.bpf.o",
+        "/workspaces/repository/kprog/selftests/build/test_global_func4__global_func4.native.o",
+        "global_func4"
+      ],
+      "exit": 1,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "8f1e134d6dbb3e85faf429fc647356d1e1ce5114820a9da00cfa7cbe94dc5a13",
+        "started": "2026-11-08T14:45:18.429390+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader', 'load', '4', '1', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/request.native.o', 'global_func4', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/debug/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/native-context/loader/trusted-native-loader', 'load', '4', '1', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/request.native.o', 'global_func4', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/request-tv_ifjxw/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/debug/native-link', '0', '0', '0', '0', '0', '0', '3', '1', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/1.failure.tar.gz",
+        "finished": "2026-11-08T14:45:21.686349+00:00"
+      },
+      "execution": "load-only"
+    },
+    {
+      "entry": "global_func8",
+      "expect": "success",
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/probe",
+        "/workspaces/repository/kprog/selftests/build/test_global_func8__global_func8.bpf.o",
+        "/workspaces/repository/kprog/selftests/build/test_global_func8__global_func8.native.o",
+        "global_func8"
+      ],
+      "exit": 0,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 0,
+        "native_sha256": "7e0ef0487b11803572367ba223e8713dc25033332d0c0686e9c859d72ecbcd35",
+        "started": "2026-11-08T14:45:21.802709+00:00",
+        "prog_id": 5,
+        "status": 0,
+        "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/plt32-tail-jumps/requests/2.success.tar.gz",
+        "finished": "2026-11-08T14:45:23.677480+00:00"
+      },
+      "execution": "load-only"
+    }
+  ],
+  "code_growth": {
+    "production_added": 25,
+    "production_removed": 10,
+    "test_added": 64
+  },
+  "source": {
+    "kprog/x86/native_lab/native_link/src/x86.rs": "fa174bc51c021ce9810998d27acaeffee3a8d33be7b93749b9f440df74c29dcd",
+    "kprog/x86/native_lab/native_link/src/main.rs": "2a07ef43915d1821f2f9e6c45f743a0c67e97345c5f5518c6a33d8807219a897",
+    "kprog/x86/native_lab/native_link/Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+    "kprog/x86/native_lab/native_link/Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+    "kprog/x86/x86_sim_local_bpf.h": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "d91e50ae9204b6d56e905e6a80df951593b352aec5dcdb4099e4e05b7494bc44"
+  }
+}
