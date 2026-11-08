@@ -1,0 +1,32 @@
+[
+  {
+    "program": "no_null_check",
+    "original_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/table/verifier_lsm.bpf.o",
+    "mode": "original stock BPF load-only",
+    "executions": 0,
+    "prog_type": 29,
+    "expected_attach_type": 27,
+    "section": "lsm/mmap_file",
+    "original_object_sha256": "d5118f586c8d6d15867eb7efe147539d1f34b124a154fa80b9edd43688ca1054",
+    "target_btf_id": 71327,
+    "load_return": -13,
+    "verifier_log": "0: R1=ctx() R10=fp0\n0: (79) r1 = *(u64 *)(r1 +0)\nfunc 'bpf_lsm_mmap_file' arg0 has btf_id 86271 type STRUCT 'file'\n1: R1=trusted_ptr_or_null_file(id=1)\n1: (79) r1 = *(u64 *)(r1 +32)\nR1 invalid mem access 'trusted_ptr_or_null_'\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+    "fd": -2,
+    "stage": "load_rejected"
+  },
+  {
+    "program": "null_check",
+    "original_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftests-expanded/table/verifier_lsm.bpf.o",
+    "mode": "original stock BPF load-only",
+    "executions": 0,
+    "prog_type": 29,
+    "expected_attach_type": 27,
+    "section": "lsm/mmap_file",
+    "original_object_sha256": "d5118f586c8d6d15867eb7efe147539d1f34b124a154fa80b9edd43688ca1054",
+    "target_btf_id": 71327,
+    "load_return": 0,
+    "verifier_log": "processed 9 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n",
+    "fd": 6,
+    "stage": "installed"
+  }
+]
