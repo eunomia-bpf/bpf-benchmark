@@ -1,0 +1,3 @@
+Ordinary BPF proof-body kernel integration prototype
+
+The stock verifier discovers ordinary B subprograms after expansion. Entry EXIT stays before ordinary callees. The last callee EXIT supplies the original native-stub terminal EXIT after proof collapse; proof-only function metadata follows the expanded code lifetime. Existing verifier rules decide the expanded B. This prototype introduces0 runtime admission predicates. The build incrementally reuses a private clone of the paired e2d3warm cache. Kernel build exit0. Exact source and raw build log are retained. Paired module/loader and the existing rawXDPwidth/alignment QEMU control follow.
