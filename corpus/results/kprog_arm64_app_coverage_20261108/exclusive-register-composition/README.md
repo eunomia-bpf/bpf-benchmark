@@ -1,0 +1,7 @@
+Universal ARM register-ADD exclusive retry composition
+
+Seven laws extend the established load/ADD/store/W-status sequence to its actual register operand and encoded shift. The complete canonical transition retains both store outcomes, ordered memory/exclusive events and the first fault. Failed visits preserve memory, NZCV, the complete vector bank, SP/platform/thread-pointer fields and every GPR outside value/status. A disjoint ordinary/SP base keeps its full address. Successful load/register-ADD advances eight bytes; the encoded-12-byte failed-cycle branch re-enters the exact64-bit PC.
+
+The existing canonical arithmetic/dispatch theorem supplies operand and shift normalization, including the emitted NONE modifier for LSL-by-zero. W/X widths, source/base/register aliases and every legal arithmetic shift amount retain their quantified domains. Platform alignment, monitor/commit outcome, writable preflight, native CFG/compiled correspondence and scoped progress admission keep their explicit interfaces. Whole BCC raw runtime logs contain the register-operand shape; the laws hold for every matching sequence.
+
+The prior module body, including Vdd4b import integration, remains byte-exact. The98-source canonical Git closure builds Exclusive, Dispatcher and Stlxr together with seven axiom audits at exit0. Complete source/commands/logs/import hashes and the initial elaboration diagnostic accompany the archive. The private warm cache is retired. Runtime epochs retain their captured inputs.

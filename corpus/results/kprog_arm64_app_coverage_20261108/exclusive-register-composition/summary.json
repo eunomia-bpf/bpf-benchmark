@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-08T03:56:13.882286+00:00",
+  "scope": "Universal register-ADD exclusive retry composition using the established canonical register/shift arithmetic semantics. W/X widths, encoded operand register, all legal arithmetic shifts/amounts, acquire/release, outcome and complete state retain their domains.",
+  "new_theorems": 7,
+  "source_files": 98,
+  "targets": [
+    "KProgFormal.Refinement.Arm64Exclusive",
+    "KProgFormal.Refinement.Arm64Dispatcher",
+    "KProgFormal.Arm64Stlxr"
+  ],
+  "build_exit": 0,
+  "axiom_audits": 7,
+  "source_before_sha256": "dbf5b9bae8440acca9065ef3c31e8e39cef211990413a2eb5f20f86150cc5145",
+  "source_after_sha256": "c12f2a75fafe3cc85e5f70237cdff152d2937c52ea969e5c721f355649105ced",
+  "prior_module_prefix_byte_exact": true,
+  "evidence": "Whole BCC raw cohort includes register-operand ADD in an exclusive retry cycle; existing BCC/Tetragon immediate cycles retain the established interface.",
+  "interfaces": "Physical alignment/monitor/commit/writable preflight and native code-label/CFG/compiled preservation/scoped progress admission remain explicit. Runtime kernel/application inputs retain their captured epochs."
+}

@@ -15,3 +15,5 @@ The [exclusive prefix/backedge interface](exclusive-prefix-composition/backedge-
 [Generic ARM fresh compiler profile](host-compile/README.md) adds thirteen passing transport/profile controls and exact allocated-byte/relocation identity for two accepted QEMU fixtures, preserving the existing ARM O2 profile and2270guest header identities. Captured runtime consumption follows original OTel/skb.
 
 The [captured host-compiler application successor](host-compile/queue-plan.json) joins34generic native-only controls with the retained original OTel/skb epoch, then whole Cilium/Tracee/OTel. Exact80source/ARM O2/sysroot and per-cohort broker lifecycle identities accompany the concrete launch sources.
+
+[Universal register-ADD retry composition](exclusive-register-composition/README.md) connects the actual operand/shift, complete state/event/fault frame and failed-cycle backedge. Seven laws,98canonical source files, the combined Exclusive/Dispatcher/Stlxr build and axiom audits exit0.

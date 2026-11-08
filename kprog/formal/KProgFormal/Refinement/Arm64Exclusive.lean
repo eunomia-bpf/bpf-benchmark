@@ -603,4 +603,179 @@ theorem retry_cycle_canonical_failed_backedge (width : Width)
   exact retry_cycle_failed_backedge width acquire release sourceScalar sourceStack
     status value base increment s loadedValue event loaded
 
+/-- Exclusive load followed by the actual non-flag register ADD, retaining
+its encoded source register, shift kind and width-specific shift amount. -/
+def retryRegisterPrefix (width : Width) (acquire : Bool) (value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (s : State) : Transition State :=
+  continueWith (step (.exclusive (.load width acquire value.castSucc base)) s)
+    (step (.arithmeticRegister width false false (.general value) (.general value) rhs kind amount))
+
+def retryRegisterPrefixCore (width : Width) (acquire sourceScalar sourceStack : Bool)
+    (value : Gpr) (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (s : State) : Transition State :=
+  continueWith (loadCore width acquire value.castSucc base s)
+    (Arm64Arithmetic.AluDispatch.rawStep false false sourceScalar sourceStack
+      (Arm64Arithmetic.AluDispatch.packedAux false
+        (Arm64Arithmetic.registerModifier width kind amount)
+        (BitVec.ofNat 8 amount.val) 0) width (.general value) (.general value) rhs 0)
+
+theorem retry_register_prefix_refines (width : Width)
+    (acquire sourceScalar sourceStack : Bool) (value : Gpr) (base rhs : Register)
+    (kind : Fin 3) (amount : Fin width.bits) (s : State)
+    (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none) :
+    retryRegisterPrefixCore width acquire sourceScalar sourceStack value base rhs kind amount s =
+      retryRegisterPrefix width acquire value base rhs kind amount s := by
+  unfold retryRegisterPrefixCore retryRegisterPrefix
+  rw [load_core_refines width acquire value.castSucc base s spAligned aligned]
+  congr 1
+  funext loaded
+  have arithmetic := Arm64Arithmetic.AluDispatch.dispatch_register_refines false
+    sourceScalar sourceStack width (.general value) (.general value) rhs kind amount 0 0 loaded
+  simp only [Arm64Arithmetic.AluDispatch.dispatch, Arm64Arithmetic.AluDispatch.decode_code,
+    Arm64Arithmetic.AluDispatch.packed_operation, Arm64Arithmetic.AluDispatch.decode_arithmetic] at arithmetic
+  change some (Arm64Arithmetic.AluDispatch.rawStep false false sourceScalar sourceStack
+    (Arm64Arithmetic.AluDispatch.packedAux false
+      (Arm64Arithmetic.registerModifier width kind amount)
+      (BitVec.ofNat 8 amount.val) 0) width (.general value) (.general value) rhs 0 loaded) = _ at arithmetic
+  exact Option.some.inj arithmetic
+
+/-- Complete register-ADD retry visit with the same canonical store/status branch. -/
+def retryRegisterCycle (width : Width) (acquire release : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State) : Transition State :=
+  continueWith (retryRegisterPrefix width acquire value base rhs kind amount s)
+    (retrySuffix width release status value.castSucc base displacement)
+
+def retryRegisterCycleCore (width : Width)
+    (acquire release failure sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State) : Transition State :=
+  continueWith (retryRegisterPrefixCore width acquire sourceScalar sourceStack
+    value base rhs kind amount s)
+    (retrySuffixCore width release failure status value.castSucc base displacement)
+
+theorem retry_register_cycle_refines (width : Width)
+    (acquire release failure sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State)
+    (loadSp : spAlignmentFault s base = none)
+    (loadAligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none)
+    (outcome : failure = !exclusiveStorePass
+      (retryRegisterPrefix width acquire value base rhs kind amount s).state width.bytes)
+    (storeSp : spAlignmentFault
+      (retryRegisterPrefix width acquire value base rhs kind amount s).state base = none)
+    (storeAligned : exclusiveNaturalFault
+      (memoryBase (retryRegisterPrefix width acquire value base rhs kind amount s).state base)
+      width.bytes = none)
+    (preflight :
+      (exclusiveMonitorPass (retryRegisterPrefix width acquire value base rhs kind amount s).state width.bytes ||
+        (retryRegisterPrefix width acquire value base rhs kind amount s).state.exclusiveInputs.abortOnFailure) = true →
+      permitted (retryRegisterPrefix width acquire value base rhs kind amount s).state.memory.writable
+        (memoryBase (retryRegisterPrefix width acquire value base rhs kind amount s).state base)
+        width.bytes = true) :
+    retryRegisterCycleCore width acquire release failure sourceScalar sourceStack
+      status value base rhs kind amount displacement s =
+    retryRegisterCycle width acquire release status value base rhs kind amount displacement s := by
+  unfold retryRegisterCycleCore retryRegisterCycle
+  rw [retry_register_prefix_refines width acquire sourceScalar sourceStack value base rhs kind amount s
+    loadSp loadAligned]
+  have suffix := retry_suffix_core_refines width release failure status value.castSucc base displacement
+    (retryRegisterPrefix width acquire value base rhs kind amount s).state outcome storeSp storeAligned preflight
+  cases h : (retryRegisterPrefix width acquire value base rhs kind amount s).fault with
+  | none => simp only [continueWith, h, suffix]
+  | some fault => simp only [continueWith, h]
+
+/-- Failed register-ADD visits preserve the complete architecture outside
+their value/status GPRs, reservation and PC, including arbitrary operand aliases. -/
+theorem retry_register_cycle_failed_frame (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State) :
+    let result := retryRegisterCycleCore width acquire release true sourceScalar sourceStack
+      status value base rhs kind amount displacement s
+    result.state = { s with gpr := result.state.gpr, exclusiveMonitor := result.state.exclusiveMonitor, pc := result.state.pc } := by
+  dsimp only
+  unfold retryRegisterCycleCore retryRegisterPrefixCore loadCore
+  cases loaded : Arm64Memory.read (accessWidth width) s.memory (Arm64Memory.baseValue s base) with
+  | error fault => simp [loaded, continueWith]
+  | ok pair =>
+      rcases pair with ⟨word, event⟩
+      by_cases monitor : (!s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass) = true
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines,
+          retrySuffixCore, storeCore, checkedState, Arm64Register.write_refines,
+          arithmeticImmediateStep, writeData, step, branchStep, monitor, writeReg]
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines,
+          retrySuffixCore, storeCore, checkedState, Arm64Register.write_refines,
+          arithmeticImmediateStep, writeData, step, branchStep, monitor, writeReg]
+
+theorem retry_register_cycle_failed_other_gpr (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value other : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State)
+    (outsideValue : other.val ≠ value.val) (outsideStatus : other.val ≠ status.val) :
+    (retryRegisterCycleCore width acquire release true sourceScalar sourceStack
+      status value base rhs kind amount displacement s).state.gpr other = s.gpr other := by
+  unfold retryRegisterCycleCore retryRegisterPrefixCore loadCore
+  cases loaded : Arm64Memory.read (accessWidth width) s.memory (Arm64Memory.baseValue s base) with
+  | error fault => simp [loaded, continueWith]
+  | ok pair =>
+      rcases pair with ⟨word, event⟩
+      by_cases monitor : (!s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass) = true
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines,
+          retrySuffixCore, storeCore, checkedState, Arm64Register.write_refines,
+          arithmeticImmediateStep, writeData, step, branchStep, monitor, writeReg,
+          outsideValue, outsideStatus]
+      · simp [loaded, continueWith, Arm64Arithmetic.AluDispatch.raw_step_refines,
+          retrySuffixCore, storeCore, checkedState, Arm64Register.write_refines,
+          arithmeticImmediateStep, writeData, step, branchStep, monitor, writeReg,
+          outsideValue, outsideStatus]
+
+theorem retry_register_cycle_failed_base (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (displacement : Word) (s : State)
+    (outsideValue : base.val ≠ value.val) (outsideStatus : base.val ≠ status.val) :
+    memoryBase (retryRegisterCycleCore width acquire release true sourceScalar sourceStack
+      status value base rhs kind amount displacement s).state base = memoryBase s base := by
+  by_cases general : base.val < 31
+  · simpa only [memoryBase, general, ↓reduceDIte] using
+      retry_register_cycle_failed_other_gpr width acquire release sourceScalar sourceStack
+        status value ⟨base.val, general⟩ base rhs kind amount displacement s outsideValue outsideStatus
+  · have preserved := congrArg State.sp
+      (retry_register_cycle_failed_frame width acquire release sourceScalar sourceStack
+        status value base rhs kind amount displacement s)
+    simpa only [memoryBase, general, ↓reduceDIte] using preserved
+
+/-- Successful load/register-ADD prefixes advance the native PC by eight bytes. -/
+theorem retry_register_prefix_core_pc (width : Width)
+    (acquire sourceScalar sourceStack : Bool) (value : Gpr) (base rhs : Register)
+    (kind : Fin 3) (amount : Fin width.bits) (s : State) (loadedValue : Word) (event : Event)
+    (loaded : Arm64Memory.read (accessWidth width) s.memory (Arm64Memory.baseValue s base) =
+      .ok (loadedValue, event)) :
+    (retryRegisterPrefixCore width acquire sourceScalar sourceStack value base rhs kind amount s).fault = none ∧
+      (retryRegisterPrefixCore width acquire sourceScalar sourceStack value base rhs kind amount s).state.pc =
+        s.pc + 4 + 4 := by
+  simp [retryRegisterPrefixCore, loadCore, loaded, continueWith,
+    Arm64Arithmetic.AluDispatch.raw_step_refines, arithmeticImmediateStep, writeData,
+    Arm64Register.write_refines]
+
+/-- The actual four-instruction register-ADD failure branch re-enters its incoming PC. -/
+theorem retry_register_cycle_failed_backedge (width : Width)
+    (acquire release sourceScalar sourceStack : Bool) (status value : Gpr)
+    (base rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (s : State) (loadedValue : Word) (event : Event)
+    (loaded : Arm64Memory.read (accessWidth width) s.memory (Arm64Memory.baseValue s base) =
+      .ok (loadedValue, event)) :
+    (retryRegisterCycleCore width acquire release true sourceScalar sourceStack
+      status value base rhs kind amount (0xfffffffffffffff4 : Word) s).state.pc = s.pc := by
+  have facts := retry_register_prefix_core_pc width acquire sourceScalar sourceStack
+    value base rhs kind amount s loadedValue event loaded
+  unfold retryRegisterCycleCore
+  simp only [continueWith, facts.1]
+  rw [retry_suffix_core_pc, facts.2]
+  simp only [if_true, BitVec.add_assoc]
+  exact BitVec.add_zero s.pc
+
 end KProgFormal.Refinement.Arm64Exclusive
