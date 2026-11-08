@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-08T23:49:45.344032+00:00",
+  "rust_existing_cases": 90,
+  "rust_release_exit": 0,
+  "loader_targets": 4,
+  "loader_exit": 0,
+  "service_existing_cases": 9,
+  "service_exit": 0,
+  "worker_compile_exit": 0,
+  "kernel_state": "incremental build active",
+  "null_btf_fixture": "queued after actual kernel/module build",
+  "production_paths": [
+    "kinsn/module/include/native_lab_trusted_wire.h",
+    "kinsn/module/x86/bpf_x86_native_lab.c",
+    "kprog/libnativeloader/src/native_loader.cpp",
+    "kprog/x86/native_lab/native_link/src/main.rs",
+    "kprog/x86/native_lab/native_link/src/x86.rs",
+    "kprog/tv/native-proof-regions.patch"
+  ],
+  "wire": {
+    "site_bytes": 8,
+    "fields": [
+      "offset:u32",
+      "insn_len:u16",
+      "destination:u16"
+    ],
+    "resume_only": 65535
+  },
+  "model_interfaces": [
+    "partial register",
+    "ALU flags",
+    "implicit and multiple accesses",
+    "vector destination",
+    "read-modify-write fault prefix"
+  ]
+}

@@ -14,6 +14,9 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 #include <linux/xarray.h>
+#include <asm/extable.h>
+#include <asm/extable_fixup_types.h>
+#include <linux/ptrace.h>
 #include "kinsn_x86_emit.h"
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
@@ -31,6 +34,8 @@ struct native_blob {
     size_t len, reloc_count, proof_len;
     struct native_lab_reloc_record *relocs;
     struct bpf_insn *proof;
+    struct native_lab_load_site *load_sites;
+    u32 load_site_count;
     struct bpf_map **maps;
     u32 map_count;
     struct native_lab_trusted_capsule *capsule;
@@ -48,6 +53,7 @@ static void native_lab_free_blob(struct native_blob *blob)
     kvfree(blob->bytes);
     kvfree(blob->relocs);
     kvfree(blob->proof);
+    kvfree(blob->load_sites);
     kfree(blob);
 }
 static void native_lab_free_chunks(struct native_lab_trusted_capsule *capsule)
@@ -79,6 +85,14 @@ static int native_lab_store_chunk(void __user *argument)
     blob->proof_len = input.proof_insns;
     blob->reloc_count = input.reloc_count;
     blob->capsule = capsule;
+    blob->load_site_count = input.load_site_count;
+    if (blob->load_site_count) {
+        blob->load_sites = vmemdup_user(u64_to_user_ptr(input.load_sites_user),
+            array_size(blob->load_site_count, sizeof(*blob->load_sites)));
+        if (IS_ERR(blob->load_sites)) {
+            err = PTR_ERR(blob->load_sites); blob->load_sites = NULL; goto fail;
+        }
+    }
     blob->bytes = vmemdup_user(u64_to_user_ptr(input.native_user), blob->len);
     if (IS_ERR(blob->bytes)) { err = PTR_ERR(blob->bytes); blob->bytes = NULL; goto fail; }
     if (blob->reloc_count) {
@@ -272,10 +286,57 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
     *off += snapshot_len;
     return snapshot_len;
 }
+static u32 native_lab_num_exentries(u64 payload)
+{
+    struct native_blob *blob;
+    u32 count = 0;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, kinsn_payload_decode(payload) >> 8);
+    if (blob) count = blob->load_site_count;
+    mutex_unlock(&blobs_lock);
+    return count;
+}
+
+static int native_lab_emit_exentries(u64 payload, void *rw_table,
+                                    const void *rx_table, const void *native_ip)
+{
+    static const u16 registers[] = {
+        offsetof(struct pt_regs, ax), offsetof(struct pt_regs, cx),
+        offsetof(struct pt_regs, dx), offsetof(struct pt_regs, bx),
+        offsetof(struct pt_regs, sp), offsetof(struct pt_regs, bp),
+        offsetof(struct pt_regs, si), offsetof(struct pt_regs, di),
+        offsetof(struct pt_regs, r8), offsetof(struct pt_regs, r9),
+        offsetof(struct pt_regs, r10), offsetof(struct pt_regs, r11),
+        offsetof(struct pt_regs, r12), offsetof(struct pt_regs, r13),
+        offsetof(struct pt_regs, r14), offsetof(struct pt_regs, r15),
+    };
+    struct exception_table_entry *rw = rw_table;
+    const struct exception_table_entry *rx = rx_table;
+    struct native_blob *blob;
+    u32 i;
+    int count;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, kinsn_payload_decode(payload) >> 8);
+    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }
+    count = blob->load_site_count;
+    for (i = 0; i < blob->load_site_count; i++) {
+        const struct native_lab_load_site *site = &blob->load_sites[i];
+        u32 reg = site->destination < ARRAY_SIZE(registers) ?
+            registers[site->destination] : 1; /* stock DONT_CLEAR */
+        rw[i].insn = (const u8 *)native_ip + site->offset - (const u8 *)&rx[i].insn;
+        rw[i].fixup = site->insn_len | (reg << 8);
+        rw[i].data = EX_TYPE_BPF;
+    }
+    mutex_unlock(&blobs_lock);
+    return count;
+}
+
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
     .owner = THIS_MODULE, .max_insn_cnt = U32_MAX,
     .native_proof = true,
     .instantiate_insn = instantiate_native_lab, .emit_x86 = emit_native_lab_x86,
+    .num_exentries = native_lab_num_exentries,
+    .emit_exentries = native_lab_emit_exentries,
 };
 static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = { &bpf_x86_native_lab_desc };
 struct map_ptr_file_priv {

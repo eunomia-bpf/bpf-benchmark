@@ -961,7 +961,8 @@ struct StubLoadAttrs {
 std::vector<uint32_t> upload_native_chunks(
     int service_fd, uint64_t request_id, const std::vector<bpf_insn> &proof_program,
     const std::vector<NativeBlobChunk> &chunks, const std::vector<uint8_t> &blob,
-    const std::vector<NativeLabReloc> &relocs)
+    const std::vector<NativeLabReloc> &relocs,
+    const std::vector<native_lab_load_site> &load_sites)
 {
     const auto proof = bound_proof_sequence(proof_program);
     const std::vector<bpf_insn> continuation{{
@@ -972,7 +973,18 @@ std::vector<uint32_t> upload_native_chunks(
     for (size_t i = 0; i < chunks.size(); i++) {
         const auto &body = i + 1 == chunks.size() ? proof : continuation;
         const auto relocated = chunk_reloc_bytes(relocs, chunks[i]);
+        std::vector<native_lab_load_site> chunk_loads;
+        for (const auto &site : load_sites) {
+            if (site.offset >= chunks[i].offset &&
+                site.offset < chunks[i].offset + chunks[i].len) {
+                auto local = site;
+                local.offset -= chunks[i].offset;
+                chunk_loads.push_back(local);
+            }
+        }
         native_lab_trusted_chunk input{};
+        input.load_sites_user = ptr_to_u64(chunk_loads.data());
+        input.load_site_count = chunk_loads.size();
         input.request_id = request_id;
         input.native_user = ptr_to_u64(blob.data() + chunks[i].offset);
         input.native_size = chunks[i].len;
@@ -1688,7 +1700,8 @@ std::vector<MapPatchSite> read_map_patch_file(const std::filesystem::path &path)
     return patches;
 }
 
-uint32_t read_link_abi_file(const std::filesystem::path &path)
+uint32_t read_link_abi_file(const std::filesystem::path &path,
+                            std::vector<native_lab_load_site> *load_sites = nullptr)
 {
     std::ifstream f(path);
     if (!f) {
@@ -1710,6 +1723,16 @@ uint32_t read_link_abi_file(const std::filesystem::path &path)
         }
         const std::string key = line.substr(0, tab);
         const std::string value = line.substr(tab + 1);
+        if (key == "load_site" && load_sites) {
+            std::string fields = value;
+            std::replace(fields.begin(), fields.end(), ',', ' ');
+            std::istringstream row(fields);
+            uint32_t offset, length, destination;
+            if (!(row >> offset >> length >> destination))
+                fail("read native load site: " + path.string());
+            load_sites->push_back(native_lab_load_site{
+                offset, static_cast<uint16_t>(length), static_cast<uint16_t>(destination)});
+        }
         if (key == "callee_saved_mask") {
             mask = parse_decimal_u64(value, "native-link callee-saved mask");
             if (mask > 0xf) {
@@ -2692,6 +2715,7 @@ struct LinkedBlob {
     bool cache_hit = false;
     bool prebuilt_proof = false;
     uint32_t callee_saved_mask = 0;
+    std::vector<native_lab_load_site> load_sites;
     std::vector<uint32_t> relocated_map_ids;
     std::string native_link_summary;
 };
@@ -4304,7 +4328,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-        linked.callee_saved_mask = read_link_abi_file(source.abi);
+        linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
 
         linked.prebuilt_proof = source.prebuilt_proof;
         linked.native_link_summary = "cache_key=" + key + " " +
@@ -4334,7 +4358,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     auto map_patches = read_map_patch_file(source.map_patches);
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-    linked.callee_saved_mask = read_link_abi_file(source.abi);
+    linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
 
     linked.cache_hit = true;
     linked.native_link_summary = "cache_key=" + key + " " +
@@ -4433,7 +4457,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
             native_loader_kmsg_line(msg.str());
         }
         handles = upload_native_chunks(service_fd, request_id, proof_insns,
-            chunks, linked.blob, relocs);
+            chunks, linked.blob, relocs, linked.load_sites);
         upload_end = std::chrono::steady_clock::now();
         {
             std::ostringstream msg;

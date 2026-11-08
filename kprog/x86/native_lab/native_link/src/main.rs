@@ -587,6 +587,7 @@ fn main() -> Result<()> {
         proof_relocs,
         proof_symbols,
         mut readonly_objects,
+        load_sites,
     } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -743,10 +744,14 @@ fn main() -> Result<()> {
         );
     }
     if let Some(path) = &args.output_abi {
-        let text = format!(
+        let mut text = format!(
             "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
             output_callee_saved_mask
         );
+        for site in &load_sites {
+            text.push_str(&format!("load_site\t{},{},{}\n",
+                site.offset, site.insn_len, site.destination));
+        }
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
     }
@@ -1098,6 +1103,14 @@ struct RewriteResult {
     proof_relocs: Vec<ProofReloc>,
     proof_symbols: Vec<ProofSymbol>,
     readonly_objects: Vec<ReadonlyObject>,
+    load_sites: Vec<LoadSite>,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+struct LoadSite {
+    offset: u32,
+    insn_len: u16,
+    destination: u16,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -4563,6 +4576,7 @@ fn rewrite_arm64(
         proof_relocs,
         proof_symbols,
         readonly_objects,
+        load_sites: Vec::new(),
     })
 }
 

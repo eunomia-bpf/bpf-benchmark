@@ -1,7 +1,8 @@
 diff --git a/include/linux/bpf.h b/include/linux/bpf.h
+index f547142b7824..aecc703cbc34 100644
 --- a/include/linux/bpf.h
 +++ b/include/linux/bpf.h
-@@ -972,8 +972,6 @@
+@@ -972,17 +972,19 @@ struct bpf_kinsn {
  	u16 native_stack_depth;
  	/* Full verifier-facing native artifact, rather than an instruction slice. */
  	bool native_proof;
@@ -10,7 +11,20 @@ diff --git a/include/linux/bpf.h b/include/linux/bpf.h
  
  	int (*instantiate_insn)(u64 payload, struct bpf_insn *insn_buf);
  
-@@ -993,7 +991,7 @@
++
+ 	int (*emit_x86)(u8 *image, u32 *off, bool emit,
+ 			u64 payload, const struct bpf_prog *prog,
+ 			const u8 *final_ip);
+ 	int (*emit_arm64)(u32 *image, int *idx, bool emit,
+ 			  u64 payload, const struct bpf_prog *prog,
+ 			  const u32 *final_ip);
++    u32 (*num_exentries)(u64 payload);
++    int (*emit_exentries)(u64 payload, void *rw_table, const void *rx_table,
++                         const void *native_ip);
+ };
+ 
+ /* Native artifacts query their generation-bound size with a NULL buffer.
+@@ -993,7 +995,7 @@ static inline int bpf_kinsn_proof_capacity(const struct bpf_kinsn *kinsn, u64 pa
  	int count = kinsn->native_proof ?
  		kinsn->instantiate_insn(payload, NULL) : kinsn->max_insn_cnt;
  
@@ -314,10 +328,36 @@ diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
 +	}
 
 diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
+index 48c49d3cc874..4188041044d9 100644
 --- a/arch/x86/net/bpf_jit_comp.c
 +++ b/arch/x86/net/bpf_jit_comp.c
-@@ -579,7 +579,8 @@
+@@ -577,9 +577,33 @@ static int emit_call(u8 **pprog, void *func, void *ip)
+ 	return emit_patch(pprog, func, ip, 0xE8);
+ }
  
++static u32 kinsn_program_exentries(const struct bpf_prog *prog)
++{
++    u32 count = 0, i;
++    for (i = 0; i < prog->len; i++) {
++        const struct bpf_insn *insn = &prog->insnsi[i];
++        u8 cls = BPF_CLASS(insn->code), mode = BPF_MODE(insn->code);
++        if ((cls == BPF_LDX && (mode == BPF_PROBE_MEM || mode == BPF_PROBE_MEMSX ||
++             mode == BPF_PROBE_MEM32 || mode == BPF_PROBE_MEM32SX)) ||
++            ((cls == BPF_ST || cls == BPF_STX) && mode == BPF_PROBE_MEM32) ||
++            (cls == BPF_STX && mode == BPF_PROBE_ATOMIC))
++            count++;
++        if (insn->code == (BPF_JMP | BPF_CALL) &&
++            insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
++            const struct bpf_kinsn *kinsn;
++            u64 payload;
++            if (!bpf_jit_get_kinsn_payload(prog, insn, &kinsn, &payload) &&
++                kinsn->native_proof && kinsn->num_exentries)
++                count += kinsn->num_exentries(payload);
++        }
++    }
++    return count;
++}
++
  static int emit_kinsn_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
  				const struct bpf_insn *insn, bool emit,
 -				const u8 *final_ip)
@@ -326,7 +366,7 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
  {
  	const struct bpf_kinsn *kinsn;
  	u8 scratch[BPF_MAX_INSN_SIZE];
-@@ -593,6 +594,27 @@
+@@ -593,6 +617,27 @@ static int emit_kinsn_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
  		return ret;
  	if (!kinsn || !kinsn->emit_x86)
  		return -EOPNOTSUPP;
@@ -354,7 +394,7 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
  	if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE)
  		return -E2BIG;
  
-@@ -1813,8 +1835,8 @@
+@@ -1813,8 +1858,8 @@ static int do_jit(struct bpf_prog *bpf_prog, int *addrs, u8 *image, u8 *rw_image
  		s64 jmp_offset;
  		s16 insn_off;
  		u8 jmp_cond;
@@ -365,7 +405,7 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
  
  		if (priv_frame_ptr) {
  			if (src_reg == BPF_REG_FP)
-@@ -2561,7 +2583,8 @@
+@@ -2561,9 +2606,24 @@ st:			if (is_imm8(insn->off))
  			if (src_reg == BPF_PSEUDO_KINSN_CALL) {
  				err = emit_kinsn_desc_call(&prog, bpf_prog, insn,
  							    !!rw_image,
@@ -374,8 +414,24 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
 +							    &native_image, &native_len);
  				if (err)
  					return err;
++                if (rw_image) {
++                    const struct bpf_kinsn *kinsn;
++                    struct exception_table_entry *ex;
++                    u64 payload;
++                    err = bpf_jit_get_kinsn_payload(bpf_prog, insn, &kinsn, &payload);
++                    if (err) return err;
++                    if (kinsn->native_proof && kinsn->emit_exentries) {
++                        ex = &bpf_prog->aux->extable[excnt];
++                        err = kinsn->emit_exentries(payload,
++                            rw_image + ((u8 *)ex - image), ex, ip);
++                        if (err < 0) { kvfree(native_image); return err; }
++                        excnt += err;
++                    }
++                }
  				break;
-@@ -2882,8 +2905,8 @@
+ 			}
+ 			if (src_reg == BPF_PSEUDO_CALL && tail_call_reachable) {
+@@ -2882,8 +2942,8 @@ st:			if (is_imm8(insn->off))
  			return -EINVAL;
  		}
  
@@ -386,7 +442,7 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
  			pr_err("bpf_jit: fatal insn size error\n");
  			return -EFAULT;
  		}
-@@ -2900,10 +2923,12 @@
+@@ -2900,10 +2960,12 @@ st:			if (is_imm8(insn->off))
  			if (unlikely(proglen + ilen > oldproglen ||
  				     proglen + ilen != addrs[i])) {
  				pr_err("bpf_jit: fatal error\n");
@@ -400,3 +456,11 @@ diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
  		proglen += ilen;
  		addrs[i] = proglen;
  		prog = temp;
+@@ -3931,6 +3993,7 @@ struct bpf_prog *bpf_int_jit_compile(struct bpf_prog *prog)
+ 	 * may converge on the last pass. In such case do one more
+ 	 * pass to emit the final image.
+ 	 */
++	prog->aux->num_exentries = kinsn_program_exentries(prog);
+ 	for (pass = 0; pass < MAX_PASSES || image; pass++) {
+ 		if (!padding && pass >= PADDING_PASSES)
+ 			padding = true;

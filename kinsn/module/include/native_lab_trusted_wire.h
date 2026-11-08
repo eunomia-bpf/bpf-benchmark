@@ -110,6 +110,14 @@ struct native_lab_trusted_map {
 /* Service-created immutable linked chunk. Counts describe copied spans.
  * chunk_id is allocated by the kernel and names that allocation for its life.
  */
+/* PC is relative to the emitted native chunk. Register indices use the
+ * target ISA encoding; 0xffff selects the stock resume-only fixup. */
+#define NATIVE_LAB_LOAD_RESUME_ONLY 0xffffU
+struct native_lab_load_site {
+    __u32 offset;
+    __u16 insn_len;
+    __u16 destination;
+};
 struct native_lab_trusted_chunk {
     __u64 request_id;
     __u64 native_user;
@@ -119,6 +127,9 @@ struct native_lab_trusted_chunk {
     __u32 reloc_count;
     __u32 proof_insns;
     __u32 chunk_id;
+    __u64 load_sites_user;
+    __u32 load_site_count;
+    __u32 reserved;
 };
 #define NATIVE_LAB_TRUSTED_CHUNK _IOWR('N', 0x78, struct native_lab_trusted_chunk)
 #endif
