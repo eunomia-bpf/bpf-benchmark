@@ -1,0 +1,88 @@
+{
+  "utc": "2026-11-08T23:06:21.412822+00:00",
+  "scope": "Load-only LSM annotation comparison on each captured kernel; actual physical BTF qualification remains part of the entry relation",
+  "rows": [
+    {
+      "arch": "ARM64",
+      "path": "original stock BPF",
+      "program": "no_null_check",
+      "stage": "installed",
+      "target_btf_id": 70008,
+      "parameter": "file",
+      "publication": "48cbe1bf9acb4c23573a397a1dddcd571aa3778e",
+      "verifier_log": "processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+    },
+    {
+      "arch": "ARM64",
+      "path": "original stock BPF",
+      "program": "null_check",
+      "stage": "installed",
+      "target_btf_id": 70008,
+      "parameter": "file",
+      "publication": "48cbe1bf9acb4c23573a397a1dddcd571aa3778e",
+      "verifier_log": "processed 7 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+    },
+    {
+      "arch": "ARM64",
+      "path": "native source0",
+      "program": "no_null_check",
+      "stage": "installed",
+      "target_btf_id": 70008,
+      "parameter": "file",
+      "publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+      "request_id": 260,
+      "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124"
+    },
+    {
+      "arch": "ARM64",
+      "path": "native source0",
+      "program": "null_check",
+      "stage": "installed",
+      "target_btf_id": 70008,
+      "parameter": "file",
+      "publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+      "request_id": 261,
+      "native_sha256": "19dd519dd9375034c4af9f021d8a230218b882d65dfc1f5e345749e5b4bf1529"
+    },
+    {
+      "arch": "x86-64",
+      "path": "original stock BPF",
+      "program": "no_null_check",
+      "stage": "load_rejected",
+      "target_btf_id": 71327,
+      "parameter": "file__nullable",
+      "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623"
+    },
+    {
+      "arch": "x86-64",
+      "path": "original stock BPF",
+      "program": "null_check",
+      "stage": "installed",
+      "target_btf_id": 71327,
+      "parameter": "file__nullable",
+      "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623"
+    },
+    {
+      "arch": "x86-64",
+      "path": "native source0",
+      "program": "no_null_check",
+      "stage": "verifier_rejected",
+      "target_btf_id": 71327,
+      "parameter": "file__nullable",
+      "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623"
+    },
+    {
+      "arch": "x86-64",
+      "path": "native source0",
+      "program": "null_check",
+      "stage": "installed",
+      "target_btf_id": 71327,
+      "parameter": "file__nullable",
+      "publication": "a3e3e0f9d8d51eefd3d3c9eafc74415db681f623"
+    }
+  ],
+  "ARM_runtime_btf_sha256": "5ecb19368498893d000bf482a2ff3f09493c62b065b2e7bf4a8089efb30b1b8b",
+  "conclusion": "ARM stock and native paths both install the two fixtures with file qualification; matched x86 stock and native paths both reject no_null_check and install null_check with file__nullable qualification. Cross-architecture stage difference tracks paired-kernel metadata. Native architectural-fault correspondence remains a separate universal obligation.",
+  "runtime_admission_additions": 0,
+  "native_executions": 0
+}

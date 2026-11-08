@@ -136,7 +136,24 @@
     "proposed_metadata_alignment": "Represent the physical nullable LSM argument as file__nullable in the owning captured ARM kernel hook prototype; existing btf_ctx_access nullability logic then supplies the matching qualification",
     "scope": "ABI/BTF contract alignment for every invocation of this hook; actual candidate would use the retained warm ARM kernel and paired module build",
     "operator_approval": "Requested before introducing changed qualification into kernel inputs",
-    "separate_obligation": "Generic fault correspondence for ordinary BTF accesses remains part of faithful simulation independently of this hook metadata"
+    "separate_obligation": "Generic fault correspondence for ordinary BTF accesses remains part of faithful simulation independently of this hook metadata",
+    "ARM_original_stock_baseline": {
+      "publication": "48cbe1bf9acb4c23573a397a1dddcd571aa3778e",
+      "rows": [
+        {
+          "program": "no_null_check",
+          "stage": "installed",
+          "target_btf_id": 70008
+        },
+        {
+          "program": "null_check",
+          "stage": "installed",
+          "target_btf_id": 70008
+        }
+      ],
+      "runtime_btf_sha256": "5ecb19368498893d000bf482a2ff3f09493c62b065b2e7bf4a8089efb30b1b8b"
+    },
+    "observed_stage_relation": "Both paths agree within each paired kernel; ARM failure annotation keeps installed stage and x86 failure annotation keeps rejection stage"
   },
   "updated_utc": "2026-11-08T22:59:13.971501+00:00"
 }
