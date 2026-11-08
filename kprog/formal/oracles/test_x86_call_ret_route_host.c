@@ -192,6 +192,49 @@ dispatch:
 	return got;
 }
 
+/* Complete emitted-CALL frame: the saved word, numeric/raw/tag cells,
+ * vector, flags and every stack byte survive the exact branch transfer. */
+static unsigned long frame_cases;
+static __u8 native_call_stack[X86_SIM_STACK_BYTES];
+static void probe_call_frame(__u64 saved, unsigned depth, unsigned fs, unsigned profile)
+{
+ DECL_STATE();
+ __x86_native_stack_base=(__u64)(long)&native_call_stack[X86_SIM_STACK_BYTES];
+ __u64 before[16], raw[16]; __u8 tags[16], expected[X86_SIM_STACK_BYTES];
+ __u64 vector_lo=0x1122334455667788ULL^saved, vector_hi=~vector_lo;
+ for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++)__x86_stack_mem.b[i]=expected[i]=(__u8)(i*137+29);
+ for(unsigned r=0;r<16;r++) {
+  unsigned kind=(r+profile)%4;
+  __u8 tag=kind==1?X86_SIM_TAG_ABI:kind==2?X86_SIM_TAG_STACK:kind==3?X86_SIM_TAG_CODE:X86_SIM_TAG_SCALAR;
+  void *value=kind==2?(void *)&__x86_stack_mem.b[(r*3+profile)%(X86_SIM_STACK_BYTES-8)]:(void *)(long)(0x1020304050607080ULL+r*0x100020003ULL);
+  X86_SIM_L_WRITE_REG_PTR_TAG(r,value,tag);
+ }
+ __x86_rsp.ptr=(void *)(long)-(__s64)depth;
+ __x86_cf=!!(fs&1);__x86_pf=!!(fs&2);__x86_af=!!(fs&4);__x86_zf=!!(fs&8);__x86_sf=!!(fs&16);__x86_of=!!(fs&32);
+ __x86_xmm0_lo=vector_lo;__x86_xmm0_hi=vector_hi;
+ for(unsigned r=0;r<16;r++){before[r]=X86_SIM_L_READ_REG(r);raw[r]=(__u64)(long)X86_SIM_L_REG_VALUE(r);tags[r]=X86_SIM_L_REG_TAG(r);}
+ unsigned at=X86_SIM_STACK_BYTES-depth-8;
+ for(unsigned i=0;i<8;i++)expected[at+i]=(__u8)(saved>>(8*i));
+ goto dispatch;
+arrived:
+ frame_cases++;
+ for(unsigned r=0;r<16;r++) {
+  __u64 delta=r==X86_RSP?8:0;
+  if(X86_SIM_L_READ_REG(r)!=before[r]-delta||(__u64)(long)X86_SIM_L_REG_VALUE(r)!=raw[r]-delta||X86_SIM_L_REG_TAG(r)!=tags[r]) {
+   printf("CALL full register frame r=%u depth=%u flags=%u profile=%u\n",r,depth,fs,profile);failures++;return;
+  }
+ }
+ for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++)if(__x86_stack_mem.b[i]!=expected[i]) {
+  printf("CALL full stack image byte=%u depth=%u\n",i,depth);failures++;return;
+ }
+ if(__x86_xmm0_lo!=vector_lo||__x86_xmm0_hi!=vector_hi||__x86_cf!=!!(fs&1)||__x86_pf!=!!(fs&2)||__x86_af!=!!(fs&4)||__x86_zf!=!!(fs&8)||__x86_sf!=!!(fs&16)||__x86_of!=!!(fs&32)) {
+  printf("CALL full flag/vector frame depth=%u\n",depth);failures++;
+ }
+ return;
+dispatch:
+ X86_SIM_X86_CALL(arrived,saved);
+}
+
 int main(void)
 {
 	static const __u64 rets[] = {
@@ -349,6 +392,12 @@ int main(void)
 		}
 	}
 
+ {
+  static const __u64 words[]={0,1,0xff,0x100,0x7fff,0x8000,0x7fffffff,0x80000000ULL,0x7fffffffffffffffULL,0x8000000000000000ULL,0xffffffffffffffffULL,0x1122334455667788ULL,0x00ff00ff00ff00ffULL};
+  for(unsigned n=0;n<sizeof(words)/sizeof(words[0]);n++)for(unsigned depth=0;depth<64;depth+=8)for(unsigned fs=0;fs<64;fs++)for(unsigned profile=0;profile<4;profile++)
+   probe_call_frame(words[n],depth,fs,profile);
+  printf("x86 CALL full frame cross-check: %lu cases\n",frame_cases);
+ }
 	if (failures) {
 		printf("x86 call/ret route host cross-check: FAIL (%d/%lu)\n",
 		       failures, cases);

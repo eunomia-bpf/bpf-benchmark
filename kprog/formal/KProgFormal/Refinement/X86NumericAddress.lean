@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Call
 import KProgFormal.Refinement.X86RepMovs
 import KProgFormal.Refinement.X86Xmm0
 import KProgFormal.Refinement.X86Push
@@ -2975,6 +2976,53 @@ theorem rep_memory_frame_step_refines (env : Environment) (frame : Frame) (arena
     Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state)
       (repMemoryFrame env frame arena state width count nextPc) := by
   rw [rep_memory_frame_refines env frame arena state width count nextPc bound counter direction successful]
+  exact ⟨rfl, rfl, rfl⟩
+
+/-- The emitted internal CALL decrements the raw stack offset, stores its
+saved return word and selects its linked target label. -/
+def callLabelFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (target savedReturn : NativeWord) : Transition Reference.X86.State :=
+  let address := registerValue env frame arena state 4 - 8
+  let advanced := advanceStack state (-8)
+  let memory := X86Push.store .w64 state.raw.memory address savedReturn
+  ⟨nativeRegisters env frame arena (registerPc (registerMemory advanced memory) target),
+    [.memory .write address (valueBytes savedReturn 8) true], none⟩
+
+theorem call_label_frame_success (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (target savedReturn : NativeWord) :
+    callLabelFrame env frame arena state target savedReturn =
+      X86Call.callSuccess target savedReturn [] (nativeRegisters env frame arena state) := by
+  simp only [callLabelFrame, X86Call.callSuccess, native_register_pc, native_register_memory, native_advance_stack]
+  have advanced : registerValue env frame arena state 4 + (-8) = registerValue env frame arena state 4 - 8 := by
+    generalize registerValue env frame arena state 4 = value
+    clear env frame arena state target savedReturn
+    bv_decide
+  change (⟨{ nativeRegisters env frame arena state with
+      gpr := fun r => if r = 4 then registerValue env frame arena state 4 + (-8) else registerValue env frame arena state r,
+      memory := X86Push.store .w64 state.raw.memory (registerValue env frame arena state 4 - 8) savedReturn,
+      pc := target }, [.memory .write (registerValue env frame arena state 4 - 8) (valueBytes savedReturn 8) true], none⟩ :
+      Transition Reference.X86.State) = _
+  rw [advanced]
+  rfl
+
+/-- Linked-label and saved-return words use the same code coordinate as the
+reference call. Step(e)'s link relation supplies their materialized addresses. -/
+theorem call_label_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (target savedReturn : NativeWord)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth target = true)
+    (writable : permitted state.raw.memory.writable (registerValue env frame arena state 4 - 8) 8 = true) :
+    callLabelFrame env frame arena state target savedReturn =
+      Reference.X86.step (.call (.immediate target) savedReturn) (nativeRegisters env frame arena state) := by
+  rw [call_label_frame_success]
+  exact X86Call.call_success_refines (.immediate target) target savedReturn [] _ rfl canonical writable
+
+theorem call_label_frame_step_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (target savedReturn : NativeWord)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth target = true)
+    (writable : permitted state.raw.memory.writable (registerValue env frame arena state 4 - 8) 8 = true) :
+    Reference.X86.Step (.call (.immediate target) savedReturn) (nativeRegisters env frame arena state)
+      (callLabelFrame env frame arena state target savedReturn) := by
+  rw [call_label_frame_refines env frame arena state target savedReturn canonical writable]
   exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86NumericAddress

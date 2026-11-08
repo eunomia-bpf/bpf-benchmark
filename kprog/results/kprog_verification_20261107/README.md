@@ -14,19 +14,19 @@ specialization token also has its own row.
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
 | Addressed memory model / composed step | 29/75 | 0/71 |
-| Additional partial-model handler families | 2/75 | 0 |
+| Additional partial-model handler families | 1/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
-| Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 65/75 | 71/71 |
+| Control handler model / composed step | 3/75 | 0/71 |
+| O2 C-model token-body equality | 66/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 65 x86 O2 equalities cover46 direct bodies, seventeen generic calls and two
+The 66 x86 O2 equalities cover46 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining2 x86 reference-family handlers have partial model proofs; eight
+The remaining x86 reference-family RET handler has a partial model proof; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -102,6 +102,12 @@ generic token. Sequential scalar memory order preserves overlap and aliases;
 RSI/RDI advance with their original tags and numeric STACK projections, and
 RCX receives scalar64 zero. Complete vector/flags/profile/control state and
 the physical-memory/native-normalization/compiler/ABI interfaces persist.
+The internal CALL branch token also composes its full64 saved-return word,
+raw RSP decrement8, exact stack store and target-label transfer through the
+extended dispatcher. Native canonical-target and stack-access premises belong
+to the ISA relation. The functional link relation in step(e) supplies code
+coordinates, materialized PCs and return-slot memory correspondence; physical
+memory, compiler/invocation and ABI remain explicit interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4322,3 +4328,23 @@ diagnostics are archived under `X86_REP_MEMORY_TOKENS_V1`.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_273765717`. Every check retains its exact published source identity.
+
+### Internal CALL numeric frame and branch token
+
+`x86_call_label_token` composes the full64 saved-return word, raw RSP decrement8,
+exact stack store and linked target label through the extended dispatcher and
+branch token. Ten public axiom audits, default Lean build, specialization
+generator, macro hygiene and oracle composition exit0. The existing C route
+oracle adds26624 complete numeric/raw/tag/vector/flag/stack-frame UBSan cases
+and retains all13 original call/return cases. Prior theorem prefixes persist
+with the CALL-core import. Current x86 O2 C-model coverage is66/75:46 direct,
+17 generic,3 branch.
+
+This simulation work implements step(c); the functional link relation in
+step(e) supplies linked-code/native-PC and return-slot memory correspondence.
+Canonical target and writable stack are ISA premises. Physical memory and
+compiler/invocation/ABI relations retain their explicit scope. Captured C-source epochs remain distinct during the shared design cleanup.
+The frozen captured C epoch also exits0; its CALL primitive matches the current
+primitive. Original fixture bounds, proof simplification and source-epoch
+transition diagnostics, corrected checks, binaries and
+source snapshots are archived under `X86_CALL_LABEL_TOKEN_V1`.
