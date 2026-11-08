@@ -4328,6 +4328,28 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_234b8e8ef": {
+    "actual_exit": 0,
+    "archive_block_sha256": "3ca162f2ee3f9825f421bac11d7cb56040fb96c58539c8c78b1cb4c9c0f14e40",
+    "archive_marker": "=== FULL MAKE CHECK 234B8E8EF PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.cpu.jsonl.gz": "2f78375eea401b61f4f0d55758148a4242e0dec38e67ace21a480e12c5df5534",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.head": "314bccf5cdac7ab55c7b15a8857f74ad56fd2f413e2a9447164d7a132f1bcd45",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.launch.log": "5b86c8e33961112d2b316d6f8d81e0e85124e817d2e8cf6f482a9f6b6aa59063",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.log": "69d56d4142ab720dc9d866da480c4b6dccbe254dc6da8c1b69d7a810f72a25d6",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.pid": "d0587c8b87b945321e83415dd6a7fadaf4a3e22fad60aec216991313f4ab0ac3",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.process.json": "67dd3ad736743ea8cc9a8ba76c425d18fdb607f4ea111704bdb58ede7a836af2",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.py": "be4b2ee43fbb9f9e2ab017c5461cc3b401e062354123859c0971f868bdfa6959",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.sources": "2220cfef295745da35ceeebcd3f8a7f73ba6bec17e20530d58e980cb5b3373dd",
+      "/workspaces/.agent-state/kprog-lanes/V/alusource-full.state": "43e7f5cda28496e424accf4338b806adbebfabaa6851db22b2b959a5546548a5"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "234b8e8ef33e00463a1447704c1dc1999ba64980",
+    "scope": "Complete formal make check of the exact published source tree 234b8e8ef33e00463a1447704c1dc1999ba64980. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1164
+  },
   "full_make_check_23a3cfde9": {
     "actual_exit": 0,
     "archive_block_sha256": "cff557e96e9ed27e414472f4ad201cf31ffe487823c9114a0d6ca8f698bdc734",

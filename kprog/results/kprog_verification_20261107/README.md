@@ -4032,3 +4032,10 @@ physical memory, C/compiler, ABI and native-link interfaces retain their
 universal completion steps. The `x86_imul_memory_token` receipt and
 `X86_IMUL_MEMORY_TOKEN_V1` raw block pin224 source inputs and their checks.
 O2 C-model totals are53/75 x86 (41direct/10generic/2branch) and71/71 ARM.
+
+### Published source full check 234b8e8ef
+
+`make check` on immutable published234b8e8ef exits0. All1164 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_234b8e8ef`. Every check retains its exact published source identity.
