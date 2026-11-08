@@ -1,0 +1,3 @@
+# Whole paired-source Tracee with existing size clamps
+
+Source d920fbca5 keeps the size value through empty read/write register asm before the four original update_min operations. Original bounds, helper-boundary reload and earlier checked string-offset operation retain their semantics. Both frontends read the same selected C tree and the embedded binary consumes that JIT BPF. Paired native/JIT/binary builds0. Model0818 captures RAW/helper source; original application/workload are retained. Actual G/C/I/failed(0, 0, 0, 0); Makeexit0. All native/C/B/compiler/verifier/service and raw work records accompany this cohort. Runtime admission additions0.
