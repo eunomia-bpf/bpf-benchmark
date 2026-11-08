@@ -1579,6 +1579,91 @@
       "stable_input_count": 175
     }
   },
+  "arm_approved_fault_oracle_profiles": {
+    "archive_compressed_prefix_bytes": 95472288,
+    "archive_compressed_prefix_sha256": "fdc2ce16395ae7adf0ccb81698db519017c67fb240cb864bf47b15b8b55003bc",
+    "archive_entries": 24,
+    "archive_marker": "ARM_APPROVED_FAULT_ORACLE_PROFILES_V1",
+    "archive_raw_bytes": 575818,
+    "archive_raw_sha256": "15982aa4433a440653259af018d03476225284715a9e7dd4044a7b7531365231",
+    "initial_components": [
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-a64_route_host.log",
+        "name": "a64_route_host"
+      },
+      {
+        "exit": 2,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-ldrsx_route_host.log",
+        "name": "ldrsx_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-pair_route_host.log",
+        "name": "pair_route_host"
+      },
+      {
+        "exit": 2,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-stlxr_route_host.log",
+        "name": "stlxr_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_dispatch_family_route_host.log",
+        "name": "test_arm64_dispatch_family_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_dispatch_singleton_route_host.log",
+        "name": "test_arm64_dispatch_singleton_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_dq_mem_route_host.log",
+        "name": "test_arm64_dq_mem_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_ldrsx_op_route_host.log",
+        "name": "test_arm64_ldrsx_op_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_mem_prepost_route_host.log",
+        "name": "test_arm64_mem_prepost_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_mem_write_arm_route_host.log",
+        "name": "test_arm64_mem_write_arm_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_pair_mem_route_host.log",
+        "name": "test_arm64_pair_mem_route_host"
+      },
+      {
+        "exit": 0,
+        "log": "/workspaces/.agent-state/kprog-lanes/V/arm-fault-component-test_arm64_reg_dispatch_route_host.log",
+        "name": "test_arm64_reg_dispatch_route_host"
+      }
+    ],
+    "initial_passing_components": 10,
+    "original_main_case_tables_and_loops_preserved": true,
+    "production_epoch": "02d14cb0a800df65aff834c3797d5cb02f4bdafe",
+    "production_fault_model": "500abe542929fa32a75301f51de8b13c086e3c02",
+    "scope": "Existing overlapping writeback/status cases now expect the approved architectural fault. Host-only fault observation exits the operation immediately and compares the original full register/tag/SP/memory state; successful paths and selector checks retain their domains. Production runtime changes0.",
+    "source_sha256": {
+      "kprog/arm64/arm64_sim.h": "a110ba33c435a770bd90d92743254637fc12a65ae6be3c8e5d2d45c40cef6d75",
+      "kprog/arm64/arm64_sim_direct.h": "7c6f6c566f449706e956f7c414147bbc5c50f8ace4081ce7d6755983ca17b02d",
+      "kprog/arm64/arm64_sim_local_bpf.h": "34255218ee857bf1d429f81888a379d7630c6b214a66ece8ea592eb6c97dde68",
+      "kprog/formal/oracles/ldrsx_route_host.c": "6497c048f072e7e3c7d1c15d0a36e98ccbec4e63fd5a91cb7dad4c3903df5dcd",
+      "kprog/formal/oracles/stlxr_route_host.c": "a75a23727f3cdf8329f76c6f6a6b8aef0db2f13e4e22b9531d0dd1a2c6231e9e"
+    },
+    "updated_ldrsx_cases": 2315529,
+    "updated_stlxr_cases": 686110,
+    "updated_ubsan_exit": 0
+  },
   "arm_immediate_alias_f051_epoch": {
     "adopted_source": "f0517e4931be058ddd8ce0d0df87612ee3ffb250",
     "all17_alias_sources_in_full_manifest": true,

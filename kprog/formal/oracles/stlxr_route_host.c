@@ -199,6 +199,12 @@ static void model_stlxr(unsigned op, unsigned dst, unsigned src,
 		model_unsupported();
 		return;
 	}
+	/* Arm DATAOVERLAP, BASEOVERLAP and incoming SP alignment. */
+	if (dst == src || (base != ARM64_SP && dst == base) ||
+	    (base == ARM64_SP && ((__u64)msp & 15U))) {
+		model_unsupported();
+		return;
+	}
 	(void)aux;
 	if (!failure)
 		model_mem_write(base, width, m_reg(src), m_rtag(src));
@@ -328,6 +334,11 @@ static void model_stlxr(unsigned op, unsigned dst, unsigned src,
 /* FLAGS carries the raw width code the dispatcher resolves; zero falls back
  * to the 64-bit default inside the dispatcher. AUX is the packed memory
  * operand byte word; the arm keeps the zero immediate for every aux. */
+/* Faults transfer directly to observation, preserving the complete frame
+ * at the architectural fault point. Selector probes keep their counting hook. */
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() \
+    ({ arm64_sim_unsupported_opcode(); goto observe_fault; })
 static void check_case(unsigned op, unsigned dst, unsigned src,
 		       unsigned base, unsigned flags, __u32 aux, unsigned via)
 {
@@ -359,6 +370,9 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 		/* The direct lane replays the arm's own two-statement body
 		 * against the same planted state. */
 		do {
+			if (dst == src || (base != ARM64_SP && dst == base))
+				ARM64_SIM_L_UNSUPPORTED_OPCODE();
+			ARM64_SIM_L_SP_ALIGNMENT(base);
 			if (!NATIVE_LAB_EXCLUSIVE_FAILURE(0))
 			ARM64_SIM_L_MEM_WRITE(base, ARM64_REG_NONE, aux, 0, 0,
 					      width,
@@ -373,6 +387,7 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 		 * arm once, like the exec lane. */
 		ARM64_SIM_L_UNSUPPORTED_OPCODE();
 
+observe_fault:
 	cases++;
 	if (unsupported_calls != u0 + (model_unsupported_calls - mu0)) {
 		printf("MISMATCH op=%#x dst=%u src=%u base=%u width=%u "
@@ -410,6 +425,9 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 
 	COMPARE_REG_STATE(op, dst, src, base, width, aux, via);
 }
+
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() arm64_sim_unsupported_opcode()
 
 /* The value selector: the generated status macro must return the painted
  * result for the known opcode and reach the caller hook exactly once for

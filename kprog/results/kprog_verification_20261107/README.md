@@ -4758,3 +4758,16 @@ their preservation across RET. Its13 existing route cases,26624 CALL frame
 cases and569088 SUB_RET frame/switch cases pass with UBSan. The separate
 zeroed ABI mirror remains present, so a stale-mirror write changes the observed
 context. Receipt `x86_ret_live_context_preservation` retains this component.
+
+### Approved Arm fault profiles in existing oracles
+
+Twelve existing operation/dispatcher components against approved model
+`500abe542` initially give10passes and two fixture mismatches: LDRSX
+writeback overlap and STLXR status/data/base overlap. Their existing cases
+now observe the architectural fault before operation effects and compare
+the complete original register/tag/SP/memory frame. All original case
+tables and loops remain byte-identical. The corrected LDRSX2315529 and
+STLXR686110 checks pass with UBSan; the other ten components retain their
+passing outcomes. Archive `arm_approved_fault_oracle_profiles` retains every
+original/corrected output and source pin. These are semantic oracle updates
+for the operator-approved fault model.

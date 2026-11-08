@@ -292,6 +292,13 @@ static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		return;
 	}
 
+	/* Arm WBOVERLAPLD and CheckSPAlignment precede memory/writeback. */
+	if (((AUX_FLAGS(aux) & 3U) && src != ARM64_SP && src == dst) ||
+	    (src == ARM64_SP && ((__u64)msp & 15U))) {
+		model_unsupported();
+		return;
+	}
+
 	if (AUX_FLAGS(aux) & ARM64_MEM_PRE)
 		model_writeback(src, imm);
 
@@ -439,6 +446,11 @@ static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
  * to the 64-bit default inside the dispatcher. AUX is the packed memory
  * operand byte word: PRE/POST flags at AUX [31:24] and the rotated-mod suffix
  * at AUX [15:8] and AUX [7:0], matching the checker's own restatement. */
+/* Faults transfer directly to observation, preserving the complete frame
+ * at the architectural fault point. Selector probes keep their counting hook. */
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() \
+    ({ arm64_sim_unsupported_opcode(); goto observe_fault; })
 static void check_case(unsigned op, unsigned dst, unsigned base,
 		       unsigned index, unsigned flags, __u32 aux, __s64 imm,
 		       unsigned via)
@@ -477,6 +489,7 @@ static void check_case(unsigned op, unsigned dst, unsigned base,
 			__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(
 				flags);
 
+			ARM64_SIM_L_WRITEBACK_OVERLAP((base), (dst), (aux));
 			ARM64_SIM_L_MEM_PRE((base), (aux), (imm));
 			{
 				__u64 __a64_l_value = ARM64_SIM_L_MEM_READ(
@@ -499,7 +512,8 @@ static void check_case(unsigned op, unsigned dst, unsigned base,
 		 * arm once, like the exec lane. */
 		ARM64_SIM_L_UNSUPPORTED_OPCODE();
 
-	if (member) {
+observe_fault:
+	if (member && model_unsupported_calls == mu0) {
 		cases++;
 		if (unsupported_calls != u0) {
 			printf("MISMATCH op=%#x dst=%u base=%u index=%u "
@@ -545,6 +559,9 @@ static void check_case(unsigned op, unsigned dst, unsigned base,
 	COMPARE_MEM_STATE();
 	COMPARE_REG_STATE(op, dst, base, index, flags, imm, via);
 }
+
+#undef ARM64_SIM_L_UNSUPPORTED_OPCODE
+#define ARM64_SIM_L_UNSUPPORTED_OPCODE() arm64_sim_unsupported_opcode()
 
 /* The derived-sign-opcode selector: the generated macro must map each load
  * opcode to the SX* opcode the checker derives itself, must reach the caller
