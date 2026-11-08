@@ -1,0 +1,43 @@
+{
+  "created": "2026-11-08T04:01:31.291999+00:00",
+  "predecessor_pid": 254066,
+  "predecessor_command": "python3 /workspaces/.agent-state/kprog-lanes/C/host-compile-otel/host-controller.py ",
+  "application": "cilium/agent",
+  "cpus": "20-23",
+  "memory": "12G",
+  "vcpus": 8,
+  "kernel_btf_sha256": "3d6e206dcd892a81fbb19ab857138ba6e562d1d81e227672b9b5f7cd5bc6f49e",
+  "member": {
+    "name": "data_len",
+    "type": 122977,
+    "bit_offset": 928
+  },
+  "change": "Native skb data_len reads use the actual kernel context field through bpf_cast_to_kern_ctx and the existing fixed-width raw load",
+  "native_workload": "captured original upstream application and native inputs",
+  "sha256": {
+    "Makefile": "287ed323c034abd38cfd864102ac379cfeb0b51be3efa8924b1e9a80840c7143",
+    "Dockerfile": "0c921058bf39028dc43af565a3b66a52f06f41f81dc8e53f741999c1e06205a8",
+    "run.sh": "009aadf072510e2e882f50b794c9d00249111d0f8b6bb14d9b97768477c87048",
+    "queue.py": "f3914fa88622a7944145ac5a247d909af53cea55ef0d3f3300e0681ee687f600",
+    "guest.py": "97ef37977fd87e9d246694f3b6fdb8c2b2c505290fa1571305f11495ce5ed6d8",
+    "guest-before.py": "eebab553094964f857d5f538837812769fffc3c4f1d1c8f9fc1175ca8c755a83",
+    "collect.py": "c322947d67a48b6ab188dacea4dfe38bbbbc14320c31e8c3caf269d4095a57d3",
+    "candidate.h": "2126503bb7af9a7465391b1f73fa0c2d404b912b9d9d679e3a7ce25362b92ff4",
+    "clang-candidate": "ceef8310dea6b38826ecd2e2d12efdcb6b95b72dce1993310f3aa2c0604dca52",
+    "abi_load.h": "b640bf8b9e6e8db9955b801b6822802347155acad52b56fd82e9e9a31e1dba8f",
+    "skb_abi.h": "dc2ef76755aa8711705b8fe0faaf8357beb054609943ba9250c293fd2db0c20f",
+    "helper.h": "1753ebe72ea80b0f49b70ab577030f2d05e674bea5ee72dafe04d8a36a2453ae",
+    "native-link-readonly-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
+    "trusted-native-loader": "005b89dbf7b4570867ce27bb04fba0cb1ea4f280e91eb3e1449b97e140e6b262",
+    "libnative_loader.so": "11cb214901ae9f778103974106af607bf85cfd392a5b69ce864992229a274ae2",
+    "base-image.json": "6c590d42538f50ba01ce685f9c677274a59b20c723ca6189ca8dffd04d61ecb4",
+    "transport-inputs.json": "913365f1e12d2a0000a084cfa4b9e478898cbe639b048db5665a53c3759a6bf4",
+    "module.ko": "bb38537701ae06af25b8d2fc0d27b2e8a7855f2875d88b8f290c6bec069e4c57",
+    "module-identities.json": "fed3c258b58dda682334f103917918f3dcd260b567d758ebcf3f66ed9d7c1644",
+    "kernel-build-inputs.json": "b946a57f78fc2dd4412b5bd3c2d58aeeb0113c5c1e5f076913d0e187849db1fd"
+  },
+  "inputs_archive_sha256": "bc1f0a1c9a01df25f83dc8f51cce4cf05c7ad183cf8f3eeab9f5553c5a72b991",
+  "queue_pid": 308743,
+  "syntax_check": "fourPython files and shell PASS",
+  "runtime_make_dry_run": 0
+}
