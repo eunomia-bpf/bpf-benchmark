@@ -4,11 +4,11 @@ The table records the latest closed whole-application attempt, including setup a
 
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
-| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
+| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
 | OTel | 13 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
 | Cilium | 62 resident | 1 | 0 | 0 | 1: missing C body for helper189, bpf_xdp_load_bytes | 0 | [matched-module cohort](xdp-load-helper/README.md) |
 | Tetragon | 287 resident | 1 | 0 | 0 | 1: compiler transport, guest broker read-only | 0 | [five-step replay](five-step-x86-replay/README.md) |
-| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
 | Tracee | 151 resident | 2 | 2 | 1 | 0 | 1: R2 scalar memory access after242instructions | [matched-module cohort](xdp-load-helper/README.md) |
 
 Current detached work runs complete Cilium and Tracee with the final-vmlinux module package, captured sources and a writable shared compiler directory; complete Tetragon and OTel follow with their own compiler lifecycle. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
@@ -49,3 +49,5 @@ The [complete Cilium selected-skb cohort](cilium-owned-skb-053636/README.md) ins
 The [five-step x86 replay](five-step-x86-replay/README.md) retains the completed38-case safety outcomes, all four original whole-application setup attempts, captured compiler inputs and842matching standard modules. All38 safety and3 application native hashes match their terminal records. The kernel image/vmlinux hashes stay equal across the incremental module refresh. Historical whole-application receipts retain OTel5generated/4installed, Cilium2generated/1installed, Tetragon4generated/3installed and Tracee6generated/5installed on their captured earlier source epochs. Corrected five-step cohorts supply the ensuing coverage and work receipts.
 
 The [XDP byte-load helper extension](xdp-load-helper/README.md) adds Linux189 to the existing68-row C/JSON/Lean dispatcher. Existing4100ID/18946typed-ABI observations, both helper Lean modules and29+1micro compile controls pass. Complete matched-module Cilium reaches that missing-body frontier; Tracee installs its first program and reaches the later R2 scalar read. The successor runs the entire original Cilium application with the extended snapshot.
+
+The [final BCC/Katran five-step cohort](bcc-katran-five-step/README.md) completes26/26 actual native loads and both original workloads. BCC syscall work is514in each arm. Katran processes2523084JIT/2455449native packets with matching per-arm BPF/VIP/LRU/TX counts and0LRU misses; native delivery accounts for2452337received+2550TX-interface+562RX-interface packets. All26native request-object hashes match the prior five-step cohort. R retains the existing timing snapshots and native-source decision.
