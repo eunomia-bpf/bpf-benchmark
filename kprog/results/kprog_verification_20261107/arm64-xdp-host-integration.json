@@ -13576,6 +13576,95 @@
     "scope": "Live Workspace suffix diagnostics and corrected existing fixtures; the immutable full check retains its separate published source manifest. ARM modeled faults use the approved writeback-store and exclusive-status overlap classes.",
     "ubsan_mov_load_and_arm_memory_tokens": true
   },
+  "lsm_context_nullability_entry_premise": {
+    "current_workspace_source_excerpts": [
+      {
+        "excerpt": "/**\n * security_mmap_file() - Check if mmap'ing a file is allowed\n * @file: file\n * @prot: protection applied by the kernel\n * @flags: flags\n *\n * Check permissions for a mmap operation.  The @file may be NULL, e.g. if\n * mapping anonymous memory.\n *\n * Return: Returns 0 if permission is granted.\n */\nint security_mmap_file(struct file *file, unsigned long prot,\n\t\t       unsigned long flags)\n{\n\treturn call_int_hook(mmap_file, file, prot, mmap_prot(file, prot),\n\t\t\t     flags);\n}",
+        "first_line": 2490,
+        "last_line": 2506,
+        "path": "vendor/linux-framework/security/security.c",
+        "sha256": "c18c4fb16f63e55d47d8b577c5e64e46069fc405d3e5acdecbc48fcac682be37"
+      },
+      {
+        "excerpt": "\tinfo->reg_type = PTR_TO_BTF_ID;\n\tif (prog_args_trusted(prog))\n\t\tinfo->reg_type |= PTR_TRUSTED;\n\n\tif (btf_param_match_suffix(btf, &args[arg], \"__nullable\"))\n\t\tinfo->reg_type |= PTR_MAYBE_NULL;",
+        "first_line": 6953,
+        "last_line": 6958,
+        "path": "vendor/linux-framework/kernel/bpf/btf.c",
+        "sha256": "4de4039c021f5219987546b239dac28e921d225ea3d77dfe54bde235e1b10934"
+      },
+      {
+        "excerpt": "LSM_HOOK(int, 0, mmap_file, struct file *file, unsigned long reqprot,\n\t unsigned long prot, unsigned long flags)",
+        "first_line": 199,
+        "last_line": 200,
+        "path": "vendor/linux-framework/include/linux/lsm_hook_defs.h",
+        "sha256": "d3600e4af1f45c98f2bc1a77906d66298c8a60ae1ede811410f0f84d438abae3"
+      }
+    ],
+    "finding": "Native P and compiled B retain the same ctx[0] then file+32 read chain. Current security_mmap_file explicitly permits a NULL file and forwards it. A plain paired BTF argument name file does not establish an always-nonnull physical entry invariant; current btf_ctx_access has a separate __nullable name rule.",
+    "formal_consequence": "INVOCATION_ENTRY_ABI and verifierSound remain conditional. Stock acceptance by itself does not discharge physical context permissions/nullability or the universal no-fault premise. Source-global BTF admissibility versus fixed native entry reachability is separately qualified by the global_func14 case; no installed annotation discrepancy is relabeled as rejection or removed.",
+    "load_only_installed_finding": {
+      "compiled_b_sha256": "ae14e807ccf97873e070c9815c623d82653ceecec56f643cf667067dd154fc91",
+      "context": {
+        "load_context": {
+          "attach_btf_id": 70008,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "expected_attach_type": 27,
+          "gpl_compatible": 1,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "prog_type": 29,
+          "source_btf_id": 0,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [],
+        "version": 1
+      },
+      "installed_prog_id": 1036,
+      "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+      "paired_btf": {
+        "arguments": [
+          {
+            "index": 0,
+            "name": "file",
+            "type_id": 276
+          },
+          {
+            "index": 1,
+            "name": "reqprot",
+            "type_id": 94830
+          },
+          {
+            "index": 2,
+            "name": "prot",
+            "type_id": 94830
+          },
+          {
+            "index": 3,
+            "name": "flags",
+            "type_id": 94830
+          }
+        ],
+        "attach_btf_id": 70008,
+        "func": "bpf_lsm_mmap_file",
+        "path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache/vmlinux",
+        "prototype_id": 16926
+      },
+      "program": "no_null_check",
+      "request_id": 260
+    },
+    "native_executions_by_this_audit": 0,
+    "remaining_owner": "Coordinator/C/A qualify the actual paired-kernel context contract and complete source/binary epoch; V retains this explicit physical-entry/verifier premise in universal O1/O2/O4 composition.",
+    "runtime_admission_additions": 0,
+    "scope": "Read-only qualification of the universal physical-entry and stock-verifier-soundness premises. No per-program theorem, execution, runtime check or gate.",
+    "source_epoch_boundary": "The excerpts identify the current vendored source tree; no new proof that this entire tree equals the captured paired runtime binary is claimed. Paired target BTF70008/file is the separately published A evidence.",
+    "source_publication": "268171331cb1eabb4ee08757b7d2645178f436c7",
+    "triage_publication": "d4a23b5b002dd582502c4b4f286622b3c4dead66",
+    "triage_sha256": "c312094a1ba6786dc28c74aedbae49188a95f9abace2c9bc8d32af85c2822e25",
+    "triage_source": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/two-installed-annotations/triage.json",
+    "utc": "2026-11-08T22:14:42.594326+00:00"
+  },
   "memory_oracle_frame_repair": {
     "archive_compressed_prefix_bytes": 87812325,
     "archive_compressed_prefix_sha256": "638536fa19119acaaeaa1c9fa2af795385af0c3d2e5e93ba5eebce1334cde387",

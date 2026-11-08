@@ -5241,3 +5241,19 @@ Existing `bpf-check` passes. [Original evidence](returning-helper-call.log.gz)
 retains sources, all proof attempts and integrated output. Physical/native
 and typed ABI, actual resolver, C/compiler correspondence and successful
 tail transfer remain explicit interfaces. Numeric70-slot coverage is unchanged.
+
+### LSM context and verifier premise qualification
+
+[A's load-only static triage](../../../corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/two-installed-annotations/README.md)
+retains the installed `no_null_check` annotation discrepancy: native P and B
+both read ctx[0], then file+32. Captured target BTF70008 names argument0 `file`.
+The current vendored `security_mmap_file` contract explicitly permits NULL
+and forwards the argument; `btf_ctx_access` separately recognizes `__nullable`.
+A plain BTF name therefore supplies no always-nonnull physical-entry proof.
+Source hashes/excerpts and the distinct captured-runtime epoch are recorded in
+`lsm_context_nullability_entry_premise`. The universal entry and stock-verifier
+soundness premises remain open for this platform profile. Stock acceptance
+alone does not discharge them. The separate global-function/FWD source rule
+and initialized native entry scope also remain distinct. All installed
+annotation counts are retained; this audit performs no native execution and
+adds no runtime check, gate or per-program proof.
