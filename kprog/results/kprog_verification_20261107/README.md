@@ -18,7 +18,7 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 61/71 |
+| O2 C-model token-body equality | 49/75 | 70/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -43,6 +43,10 @@ conditional negation, extract/reverse/extend/bitfield, arithmetic/logical flags,
 ORN, conditional compare and select. The six logical flag selectors retain
 their native inverted-register field condition. The same code/address,
 provenance, source-emission and compiled-C interfaces remain explicit.
+Nine pair/vector tokens add the same equality/step composition: LDP/STP,
+LOAD/STORE D0/Q0, FMOV and CNT/UADDLV. Pair width, fixed D/Q width,
+FMOV direction/bank and reduction AUX retain their exact boundaries.
+RET carries the remaining outer-return token obligation.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -3910,3 +3914,17 @@ source-emission and invocation ABI interfaces continue through universal laws.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_01fba1f4d`. Every check retains its exact published source identity.
+
+ARM pair/vector-token composition (`arm64_vector_token_bodies` in the existing
+[integration receipt](arm64-xdp-host-integration.json)) adds nine generic O2
+body equalities and canonical observed-step composition: LDP/STP, D0/Q0
+loads/stores, FMOV and CNT/UADDLV. Two axiom audits and the default Lean build
+pass; the prior204 dispatcher theorem statements and module prefix retain
+exact bytes. The actual C macros agree on188,160 additional host UBSan cases,
+including all32 FMOV banks/default bank, fixed D/Q widths, pair widths,
+pre/post/index/displacement fields, all16 NZCV inputs and independent complete
+store buffers. The earlier2,885,376 scalar and53,728 memory cases also pass.
+All175 inputs retain stable hashes and published Git identities. ARM C-model
+O2 reaches70/71; RET's outer-return token relation is the remaining token item.
+Complete raw/compiled closure continues through the explicit native-field,
+memory/profile/effect, provenance, source-emission and invocation ABI interfaces.

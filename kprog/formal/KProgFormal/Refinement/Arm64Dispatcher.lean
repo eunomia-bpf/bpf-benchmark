@@ -4239,4 +4239,81 @@ theorem scalar_token_step_refines (token : ScalarToken) (flags : Byte) (aux : Bi
   exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
     firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
 
+
+/-- Direct pair/vector/move/reduction selectors preserve their own width and
+bank domains. D/Q and reductions consume their fixed widths independently of FLAGS. -/
+inductive VectorToken where
+  | pair (load : Bool) | d (load : Bool) | q (load : Bool) | move
+  | reduction (op : Reference.AArch64.ReductionOp)
+
+def vectorTokenOpcode : VectorToken → Nat
+  | .pair load => pairCode load
+  | .d load => dCode load
+  | .q load => qCode load
+  | .move => GeneratedArm64DispatchSingleton.code .fmov
+  | .reduction op => GeneratedArm64Reduction.code (Arm64Reduction.operation op)
+
+def specializedVector (token : VectorToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word) (firstScalar secondScalar : Bool)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  match token with
+  | .pair load => (decodeDataWidth flags).map (fun width => pairByteBody load width aux
+      (if load then dst else src) (if load then src else src2) (if load then src2 else dst)
+      src3 value firstScalar secondScalar s)
+  | .d load => some (dByteBody load aux (if load then src else dst) src2 value s)
+  | .q load => some (qByteBody load aux (if load then src else dst) src2 value s)
+  | .move => (Arm64Fmov.decodeDirection aux.toNat).bind (fun direction =>
+      (Arm64Fmov.vectorIndex src2.toNat).bind (fun bank =>
+        (decodeFmovWidth direction flags).map (fun width => fmovByteBody bank direction width dst src s)))
+  | .reduction op => some (Arm64Reduction.handlerStep op (aux.toNat == 16) s)
+
+/-- The selected direct body equals the complete L_EXEC transition for each
+pair/vector token, including bank31, default bank, fixed widths and AUX branches. -/
+theorem vector_token_body_matches (token : VectorToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    specializedVector token flags aux dst src src2 src3 value firstScalar secondScalar s =
+      dispatchExec (vectorTokenOpcode token) flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s := by
+  cases token with
+  | pair load =>
+      unfold specializedVector vectorTokenOpcode dispatchExec dispatchThroughQ dispatchThroughD
+      rw [pair_reached]
+      cases load <;> cases w : (decodeDataWidth flags) <;> rfl
+  | d load =>
+      unfold specializedVector vectorTokenOpcode dispatchExec dispatchThroughQ
+      rw [d_reached]
+  | q load =>
+      unfold specializedVector vectorTokenOpcode dispatchExec
+      rw [q_reached]
+  | move =>
+      unfold specializedVector vectorTokenOpcode dispatchExec
+      rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s (Or.inl rfl)]
+      rfl
+  | reduction op =>
+      have tailCode : vectorTokenOpcode (.reduction op) = GeneratedArm64DispatchSingleton.code .fmov ∨
+          vectorTokenOpcode (.reduction op) = GeneratedArm64Reduction.code .cnt ∨
+          vectorTokenOpcode (.reduction op) = GeneratedArm64Reduction.code .uaddlv := by
+        cases op <;> simp [vectorTokenOpcode, Arm64Reduction.operation]
+      unfold specializedVector dispatchExec
+      rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s tailCode]
+      cases op <;> rfl
+
+/-- Pair access, D/Q observations and FMOV bank/width binding compose the direct
+body identity with the existing full canonical step under the shared premises. -/
+theorem vector_token_step_refines (token : VectorToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc (vectorTokenOpcode token) flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch (vectorTokenOpcode token) flags release failure src2 s
+      (observeQDispatch (vectorTokenOpcode token) (specializedVector token flags aux dst src src2 src3 value
+        firstScalar secondScalar s)) = some (Reference.AArch64.step native s) := by
+  rw [vector_token_body_matches token flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar failure s]
+  exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
+
 end KProgFormal.Refinement.Arm64Dispatcher

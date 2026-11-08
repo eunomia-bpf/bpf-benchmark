@@ -190,6 +190,68 @@ static unsigned long scalar_cases(void)
  printf("arm64 scalar tokens host cross-check: OK (%lu cases)\n",count);return count;
 }
 
+
+#define VECTOR_DIRECT(OP) ARM64_SIM_DIRECT_##OP(dst,src,src2,src3,flags,aux,imm)
+static const unsigned vector_ops[]={ARM64_OP_LDP,ARM64_OP_STP,ARM64_OP_LOAD_D0,ARM64_OP_STORE_D0,
+ ARM64_OP_LOAD_Q0,ARM64_OP_STORE_Q0,ARM64_OP_FMOV,ARM64_OP_CNT,ARM64_OP_UADDLV};
+static void run_vector(struct snapshot *out,unsigned token,int direct,unsigned flags,unsigned mode,
+                       unsigned indexed,unsigned shift,unsigned negative,unsigned pattern,unsigned bank)
+{
+ ARM64_SIM_L_DECLARE_STATE();__u8 __a64_sim_abi_kind=KPROG_ABI_KIND_XDP;
+ ARM64_SIM_L_DECLARE_STACK();ARM64_SIM_L_FOR_EACH_GPR(SEED_REG)
+ __a64_numeric_sp=0x123400000ULL;__a64_numeric_sp_valid=1;
+ __a64_numeric_return=0x567800000ULL;__a64_numeric_return_valid=1;
+ __a64_sp=32;__a64_lr=0x8877665544332211ULL;
+ __a64_n=pattern&1;__a64_z=(pattern>>1)&1;__a64_c=(pattern>>2)&1;__a64_v=(pattern>>3)&1;
+ for(unsigned i=0;i<32;i++){__a64_vectors[i].lo=0x123456789abcdef0ULL+i+pattern;__a64_vectors[i].hi=0x876543210fedcba9ULL-i-pattern;}
+ for(unsigned i=0;i<sizeof(scratch);i++)((__u8 *)scratch)[i]=(__u8)(0x85+i*7);
+ ARM64_SIM_L_WRITE_REG_PTR_TAG(4,((__u8 *)scratch)+128,ARM64_SIM_TAG_MAP_VALUE);
+ ARM64_SIM_L_WRITE_REG_WIDTH(5,1,8);
+ unsigned dst=token==0?1:4,src=token==0?2:token==1?1:token==2||token==4?4:1;
+ unsigned src2=token==0?4:token==1?2:token==6?bank:indexed?5:255;
+ unsigned src3=token<2?(indexed?5:255):255;
+ __u32 aux=(mode<<24)|(shift<<16)|(ARM64_MOD_LSL<<8);__u64 imm=negative?(__u64)-16:16;
+ if(token==6)aux=pattern%4;
+ if(token>=7)aux=(pattern&1)?16:8;
+ unsigned op=vector_ops[token];memset(out,0,sizeof(*out));calls=0;
+ out->source=token<2?ARM64_SIM_L_READ_REG(1):__a64_v0;
+ out->data=token<2?ARM64_SIM_L_READ_REG(2):__a64_v0_hi;
+ if(direct){switch(token){
+  case 0:VECTOR_DIRECT(ARM64_OP_LDP);break;case 1:VECTOR_DIRECT(ARM64_OP_STP);break;
+  case 2:VECTOR_DIRECT(ARM64_OP_LOAD_D0);break;case 3:VECTOR_DIRECT(ARM64_OP_STORE_D0);break;
+  case 4:VECTOR_DIRECT(ARM64_OP_LOAD_Q0);break;case 5:VECTOR_DIRECT(ARM64_OP_STORE_Q0);break;
+  case 6:VECTOR_DIRECT(ARM64_OP_FMOV);break;case 7:VECTOR_DIRECT(ARM64_OP_CNT);break;
+  case 8:VECTOR_DIRECT(ARM64_OP_UADDLV);break;default:abort();
+ }}else ARM64_SIM_L_EXEC(op,dst,src,src2,src3,flags,aux,imm);
+ ARM64_SIM_L_FOR_EACH_GPR(SAVE_REG)
+ for(unsigned i=0;i<32;i++){out->vectors[i*2]=__a64_vectors[i].lo;out->vectors[i*2+1]=__a64_vectors[i].hi;}
+ out->sp=(__u64)__a64_sp;out->lr=__a64_lr;out->calls=calls;
+ out->flags[0]=__a64_n;out->flags[1]=__a64_z;out->flags[2]=__a64_c;out->flags[3]=__a64_v;
+ memcpy(out->bytes,scratch,sizeof(scratch));(void)__a64_sim_abi_kind;
+}
+static void vector_cases(void)
+{
+ const unsigned widths[]={0,1,2,4,8,16,255};unsigned long count=0;
+ for(unsigned token=0;token<9;token++)for(unsigned w=0;w<7;w++){
+  unsigned flags=widths[w];if((token<2||token==6)&&flags!=0&&flags!=4&&flags!=8)continue;
+  for(unsigned mode=0;mode<4;mode++)for(unsigned indexed=0;indexed<2;indexed++)
+  for(unsigned shift=0;shift<5;shift++)for(unsigned negative=0;negative<2;negative++)
+  for(unsigned pattern=0;pattern<16;pattern++)for(unsigned b=0;b<(token==6?33:1);b++){
+   unsigned bank=b==32?255:b;struct snapshot a,c;
+   run_vector(&a,token,0,flags,mode,indexed,shift,negative,pattern,bank);
+   run_vector(&c,token,1,flags,mode,indexed,shift,negative,pattern,bank);
+   if(memcmp(&a,&c,sizeof(a))||a.calls){fprintf(stderr,"vector token=%u flags=%u bank=%u\n",token,flags,bank);exit(1);}
+   __u8 expected[sizeof(scratch)];for(unsigned i=0;i<sizeof(expected);i++)expected[i]=(__u8)(0x85+i*7);
+   int delta=negative?-16:16;unsigned address=128+((mode&1)?delta:0)+(indexed?(1<<shift):0)+(mode?0:delta);
+   if(token==1||token==3||token==5){unsigned width=token==1?(flags?flags:8):8,lanes=token==3?1:2;
+    for(unsigned lane=0;lane<lanes;lane++)for(unsigned i=0;i<width;i++)expected[address+lane*width+i]=(__u8)((lane?a.data:a.source)>>(i*8));}
+   if(memcmp(expected,a.bytes,sizeof(expected))){fprintf(stderr,"vector byte store token=%u\n",token);exit(1);}
+   count++;
+  }
+ }
+ printf("arm64 vector tokens host cross-check: OK (%lu cases)\n",count);
+}
+
 int main(void)
 {
  const unsigned widths[]={0,1,2,4,8};
@@ -225,5 +287,6 @@ int main(void)
  }
  printf("arm64 memory tokens host cross-check: OK (%lu cases)\n",cases);
  scalar_cases();
+ vector_cases();
  return 0;
 }
