@@ -282,5 +282,7 @@
     "kprog/arm64/README.md": "84ab17f3388561f763ff2b7d75094e44ffa7102f8c06f61d2dbbf5ff2061a9d1"
   },
   "frontier": "Clang18 BPF atomic8/16 lowering; complete app QEMU outcomes and universal LDSET/LDCLR theorems retain their own epochs",
-  "runtime_admission_additions": 0
+  "runtime_admission_additions": 0,
+  "assembled_mnemonic_lowering_forms": 72,
+  "mnemonic_source_commit": "a8d17004cf8e3208ca9330d9ac6d1820ae8ba83f"
 }
