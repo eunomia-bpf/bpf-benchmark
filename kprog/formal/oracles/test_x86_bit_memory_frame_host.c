@@ -84,7 +84,8 @@ int main(void){const unsigned widths[]={0,2,4,8};unsigned long cases=0;
   __u64 count=a.before[(fs+ci)%16];struct cpu_result expected=cpu(form,width,stack?native_stack+offset:heap+offset,count,flagword(fs));
   __u64 mask=width==8?~0ULL:(1ULL<<(width*8))-1,write=expected.value&mask;if(width==2)write|=a.before[dst]&~mask;
   __u64 flagmask=form?0x8d5:0x8c1,flags=(flagword(fs)&~flagmask)|(expected.flags&flagmask);
-  if(memcmp(a.heap,heap,512)||memcmp(a.stack,native_stack,512)||a.flags!=flags){
+  /* BZHI PF/AF vary independently; every other flag remains observed. */
+  if(memcmp(a.heap,heap,512)||memcmp(a.stack,native_stack,512)||((a.flags^flags)&(form?~0ULL:~0x14ULL))!=0){
    fprintf(stderr,"CPU flags/memory width=%u form=%u dst=%u profile=%u fs=%u source=%u count=%u got=%llx expected=%llx\n",width,form,dst,profile,fs,li,ci,a.flags,flags);return 1;}
   for(unsigned reg=0;reg<16;reg++){
    __u64 want=reg==dst?write:a.before[reg],raw=reg==dst?(reg==X86_RSP?write-(__u64)(long)&native_stack[512]:write):a.raw_before[reg];
