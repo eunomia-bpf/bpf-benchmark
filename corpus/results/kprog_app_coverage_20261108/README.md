@@ -5,10 +5,12 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 2 | 2 | 1 | 0 | 1: private-stack alignment | [000433](../kprog_app_coverage_20261107/otel-stack-identity/README.md) |
+| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [001743](otel-stack-aligned/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 1: proof kfunc relocation | 0 | [001201](cilium-bmi2/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541](../kprog_app_coverage_20261107/tetragon-stack-width/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [235054](../kprog_app_coverage_20261107/tracee-narrow-identity/README.md) |
 
 Current serial trials: aligned-stack OTel then Tracee, each12GiB/eightvCPU/20-23. A Cilium successor consumes generic vmlinux kfunc relocation after these trials. Every completed batch retains commands, all native/proof input hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program proof material retains its frozen state.
+
+The [OTel aligned private-stack batch001743](otel-stack-aligned/README.md) freshly binds read_task_struct and perf_unwind_stop and continues from perf_unwind_native instruction exploration,1000001instructions/66042states. The [generic proof kfunc loader](proof-kfunc/README.md) passes20BTF/site/prototype controls and the exact original CiliumELF/matching kernelBTF call. Its whole-application successor follows Tracee serially.
