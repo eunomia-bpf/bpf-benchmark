@@ -5441,3 +5441,12 @@ pair/vector/multiple accesses, ALU flags and exclusive/atomic state also need
 their actual fault-prefix relation. C/A own the production metadata/handler and
 actual NULL-BTF guest execution (guest survives and destination is zero).
 No new runtime gate or completed proof/replay is claimed.
+
+### Published source full check 8ed234439
+
+`make check` on immutable published8ed234439 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_8ed234439`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-8ed234439.log.gz](full-make-check-8ed234439.log.gz).
