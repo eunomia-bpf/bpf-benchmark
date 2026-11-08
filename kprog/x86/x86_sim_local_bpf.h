@@ -2012,6 +2012,11 @@ extern void x86_sim_unmapped_xdp_read(void)
 			__x86_l_value = x86_apply_width(__x86_l_value,    \
 				__x86_l_src_width);                       \
 		}                                                         \
+		if (__x86_l_width == X86_WIDTH_32) {                    \
+			__u32 __x86_l_lane32 = (__u32)__x86_l_value;      \
+			__asm__("" : "+r"(__x86_l_lane32));              \
+			__x86_l_value = __x86_l_lane32;                    \
+		} else __asm__("" : "+r"(__x86_l_value));               \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,           \
 					  __x86_l_width);                    \
 	} while (0)

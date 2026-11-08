@@ -109,6 +109,11 @@ For `cgroup_skb`, that return value is only the kernel action
 `__sk_buff.cb[]`. Packet writes are not a valid result channel for cgroup_skb
 because the verifier rejects packet writes for that program type.
 
+MOVZX/MOVSX keeps compiler value identity in the architectural destination
+lane: a32-bit identity for32-bit writes and a full-width identity for the
+other destination widths. The empty assembly expression preserves the value
+and flags while carrying the native lane through subsequent comparisons.
+
 Private-stack scalar MOV stores through stack-tagged register aliases use the
 same little-endian byte ladder as direct RSP stores. Each byte keeps its
 original value and address, including unaligned offsets. Pointer-valued stores
