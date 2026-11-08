@@ -36,7 +36,6 @@ static struct cpu_result cpu(unsigned form,unsigned width,const __u8 *address,__
  return out;
 }
 static const unsigned indices[]={0,1,15,16,31,32,63,64,127,128,255};
-static unsigned parity(__u64 value){unsigned ones=0;for(unsigned i=0;i<8;i++)ones+=(value>>i)&1;return !(ones&1);}
 static __attribute__((noinline,noclone)) void simulate(struct observation *out,unsigned specialized,unsigned form,unsigned count_index,unsigned flags,unsigned dst,
  unsigned profile,unsigned index_mode,int displacement,__u64 left,__u64 right,unsigned flagseed){
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=0;
@@ -85,7 +84,7 @@ int main(void){const unsigned widths[]={0,2,4,8};unsigned long cases=0;
   __u64 first=a.before[(fs+ci)%16];struct cpu_result expected=cpu(form,width,stack?native_stack+offset:heap+offset,first,form?indices[ci]:0,flagword(fs));
   __u64 write=width==4?(__u32)expected.value:expected.value;
   __u64 flagmask=form?1:0x8c1,flags=(flagword(fs)&~flagmask)|(expected.flags&flagmask);
-  if(!form)flags=(flags&~4ULL)|((__u64)parity(write)<<2);
+  if(!form)flags &= ~(4ULL|16ULL);
   if(memcmp(a.heap,heap,512)||memcmp(a.stack,native_stack,512)||a.flags!=flags){
    fprintf(stderr,"CPU flags/memory width=%u form=%u dst=%u profile=%u fs=%u source=%u field=%u got=%llx expected=%llx\n",width,form,dst,profile,fs,li,ci,a.flags,flags);return 1;}
   for(unsigned reg=0;reg<16;reg++){

@@ -44,6 +44,14 @@ typedef signed long long __s64;
 #include <stdio.h>
 #include <string.h>
 
+static unsigned choice_bits, choice_cursor;
+static unsigned long undefined_value(void)
+{
+	return (choice_bits >> (choice_cursor++ & 1U)) & 1U;
+}
+#undef X86_SIM_L_UNSPECIFIED
+#define X86_SIM_L_UNSPECIFIED() undefined_value()
+
 static int failures;
 static __u64 model_arena_top;
 static unsigned long cases;
@@ -206,14 +214,13 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	mzf = (__u8)(masked == 0U);
 	msf = (__u8)((masked >> (w * 8U - 1U)) & 1U);
 	mof = 0U;
-	/* Catch a missing PF write in the shared logic macro, even though PF
-	 * is architecturally undefined for ANDN. AF must remain untouched.
-	 * Plant PF opposite the independently counted low-byte parity. */
-	for (i = 0; i < 8U; i++)
-		mpf ^= (__u8)((masked >> i) & 1U);
-	maf = (__u8)((src1_reg ^ aux_reg ^ dst_reg ^ flags ^ via_dispatch) & 1U);
+	/* Each kind6 output ranges independently over both native bit values. */
+	choice_bits = (src1_reg ^ aux_reg ^ dst_reg ^ flags ^ via_dispatch) & 3U;
+	choice_cursor = 0U;
+	mpf = choice_bits & 1U;
+	maf = (choice_bits >> 1) & 1U;
 	__x86_pf = mpf ^ 1U;
-	__x86_af = maf;
+	__x86_af = maf ^ 1U;
 
 	/* ---- run the real body ---- */
 	if (op_is_mem) {
@@ -259,7 +266,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 
 	/* ---- compare the flags ---- */
 	cases++;
-	if (__x86_cf != mcf || __x86_zf != mzf || __x86_sf != msf ||
+	if (choice_cursor != 2U || __x86_cf != mcf || __x86_zf != mzf || __x86_sf != msf ||
 	    __x86_of != mof || __x86_pf != mpf || __x86_af != maf) {
 		printf("MISMATCH mem=%u flags=%u auxw=%u src1=%u dst=%u "
 		       "disp=%lld flags: got cf=%u zf=%u sf=%u of=%u pf=%u af=%u "
@@ -302,8 +309,31 @@ static void check_selectors(void)
 	}
 }
 
+static void check_bzhi_choices(void)
+{
+ X86_SIM_L_DECLARE_STATE();
+ const __u64 values[] = {0, 1, 0xffffffffULL, 0xffffffffffffffffULL};
+ for (unsigned width=4; width<=8; width+=4)
+ for (unsigned bits=0; bits<4; bits++)
+ for (unsigned count=0; count<=width*8+1; count++)
+ for (unsigned value=0; value<4; value++) {
+  __u64 result=width==4 ? (__u32)values[value] : values[value];
+  choice_bits=bits; choice_cursor=0;
+  __x86_pf=(bits&1U)^1U; __x86_af=((bits>>1)&1U)^1U;
+  __x86_cf=1; __x86_zf=1; __x86_sf=1; __x86_of=1;
+  X86_SIM_L_SET_BZHI_FLAGS(count,width*8,result);
+  cases++;
+  if (choice_cursor!=2 || __x86_pf!=(bits&1U) ||
+      __x86_af!=((bits>>1)&1U) || __x86_cf!=(count>=width*8) ||
+      __x86_zf!=(result==0) || __x86_sf!=((result>>(width*8-1))&1U) ||
+      __x86_of || X86_SIM_L_EVAL_CC(10)!=(bits&1U) ||
+      X86_SIM_L_EVAL_CC(11)!=((bits&1U)^1U)) failures++;
+ }
+}
+
 int main(void)
 {
+	check_bzhi_choices();
 	static const unsigned flags_codes[5] = { 0U, X86_WIDTH_8, X86_WIDTH_16,
 						 X86_WIDTH_32, X86_WIDTH_64 };
 	static const unsigned aux_widths[5] = { 0U, X86_WIDTH_8, X86_WIDTH_16,

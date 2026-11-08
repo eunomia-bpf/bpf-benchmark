@@ -840,6 +840,8 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
 			(COUNT) >= (BITS), (RESULT) == 0,                  \
 			((RESULT) >> ((BITS) - 1U)) & 1U);                \
+		__x86_pf = X86_SIM_L_UNSPECIFIED() & 1;                  \
+		__x86_af = X86_SIM_L_UNSPECIFIED() & 1;                  \
 	} while (0)
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
@@ -2109,6 +2111,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
 		__u64 __x86_l_result = (~__x86_l_src1) & __x86_l_src2;    \
 		X86_SIM_L_SET_LOGIC_FLAGS(__x86_l_result, __x86_l_width); \
+		__x86_pf = X86_SIM_L_UNSPECIFIED() & 1;                  \
+		__x86_af = X86_SIM_L_UNSPECIFIED() & 1;                  \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
 					  __x86_l_width);                    \
 	} while (0)

@@ -1,0 +1,141 @@
+{
+  "utc": "2026-11-08T16:29:25.809673+00:00",
+  "source_adoption": true,
+  "source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "eba653298481574afb053754cd0f4405324a59797da361ac4bfcfe11f6fe7c80",
+    "kprog/formal/oracles/test_x86_andn_route_host.c": "c906b92425056e5c5d2f2e2673e1b74732f4b8d761bbda85939b94ccf9da20dc",
+    "kprog/formal/oracles/test_x86_andn_bt_memory_frame_host.c": "c8b78e84c387d3195fd3f4554ea5e7153f34dca23676c925f8884721d74202ad"
+  },
+  "exits": {
+    "before": 2,
+    "host": 0,
+    "oracles": 0,
+    "micro": 0,
+    "maintained-oracles": 0
+  },
+  "host_choice_cases": 51200,
+  "micro_objects": [
+    {
+      "path": "micro/trace_event_type_switch_dispatch.bpf.o",
+      "sha256": "f0720a9e4518979d61173656cefa178233a346788c69f931a2b206a182bb7222"
+    },
+    {
+      "path": "micro/katran_lb_consistent_hash_select.bpf.o",
+      "sha256": "570a141d16a074fdd816f849d8fdd23e87a2b09bc6a642349e0a1c3d02e867df"
+    },
+    {
+      "path": "micro/tracee_syscall_name_table_lookup.bpf.o",
+      "sha256": "7a83b935a14ec29c9cbbc5c1adf75cc698600e305ae66f36365419c1a35fc496"
+    },
+    {
+      "path": "micro/packet_record_bounds_window.bpf.o",
+      "sha256": "7e7602a61ab6f913df83b1727f064845d2f972abaf55b7e8d9819b2512fb6482"
+    },
+    {
+      "path": "micro/bcc_runqlat_log2_histogram_bucket.bpf.o",
+      "sha256": "751135ceffbe428b8b498d315fca0af4dc9df825ddaf5b5adb741337a856b6f3"
+    },
+    {
+      "path": "micro/flow_record_field_scan.bpf.o",
+      "sha256": "5297cfde775fd5850c3486919946d1cbbeece80cf154f837e892fe7fe7cad00c"
+    },
+    {
+      "path": "micro/cilium_ct_nat_tuple_rewrite.bpf.o",
+      "sha256": "ad3bb8a572871aea206b6050c6a85dbbf3f22d4cf43a34d350745c81d6424088"
+    },
+    {
+      "path": "micro/siphash_rotate64_mixer.bpf.o",
+      "sha256": "7261d8cd349c9784a9fa9ab4fcd2e27bec5d0aaf5d10b2f1fb16bb7507898dd2"
+    },
+    {
+      "path": "micro/payload_prefix_memcmp_scan.bpf.o",
+      "sha256": "581132c477401dcdf7d8341cec03dc484c92a2973fd0133e7e8076c418f1929d"
+    },
+    {
+      "path": "micro/bpftrace_comm_key_fnv_hash.bpf.o",
+      "sha256": "9e4128e612840357a6a068eb6a059a13ce750c1eb5099caaa7db1f2c42132cc6"
+    },
+    {
+      "path": "micro/packet_toeplitz_rss_hash.bpf.o",
+      "sha256": "3cb0a03e30c50e26a0fa62a168d97ddbf085b3e587f58b32c576cedc7f7c9086"
+    },
+    {
+      "path": "micro/packet_vlan_tcpopt_parser.bpf.o",
+      "sha256": "1c37e2bc270197612f72b141bd3267ec49f7972b8564e811cbb400a5fd3a6ff3"
+    },
+    {
+      "path": "micro/simple.bpf.o",
+      "sha256": "6d583805961b34798f62ab93c550072cfbbb63aa4a965fd72aca411586b2e33e"
+    },
+    {
+      "path": "micro/simple_packet.bpf.o",
+      "sha256": "da96892d1e8e2fd1210ee9b34eea4aa736581f06d3f7b96480712419d191892e"
+    },
+    {
+      "path": "micro/flow_5tuple_rss_hash.bpf.o",
+      "sha256": "d6c2df528cefc60fde777c301d1fe9623e1abfdad735670759ff158f4d29b3cb"
+    },
+    {
+      "path": "micro/cilium_policy_guard_tree_filter.bpf.o",
+      "sha256": "70cdffe5b41999a913925afad43e966b279ef145cc20e5991276484322db32be"
+    },
+    {
+      "path": "micro/bpftrace_string_search_prefix_scan.bpf.o",
+      "sha256": "a5d8c7cce9c45e60d4d478926c6d1e757001712068bbc1ed9ebefae86c78da67"
+    },
+    {
+      "path": "micro/packed_header_bitfield_decode.bpf.o",
+      "sha256": "44e1c1ba55bf4f1ecaeaa5d808894560eb0b325de8bf8bce2e2647bad643d047"
+    },
+    {
+      "path": "micro/tc_packet_checksum_fold.bpf.o",
+      "sha256": "ee5629a83756549e5e9eccd8e404b2b9cf67fa26566157eba418922fbff5dc2e"
+    },
+    {
+      "path": "micro/bpf_local_call_fanout_dispatch.bpf.o",
+      "sha256": "8bedc1f966c4668781fd70c60dcc173198ae2a2c0ae4a63d4026d5a5ad902cf3"
+    },
+    {
+      "path": "micro/tetragon_process_event_arg_filter.bpf.o",
+      "sha256": "bf4d6420e5834977037813f7ccfa108d5e2ce954982aa51eae4775949a8b82c1"
+    },
+    {
+      "path": "micro/otel_stack_frame_unwind_scan.bpf.o",
+      "sha256": "a11d1dfe307c4eb56bc2e54f45528e0a3ca876ad6c8216d8f6b6a38bb8407d2b"
+    },
+    {
+      "path": "micro/tracee_http_method_prefix_detect.bpf.o",
+      "sha256": "e3f9c7bf7b0d21be444371d7e20efae35b7ea2b4bbefd30691b7adbd909e6a79"
+    },
+    {
+      "path": "micro/packet_checksum_fold.bpf.o",
+      "sha256": "c7e4cae8409282de88e6a373a66bdd3f8b596a2bae3885a2a8e88c377cdde080"
+    },
+    {
+      "path": "micro/bcc_tcpconnect_ipv4_tuple_filter.bpf.o",
+      "sha256": "d35dfa2540074df99c4b0a38beafc5a42473f0b67a92833272715027490d4894"
+    },
+    {
+      "path": "micro/bitmap_popcount_scan.bpf.o",
+      "sha256": "e23e1bc33e1844a85f9dd9d1c3614fab95da9a45d9f403786c69632d749f40f1"
+    },
+    {
+      "path": "micro/cilium_socket_lb_service_select.bpf.o",
+      "sha256": "5f0911ef5838b7459cd83d6e2bf50eba03dbdfac53a37bd7b68982785c372dc3"
+    },
+    {
+      "path": "micro/cgroup_skb_hash_chain.bpf.o",
+      "sha256": "9366f7303f8b990b81b6194e56e864b60561d7ea1da475106a7633456fb615f0"
+    },
+    {
+      "path": "micro/sorted_rule_binary_search.bpf.o",
+      "sha256": "63678a728ac4e93e83ee640eacea0201b7dc03c2f479aa06181db82fde5bc9b1"
+    },
+    {
+      "path": "micro/negative/unchecked_packet_read.bpf.o",
+      "sha256": "73e40cfbe879b69ea0dc1d66ac4e7377b846633067cdbe9461d898e77e562bc5"
+    }
+  ],
+  "source_scope": "ANDN and BZHI register/memory32/64 PF/AF use existing kind6 outputs; all defined flags and raw effects retain their operations",
+  "runtime_admission_additions": 0
+}
