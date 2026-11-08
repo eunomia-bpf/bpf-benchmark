@@ -117,6 +117,7 @@ static void drive_store(unsigned variant, unsigned index, unsigned width,
 			__u64 value, __u8 tag)
 {
 	ARM64_SIM_L_DECLARE_STATE();
+	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
 	ARM64_SIM_L_DECLARE_STACK();
 	__u8 b_model[STACK_BYTES];
 	__u8 t_model[STACK_SLOTS];
@@ -200,6 +201,7 @@ static void drive_roundtrip(unsigned variant, unsigned index, unsigned width,
 			    __u64 value)
 {
 	ARM64_SIM_L_DECLARE_STATE();
+	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
 	ARM64_SIM_L_DECLARE_STACK();
 	unsigned n = width_bytes(width);
 	__u64 mask = n == 8 ? ~0ULL : (1ULL << (8 * n)) - 1ULL;

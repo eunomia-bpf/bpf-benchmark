@@ -4500,3 +4500,21 @@ existing C/LLVM cases. The ARM exclusive target drops its prerequisite on C's
 retired environment-binding fixture and keeps its semantic Lean target.
 Decisions and the design step served by retained items appear in the
 [design-only ledger](../kprog_design_only_20261108/README.md#lane-v-verification-retirement).
+
+### Memory oracle frame repair
+
+The immutable d816e27e8 full check completed with Make exit2 at the manual
+ARM store fixture: its state omitted the ABI kind used by the memory body.
+Both ordinary-memory route fixtures now declare RAW state in their existing
+store and roundtrip scopes. Original compilations exit1; corrected UBSan
+compilations and executions exit0, preserving16,486,328 store-byte and
+17,758,119 store-routing observations. The source manifest verifies all1171
+Git blobs from the original full check; its private export is retired.
+
+The existing x86 pointer oracle follows published a04786538: resolved values
+written to RSP use its native-stack-relative raw coordinate, and numeric
+observation yields the resolved value for all16 destinations. Its original
+2,097,152 production frames and1342 contract cases pass UBSan. Exact source
+pins, original diagnostics and complete outcomes appear under
+`memory_oracle_frame_repair`. Generic pointer-coordinate proof composition
+continues in the O1/O2 model.

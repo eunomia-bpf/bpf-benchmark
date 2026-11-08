@@ -663,8 +663,8 @@ static void production_pointer_frame(unsigned op,unsigned dst,__u32 aux,__u8 fla
  else X86_SIM_L_EXEC(op,dst,flags^0xffU,flags,aux,value);
  const __u8 selected_tag=op==0x2cU?((aux&1)?6:5):7;
  for(unsigned r=0;r<16;r++){
-  __u64 expected_raw=r==dst?value:raw[r];
-  __u64 expected_numeric=r==dst?(r==4?value+__x86_native_stack_base:value):numeric[r];
+  __u64 expected_raw=r==dst?value-(r==4?__x86_native_stack_base:0):raw[r];
+  __u64 expected_numeric=r==dst?value:numeric[r];
   __u8 expected_tag=r==dst?selected_tag:tags[r];
   if((__u64)(long)X86_SIM_L_REG_VALUE(r)!=expected_raw||X86_SIM_L_READ_REG(r)!=expected_numeric||X86_SIM_L_REG_TAG(r)!=expected_tag){
    fprintf(stderr,"pointer frame op=%x dst=%u r=%u aux=%x flags=%u direct=%u\n",op,dst,r,aux,flags,direct);mismatches++;return;

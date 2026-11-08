@@ -86,6 +86,7 @@ static void fill_images(void)
 static void drive_store(unsigned width, __u64 value)
 {
 	ARM64_SIM_L_DECLARE_STATE();
+	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
 	ARM64_SIM_L_DECLARE_STACK();
 	unsigned i;
 
@@ -127,6 +128,7 @@ static void drive_store(unsigned width, __u64 value)
 static void drive_roundtrip(unsigned width, __u64 value)
 {
 	ARM64_SIM_L_DECLARE_STATE();
+	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
 	ARM64_SIM_L_DECLARE_STACK();
 	unsigned n = width_bytes(width);
 	__u64 mask = n == 8 ? ~0ULL : (1ULL << (8 * n)) - 1ULL;
