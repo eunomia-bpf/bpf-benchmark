@@ -5197,32 +5197,29 @@ are bound (census 445 -> 446).
 
 
 Step 0575 ported the kernel's annotated selftests to
-the five-step path and found that most of the
-agreement was not evidence. Of 1,917 annotated
-programs, 657 are written in C and 1,260 are BPF
-inline assembly, which stays with test_progs; 128 of
-the C programs both compile and expose their entry
-symbol. Each gets its own BPF object, because the
-kernel groups programs into one section and libbpf
-reads a program's type off that section, so the
-siblings are commented out of the translation unit
-down to their own closing brace. Of the 128, 33 were
-submitted, one ran, ten the specializer refused, 22
-never reached it because the companion BPF object
-failed to load, and 95 carry a program type the stub
-does not create. Only the one that ran and the ten
-the specializer refused say anything about the native
-path, and the earlier run's 11 apparent __failure
-agreements were programs whose companion never
-loaded; only a ran or refused outcome counts now. The
-named refusal is the 512-byte stack the stub frame
-shares with the program. Four harness defects were
-found by running it: the BPF compile drove the host
-linker without -c, libbpf needs a license section the
-selftests omit, the native compile omitted
--mno-red-zone, and a program's removal took a
-following sibling's declarations with it (census 445
--> 446).
+the five-step path, so the safety evidence comes from
+the kernel's own cases rather than purpose-built
+ones. Of 1,917 annotated programs, 657 are written in
+C; 239 of those compile to a native object whose
+entry symbol is present, and each is compiled from
+its own translation unit, because the kernel groups
+programs into one section, libbpf reads a program's
+type off that section, and a file may mix C programs
+with asm ones the native compiler cannot express.
+Listing the siblings out of the unit raised the sweep
+from 128 programs to 239. Of the 239, 78 reach a
+submission: one runs, ten the specializer refuses, 67
+stop at the companion object, and 161 carry a program
+type the runner's stub does not create. The check
+that matters holds: two __failure programs were
+rejected and none ran, so the native path agreed with
+the kernel's annotation on every failure case it
+reached. Seven of the ten refusals are generation
+failures that name a helper with no address or a
+relocation that leaves the symbol set; the rest are
+the 512-byte stack and an uninitialised stack slot.
+Five harness defects were found by running it, each
+fixed (census 445 -> 446).
 
 
 Step 0574 guarded the derivation itself. Reverting an

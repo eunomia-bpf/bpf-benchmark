@@ -159,7 +159,8 @@ def main(argv):
     for r in work:
         src = pathlib.Path(r["path"])
         bpf = pathlib.Path(r.get("bpf_object") or "")
-        obj = pathlib.Path(args.table) / (src.stem + ".native.o")
+        obj = pathlib.Path(args.table) / (
+            src.stem + "__" + r["program"] + ".native.o")
         listing = program_listing(args.micro_exec, bpf)
         if len(listing) != 1 or listing[0][0] != r["program"]:
             # `selftests.py` compiles each program into its own object, so

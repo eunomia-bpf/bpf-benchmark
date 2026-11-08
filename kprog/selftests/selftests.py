@@ -119,9 +119,24 @@ def only_program(source, head, keep, out_dir):
         pieces.append("#if 0\n" + text[start:end] + "#endif\n")
         cut = end
     pieces.append(text[cut:])
+    unit = "".join(pieces)
+    # A leading `?` says a section may hold several programs; with the
+    # others removed, libbpf cannot infer a type from the marked name, so
+    # the kept program carries the plain section it maps to.
+    marked = _section_of(head, keep)
+    if marked.startswith("?"):
+        unit = unit.replace('SEC("%s")' % marked, 'SEC("%s")' % marked[1:])
     wrapper = out_dir / (pathlib.Path(source).stem + "__" + keep + ".c")
-    wrapper.write_text("".join(pieces))
+    wrapper.write_text(unit)
     return wrapper
+
+
+def _section_of(head, name):
+    """The section a program declares."""
+    for section, program, _, _, _ in head:
+        if program == name:
+            return section
+    return ""
 
 
 def compile_bpf(source, out, includes, clang):
@@ -232,28 +247,23 @@ def main(argv):
     for want in ("failure", "success"):
         counts[want] = sum(1 for r in rows if r["expect"] == want)
 
-    # One file can mix C programs with inline-asm ones, and the asm makes the
-    # whole translation unit uncompilable by the native compiler.  So compile
-    # a file only when every program in it is C: a file with any asm program
-    # is the asm family and its C programs share the same obstacle.
+    # A file may mix C programs with inline-asm ones, and an asm body makes
+    # the translation unit uncompilable by the native compiler.  Every
+    # program is compiled from its own unit with the others commented out,
+    # so a C program in a mixed file compiles and its asm siblings do not
+    # take it with them.
     compiled = {}
-    asm_files = {r["file"] for r in rows if r["body"] == "asm"}
-    natives = {}
     for r in rows:
-        if r["body"] != "c" or r["file"] in asm_files:
+        if r["body"] != "c":
             continue
         src = pathlib.Path(r["path"])
-        # The native object is the whole file's, because the native
-        # compiler takes the programs as ordinary C functions; the BPF
-        # object is this program's own, because libbpf reads a program's
-        # type off its section and the kernel groups programs by section.
-        if src.name not in natives:
-            obj = out / (src.stem + ".native.o")
-            natives[src.name] = (obj,) + compile_native(src, obj, includes,
-                                                        clang)
-        obj, ok, err = natives[src.name]
-        unit = (only_program(src, per_file.get(src.name, []), r["program"],
-                             out) if ok else src)
+        # Both objects come from this program's own unit, so an asm
+        # sibling's body never reaches the native compiler and libbpf sees
+        # exactly one program.
+        unit = only_program(src, per_file.get(src.name, []), r["program"],
+                            out)
+        obj = out / (src.stem + "__" + r["program"] + ".native.o")
+        ok, err = compile_native(unit, obj, includes, clang)
         bpf = out / (src.stem + "__" + r["program"] + ".bpf.o")
         bpf_ok, bpf_err = (compile_bpf(unit, bpf, includes, clang) if ok
                            else (False, "native compile failed"))
@@ -264,12 +274,6 @@ def main(argv):
             bpf_error=(bpf_err[-400:] if not bpf_ok else ""),
             symbols=symbols(obj) if ok else [])
     for r in rows:
-        if r["file"] in asm_files:
-            r["compiled"] = False
-            r["bpf_object"] = None
-            r["entry"] = False
-            r["compile_error"] = "file contains a BPF-asm program"
-            continue
         info = compiled.get((r["file"], r["program"]), {})
         r["compiled"] = info.get("ok")
         r["bpf_object"] = info.get("bpf")

@@ -1,13 +1,13 @@
 {
  "counts": {
-  "submitted": 33,
-  "skipped": 95,
+  "submitted": 78,
+  "skipped": 161,
   "ran": 1,
   "refused": 10,
-  "not-reached": 22,
-  "failure": 0,
-  "failure_agrees": 0,
-  "success": 11,
+  "not-reached": 67,
+  "failure": 2,
+  "failure_agrees": 2,
+  "success": 9,
   "success_agrees": 1
  },
  "programs": [
@@ -32,6 +32,456 @@
    "stderr": "libbpf: prog 'async_call_root_check': BPF program load failed: -EACCES\nlibbpf: prog 'async_call_root_check': -- BEGIN PROG LOAD LOG --\ncombined stack size of 2 calls is 576. Too large\nprocessed 131 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'async_call_root_check': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/async_stack_depth__async_call_root_check.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_skb",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "m(sz=14)\n; *(__u8*)(hdr + 1) = 1; @ dynptr_fail__data_slice_out_of_bounds_skb.c:285\n17: (72) *(u8 *)(r1 +14) = 1\ninvalid access to memory, mem_size=14 off=14 size=1\nR1 min value is outside of the allowed memory range\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'data_slice_out_of_bounds_skb': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__data_slice_out_of_bounds_skb.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_skb_meta",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "1)\n; *(md + 1) = 42; @ dynptr_fail__data_slice_out_of_bounds_skb_meta.c:307\n13: (72) *(u8 *)(r1 +1) = 42\ninvalid access to memory, mem_size=1 off=1 size=1\nR1 min value is outside of the allowed memory range\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'data_slice_out_of_bounds_skb_meta': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__data_slice_out_of_bounds_skb_meta.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_slice_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "r_fail__skb_invalid_slice_write.c:1189\n15: (15) if r0 == 0x0 goto pc+3       ; R0=rdonly_mem(sz=14)\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_slice_write.c:1193\n16: (72) *(u8 *)(r0 +13) = 0\nR0 cannot write into rdonly_mem\nprocessed 17 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_slice_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_slice_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_meta_invalid_slice_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_meta_invalid_slice_write.c:1211\n12: (15) if r1 == 0x0 goto pc+2       ; R1=rdonly_mem(sz=1)\n; *md = 42; @ dynptr_fail__skb_meta_invalid_slice_write.c:1215\n13: (72) *(u8 *)(r1 +0) = 42\nR1 cannot write into rdonly_mem\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_meta_invalid_slice_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_meta_invalid_slice_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice1",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "\n27: (85) call bpf_skb_pull_data#39    ; R0=scalar()\n28: (55) if r0 != 0x0 goto pc+6       ; R0=0\n; val = hdr->h_proto; @ dynptr_fail__skb_invalid_data_slice1.c:1243\n29: (71) r1 = *(u8 *)(r8 +12)\nR8 invalid mem access 'scalar'\nprocessed 29 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_data_slice1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice2",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "x()\n22: (85) call bpf_skb_pull_data#39    ; R0=scalar()\n23: (55) if r0 != 0x0 goto pc+3       ; R0=0\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_data_slice2.c:1271\n24: (72) *(u8 *)(r8 +13) = 0\nR8 invalid mem access 'scalar'\nprocessed 25 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice2': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_data_slice2.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice3",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "mem(sz=14)\n43: (85) call bpf_dynptr_write#202    ; R0=scalar() fp-80=dynptr_skb(id=1,dynptr_id=1)\n; val = hdr->h_proto; @ dynptr_fail__skb_invalid_data_slice3.c:1299\n44: (71) r1 = *(u8 *)(r7 +12)\nR7 invalid mem access 'scalar'\nprocessed 42 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice3': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_data_slice3.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_data_slice4",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "R6=mem(sz=14)\n38: (85) call bpf_dynptr_write#202    ; R0=scalar() fp-80=dynptr_skb(id=1,dynptr_id=1)\n; hdr->h_proto = 1; @ dynptr_fail__skb_invalid_data_slice4.c:1326\n39: (72) *(u8 *)(r6 +13) = 0\nR6 invalid mem access 'scalar'\nprocessed 38 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_data_slice4': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_data_slice4.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " ; R0=scalar() fp-32=dynptr_skb_meta(id=2,dynptr_id=1)\n; val = *d; @ dynptr_fail__ro_skb_slice_invalid_after_metadata_write.c:1351\n28: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__ro_skb_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "  ; R0=scalar() fp-32=dynptr_skb_meta(id=2,dynptr_id=1)\n; *d = 42; @ dynptr_fail__rw_skb_slice_invalid_after_metadata_write.c:1376\n28: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__rw_skb_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_payload_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "alar() fp-16=dynptr_skb(id=1,dynptr_id=1)\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_payload_write.c:1401\n28: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_payload_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_payload_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "calar() fp-16=dynptr_skb(id=1,dynptr_id=1)\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_payload_write.c:1426\n28: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_payload_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_payload_helper",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "5) if r0 != 0x0 goto pc+5       ; R0=0\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_payload_helper.c:1451\n18: (71) r1 = *(u8 *)(r8 +0)\nR8 invalid mem access 'scalar'\nprocessed 19 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_payload_helper': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_helper.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_payload_helper",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "55) if r0 != 0x0 goto pc+2       ; R0=0\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_payload_helper.c:1476\n18: (72) *(u8 *)(r8 +0) = 42\nR8 invalid mem access 'scalar'\nprocessed 19 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_payload_helper': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_helper.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ro_skb_meta_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "p-16=dynptr_skb_meta(id=1,dynptr_id=1)\n; val = *md; @ dynptr_fail__ro_skb_meta_slice_invalid_after_metadata_write.c:1500\n22: (71) r1 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 22 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'ro_skb_meta_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__ro_skb_meta_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "rw_skb_meta_slice_invalid_after_metadata_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "fp-16=dynptr_skb_meta(id=1,dynptr_id=1)\n; *md = 42; @ dynptr_fail__rw_skb_meta_slice_invalid_after_metadata_write.c:1524\n22: (72) *(u8 *)(r6 +0) = 42\nR6 invalid mem access 'scalar'\nprocessed 22 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'rw_skb_meta_slice_invalid_after_metadata_write': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__rw_skb_meta_slice_invalid_after_metadata_write.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_data_slice1",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "r(id=3)\n29: (b4) w0 = 1                       ; R0=1\n30: (55) if r1 != 0x0 goto pc+6       ; R1=0\n; val = hdr->h_proto; @ dynptr_fail__xdp_invalid_data_slice1.c:1551\n31: (71) r1 = *(u8 *)(r7 +12)\nR7 invalid mem access 'scalar'\nprocessed 31 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_invalid_data_slice1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__xdp_invalid_data_slice1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_data_slice2",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "alar(id=3)\n24: (b4) w0 = 1                       ; R0=1\n25: (55) if r1 != 0x0 goto pc+3       ; R1=0\n; hdr->h_proto = 1; @ dynptr_fail__xdp_invalid_data_slice2.c:1578\n26: (72) *(u8 *)(r7 +13) = 0\nR7 invalid mem access 'scalar'\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_invalid_data_slice2': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__xdp_invalid_data_slice2.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_invalid_ctx",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "               ; R3=fp-16\n; bpf_dynptr_from_skb(ctx, 0, &ptr); @ dynptr_fail__skb_invalid_ctx.c:1593\n2: (b7) r2 = 0                        ; R2=0\n3: (85) call bpf_dynptr_from_skb#70638\ncalling kernel function bpf_dynptr_from_skb is not allowed\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'skb_invalid_ctx': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__skb_invalid_ctx.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_slice_var_len1",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "; R1=fp-16 R6=fp-16\n14: (b7) r2 = 0                       ; R2=0\n15: (85) call bpf_dynptr_slice#70651\nR4 unbounded memory access, use 'var &= const' or 'if (var < const)'\narg#2 arg#3 memory, len pair leads to invalid memory access\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'dynptr_slice_var_len1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__dynptr_slice_var_len1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_slice_var_len2",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "  ; R1=fp-32\n14: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n15: (07) r3 += -16                    ; R3=fp-16\n16: (b7) r2 = 0                       ; R2=0\n17: (85) call bpf_dynptr_slice_rdwr#70652\nR4 must be a known constant\nprocessed 17 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'dynptr_slice_var_len2': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__dynptr_slice_var_len2.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_slice_rdwr_rdonly",
+   "section": "cgroup_skb/ingress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": " r6                      ; R1=fp-32 R6=fp-32\n11: (b7) r2 = 0                       ; R2=0\n12: (b7) r4 = 14                      ; R4=14\n13: (85) call bpf_dynptr_slice_rdwr#70652\nthe prog does not allow writes to packet data\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'invalid_slice_rdwr_rdonly': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__invalid_slice_rdwr_rdonly.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalid2",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "lone); @ dynptr_fail__clone_invalid2.c:1870\n13: (bf) r1 = r6                      ; R1=fp-16 R6=fp-16 refs=3\n14: (bf) r2 = r7                      ; R2=fp-32 R7=fp-32 refs=3\n15: (85) call bpf_dynptr_clone#70630\ncannot overwrite referenced dynptr\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_invalid2': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__clone_invalid2.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_skb_packet_data",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "=4) R1=scalar(id=4)\n25: (b4) w0 = 0                       ; R0=0\n26: (55) if r1 != 0x0 goto pc+1       ; R1=0\n; *data = 123; @ dynptr_fail__clone_skb_packet_data.c:2060\n27: (62) *(u32 *)(r7 +0) = 123\nR7 invalid mem access 'scalar'\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_skb_packet_data': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__clone_skb_packet_data.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_skb_packet_meta",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "R1=ctx() R6=ctx()\n20: (85) call bpf_skb_pull_data#39    ; R0=scalar()\n21: (55) if r0 != 0x0 goto pc+1       ; R0=0\n; *md = 42; @ dynptr_fail__clone_skb_packet_meta.c:2085\n22: (72) *(u8 *)(r7 +0) = 42\nR7 invalid mem access 'scalar'\nprocessed 23 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_skb_packet_meta': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__clone_skb_packet_meta.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_xdp_packet_data",
+   "section": "?xdp",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "fff2\n23: (85) call bpf_xdp_adjust_head#44          ; R0=scalar()\n24: (55) if r0 != 0x0 goto pc+2       ; R0=0\n; *data = 123; @ dynptr_fail__clone_xdp_packet_data.c:2114\n25: (62) *(u32 *)(r8 +0) = 123\nR8 invalid mem access 'scalar'\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'clone_xdp_packet_data': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__clone_xdp_packet_data.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "test_dynptr_skb_small_buff",
+   "section": "?cgroup_skb/egress",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "2 = 0                       ; R2=0\n16: (b7) r4 = 9                       ; R4=9\n17: (85) call bpf_dynptr_slice#70651\ninvalid read from stack R3 off -24+8 size 9\narg#2 arg#3 memory, len pair leads to invalid memory access\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'test_dynptr_skb_small_buff': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/dynptr_fail__test_dynptr_skb_small_buff.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "size_not_bpf_dw",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "non_const_var_off",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "refused",
+   "stdout": "",
+   "stderr": "trusted specializer refused native program: Input/output error\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "non_const_var_off_kptr_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "n=umin=smin32=umin32=4,smax=umax=smax32=umax32=12,var_off=(0x0; 0xf))\n14: (b7) r2 = 0                       ; R2=0\n15: (85) call bpf_kptr_xchg#194\nR1 doesn't have constant offset. kptr has to be at the constant offset\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'non_const_var_off_kptr_xchg': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__non_const_var_off_kptr_xchg.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "misaligned_access_write",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "misaligned_access_read",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_var_off_store",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "refused",
+   "stdout": "",
+   "stderr": "trusted specializer refused native program: Input/output error\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_bad_type_match",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "marked_as_untrusted_or_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "sted_or_null.c:176\n7: (79) r1 = *(u64 *)(r0 +8)          ; R0=map_value(map=array_map,ks=4,vs=32) R1=scalar()\n8: (85) call bpf_this_cpu_ptr#154\nR1 type=scalar expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'marked_as_untrusted_or_null': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__marked_as_untrusted_or_null.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "inherit_untrusted_on_walk",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "r_prog_test_ref_kfunc()\n; bpf_this_cpu_ptr(unref_ptr); @ map_kptr_fail__inherit_untrusted_on_walk.c:218\n10: (85) call bpf_this_cpu_ptr#154\nR1 type=untrusted_ptr_ expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'inherit_untrusted_on_walk': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__inherit_untrusted_on_walk.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_kptr_xchg_on_unref",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": ") r1 = r0                       ; R0=map_value(map=array_map,ks=4,vs=32,off=8) R1=map_value(map=array_map,ks=4,vs=32,off=8)\n9: (b7) r2 = 0                        ; R2=0\n10: (85) call bpf_kptr_xchg#194\nR1 has no valid kptr\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'reject_kptr_xchg_on_unref': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__reject_kptr_xchg_on_unref.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "mark_ref_as_untrusted_or_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "_or_null.c:252\n7: (79) r1 = *(u64 *)(r0 +16)         ; R0=map_value(map=array_map,ks=4,vs=32) R1=scalar()\n8: (85) call bpf_this_cpu_ptr#154\nR1 type=scalar expected=percpu_ptr_, percpu_rcu_ptr_, percpu_trusted_ptr_\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'mark_ref_as_untrusted_or_null': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__mark_ref_as_untrusted_or_null.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_untrusted_store_to_ref",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_untrusted_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "@ map_kptr_fail__reject_untrusted_xchg.c:295\n10: (bf) r1 = r0                      ; R0=map_value(map=array_map,ks=4,vs=32,off=16) R1=map_value(map=array_map,ks=4,vs=32,off=16)\n11: (85) call bpf_kptr_xchg#194\nR1 has no valid kptr\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'reject_untrusted_xchg': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/map_kptr_fail__reject_untrusted_xchg.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_bad_type_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_member_of_ref_xchg",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_indirect_global_func_access",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "warmup test_run failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "kptr_xchg_ref_state",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "kptr_xchg_possibly_null",
+   "section": "?tc",
+   "expect": "failure",
+   "returncode": 1,
+   "outcome": "not-reached",
+   "stdout": "",
+   "stderr": "libbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+  },
+  {
    "file": "test_bpf_nf_fail.c",
    "program": "lookup_null_bpf_tuple",
    "section": "?tc",
@@ -39,7 +489,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "unable to infer BPF program type from section '?tc'\n"
+   "stderr": "le.c:177\n4: (b7) r2 = 0                        ; R2=0\n5: (b4) w3 = 0                        ; R3=0\n6: (b4) w5 = 12                       ; R5=12\n7: (85) call bpf_skb_ct_lookup#72038\nPossibly NULL pointer passed to trusted arg1\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'lookup_null_bpf_tuple': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_bpf_nf_fail__lookup_null_bpf_tuple.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "test_bpf_nf_fail.c",
@@ -49,7 +499,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "unable to infer BPF program type from section '?tc'\n"
+   "stderr": "s.c:192\n7: (b4) w3 = 12                       ; R3=12\n8: (b7) r4 = 0                        ; R4=0\n9: (b4) w5 = 12                       ; R5=12\n10: (85) call bpf_skb_ct_lookup#72038\nPossibly NULL pointer passed to trusted arg3\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'lookup_null_bpf_opts': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_bpf_nf_fail__lookup_null_bpf_opts.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "test_bpf_nf_fail.c",
@@ -59,7 +509,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "unable to infer BPF program type from section '?xdp'\n"
+   "stderr": "\n4: (b7) r2 = 0                        ; R2=0\n5: (b4) w3 = 0                        ; R3=0\n6: (b4) w5 = 12                       ; R5=12\n7: (85) call bpf_xdp_ct_lookup#72421\nPossibly NULL pointer passed to trusted arg1\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_lookup_null_bpf_tuple': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_bpf_nf_fail__xdp_lookup_null_bpf_tuple.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "test_bpf_nf_fail.c",
@@ -69,7 +519,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "unable to infer BPF program type from section '?xdp'\n"
+   "stderr": "7: (b4) w3 = 12                       ; R3=12\n8: (b7) r4 = 0                        ; R4=0\n9: (b4) w5 = 12                       ; R5=12\n10: (85) call bpf_xdp_ct_lookup#72421\nPossibly NULL pointer passed to trusted arg3\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'xdp_lookup_null_bpf_opts': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_bpf_nf_fail__xdp_lookup_null_bpf_opts.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "test_global_func1.c",
@@ -149,7 +599,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "@ test_global_func17__global_func17.c:18\n0: (18) r1 = 0xffffd4c34157a000       ; R1=map_value(map=test_glo.rodata,ks=4,vs=4)\n2: (85) call pc+1\nwrite into map forbidden, value_size=4 off=0 size=4\nCaller passes invalid args into func#1 ('foo')\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func17': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_global_func17__global_func17.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
+   "stderr": "@ test_global_func17__global_func17.c:18\n0: (18) r1 = 0xffffd5384359f000       ; R1=map_value(map=test_glo.rodata,ks=4,vs=4)\n2: (85) call pc+1\nwrite into map forbidden, value_size=4 off=0 size=4\nCaller passes invalid args into func#1 ('foo')\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'global_func17': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/test_global_func17__global_func17.bpf.o'\nnative_kernel companion bpf_object__load failed: Invalid argument\n"
   },
   {
    "file": "test_global_func2.c",
@@ -218,7 +668,7 @@
    "expect": "success",
    "returncode": 0,
    "outcome": "ran",
-   "stdout": "{\"bpf_bytecode_bytes\":64,\"native_code_bytes\":0},\"phases_ns\":{\"memory_prepare_ns\":187,\"packet_prepare_ns\":100366,\"native_load_ns\":867949507,\"companion_load_ns\":4957284,\"companion_open_ns\":2993685,\"companion_object_load_ns\":1789159,\"companion_map_ptr_extract_ns\":0,\"companion_lookup_spec_ns\":0,\"native_link_cache_lookup_ns\":0,\"native_link_exec_ns\":0,\"native_link_read_ns\":0,\"native_link_map_patch_ns\":0,\"blob_upload_ns\":0,\"prog_load_ns\":0,\"prog_run_wall_ns\":1935},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"}}\n",
+   "stdout": ":{\"bpf_bytecode_bytes\":64,\"native_code_bytes\":0},\"phases_ns\":{\"memory_prepare_ns\":195,\"packet_prepare_ns\":97678,\"native_load_ns\":993354470,\"companion_load_ns\":6947089,\"companion_open_ns\":4697076,\"companion_object_load_ns\":2067271,\"companion_map_ptr_extract_ns\":0,\"companion_lookup_spec_ns\":0,\"native_link_cache_lookup_ns\":0,\"native_link_exec_ns\":0,\"native_link_read_ns\":0,\"native_link_map_patch_ns\":0,\"blob_upload_ns\":0,\"prog_load_ns\":0,\"prog_run_wall_ns\":1210},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"}}\n",
    "stderr": ""
   },
   {
@@ -249,7 +699,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "cx1.c:19\n4: (b7) r2 = 3                        ; R2=3\n5: (b7) r3 = 0                        ; R3=0\n6: (18) r4 = 0xffffd4c341d5a000       ; R4=map_value(map=verifier.rodata,ks=4,vs=8)\n8: (85) call bpf_strtol#105\nwrite into map forbidden, value_size=8 off=0 size=8\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+   "stderr": "cx1.c:19\n4: (b7) r2 = 3                        ; R2=3\n5: (b7) r3 = 0                        ; R3=0\n6: (18) r4 = 0xffffd538438fa000       ; R4=map_value(map=verifier.rodata,ks=4,vs=8)\n8: (85) call bpf_strtol#105\nwrite into map forbidden, value_size=8 off=0 size=8\nprocessed 8 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx1': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx1.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "verifier_const.c",
@@ -257,9 +707,9 @@
    "section": "tc/ingress",
    "expect": "success",
    "returncode": 1,
-   "outcome": "refused",
+   "outcome": "not-reached",
    "stdout": "",
-   "stderr": "trusted specializer refused native program: Input/output error\n"
+   "stderr": "warmup test_run failed: Invalid argument\n"
   },
   {
    "file": "verifier_const.c",
@@ -267,9 +717,9 @@
    "section": "tc/ingress",
    "expect": "success",
    "returncode": 1,
-   "outcome": "refused",
+   "outcome": "not-reached",
    "stdout": "",
-   "stderr": "trusted specializer refused native program: Input/output error\n"
+   "stderr": "warmup test_run failed: Invalid argument\n"
   },
   {
    "file": "verifier_const.c",
@@ -279,7 +729,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "fff))\n1: (18) r3 = 0xffffd4c341e7d000       ; R3=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (b4) w4 = 0                        ; R4=0\n4: (b7) r5 = 0                        ; R5=0\n5: (85) call bpf_check_mtu#163\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx4': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx4.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+   "stderr": "fff))\n1: (18) r3 = 0xffffd53843a51000       ; R3=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (b4) w4 = 0                        ; R4=0\n4: (b7) r5 = 0                        ; R5=0\n5: (85) call bpf_check_mtu#163\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx4': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx4.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "verifier_const.c",
@@ -309,7 +759,7 @@
    "returncode": 1,
    "outcome": "not-reached",
    "stdout": "",
-   "stderr": "x=0xffffffff,var_off=(0x0; 0xffffffff))\n; *(volatile __u32 *)p = val; @ verifier_const__tcx7.c:84\n1: (18) r2 = 0xffffd4c341f49000       ; R2=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (63) *(u32 *)(r2 +0) = r1\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx7': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx7.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
+   "stderr": "x=0xffffffff,var_off=(0x0; 0xffffffff))\n; *(volatile __u32 *)p = val; @ verifier_const__tcx7.c:84\n1: (18) r2 = 0xffffd53843b47000       ; R2=map_value(map=verifier.rodata,ks=4,vs=8)\n3: (63) *(u32 *)(r2 +0) = r1\nwrite into map forbidden, value_size=8 off=0 size=4\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'tcx7': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/selftests/build/verifier_const__tcx7.bpf.o'\nnative_kernel companion bpf_object__load failed: Permission denied\n"
   },
   {
    "file": "verifier_mtu.c",
@@ -349,6 +799,474 @@
    "expect": "failure",
    "programs": [
     "crypto_acquire"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release1",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release2",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_missing_release_callback",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_missing_release_callback"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_release_uninit_dynptr",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_release_uninit_dynptr"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "use_after_invalid",
+   "expect": "failure",
+   "programs": [
+    "use_after_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "ringbuf_invalid_api",
+   "expect": "failure",
+   "programs": [
+    "ringbuf_invalid_api"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "add_dynptr_to_map1",
+   "expect": "failure",
+   "programs": [
+    "add_dynptr_to_map1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "add_dynptr_to_map2",
+   "expect": "failure",
+   "programs": [
+    "add_dynptr_to_map2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_ringbuf",
+   "expect": "failure",
+   "programs": [
+    "data_slice_out_of_bounds_ringbuf"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_out_of_bounds_map_value",
+   "expect": "failure",
+   "programs": [
+    "data_slice_out_of_bounds_map_value"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_use_after_release1",
+   "expect": "failure",
+   "programs": [
+    "data_slice_use_after_release1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_use_after_release2",
+   "expect": "failure",
+   "programs": [
+    "data_slice_use_after_release2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_missing_null_check1",
+   "expect": "failure",
+   "programs": [
+    "data_slice_missing_null_check1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "data_slice_missing_null_check2",
+   "expect": "failure",
+   "programs": [
+    "data_slice_missing_null_check2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_helper1",
+   "expect": "failure",
+   "programs": [
+    "invalid_helper1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_helper2",
+   "expect": "failure",
+   "programs": [
+    "invalid_helper2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write1",
+   "expect": "failure",
+   "programs": [
+    "invalid_write1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write2",
+   "expect": "failure",
+   "programs": [
+    "invalid_write2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write3",
+   "expect": "failure",
+   "programs": [
+    "invalid_write3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_write4",
+   "expect": "failure",
+   "programs": [
+    "invalid_write4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "global",
+   "expect": "failure",
+   "programs": [
+    "global"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read1",
+   "expect": "failure",
+   "programs": [
+    "invalid_read1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read2",
+   "expect": "failure",
+   "programs": [
+    "invalid_read2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read3",
+   "expect": "failure",
+   "programs": [
+    "invalid_read3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_read4",
+   "expect": "failure",
+   "programs": [
+    "invalid_read4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_offset",
+   "expect": "failure",
+   "programs": [
+    "invalid_offset"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "release_twice",
+   "expect": "failure",
+   "programs": [
+    "release_twice"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "release_twice_callback",
+   "expect": "failure",
+   "programs": [
+    "release_twice_callback"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_from_mem_invalid_api",
+   "expect": "failure",
+   "programs": [
+    "dynptr_from_mem_invalid_api"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_overwrite_unref",
+   "expect": "success",
+   "programs": [
+    "dynptr_overwrite_unref"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_reinit",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_reinit"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_or_null",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_or_null"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_failure",
+   "expect": "failure",
+   "programs": [
+    "dynptr_invalidate_slice_failure"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_invalidate_slice_success",
+   "expect": "success",
+   "programs": [
+    "dynptr_invalidate_slice_success"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_overwrite_ref",
+   "expect": "failure",
+   "programs": [
+    "dynptr_overwrite_ref"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_read_into_slot",
+   "expect": "failure",
+   "programs": [
+    "dynptr_read_into_slot"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "skb_meta_invalid_ctx",
+   "expect": "failure",
+   "programs": [
+    "skb_meta_invalid_ctx"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "uninit_write_into_slot",
+   "expect": "failure",
+   "programs": [
+    "uninit_write_into_slot"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "xdp_invalid_ctx",
+   "expect": "failure",
+   "programs": [
+    "xdp_invalid_ctx"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "invalid_data_slices",
+   "expect": "failure",
+   "programs": [
+    "invalid_data_slices"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_adjust_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_adjust_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_is_null_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_is_null_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_is_rdonly_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_is_rdonly_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "dynptr_size_invalid",
+   "expect": "failure",
+   "programs": [
+    "dynptr_size_invalid"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalid1",
+   "expect": "failure",
+   "programs": [
+    "clone_invalid1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate1",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate1"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate2",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate3",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate3"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate4",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate4"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate5",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate5"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "clone_invalidate6",
+   "expect": "failure",
+   "programs": [
+    "clone_invalidate6"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "dynptr_fail.c",
+   "program": "test_dynptr_reg_type",
+   "expect": "failure",
+   "programs": [
+    "test_dynptr_reg_type"
    ],
    "reason": "unsupported type"
   },
@@ -439,6 +1357,15 @@
    "expect": "failure",
    "programs": [
     "kprobe_session_return_2"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "map_kptr_fail.c",
+   "program": "reject_indirect_helper_access",
+   "expect": "failure",
+   "programs": [
+    "reject_indirect_helper_access"
    ],
    "reason": "unsupported type"
   },
@@ -569,6 +1496,87 @@
    "reason": "unsupported type"
   },
   {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "an_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "multiple_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "multiple_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_32bit_constant_0_no_nullness",
+   "expect": "success",
+   "programs": [
+    "an_array_with_a_32bit_constant_0_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "a_pcpu_array_with_a_constant_no_nullness",
+   "expect": "success",
+   "programs": [
+    "a_pcpu_array_with_a_constant_no_nullness"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_no_nullness_out_of_bounds",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_no_nullness_out_of_bounds"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_too_small",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_too_small"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "an_array_with_a_constant_too_big",
+   "expect": "failure",
+   "programs": [
+    "an_array_with_a_constant_too_big"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "non_stack_key_lookup",
+   "expect": "failure",
+   "programs": [
+    "non_stack_key_lookup"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_array_access.c",
+   "program": "doesnt_reject_irrelevant_maps",
+   "expect": "success",
+   "programs": [
+    "doesnt_reject_irrelevant_maps"
+   ],
+   "reason": "unsupported type"
+  },
+  {
    "file": "verifier_bits_iter.c",
    "program": "null_pointer",
    "expect": "success",
@@ -673,6 +1681,33 @@
    "expect": "success",
    "programs": [
     "inline_bpf_get_current_task"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_linked_scalars.c",
+   "program": "alu32_negative_offset",
+   "expect": "success",
+   "programs": [
+    "alu32_negative_offset"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_load_acquire.c",
+   "program": "dummy_test",
+   "expect": "success",
+   "programs": [
+    "dummy_test"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_netfilter_ctx.c",
+   "program": "with_invalid_ctx_access_test5",
+   "expect": "failure",
+   "programs": [
+    "with_invalid_ctx_access_test5"
    ],
    "reason": "unsupported type"
   },
@@ -1195,6 +2230,15 @@
    "expect": "success",
    "programs": [
     "test_sockops_update_dedicated"
+   ],
+   "reason": "unsupported type"
+  },
+  {
+   "file": "verifier_store_release.c",
+   "program": "dummy_test",
+   "expect": "success",
+   "programs": [
+    "dummy_test"
    ],
    "reason": "unsupported type"
   }

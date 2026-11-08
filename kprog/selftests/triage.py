@@ -77,13 +77,20 @@ def archive_causes(archive):
                              if "rror" in x or "nknown" in x]
                     generated = named[-1].strip() if named else text.strip()
                     break
-        stderr = root / "request/load.stderr"
-        verifier = ""
-        if stderr.exists():
-            found = [x for x in stderr.read_text(errors="ignore").splitlines()
-                     if "invalid " in x or "R10 off" in x]
-            verifier = found[0].strip() if found else ""
-        return generated, verifier
+        # The loader writes the generator's own message on stdout and the
+        # verifier's message on stderr; either one names the cause.
+        loader = ""
+        for name in ("load.stdout", "load.stderr"):
+            path = root / "request" / name
+            if not path.exists():
+                continue
+            lines = [x.strip() for x in
+                     path.read_text(errors="ignore").splitlines()]
+            named = [x for x in lines if "Error" in x or "invalid " in x
+                     or "R10 off" in x]
+            if named and not loader:
+                loader = named[0]
+        return generated, loader
 
 
 def main():
@@ -92,14 +99,16 @@ def main():
     if not refused:
         print("no refused program to triage")
         return 0
-    state = pathlib.Path(tempfile.mkdtemp(prefix="triage-"))
-    service = start_service(state)
     out = []
-    try:
-        for r in refused:
-            stem = pathlib.Path(r["file"]).stem
-            obj = BUILD / (stem + ".native.o")
-            bpf = BUILD / (stem + "__" + r["program"] + ".bpf.o")
+    for r in refused:
+        stem = pathlib.Path(r["file"]).stem
+        obj = BUILD / (stem + "__" + r["program"] + ".native.o")
+        bpf = BUILD / (stem + "__" + r["program"] + ".bpf.o")
+        # One service per program, so the single archive it writes belongs
+        # to this request and to no other.
+        state = pathlib.Path(tempfile.mkdtemp(prefix="triage-"))
+        service = start_service(state)
+        try:
             found = json.loads(subprocess.run(
                 [str(MICRO), "list-programs", "--program", str(bpf)],
                 capture_output=True, text=True).stdout or "[]")
@@ -110,17 +119,15 @@ def main():
                      "--native-program", str(obj), "--inner-repeat", "1",
                      "--native-kernel-prog-type", kind],
                     capture_output=True, text=True)
-            archives = sorted(state.glob("*.failure.tar.gz"),
-                              key=lambda a: int(a.name.split(".")[0]))
-            generated, verifier = archive_causes(archives[-1])
-            out.append(dict(
-                file=r["file"], program=r["program"],
-                native_frame=frame_bytes(obj) if obj.exists() else None,
-                stack_budget=STACK,
-                generated=generated,
-                verifier=verifier))
-    finally:
-        service.terminate()
+            archives = sorted(state.rglob("*.failure.tar.gz"))
+            generated, verifier = (archive_causes(archives[0]) if archives
+                                   else ("", ""))
+        finally:
+            service.terminate()
+        out.append(dict(
+            file=r["file"], program=r["program"], expect=r["expect"],
+            native_frame=frame_bytes(obj) if obj.exists() else None,
+            stack_budget=STACK, generated=generated, verifier=verifier))
     print(json.dumps(out, indent=1))
     return 0
 

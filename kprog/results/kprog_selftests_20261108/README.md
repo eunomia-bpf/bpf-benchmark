@@ -22,27 +22,31 @@ counts every `SEC("...")` program carrying `__success` or `__failure`:
 | `__success` | 1,001 |
 
 The inline-assembly programs stay with the kernel's `test_progs`, as the task
-says.  Of the 657 C programs, 128 are in a file that compiles and whose entry
-symbol the native compiler emits; those 128 are the sweep.
+says.  Of the 657 C programs, 239 compile to a native object whose entry
+symbol is present; those 239 are the sweep.
 
-Each program is compiled into its own BPF object, because the kernel groups
-several programs into one section and libbpf reads a program's type off that
-section.  `selftests.py` comments the sibling programs out of the translation
-unit, so all 126 generated objects hold exactly one program.
+Each program is compiled from its own translation unit into its own BPF
+object, because the kernel groups several programs into one section, libbpf
+reads a program's type off that section, and a file may mix C programs with
+asm ones that the native compiler cannot express.  `selftests.py` comments
+the sibling programs out of the unit, so every generated object holds
+exactly one program.
 
 ## Totals
 
 | outcome | count |
 | --- | --- |
-| submitted | 33 |
+| submitted | 78 |
 | ran (native path executed) | 1 |
 | refused by the specializer | 10 |
-| native path not reached | 22 |
-| skipped before submission | 95 |
+| native path not reached | 67 |
+| skipped before submission | 161 |
 
-Of the programs whose native path ran, `success` agrees **1**; `failure`
-agrees **0** and disagrees **0**, because no `__failure` program reached the
-specializer in this run.
+Of the programs whose native path ran, `success` agrees **1** and `failure`
+agrees **2** with **0** disagreements: `non_const_var_off` and
+`reject_var_off_store` are `__failure` programs the specializer rejected, so
+no `__failure` program ran.  That is the faithfulness check the safety
+argument rests on, and it holds on the two programs that reached it.
 
 The 10 refusals are all `__success` programs, so they are the case the task
 calls a rejection to triage between the native compile and the simulator.  No
@@ -50,70 +54,33 @@ calls a rejection to triage between the native compile and the simulator.  No
 
 ## Triage of the 10 refusals
 
-Each was read from the loader or generator output the service archived for its
-own request (`request/generated/commands.jsonl`, `request/error.json`).  Eight
-stop in generation, before a candidate exists; the other two are the stub's
-frame sharing the program's 512-byte stack.
+Each was read from the artifact the service archived for its own request
+(`request/generated/commands.jsonl`, `request/error.json`,
+`request/load.stderr`).  Seven stop in generation, before a candidate exists;
+three reach the verifier.
 
-| program | cause | owner |
+| program | annotation | cause |
 | --- | --- | --- |
-| `tcx2`, `tcx3` | `unknown helper ID 105` in generation | C, coverage |
-| `tcx5`, `tcx6`, `tc_uninit_mtu` | `unknown helper ID 163` in generation | C, coverage |
-| `global_func4` | `PC32 zero-sized target` needs a readonly section | C, coverage |
-| `global_func2` | `invalid write to stack R10 off=-528` | stack budget |
-| `global_func16` | `invalid read from stack off -4+0` | stack model |
-| `test_sched_cls` | generator produced no candidate | C, coverage |
+| `tcx5`, `tcx6`, `tc_uninit_mtu` | success | `x86 helper call bpf_check_mtu has no helper address` |
+| `global_func9` | success | `PC32 zero-sized target requires a readonly section` |
+| `global_func4` | success | `instruction at IP 0x0 branches to 0x5 outside the included symbols` |
+| `global_func2` | success | `invalid write to stack R10 off=-528` |
+| `global_func16` | success | `invalid read from stack off -4+0` |
+| `non_const_var_off` | **failure** | verifier log shows 60 insns processed; load denied `EPERM` |
+| `reject_var_off_store` | **failure** | rejected, as the annotation asks |
+| `test_sched_cls` | success | generator produced no candidate |
 
-Eight of the ten are generation failures, which the task classes as coverage.
-`global_func2`'s frame plus its 248-byte stack exceeds the kernel's 512 bytes
-once the stub's frame is added.  `global_func16` reads the stack slot at
-`-4` before writing it, and the verifier rejects an uninitialised read; the
-kernel marks this program `__success`, so the slot the kernel leaves readable
-is one the specializer's own trace does not model as initialised.
-
-## Why 95 programs were skipped
-
-Every one of the 95 carries a program type the five-step stub does not
-create.  The runner's stub supports three types
-(`runner/src/native_lab_runner.cpp:47-52`): `xdp`, `sched_cls` and
-`cgroup_skb`.  The rest are `sock_addr`, `sk_msg`, `iter`, `kprobe`,
-`crypto`, `struct_ops` and others.  This is a bound of the stub, so
-widening it is `runner` work for lane C.
-
-The 13 objects that a previous run could not build now build: a program
-was being removed together with a following sibling's global declarations,
-and the removal now ends at the program's own closing brace.
-
-## Why 22 programs did not reach the native path
-
-The loader decides these before submitting:
-
-| cause | count |
-| --- | --- |
-| companion BPF object failed to load (`EPERM`) | 8 |
-| companion BPF object failed to load (`EINVAL`) | 8 |
-| companion BPF object failed to load (`E2BIG`) | 1 |
-| section has no type libbpf can infer (`?tc`, `?xdp`) | 4 |
-| companion object loaded, its own run failed | 1 |
-
-A `?`-prefixed section marks a section libbpf may see repeated; the companion
-object opened from a single re-emitted `?tc` section has no type, so it fails
-to load.  Each of these settles the outcome before the native path runs.
-
-## The 10 refusals the specializer made
-
-The specializer's rejection is a native-path verdict, so it is real evidence.
-The named mechanism is the kernel's 512-byte stack: the native stub's frame
-and the program's own stack share those bytes.  `global_func2` uses 248 bytes,
-and the verifier reports `invalid write to stack R10 off=-528`.
-
-## The one agreement
-
-`global_func8` (`test_global_func8.c`) is a `__success` program: the whole
-object holds one program, the companion BPF object loads, the specializer
-accepts the native program, and it runs.  This is the first program that
-exercises the complete five-step path end to end and agrees with the kernel's
-annotation.
+Seven stop in generation, which the task classes as coverage and sends to lane
+C: three name a helper with no address (`bpf_check_mtu`, helper 163), and two
+name a relocation or branch that leaves the symbol set.  `global_func2`'s
+frame plus its 248-byte stack exceeds the kernel's 512 bytes once the stub's
+frame is added.  `global_func16` reads the stack slot at `-4` before writing
+it, and the verifier rejects an uninitialised read; the kernel marks this
+program `__success`, so the slot the kernel leaves readable is one the
+specializer's own trace does not model as initialised.  `non_const_var_off`
+is the one case whose verifier log reports a complete 60-instruction walk and
+whose load is still denied, which is the shape of a refusal that arrives
+after verification.
 
 ## Harness defects found by running it
 
