@@ -1,0 +1,5 @@
+Generic native-proof vmlinux kfunc kernel profile
+
+A coherent incremental ARM kernel/module build extends the9c50491 native-region path with exact vmlinux call fields and ordinary kfunc descriptor registration. GPL/BTF/JIT checks apply to real kfunc calls independently of prior kinsn descriptor allocation. Existing helper and source-map rules retain their bodies. The frozen baseline syscall source keeps the active diagnostic source epoch separately pinned. Warm kernel8GiB and module caches supply the build; module source links retain their symlink form. Initial module-copy setup diagnostics and the corrected cache procedure accompany the source archive.
+
+Image.gz, build.json and build-inputs.tar.gz retain exact Image/module/source/compiler identities and commands. The retained current Image483 and module8a remain the active whole-application epoch. Sequential2GiB16-19 XDP/TC native-only service controls and the existing34-outcome transport suite exercise this isolated profile. Actual outcomes and complete raw logs are collected separately. Universal ABI/binding composition continues with V/C.
