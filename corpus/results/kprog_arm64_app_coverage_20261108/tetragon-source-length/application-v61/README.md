@@ -1,0 +1,3 @@
+Complete Tetragon actual-selected V61 paired source replay
+
+The original complete recipe selects V61 (original kernel requestSHA2de9f398). This successor supplies both V61 native and original upstream JIT BPF inputs built from the same edited process.h/bpf_d_path.h/main C bytes in3b9a5561f. It preserves every native manifest entry, original2048 path-iteration bound and helper/iterator choices. Existing source scanner updates only V61 bytecode length selectors. RAW helper contextae04d80a6 and paired88a Image/module retain the same five-step design. Guest8GiB/eightvCPU16-19; complete original two-start workload/counters retained. QEMU timing is functional. Runtime admission additions0.
