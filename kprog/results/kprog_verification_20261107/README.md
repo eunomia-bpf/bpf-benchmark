@@ -4572,3 +4572,16 @@ Native call-symbol/ABI, physical memory/provenance, access faults, ISA event
 transport and C/compiler correspondence remain explicit interfaces. Exact
 sources, commands and initial elaboration diagnostics are archived under
 `x86_call_memory_tokens`.
+
+### Typed helper oracle refresh
+
+The immutable6a8067f77 full check returned Make exit2 because its generated
+helper-capture header preceded the published ARM188/190 identities. The
+existing generator now emits their typed stubs, argument normalization,
+result conversions and pointer masks from the same public libbpf ABI.
+Its freshness comparison passes. Six retained C programs pass UBSan:
+ARM typed route18,770, x86 dispatch4100, x86 dispatch route18,946,
+x86 helper call12, ARM identities82 and ARM helper call154 observations.
+Every original semantic case remains. Exact sources, commands and the
+original full outcome/all1263 Git source hashes appear under
+`typed_helper_oracle_refresh`; the full source export is retired.

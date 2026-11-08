@@ -681,6 +681,13 @@ static inline int bpf_get_retval(void)
 
   return (int)(uintptr_t)ora_raw_result(186U);
 }
+static inline __u64 bpf_xdp_get_buff_len(struct xdp_md *xdp_md)
+{
+  ora_called = 188U;
+  ora_argc = 1U;
+  ora_arguments[0] = (__u64)(uintptr_t)xdp_md;
+  return (__u64)(uintptr_t)ora_raw_result(188U);
+}
 static inline long bpf_xdp_load_bytes(struct xdp_md *xdp_md, __u32 offset, void *buf, __u32 len)
 {
   ora_called = 189U;
@@ -690,6 +697,16 @@ static inline long bpf_xdp_load_bytes(struct xdp_md *xdp_md, __u32 offset, void 
   ora_arguments[2] = (__u64)(uintptr_t)buf;
   ora_arguments[3] = (__u64)(uintptr_t)len;
   return (long)(uintptr_t)ora_raw_result(189U);
+}
+static inline long bpf_xdp_store_bytes(struct xdp_md *xdp_md, __u32 offset, void *buf, __u32 len)
+{
+  ora_called = 190U;
+  ora_argc = 4U;
+  ora_arguments[0] = (__u64)(uintptr_t)xdp_md;
+  ora_arguments[1] = (__u64)(uintptr_t)offset;
+  ora_arguments[2] = (__u64)(uintptr_t)buf;
+  ora_arguments[3] = (__u64)(uintptr_t)len;
+  return (long)(uintptr_t)ora_raw_result(190U);
 }
 static inline long bpf_copy_from_user_task(void *dst, __u32 size, const void *user_ptr, struct task_struct *tsk, __u64 flags)
 {
@@ -1065,7 +1082,16 @@ static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u6
   case 186ULL:
 
     return 0U;
+  case 188ULL:
+    out[0] = (__u64)(uintptr_t)((struct xdp_md *)(uintptr_t)raw[0]);
+    return 1U;
   case 189ULL:
+    out[0] = (__u64)(uintptr_t)((struct xdp_md *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[2]);
+    out[3] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[3]);
+    return 4U;
+  case 190ULL:
     out[0] = (__u64)(uintptr_t)((struct xdp_md *)(uintptr_t)raw[0]);
     out[1] = (__u64)(uintptr_t)((__u32)(uintptr_t)raw[1]);
     out[2] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[2]);
@@ -1168,7 +1194,9 @@ static inline __u64 ora_expected_result(__u64 id)
   case 184ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(184U));
   case 185ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(185U));
   case 186ULL: return (__u64)(uintptr_t)((int)(uintptr_t)ora_raw_result(186U));
+  case 188ULL: return (__u64)(uintptr_t)((__u64)(uintptr_t)ora_raw_result(188U));
   case 189ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(189U));
+  case 190ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(190U));
   case 191ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(191U));
   case 193ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(193U));
   case 195ULL: return (__u64)(uintptr_t)((void *)(uintptr_t)ora_raw_result(195U));
@@ -1256,7 +1284,9 @@ static inline unsigned ora_pointer_arguments(__u64 id)
   case 184ULL: return 3U;
   case 185ULL: return 1U;
   case 186ULL: return 0U;
+  case 188ULL: return 1U;
   case 189ULL: return 5U;
+  case 190ULL: return 5U;
   case 191ULL: return 13U;
   case 193ULL: return 3U;
   case 195ULL: return 3U;
