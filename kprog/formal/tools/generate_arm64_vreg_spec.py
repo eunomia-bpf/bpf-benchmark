@@ -93,7 +93,7 @@ def load() -> dict:
         raise SystemExit(f"arm64 vector-register halves alias: {data!r}")
     text = STATE_HEADER.read_text()
     for declaration in (
-            "struct { __u64 lo, hi; } __a64_vectors[32] = {}",
+            "struct { __u64 lo, hi; } __a64_vectors[32] =",
             f"#define {LOW_FIELD} (__a64_vectors[0].lo)",
             f"#define {HIGH_FIELD} (__a64_vectors[0].hi)"):
         if declaration not in text:

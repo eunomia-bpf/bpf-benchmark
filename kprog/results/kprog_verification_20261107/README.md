@@ -4657,3 +4657,12 @@ value and scale. Original compilation/run exits0/1; the corrected oracle
 passes7057 UBSan observations. Exact source epoch, original full outcome,
 all1263 Git hashes and intermediate diagnostics remain under
 `helper_route_caller_frame`; the full export is retired.
+
+### Vector layout and entry words
+
+The immutable a9fbabbf5 full check returned Make exit2 at the vector
+contract generator's historical empty-initializer expectation. The existing
+layout assertion now covers the array declaration and both low/high aliases;
+the canonical kind6 entry interface supplies its initial words. Generator
+check exit0. Original full command, source hashes and outcome are retained
+in `vector_layout_initializer_update`.

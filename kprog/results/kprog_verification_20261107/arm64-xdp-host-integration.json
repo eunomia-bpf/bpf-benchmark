@@ -8495,6 +8495,18 @@
       "sail-x86-from-acl2/model/xor_spec.sail": "abaf22867709d9f828c9fa1b348316dad793a821cb29695a5d36e2b857f1007f"
     }
   },
+  "vector_layout_initializer_update": {
+    "archive_compressed_prefix_bytes": 92759889,
+    "archive_compressed_prefix_sha256": "f6586893c9e9663eb9da9d1580d676241ceb660faa3ff2703ab6ec821eca72c9",
+    "archive_entries": 6,
+    "archive_marker": "VECTOR_LAYOUT_INITIALIZER_UPDATE_V1",
+    "archive_raw_bytes": 196530,
+    "archive_raw_sha256": "54bd46ce88ad61fda992a8612c62743fe9346b05d14be3f66ca6251927b9c78b",
+    "full_epoch": "a9fbabbf50c0c1e03d09ade683f6d60400ac6048",
+    "full_exit": 2,
+    "generator_check_exit": 0,
+    "scope": "Vector declaration and low/high mapping stay checked. Initial words come from the canonical kind6 entry interface."
+  },
   "x86_alu_memory_tokens": {
     "c_domain": "11 payloads, immediate/register forms, five raw width fields (default0/1/2/4/8), heap/RSP/STACK-alias bases, five correlated optional-index/scale modes, signed +/-16 displacements, all64 six-flag seeds, 19 boundary values for each data operand plus three RSP/STACK/scalar alias source cases for register arithmetic/logic. Full512-byte heap and private stack, all16 numeric GPR/tag cells and unchanged raw cells are compared between direct and interpreter bodies; independent real x86 instructions check result bytes and every architecturally defined status flag. Host red zone is disabled for flag-stack assembly.",
     "diagnostics": "Initial host fixture added the interpreter ABI-kind variable and corrected stack numeric origin to capacity512. Final checks use the archived final source and mirrored dependency hashes. Earlier Lean elaboration diagnostics and successful terminal logs are retained.",
