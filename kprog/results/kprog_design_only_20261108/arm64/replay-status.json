@@ -64,5 +64,61 @@
       583910
     ]
   },
-  "approval_case": "architectural-fault-approval-case.json"
+  "approval_case": "architectural-fault-approval-case.json",
+  "current_canonical_replay": {
+    "utc": "2026-11-08T13:56:01.851395+00:00",
+    "architecture_fault_approval": {
+      "utc": "2026-11-08T09:36Z",
+      "scope": [
+        "incoming_SP_alignment",
+        "load_pair_destination_overlap",
+        "load_store_writeback_overlap",
+        "exclusive_status_overlap"
+      ],
+      "record": "arm64/architectural-fault-approval-case.json",
+      "mechanism": "Existing operation bodies model the approved architectural faults through the verifier-visible fault arm"
+    },
+    "bcc": {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/coverage.json",
+      "host_ok": true,
+      "requests": 23,
+      "proof_generated": 23,
+      "stages": {
+        "verifier_accepted_installed": 23
+      }
+    },
+    "katran": {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/design-only-x30/trusted-arm64-katran-result/coverage.json",
+      "host_ok": true,
+      "requests": 1,
+      "proof_generated": 1,
+      "stages": {
+        "verifier_accepted_installed": 1
+      }
+    },
+    "isa_safety": {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/safety/summary.json",
+      "make_exit": 0,
+      "cases": 34,
+      "stages": {
+        "valid_executed": 4,
+        "verifier_rejected": 28,
+        "specialization_rejected": 2
+      },
+      "unsafe_native_executions": 0,
+      "source_header_sha256": "ce40d27c70d4365f3d7ea21d473040ac7ddca0716027983390539c2e54f4d80c",
+      "source_header_equals_current": true,
+      "runtime_scope": "Captured source/runtime in the original safety archive"
+    },
+    "current_byte_primitive": {
+      "source_commit": "042ae2e505a845f9826bb9373a765736f2d44777",
+      "evidence": "corpus/results/kprog_arm64_app_coverage_20261108/byte-atomic/summary.json",
+      "fresh_service_control_retval": 2
+    },
+    "current_tag_storage": {
+      "source_commit": "5379bb7caf65c232ba1ceceb75dc36e9488994f2",
+      "evidence": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/tag-storage/summary.json"
+    },
+    "runtime_admission_additions": 0
+  }
 }

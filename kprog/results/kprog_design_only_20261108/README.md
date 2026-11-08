@@ -998,3 +998,13 @@ and0accepted unsafe inputs. All38P hashes reconcile with their original native
 objects. Actual resource map creation and SUBMIT_RESOURCES replace original
 program loading. The [raw38receipt](native-context/README.md) preserves full
 inputs/errors and distinguishes this suite from R's upstream selftest coverage.
+
+### AArch64 approved architecture model and complete replay receipts
+
+The operator approved four Arm architectural fault classes at09:36UTC on November8: incoming-SP alignment, load-pair destination overlap, load/store writeback overlap and exclusive-status overlap. Each predicate lives in its existing operation body and reaches the stock verifier through B's existing fault arm. The approval scope is recorded in arm64/architectural-fault-approval-case.json.
+
+The complete captured34case ARM ISA cohort16fc6cb01 records4matching native executions,28stock-verifier rejections and2generation coverage failures, with Make/guest/compiler exits0 and risk native executions0. Its exact simulator header equals the current5379bb7ca tag-storage source; the archive identifies its captured Image/module separately. The two generation outcomes retain their actual unbounded-target/instruction diagnostics in the raw rows.
+
+Complete BCC17d2721fe generates, compiles, verifies and installs all23submitted application programs and closes its existing workload successfully. Phase counters contain23resident rows each,21positive rows each and441319JIT/443267native BPF calls. The upstream block merge/insert trigger case stays with the coordinator. Complete five-step Katran84907b44c retains1/1generated/accepted/native installation with phase-local packet/BPF counters. Current byte primitive042ae2e50 has a separate paired-Image/module fresh-service control at retval2. Each result keeps its actual source/runtime epoch.
+
+[Current ARM replay ledger](arm64/replay-status.json) retains the earlier checkpoint and these later outcomes together. The original72removal/55functional-keep inventory continues to describe the module transition. Safety uses stock verifier acceptance and faithful simulation; ordinary kernel copy/allocation and link resolution retain their five-step roles. The complete Tetragon/OTel/Tracee queue consumes its recorded source snapshots. Additional runtime admission predicates continue through the operator's Notices approval path.
