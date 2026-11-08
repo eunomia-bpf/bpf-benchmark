@@ -1,0 +1,40 @@
+{
+  "utc": "2026-11-08T23:19:19.637074+00:00",
+  "command": [
+    "taskset",
+    "-c",
+    "12-15",
+    "unshare",
+    "--mount",
+    "--propagation",
+    "private",
+    "python3",
+    "/workspaces/.agent-state/kprog-lanes/A/same-copy-arm/build.py"
+  ],
+  "returncode": 0,
+  "source_publication": "dc120a8ebc2fea2dd274c510fe045a22e29bc52d",
+  "source_hashes": {
+    "kprog/libnativeloader/src/native_loader.cpp": "e727ba0bb4115b2a9b82d5a74cb682eba007d3c390fbb562c07e5ccaafc1b57c",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8"
+  },
+  "outputs": {
+    "runner/build-arm64-llvmbpf/micro_exec": {
+      "sha256": "1806afa502e54f65450e27530ba83daa94733651bb0b074553b2ba659659238c",
+      "bytes": 79501544
+    },
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": {
+      "sha256": "b488db785afa52632c5f58d834ad985e366f6e2c58580fc06307cb55a9d71bfe",
+      "bytes": 881128
+    },
+    "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": {
+      "sha256": "9a28fe8d768b4d499bcfea2a2836eb9777012456b189863ac86ee80dc52125d6",
+      "bytes": 812720
+    },
+    "runner/build-arm64-llvmbpf/native_loader/trusted-service-client": {
+      "sha256": "0e8317d65c2cf4594c5225399ebf55935cb58394af8ecfd36cd874a8416b0f2d",
+      "bytes": 812712
+    }
+  },
+  "scope": "Owning ARM incremental cache; trusted worker uses existing public helper relocation resolution and functional ARM helper/tail ABI; direct-native optimizer hints retain their own path",
+  "runtime_admission_additions": 0
+}
