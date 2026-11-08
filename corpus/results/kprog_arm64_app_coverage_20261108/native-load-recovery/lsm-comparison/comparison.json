@@ -1,0 +1,45 @@
+{
+  "utc": "2026-11-08T23:47:40.021433+00:00",
+  "terminal": "a018586545b6c2553c55c44ea1bb6ce4b35ce8e3",
+  "kernel": "61656250e90663eb1cf32c09eb2c8a6191cfd47d",
+  "hook": "bpf_lsm_mmap_file/70002/file__nullable",
+  "native_counts": {
+    "catalog_rows": 2,
+    "attempted": 2,
+    "submitted": 2,
+    "installed": 1,
+    "verifier_rejected": 1,
+    "generation_failed": 0,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 1,
+    "failure_agrees": 1,
+    "failure_installed": 0,
+    "success": 1,
+    "success_agrees": 1,
+    "success_installed": 1
+  },
+  "rows": [
+    {
+      "program": "no_null_check",
+      "annotation": "failure",
+      "stock_stage": "load_rejected",
+      "native_stage": "verifier_rejected",
+      "target_btf_id": 70002,
+      "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+      "native_executions": 0
+    },
+    {
+      "program": "null_check",
+      "annotation": "success",
+      "stock_stage": "installed",
+      "native_stage": "installed",
+      "target_btf_id": 70002,
+      "native_sha256": "19dd519dd9375034c4af9f021d8a230218b882d65dfc1f5e345749e5b4bf1529",
+      "native_executions": 0
+    }
+  ]
+}
