@@ -1,0 +1,116 @@
+{
+  "created": "2026-11-08T13:14:09.699666+00:00",
+  "hosts": [
+    {
+      "name": "host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/native.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "test_x86_pushpop_host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/test_x86_pushpop_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/test_x86_pushpop_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "test_x86_pushpop_route_host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/test_x86_pushpop_route_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/test_x86_pushpop_route_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "named-host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/named-host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/named-host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "named-host-liveness",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/named-host-liveness.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop-offset/named-host-liveness"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "domains": {
+    "pointer_pushpop": 240,
+    "pushpop_handler": 463,
+    "pushpop_routing": 347152,
+    "pointer_mov_bytes": 52992,
+    "pointer_mov_lifetime": 552
+  },
+  "source_adoption": 0,
+  "runtime_admission_additions": 0
+}
