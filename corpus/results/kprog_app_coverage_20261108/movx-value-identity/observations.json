@@ -1,0 +1,88 @@
+{
+  "route_host_cases": 23761,
+  "route_host_ubsan_exit": 0,
+  "whole_tracee_compile_exit": 0,
+  "bpf_insns": 3203,
+  "deepest_direct_frame_offset": -304,
+  "compiler_files": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/tracee.bpf.c",
+      "md5": "cdf0489fa699879592f0e08b607a546e",
+      "sha256": "914c57d1ad1722e51ef6b919bb0c6d5664ff012e1765fd320a4c5516b254df4c",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/asm-generic/int-ll64.h",
+      "md5": "b810f270733e106319b67ef512c6246e",
+      "sha256": "eb8b891e775ebb50af0353fdcbc625854fd98780399b3a57a404d36af6c29749",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/tracee.bpf.c",
+      "md5": "cdf0489fa699879592f0e08b607a546e",
+      "sha256": "914c57d1ad1722e51ef6b919bb0c6d5664ff012e1765fd320a4c5516b254df4c",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h",
+      "md5": "1a4f9d7387ea7d9b92f499307bdf712e",
+      "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h",
+      "md5": "af3577c2b1c2566ad76f1bd2c69dbe37",
+      "sha256": "d116a84a62207260a394206e2b1f0811ac72f3563b88d4f49b8dce7377c08ab4",
+      "recovered_from": null
+    },
+    {
+      "path": "/usr/include/linux/types.h",
+      "md5": "bf9fbc0e8f60927fef9d8917535375a6",
+      "sha256": "89de4736e44cf154844fad3d6c40c435f3d15200801046becb1876030db247ce",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_mem_access.h",
+      "md5": "642fcb4f054d60386fcd37ded524589c",
+      "sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_shift_result.h",
+      "md5": "5fe3ccb6b79d41b1697e6028053391d1",
+      "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim.h",
+      "md5": "cedba0dfb15f459a1fb61860887ac4b4",
+      "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_signed.h",
+      "md5": "54e02d4b7a02a40c0cb8724ce2f2626f",
+      "sha256": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/repository/kprog/formal/generated/x86_bitops.h",
+      "md5": "10b83a65d7d01bc15a626712d3efe769",
+      "sha256": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+      "recovered_from": null
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/movx-value-identity/candidate.h",
+      "md5": "ebc2a87168e020c277dd835f0c9020db",
+      "sha256": "13d30f4c4dbbf5a15f9c3992602c09cb00260aec49c452866c717cbd9fa944ef",
+      "recovered_from": null
+    }
+  ],
+  "source_sha256": "914c57d1ad1722e51ef6b919bb0c6d5664ff012e1765fd320a4c5516b254df4c",
+  "object_sha256": "0911b3a40f0582ca07ea398589a3e8e47c7a4f37075a82763267723923261bb0",
+  "candidate_sha256": "13d30f4c4dbbf5a15f9c3992602c09cb00260aec49c452866c717cbd9fa944ef",
+  "mechanism": "Pure extension-result compiler identity in the generic register MOVZX/MOVSX handler",
+  "runtime_successor": "/workspaces/.agent-state/kprog-lanes/C/tracee-movx-identity-runtime",
+  "runtime_pid": 322010,
+  "archive_sha256": "6481c79a91bf0f4edb61ee4bf03af1b15b8097f3ba5bbad643a0c7100a5e438b"
+}
