@@ -950,6 +950,9 @@ extern void x86_sim_unmapped_xdp_read(void)
 			 __x86_xdp_off == KPROG_ABI_XDP_DATA_END_OFF)      \
 			__x86_xdp_value = (__u64)(long)(void *)(long)     \
 				__x86_xdp_ctx->data_end;                  \
+		else if ((WIDTH) == X86_WIDTH_64 && __x86_xdp_off == 16) \
+			__x86_xdp_value = (__u64)(long)(void *)(long)     \
+				__x86_xdp_ctx->data_meta;                 \
 		else                                                     \
 			x86_sim_unmapped_xdp_read();                     \
 		X86_SIM_L_BARRIER_VAR(__x86_xdp_value);                    \
