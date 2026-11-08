@@ -1,0 +1,84 @@
+{
+  "utc": "2026-11-08T23:18:35.944136+00:00",
+  "make_exit": 0,
+  "source": {
+    "utc": "2026-11-08T23:16:15.100506+00:00",
+    "application_source_publication": "d920fbca5271543cba020de3631273e3abcb3788",
+    "paired_x86_publication": "557cb9a724e2a212f98c53ec019b653db58510ee",
+    "source_files": {
+      "tracee.h": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174",
+      "vmlinux.h": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43",
+      "vmlinux_flavors.h": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082",
+      "maps.h": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a",
+      "tracee.bpf.c": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+      "types.h": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+      "vmlinux_missing.h": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395",
+      "capture_filtering.h": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+      "common/probes.h": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686",
+      "common/logging.h": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9",
+      "common/capabilities.h": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87",
+      "common/common.h": "3ef7ef9ba2e3384439cf5b9e1fa06d3fd509441420f7c9b2b50bba9640187686",
+      "common/hash.h": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f",
+      "common/signal.h": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1",
+      "common/task.h": "f97496645f4c146da9078e9bf72ee96a9b8bed542e2a20f4cac40ec173e97a2a",
+      "common/network.h": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76",
+      "common/filtering.h": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94",
+      "common/consts.h": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4",
+      "common/context.h": "3f75fae98f3af498bccb4df5ddc9bb5bd37199f6ebce31bcb2b14c0ac3b432db",
+      "common/cgroups.h": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51",
+      "common/kconfig.h": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036",
+      "common/namespaces.h": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
+      "common/arch.h": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
+      "common/binprm.h": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
+      "common/buffer.h": "2ee26ad192c5b1599ae33fc4537aa1b8c2a99cbc471b4ff5ed88ca4ef66b5070",
+      "common/ksymbols.h": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
+      "common/memory.h": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
+      "common/filesystem.h": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
+      "common/arguments.h": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97",
+      "common/bpf_prog.h": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970",
+      "lsmsupport/lsm_check.bpf.c": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2",
+      "lsmsupport/kprobe_check.bpf.c": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+      "lsmsupport/lsm_check_common.h": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79"
+    },
+    "source_changes_ledger": "corpus/results/kprog_app_source_changes/README.md",
+    "scope": "Complete published Tracee C tree for both ARM frontends; existing source edits/limits retained; warm ARM Go/libbpf cache; private embedded-dist namespace",
+    "candidate": "Existing ellipsis offset clamp retained in u32 local through original helper, field writeback preserved; no new bound or predicate",
+    "prior_runtime_publication": "7c9fe02ed64fbf40ef3fa8ac5e5c2147d0758398"
+  },
+  "build_phases": "Fresh paired native/JIT/embedded binary; existing canonical ARM cross-library flags and warm caches",
+  "output_files": {
+    "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-ellipsis-local/stage/tracee/manifest.json": {
+      "bytes": 28614,
+      "sha256": "60670d793e5aa98907c6e47bdb639681467af3287f239f01cdf9e09fe23030b3"
+    },
+    "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-ellipsis-local/stage/tracee/lsm_check.native.o": {
+      "bytes": 6704,
+      "sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779"
+    },
+    "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-ellipsis-local/stage/tracee/tracee.native.o": {
+      "bytes": 10085304,
+      "sha256": "244c69c8494ce53ad112814e5220858abdb2604be7a62d4d88ef086eb2acdb0e"
+    },
+    "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-ellipsis-local/stage/tracee/kprobe_check.native.o": {
+      "bytes": 7808,
+      "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc"
+    },
+    "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/tracee": {
+      "bytes": 79712936,
+      "sha256": "21f30f3dacc2c4281c07a006b7b4167943762c6c7ed75084d58b6d3cfe42bda4"
+    },
+    "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/tracee.bpf.o": {
+      "bytes": 14369528,
+      "sha256": "579d0ea100170ee33f5ec44716818f63899f08681084b89ac3b562c9907cb094"
+    },
+    "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/lsm_support/kprobe_check.bpf.o": {
+      "bytes": 8120,
+      "sha256": "a3fa0243502e07704295677268070a36ff1498e18e6ee03d59db3589dd002f57"
+    },
+    "/workspaces/repository/vendor/build/.tracee-build/none/arm64/dist/lsm_support/lsm_check.bpf.o": {
+      "bytes": 6616,
+      "sha256": "c0c67e8e0fe79dad8614259e13f66b031a71c6c9c039223983e4df1b8b1adffd"
+    }
+  },
+  "runtime_admission_additions": 0
+}
