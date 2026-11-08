@@ -25,6 +25,7 @@ Usage: submit.py [--arch x86|arm64] [--table DIR] [--out DIR] [--limit N] [--onl
 """
 
 import argparse
+import fcntl
 import json
 import os
 import pathlib
@@ -94,7 +95,7 @@ def start_service(arch=1):
             return None, proc
     except (ValueError, KeyError):
         return None, proc
-    return proc, proc
+    return proc, state
 
 
 # A rejection only means something if the native path was reached.  The
@@ -156,7 +157,7 @@ def main(argv):
     if args.limit:
         work = work[:args.limit]
 
-    service, _ = start_service({"x86": 1, "arm64": 2}[args.arch])
+    service, state = start_service({"x86": 1, "arm64": 2}[args.arch])
     if service is None:
         print("no trusted service: the kernel endpoint is absent",
               file=sys.stderr)
@@ -199,7 +200,11 @@ def main(argv):
                             outcome=classify(rc, se),
                             stdout=so[-600:], stderr=se[-600:]))
 
-    service.terminate()
+    # The service holds this lock through its terminal archive and receipt.
+    with (state / "request.lock").open("rb") as request_lock:
+        fcntl.flock(request_lock, fcntl.LOCK_EX)
+        service.terminate()
+    service.wait()
     counts = {"submitted": len(results), "skipped": len(skipped)}
     for outcome in ("ran", "refused", "not-reached"):
         counts[outcome] = sum(1 for x in results if x["outcome"] == outcome)
