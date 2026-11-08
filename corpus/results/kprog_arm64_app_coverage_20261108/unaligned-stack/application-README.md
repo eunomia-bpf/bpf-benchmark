@@ -1,0 +1,3 @@
+Complete OTel stack-byte-arm successor
+
+The captured80-source profile runs the original OTel native ELF and two-start workload through the matched kfunc Image/module9a and registered native-only worker. Host ARM O2/BPFv4/4096-byte frame compilation uses2270guest header identities. The existing application/rejit lifecycle interfaces use0, and the registered service retains the kernel-owned generation/verifier/binding route. Guest8GiB/eightvCPU uses16-19. The generic controls and current Cilium/Tracee/OTel controller finish before canonical stack promotion and this new complete run. Runtime3196 identities, commands and private source snapshots accompany this concrete launch.
