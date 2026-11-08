@@ -1,0 +1,928 @@
+[
+  {
+    "name": "valid_control",
+    "assembly": "mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_control.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_array.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_control.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 1,
+      "source_prog_id": 8,
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "started": "1970-01-01T00:00:35.055888+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '1', '8', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '1', '8', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vtix4zy8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/1.failure.tar.gz",
+      "finished": "1970-01-01T00:01:02.146202+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "positive_infrastructure_error",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound-probe: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "name": "valid_copy_restore",
+    "assembly": "mov x1,sp; mov sp,x1; mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_copy_restore.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_array.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_copy_restore.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 2,
+      "source_prog_id": 20,
+      "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
+      "started": "1970-01-01T00:01:07.602816+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '2', '20', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '2', '20', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_8ajnvfd/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/2.failure.tar.gz",
+      "finished": "1970-01-01T00:01:36.521676+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "positive_infrastructure_error",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound-probe: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "name": "valid_alias_load",
+    "assembly": "sub sp,sp,#16; mov x1,#37; str x1,[sp]; mov x2,sp; ldr x3,[x2]; add sp,sp,#16; cmp x3,#37; b.ne 1f; mov w0,#2; ret; 1: mov w0,#0; ret",
+    "negative": false,
+    "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_alias_load.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_array.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_alias_load.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 3,
+      "source_prog_id": 32,
+      "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
+      "started": "1970-01-01T00:01:41.919838+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '3', '32', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '3', '32', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-0nujn709/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/3.failure.tar.gz",
+      "finished": "1970-01-01T00:02:23.813346+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "positive_infrastructure_error",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound-probe: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "name": "valid_spill_restore",
+    "assembly": "sub sp,sp,#32; add x1,sp,#16; str x1,[sp]; ldr x1,[sp]; mov sp,x1; add sp,sp,#16; mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_spill_restore.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_array.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_spill_restore.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 4,
+      "source_prog_id": 44,
+      "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
+      "started": "1970-01-01T00:02:29.303463+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '4', '44', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '4', '44', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3fpezccs/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/4.failure.tar.gz",
+      "finished": "1970-01-01T00:03:26.814436+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "positive_infrastructure_error",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound-probe: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "name": "past_data_end_read",
+    "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+    "negative": true,
+    "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_read.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_read.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 5,
+      "source_prog_id": 54,
+      "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
+      "started": "1970-01-01T00:03:35.165596+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '5', '54', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '5', '54', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/5.failure.tar.gz",
+      "finished": "1970-01-01T00:04:13.525311+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '5', '54', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5onhna1u/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "past_data_end_write",
+    "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_write.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_write.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 6,
+      "source_prog_id": 64,
+      "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
+      "started": "1970-01-01T00:04:19.306048+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '6', '64', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '6', '64', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/6.failure.tar.gz",
+      "finished": "1970-01-01T00:04:59.762738+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '6', '64', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3kccsrr_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "missing_data_end_check",
+    "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+    "negative": true,
+    "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/missing_data_end_check.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/missing_data_end_check.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 7,
+      "source_prog_id": 74,
+      "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
+      "started": "1970-01-01T00:05:05.554443+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '7', '74', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '7', '74', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/7.failure.tar.gz",
+      "finished": "1970-01-01T00:05:45.843735+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '7', '74', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-rmid6s_5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "map_value_oob",
+    "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+    "negative": true,
+    "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/map_value_oob.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/map_value_oob.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 8,
+      "source_prog_id": 84,
+      "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
+      "started": "1970-01-01T00:05:51.675710+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '8', '84', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '8', '84', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/8.failure.tar.gz",
+      "finished": "1970-01-01T00:06:49.217946+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '8', '84', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-cw_rdmbz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "nullable_map_dereference",
+    "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+    "negative": true,
+    "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/nullable_map_dereference.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/nullable_map_dereference.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 9,
+      "source_prog_id": 90,
+      "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
+      "started": "1970-01-01T00:06:54.955355+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '9', '90', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '9', '90', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/9.failure.tar.gz",
+      "finished": "1970-01-01T00:08:00.592190+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '9', '90', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-vt291xdi/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "invalid_helper_argument",
+    "assembly": "str x30, [sp, #-16]!; mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ret",
+    "negative": true,
+    "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/invalid_helper_argument.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/invalid_helper_argument.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 10,
+      "source_prog_id": 96,
+      "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
+      "started": "1970-01-01T00:08:06.288719+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '10', '96', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '10', '96', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/10.failure.tar.gz",
+      "finished": "1970-01-01T00:08:45.558778+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '10', '96', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x581gymv/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "stack_oob",
+    "assembly": "ldr x0, [sp, #1024]; ret",
+    "negative": true,
+    "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_oob.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_oob.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 11,
+      "source_prog_id": 106,
+      "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
+      "started": "1970-01-01T00:08:51.197845+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '11', '106', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '11', '106', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/11.failure.tar.gz",
+      "finished": "1970-01-01T00:09:23.477115+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '11', '106', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-4antopfm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "uninitialized_stack",
+    "assembly": "ldur x0, [sp, #-8]; ret",
+    "negative": true,
+    "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/uninitialized_stack.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/uninitialized_stack.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 12,
+      "source_prog_id": 116,
+      "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
+      "started": "1970-01-01T00:09:29.227014+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '12', '116', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '12', '116', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/12.failure.tar.gz",
+      "finished": "1970-01-01T00:10:01.452605+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '12', '116', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-l7gtpq6g/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "unbounded_loop",
+    "assembly": "1: b 1b",
+    "negative": true,
+    "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_loop.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_loop.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 13,
+      "source_prog_id": 126,
+      "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
+      "started": "1970-01-01T00:10:07.138538+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '13', '126', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '13', '126', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/13.failure.tar.gz",
+      "finished": "1970-01-01T00:10:34.947566+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '13', '126', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-hgxy5vbl/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "unbounded_indirect_jump",
+    "assembly": "ldr x1, [x0]; br x1",
+    "negative": true,
+    "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_indirect_jump.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_indirect_jump.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 14,
+      "source_prog_id": 136,
+      "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
+      "started": "1970-01-01T00:10:40.681483+00:00",
+      "status": -22,
+      "error": "unbounded indirect target at 0x4: br x1",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 788, in indirect_targets\n    raise ValueError(f\"unbounded indirect target at 0x{insn.addr:x}: {insn.raw}\")\nValueError: unbounded indirect target at 0x4: br x1\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/14.failure.tar.gz",
+      "finished": "1970-01-01T00:10:43.525369+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "specialization_rejected",
+    "message": "unbounded indirect target at 0x4: br x1\n"
+  },
+  {
+    "name": "unsupported_instruction",
+    "assembly": "brk #0; ret",
+    "negative": true,
+    "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unsupported_instruction.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unsupported_instruction.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 15,
+      "source_prog_id": 142,
+      "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
+      "started": "1970-01-01T00:10:49.089221+00:00",
+      "status": -22,
+      "error": "unsupported arm64 instruction: brk #0x0",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 193, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 1109, in render_program\n    append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 917, in append_insn\n    enc = encode(insn, rodata_idents, reloc_idents)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 645, in encode\n    raise ValueError(f\"unsupported arm64 instruction: {insn.raw}\")\nValueError: unsupported arm64 instruction: brk #0x0\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/15.failure.tar.gz",
+      "finished": "1970-01-01T00:10:51.947683+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "specialization_rejected",
+    "message": "unsupported arm64 instruction: brk #0x0\n"
+  },
+  {
+    "name": "misaligned_sp",
+    "assembly": "sub sp, sp, #16; mov w1, #0x2222; str x1, [sp]; add sp, sp, #1; ldrb w0, [sp]; sub sp, sp, #1; add sp, sp, #16; ret",
+    "negative": true,
+    "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/misaligned_sp.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/misaligned_sp.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 16,
+      "source_prog_id": 148,
+      "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
+      "started": "1970-01-01T00:10:57.519228+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '16', '148', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '16', '148', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/16.failure.tar.gz",
+      "finished": "1970-01-01T00:11:34.522322+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '16', '148', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5m2vila5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "overlapping_load_pair",
+    "assembly": "sub sp, sp, #16; mov x1, #2; stp x1, x1, [sp]; ldp x1, x1, [sp]; add sp, sp, #16; mov w0, w1; ret",
+    "negative": true,
+    "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/overlapping_load_pair.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/overlapping_load_pair.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 17,
+      "source_prog_id": 158,
+      "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
+      "started": "1970-01-01T00:11:40.274994+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '17', '158', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '17', '158', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/17.failure.tar.gz",
+      "finished": "1970-01-01T00:12:34.253483+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '17', '158', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-thgveaut/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "writeback_load_overlap",
+    "assembly": "sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; ldr x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_load_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_load_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 18,
+      "source_prog_id": 168,
+      "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
+      "started": "1970-01-01T00:12:39.979834+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '18', '168', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '18', '168', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/18.failure.tar.gz",
+      "finished": "1970-01-01T00:13:27.567068+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '18', '168', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-oae4y7nd/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "writeback_store_overlap",
+    "assembly": "sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; str x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_store_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_store_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 19,
+      "source_prog_id": 178,
+      "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
+      "started": "1970-01-01T00:13:33.333478+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '19', '178', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '19', '178', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/19.failure.tar.gz",
+      "finished": "1970-01-01T00:14:20.944085+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '19', '178', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-bdxr6bso/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "scalar_vector_load_clear_high",
+    "assembly": "sub sp, sp, #32; mov x1, #1; str xzr, [sp]; str x1, [sp, #8]; ldr q0, [sp]; ldr d0, [sp]; str q0, [sp, #16]; ldr x1, [sp, #24]; cbnz x1, 1f; mov x0, #0; ldr x0, [x0]; 1: add sp, sp, #32; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/scalar_vector_load_clear_high.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/scalar_vector_load_clear_high.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 20,
+      "source_prog_id": 188,
+      "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+      "started": "1970-01-01T00:14:26.786848+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '20', '188', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '20', '188', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/20.failure.tar.gz",
+      "finished": "1970-01-01T00:15:30.175978+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '20', '188', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_xafdex0/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "unpaired_stxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stxr_failure.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stxr_failure.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 21,
+      "source_prog_id": 198,
+      "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+      "started": "1970-01-01T00:15:35.958368+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '21', '198', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '21', '198', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/21.failure.tar.gz",
+      "finished": "1970-01-01T00:16:18.941326+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '21', '198', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_sz2i5ow/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "unpaired_stlxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stlxr_failure.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stlxr_failure.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 22,
+      "source_prog_id": 208,
+      "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+      "started": "1970-01-01T00:16:24.754187+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '22', '208', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '22', '208', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/22.failure.tar.gz",
+      "finished": "1970-01-01T00:17:07.586202+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '22', '208', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-8bc43tw4/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "paired_stxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldxr x1, [x2]; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stxr_failure.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stxr_failure.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 23,
+      "source_prog_id": 218,
+      "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+      "started": "1970-01-01T00:17:13.353722+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '23', '218', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '23', '218', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/23.failure.tar.gz",
+      "finished": "1970-01-01T00:17:58.126069+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '23', '218', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-028_p7e5/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "paired_stlxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldaxr x1, [x2]; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stlxr_failure.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stlxr_failure.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 24,
+      "source_prog_id": 228,
+      "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+      "started": "1970-01-01T00:18:03.899307+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '24', '228', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '24', '228', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/24.failure.tar.gz",
+      "finished": "1970-01-01T00:18:51.911740+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '24', '228', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-5_ab6mtk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "stxr_status_data_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w1, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_data_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_data_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 25,
+      "source_prog_id": 238,
+      "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+      "started": "1970-01-01T00:18:57.653283+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '25', '238', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '25', '238', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/25.failure.tar.gz",
+      "finished": "1970-01-01T00:19:36.324868+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '25', '238', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ywxxe4nt/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: native_loader manifest JSON: invalid/duplicate native exclusive site\n\n"
+  },
+  {
+    "name": "stlxr_status_data_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w1, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_data_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_data_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 26,
+      "source_prog_id": 244,
+      "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+      "started": "1970-01-01T00:19:42.146786+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '26', '244', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '26', '244', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/26.failure.tar.gz",
+      "finished": "1970-01-01T00:20:22.795253+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '26', '244', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-_m2mcjx9/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: native_loader manifest JSON: invalid/duplicate native exclusive site\n\n"
+  },
+  {
+    "name": "stxr_status_base_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w2, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_base_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_base_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 27,
+      "source_prog_id": 250,
+      "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+      "started": "1970-01-01T00:20:28.527465+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '27', '250', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '27', '250', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/27.failure.tar.gz",
+      "finished": "1970-01-01T00:21:06.841200+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '27', '250', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-fpg7nges/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: native_loader manifest JSON: invalid/duplicate native exclusive site\n\n"
+  },
+  {
+    "name": "stlxr_status_base_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w2, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_base_overlap.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_base_overlap.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 28,
+      "source_prog_id": 256,
+      "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+      "started": "1970-01-01T00:21:12.669747+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '28', '256', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '28', '256', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/28.failure.tar.gz",
+      "finished": "1970-01-01T00:21:56.336942+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '28', '256', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-3u8tkqjq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: native_loader manifest JSON: invalid/duplicate native exclusive site\n\n"
+  },
+  {
+    "name": "entry_return_address_flags",
+    "assembly": "mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+    "negative": true,
+    "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/entry_return_address_flags.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/entry_return_address_flags.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 29,
+      "source_prog_id": 262,
+      "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+      "started": "1970-01-01T00:22:03.931067+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '29', '262', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '29', '262', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/29.failure.tar.gz",
+      "finished": "1970-01-01T00:22:40.873222+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '29', '262', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-x02qczyh/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "return_register_overwrite",
+    "assembly": "mov x30, #0; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/return_register_overwrite.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/return_register_overwrite.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 30,
+      "source_prog_id": 272,
+      "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+      "started": "1970-01-01T00:22:46.723764+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '30', '272', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '30', '272', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/30.failure.tar.gz",
+      "finished": "1970-01-01T00:23:18.521993+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '30', '272', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d6azplv_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "stack_base_flags",
+    "assembly": "mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+    "negative": true,
+    "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_base_flags.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_base_flags.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 31,
+      "source_prog_id": 282,
+      "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+      "started": "1970-01-01T00:23:24.314804+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '31', '282', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '31', '282', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/31.failure.tar.gz",
+      "finished": "1970-01-01T00:24:05.475698+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '31', '282', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-d3wmp6au/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "undefined_entry_register",
+    "assembly": "cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_register.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_register.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 32,
+      "source_prog_id": 292,
+      "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+      "started": "1970-01-01T00:24:11.317614+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '32', '292', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '32', '292', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/32.failure.tar.gz",
+      "finished": "1970-01-01T00:24:54.791634+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '32', '292', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-ybb88swm/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "undefined_entry_flags",
+    "assembly": "b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_flags.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_flags.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 33,
+      "source_prog_id": 302,
+      "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+      "started": "1970-01-01T00:25:00.832702+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '33', '302', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '33', '302', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/33.failure.tar.gz",
+      "finished": "1970-01-01T00:25:43.059113+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '33', '302', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-qelt7gsk/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  },
+  {
+    "name": "helper_clobbered_register",
+    "assembly": "stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret",
+    "negative": true,
+    "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/helper_clobbered_register.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/context_hash.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/helper_clobbered_register.manifest.json"
+    ],
+    "returncode": 1,
+    "request": {
+      "request_id": 34,
+      "source_prog_id": 312,
+      "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+      "started": "1970-01-01T00:25:48.919365+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '34', '312', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '34', '312', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/34.failure.tar.gz",
+      "finished": "1970-01-01T00:26:59.991869+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "pipeline_rejected_unclassified",
+    "message": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '4', '34', '312', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-ig4okyva/requests/request-q2xrip_v/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\ntrusted-native-loader: open /sys/kernel/debug/bpf_arm64_native_lab/blob0: No such file or directory\n\n"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-08T15:42:36.179241+00:00",
+  "scope": "Complete original34 ISA inputs on the packed private candidate with captured legacy service loader",
+  "make_exit": 2,
+  "cases": 34,
+  "stages": {
+    "positive_infrastructure_error": 4,
+    "pipeline_rejected_unclassified": 28,
+    "specialization_rejected": 2
+  },
+  "accepted_unsafe": 0,
+  "loader_failure": "Legacy build-arm64-a-map-order-v3 trusted-native-loader resolves retired debugfs blob0 path; current module owns immutable submission copies",
+  "successor": "Same complete34 inputs with current paired loader and existing host compiler broker",
+  "runtime_admission_additions": 0
+}

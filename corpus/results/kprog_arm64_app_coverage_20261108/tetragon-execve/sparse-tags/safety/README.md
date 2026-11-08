@@ -1,0 +1,3 @@
+Captured complete ISA pipeline epoch
+
+All34original ISA inputs have terminal records:4positive infrastructure outcomes,28pipeline-stage outcomes and2generation refusals. The captured legacy service loader uses build-arm64-a-map-order-v3 and resolves the retired debugfs blob0 path. The paired current module implements the immutable native submission copy path. This pipeline epoch records accepted unsafe0 and actual native positive completions0; each native-generation/compiler/loader diagnostic remains in the complete archive. The current-loader successor keeps the identical four positive and30load-only risk inputs, the same packed candidate and paired88a Image/module, and uses the already-established host B compiler broker. Runtime admission additions:0.
