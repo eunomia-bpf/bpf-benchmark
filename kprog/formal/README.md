@@ -69,7 +69,9 @@ Rust/Cargo, a C compiler with UBSan, clang 18/LLVM 18, GNU objdump,
 AArch64 cross-GCC, QEMU user emulation, and the vendor/libbpf and
 vendor/linux-framework submodules. This entry point builds all Lean modules,
 checks generated contracts and proof hygiene, and runs retained semantic C
-oracles and executable-reference comparisons. Existing build caches are reused. Generator checks compare locked numeric contracts
+oracles and executable-reference comparisons. The existing compiled CMOV unit covers all16 conditions and16/32/64 widths
+through decoded clang bytes, arbitrary fresh inputs and whole-memory preservation;
+its scalar-register mapping and invocation interface remain explicit. Existing build caches are reused. Generator checks compare locked numeric contracts
 and generated artifacts; compiled oracles exercise the current production bodies.
 The dated ledger retains exact source hashes, commands and original outcomes.
 

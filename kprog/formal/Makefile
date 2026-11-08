@@ -701,3 +701,4 @@ check:
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host
 	$(MAKE) -C ../tv native-link-arm-percpu-check
+	$(MAKE) -C ../tv cmov-check

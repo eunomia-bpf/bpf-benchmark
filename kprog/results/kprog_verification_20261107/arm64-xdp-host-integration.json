@@ -3276,6 +3276,847 @@
     },
     "source_drift": []
   },
+  "compiled_cmov_all_conditions": {
+    "actual_main_exit": 0,
+    "archive_block_sha256": "386571311a9dc95a7423453e58b980c2bcd48637fcfe7d33f8be2c675c49147a",
+    "archive_compressed_prefix_bytes": 96854271,
+    "archive_compressed_prefix_sha256": "dedff2374a6150bee9879e23d136767053fabf37c06046303b21053246c05207",
+    "archive_marker": "=== COMPILED CMOV ALL48 CONDITIONS AND WIDTHS V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-before.c": {
+        "bytes": 1309,
+        "sha256": "4f018110206f4d99c67a15a0b397f75ca83ec3de373b65acb6ea6171a058e059"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-before.lean": {
+        "bytes": 3971,
+        "sha256": "93296855ae7a9ecdc5659c7ce75fb12fa53918d70ae531ef244eae359cf357d7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-branch-trace.lean": {
+        "bytes": 25051,
+        "sha256": "3271e924b616c4e7f6b9d4d801f13123328e84842973e4a7d9bcf4c6ca73791f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-branch-trace.log": {
+        "bytes": 2079,
+        "sha256": "5de8faed77ae83b2812614f7a3adf336aff1306ae8029c6ce569aff108ec2f12"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-branches-2.lean": {
+        "bytes": 25519,
+        "sha256": "9ce3adf9c903a735ee956a16cf01bc31d66b6c1d96aaf88b6431dba03e143c11"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-branches-2.log": {
+        "bytes": 2223,
+        "sha256": "0bf03415c267399ae1f6287134d679321642935bc8550aad6fc458080947ba97"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-cases-only.lean": {
+        "bytes": 30519,
+        "sha256": "2a78f37b0a090658f009d0258d9cb10474be6f7ebbb33469cc0793b02f282e10"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-cases-only.log": {
+        "bytes": 1263,
+        "sha256": "f036fd358311333b622d202b94eab1db648aa497d3c7c926d8df471ad234f441"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-compile.log": {
+        "bytes": 412,
+        "sha256": "0c68273a70b0e69ff4adf44add2b5b586b8cc420e7532796805548101b825ed9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-2.lean": {
+        "bytes": 31039,
+        "sha256": "e194befb7471b594000fdd0cdff8e94380507b261fa13e0ab64476153949306e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-2.log": {
+        "bytes": 95,
+        "sha256": "1b96f57cf0678960a500852453dedfeeb521840f64e99588a84a8fc46bc20334"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-2.pid": {
+        "bytes": 8,
+        "sha256": "58a62add62ac1419d7f1410ba22814b065cb75b6fb300bea058c4792da4843dc"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-3.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-3.lean": {
+        "bytes": 31003,
+        "sha256": "25d37cd971dc5dc131ff8ec2f07bceac7c2054fcd4716893c2e76dc9f7109f48"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-3.log": {
+        "bytes": 327,
+        "sha256": "6ad6ae3013fbe573c95f4e9e540e3b4c2f09d21a5a87531882d17409a1b2d529"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled-3.pid": {
+        "bytes": 8,
+        "sha256": "a8b34b688efaff7825ba6b1868f151abfd9a021aa4b8286998f950bd534ca8d2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled.lean": {
+        "bytes": 31039,
+        "sha256": "9b9bedb5a79a5bd3dc7c90b89a9245d10bb07a8f79d6de268792523ac01a1144"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled.log": {
+        "bytes": 93,
+        "sha256": "718fe6dc21d1cb7808452257decc7b1114e7665b6d50f178dbaeca321d5b8383"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-controlled.pid": {
+        "bytes": 8,
+        "sha256": "33db88bd8bc2d84aa7ec542e7825cd29a7e8200fcb7b125e434e28c7bb6ad05c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-2.lean": {
+        "bytes": 30628,
+        "sha256": "9ee460e85c2dd0d9abc8074482ffa12bef994fca66b8a9cc8bd0470d71a8509a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-2.log": {
+        "bytes": 328,
+        "sha256": "b3b4f8d0b8098a3a548e9c715ba9377d3d83816326b9eb4186edb6491e7d81a1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-2.pid": {
+        "bytes": 8,
+        "sha256": "6adb31b2e6ae05ace1c69e65745c879a5b6cf31aa2218663c6bb32b4d5fc9ba4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-3.lean": {
+        "bytes": 30644,
+        "sha256": "867d96611e6ee8894335ba4090220abc1bdf2fa590fe135c738b01ade998a03f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions-3.log": {
+        "bytes": 434,
+        "sha256": "818978a8e1bfa8fd50d9e4b3dd03af2e3e5577680fb84b4b83e8239c42d670b4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions.lean": {
+        "bytes": 30556,
+        "sha256": "44664c8b7ff62de3cfb4ff9db0c08c8755858c8af33d1e2388a0a18f17d33aa8"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions.log": {
+        "bytes": 3204,
+        "sha256": "c40429f1d7f4f931405c0cffc3a02b786ff950ca3715c54bbb1dfcdde267178f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-definitions.pid": {
+        "bytes": 8,
+        "sha256": "e8d10159686d0d9452b8548c2ee38ad5cc3cf91e5a378a582580dcc2120e9619"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-disassembly.txt": {
+        "bytes": 76500,
+        "sha256": "7c8fdafdc651805ee9935d91c35c5736cc2a11577d65d11b909d7ad4f7574183"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-extract-2.log": {
+        "bytes": 192,
+        "sha256": "9ac243888335908853732b493e0b3dbdf1b328719bb51114b1f28f4834ab0abe"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-input-reproduction.json": {
+        "bytes": 4971,
+        "sha256": "239ffb3c95b5aa7af010d0a7fd88c797f2de361efd72184c93b7cf5a0ce0ee46"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-input.i": {
+        "bytes": 9845736,
+        "sha256": "a000d0110497f11cd4ac8db29f6a7d2b45ad640449b99cd667fea7bec1788c04"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel-2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel-2.lean": {
+        "bytes": 30493,
+        "sha256": "8dc6a4ce8613045ff1ee9725591a55eae80fbbe849187c70d50186be6eabd29b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel-2.log": {
+        "bytes": 479,
+        "sha256": "2c77d3e0e1c998c125b836e59663b663a3261d4c0a3c88b8188d5c7dea074b4c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel-2.pid": {
+        "bytes": 8,
+        "sha256": "55df00a3d02b255c97dd91bd039b5e32c40950c990b839e02e6b9be68aa91de9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel.lean": {
+        "bytes": 33342,
+        "sha256": "de9aa2d259a4236232b3cf47df919e8da5a3f2e79dcf71b7fa00579b8141825f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel.log": {
+        "bytes": 200,
+        "sha256": "57fdc4f6ba1a5ab321eae7f88d034fb4ad7df2553b19bb3d2039f2bc3176dfe7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-kernel.pid": {
+        "bytes": 8,
+        "sha256": "3809bb10fc4f3d9b43ff877919d41ef93ea8eb4fc3767fbc4f42723a982fd134"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-old-proof-section.txt": {
+        "bytes": 1509,
+        "sha256": "4301656af53ae7aa06f5628396dc7de3856c459374a0080e1ca02868ff0e44ef"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-10.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-10.lean": {
+        "bytes": 33239,
+        "sha256": "47f012ecca30c0572c44d7e3716c737777da180795cd94039cce75cf8a42eb59"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-10.log": {
+        "bytes": 321,
+        "sha256": "73bcbcd8834df1b2c6d5e41d4b406bad32edc60f395c466dd88785bc6dc9a370"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-10.pid": {
+        "bytes": 8,
+        "sha256": "5d77398fd5ed4863ddd58d038dd24161476eb7336d2129bd9e8df20fbdb2ff44"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-11.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-11.lean": {
+        "bytes": 33252,
+        "sha256": "e8e9982d92c533e7a31bce54f1d98f4d90a5710b35a0e1007545ea20a2190a1f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-11.log": {
+        "bytes": 321,
+        "sha256": "e7395049ae8f373e66198c100c3a8064ab0dd8a653a49614adc8bc8bacce29c7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-11.pid": {
+        "bytes": 8,
+        "sha256": "f9dd7eb7118ed2ab08007a4908a2481b22bd1f37b3e3a6416dc6e90fdfe96870"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-12.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-12.lean": {
+        "bytes": 30372,
+        "sha256": "a1e21dc0701c302493a2ccefacd2f323741492104e8246c9745f5e6e9f743508"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-12.log": {
+        "bytes": 321,
+        "sha256": "d2c7b262188a5456ba344fae83846076d0b7bea5171932e7540bf3559ee07ac8"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-12.pid": {
+        "bytes": 8,
+        "sha256": "a30d07b4816ef13519fe71b35be880174dd8e8d45b1f134d5dab893a7343c719"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-13.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-13.lean": {
+        "bytes": 30380,
+        "sha256": "3c86a1167d28befedd6dcaddb12a3b63f8a225b720334c82896d38986a787efb"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-13.log": {
+        "bytes": 321,
+        "sha256": "13c9e4a6bbc6393db04c1f44c82cc4be1114bbf755bb860c44aa0a38ffbad41b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-13.pid": {
+        "bytes": 8,
+        "sha256": "2335cf89ce80f483a9703b79a9bc2dbecc5aac80ffa98bdf42b3cba36103f0ad"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-2.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-2.lean": {
+        "bytes": 25920,
+        "sha256": "dbff6f4caef48108435b8d9dab88fdc899f3664f25ce0fc97e413a9fb7563199"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-2.log": {
+        "bytes": 586,
+        "sha256": "829703f9705e4348cc850b3829379d6339a4e39f4cc00db7267534e62d3fd0b7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-2.pid": {
+        "bytes": 8,
+        "sha256": "54950bb5a147ec01aa2e12b4fb07fa145a359fb4f9c17ac13441c49cba7201db"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-3.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-3.lean": {
+        "bytes": 25950,
+        "sha256": "950622a8f43399c988d0560e246e6dfb83624dad5727ff1f5828e76eb3726383"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-3.log": {
+        "bytes": 586,
+        "sha256": "0d96de409f82ef51f95e379531513c6821366b7bfa2f9ed21d46cc63f23f982d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-3.pid": {
+        "bytes": 8,
+        "sha256": "27278a46cba3418e74da29d53e06a9fa15f73b7874dbfa3ef6699c6d1b98f67b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-4.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-4.lean": {
+        "bytes": 26558,
+        "sha256": "475e758a0cff656dfbad58d7edf932a30657ae2d457298868ef65afa1f84d1d3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-4.log": {
+        "bytes": 2722,
+        "sha256": "ca3b4de6a2bbb9e489e8e89bfa188aa955d6e463d55ecc463074489ce3dd65b4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-4.pid": {
+        "bytes": 8,
+        "sha256": "4db9de2b46f41e8edec7ace7d5fcc0e530d88324fc159a70b606c7c868876e40"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-5.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-5.lean": {
+        "bytes": 26300,
+        "sha256": "fef216c0f871514b93f998b47b799626c4b1ddba76e0cf9cb8658d92621e8427"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-5.log": {
+        "bytes": 589,
+        "sha256": "3a6a2d0901c96cc1b973e8e850e79797abd5583fcc415ca63b4656ed1db42e41"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-5.pid": {
+        "bytes": 8,
+        "sha256": "742d31eedc69b2f7fd0e9a9800149f67dde0617d076b9918b2c720c29835563a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-6.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-6.lean": {
+        "bytes": 26266,
+        "sha256": "24ff0ca95f66a93a7bf1f60bb65ebbdcd87a55170d39a15b713b1b583d45d9be"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-6.log": {
+        "bytes": 320,
+        "sha256": "053f3042b0de0b882e5a178e924dfa2e7e719b6261dec5b8fbcce0583bec8f97"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-6.pid": {
+        "bytes": 8,
+        "sha256": "7a7e1954b02790f0a730b1e1de5cbe477fd2120e48f61d7e88e66462dd05a4be"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-7.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-7.lean": {
+        "bytes": 26159,
+        "sha256": "449552976b23a2ace1a72ef4704171dfbf5bfff4e2469710f526564947f76bed"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-7.log": {
+        "bytes": 1066,
+        "sha256": "3e515f2c21ed29e13c52b785a9471d2363cc8226ba513adb77b7a57b08dadc5b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-7.pid": {
+        "bytes": 8,
+        "sha256": "1979970cca19f486706093fa19a69d4b13b10fe99f0468979b42cac481323eb1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-8.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-8.lean": {
+        "bytes": 26169,
+        "sha256": "88c21baf24e55d2c2506ae27a2fb058c2e8fa599ea6dcfebbc348d6c5c856db7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-8.log": {
+        "bytes": 1066,
+        "sha256": "3a4a12599d2c75f2ffccdb88f33431bbf870e4ac4398dde44a07050f7b8618c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-8.pid": {
+        "bytes": 8,
+        "sha256": "f524becae2d005873262745b9c7a81d67efb1f542c19e34cd6cee63e175d615f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-9.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-9.lean": {
+        "bytes": 27166,
+        "sha256": "c1670a881f1eef726e05f929c516e919c57be9019ca16ee62c8468c7bc5e91be"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-9.log": {
+        "bytes": 320,
+        "sha256": "d125f9b43b0add6d17cfc722ad7cec9b1c7c20c31f5ad2b41da735c7ca8b454d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one-9.pid": {
+        "bytes": 8,
+        "sha256": "d9221caf81c17c654dc05e6579efad41d729017fc02045914592ffb47e971817"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one.lean": {
+        "bytes": 26806,
+        "sha256": "bf0e7c004df37a53c6ebca04a2d08c83a566061cf656cbc1b9d781fa9bbdac36"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one.log": {
+        "bytes": 580,
+        "sha256": "53ae88128429571e8e29524c2276121a7df2d3fda6f023ed5021d2c5b53e8d08"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-one.pid": {
+        "bytes": 8,
+        "sha256": "db22090cedadb9da74785db82010d772b7375a980d01ed6169564a28bf820bf4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-prepare.py": {
+        "bytes": 8915,
+        "sha256": "42e0311dbc1587b2bf8dad65ed60d51ddc4acced1c9e9c47006c84eec450aedf"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-2.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-2.log": {
+        "bytes": 67487,
+        "sha256": "209e5776eb33e7845868e8b5048c9a73fba1e12380f67474624095a5cbc224f3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-2.pid": {
+        "bytes": 8,
+        "sha256": "cbd36d2ecacc081482df83b8c50342fc17eb00484f6d3980acbe7664528e2d87"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-3.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-3.log": {
+        "bytes": 5284,
+        "sha256": "7e29a176430f369f9d71ca544146f85d7fd02e764ebe4cc452396ceabb0f5eb1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof-3.pid": {
+        "bytes": 8,
+        "sha256": "99c6ea0d1c93c810e6861a0b7e3c8a1f20ba5945fdfe6544cbc1e431410e6b6b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof.log": {
+        "bytes": 328424,
+        "sha256": "dfa5a4f2ea2a2b30b4370de8ae3adf71716a30bf8d1351eab613f03c28387ec9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-proof.pid": {
+        "bytes": 8,
+        "sha256": "10b79878c8901ea51e6aaa2421e16d15c071128aa29685f72cb6d5bb734e3448"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-reproduce.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-reproduce.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-reproduce.pid": {
+        "bytes": 8,
+        "sha256": "3c323d91a91842c39f846c90666373518da4fcf74091ef9312601eebe9c6ea2d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-reproduced.bpf.o": {
+        "bytes": 20520,
+        "sha256": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-residual.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-residual.lean": {
+        "bytes": 30316,
+        "sha256": "4d5025518c14f618dc96a19bb82eaff70037cd762c44066d8788685014ca0664"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-residual.log": {
+        "bytes": 323,
+        "sha256": "b14545eca138c17fed905399d4786da040f6bb75cbc8d59d2f8d58b30272d45a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-residual.pid": {
+        "bytes": 8,
+        "sha256": "8afb94f5b5b25d8aabeb99384ea12ac619e472073f83adc1b02e07ed09228280"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-specialized.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-specialized.lean": {
+        "bytes": 28264,
+        "sha256": "676b661dd6c63f16f6e81305a743f1a677b5027eb640cc44a191489cc5c0d8b1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-specialized.log": {
+        "bytes": 978,
+        "sha256": "032249022f6899ff0aa226825b768bf53dc0295e4176f327558aa1cc41d8126c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-specialized.pid": {
+        "bytes": 8,
+        "sha256": "c2b7e3a687d4157f93c6437efe8b4a3bdc55e2377adfab82d72cc47f80717cf4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-static-burst.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-static-burst.lean": {
+        "bytes": 30874,
+        "sha256": "07892bfad13864d14a0ebd3fd6c5e082ced42ad4bea70b2108d9311120d90b1b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-static-burst.log": {
+        "bytes": 327,
+        "sha256": "317b510d02b0d37889ad90ffdf658fe9a814ff2c8500054091e30f795e256fac"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-static-burst.pid": {
+        "bytes": 8,
+        "sha256": "aa182deb25913e88e0a7e19ca9a09feeb6644c1dbae1717992779c5549b63f3e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-step.lean": {
+        "bytes": 25684,
+        "sha256": "32a77c4043769c6a1bfaf2cfd08df42ff0ab4ee63b3a303661f59f93b3803ad9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-step.log": {
+        "bytes": 206,
+        "sha256": "16985735d0de4bb7d0f83f76bbba0b9944880c88db02f5c4a2b7ed35924f4eeb"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-trace-stages.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-trace-stages.lean": {
+        "bytes": 26163,
+        "sha256": "d05a72aefa709db3979c5c23634ea440c16fb9ed16f7c45494cfa073654a1f45"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-trace-stages.log": {
+        "bytes": 605,
+        "sha256": "194afbf97df98aa2debeaf729f6ec984239c47cf71439bfab718e1a6b19d1d1e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-trace-stages.pid": {
+        "bytes": 8,
+        "sha256": "0335ae33ad559c4171a576d8fff78b9990d6de52ebdb7e432bc20a013a124076"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-type.lean": {
+        "bytes": 25663,
+        "sha256": "a396af33a96c55fadf270a2b855d0c99e52d0aa9b375bda9a43380050f369d14"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-type.log": {
+        "bytes": 5016,
+        "sha256": "7e9883b464ba3361501a9a41e35a9d5dff5e7f65643f9566788c1ffa458b584a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-all-unit-metadata.json": {
+        "bytes": 63242,
+        "sha256": "3e3432d1fa169a814131592b4df43af1d11f5f4a0ec70d2150cde42d3cce0f53"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-burst-concrete.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-burst-concrete.lean": {
+        "bytes": 29788,
+        "sha256": "4fde0a940f08ebba78d4c47d8b9927f28844b7ed20533ff7df15292bf84a5004"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-burst-concrete.log": {
+        "bytes": 409,
+        "sha256": "6639fb7d82022301e435e3248b507bf2fcd1dec3b4b886a7679af72801e04529"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-burst-concrete.pid": {
+        "bytes": 8,
+        "sha256": "ff1b0c0fd2b902200ad922267c97333da7d6c50421530c329eba9969035b2266"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-complete-before-build.lean": {
+        "bytes": 189434,
+        "sha256": "c558b2b40f105322e0617edec1d2aee24ab4a878227ee21994f11918a4f3c48b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-complete-build.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-complete-build.log": {
+        "bytes": 3600,
+        "sha256": "c82d7a1806127fd263957584cc88386ec6a4a74525973fa940afce19c5b17e1e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-complete-build.sh": {
+        "bytes": 157,
+        "sha256": "f91e34743fec2be1430cb1cb947154d177487a813f22bb7d9c2809b0ea14b233"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-concrete-matrix.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-concrete-matrix.lean": {
+        "bytes": 175881,
+        "sha256": "5235766ef29ba8c05e82a167ba552bb7aaf41b028571d21647b10df5b4b1d725"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-concrete-matrix.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-concrete-matrix.sh": {
+        "bytes": 286,
+        "sha256": "ba4456b5548e62e89016ebb41c85ae6b7dc1d5ff2769ad766b23ecc48c923fba"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-current-reproduced.bpf.o": {
+        "bytes": 20520,
+        "sha256": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-current-reproduced.lean": {
+        "bytes": 248765,
+        "sha256": "ecb3ca78ffa0ab893bb142b5087e4ee3ac3765b0a994350916e559e563b81397"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-current.i": {
+        "bytes": 10307097,
+        "sha256": "19fffaaed9541b33b24fdc9e35e29ba438d53d98a00b097fb56578ce4898c8e6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-equations.lean": {
+        "bytes": 89,
+        "sha256": "2ab05ebada0e986c77ff91748395329416dc38620c8acad1f8d49c04aace1f81"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-equations.log": {
+        "bytes": 1540,
+        "sha256": "e561f089380a7f136e96f244fd240e6f662d914f4d1e636f83b0f09957167b12"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-explicit-selectors.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-explicit-selectors.lean": {
+        "bytes": 31109,
+        "sha256": "b5ba03e11537a33982df001d436b28218cfd8625e79360b224ae36eb59f698c5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-explicit-selectors.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-explicit-selectors.sh": {
+        "bytes": 292,
+        "sha256": "74aa336041f7f845e74684222c993f07bd3fc6c3c3126329f9e397df346c3dcd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main-inputs.json": {
+        "bytes": 766,
+        "sha256": "6513672bac0204f40b19e3f4ba1cbc2463fa7a342aed599a5e10e705c6f5fce9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main-results.json": {
+        "bytes": 1543,
+        "sha256": "88f6f693252ba9eb85f77b840f6f7550f386466acfeaf851a74a83d61f8c96ce"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.log": {
+        "bytes": 490,
+        "sha256": "53bf2c0e8b57ec5eb7fcf4fdf7d0eaa77cb6495cca99b416c0e3b913b7120319"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.mk": {
+        "bytes": 122,
+        "sha256": "961538d44ae598e40d251bdbe088b797a3e5df36991e4637267df180412d5bf1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.py": {
+        "bytes": 2697,
+        "sha256": "85504af405615b056716dc9900f88360d78afeae496dfd7e0bde5039320f723c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-final-main.state": {
+        "bytes": 24,
+        "sha256": "80eefbf81ba874d41413b093f89a649fbc2e193f4a7f783d1760bf5e47868d59"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-input-selector.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-input-selector.lean": {
+        "bytes": 30265,
+        "sha256": "31a35ffa81ac57dd75073f0695720b9c2dca8014150f24a7e551fded3f6df021"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-input-selector.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-input-selector.sh": {
+        "bytes": 300,
+        "sha256": "379409bdf67a30ee7de0862662ea27df56627d1f1bfaab5c6fc6d4a37c8df67c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-matrix.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-matrix.lean": {
+        "bytes": 104136,
+        "sha256": "69e645785ffeb0f3b67e38229e61d43378bbb24946b82fc433ba62f27e180945"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-matrix.log": {
+        "bytes": 2881,
+        "sha256": "66c3f773de7852bd8f197ae0e4a1c0f2bec1a3bc6d627afb282cb1d1aae576e6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-generic-matrix.sh": {
+        "bytes": 284,
+        "sha256": "58031c6a6670a5c23a6fba30ec5e6ff3e9e39f148b0abd7e01bcbf9348c96bbf"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-legacy-path-2.lean": {
+        "bytes": 30307,
+        "sha256": "fae005bcd1ec629c68b57f996ee7304af0eea8fdfe48496b79238191bca8a240"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-legacy-path.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-legacy-path.lean": {
+        "bytes": 30123,
+        "sha256": "7f005147fd544248675f51b7fd3e777022c76dc424d958f5c65f32e92016118f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-legacy-path.log": {
+        "bytes": 1218,
+        "sha256": "9d01050951c9f604cb4000a6c3945daa1199b514aa063809c7cee35692627fed"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-legacy-path.sh": {
+        "bytes": 278,
+        "sha256": "2cb644bfebe6bf02f12e295f24f4ae46be533aed57c4071b6aa0cf65ba6174e5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-matrix-wip.patch": {
+        "bytes": 56090,
+        "sha256": "ee40a9307918af8ae98c44ff2a2d818c9091023d72a4ea9e6d477888eef1fd52"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce-initial.log": {
+        "bytes": 691,
+        "sha256": "ff0b3deeb33ea4e14b93b319682b70b174a92ed34ab9770ac39ff043c23bbcd9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce-initial.py": {
+        "bytes": 1360,
+        "sha256": "93672b6d5a9198d5b1ffa092e03ebc52b897ce5bb4bb6830105b25ced843ccf5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce-results.json": {
+        "bytes": 1531,
+        "sha256": "4742c2b6d270aad5ea75f6a14d767f660507e2c42e888dd0690db7b963b52248"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce.log": {
+        "bytes": 612,
+        "sha256": "744abcf2dd640ea35494a804fb59bf8d1d808090cc7039faa44a277a50ddd44c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce.mk": {
+        "bytes": 486,
+        "sha256": "4695943e63e5b18f2e2ebdb2b0180b99965090c6dedecfad3a40190e18f64505"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/cmov-source-reproduce.py": {
+        "bytes": 1439,
+        "sha256": "2cf966886c963c28bfd197546164bde94c8e065ff6e2120265ef5dd6d1eef3de"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3722,
+        "sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean": {
+        "bytes": 88876,
+        "sha256": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b"
+      },
+      "/workspaces/repository/kprog/formal/Makefile": {
+        "bytes": 54492,
+        "sha256": "331ab2b051aa5b9321f7ad3b7909b67b35ec90a69b4c191b1d81fbe4a8304773"
+      },
+      "/workspaces/repository/kprog/tv/BPF.lean": {
+        "bytes": 15089,
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      "/workspaces/repository/kprog/tv/BPFPath.lean": {
+        "bytes": 13188,
+        "sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      "/workspaces/repository/kprog/tv/CmovCertificate.lean": {
+        "bytes": 189510,
+        "sha256": "bc509fef11b667cd63758d2446ccba9914298ad01f8da727d7d5c0301932a572"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45056,
+        "sha256": "92eef8c23b13d41c5499f4086169ce6214648da9c20b6b5313e7891e08e616b6"
+      },
+      "/workspaces/repository/kprog/tv/build/CompiledBlocks.lean": {
+        "bytes": 248765,
+        "sha256": "ecb3ca78ffa0ab893bb142b5087e4ee3ac3765b0a994350916e559e563b81397"
+      },
+      "/workspaces/repository/kprog/tv/build/cmov-block.bpf.o": {
+        "bytes": 20520,
+        "sha256": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376"
+      },
+      "/workspaces/repository/kprog/tv/cmov_block.bpf.c": {
+        "bytes": 4874,
+        "sha256": "d6ab564e5e7bde4efdb61a34d99a9d12df8c94f0cd1c4d265afc1ba75601dbb0"
+      },
+      "/workspaces/repository/kprog/tv/extract_blocks.py": {
+        "bytes": 2961,
+        "sha256": "b02eb057ff0b315dceb417ff0b79318c39b63466286a4cc447835e18b63d1fbe"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim.h": {
+        "bytes": 8844,
+        "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 175597,
+        "sha256": "8318a76d393dd0fd083cb8abbef83e8af8d301aa05a6489f311f7e22ffcd884c"
+      }
+    },
+    "compiled_units": 51,
+    "compiler_reproduction": {
+      "actual_exit": 0,
+      "after": {
+        "kprog/tv/build/CompiledBlocks.lean": "ecb3ca78ffa0ab893bb142b5087e4ee3ac3765b0a994350916e559e563b81397",
+        "kprog/tv/build/cmov-block.bpf.o": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376",
+        "kprog/tv/cmov_block.bpf.c": "d6ab564e5e7bde4efdb61a34d99a9d12df8c94f0cd1c4d265afc1ba75601dbb0",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "8318a76d393dd0fd083cb8abbef83e8af8d301aa05a6489f311f7e22ffcd884c"
+      },
+      "before": {
+        "kprog/tv/build/CompiledBlocks.lean": "ecb3ca78ffa0ab893bb142b5087e4ee3ac3765b0a994350916e559e563b81397",
+        "kprog/tv/build/cmov-block.bpf.o": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376",
+        "kprog/tv/cmov_block.bpf.c": "d6ab564e5e7bde4efdb61a34d99a9d12df8c94f0cd1c4d265afc1ba75601dbb0",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "8318a76d393dd0fd083cb8abbef83e8af8d301aa05a6489f311f7e22ffcd884c"
+      },
+      "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-18/bin\n",
+      "lean_artifact_equal": true,
+      "preprocessed_bytes": 10307097,
+      "preprocessed_sha256": "19fffaaed9541b33b24fdc9e35e29ba438d53d98a00b097fb56578ce4898c8e6",
+      "reproduced_object_sha256": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376",
+      "source_identity_preserved": true
+    },
+    "condition_selectors": 16,
+    "existing_entry_point": "formal make check now also invokes the existing tv cmov-check target",
+    "legacy_theorems": [
+      "compiled_value",
+      "compiled_execution"
+    ],
+    "physical_interface": "Register assignment RAX/RDX and scalar return unit. Whole architectural frame, arbitrary register renaming, production invocation ABI and physical compiler embedding remain explicit interfaces.",
+    "proof_axioms": [
+      "propext",
+      "Classical.choice",
+      "Lean.ofReduceBool",
+      "Quot.sound"
+    ],
+    "proof_sources": {
+      "kprog/tv/BPF.lean": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9",
+      "kprog/tv/BPFPath.lean": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d",
+      "kprog/tv/CmovCertificate.lean": "bc509fef11b667cd63758d2446ccba9914298ad01f8da727d7d5c0301932a572",
+      "kprog/tv/build/CompiledBlocks.lean": "ecb3ca78ffa0ab893bb142b5087e4ee3ac3765b0a994350916e559e563b81397",
+      "kprog/tv/build/CompiledBlocks.olean": "5a54cc1ed0383497d281de61478b8143dd3ab6657670b18fba9c72ea25d17712",
+      "kprog/tv/build/cmov-block.bpf.o": "1fa35f1e22f9c4b379f9c6f1decd8e05b1d3e4d1ebcf98ef5463f59688206376",
+      "kprog/tv/cmov_block.bpf.c": "d6ab564e5e7bde4efdb61a34d99a9d12df8c94f0cd1c4d265afc1ba75601dbb0"
+    },
+    "proof_theorem": "KProgTV.CmovCertificate.compiled_all_conditions",
+    "proved_condition_width_units": 48,
+    "proved_outputs": "Canonical X86.cmovValue in BPF R0; whole memory preserved; exact fresh-input visit increment; halted=true, fault=none, events=[].",
+    "source_identity_preserved": true,
+    "universal_inputs": "Arbitrary64-bit RAX/RDX operands and RFLAGS, arbitrary fresh-input stream and starting visit, arbitrary whole Memory.",
+    "widths": [
+      16,
+      32,
+      64
+    ]
+  },
   "compiled_input_burst_composition": {
     "archive_compressed_prefix_bytes": 94891789,
     "archive_compressed_prefix_sha256": "e1d50a7e309b3692e04e6c8d810033ac7737d22b85e81550ead388e01a6f741f",

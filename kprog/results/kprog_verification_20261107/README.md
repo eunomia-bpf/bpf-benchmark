@@ -21,6 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/72 |
 | Memory-call full-frame C body model | 4/75 | 0/72 |
 | O2 C-model token-body equality | 72/75 | 72/72 |
+| Actual clang CMOV scalar unit (all16 conditions ×3 widths) | 1/75 | 0/72 |
 | Additional returning-helper interface equality | 2/75 | 0/72 |
 | Upstream machine-model sampled architectural-state agreement | 25/75 | 72/72 selected profiles |
 | Upstream model-stopped operation rows | 7/75 | 0/72 selected forms |
@@ -4868,3 +4869,17 @@ immutable full check keep their own source identities.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_0e21d357c`. Every check retains its exact published source identity.
+
+### Compiled CMOV token units
+
+The existing CMOV compiler unit now covers all16 conditions and16/32/64 widths.
+`CmovCertificate.compiled_all_conditions` proves the decoded clang byte execution
+returns canonical `X86.cmovValue` for arbitrary operands, flags, fresh-input stream
+and starting visit. It preserves whole memory and proves the exact input count,
+halt, fault and effect summary. All48 bodies and both legacy corollaries pass;
+the51-unit object and extracted arrays reproduce byte for byte with clang18.1.3.
+The receipt `compiled_cmov_all_conditions` retains source/preprocessor/object
+identities, original proof attempts and trusted reduction axioms. Register
+renaming, whole architectural frame, invocation ABI and physical compiler
+embedding remain the explicit interface to the generic simulator. The existing
+`cmov-check` target joins the single formal `make check` entry point.
