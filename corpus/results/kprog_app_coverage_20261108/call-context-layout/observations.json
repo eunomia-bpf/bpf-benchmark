@@ -1,0 +1,42 @@
+{
+  "controls": 196608,
+  "comparison": "actual CPU versus UBSan host versus BPF-JIT",
+  "test_profiles": [
+    {
+      "name": "case0",
+      "native_instructions": 15,
+      "native_functions": 1
+    },
+    {
+      "name": "case1",
+      "native_instructions": 15,
+      "native_functions": 2
+    },
+    {
+      "name": "case2",
+      "native_instructions": 17,
+      "native_functions": 2
+    }
+  ],
+  "baseline": {
+    "insns": 11824,
+    "deepest_direct_frame_offset": -1272
+  },
+  "candidate": {
+    "insns": 29598,
+    "deepest_direct_frame_offset": -1848
+  },
+  "graph": {
+    "native_insns": 2438,
+    "native_subroutines": 7,
+    "nodes": 3795,
+    "contexts": 29,
+    "edges": 4163,
+    "native_returns": 8,
+    "context_returns": 29,
+    "original_proof_sha256": "94fc1b13be6a517c6c0c35b9a1ccccfc84ad2906012a557d77b187c3de4c6026"
+  },
+  "source_scope": "private generic representation experiment; current production generator and application cohort retain captured bytes",
+  "archive_sha256": "e5ef5efc9c9333264e9f5918390a2e6c2a63de3ca607ac16c2d26cb382d63525",
+  "test_adapters": "offline environment SP0 and rejected-edge reporter helper63; original verifier object/bytecode retained"
+}
