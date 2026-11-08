@@ -1,0 +1,3044 @@
+{
+  "utc": "2026-11-08T07:49:41.425518+00:00",
+  "application": "tetragon",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-08T07:49:41.556722+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 1,
+    "distinct_source_prog_ids": 1,
+    "proof_generated": 1,
+    "stages": {
+      "verifier_rejected": 1
+    },
+    "failure_causes": {
+      "infinite_loop": 1
+    },
+    "requests": [
+      {
+        "request_id": 1,
+        "source_prog_id": 229,
+        "native_sha256": "7620cc8d34b1d50c5d504a233b6db0ca1383b78e6c49d462e3ae64e19976b937",
+        "entry": "event_exit_acct_process",
+        "status": -5,
+        "stage": "verifier_rejected",
+        "cause": "infinite_loop",
+        "proof_generated": true,
+        "source_generated": true,
+        "prog_id": null,
+        "request_archive": "run/requests/1.failure.tar.gz",
+        "request_archive_sha256": "f5a344a790b232fe7876e408497608ebdfe59d194cb1df35b33a2ffde46788de",
+        "failed_commands": [],
+        "error": "Command '['/workspaces/repository/kprog/arm64/build/design-only/loader/trusted-native-loader', 'load', '4', '1', '229', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-yhqf55kl/requests/request-kit1r8l6/generated/request.native.o', 'event_exit_acct_process', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-yhqf55kl/requests/request-kit1r8l6/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-yhqf55kl/requests/request-kit1r8l6/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '0', '0', '0', '0', '0', '0', 'execve_map', '2424', 'null', 'execve_map_stats', '2426', 'null', 'exit_heap_map', '2455', 'null', 'tcpmon_map', '2430', 'null', 'tg_conf_map', '2423', 'null', 'tg_parents_bin', '2453', 'null', 'tg_rb_events', '2435', 'null', 'tg_stats_map', '2431', 'null']' returned non-zero exit status 1.",
+        "load_stderr": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=79661\nstub fd_array_cnt=10 fd_array=0:21,1:21,2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20\nstub insns=0:code=183,dst=0,src=3,off=31,imm=0;1:code=133,dst=0,src=4,off=1,imm=126349;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7b) *(u64 *)(r10 -136) = r1       ; R1=ctx() R10=fp0 fp-136=ctx()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (bf) r1 = r0                      ; R0=scalar(id=1) R1=scalar(id=1)\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (bf) r2 = r0                      ; R0=scalar(id=2) R2=scalar(id=2)\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (bf) r3 = r0                      ; R0=scalar(id=3) R3=scalar(id=3)\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (bf) r4 = r0                      ; R0=scalar(id=4) R4=scalar(id=4)\n28: (b7) r0 = 2                       ; R0=scalar()\n29: (bf) r5 = r0                      ; R0=scalar(id=5) R5=scalar(id=5)\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (bf) r6 = r0                      ; R0=scalar(id=6) R6=scalar(id=6)\n32: (b7) r0 = 2                       ; R0=scalar()\n33: (b7) r0 = 2                       ; R0=scalar()\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r0 = 2                       ; R0=scalar()\n51: (b7) r0 = 2                       ; R0=scalar()\n52: (b7) r0 = 2                       ; R0=scalar()\n53: (b7) r0 = 2                       ; R0=scalar()\n54: (b7) r0 = 2                       ; R0=scalar()\n55: (b7) r0 = 2                       ; R0=scalar()\n56: (b7) r0 = 2                       ; R0=scalar()\n57: (b7) r0 = 2                       ; R0=scalar()\n58: (b7) r0 = 2                       ; R0=scalar()\n59: (b7) r0 = 2                       ; R0=scalar()\n60: (b7) r0 = 2                       ; R0=scalar()\n61: (b7) r0 = 2                       ; R0=scalar()\n62: (b7) r0 = 2                       ; R0=scalar()\n63: (b7) r0 = 2                       ; R0=scalar()\n64: (b7) r0 = 2                       ; R0=scalar()\n65: (b7) r0 = 2                       ; R0=scalar()\n66: (b7) r0 = 2                       ; R0=scalar()\n67: (b7) r0 = 2                       ; R0=scalar()\n68: (b7) r0 = 2                       ; R0=scalar()\n69: (b7) r0 = 2                       ; R0=scalar()\n70: (b7) r0 = 2                       ; R0=scalar()\n71: (b7) r0 = 2                       ; R0=scalar()\n72: (b7) r0 = 2                       ; R0=scalar()\n73: (b7) r0 = 2                       ; R0=scalar()\n74: (b7) r0 = 2                       ; R0=scalar()\n75: (b7) r0 = 2                       ; R0=scalar()\n76: (b7) r0 = 2                       ; R0=scalar()\n77: (b7) r0 = 2                       ; R0=scalar()\n78: (b7) r0 = 2                       ; R0=scalar()\n79: (b7) r0 = 2                       ; R0=scalar()\n80: (b7) r0 = 2                       ; R0=scalar()\n81: (b7) r0 = 2                       ; R0=scalar()\n82: (b7) r0 = 2                       ; R0=scalar()\n83: (b7) r0 = 2                       ; R0=scalar()\n84: (b7) r0 = 2                       ; R0=scalar()\n85: (b7) r0 = 2                       ; R0=scalar()\n86: (b7) r0 = 2                       ; R0=scalar()\n87: (b7) r0 = 2                       ; R0=scalar()\n88: (b7) r0 = 2                       ; R0=scalar()\n89: (b7) r0 = 2                       ; R0=scalar()\n90: (b7) r0 = 2                       ; R0=scalar()\n91: (b7) r0 = 2                       ; R0=scalar()\n92: (b7) r0 = 2                       ; R0=scalar()\n93: (b7) r0 = 2                       ; R0=scalar()\n94: (b7) r0 = 2                       ; R0=scalar()\n95: (b7) r0 = 2                       ; R0=scalar()\n96: (b7) r0 = 2                       ; R0=scalar()\n97: (b7) r0 = 2                       ; R0=scalar()\n98: (b7) r0 = 2                       ; R0=scalar()\n99: (b7) r0 = 2                       ; R0=scalar()\n100: (b7) r0 = 2                      ; R0=scalar()\n101: (b7) r0 = 2                      ; R0=scalar()\n102: (b7) r0 = 2                      ; R0=scalar()\n103: (b7) r0 = 2                      ; R0=scalar()\n104: (b7) r0 = 2                      ; R0=scalar()\n105: (7a) *(u64 *)(r10 -96) = 0       ; R10=fp0 fp-96=0\n106: (7a) *(u64 *)(r10 -104) = 0      ; R10=fp0 fp-104=0\n107: (b7) r0 = 2                      ; R0=scalar()\n108: (b7) r0 = 2                      ; R0=scalar()\n109: (7b) *(u64 *)(r10 -64) = r0      ; R0=scalar(id=7) R10=fp0 fp-64=scalar(id=7)\n110: (7a) *(u64 *)(r10 -88) = 0       ; R10=fp0 fp-88=0\n111: (79) r0 = *(u64 *)(r10 -96)      ; R0=0 R10=fp0 fp-96=0\n112: (57) r0 &= -16711681             ; R0=0\n113: (47) r0 |= 655360                ; R0=0xa0000\n114: (7b) *(u64 *)(r10 -96) = r0      ; R0=0xa0000 R10=fp0 fp-96=0xa0000\n115: (7b) *(u64 *)(r10 -48) = r6      ; R6=scalar(id=6) R10=fp0 fp-48=scalar(id=6)\n116: (18) r0 = 0xffffff00ffffffff     ; R0=0xffffff00ffffffff\n118: (79) r6 = *(u64 *)(r10 -96)      ; R6=0xa0000 R10=fp0 fp-96=0xa0000\n119: (5f) r6 &= r0                    ; R0=0xffffff00ffffffff R6=0xa0000\n120: (7b) *(u64 *)(r10 -96) = r6      ; R6=0xa0000 R10=fp0 fp-96=0xa0000\n121: (7b) *(u64 *)(r10 -40) = r5      ; R5=scalar(id=5) R10=fp0 fp-40=scalar(id=5)\n122: (18) r5 = 0xffff00ffffffffff     ; R5=0xffff00ffffffffff\n124: (79) r0 = *(u64 *)(r10 -96)      ; R0=0xa0000 R10=fp0 fp-96=0xa0000\n125: (5f) r0 &= r5                    ; R0=0xa0000 R5=0xffff00ffffffffff\n126: (7b) *(u64 *)(r10 -96) = r0      ; R0=0xa0000 R10=fp0 fp-96=0xa0000\n127: (7b) *(u64 *)(r10 -32) = r4      ; R4=scalar(id=4) R10=fp0 fp-32=scalar(id=4)\n128: (18) r4 = 0xff00ffffffffffff     ; R4=0xff00ffffffffffff\n130: (79) r5 = *(u64 *)(r10 -96)      ; R5=0xa0000 R10=fp0 fp-96=0xa0000\n131: (5f) r5 &= r4                    ; R4=0xff00ffffffffffff R5=0xa0000\n132: (7b) *(u64 *)(r10 -96) = r5      ; R5=0xa0000 R10=fp0 fp-96=0xa0000\n133: (7b) *(u64 *)(r10 -24) = r3      ; R3=scalar(id=3) R10=fp0 fp-24=scalar(id=3)\n134: (18) r3 = 0xffffffffffffff       ; R3=0xffffffffffffff\n136: (79) r4 = *(u64 *)(r10 -96)      ; R4=0xa0000 R10=fp0 fp-96=0xa0000\n137: (5f) r4 &= r3                    ; R3=0xffffffffffffff R4=0xa0000\n138: (7b) *(u64 *)(r10 -96) = r4      ; R4=0xa0000 R10=fp0 fp-96=0xa0000\n139: (7b) *(u64 *)(r10 -16) = r2      ; R2=scalar(id=2) R10=fp0 fp-16=scalar(id=2)\n140: (79) r2 = *(u64 *)(r10 -104)     ; R2=0 R10=fp0 fp-104=0\n141: (57) r2 &= -256                  ; R2=0\n142: (7b) *(u64 *)(r10 -104) = r2     ; R2=0 R10=fp0 fp-104=0\n143: (7b) *(u64 *)(r10 -8) = r1       ; R1=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n144: (79) r1 = *(u64 *)(r10 -104)     ; R1=0 R10=fp0 fp-104=0\n145: (57) r1 &= -65281                ; R1=0\n146: (7b) *(u64 *)(r10 -104) = r1     ; R1=0 R10=fp0 fp-104=0\n147: (85) call bpf_get_current_pid_tgid#14    ; R0=scalar()\n148: (bf) r7 = r0                     ; R0=scalar(id=8) R7=scalar(id=8)\n149: (b7) r0 = 2                      ; R0=scalar()\n150: (b7) r0 = 2                      ; R0=scalar()\n151: (b7) r0 = 2                      ; R0=scalar()\n152: (b7) r0 = 2                      ; R0=scalar()\n153: (b7) r0 = 2                      ; R0=scalar()\n154: (b7) r0 = 2                      ; R0=scalar()\n155: (b7) r0 = 2                      ; R0=scalar()\n156: (b7) r0 = 2                      ; R0=scalar()\n157: (b7) r0 = 2                      ; R0=scalar()\n158: (b7) r0 = 2                      ; R0=scalar()\n159: (b7) r0 = 2                      ; R0=scalar()\n160: (b7) r0 = 2                      ; R0=scalar()\n161: (b7) r0 = 2                      ; R0=scalar()\n162: (b7) r0 = 2                      ; R0=scalar()\n163: (b7) r0 = 2                      ; R0=scalar()\n164: (b7) r0 = 2                      ; R0=scalar()\n165: (b7) r0 = 2                      ; R0=scalar()\n166: (b7) r0 = 2                      ; R0=scalar()\n167: (b7) r0 = 2                      ; R0=scalar()\n168: (b7) r0 = 2                      ; R0=scalar()\n169: (b7) r0 = 2                      ; R0=scalar()\n170: (b7) r0 = 2                      ; R0=scalar()\n171: (b7) r0 = 2                      ; R0=scalar()\n172: (b7) r0 = 2                      ; R0=scalar()\n173: (b7) r0 = 2                      ; R0=scalar()\n174: (b7) r0 = 2                      ; R0=scalar()\n175: (b7) r0 = 2                      ; R0=scalar()\n176: (b7) r0 = 2                      ; R0=scalar()\n177: (b7) r0 = 2                      ; R0=scalar()\n178: (b7) r0 = 2                      ; R0=scalar()\n179: (b7) r0 = 2                      ; R0=scalar()\n180: (b7) r0 = 2                      ; R0=scalar()\n181: (b7) r0 = 2                      ; R0=scalar()\n182: (b7) r0 = 2                      ; R0=scalar()\n183: (b7) r0 = 2                      ; R0=scalar()\n184: (b7) r0 = 2                      ; R0=scalar()\n185: (b7) r0 = 2                      ; R0=scalar()\n186: (b7) r0 = 2                      ; R0=scalar()\n187: (b7) r0 = 2                      ; R0=scalar()\n188: (b7) r0 = 2                      ; R0=scalar()\n189: (b7) r0 = 2                      ; R0=scalar()\n190: (b7) r0 = 2                      ; R0=scalar()\n191: (b7) r0 = 2                      ; R0=scalar()\n192: (b7) r0 = 2                      ; R0=scalar()\n193: (b7) r0 = 2                      ; R0=scalar()\n194: (b7) r0 = 2                      ; R0=scalar()\n195: (b7) r0 = 2                      ; R0=scalar()\n196: (b7) r0 = 2                      ; R0=scalar()\n197: (b7) r0 = 2                      ; R0=scalar()\n198: (b7) r0 = 2                      ; R0=scalar()\n199: (b7) r0 = 2                      ; R0=scalar()\n200: (b7) r0 = 2                      ; R0=scalar()\n201: (b7) r0 = 2                      ; R0=scalar()\n202: (b7) r0 = 2                      ; R0=scalar()\n203: (b7) r0 = 2                      ; R0=scalar()\n204: (b7) r0 = 2                      ; R0=scalar()\n205: (b7) r0 = 2                      ; R0=scalar()\n206: (b7) r0 = 2                      ; R0=scalar()\n207: (b7) r0 = 2                      ; R0=scalar()\n208: (b7) r0 = 2                      ; R0=scalar()\n209: (b7) r0 = 2                      ; R0=scalar()\n210: (b7) r0 = 2                      ; R0=scalar()\n211: (b7) r0 = 2                      ; R0=scalar()\n212: (b7) r0 = 2                      ; R0=scalar()\n213: (b7) r0 = 2                      ; R0=scalar()\n214: (b7) r0 = 2                      ; R0=scalar()\n215: (b7) r0 = 2                      ; R0=scalar()\n216: (b7) r0 = 2                      ; R0=scalar()\n217: (b7) r0 = 2                      ; R0=scalar()\n218: (b7) r0 = 2                      ; R0=scalar()\n219: (b7) r0 = 2                      ; R0=scalar()\n220: (b7) r0 = 2                      ; R0=scalar()\n221: (b7) r0 = 2                      ; R0=scalar()\n222: (b7) r0 = 2                      ; R0=scalar()\n223: (b7) r0 = 2                      ; R0=scalar()\n224: (b7) r0 = 2                      ; R0=scalar()\n225: (b7) r0 = 2                      ; R0=scalar()\n226: (b7) r0 = 2                      ; R0=scalar()\n227: (b7) r0 = 2                      ; R0=scalar()\n228: (b7) r0 = 2                      ; R0=scalar()\n229: (b7) r0 = 2                      ; R0=scalar()\n230: (b7) r0 = 2                      ; R0=scalar()\n231: (b7) r0 = 2                      ; R0=scalar()\n232: (b7) r0 = 2                      ; R0=scalar()\n233: (b7) r0 = 2                      ; R0=scalar()\n234: (b7) r0 = 2                      ; R0=scalar()\n235: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n237: (79) r2 = *(u64 *)(r10 -96)      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n238: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\n239: (7b) *(u64 *)(r10 -96) = r2      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n240: (bf) r1 = r7                     ; R1=scalar(id=8) R7=scalar(id=8)\n241: (77) r1 >>= 56                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n242: (bf) r2 = r7                     ; R2=scalar(id=8) R7=scalar(id=8)\n243: (77) r2 >>= 48                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n244: (bf) r6 = r7                     ; R6=scalar(id=8) R7=scalar(id=8)\n245: (77) r6 >>= 40                   ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))\n246: (77) r7 >>= 32                   ; R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n247: (73) *(u8 *)(r10 -52) = r7       ; R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-56=???m????\n248: (73) *(u8 *)(r10 -51) = r6       ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R10=fp0 fp-56=??mm????\n249: (7b) *(u64 *)(r10 -128) = r2     ; R2=scalar(id=9,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-128=scalar(id=9,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n250: (73) *(u8 *)(r10 -50) = r2       ; R2=scalar(id=9,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-56=?mmm????\n251: (7b) *(u64 *)(r10 -120) = r1     ; R1=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-120=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n252: (73) *(u8 *)(r10 -49) = r1       ; R1=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-56=mmmm????\n253: (b7) r2 = -52                    ; R2=-52\n254: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n255: (07) r1 += -80                   ; R1=fp-80\n256: (0f) r2 += r1                    ; R1=fp-80 R2=fp-132\n257: (07) r2 += 80                    ; R2=fp-52\n258: (18) r1 = 0xffff0000c2250400     ; R1=map_ptr(map=execve_map,ks=4,vs=896)\n260: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=11,map=execve_map,ks=4,vs=896)\n261: (bf) r1 = r0                     ; R0=map_value_or_null(id=11,map=execve_map,ks=4,vs=896) R1=map_value_or_null(id=11,map=execve_map,ks=4,vs=896)\n262: (b7) r0 = 2                      ; R0=scalar()\n263: (b7) r0 = 2                      ; R0=scalar()\n264: (b7) r0 = 2                      ; R0=scalar()\n265: (b7) r0 = 2                      ; R0=scalar()\n266: (b7) r0 = 2                      ; R0=scalar()\n267: (b7) r0 = 2                      ; R0=scalar()\n268: (b7) r0 = 2                      ; R0=scalar()\n269: (b7) r0 = 2                      ; R0=scalar()\n270: (b7) r0 = 2                      ; R0=scalar()\n271: (b7) r0 = 2                      ; R0=scalar()\n272: (b7) r0 = 2                      ; R0=scalar()\n273: (b7) r0 = 2                      ; R0=scalar()\n274: (b7) r0 = 2                      ; R0=scalar()\n275: (b7) r0 = 2                      ; R0=scalar()\n276: (b7) r0 = 2                      ; R0=scalar()\n277: (b7) r0 = 2                      ; R0=scalar()\n278: (b7) r0 = 2                      ; R0=scalar()\n279: (b7) r0 = 2                      ; R0=scalar()\n280: (b7) r0 = 2                      ; R0=scalar()\n281: (b7) r0 = 2                      ; R0=scalar()\n282: (b7) r0 = 2                      ; R0=scalar()\n283: (b7) r0 = 2                      ; R0=scalar()\n284: (b7) r0 = 2                      ; R0=scalar()\n285: (b7) r0 = 2                      ; R0=scalar()\n286: (b7) r0 = 2                      ; R0=scalar()\n287: (b7) r0 = 2                      ; R0=scalar()\n288: (b7) r0 = 2                      ; R0=scalar()\n289: (b7) r0 = 2                      ; R0=scalar()\n290: (b7) r0 = 2                      ; R0=scalar()\n291: (b7) r0 = 2                      ; R0=scalar()\n292: (b7) r0 = 2                      ; R0=scalar()\n293: (b7) r0 = 2                      ; R0=scalar()\n294: (b7) r0 = 2                      ; R0=scalar()\n295: (b7) r0 = 2                      ; R0=scalar()\n296: (b7) r0 = 2                      ; R0=scalar()\n297: (b7) r0 = 2                      ; R0=scalar()\n298: (b7) r0 = 2                      ; R0=scalar()\n299: (b7) r0 = 2                      ; R0=scalar()\n300: (b7) r0 = 2                      ; R0=scalar()\n301: (b7) r0 = 2                      ; R0=scalar()\n302: (b7) r0 = 2                      ; R0=scalar()\n303: (b7) r0 = 2                      ; R0=scalar()\n304: (b7) r0 = 2                      ; R0=scalar()\n305: (b7) r0 = 2                      ; R0=scalar()\n306: (b7) r0 = 2                      ; R0=scalar()\n307: (b7) r0 = 2                      ; R0=scalar()\n308: (b7) r0 = 2                      ; R0=scalar()\n309: (b7) r0 = 2                      ; R0=scalar()\n310: (b7) r0 = 2                      ; R0=scalar()\n311: (b7) r0 = 2                      ; R0=scalar()\n312: (b7) r0 = 2                      ; R0=scalar()\n313: (b7) r0 = 2                      ; R0=scalar()\n314: (b7) r0 = 2                      ; R0=scalar()\n315: (b7) r0 = 2                      ; R0=scalar()\n316: (b7) r0 = 2                      ; R0=scalar()\n317: (b7) r0 = 2                      ; R0=scalar()\n318: (b7) r0 = 2                      ; R0=scalar()\n319: (b7) r0 = 2                      ; R0=scalar()\n320: (b7) r0 = 2                      ; R0=scalar()\n321: (b7) r0 = 2                      ; R0=scalar()\n322: (b7) r0 = 2                      ; R0=scalar()\n323: (b7) r0 = 2                      ; R0=scalar()\n324: (b7) r0 = 2                      ; R0=scalar()\n325: (b7) r0 = 2                      ; R0=scalar()\n326: (b7) r0 = 2                      ; R0=scalar()\n327: (b7) r0 = 2                      ; R0=scalar()\n328: (b7) r0 = 2                      ; R0=scalar()\n329: (b7) r0 = 2                      ; R0=scalar()\n330: (b7) r0 = 2                      ; R0=scalar()\n331: (b7) r0 = 2                      ; R0=scalar()\n332: (b7) r0 = 2                      ; R0=scalar()\n333: (b7) r0 = 2                      ; R0=scalar()\n334: (b7) r0 = 2                      ; R0=scalar()\n335: (b7) r0 = 2                      ; R0=scalar()\n336: (b7) r0 = 2                      ; R0=scalar()\n337: (b7) r0 = 2                      ; R0=scalar()\n338: (b7) r0 = 2                      ; R0=scalar()\n339: (b7) r0 = 2                      ; R0=scalar()\n340: (b7) r0 = 2                      ; R0=scalar()\n341: (b7) r0 = 2                      ; R0=scalar()\n342: (b7) r0 = 2                      ; R0=scalar()\n343: (b7) r0 = 2                      ; R0=scalar()\n344: (b7) r0 = 2                      ; R0=scalar()\n345: (b7) r0 = 2                      ; R0=scalar()\n346: (b7) r0 = 2                      ; R0=scalar()\n347: (b7) r0 = 2                      ; R0=scalar()\n348: (15) if r1 == 0x0 goto pc+1361   ; R1=map_value(map=execve_map,ks=4,vs=896)\n349: (7b) *(u64 *)(r10 -112) = r1     ; R1=map_value(map=execve_map,ks=4,vs=896) R10=fp0 fp-112=map_value(map=execve_map,ks=4,vs=896)\n350: (79) r1 = *(u64 *)(r1 +8)        ; R1=scalar()\n351: (15) if r1 == 0x0 goto pc+951    ; R1=scalar(umin=1)\n352: (85) call bpf_get_current_task#35        ; R0=scalar()\n353: (7b) *(u64 *)(r10 -144) = r0     ; R0=scalar(id=12) R10=fp0 fp-144=scalar(id=12)\n354: (b7) r0 = 2                      ; R0=scalar()\n355: (b7) r0 = 2                      ; R0=scalar()\n356: (b7) r0 = 2                      ; R0=scalar()\n357: (b7) r0 = 2                      ; R0=scalar()\n358: (b7) r0 = 2                      ; R0=scalar()\n359: (b7) r0 = 2                      ; R0=scalar()\n360: (b7) r0 = 2                      ; R0=scalar()\n361: (b7) r0 = 2                      ; R0=scalar()\n362: (b7) r0 = 2                      ; R0=scalar()\n363: (b7) r0 = 2                      ; R0=scalar()\n364: (b7) r0 = 2                      ; R0=scalar()\n365: (b7) r0 = 2                      ; R0=scalar()\n366: (b7) r0 = 2                      ; R0=scalar()\n367: (b7) r0 = 2                      ; R0=scalar()\n368: (b7) r0 = 2                      ; R0=scalar()\n369: (b7) r0 = 2                      ; R0=scalar()\n370: (b7) r0 = 2                      ; R0=scalar()\n371: (b7) r0 = 2                      ; R0=scalar()\n372: (b7) r0 = 2                      ; R0=scalar()\n373: (b7) r0 = 2                      ; R0=scalar()\n374: (b7) r0 = 2                      ; R0=scalar()\n375: (b7) r0 = 2                      ; R0=scalar()\n376: (b7) r0 = 2                      ; R0=scalar()\n377: (b7) r0 = 2                      ; R0=scalar()\n378: (b7) r0 = 2                      ; R0=scalar()\n379: (b7) r0 = 2                      ; R0=scalar()\n380: (b7) r0 = 2                      ; R0=scalar()\n381: (b7) r0 = 2                      ; R0=scalar()\n382: (b7) r0 = 2                      ; R0=scalar()\n383: (b7) r0 = 2                      ; R0=scalar()\n384: (b7) r0 = 2                      ; R0=scalar()\n385: (b7) r0 = 2                      ; R0=scalar()\n386: (b7) r0 = 2                      ; R0=scalar()\n387: (b7) r0 = 2                      ; R0=scalar()\n388: (b7) r0 = 2                      ; R0=scalar()\n389: (b7) r0 = 2                      ; R0=scalar()\n390: (b7) r0 = 2                      ; R0=scalar()\n391: (b7) r0 = 2                      ; R0=scalar()\n392: (b7) r0 = 2                      ; R0=scalar()\n393: (b7) r0 = 2                      ; R0=scalar()\n394: (b7) r0 = 2                      ; R0=scalar()\n395: (b7) r0 = 2                      ; R0=scalar()\n396: (b7) r0 = 2                      ; R0=scalar()\n397: (b7) r0 = 2                      ; R0=scalar()\n398: (b7) r0 = 2                      ; R0=scalar()\n399: (b7) r0 = 2                      ; R0=scalar()\n400: (b7) r0 = 2                      ; R0=scalar()\n401: (b7) r0 = 2                      ; R0=scalar()\n402: (b7) r0 = 2                      ; R0=scalar()\n403: (b7) r0 = 2                      ; R0=scalar()\n404: (b7) r0 = 2                      ; R0=scalar()\n405: (b7) r0 = 2                      ; R0=scalar()\n406: (b7) r0 = 2                      ; R0=scalar()\n407: (b7) r0 = 2                      ; R0=scalar()\n408: (b7) r0 = 2                      ; R0=scalar()\n409: (b7) r0 = 2                      ; R0=scalar()\n410: (b7) r0 = 2                      ; R0=scalar()\n411: (b7) r0 = 2                      ; R0=scalar()\n412: (b7) r0 = 2                      ; R0=scalar()\n413: (b7) r0 = 2                      ; R0=scalar()\n414: (b7) r0 = 2                      ; R0=scalar()\n415: (b7) r0 = 2                      ; R0=scalar()\n416: (b7) r0 = 2                      ; R0=scalar()\n417: (b7) r0 = 2                      ; R0=scalar()\n418: (b7) r0 = 2                      ; R0=scalar()\n419: (b7) r0 = 2                      ; R0=scalar()\n420: (b7) r0 = 2                      ; R0=scalar()\n421: (b7) r0 = 2                      ; R0=scalar()\n422: (b7) r0 = 2                      ; R0=scalar()\n423: (b7) r0 = 2                      ; R0=scalar()\n424: (b7) r0 = 2                      ; R0=scalar()\n425: (b7) r0 = 2                      ; R0=scalar()\n426: (b7) r0 = 2                      ; R0=scalar()\n427: (b7) r0 = 2                      ; R0=scalar()\n428: (b7) r0 = 2                      ; R0=scalar()\n429: (b7) r0 = 2                      ; R0=scalar()\n430: (b7) r0 = 2                      ; R0=scalar()\n431: (b7) r0 = 2                      ; R0=scalar()\n432: (b7) r0 = 2                      ; R0=scalar()\n433: (b7) r0 = 2                      ; R0=scalar()\n434: (b7) r0 = 2                      ; R0=scalar()\n435: (b7) r0 = 2                      ; R0=scalar()\n436: (b7) r0 = 2                      ; R0=scalar()\n437: (b7) r0 = 2                      ; R0=scalar()\n438: (b7) r0 = 2                      ; R0=scalar()\n439: (b7) r0 = 2                      ; R0=scalar()\n440: (79) r1 = *(u64 *)(r10 -96)      ; R1=0xa0000 R10=fp0 fp-96=0xa0000\n441: (57) r1 &= -65281                ; R1=0xa0000\n442: (7b) *(u64 *)(r10 -96) = r1      ; R1=0xa0000 R10=fp0 fp-96=0xa0000\n443: (72) *(u8 *)(r10 -68) = 0        ; R10=fp0 fp-72=???0????\n444: (72) *(u8 *)(r10 -67) = 0        ; R10=fp0 fp-72=??00????\n445: (72) *(u8 *)(r10 -66) = 0        ; R10=fp0 fp-72=?000????\n446: (72) *(u8 *)(r10 -65) = 0        ; R10=fp0 fp-72=0000????\n447: (b7) r2 = -68                    ; R2=-68\n448: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n449: (07) r1 += -80                   ; R1=fp-80\n450: (0f) r2 += r1                    ; R1=fp-80 R2=fp-148\n451: (07) r2 += 80                    ; R2=fp-68\n452: (18) r1 = 0xffff0000c3805800     ; R1=map_ptr(map=exit_heap_map,ks=4,vs=40)\n454: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=exit_heap_map,ks=4,vs=40)\n455: (bf) r9 = r0                     ; R0=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n456: (b7) r0 = 2                      ; R0=scalar()\n457: (b7) r0 = 2                      ; R0=scalar()\n458: (b7) r0 = 2                      ; R0=scalar()\n459: (b7) r0 = 2                      ; R0=scalar()\n460: (b7) r0 = 2                      ; R0=scalar()\n461: (b7) r0 = 2                      ; R0=scalar()\n462: (b7) r0 = 2                      ; R0=scalar()\n463: (b7) r0 = 2                      ; R0=scalar()\n464: (b7) r0 = 2                      ; R0=scalar()\n465: (b7) r0 = 2                      ; R0=scalar()\n466: (b7) r0 = 2                      ; R0=scalar()\n467: (b7) r0 = 2                      ; R0=scalar()\n468: (b7) r0 = 2                      ; R0=scalar()\n469: (b7) r0 = 2                      ; R0=scalar()\n470: (b7) r0 = 2                      ; R0=scalar()\n471: (b7) r0 = 2                      ; R0=scalar()\n472: (b7) r0 = 2                      ; R0=scalar()\n473: (b7) r0 = 2                      ; R0=scalar()\n474: (b7) r0 = 2                      ; R0=scalar()\n475: (b7) r0 = 2                      ; R0=scalar()\n476: (b7) r0 = 2                      ; R0=scalar()\n477: (b7) r0 = 2                      ; R0=scalar()\n478: (b7) r0 = 2                      ; R0=scalar()\n479: (b7) r0 = 2                      ; R0=scalar()\n480: (b7) r0 = 2                      ; R0=scalar()\n481: (b7) r0 = 2                      ; R0=scalar()\n482: (b7) r0 = 2                      ; R0=scalar()\n483: (b7) r0 = 2                      ; R0=scalar()\n484: (b7) r0 = 2                      ; R0=scalar()\n485: (b7) r0 = 2                      ; R0=scalar()\n486: (b7) r0 = 2                      ; R0=scalar()\n487: (b7) r0 = 2                      ; R0=scalar()\n488: (b7) r0 = 2                      ; R0=scalar()\n489: (b7) r0 = 2                      ; R0=scalar()\n490: (b7) r0 = 2                      ; R0=scalar()\n491: (b7) r0 = 2                      ; R0=scalar()\n492: (b7) r0 = 2                      ; R0=scalar()\n493: (b7) r0 = 2                      ; R0=scalar()\n494: (b7) r0 = 2                      ; R0=scalar()\n495: (b7) r0 = 2                      ; R0=scalar()\n496: (b7) r0 = 2                      ; R0=scalar()\n497: (b7) r0 = 2                      ; R0=scalar()\n498: (b7) r0 = 2                      ; R0=scalar()\n499: (b7) r0 = 2                      ; R0=scalar()\n500: (b7) r0 = 2                      ; R0=scalar()\n501: (b7) r0 = 2                      ; R0=scalar()\n502: (b7) r0 = 2                      ; R0=scalar()\n503: (b7) r0 = 2                      ; R0=scalar()\n504: (b7) r0 = 2                      ; R0=scalar()\n505: (b7) r0 = 2                      ; R0=scalar()\n506: (b7) r0 = 2                      ; R0=scalar()\n507: (b7) r0 = 2                      ; R0=scalar()\n508: (b7) r0 = 2                      ; R0=scalar()\n509: (b7) r0 = 2                      ; R0=scalar()\n510: (b7) r0 = 2                      ; R0=scalar()\n511: (b7) r0 = 2                      ; R0=scalar()\n512: (b7) r0 = 2                      ; R0=scalar()\n513: (b7) r0 = 2                      ; R0=scalar()\n514: (b7) r0 = 2                      ; R0=scalar()\n515: (b7) r0 = 2                      ; R0=scalar()\n516: (b7) r0 = 2                      ; R0=scalar()\n517: (b7) r0 = 2                      ; R0=scalar()\n518: (b7) r0 = 2                      ; R0=scalar()\n519: (b7) r0 = 2                      ; R0=scalar()\n520: (b7) r0 = 2                      ; R0=scalar()\n521: (b7) r0 = 2                      ; R0=scalar()\n522: (b7) r0 = 2                      ; R0=scalar()\n523: (b7) r0 = 2                      ; R0=scalar()\n524: (b7) r0 = 2                      ; R0=scalar()\n525: (b7) r0 = 2                      ; R0=scalar()\n526: (b7) r0 = 2                      ; R0=scalar()\n527: (b7) r0 = 2                      ; R0=scalar()\n528: (b7) r0 = 2                      ; R0=scalar()\n529: (b7) r0 = 2                      ; R0=scalar()\n530: (b7) r0 = 2                      ; R0=scalar()\n531: (b7) r0 = 2                      ; R0=scalar()\n532: (b7) r0 = 2                      ; R0=scalar()\n533: (b7) r0 = 2                      ; R0=scalar()\n534: (b7) r0 = 2                      ; R0=scalar()\n535: (b7) r0 = 2                      ; R0=scalar()\n536: (b7) r0 = 2                      ; R0=scalar()\n537: (b7) r0 = 2                      ; R0=scalar()\n538: (b7) r0 = 2                      ; R0=scalar()\n539: (b7) r0 = 2                      ; R0=scalar()\n540: (b7) r0 = 2                      ; R0=scalar()\n541: (b7) r0 = 2                      ; R0=scalar()\n542: (79) r8 = *(u64 *)(r10 -112)     ; R8=map_value(map=execve_map,ks=4,vs=896) R10=fp0 fp-112=map_value(map=execve_map,ks=4,vs=896)\n543: (15) if r9 == 0x0 goto pc+1166   ; R9=map_value(map=exit_heap_map,ks=4,vs=40)\n544: (18) r1 = 0x2800000007           ; R1=0x2800000007\n546: (7b) *(u64 *)(r9 +0) = r1        ; R1=0x2800000007 R9=map_value(map=exit_heap_map,ks=4,vs=40)\n547: (85) call bpf_ktime_get_boot_ns#125      ; R0=scalar()\n548: (bf) r1 = r0                     ; R0=scalar(id=13) R1=scalar(id=13)\n549: (b7) r0 = 2                      ; R0=scalar()\n550: (b7) r0 = 2                      ; R0=scalar()\n551: (b7) r0 = 2                      ; R0=scalar()\n552: (b7) r0 = 2                      ; R0=scalar()\n553: (b7) r0 = 2                      ; R0=scalar()\n554: (b7) r0 = 2                      ; R0=scalar()\n555: (b7) r0 = 2                      ; R0=scalar()\n556: (b7) r0 = 2                      ; R0=scalar()\n557: (b7) r0 = 2                      ; R0=scalar()\n558: (b7) r0 = 2                      ; R0=scalar()\n559: (b7) r0 = 2                      ; R0=scalar()\n560: (b7) r0 = 2                      ; R0=scalar()\n561: (b7) r0 = 2                      ; R0=scalar()\n562: (b7) r0 = 2                      ; R0=scalar()\n563: (b7) r0 = 2                      ; R0=scalar()\n564: (b7) r0 = 2                      ; R0=scalar()\n565: (b7) r0 = 2                      ; R0=scalar()\n566: (b7) r0 = 2                      ; R0=scalar()\n567: (b7) r0 = 2                      ; R0=scalar()\n568: (b7) r0 = 2                      ; R0=scalar()\n569: (b7) r0 = 2                      ; R0=scalar()\n570: (b7) r0 = 2                      ; R0=scalar()\n571: (b7) r0 = 2                      ; R0=scalar()\n572: (b7) r0 = 2                      ; R0=scalar()\n573: (b7) r0 = 2                      ; R0=scalar()\n574: (b7) r0 = 2                      ; R0=scalar()\n575: (b7) r0 = 2                      ; R0=scalar()\n576: (b7) r0 = 2                      ; R0=scalar()\n577: (b7) r0 = 2                      ; R0=scalar()\n578: (b7) r0 = 2                      ; R0=scalar()\n579: (b7) r0 = 2                      ; R0=scalar()\n580: (b7) r0 = 2                      ; R0=scalar()\n581: (b7) r0 = 2                      ; R0=scalar()\n582: (b7) r0 = 2                      ; R0=scalar()\n583: (b7) r0 = 2                      ; R0=scalar()\n584: (b7) r0 = 2                      ; R0=scalar()\n585: (b7) r0 = 2                      ; R0=scalar()\n586: (b7) r0 = 2                      ; R0=scalar()\n587: (b7) r0 = 2                      ; R0=scalar()\n588: (b7) r0 = 2                      ; R0=scalar()\n589: (b7) r0 = 2                      ; R0=scalar()\n590: (b7) r0 = 2                      ; R0=scalar()\n591: (b7) r0 = 2                      ; R0=scalar()\n592: (b7) r0 = 2                      ; R0=scalar()\n593: (b7) r0 = 2                      ; R0=scalar()\n594: (b7) r0 = 2                      ; R0=scalar()\n595: (b7) r0 = 2                      ; R0=scalar()\n596: (b7) r0 = 2                      ; R0=scalar()\n597: (b7) r0 = 2                      ; R0=scalar()\n598: (b7) r0 = 2                      ; R0=scalar()\n599: (b7) r0 = 2                      ; R0=scalar()\n600: (b7) r0 = 2                      ; R0=scalar()\n601: (b7) r0 = 2                      ; R0=scalar()\n602: (b7) r0 = 2                      ; R0=scalar()\n603: (b7) r0 = 2                      ; R0=scalar()\n604: (b7) r0 = 2                      ; R0=scalar()\n605: (b7) r0 = 2                      ; R0=scalar()\n606: (b7) r0 = 2                      ; R0=scalar()\n607: (b7) r0 = 2                      ; R0=scalar()\n608: (b7) r0 = 2                      ; R0=scalar()\n609: (b7) r0 = 2                      ; R0=scalar()\n610: (b7) r0 = 2                      ; R0=scalar()\n611: (b7) r0 = 2                      ; R0=scalar()\n612: (b7) r0 = 2                      ; R0=scalar()\n613: (b7) r0 = 2                      ; R0=scalar()\n614: (b7) r0 = 2                      ; R0=scalar()\n615: (b7) r0 = 2                      ; R0=scalar()\n616: (b7) r0 = 2                      ; R0=scalar()\n617: (b7) r0 = 2                      ; R0=scalar()\n618: (b7) r0 = 2                      ; R0=scalar()\n619: (b7) r0 = 2                      ; R0=scalar()\n620: (b7) r0 = 2                      ; R0=scalar()\n621: (b7) r0 = 2                      ; R0=scalar()\n622: (b7) r0 = 2                      ; R0=scalar()\n623: (b7) r0 = 2                      ; R0=scalar()\n624: (b7) r0 = 2                      ; R0=scalar()\n625: (b7) r0 = 2                      ; R0=scalar()\n626: (b7) r0 = 2                      ; R0=scalar()\n627: (b7) r0 = 2                      ; R0=scalar()\n628: (b7) r0 = 2                      ; R0=scalar()\n629: (b7) r0 = 2                      ; R0=scalar()\n630: (b7) r0 = 2                      ; R0=scalar()\n631: (b7) r0 = 2                      ; R0=scalar()\n632: (b7) r0 = 2                      ; R0=scalar()\n633: (b7) r0 = 2                      ; R0=scalar()\n634: (b7) r0 = 2                      ; R0=scalar()\n635: (bf) r2 = r9                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n636: (07) r2 += 8                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=8)\n637: (7b) *(u64 *)(r2 +0) = r1        ; R1=scalar(id=13) R2=map_value(map=exit_heap_map,ks=4,vs=40,off=8)\n638: (bf) r1 = r9                     ; R1=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n639: (07) r1 += 16                    ; R1=map_value(map=exit_heap_map,ks=4,vs=40,off=16)\n640: (63) *(u32 *)(r1 +0) = r7        ; R1=map_value(map=exit_heap_map,ks=4,vs=40,off=16) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n641: (bf) r1 = r9                     ; R1=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n642: (07) r1 += 20                    ; R1=map_value(map=exit_heap_map,ks=4,vs=40,off=20)\n643: (b7) r2 = 0                      ; R2=0\n644: (63) *(u32 *)(r1 +0) = r2        ; R1=map_value(map=exit_heap_map,ks=4,vs=40,off=20) R2=0\n645: (79) r1 = *(u64 *)(r8 +8)        ; R1=scalar() R8=map_value(map=execve_map,ks=4,vs=896)\n646: (bf) r2 = r9                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n647: (07) r2 += 36                    ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=36)\n648: (63) *(u32 *)(r2 +0) = r7        ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=36) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n649: (bf) r2 = r9                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n650: (07) r2 += 24                    ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=24)\n651: (7b) *(u64 *)(r2 +0) = r1        ; R1=scalar() R2=map_value(map=exit_heap_map,ks=4,vs=40,off=24)\n652: (bf) r1 = r9                     ; R1=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n653: (07) r1 += 32                    ; R1=map_value(map=exit_heap_map,ks=4,vs=40,off=32)\n654: (79) r3 = *(u64 *)(r10 -144)     ; R3=scalar(id=14) R10=fp0 fp-144=scalar(id=14)\n655: (07) r3 += 2156                  ; R3=scalar(id=14+2156)\n656: (b4) w2 = 4                      ; R2=4\n657: (85) call bpf_probe_read#4       ; R0=scalar()\n658: (b7) r0 = 2                      ; R0=scalar()\n659: (b7) r0 = 2                      ; R0=scalar()\n660: (b7) r0 = 2                      ; R0=scalar()\n661: (b7) r0 = 2                      ; R0=scalar()\n662: (b7) r0 = 2                      ; R0=scalar()\n663: (b7) r0 = 2                      ; R0=scalar()\n664: (b7) r0 = 2                      ; R0=scalar()\n665: (b7) r0 = 2                      ; R0=scalar()\n666: (b7) r0 = 2                      ; R0=scalar()\n667: (b7) r0 = 2                      ; R0=scalar()\n668: (b7) r0 = 2                      ; R0=scalar()\n669: (b7) r0 = 2                      ; R0=scalar()\n670: (b7) r0 = 2                      ; R0=scalar()\n671: (b7) r0 = 2                      ; R0=scalar()\n672: (b7) r0 = 2                      ; R0=scalar()\n673: (b7) r0 = 2                      ; R0=scalar()\n674: (b7) r0 = 2                      ; R0=scalar()\n675: (b7) r0 = 2                      ; R0=scalar()\n676: (b7) r0 = 2                      ; R0=scalar()\n677: (b7) r0 = 2                      ; R0=scalar()\n678: (b7) r0 = 2                      ; R0=scalar()\n679: (b7) r0 = 2                      ; R0=scalar()\n680: (b7) r0 = 2                      ; R0=scalar()\n681: (b7) r0 = 2                      ; R0=scalar()\n682: (b7) r0 = 2                      ; R0=scalar()\n683: (b7) r0 = 2                      ; R0=scalar()\n684: (b7) r0 = 2                      ; R0=scalar()\n685: (b7) r0 = 2                      ; R0=scalar()\n686: (b7) r0 = 2                      ; R0=scalar()\n687: (b7) r0 = 2                      ; R0=scalar()\n688: (b7) r0 = 2                      ; R0=scalar()\n689: (b7) r0 = 2                      ; R0=scalar()\n690: (b7) r0 = 2                      ; R0=scalar()\n691: (b7) r0 = 2                      ; R0=scalar()\n692: (b7) r0 = 2                      ; R0=scalar()\n693: (b7) r0 = 2                      ; R0=scalar()\n694: (b7) r0 = 2                      ; R0=scalar()\n695: (b7) r0 = 2                      ; R0=scalar()\n696: (b7) r0 = 2                      ; R0=scalar()\n697: (b7) r0 = 2                      ; R0=scalar()\n698: (b7) r0 = 2                      ; R0=scalar()\n699: (b7) r0 = 2                      ; R0=scalar()\n700: (b7) r0 = 2                      ; R0=scalar()\n701: (b7) r0 = 2                      ; R0=scalar()\n702: (b7) r0 = 2                      ; R0=scalar()\n703: (b7) r0 = 2                      ; R0=scalar()\n704: (b7) r0 = 2                      ; R0=scalar()\n705: (b7) r0 = 2                      ; R0=scalar()\n706: (b7) r0 = 2                      ; R0=scalar()\n707: (b7) r0 = 2                      ; R0=scalar()\n708: (b7) r0 = 2                      ; R0=scalar()\n709: (b7) r0 = 2                      ; R0=scalar()\n710: (b7) r0 = 2                      ; R0=scalar()\n711: (b7) r0 = 2                      ; R0=scalar()\n712: (b7) r0 = 2                      ; R0=scalar()\n713: (b7) r0 = 2                      ; R0=scalar()\n714: (b7) r0 = 2                      ; R0=scalar()\n715: (b7) r0 = 2                      ; R0=scalar()\n716: (b7) r0 = 2                      ; R0=scalar()\n717: (b7) r0 = 2                      ; R0=scalar()\n718: (b7) r0 = 2                      ; R0=scalar()\n719: (b7) r0 = 2                      ; R0=scalar()\n720: (b7) r0 = 2                      ; R0=scalar()\n721: (b7) r0 = 2                      ; R0=scalar()\n722: (b7) r0 = 2                      ; R0=scalar()\n723: (b7) r0 = 2                      ; R0=scalar()\n724: (b7) r0 = 2                      ; R0=scalar()\n725: (b7) r0 = 2                      ; R0=scalar()\n726: (b7) r0 = 2                      ; R0=scalar()\n727: (b7) r0 = 2                      ; R0=scalar()\n728: (b7) r0 = 2                      ; R0=scalar()\n729: (b7) r0 = 2                      ; R0=scalar()\n730: (b7) r0 = 2                      ; R0=scalar()\n731: (b7) r0 = 2                      ; R0=scalar()\n732: (b7) r0 = 2                      ; R0=scalar()\n733: (b7) r0 = 2                      ; R0=scalar()\n734: (b7) r0 = 2                      ; R0=scalar()\n735: (b7) r0 = 2                      ; R0=scalar()\n736: (b7) r0 = 2                      ; R0=scalar()\n737: (b7) r0 = 2                      ; R0=scalar()\n738: (b7) r0 = 2                      ; R0=scalar()\n739: (b7) r0 = 2                      ; R0=scalar()\n740: (b7) r0 = 2                      ; R0=scalar()\n741: (b7) r0 = 2                      ; R0=scalar()\n742: (b7) r0 = 2                      ; R0=scalar()\n743: (b7) r0 = 2                      ; R0=scalar()\n744: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n746: (79) r2 = *(u64 *)(r10 -96)      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n747: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\n748: (7b) *(u64 *)(r10 -96) = r2      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n749: (72) *(u8 *)(r10 -56) = 0        ; R10=fp0 fp-56=mmmm???0\n750: (72) *(u8 *)(r10 -55) = 0        ; R10=fp0 fp-56=mmmm??0m\n751: (72) *(u8 *)(r10 -54) = 0        ; R10=fp0 fp-56=mmmm?00m\n752: (72) *(u8 *)(r10 -53) = 0        ; R10=fp0 fp-56=mmmm000m\n753: (b7) r2 = -56                    ; R2=-56\n754: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n755: (07) r1 += -80                   ; R1=fp-80\n756: (0f) r2 += r1                    ; R1=fp-80 R2=fp-136\n757: (07) r2 += 80                    ; R2=fp-56\n758: (18) r1 = 0xffff0000d19b6400     ; R1=map_ptr(map=tg_conf_map,ks=4,vs=48)\n760: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=15,map=tg_conf_map,ks=4,vs=48)\n761: (bf) r1 = r0                     ; R0=map_value_or_null(id=15,map=tg_conf_map,ks=4,vs=48) R1=map_value_or_null(id=15,map=tg_conf_map,ks=4,vs=48)\n762: (b7) r0 = 2                      ; R0=scalar()\n763: (b7) r0 = 2                      ; R0=scalar()\n764: (b7) r0 = 2                      ; R0=scalar()\n765: (b7) r0 = 2                      ; R0=scalar()\n766: (b7) r0 = 2                      ; R0=scalar()\n767: (b7) r0 = 2                      ; R0=scalar()\n768: (b7) r0 = 2                      ; R0=scalar()\n769: (b7) r0 = 2                      ; R0=scalar()\n770: (b7) r0 = 2                      ; R0=scalar()\n771: (b7) r0 = 2                      ; R0=scalar()\n772: (b7) r0 = 2                      ; R0=scalar()\n773: (b7) r0 = 2                      ; R0=scalar()\n774: (b7) r0 = 2                      ; R0=scalar()\n775: (b7) r0 = 2                      ; R0=scalar()\n776: (b7) r0 = 2                      ; R0=scalar()\n777: (b7) r0 = 2                      ; R0=scalar()\n778: (b7) r0 = 2                      ; R0=scalar()\n779: (b7) r0 = 2                      ; R0=scalar()\n780: (b7) r0 = 2                      ; R0=scalar()\n781: (b7) r0 = 2                      ; R0=scalar()\n782: (b7) r0 = 2                      ; R0=scalar()\n783: (b7) r0 = 2                      ; R0=scalar()\n784: (b7) r0 = 2                      ; R0=scalar()\n785: (b7) r0 = 2                      ; R0=scalar()\n786: (b7) r0 = 2                      ; R0=scalar()\n787: (b7) r0 = 2                      ; R0=scalar()\n788: (b7) r0 = 2                      ; R0=scalar()\n789: (b7) r0 = 2                      ; R0=scalar()\n790: (b7) r0 = 2                      ; R0=scalar()\n791: (b7) r0 = 2                      ; R0=scalar()\n792: (b7) r0 = 2                      ; R0=scalar()\n793: (b7) r0 = 2                      ; R0=scalar()\n794: (b7) r0 = 2                      ; R0=scalar()\n795: (b7) r0 = 2                      ; R0=scalar()\n796: (b7) r0 = 2                      ; R0=scalar()\n797: (b7) r0 = 2                      ; R0=scalar()\n798: (b7) r0 = 2                      ; R0=scalar()\n799: (b7) r0 = 2                      ; R0=scalar()\n800: (b7) r0 = 2                      ; R0=scalar()\n801: (b7) r0 = 2                      ; R0=scalar()\n802: (b7) r0 = 2                      ; R0=scalar()\n803: (b7) r0 = 2                      ; R0=scalar()\n804: (b7) r0 = 2                      ; R0=scalar()\n805: (b7) r0 = 2                      ; R0=scalar()\n806: (b7) r0 = 2                      ; R0=scalar()\n807: (b7) r0 = 2                      ; R0=scalar()\n808: (b7) r0 = 2                      ; R0=scalar()\n809: (b7) r0 = 2                      ; R0=scalar()\n810: (b7) r0 = 2                      ; R0=scalar()\n811: (b7) r0 = 2                      ; R0=scalar()\n812: (b7) r0 = 2                      ; R0=scalar()\n813: (b7) r0 = 2                      ; R0=scalar()\n814: (b7) r0 = 2                      ; R0=scalar()\n815: (b7) r0 = 2                      ; R0=scalar()\n816: (b7) r0 = 2                      ; R0=scalar()\n817: (b7) r0 = 2                      ; R0=scalar()\n818: (b7) r0 = 2                      ; R0=scalar()\n819: (b7) r0 = 2                      ; R0=scalar()\n820: (b7) r0 = 2                      ; R0=scalar()\n821: (b7) r0 = 2                      ; R0=scalar()\n822: (b7) r0 = 2                      ; R0=scalar()\n823: (b7) r0 = 2                      ; R0=scalar()\n824: (b7) r0 = 2                      ; R0=scalar()\n825: (b7) r0 = 2                      ; R0=scalar()\n826: (b7) r0 = 2                      ; R0=scalar()\n827: (b7) r0 = 2                      ; R0=scalar()\n828: (b7) r0 = 2                      ; R0=scalar()\n829: (b7) r0 = 2                      ; R0=scalar()\n830: (b7) r0 = 2                      ; R0=scalar()\n831: (b7) r0 = 2                      ; R0=scalar()\n832: (b7) r0 = 2                      ; R0=scalar()\n833: (b7) r0 = 2                      ; R0=scalar()\n834: (b7) r0 = 2                      ; R0=scalar()\n835: (b7) r0 = 2                      ; R0=scalar()\n836: (b7) r0 = 2                      ; R0=scalar()\n837: (b7) r0 = 2                      ; R0=scalar()\n838: (b7) r0 = 2                      ; R0=scalar()\n839: (b7) r0 = 2                      ; R0=scalar()\n840: (b7) r0 = 2                      ; R0=scalar()\n841: (b7) r0 = 2                      ; R0=scalar()\n842: (b7) r0 = 2                      ; R0=scalar()\n843: (b7) r0 = 2                      ; R0=scalar()\n844: (b7) r0 = 2                      ; R0=scalar()\n845: (b7) r0 = 2                      ; R0=scalar()\n846: (b7) r0 = 2                      ; R0=scalar()\n847: (b7) r0 = 2                      ; R0=scalar()\n848: (15) if r1 == 0x0 goto pc+210    ; R1=map_value(map=tg_conf_map,ks=4,vs=48)\n849: (71) r1 = *(u8 *)(r1 +40)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n850: (57) r1 &= 255                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n851: (15) if r1 == 0x0 goto pc+207    ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n852: (79) r1 = *(u64 *)(r10 -136)     ; R1=ctx() R10=fp0 fp-136=ctx()\n853: (18) r2 = 0xffff0000d0d93200     ; R2=map_ptr(map=tcpmon_map,ks=4,vs=4)\n855: (18) r3 = 0xffffffff             ; R3=0xffffffff\n857: (bf) r4 = r9                     ; R4=map_value(map=exit_heap_map,ks=4,vs=40) R9=map_value(map=exit_heap_map,ks=4,vs=40)\n858: (b7) r5 = 40                     ; R5=40\n859: (85) call bpf_perf_event_output#25       ; R0=scalar()\n860: (bf) r9 = r0                     ; R0=scalar(id=16) R9=scalar(id=16)\n861: (b7) r0 = 2                      ; R0=scalar()\n862: (b7) r0 = 2                      ; R0=scalar()\n863: (b7) r0 = 2                      ; R0=scalar()\n864: (b7) r0 = 2                      ; R0=scalar()\n865: (b7) r0 = 2                      ; R0=scalar()\n866: (b7) r0 = 2                      ; R0=scalar()\n867: (b7) r0 = 2                      ; R0=scalar()\n868: (b7) r0 = 2                      ; R0=scalar()\n869: (b7) r0 = 2                      ; R0=scalar()\n870: (b7) r0 = 2                      ; R0=scalar()\n871: (b7) r0 = 2                      ; R0=scalar()\n872: (b7) r0 = 2                      ; R0=scalar()\n873: (b7) r0 = 2                      ; R0=scalar()\n874: (b7) r0 = 2                      ; R0=scalar()\n875: (b7) r0 = 2                      ; R0=scalar()\n876: (b7) r0 = 2                      ; R0=scalar()\n877: (b7) r0 = 2                      ; R0=scalar()\n878: (b7) r0 = 2                      ; R0=scalar()\n879: (b7) r0 = 2                      ; R0=scalar()\n880: (b7) r0 = 2                      ; R0=scalar()\n881: (b7) r0 = 2                      ; R0=scalar()\n882: (b7) r0 = 2                      ; R0=scalar()\n883: (b7) r0 = 2                      ; R0=scalar()\n884: (b7) r0 = 2                      ; R0=scalar()\n885: (b7) r0 = 2                      ; R0=scalar()\n886: (b7) r0 = 2                      ; R0=scalar()\n887: (b7) r0 = 2                      ; R0=scalar()\n888: (b7) r0 = 2                      ; R0=scalar()\n889: (b7) r0 = 2                      ; R0=scalar()\n890: (b7) r0 = 2                      ; R0=scalar()\n891: (b7) r0 = 2                      ; R0=scalar()\n892: (b7) r0 = 2                      ; R0=scalar()\n893: (b7) r0 = 2                      ; R0=scalar()\n894: (b7) r0 = 2                      ; R0=scalar()\n895: (b7) r0 = 2                      ; R0=scalar()\n896: (b7) r0 = 2                      ; R0=scalar()\n897: (b7) r0 = 2                      ; R0=scalar()\n898: (b7) r0 = 2                      ; R0=scalar()\n899: (b7) r0 = 2                      ; R0=scalar()\n900: (b7) r0 = 2                      ; R0=scalar()\n901: (b7) r0 = 2                      ; R0=scalar()\n902: (b7) r0 = 2                      ; R0=scalar()\n903: (b7) r0 = 2                      ; R0=scalar()\n904: (b7) r0 = 2                      ; R0=scalar()\n905: (b7) r0 = 2                      ; R0=scalar()\n906: (b7) r0 = 2                      ; R0=scalar()\n907: (b7) r0 = 2                      ; R0=scalar()\n908: (b7) r0 = 2                      ; R0=scalar()\n909: (b7) r0 = 2                      ; R0=scalar()\n910: (b7) r0 = 2                      ; R0=scalar()\n911: (b7) r0 = 2                      ; R0=scalar()\n912: (b7) r0 = 2                      ; R0=scalar()\n913: (b7) r0 = 2                      ; R0=scalar()\n914: (b7) r0 = 2                      ; R0=scalar()\n915: (b7) r0 = 2                      ; R0=scalar()\n916: (b7) r0 = 2                      ; R0=scalar()\n917: (b7) r0 = 2                      ; R0=scalar()\n918: (b7) r0 = 2                      ; R0=scalar()\n919: (b7) r0 = 2                      ; R0=scalar()\n920: (b7) r0 = 2                      ; R0=scalar()\n921: (b7) r0 = 2                      ; R0=scalar()\n922: (b7) r0 = 2                      ; R0=scalar()\n923: (b7) r0 = 2                      ; R0=scalar()\n924: (b7) r0 = 2                      ; R0=scalar()\n925: (b7) r0 = 2                      ; R0=scalar()\n926: (b7) r0 = 2                      ; R0=scalar()\n927: (b7) r0 = 2                      ; R0=scalar()\n928: (b7) r0 = 2                      ; R0=scalar()\n929: (b7) r0 = 2                      ; R0=scalar()\n930: (b7) r0 = 2                      ; R0=scalar()\n931: (b7) r0 = 2                      ; R0=scalar()\n932: (b7) r0 = 2                      ; R0=scalar()\n933: (b7) r0 = 2                      ; R0=scalar()\n934: (b7) r0 = 2                      ; R0=scalar()\n935: (b7) r0 = 2                      ; R0=scalar()\n936: (b7) r0 = 2                      ; R0=scalar()\n937: (b7) r0 = 2                      ; R0=scalar()\n938: (b7) r0 = 2                      ; R0=scalar()\n939: (b7) r0 = 2                      ; R0=scalar()\n940: (b7) r0 = 2                      ; R0=scalar()\n941: (b7) r0 = 2                      ; R0=scalar()\n942: (b7) r0 = 2                      ; R0=scalar()\n943: (b7) r0 = 2                      ; R0=scalar()\n944: (b7) r0 = 2                      ; R0=scalar()\n945: (b7) r0 = 2                      ; R0=scalar()\n946: (b7) r0 = 2                      ; R0=scalar()\n947: (65) if r9 s> 0xffffffff goto pc+355     ; R9=scalar(id=16,smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff))\n948: (18) r1 = 0xffffffff00ffffff     ; R1=0xffffffff00ffffff\n950: (79) r2 = *(u64 *)(r10 -96)      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n951: (5f) r2 &= r1                    ; R1=0xffffffff00ffffff R2=0xa0000\n952: (7b) *(u64 *)(r10 -96) = r2      ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n953: (72) *(u8 *)(r10 -52) = 0        ; R10=fp0 fp-56=mmm0000m\n954: (72) *(u8 *)(r10 -51) = 0        ; R10=fp0 fp-56=mm00000m\n955: (72) *(u8 *)(r10 -50) = 0        ; R10=fp0 fp-56=m000000m\n956: (72) *(u8 *)(r10 -49) = 0        ; R10=fp0 fp-56=0000000m\n957: (b7) r2 = -52                    ; R2=-52\n958: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n959: (07) r1 += -80                   ; R1=fp-80\n960: (0f) r2 += r1                    ; R1=fp-80 R2=fp-132\n961: (07) r2 += 80                    ; R2=fp-52\n962: (18) r1 = 0xffff0000c2e89800     ; R1=map_ptr(map=tg_stats_map,ks=4,vs=14336)\n964: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=tg_stats_map,ks=4,vs=14336)\n965: (bf) r1 = r0                     ; R0=map_value(map=tg_stats_map,ks=4,vs=14336) R1=map_value(map=tg_stats_map,ks=4,vs=14336)\n966: (b7) r0 = 2                      ; R0=scalar()\n967: (b7) r0 = 2                      ; R0=scalar()\n968: (b7) r0 = 2                      ; R0=scalar()\n969: (b7) r0 = 2                      ; R0=scalar()\n970: (b7) r0 = 2                      ; R0=scalar()\n971: (b7) r0 = 2                      ; R0=scalar()\n972: (b7) r0 = 2                      ; R0=scalar()\n973: (b7) r0 = 2                      ; R0=scalar()\n974: (b7) r0 = 2                      ; R0=scalar()\n975: (b7) r0 = 2                      ; R0=scalar()\n976: (b7) r0 = 2                      ; R0=scalar()\n977: (b7) r0 = 2                      ; R0=scalar()\n978: (b7) r0 = 2                      ; R0=scalar()\n979: (b7) r0 = 2                      ; R0=scalar()\n980: (b7) r0 = 2                      ; R0=scalar()\n981: (b7) r0 = 2                      ; R0=scalar()\n982: (b7) r0 = 2                      ; R0=scalar()\n983: (b7) r0 = 2                      ; R0=scalar()\n984: (b7) r0 = 2                      ; R0=scalar()\n985: (b7) r0 = 2                      ; R0=scalar()\n986: (b7) r0 = 2                      ; R0=scalar()\n987: (b7) r0 = 2                      ; R0=scalar()\n988: (b7) r0 = 2                      ; R0=scalar()\n989: (b7) r0 = 2                      ; R0=scalar()\n990: (b7) r0 = 2                      ; R0=scalar()\n991: (b7) r0 = 2                      ; R0=scalar()\n992: (b7) r0 = 2                      ; R0=scalar()\n993: (b7) r0 = 2                      ; R0=scalar()\n994: (b7) r0 = 2                      ; R0=scalar()\n995: (b7) r0 = 2                      ; R0=scalar()\n996: (b7) r0 = 2                      ; R0=scalar()\n997: (b7) r0 = 2                      ; R0=scalar()\n998: (b7) r0 = 2                      ; R0=scalar()\n999: (b7) r0 = 2                      ; R0=scalar()\n1000: (b7) r0 = 2                     ; R0=scalar()\n1001: (b7) r0 = 2                     ; R0=scalar()\n1002: (b7) r0 = 2                     ; R0=scalar()\n1003: (b7) r0 = 2                     ; R0=scalar()\n1004: (b7) r0 = 2                     ; R0=scalar()\n1005: (b7) r0 = 2                     ; R0=scalar()\n1006: (b7) r0 = 2                     ; R0=scalar()\n1007: (b7) r0 = 2                     ; R0=scalar()\n1008: (b7) r0 = 2                     ; R0=scalar()\n1009: (b7) r0 = 2                     ; R0=scalar()\n1010: (b7) r0 = 2                     ; R0=scalar()\n1011: (b7) r0 = 2                     ; R0=scalar()\n1012: (b7) r0 = 2                     ; R0=scalar()\n1013: (b7) r0 = 2                     ; R0=scalar()\n1014: (b7) r0 = 2                     ; R0=scalar()\n1015: (b7) r0 = 2                     ; R0=scalar()\n1016: (b7) r0 = 2                     ; R0=scalar()\n1017: (b7) r0 = 2                     ; R0=scalar()\n1018: (b7) r0 = 2                     ; R0=scalar()\n1019: (b7) r0 = 2                     ; R0=scalar()\n1020: (b7) r0 = 2                     ; R0=scalar()\n1021: (b7) r0 = 2                     ; R0=scalar()\n1022: (b7) r0 = 2                     ; R0=scalar()\n1023: (b7) r0 = 2                     ; R0=scalar()\n1024: (b7) r0 = 2                     ; R0=scalar()\n1025: (b7) r0 = 2                     ; R0=scalar()\n1026: (b7) r0 = 2                     ; R0=scalar()\n1027: (b7) r0 = 2                     ; R0=scalar()\n1028: (b7) r0 = 2                     ; R0=scalar()\n1029: (b7) r0 = 2                     ; R0=scalar()\n1030: (b7) r0 = 2                     ; R0=scalar()\n1031: (b7) r0 = 2                     ; R0=scalar()\n1032: (b7) r0 = 2                     ; R0=scalar()\n1033: (b7) r0 = 2                     ; R0=scalar()\n1034: (b7) r0 = 2                     ; R0=scalar()\n1035: (b7) r0 = 2                     ; R0=scalar()\n1036: (b7) r0 = 2                     ; R0=scalar()\n1037: (b7) r0 = 2                     ; R0=scalar()\n1038: (b7) r0 = 2                     ; R0=scalar()\n1039: (b7) r0 = 2                     ; R0=scalar()\n1040: (b7) r0 = 2                     ; R0=scalar()\n1041: (b7) r0 = 2                     ; R0=scalar()\n1042: (b7) r0 = 2                     ; R0=scalar()\n1043: (b7) r0 = 2                     ; R0=scalar()\n1044: (b7) r0 = 2                     ; R0=scalar()\n1045: (b7) r0 = 2                     ; R0=scalar()\n1046: (b7) r0 = 2                     ; R0=scalar()\n1047: (b7) r0 = 2                     ; R0=scalar()\n1048: (b7) r0 = 2                     ; R0=scalar()\n1049: (b7) r0 = 2                     ; R0=scalar()\n1050: (b7) r0 = 2                     ; R0=scalar()\n1051: (b7) r0 = 2                     ; R0=scalar()\n1052: (15) if r1 == 0x0 goto pc+250   ; R1=map_value(map=tg_stats_map,ks=4,vs=14336)\n1053: (25) if r9 > 0xfffffff4 goto pc+216     ; R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff))\n1054: (15) if r9 == 0xffffffe4 goto pc+239    ; R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff))\n1055: (15) if r9 == 0xffffffea goto pc+234    ; R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff))\n1056: (b7) r2 = 416                   ; R2=416\n1057: (15) if r9 == 0xfffffff0 goto pc+239    ; R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff))\n1058: (05) goto pc+215\n1274: (b7) r2 = 392                   ; R2=392\n1275: (05) goto pc+21\n1297: (0f) r2 += r1                   ; R1=map_value(map=tg_stats_map,ks=4,vs=14336) R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392)\n1298: (79) r1 = *(u64 *)(r2 +0)       ; R1=scalar() R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392)\n1299: (b7) r0 = 648                   ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n1300: (55) if r0 != 0x0 goto pc-3 1298: R0=1 R1=scalar() R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392) R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=execve_map,ks=4,vs=896) R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=0000000m fp-64=scalar() fp-72=0000???? fp-88=0 fp-96=0xa0000 fp-104=0 fp-112=map_value(map=execve_map,ks=4,vs=896) fp-120=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-128=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-136=ctx() fp-144=scalar()\n1298: (79) r1 = *(u64 *)(r2 +0)       ; R1=scalar() R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392)\n1299: (b7) r0 = 648                   ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n1300: (55) if r0 != 0x0 goto pc-3 infinite loop detected at insn 1298\ncur state: R0=1 R1=scalar() R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392) R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=execve_map,ks=4,vs=896) R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=0000000m fp-64=scalar() fp-72=0000???? fp-88=0 fp-96=0xa0000 fp-104=0 fp-112=map_value(map=execve_map,ks=4,vs=896) fp-120=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-128=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-136=ctx() fp-144=scalar()\nold state: R0=1 R1=scalar() R2=map_value(map=tg_stats_map,ks=4,vs=14336,off=392) R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=execve_map,ks=4,vs=896) R9=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=0000000m fp-64=scalar() fp-72=0000???? fp-88=P0 fp-96=P0xa0000 fp-104=P0 fp-112=map_value(map=execve_map,ks=4,vs=896) fp-120=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-128=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-136=ctx() fp-144=scalar()\nprocessed 1624 insns (limit 1000000) max_states_per_insn 1 total_states 17 peak_states 17 mark_read 0\n\n= 80                   ; R2=fp-56\n1319: (18) r1 = 0xffff0000c2250400    ; R1=map_ptr(map=execve_map,ks=4,vs=896)\n1321: (85) call bpf_map_delete_elem#3\n\nfrom 1321 to 1322: safe\n\n        ; R0=scalar()\n1342: (b7) r0 = 2                     ; R0=scalar()\n1343: (b7) r0 = 2                     ; R0=scalar()\n1344: (b7) r0 = 2                     ; R0=scalar()\n1345: (b7) r0 = 2                     ; R0=scalar()\n1346: (b7) r0 = 2                     ; R0=scalar()\n1347: (b7) r0 = 2                     ; R0=scalar()\n1348: (b7) r0 = 2                     ; R0=scalar()\n1349: (b7) r0 = 2                     ; R0=scalar()\n1350: (b7) r0 = 2                     ; R0=scalar()\n1351: (b7) r0 = 2                     ; R0=scalar()\n1352: (b7) r0 = 2                     ; R0=scalar()\n1353: (b7) r0 = 2                     ; R0=scalar()\n1354: (b7) r0 = 2                     ; R0=scalar()\n1355: (b7) r0 = 2                     ; R0=scalar()\n1356: (b7) r0 = 2                     ; R0=scalar()\n1357: (b7) r0 = 2                     ; R0=scalar()\n1358: (b7) r0 = 2                     ; R0=scalar()\n1359: (b7) r0 = 2                     ; R0=scalar()\n1360: (b7) r0 = 2                     ; R0=scalar()\n1361: (b7) r0 = 2                     ; R0=scalar()\n1362: (b7) r0 = 2                     ; R0=scalar()\n1363: (b7) r0 = 2                     ; R0=scalar()\n1364: (b7) r0 = 2                     ; R0=scalar()\n1365: (b7) r0 = 2                     ; R0=scalar()\n1366: (b7) r0 = 2                     ; R0=scalar()\n1367: (b7) r0 = 2                     ; R0=scalar()\n1368: (b7) r0 = 2                     ; R0=scalar()\n1369: (b7) r0 = 2                     ; R0=scalar()\n1370: (b7) r0 = 2                     ; R0=scalar()\n1371: (b7) r0 = 2                     ; R0=scalar()\n1372: (b7) r0 = 2                     ; R0=scalar()\n1373: (b7) r0 = 2                     ; R0=scalar()\n1374: (b7) r0 = 2                     ; R0=scalar()\n1375: (b7) r0 = 2                     ; R0=scalar()\n1376: (b7) r0 = 2                     ; R0=scalar()\n1377: (b7) r0 = 2                     ; R0=scalar()\n1378: (b7) r0 = 2                     ; R0=scalar()\n1379: (b7) r0 = 2                     ; R0=scalar()\n1380: (b7) r0 = 2                     ; R0=scalar()\n1381: (b7) r0 = 2                     ; R0=scalar()\n1382: (b7) r0 = 2                     ; R0=scalar()\n1383: (b7) r0 = 2                     ; R0=scalar()\n1384: (b7) r0 = 2                     ; R0=scalar()\n1385: (b7) r0 = 2                     ; R0=scalar()\n1386: (b7) r0 = 2                     ; R0=scalar()\n1387: (b7) r0 = 2                     ; R0=scalar()\n1388: (b7) r0 = 2                     ; R0=scalar()\n1389: (b7) r0 = 2                     ; R0=scalar()\n1390: (b7) r0 = 2                     ; R0=scalar()\n1391: (b7) r0 = 2                     ; R0=scalar()\n1392: (b7) r0 = 2                     ; R0=scalar()\n1393: (b7) r0 = 2                     ; R0=scalar()\n1394: (b7) r0 = 2                     ; R0=scalar()\n1395: (b7) r0 = 2                     ; R0=scalar()\n1396: (b7) r0 = 2                     ; R0=scalar()\n1397: (b7) r0 = 2                     ; R0=scalar()\n1398: (b7) r0 = 2                     ; R0=scalar()\n1399: (b7) r0 = 2                     ; R0=scalar()\n1400: (b7) r0 = 2                     ; R0=scalar()\n1401: (b7) r0 = 2                     ; R0=scalar()\n1402: (b7) r0 = 2                     ; R0=scalar()\n1403: (b7) r0 = 2                     ; R0=scalar()\n1404: (b7) r0 = 2                     ; R0=scalar()\n1405: (b7) r0 = 2                     ; R0=scalar()\n1406: (b7) r0 = 2                     ; R0=scalar()\n1407: (b7) r0 = 2                     ; R0=scalar()\n1408: (b7) r0 = 2                     ; R0=scalar()\n1409: (79) r2 = *(u64 *)(r10 -96)     ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n1410: (5f) r2 &= r9                   ; R2=0xa0000 R9=0xffffffff00ffffff\n1411: (7b) *(u64 *)(r10 -96) = r2     ; R2=0xa0000 R10=fp0 fp-96=0xa0000\n1412: (16) if w1 == 0x0 goto pc+104 1517: R0=scalar() R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000)) R2=0xa0000 R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=execve_map,ks=4,vs=896) R9=0xffffffff00ffffff R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=mmmmmmmm fp-64=scalar() fp-72=0000???? fp-88=0 fp-96=0xa0000 fp-104=0 fp-112=map_value(map=execve_map,ks=4,vs=896) fp-120=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-128=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-136=ctx() fp-144=scalar()\n1517: (72) *(u8 *)(r10 -52) = 0       ; R10=fp0 fp-56=mmm0mmmm\n1518: (72) *(u8 *)(r10 -51) = 0       ; R10=fp0 fp-56=mm00mmmm\n1519: (72) *(u8 *)(r10 -50) = 0       ; R10=fp0 fp-56=m000mmmm\n1520: (72) *(u8 *)(r10 -49) = 0       ; R10=fp0 fp-56=0000mmmm\n1521: (b7) r2 = -52                   ; R2=-52\n1522: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n1523: (07) r1 += -80                  ; R1=fp-80\n1524: (0f) r2 += r1                   ; R1=fp-80 R2=fp-132\n1525: (07) r2 += 80                   ; R2=fp-52\n1526: (18) r1 = 0xffff0000cf5a5e00    ; R1=map_ptr(map=execve_map_stat,ks=4,vs=8)\n1528: (85) call bpf_map_lookup_elem#1         ; R0=map_value(map=execve_map_stat,ks=4,vs=8)\n1529: (bf) r1 = r0                    ; R0=map_value(map=execve_map_stat,ks=4,vs=8) R1=map_value(map=execve_map_stat,ks=4,vs=8)\n1530: (b7) r0 = 2                     ; R0=scalar()\n1531: (b7) r0 = 2                     ; R0=scalar()\n1532: (b7) r0 = 2                     ; R0=scalar()\n1533: (b7) r0 = 2                     ; R0=scalar()\n1534: (b7) r0 = 2                     ; R0=scalar()\n1535: (b7) r0 = 2                     ; R0=scalar()\n1536: (b7) r0 = 2                     ; R0=scalar()\n1537: (b7) r0 = 2                     ; R0=scalar()\n1538: (b7) r0 = 2                     ; R0=scalar()\n1539: (b7) r0 = 2                     ; R0=scalar()\n1540: (b7) r0 = 2                     ; R0=scalar()\n1541: (b7) r0 = 2                     ; R0=scalar()\n1542: (b7) r0 = 2                     ; R0=scalar()\n1543: (b7) r0 = 2                     ; R0=scalar()\n1544: (b7) r0 = 2                     ; R0=scalar()\n1545: (b7) r0 = 2                     ; R0=scalar()\n1546: (b7) r0 = 2                     ; R0=scalar()\n1547: (b7) r0 = 2                     ; R0=scalar()\n1548: (b7) r0 = 2                     ; R0=scalar()\n1549: (b7) r0 = 2                     ; R0=scalar()\n1550: (b7) r0 = 2                     ; R0=scalar()\n1551: (b7) r0 = 2                     ; R0=scalar()\n1552: (b7) r0 = 2                     ; R0=scalar()\n1553: (b7) r0 = 2                     ; R0=scalar()\n1554: (b7) r0 = 2                     ; R0=scalar()\n1555: (b7) r0 = 2                     ; R0=scalar()\n1556: (b7) r0 = 2                     ; R0=scalar()\n1557: (b7) r0 = 2                     ; R0=scalar()\n1558: (b7) r0 = 2                     ; R0=scalar()\n1559: (b7) r0 = 2                     ; R0=scalar()\n1560: (b7) r0 = 2                     ; R0=scalar()\n1561: (b7) r0 = 2                     ; R0=scalar()\n1562: (b7) r0 = 2                     ; R0=scalar()\n1563: (b7) r0 = 2                     ; R0=scalar()\n1564: (b7) r0 = 2                     ; R0=scalar()\n1565: (b7) r0 = 2                     ; R0=scalar()\n1566: (b7) r0 = 2                     ; R0=scalar()\n1567: (b7) r0 = 2                     ; R0=scalar()\n1568: (b7) r0 = 2                     ; R0=scalar()\n1569: (b7) r0 = 2                     ; R0=scalar()\n1570: (b7) r0 = 2                     ; R0=scalar()\n1571: (b7) r0 = 2                     ; R0=scalar()\n1572: (b7) r0 = 2                     ; R0=scalar()\n1573: (b7) r0 = 2                     ; R0=scalar()\n1574: (b7) r0 = 2                     ; R0=scalar()\n1575: (b7) r0 = 2                     ; R0=scalar()\n1576: (b7) r0 = 2                     ; R0=scalar()\n1577: (b7) r0 = 2                     ; R0=scalar()\n1578: (b7) r0 = 2                     ; R0=scalar()\n1579: (b7) r0 = 2                     ; R0=scalar()\n1580: (b7) r0 = 2                     ; R0=scalar()\n1581: (b7) r0 = 2                     ; R0=scalar()\n1582: (b7) r0 = 2                     ; R0=scalar()\n1583: (b7) r0 = 2                     ; R0=scalar()\n1584: (b7) r0 = 2                     ; R0=scalar()\n1585: (b7) r0 = 2                     ; R0=scalar()\n1586: (b7) r0 = 2                     ; R0=scalar()\n1587: (b7) r0 = 2                     ; R0=scalar()\n1588: (b7) r0 = 2                     ; R0=scalar()\n1589: (b7) r0 = 2                     ; R0=scalar()\n1590: (b7) r0 = 2                     ; R0=scalar()\n1591: (b7) r0 = 2                     ; R0=scalar()\n1592: (b7) r0 = 2                     ; R0=scalar()\n1593: (b7) r0 = 2                     ; R0=scalar()\n1594: (b7) r0 = 2                     ; R0=scalar()\n1595: (b7) r0 = 2                     ; R0=scalar()\n1596: (b7) r0 = 2                     ; R0=scalar()\n1597: (b7) r0 = 2                     ; R0=scalar()\n1598: (b7) r0 = 2                     ; R0=scalar()\n1599: (b7) r0 = 2                     ; R0=scalar()\n1600: (b7) r0 = 2                     ; R0=scalar()\n1601: (b7) r0 = 2                     ; R0=scalar()\n1602: (b7) r0 = 2                     ; R0=scalar()\n1603: (b7) r0 = 2                     ; R0=scalar()\n1604: (b7) r0 = 2                     ; R0=scalar()\n1605: (b7) r0 = 2                     ; R0=scalar()\n1606: (b7) r0 = 2                     ; R0=scalar()\n1607: (b7) r0 = 2                     ; R0=scalar()\n1608: (b7) r0 = 2                     ; R0=scalar()\n1609: (b7) r0 = 2                     ; R0=scalar()\n1610: (b7) r0 = 2                     ; R0=scalar()\n1611: (b7) r0 = 2                     ; R0=scalar()\n1612: (b7) r0 = 2                     ; R0=scalar()\n1613: (b7) r0 = 2                     ; R0=scalar()\n1614: (b7) r0 = 2                     ; R0=scalar()\n1615: (b7) r0 = 2                     ; R0=scalar()\n1616: (79) r2 = *(u64 *)(r10 -112)    ; R2=map_value(map=execve_map,ks=4,vs=896) R10=fp0 fp-112=map_value(map=execve_map,ks=4,vs=896)\n1617: (15) if r1 == 0x0 goto pc+3     ; R1=map_value(map=execve_map_stat,ks=4,vs=8)\n1618: (79) r3 = *(u64 *)(r1 +0)       ; R1=map_value(map=execve_map_stat,ks=4,vs=8) R3=scalar()\n1619: (07) r3 += -1\n\nfrom 1619 to 1620: safe\n\n         ; R0=scalar()\n1625: (b7) r0 = 2                     ; R0=scalar()\n1626: (b7) r0 = 2                     ; R0=scalar()\n1627: (b7) r0 = 2                     ; R0=scalar()\n1628: (b7) r0 = 2                     ; R0=scalar()\n1629: (b7) r0 = 2                     ; R0=scalar()\n1630: (b7) r0 = 2                     ; R0=scalar()\n1631: (b7) r0 = 2                     ; R0=scalar()\n1632: (b7) r0 = 2                     ; R0=scalar()\n1633: (b7) r0 = 2                     ; R0=scalar()\n1634: (b7) r0 = 2                     ; R0=scalar()\n1635: (b7) r0 = 2                     ; R0=scalar()\n1636: (b7) r0 = 2                     ; R0=scalar()\n1637: (b7) r0 = 2                     ; R0=scalar()\n1638: (b7) r0 = 2                     ; R0=scalar()\n1639: (b7) r0 = 2                     ; R0=scalar()\n1640: (b7) r0 = 2                     ; R0=scalar()\n1641: (b7) r0 = 2                     ; R0=scalar()\n1642: (b7) r0 = 2                     ; R0=scalar()\n1643: (b7) r0 = 2                     ; R0=scalar()\n1644: (b7) r0 = 2                     ; R0=scalar()\n1645: (b7) r0 = 2                     ; R0=scalar()\n1646: (b7) r0 = 2                     ; R0=scalar()\n1647: (b7) r0 = 2                     ; R0=scalar()\n1648: (b7) r0 = 2                     ; R0=scalar()\n1649: (b7) r0 = 2                     ; R0=scalar()\n1650: (b7) r0 = 2                     ; R0=scalar()\n1651: (b7) r0 = 2                     ; R0=scalar()\n1652: (b7) r0 = 2                     ; R0=scalar()\n1653: (b7) r0 = 2                     ; R0=scalar()\n1654: (b7) r0 = 2                     ; R0=scalar()\n1655: (b7) r0 = 2                     ; R0=scalar()\n1656: (b7) r0 = 2                     ; R0=scalar()\n1657: (b7) r0 = 2                     ; R0=scalar()\n1658: (b7) r0 = 2                     ; R0=scalar()\n1659: (b7) r0 = 2                     ; R0=scalar()\n1660: (b7) r0 = 2                     ; R0=scalar()\n1661: (b7) r0 = 2                     ; R0=scalar()\n1662: (b7) r0 = 2                     ; R0=scalar()\n1663: (b7) r0 = 2                     ; R0=scalar()\n1664: (b7) r0 = 2                     ; R0=scalar()\n1665: (b7) r0 = 2                     ; R0=scalar()\n1666: (b7) r0 = 2                     ; R0=scalar()\n1667: (b7) r0 = 2                     ; R0=scalar()\n1668: (b7) r0 = 2                     ; R0=scalar()\n1669: (b7) r0 = 2                     ; R0=scalar()\n1670: (b7) r0 = 2                     ; R0=scalar()\n1671: (b7) r0 = 2                     ; R0=scalar()\n1672: (b7) r0 = 2                     ; R0=scalar()\n1673: (b7) r0 = 2                     ; R0=scalar()\n1674: (b7) r0 = 2                     ; R0=scalar()\n1675: (b7) r0 = 2                     ; R0=scalar()\n1676: (b7) r0 = 2                     ; R0=scalar()\n1677: (b7) r0 = 2                     ; R0=scalar()\n1678: (b7) r0 = 2                     ; R0=scalar()\n1679: (b7) r0 = 2                     ; R0=scalar()\n1680: (b7) r0 = 2                     ; R0=scalar()\n1681: (b7) r0 = 2                     ; R0=scalar()\n1682: (b7) r0 = 2                     ; R0=scalar()\n1683: (b7) r0 = 2                     ; R0=scalar()\n1684: (b7) r0 = 2                     ; R0=scalar()\n1685: (b7) r0 = 2                     ; R0=scalar()\n1686: (b7) r0 = 2                     ; R0=scalar()\n1687: (b7) r0 = 2                     ; R0=scalar()\n1688: (b7) r0 = 2                     ; R0=scalar()\n1689: (b7) r0 = 2                     ; R0=scalar()\n1690: (b7) r0 = 2                     ; R0=scalar()\n1691: (b7) r0 = 2                     ; R0=scalar()\n1692: (b7) r0 = 2                     ; R0=scalar()\n1693: (b7) r0 = 2                     ; R0=scalar()\n1694: (b7) r0 = 2                     ; R0=scalar()\n1695: (b7) r0 = 2                     ; R0=scalar()\n1696: (b7) r0 = 2                     ; R0=scalar()\n1697: (b7) r0 = 2                     ; R0=scalar()\n1698: (b7) r0 = 2                     ; R0=scalar()\n1699: (b7) r0 = 2                     ; R0=scalar()\n1700: (b7) r0 = 2                     ; R0=scalar()\n1701: (b7) r0 = 2                     ; R0=scalar()\n1702: (b7) r0 = 2                     ; R0=scalar()\n1703: (b7) r0 = 2                     ; R0=scalar()\n1704: (b7) r0 = 2                     ; R0=scalar()\n1705: (b7) r0 = 2                     ; R0=scalar()\n1706: (b7) r0 = 2                     ; R0=scalar()\n1707: (b7) r0 = 2                     ; R0=scalar()\n1708: (b7) r0 = 2                     ; R0=scalar()\n1709: (b7) r0 = 2                     ; R0=scalar()\n1710: (79) r1 = *(u64 *)(r10 -16)     ; R1=scalar(id=28) R10=fp0 fp-16=scalar(id=28)\n1711: (79) r1 = *(u64 *)(r10 -8)      ; R1=scalar(id=29) R10=fp0 fp-8=scalar(id=29)\n1712: (79) r2 = *(u64 *)(r10 -104)    ; R2=0 R10=fp0 fp-104=0\n1713: (79) r1 = *(u64 *)(r10 -104)    ; R1=0 R10=fp0 fp-104=0\n1714: (77) r1 >>= 8                   ; R1=0\n1715: (bc) w3 = w2                    ; R2=0 R3=0\n1716: (4c) w3 |= w1                   ; R1=0 R3=0\n1717: (54) w3 &= 255                  ; R3=0\n1718: (16) if w3 == 0x0 goto pc+8     ; R3=0\n\nfrom 1718 to 1727: safe\n\n0 R10=fp0 fp-88=0\n1735: (79) r3 = *(u64 *)(r10 -32)     ; R3=scalar(id=24) R10=fp0 fp-32=scalar(id=24)\n1736: (79) r3 = *(u64 *)(r10 -24)     ; R3=scalar(id=25) R10=fp0 fp-24=scalar(id=25)\n1737: (79) r4 = *(u64 *)(r10 -96)     ; R4=0xa0000 R10=fp0 fp-96=0xa0000\n1738: (77) r4 >>= 48                  ; R4=0\n1739: (79) r3 = *(u64 *)(r10 -96)     ; R3=0xa0000 R10=fp0 fp-96=0xa0000\n1740: (77) r3 >>= 56                  ; R3=0\n1741: (bc) w5 = w4                    ; R4=0 R5=0\n1742: (4c) w5 |= w3                   ; R3=0 R5=0\n1743: (54) w5 &= 255                  ; R5=0\n1744: (16) if w5 == 0x0 goto pc+7     ; R5=0\n1752: (79) r3 = *(u64 *)(r10 -48)     ; R3=scalar(id=26) R10=fp0 fp-48=scalar(id=26)\n1753: (79) r3 = *(u64 *)(r10 -40)     ; R3=scalar(id=27) R10=fp0 fp-40=scalar(id=27)\n1754: (79) r4 = *(u64 *)(r10 -96)     ; R4=0xa0000 R10=fp0 fp-96=0xa0000\n1755: (77) r4 >>= 32                  ; R4=0\n1756: (79) r3 = *(u64 *)(r10 -96)     ; R3=0xa0000 R10=fp0 fp-96=0xa0000\n1757: (77) r3 >>= 40                  ; R3=0\n1758: (bc) w5 = w4                    ; R4=0 R5=0\n1759: (4c) w5 |= w3                   ; R3=0 R5=0\n1760: (54) w5 &= 255                  ; R5=0\n1761: (16) if w5 == 0x0 goto pc+8     ; R5=0\n1770: (54) w2 &= 255                  ; R2=10\n1771: (56) if w2 != 0xa goto pc+1     ; R2=10\n1772: (15) if r1 == 0x0 goto pc+1     ; R1=0\n1774: (b4) w0 = 0                     ; R0=0\n1775: (05) goto pc+0\n1776: (bf) r6 = r0                    ; R0=0 R6=0\n1777: (bf) r7 = r0                    ; R0=0 R7=0\n1778: (bf) r8 = r0                    ; R0=0 R8=0\n1779: (bf) r9 = r0                    ; R0=0 R9=0\n1780: (95) exit\n\nkernel log tail:\n4,244,6141156,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,245,6143007,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=2 blob_bytes=1212 reloc_records=21 reloc_bytes=336 chunks=1 proof_bound=1 callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=8 relocated_map_ids=8 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126349\nretained_map_info=13:id=2424:type=1:name=execve_map,14:id=2455:type=6:name=exit_heap_map,15:id=2423:type=2:name=tg_conf_map,16:id=2430:type=4:name=tcpmon_map,17:id=2431:type=6:name=tg_stats_map,18:id=2435:type=27:name=tg_rb_events,19:id=2426:type=6:name=execve_map_stat,20:id=2453:type=9:name=tg_parents_bin\nnative_blob_diag: fnv64=78f61f79d02b8a58 word_count=303 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=16 first_zero_offset=1144 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=1212 final_size_matches=1\nchunk_bytes=0:1212\nreloc_targets=28:0xffff8000802f1188,76:0xffff800080301a48,176:0x0,216:0xffff8000802f1270,268:0xffff800080297140,388:0xffff800080299038,464:0x0,556:0xffff8000803116b0,632:0x0,900:0xffff8000802f0ff0,972:0x0,1052:0x0,1100:0xffff8000802f0ff0,1144:0x978,1152:0x997,1160:0x977,1168:0x97e,1176:0x97f,1184:0x983,1192:0x97a,1200:0x995\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n"
+      }
+    ],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000048_951534/details/apps/tetragon__observer.json",
+        "app": "tetragon/observer",
+        "status": "error",
+        "error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/arm64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:39713 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:47277 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=898 pidfile=/var/run/tetragon/tetragon.pid\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: false, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/run/tetragon/cgroup2 cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/run/tetragon/cgroup2 cgroup.path=/proc/1/root/run/tetragon/cgroup2 cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/run/tetragon/cgroup2 cgroup.path=/run/tetragon/cgroup2 cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/run/tetragon/cgroup2 error=\"cgroup path is empty\"\nlevel=warn msg=\"Unable to find Cgroup migration path for pid=898\" cgroup.fs=/run/tetragon/cgroup2 error=\"could not validate Cgroupv2 hierarchy\"\nlevel=warn msg=\"Detection of deployment mode failed\" cgroup.fs=/run/tetragon/cgroup2 error=\"could not detect Cgroup migration path for pid=898\"\nlevel=warn msg=\"Deployment mode detection failed\" cgroup.fs=/run/tetragon/cgroup2 deployment.mode=unknown\nlevel=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map\nlevel=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=898\nlevel=info msg=\"Disabling Kubernetes API\"\nlevel=info msg=\"Configured redaction filters\" redactionFilters=\"\"\nlevel=info msg=\"Exit probe on acct_process\"\nlevel=info msg=\"Set execve_map entries 32768\" size=28M\nlevel=info msg=\"BPF ring buffer size (bytes)\" total=512K\nlevel=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux\nlevel=info msg=\"Loading sensor\" name=__base__\nlevel=info msg=\"Loading kernel version 7.0.0\"",
+        "phases": {
+          "baseline": {
+            "programs": [
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 100,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 101,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2025,
+                "run_time_ns_delta": 583153856,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12000,
+                "bytes_xlated": 19896,
+                "id": 102,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 103,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 104,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 105,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 106,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 107,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2026,
+                "run_time_ns_delta": 574593200,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 108,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 109,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 110,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21096,
+                "bytes_xlated": 29864,
+                "id": 111,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 112,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 113,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 114,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 115,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 116,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 117,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 118,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 119,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 120,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 121,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 122,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 123,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 124,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 125,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 6820,
+                "run_time_ns_delta": 643496304,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 126,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 127,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 128,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 129,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 130,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 131,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 132,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 133,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 134,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2144,
+                "bytes_xlated": 3272,
+                "id": 135,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2480,
+                "run_time_ns_delta": 610817264,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 136,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 137,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 138,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 139,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 2480,
+                "run_time_ns_delta": 30892144,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 140,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 141,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 142,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 143,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 144,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 145,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 688,
+                "run_time_ns_delta": 794569536,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 146,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 147,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 148,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19912,
+                "bytes_xlated": 28616,
+                "id": 149,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 150,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4840,
+                "bytes_xlated": 7784,
+                "id": 151,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 152,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 688,
+                "run_time_ns_delta": 3972448,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 153,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 154,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 155,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 156,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 157,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 158,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 159,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 160,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 161,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 162,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 163,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 164,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 165,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 166,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 167,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 168,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 169,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 170,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 171,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 172,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 173,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 174,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 175,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 176,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 177,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 178,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 179,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 180,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 181,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 182,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 183,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 184,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 185,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 186,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 187,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1200,
+                "bytes_xlated": 1824,
+                "id": 22,
+                "name": "event_exit_acct",
+                "run_cnt_delta": 13,
+                "run_time_ns_delta": 837536,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6560,
+                "bytes_xlated": 11312,
+                "id": 24,
+                "name": "event_wake_up_n",
+                "run_cnt_delta": 13,
+                "run_time_ns_delta": 5405344,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4816,
+                "bytes_xlated": 8088,
+                "id": 25,
+                "name": "execve_send",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              {
+                "bytes_jited": 12560,
+                "bytes_xlated": 20360,
+                "id": 26,
+                "name": "event_execve",
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 364144,
+                "type": "tracepoint"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2352,
+                "id": 27,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              {
+                "bytes_jited": 1624,
+                "bytes_xlated": 2544,
+                "id": 28,
+                "name": "tg_kp_bprm_comm",
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 27248,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 440,
+                "bytes_xlated": 560,
+                "id": 29,
+                "name": "execve_map_upda",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "socket_filter"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 32,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 33,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 34,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 35,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 36,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 37,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 38,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 39,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 40,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 41,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 42,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 43,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 44,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12000,
+                "bytes_xlated": 19896,
+                "id": 45,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 46,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 47,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 48,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6192,
+                "bytes_xlated": 10136,
+                "id": 49,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 50,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 51,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 52,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 53,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 54,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2110,
+                "run_time_ns_delta": 298558784,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 55,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 56,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 57,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 58,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 59,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 60,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 61,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 62,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 63,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 2110,
+                "run_time_ns_delta": 26649088,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 64,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2111,
+                "run_time_ns_delta": 228988256,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12000,
+                "bytes_xlated": 19896,
+                "id": 65,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 66,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 67,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 68,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 69,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 70,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 71,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 72,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 73,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 74,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12000,
+                "bytes_xlated": 19896,
+                "id": 75,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 76,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 77,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 78,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 79,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 80,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 81,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 82,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 83,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2110,
+                "run_time_ns_delta": 332518304,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 84,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 928,
+                "bytes_xlated": 1360,
+                "id": 85,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 4848,
+                "bytes_xlated": 7784,
+                "id": 86,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19920,
+                "bytes_xlated": 28616,
+                "id": 87,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 15384,
+                "bytes_xlated": 26352,
+                "id": 88,
+                "name": "generic_retkpro",
+                "run_cnt_delta": 2110,
+                "run_time_ns_delta": 29434272,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 89,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 90,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21104,
+                "bytes_xlated": 29864,
+                "id": 91,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 12008,
+                "bytes_xlated": 19896,
+                "id": 92,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 93,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 2152,
+                "bytes_xlated": 3272,
+                "id": 94,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 2111,
+                "run_time_ns_delta": 248742656,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 6200,
+                "bytes_xlated": 10136,
+                "id": 95,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1576,
+                "bytes_xlated": 2240,
+                "id": 96,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 1968,
+                "bytes_xlated": 3128,
+                "id": 97,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 19088,
+                "bytes_xlated": 32040,
+                "id": 98,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              },
+              {
+                "bytes_jited": 21096,
+                "bytes_xlated": 29864,
+                "id": 99,
+                "name": "generic_kprobe_",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "kprobe"
+              }
+            ],
+            "workload": null,
+            "raw_measurement": {
+              "bpf": {
+                "100": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 100,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "101": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 101,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2025,
+                  "run_time_ns_delta": 583153856,
+                  "type": "kprobe"
+                },
+                "102": {
+                  "bytes_jited": 12000,
+                  "bytes_xlated": 19896,
+                  "id": 102,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "103": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 103,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "104": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 104,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "105": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 105,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "106": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 106,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "107": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 107,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2026,
+                  "run_time_ns_delta": 574593200,
+                  "type": "kprobe"
+                },
+                "108": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 108,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "109": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 109,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "110": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 110,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "111": {
+                  "bytes_jited": 21096,
+                  "bytes_xlated": 29864,
+                  "id": 111,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "112": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 112,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "113": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 113,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "114": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 114,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "115": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 115,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "116": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 116,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "117": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 117,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "118": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 118,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "119": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 119,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "120": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 120,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "121": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 121,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "122": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 122,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "123": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 123,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "124": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 124,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "125": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 125,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 6820,
+                  "run_time_ns_delta": 643496304,
+                  "type": "kprobe"
+                },
+                "126": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 126,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "127": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 127,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "128": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 128,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "129": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 129,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "130": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 130,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "131": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 131,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "132": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 132,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "133": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 133,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "134": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 134,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "135": {
+                  "bytes_jited": 2144,
+                  "bytes_xlated": 3272,
+                  "id": 135,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2480,
+                  "run_time_ns_delta": 610817264,
+                  "type": "kprobe"
+                },
+                "136": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 136,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "137": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 137,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "138": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 138,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "139": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 139,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 2480,
+                  "run_time_ns_delta": 30892144,
+                  "type": "kprobe"
+                },
+                "140": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 140,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "141": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 141,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "142": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 142,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "143": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 143,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "144": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 144,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "145": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 145,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 688,
+                  "run_time_ns_delta": 794569536,
+                  "type": "kprobe"
+                },
+                "146": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 146,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "147": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 147,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "148": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 148,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "149": {
+                  "bytes_jited": 19912,
+                  "bytes_xlated": 28616,
+                  "id": 149,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "150": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 150,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "151": {
+                  "bytes_jited": 4840,
+                  "bytes_xlated": 7784,
+                  "id": 151,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "152": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 152,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 688,
+                  "run_time_ns_delta": 3972448,
+                  "type": "kprobe"
+                },
+                "153": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 153,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "154": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 154,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "155": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 155,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "156": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 156,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "157": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 157,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "158": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 158,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "159": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 159,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "160": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 160,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "161": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 161,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "162": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 162,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "163": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 163,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "164": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 164,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "165": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 165,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "166": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 166,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "167": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 167,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "168": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 168,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "169": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 169,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "170": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 170,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "171": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 171,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "172": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 172,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "173": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 173,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "174": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 174,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "175": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 175,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "176": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 176,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "177": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 177,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "178": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 178,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "179": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 179,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "180": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 180,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "181": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 181,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "182": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 182,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "183": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 183,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "184": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 184,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "185": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 185,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "186": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 186,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "187": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 187,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "22": {
+                  "bytes_jited": 1200,
+                  "bytes_xlated": 1824,
+                  "id": 22,
+                  "name": "event_exit_acct",
+                  "run_cnt_delta": 13,
+                  "run_time_ns_delta": 837536,
+                  "type": "kprobe"
+                },
+                "24": {
+                  "bytes_jited": 6560,
+                  "bytes_xlated": 11312,
+                  "id": 24,
+                  "name": "event_wake_up_n",
+                  "run_cnt_delta": 13,
+                  "run_time_ns_delta": 5405344,
+                  "type": "kprobe"
+                },
+                "25": {
+                  "bytes_jited": 4816,
+                  "bytes_xlated": 8088,
+                  "id": 25,
+                  "name": "execve_send",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "tracepoint"
+                },
+                "26": {
+                  "bytes_jited": 12560,
+                  "bytes_xlated": 20360,
+                  "id": 26,
+                  "name": "event_execve",
+                  "run_cnt_delta": 1,
+                  "run_time_ns_delta": 364144,
+                  "type": "tracepoint"
+                },
+                "27": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2352,
+                  "id": 27,
+                  "name": "execve_rate",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "tracepoint"
+                },
+                "28": {
+                  "bytes_jited": 1624,
+                  "bytes_xlated": 2544,
+                  "id": 28,
+                  "name": "tg_kp_bprm_comm",
+                  "run_cnt_delta": 1,
+                  "run_time_ns_delta": 27248,
+                  "type": "kprobe"
+                },
+                "29": {
+                  "bytes_jited": 440,
+                  "bytes_xlated": 560,
+                  "id": 29,
+                  "name": "execve_map_upda",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "socket_filter"
+                },
+                "32": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 32,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "33": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 33,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "34": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 34,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "35": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 35,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "36": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 36,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "37": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 37,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "38": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 38,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "39": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 39,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "40": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 40,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "41": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 41,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "42": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 42,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "43": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 43,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "44": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 44,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "45": {
+                  "bytes_jited": 12000,
+                  "bytes_xlated": 19896,
+                  "id": 45,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "46": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 46,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "47": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 47,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "48": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 48,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "49": {
+                  "bytes_jited": 6192,
+                  "bytes_xlated": 10136,
+                  "id": 49,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "50": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 50,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "51": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 51,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "52": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 52,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "53": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 53,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "54": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 54,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2110,
+                  "run_time_ns_delta": 298558784,
+                  "type": "kprobe"
+                },
+                "55": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 55,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "56": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 56,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "57": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 57,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "58": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 58,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "59": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 59,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "60": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 60,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "61": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 61,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "62": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 62,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "63": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 63,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 2110,
+                  "run_time_ns_delta": 26649088,
+                  "type": "kprobe"
+                },
+                "64": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 64,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2111,
+                  "run_time_ns_delta": 228988256,
+                  "type": "kprobe"
+                },
+                "65": {
+                  "bytes_jited": 12000,
+                  "bytes_xlated": 19896,
+                  "id": 65,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "66": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 66,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "67": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 67,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "68": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 68,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "69": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 69,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "70": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 70,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "71": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 71,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "72": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 72,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "73": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 73,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "74": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 74,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "75": {
+                  "bytes_jited": 12000,
+                  "bytes_xlated": 19896,
+                  "id": 75,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "76": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 76,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "77": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 77,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "78": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 78,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "79": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 79,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "80": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 80,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "81": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 81,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "82": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 82,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "83": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 83,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2110,
+                  "run_time_ns_delta": 332518304,
+                  "type": "kprobe"
+                },
+                "84": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 84,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "85": {
+                  "bytes_jited": 928,
+                  "bytes_xlated": 1360,
+                  "id": 85,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "86": {
+                  "bytes_jited": 4848,
+                  "bytes_xlated": 7784,
+                  "id": 86,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "87": {
+                  "bytes_jited": 19920,
+                  "bytes_xlated": 28616,
+                  "id": 87,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "88": {
+                  "bytes_jited": 15384,
+                  "bytes_xlated": 26352,
+                  "id": 88,
+                  "name": "generic_retkpro",
+                  "run_cnt_delta": 2110,
+                  "run_time_ns_delta": 29434272,
+                  "type": "kprobe"
+                },
+                "89": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 89,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "90": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 90,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "91": {
+                  "bytes_jited": 21104,
+                  "bytes_xlated": 29864,
+                  "id": 91,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "92": {
+                  "bytes_jited": 12008,
+                  "bytes_xlated": 19896,
+                  "id": 92,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "93": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 93,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "94": {
+                  "bytes_jited": 2152,
+                  "bytes_xlated": 3272,
+                  "id": 94,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 2111,
+                  "run_time_ns_delta": 248742656,
+                  "type": "kprobe"
+                },
+                "95": {
+                  "bytes_jited": 6200,
+                  "bytes_xlated": 10136,
+                  "id": 95,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "96": {
+                  "bytes_jited": 1576,
+                  "bytes_xlated": 2240,
+                  "id": 96,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "97": {
+                  "bytes_jited": 1968,
+                  "bytes_xlated": 3128,
+                  "id": 97,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "98": {
+                  "bytes_jited": 19088,
+                  "bytes_xlated": 32040,
+                  "id": 98,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                },
+                "99": {
+                  "bytes_jited": 21096,
+                  "bytes_xlated": 29864,
+                  "id": 99,
+                  "name": "generic_kprobe_",
+                  "run_cnt_delta": 0,
+                  "run_time_ns_delta": 0,
+                  "type": "kprobe"
+                }
+              },
+              "workloads": [
+                {
+                  "command": [
+                    "/usr/bin/stress-ng",
+                    "--eventfd",
+                    "1",
+                    "--mmap",
+                    "1",
+                    "--mmap-bytes",
+                    "16M",
+                    "--udp",
+                    "1",
+                    "--sock",
+                    "1",
+                    "--sockfd",
+                    "1",
+                    "--sockpair",
+                    "1",
+                    "--sock-port",
+                    "13378",
+                    "--sockfd-port",
+                    "13478",
+                    "--timeout",
+                    "2s",
+                    "--metrics-brief",
+                    "--temp-path",
+                    "/var/tmp/bpfrejit-runtime/86ddf06c"
+                  ],
+                  "config": {
+                    "stressors": [
+                      "eventfd",
+                      "mmap",
+                      "udp",
+                      "sock",
+                      "sockfd",
+                      "sockpair"
+                    ],
+                    "tool": "stress-ng"
+                  },
+                  "duration_s": 4.3148881600000095,
+                  "returncode": 0,
+                  "stderr": "",
+                  "stdout": "stress-ng: info:  [871] setting to a 2 secs run per stressor\nstress-ng: info:  [871] dispatching hogs: 1 eventfd, 1 mmap, 1 udp, 1 sock, 1 sockfd, 1 sockpair\nstress-ng: info:  [871] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [871] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [871]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [871] eventfd             389      2.12      0.15      1.88       183.56         190.96\nstress-ng: metrc: [871] mmap                  1      2.14      0.09      2.02         0.47           0.47\nstress-ng: metrc: [871] udp                 973      2.15      0.05      2.14       452.72         443.36\nstress-ng: metrc: [871] sock                  8      2.16      0.19      2.50         3.71           2.97\nstress-ng: metrc: [871] sockfd             2033      2.15      0.39      2.41       947.43         726.06\nstress-ng: metrc: [871] sockpair              0      2.87      0.06      2.80         0.00           0.00\nstress-ng: info:  [871] skipped: 0\nstress-ng: info:  [871] passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)\nstress-ng: info:  [871] failed: 0\nstress-ng: info:  [871] metrics untrustworthy: 0\nstress-ng: info:  [871] successful run completed in 2.98 secs",
+                  "workload_name": "stress_ng_tetragon_policy_hot"
+                }
+              ]
+            }
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
