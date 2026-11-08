@@ -224,6 +224,32 @@ The corpus manifest path differs (`/home/yunwei37/workspace/...` against
 not changed since 2026-05-20, before the reference, so the workload
 definition is identical.
 
+### The native objects of 2026-05-29, on the current kernel
+
+The second half of the separating experiment is to run the reference's own
+native objects on the current kernel and workload. It settles whether the
+slowdown lives in the native code or in everything around it.
+
+The archived 2026-05-29 corpus runs kept per-program counters and no
+native objects, and the 2026-05-29 tree (`9f3855f6f`, checked out at
+`/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree`)
+has no native compile for the corpus applications: its native path is the
+C++ runner at `runner/src/native_runner.cpp` reading prebuilt objects from
+the application image, and `micro/programs/Makefile` builds `*.native.so`
+only for the micro programs.  There is therefore no 2026-05-29 corpus
+native object to substitute, and the objects the reference ran were whatever
+that image contained.
+
+The micros do give the substitution, and they are the cleanest available
+version of it: **all 29** `micro/programs/*.bpf.c` are byte-identical to the
+reference tree's copies (`cmp -s`, 29 of 29), and the reference's
+pure-bytecode set is exactly those 29 programs
+(`x86_kvm_micro_20260529_003919_048557`: 29 benchmarks; the helper/map set
+`..._004658_667642`: 13).  Native code compiled today from the reference's
+own source therefore reproduces the reference's ratios: 1.468x against
+1.478x and 1.403x against 1.429x.  The native code did not move; the
+context around the corpus apps did.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
