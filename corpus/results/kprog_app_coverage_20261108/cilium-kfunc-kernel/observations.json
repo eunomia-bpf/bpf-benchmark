@@ -1,0 +1,15 @@
+{
+  "native_requests_observed": 0,
+  "application_coverage_applicable": false,
+  "baseline_status": "Cilium route reconciler protocol unsupported",
+  "kernel_diagnostic": "split module BTF Invalid name: nfnetlink/xfrm_algo/bpf_preload",
+  "native_service_ready": true,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "d4a3ad77bab2ff30abbb26486c839596d4ef68a10bde5adb4e5e63e3255647ec",
+    "service.tar.gz": "80c218e3abb0e771bba841d2af7d37e6f10fa2d43efc60b56198341846e0b0fa",
+    "launch.tar.gz": "cb140d63a4a4a2361eb6ddee8d06a0e1852f0adefda955ca111e21e86f2779bf",
+    "result.tar.gz": "e13b93ac4fab1a813556d60cb7524b53e83404b31bc50e4898be49cdd893e3ca"
+  },
+  "corrected_cohort": "cilium-matched-runtime"
+}
