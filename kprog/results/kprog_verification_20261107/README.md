@@ -4094,3 +4094,10 @@ universal completion interfaces.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_000d86147`. Every check retains its exact published source identity.
+
+### Published source full check 18a049494
+
+`make check` on immutable published18a049494 exits0. All1166 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_18a049494`. Every check retains its exact published source identity.
