@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 28/75 | 0/71 |
-| Additional partial-model handler families | 3/75 | 0 |
+| Addressed memory model / composed step | 29/75 | 0/71 |
+| Additional partial-model handler families | 2/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 64/75 | 71/71 |
+| O2 C-model token-body equality | 65/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 64 x86 O2 equalities cover46 direct bodies, sixteen generic calls and two
+The 65 x86 O2 equalities cover46 direct bodies, seventeen generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining3 x86 reference-family handlers have partial model proofs; eight
+The remaining2 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -96,6 +96,12 @@ index. Fixed128-bit movement, vector/memory update and complete preserved
 GPR/flag/control state retain whole16-byte permission, native MOVAPS alignment
 and coherent guest-observation witnesses. Physical memory, native normalization,
 compiler/invocation/ABI and native-link relations remain explicit interfaces.
+REP_MOVS also composes its bounded immediate count, FLAGS width and
+native RCX/direction/access witnesses through the extended dispatcher and
+generic token. Sequential scalar memory order preserves overlap and aliases;
+RSI/RDI advance with their original tags and numeric STACK projections, and
+RCX receives scalar64 zero. Complete vector/flags/profile/control state and
+the physical-memory/native-normalization/compiler/ABI interfaces persist.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4290,3 +4296,22 @@ proof-type failure and corrected build/audits are archived under
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_9db407602`. Every check retains its exact published source identity.
+
+### REP MOVS fields, numeric pointer frame and generic token
+
+`x86_rep_memory_tokens` composes the bounded immediate count and FLAGS width
+through the original-tag RSI/RDI advances, scalar64 RCX zero, extended
+dispatcher and generic fixed-opcode token. Fifteen public axiom audits,
+default Lean build, both generators, macro hygiene and oracle composition
+exit0. Direct/interpreter/real-CPU UBSan checks cover665600 complete frames,
+including332800 same-image overlap/alias copies. Existing contract and route
+cases remain included. Prior module statements and token chains persist;
+the existing bitvector arithmetic proof isolates its scalar word context.
+Current x86 O2 C-model coverage is65/75:46 direct,17 generic,2 branch.
+
+Theorems carry forward/default64-address, count<=64, RCX=count, DFclear
+and successful sequential-access witnesses. Physical arena/native memory,
+coherent guest-access order, native field/count/direction normalization,
+compiler/invocation/ABI and native-link relations retain their universal
+production interfaces. Source snapshots, binaries and initial import/proof
+diagnostics are archived under `X86_REP_MEMORY_TOKENS_V1`.

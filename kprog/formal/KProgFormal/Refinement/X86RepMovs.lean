@@ -110,6 +110,8 @@ theorem advance_progressed (width : ScalarWidth) (count : Nat) (s : Reference.X8
   by_cases h1 : r = 1
   · simp only [progressed, advance, h1, ↓reduceIte, BitVec.ofNat_add]
     change (s.gpr 1 - 1) - BitVec.ofNat 64 count = s.gpr 1 - (BitVec.ofNat 64 count + 1)
+    generalize s.gpr 1 = value
+    clear s width
     bv_decide
   · by_cases h67 : r = 6 ∨ r = 7
     · simpa only [progressed, advance, if_neg h1, if_pos h67] using advance_comp width count (s.gpr r)
@@ -204,5 +206,48 @@ theorem handler_step_refines (width : ScalarWidth) (count : Nat) (nextPc : Refer
     Reference.X86.Step (.repMovs width false 0 nextPc) s (handlerStep width count nextPc s) := by
   rw [handler_refines width count nextPc s bound counter direction noFault]
   exact ⟨rfl, rfl, rfl⟩
+
+/-- Each scalar copy preserves the architectural frame surrounding its
+progress registers and memory image. -/
+theorem element_fields (width : ScalarWidth) (s : Reference.X86.State) :
+    (element width s).state.rflags = s.rflags ∧
+    (element width s).state.xmm0 = s.xmm0 ∧
+    (element width s).state.fsBase = s.fsBase ∧
+    (element width s).state.gsBase = s.gsBase ∧
+    (element width s).state.addressWidth = s.addressWidth := by
+  unfold element
+  split
+  · exact ⟨rfl, rfl, rfl, rfl, rfl⟩
+  · split <;> exact ⟨rfl, rfl, rfl, rfl, rfl⟩
+
+theorem loop_fields (width : ScalarWidth) (nextPc : Reference.Word) (count : Nat)
+    (s : Reference.X86.State) :
+    (loop width nextPc count s).state.rflags = s.rflags ∧
+    (loop width nextPc count s).state.xmm0 = s.xmm0 ∧
+    (loop width nextPc count s).state.fsBase = s.fsBase ∧
+    (loop width nextPc count s).state.gsBase = s.gsBase ∧
+    (loop width nextPc count s).state.addressWidth = s.addressWidth := by
+  induction count generalizing s with
+  | zero => exact ⟨rfl, rfl, rfl, rfl, rfl⟩
+  | succ n ih =>
+      simp only [loop]
+      split
+      · exact element_fields width s
+      · obtain ⟨ef, ex, efs, egs, ea⟩ := element_fields width s
+        obtain ⟨lf, lx, lfs, lgs, la⟩ := ih (element width s).state
+        exact ⟨lf.trans ef, lx.trans ex, lfs.trans efs, lgs.trans egs, la.trans ea⟩
+
+theorem loop_success_pc (width : ScalarWidth) (nextPc : Reference.Word) (count : Nat)
+    (s : Reference.X86.State) (successful : (loop width nextPc count s).fault = none) :
+    (loop width nextPc count s).state.pc = nextPc := by
+  induction count generalizing s with
+  | zero => rfl
+  | succ n ih =>
+      by_cases stopped : (element width s).fault.isSome = true
+      · have contradiction : (element width s).fault = none := by simpa [loop, stopped] using successful
+        simp [contradiction] at stopped
+      · have rest : (loop width nextPc n (element width s).state).fault = none := by
+          simpa [loop, stopped] using successful
+        simpa [loop, stopped] using ih _ rest
 
 end KProgFormal.Refinement.X86RepMovs

@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86RepMovs
 import KProgFormal.Refinement.X86Xmm0
 import KProgFormal.Refinement.X86Push
 import KProgFormal.Refinement.X86Divide
@@ -2885,5 +2886,95 @@ theorem xmm_load_absolute_index (immediate indexOffset ignored : NativeWord) :
       immediate + indexOffset := by
   simp [generatedX86Xmm0OrdinaryAddr, generatedX86Xmm0BasePtr, generatedX86Xmm0AddsOffset,
     GeneratedX86Xmm0.baseForm, x86Xmm0ToOp]
+
+/-- REP commits its two original-tag pointer advances and scalar RCX zero
+from the captured initial cells. The stride retains all64 wrapping bits. -/
+def repFinish (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) : RegisterState :=
+  { raw := { state.raw with gpr := fun r => if r = 1 then 0 else if r = 6 ∨ r = 7 then
+      generatedX86RepMovsAdvance (state.raw.gpr r) count (X86Scalar.handlerWidth width) else state.raw.gpr r },
+    stack := fun r => if r = 1 then false else state.stack r }
+
+theorem project_address_advance (env : Environment) (frame : Frame) (arena pointer delta : NativeWord) :
+    projectAddress env frame arena (pointer + delta) = projectAddress env frame arena pointer + delta := by
+  unfold projectAddress
+  generalize base env frame .stack = origin
+  clear env frame
+  bv_decide
+
+theorem native_rep_finish (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) :
+    nativeRegisters env frame arena (repFinish state width count) =
+      { nativeRegisters env frame arena state with gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state) } := by
+  simp only [nativeRegisters, repFinish]
+  congr 1
+  funext r
+  by_cases counter : r = 1
+  · subst r
+    simp [registerValue, X86RepMovs.emittedRegisters, generatedX86RepMovsRcx,
+      generatedX86RegWrite, GeneratedX86RegWrite.write, GeneratedX86RegWrite.writeAt,
+      GeneratedX86RegWrite.bitsAt, GeneratedX86RegWrite.bits]
+  · by_cases pointer : r = 6 ∨ r = 7
+    · have stackPointer : r ≠ 4 := by rcases pointer with h | h <;> subst r <;> decide
+      simp only [registerValue, if_neg counter, if_pos pointer, if_neg stackPointer,
+        X86RepMovs.emittedRegisters, generatedX86RepMovsAdvance]
+      split <;> simp only [project_address_advance]
+    · simp only [registerValue, if_neg counter, if_neg pointer, X86RepMovs.emittedRegisters]
+
+/-- The observed scalar-copy loop supplies its complete sequential memory
+image. The actual handler commits only RSI/RDI/RCX and its next control label. -/
+def repMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) (nextPc : NativeWord) :
+    Transition Reference.X86.State :=
+  let copied := X86RepMovs.loop width nextPc (generatedX86RepMovsElementCount count)
+    (nativeRegisters env frame arena state)
+  ⟨nativeRegisters env frame arena (registerPc
+    (registerMemory (repFinish state width count) copied.state.memory) nextPc), copied.events, none⟩
+
+theorem rep_memory_frame_matches_handler (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) (nextPc : NativeWord)
+    (bound : count ≤ 64)
+    (successful : (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).fault = none) :
+    repMemoryFrame env frame arena state width count nextPc =
+      X86RepMovs.handlerStep width count nextPc (nativeRegisters env frame arena state) := by
+  obtain ⟨flags, vector, fs, gs, addressWidth⟩ :=
+    X86RepMovs.loop_fields width nextPc count (nativeRegisters env frame arena state)
+  have pc := X86RepMovs.loop_success_pc width nextPc count (nativeRegisters env frame arena state) successful
+  unfold repMemoryFrame X86RepMovs.handlerStep
+  rw [X86RepMovs.bounded_count_exact count bound]
+  cases result : X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state) with
+  | mk final events fault =>
+      have finished : fault = none := by simpa only [result] using successful
+      have preserved : { final with gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state) } =
+          { nativeRegisters env frame arena state with
+            gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state),
+            memory := final.memory, pc := nextPc } := by
+        simp only [result] at flags vector fs gs addressWidth pc
+        cases final
+        simp_all only
+      simp only [finished, Option.isSome_none, Bool.false_eq_true, ↓reduceIte,
+        native_register_pc, native_register_memory, native_rep_finish]
+      rw [preserved]
+
+/-- Complete raw pointer and count writeback refines the canonical forward
+copy under its captured count, direction and successful-access witnesses. -/
+theorem rep_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) (nextPc : NativeWord)
+    (bound : count ≤ 64) (counter : registerValue env frame arena state 1 = BitVec.ofNat 64 count)
+    (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).fault = none) :
+    repMemoryFrame env frame arena state width count nextPc =
+      Reference.X86.step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) := by
+  rw [rep_memory_frame_matches_handler env frame arena state width count nextPc bound successful]
+  exact X86RepMovs.handler_refines width count nextPc _ bound counter direction successful
+
+theorem rep_memory_frame_step_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count : Nat) (nextPc : NativeWord)
+    (bound : count ≤ 64) (counter : registerValue env frame arena state 1 = BitVec.ofNat 64 count)
+    (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).fault = none) :
+    Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state)
+      (repMemoryFrame env frame arena state width count nextPc) := by
+  rw [rep_memory_frame_refines env frame arena state width count nextPc bound counter direction successful]
+  exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86NumericAddress

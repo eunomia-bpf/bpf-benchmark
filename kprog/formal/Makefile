@@ -424,6 +424,8 @@ check:
 	./build/test_x86_pushpop_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_pushpop_route_host.c -o build/test_x86_pushpop_route_host
 	./build/test_x86_pushpop_route_host
+	$(CC) -Wall -Wextra -O2 -mno-red-zone -fsanitize=undefined -fno-sanitize-recover=all -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_rep_memory_frame_host.c -o build/test_x86_rep_memory_frame_host
+	./build/test_x86_rep_memory_frame_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_rep_movs_host.c -o build/test_x86_rep_movs_host
 	./build/test_x86_rep_movs_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_rep_movs_route_host.c -o build/test_x86_rep_movs_route_host
