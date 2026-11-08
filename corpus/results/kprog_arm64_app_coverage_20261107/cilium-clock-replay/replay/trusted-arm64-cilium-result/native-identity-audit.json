@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-08T02:00:13.466921+00:00",
+  "kind": "cilium",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261108T012315509298Z.tar.gz",
+  "archive_sha256": "94707b3ba5d48c68f829ad0e1b8734ecd9fcacb42b862ad734fbc800baac77bb",
+  "host_reported_ok": false,
+  "hashes_unchanged": true,
+  "completed_counts": {
+    "service_accepted": 0,
+    "service_refused": 1
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 1,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": -22,
+      "entry": "cil_xdp_entry",
+      "native_sha256": "0f33cfd4530c4feb58567cd2c21847afed136975d708010b18d1bffcc112c325",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "cbc807af80287391e1012adc130245a3de10bba0c042bf62a63c71db37bbce28",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "ff85313d4c8a090bbcf62fa9c85db1007b1857be0ada6b54b3c6c83d6222e1ae",
+        "request/generation.metadata.json": "f9efa1745612e1df65e6a4992c1bbc1038533a61716c800097ea82d54ab93b41",
+        "request/kernel.facts.json": "ff145095d1476c273c2de2f42d76c6b017ec9ce82580e4e84ea346159736a17a",
+        "request/source-identities.json": "c9f16f8fbcc464cd6b45775e17f3914548af6a4a114d44c9bf6ae08b56f0361a"
+      }
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}
