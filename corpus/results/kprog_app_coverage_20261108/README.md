@@ -9,7 +9,7 @@ The table records the latest closed whole-application attempt, including setup a
 | Cilium | 62 resident | 1 | 0 | 0 | 1: missing C body for helper189, bpf_xdp_load_bytes | 0 | [matched-module cohort](xdp-load-helper/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [final five-step cohort](bcc-katran-five-step/README.md) |
-| Tracee | 151 resident | 2 | 2 | 1 | 0 | 1: R2 scalar memory access after242instructions | [matched-module cohort](xdp-load-helper/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 1: sys_exit_submit native chunk creation ENOENT | 0 | [current CORE input](tracee-current-core/README.md) |
 
 Current detached work runs complete Cilium and Tracee with the final-vmlinux module package, captured sources and a writable shared compiler directory; complete Tetragon and OTel follow with their own compiler lifecycle. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
 
@@ -53,3 +53,5 @@ The [XDP byte-load helper extension](xdp-load-helper/README.md) adds Linux189 to
 The [final BCC/Katran five-step cohort](bcc-katran-five-step/README.md) completes26/26 actual native loads and both original workloads. BCC syscall work is514in each arm. Katran processes2523084JIT/2455449native packets with matching per-arm BPF/VIP/LRU/TX counts and0LRU misses; native delivery accounts for2452337received+2550TX-interface+562RX-interface packets. All26native request-object hashes match the prior five-step cohort. R retains the existing timing snapshots and native-source decision.
 
 The [whole Tetragon/OTel five-step cohorts](whole-five-step-0700/README.md) retain11terminal native hash joins. Restoring the current237-row Tetragon asset inventory advances its entire startup to5generated/4installed and the event_execve stack-write frontier. OTel reaches3generated/2installed and the perf_unwind_native exploration frontier. Original startup errors, native objects and work counters retain their full logs.
+
+The [Tracee current CORE-input cohort](tracee-current-core/README.md) consumes the existing published native build7479850e and installs five entries across six generated/compiled requests. The sixth reaches native chunk creation ENOENT; relocation resolution supplies the next step. The current header/native-source identity and original151-program baseline are preserved.
