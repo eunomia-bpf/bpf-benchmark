@@ -106,7 +106,7 @@ class ObjectResources:
         self.bind("libbpf_get_error", c.c_long, c.c_void_p)
         self.bind("bpf_object__open_file", c.c_void_p, c.c_char_p, c.c_void_p)
         self.bind("bpf_object__close", None, c.c_void_p)
-        self.bind("bpf_object__load", c.c_int, c.c_void_p)
+        self.bind("bpf_object__prepare", c.c_int, c.c_void_p)
         self.bind("bpf_object__next_program", c.c_void_p, c.c_void_p, c.c_void_p)
         self.bind("bpf_object__find_program_by_name", c.c_void_p, c.c_void_p, c.c_char_p)
         self.bind("bpf_program__set_autoload", c.c_int, c.c_void_p, c.c_bool)
@@ -191,7 +191,7 @@ class ObjectResources:
         return sections
 
     def load(self, path):
-        self.ok(self.lib.bpf_object__load(self.obj), "maps/BTF object load")
+        self.ok(self.lib.bpf_object__prepare(self.obj), "maps/BTF object prepare")
         btf = self.lib.bpf_object__btf(self.obj)
         sections = self.datasections(btf)
         bindings, fds, pins = [], [], []
