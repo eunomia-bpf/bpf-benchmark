@@ -6,7 +6,7 @@ The table records the latest closed whole-application attempt, including setup a
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | startup not reached | 0 | 0 | 0 | 1 setup: frozen generator missing x86_abi | 0 observed | [initial private snapshot setup](stack-spill-values/whole-cilium/README.md) |
+| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_netdev R0 invalid mem access 'scalar' | [private stack spill whole cohort](stack-spill-values/whole-cilium-retry/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit invalid access to map value, value_size=32536 off=65677 size=4096 | [generic C-copy whole cohort](readonly-c-loads/whole-tracee-retry/README.md) |
