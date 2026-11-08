@@ -115,6 +115,44 @@
     ],
     "universal_domain": "Every BPF program byte array and decoded instruction position, saved r0-r9, every16-bit signed frame offset, arbitrary complete BPF state/environment."
   },
+  "andn_bzhi_fresh_aux_transport": {
+    "archive_block_sha256": "4304af1ab54396e373359c7cc73fbdc2be8a9a98a118ef2a2321945bb43e2d99",
+    "archive_entries": 23,
+    "archive_file": "kprog/results/kprog_verification_20261107/fresh-aux-output-transport.log.gz",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Lean.ofReduceBool",
+      "Quot.sound"
+    ],
+    "integrated_numeric_module_exit": 0,
+    "production_source": "c1f6b78f4a26c3075d85c50dd3e3d62a16e713bf",
+    "remaining_interfaces": "Global DefinednessTransport includes every other instruction undefined output and incoming state relation. C-model extraction, compiler embedding, actual kind6 stream/visit transport, physical ABI and native semantics coverage remain explicit.",
+    "runtime_admission_additions": 0,
+    "scope": "All scalar/register and memory ANDN/BZHI forms,32/64-bit widths, arbitrary complete incoming frame and allowed memory-read faults. Both PF and AF vary independently. Every canonical permitted output is realized as a complete state/effect by the appropriate choices; every choice preserves defined outputs. A stream construction changes precisely two input positions and retains every other position.",
+    "source_epoch": {
+      "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "fc04182ec20e4ca96d767126731375814154092ac6327609d82597eb04c6ca5a",
+      "kprog/x86/x86_sim_local_bpf.h": "eba653298481574afb053754cd0f4405324a59797da361ac4bfcfe11f6fe7c80"
+    },
+    "source_pairing": "Production C appends existing kind6 PF then AF reads after its shared logic/BZHI defined flag assignment. Earlier deterministic intermediate definitions and every theorem remain present; FreshAux composes both final assignments.",
+    "source_publication": "5f103be68fb3dae497f6798d3fc748c8bac26de7",
+    "standalone_proof_exit": 0,
+    "theorems": [
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.flags_realize",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.matches_preserved",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.realizes",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.realizes_stream",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_register_body_refines",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_register_body_realizes",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_memory_body_refines",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_memory_body_realizes",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_register_body_refines",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_register_body_realizes",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_refines",
+      "KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_realizes"
+    ]
+  },
   "arm64_entry_abi_base_fixture": {
     "archive_marker": "X86_POINTER_LOAD_TOKENS_V1",
     "fixed_exit": 0,

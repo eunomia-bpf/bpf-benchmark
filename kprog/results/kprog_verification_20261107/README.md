@@ -5119,3 +5119,16 @@ byte. [Original evidence](compiled-movx.log.gz) retains preprocessing, ELF,
 arrays, scripts and proof logs. Architectural register mapping, complete
 register/tag frame, physical invocation ABI and compiler embedding remain
 explicit interfaces. The scalar family total records6/75.
+
+### Fresh ANDN and BZHI flag output transport
+
+[Source publication](https://github.com/eunomia-bpf/bpf-benchmark/commit/5f103be68fb3dae497f6798d3fc748c8bac26de7) composes both existing production kind6 PF/AF assignments for register and
+memory forms at32/64-bit widths. `FreshAux.matches_preserved` proves every
+choice preserves canonical defined outputs. `realizes` and the four body
+realization theorems cover every permitted complete output state and effects,
+including memory-read faults. `realizes_stream` alters precisely the two fresh
+input positions and preserves the remaining stream. Standalone and integrated
+NumericAddress proofs both returned0. [Original evidence](fresh-aux-output-transport.log.gz)
+retains the source epoch and all proof attempts. Every earlier theorem remains
+present. Global incoming-state/other undefined-output transport and physical
+kind6/compiler/ABI embedding remain explicit interfaces.

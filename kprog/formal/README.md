@@ -30,6 +30,10 @@ PC, ordered memory effects, faults and defined architectural outputs under
 their stated operand, address, access and platform premises. Undefined outputs
 use the reference step's observation mask; uninitialized memory has arbitrary
 values. The theorem statements and coverage rows give each operation's domain.
+FreshAux composes the production ANDN/BZHI independent PF/AF choices, proves
+complete local output realization and transports a two-position fresh stream.
+Global incoming-state/other undefined-output and compiler/ABI transport remain
+explicit interfaces.
 The x86 pointer bodies share the extended dispatcher and refine resolved moves
 for all sixteen registers, including the RSP coordinate. Native symbol/helper
 address transport remains an explicit interface. Four memory-call token bodies
