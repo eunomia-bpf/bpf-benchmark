@@ -146,3 +146,12 @@ The prior byte-source event_execve FP-672 and precise-copy execve_send jump-sequ
 | Tracee / c3e0b3178 | 151 / 92419 | 2 / 2 / 1 | sys_enter_init context-loaded scalar used as memory base | error |
 
 Each work-summary.json retains every baseline per-program counter and workload stream. Native startup reaches the listed verifier refusal before the post-rejit workload phase. Installed service outcomes and whole-application completion retain separate stages. Earlier cohorts remain in terminal_history. Ordered OTel/Tracee successors continue through the serial captured queue.
+
+## Ordered-tag complete OTel and Tracee terminal cohorts
+
+Each row retains the complete original two-start recipe, source epoch, raw service/verifier archive and per-program work-summary.json. Installed stage counts remain distinct from complete application work.
+
+| Application / publication | Baseline resident / BPF calls | Generated / compiled / installed | Verifier rejects | Actual frontier |
+| --- | ---: | ---: | ---: | --- |
+| OTel / ca76dc674 | 12 / 200310 | 3 / 3 / 2 | 1 | perf_unwind_native bpf_stack_extent |
+| Tracee / f77510715 | 151 / 79963 | 2 / 2 / 1 | 1 | sys_enter_init verifier_diagnostic |
