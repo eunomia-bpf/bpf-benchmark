@@ -1,0 +1,38 @@
+{
+  "cilium.before": {
+    "sha256": "be8b6bc974485378abcc43f9eb31a6b5de52ec5f537e397e7cdf093239f024fe",
+    "object_bytes": 840368,
+    "max_direct_frame_offset": 608,
+    "direct_accesses_beyond_512": 184
+  },
+  "cilium.baseline": {
+    "sha256": "c6889af5e59f131286ed382a091b933c95f971895090ffadc8135d40bdd5dea2",
+    "object_bytes": 842712,
+    "max_direct_frame_offset": 616,
+    "direct_accesses_beyond_512": 184
+  },
+  "cilium": {
+    "sha256": "562da59ac73ae68af83d22deb6efb294747e9abc23ed970dee4186143852b6ee",
+    "object_bytes": 1136552,
+    "max_direct_frame_offset": 768,
+    "direct_accesses_beyond_512": 713
+  },
+  "tetragon.before": {
+    "sha256": "88b08562f6ef0eb9a851197ce00779847393fab8bb110edaed31fba9e48e4d2b",
+    "object_bytes": 1065136,
+    "max_direct_frame_offset": 1280,
+    "direct_accesses_beyond_512": 529
+  },
+  "tetragon.baseline": {
+    "sha256": "d8192c20489fa8a3a25af3da189dcab3611c2a5ccfd820ba7ef6f2f5fb053e07",
+    "object_bytes": 1080528,
+    "max_direct_frame_offset": 1280,
+    "direct_accesses_beyond_512": 559
+  },
+  "tetragon": {
+    "sha256": "987e5a072af9f7cb14f50ae6a71404a4560f8efb756aa20587c3ebca98f703df",
+    "object_bytes": 1519552,
+    "max_direct_frame_offset": 1280,
+    "direct_accesses_beyond_512": 798
+  }
+}
