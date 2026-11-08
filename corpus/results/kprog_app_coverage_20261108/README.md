@@ -7,11 +7,11 @@ The table records the latest closed complete-application attempts. Baseline resi
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [004333](otel-typed-read/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 1: original kfunc BTF linkage | 0 | [003807](cilium-kfunc/README.md) |
-| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541](../kprog_app_coverage_20261107/tetragon-stack-width/README.md) |
+| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [005356](tetragon-typed-read/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [002731](tracee-stack-aligned/README.md) |
 
-Current serial trials: aligned-stack OTel then Tracee, each12GiB/eightvCPU/20-23. A Cilium successor consumes generic vmlinux kfunc relocation after these trials. Every completed batch retains commands, all native/proof input hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program proof material retains its frozen state.
+Current serial trials: whole Tracee uses the generic typed-read/aligned-stack candidate; Cilium follows with the same-snapshot original-BTF loader. Each guest uses12GiB/eightvCPU/20-23. Every completed batch retains commands, native input hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
 
 The [OTel aligned private-stack batch001743](otel-stack-aligned/README.md) freshly binds read_task_struct and perf_unwind_stop and continues from perf_unwind_native instruction exploration,1000001instructions/66042states. The [generic proof kfunc loader](proof-kfunc/README.md) passes20BTF/site/prototype controls and the exact original CiliumELF/matching kernelBTF call. Its whole-application successor follows Tracee serially.
 
@@ -22,3 +22,5 @@ The [generic narrow register-read representation](typed-read-identity/README.md)
 The [Cilium kfunc batch003807](cilium-kfunc/README.md) freshly generates/compiles2requests and binds1, then reaches libbpf-normalized extern linkage at the next TC proof. The common loader successor reads original declarations from the same ELF snapshot and retains the kernel prototype matcher.
 
 The [whole OTel typed-read batch004333](otel-typed-read/README.md) preserves3fresh generation/compilation and2bound loads and reaches1000001verifier instructions/65666states. The complete fixed-input result continues from control/state exploration. Whole Tetragon is now active, followed by Tracee and then the Cilium original-BTF successor.
+
+The [whole Tetragon typed-read batch005356](tetragon-typed-read/README.md) freshly generates/compiles5requests and binds4; execve_send reaches8193jumps/179285instructions/1930states. All5terminal native hashes and source pins reconcile. Tracee follows in the same serial source epoch.

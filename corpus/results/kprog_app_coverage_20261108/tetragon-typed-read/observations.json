@@ -1,0 +1,20 @@
+{
+  "baseline_resident": 287,
+  "generated": 5,
+  "compiled": 5,
+  "accepted_bound": 4,
+  "verifier_rejections": 1,
+  "verifier_class": "8193-jump exploration depth",
+  "processed_instructions": 179285,
+  "total_states": 1930,
+  "peak_states": 1930,
+  "max_states_per_insn": 4,
+  "terminal_native_hashes_checked": 5,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "2c1720f64e978397d222af0152d28e253a310f63262ba27543e664592841d338",
+    "service.tar.gz": "2c208400eab91fb4fb5de311357df6fef95da1b9648ac04b754753c9e08f0a49",
+    "launch.tar.gz": "bbb47fb53e66a0ecd1eb9c2a4e80b0b0e4578f6e212f1cf425ca85c2e25d6565",
+    "result.tar.gz": "6a8e8f0c661493ef025fec47aca576e52105a9d489a84c4b16c6621c19c1b3e9"
+  }
+}
