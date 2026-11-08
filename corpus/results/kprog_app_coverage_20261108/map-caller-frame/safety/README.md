@@ -1,0 +1,3 @@
+# Original38 with map helper caller-frame representation
+
+Actual stages {'make_exit': 0, 'cases': 38, 'stages': {'specialization_rejected': 1, 'valid_executed': 9, 'verifier_rejected': 28}, 'native_risk_executions': 0}. Original native fixtures/annotations retain bytes. Positive controls use their original TEST_RUN comparison; risky inputs use load-only submission. Native risky executions0. Captured production source includes current RAW/named helpers and dc120a8eb public helper-call binding plus private generic map helper caller-frame representation. Complete native/C/B/compiler/verifier/request records accompany raw.tar.gz. Runtime admission additions0.
