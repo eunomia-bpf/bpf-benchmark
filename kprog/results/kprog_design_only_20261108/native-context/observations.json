@@ -1,0 +1,15 @@
+{
+  "total": 38,
+  "stage_counts": {
+    "valid_executed": 9,
+    "verifier_rejected": 27,
+    "specialization_rejected": 2
+  },
+  "source_program_id_counts": {
+    "0": 38
+  },
+  "matching_native_hashes": 38,
+  "accepted_unsafe": [],
+  "replay_exit": "0",
+  "program_loads_before_native": "resource object programs autoload=false; producer invokes no original BPF_PROG_LOAD"
+}

@@ -991,3 +991,10 @@ x86 module builds pass; all8existing service cases pass. The
 [direct-context result](native-context/README.md) retains the implementation,
 exact binaries and queued38-case native-only replay. R owns the upstream
 selftest annotation comparison, which can now reach native submission directly.
+
+The direct-context native-only replay closes38actual source_prog_id0 requests:
+9positive TEST_RUN executions,27stock-verifier refusals,2generation outcomes
+and0accepted unsafe inputs. All38P hashes reconcile with their original native
+objects. Actual resource map creation and SUBMIT_RESOURCES replace original
+program loading. The [raw38receipt](native-context/README.md) preserves full
+inputs/errors and distinguishes this suite from R's upstream selftest coverage.

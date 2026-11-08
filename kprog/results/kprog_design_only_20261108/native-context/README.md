@@ -12,7 +12,7 @@ Raw load_context carries prog_type, expected_attach_type, prog_flags, prog_ifind
 | static/shared loader and worker | build0 |
 | Existing trusted-service component cases | 8pass |
 | Existing native-only producer with direct P context | builds0 |
-| Existing38-case native-only suite | detached, terminal outcomes follow |
+| Existing38-case native-only suite | 9positive executions,27stock-verifier refusals,2generation failures; accepted unsafe0 |
 
 ```sh
 G=/workspaces/.agent-state/kprog-lanes/C/design-only/native-context
@@ -23,3 +23,7 @@ make -f "$G/Makefile" replay
 The replay uses all38existing native objects and the existing ARRAY/HASH resource objects. It marks original programs autoload=false before creating their maps, then submits P with source_prog_id0. Positive controls retain their original TEST_RUN expectations; unsafe inputs are load-only. The current complete application guest retains its owner; raw replay follows it on CPUs20-23 with4GiB. The shared R module and existing active guest binaries retain their captured epochs.
 
 `component.tar.gz` retains the exact source patch/baselines/current files, module, worker, producer, compiler commands/logs/exits and replay source. components.json records all binary identities and the unchanged shared kernel. Additional runtime admission predicates total0.
+
+The actual direct-context replay closes make exit0. Every one of38service records has source_prog_id0; all38native request hashes equal the original case objects. All9positives complete their original TEST_RUN expectations. Stock verification rejects27unsafe submissions; the two generation outcomes remain unbounded_indirect_jump and unsupported_instruction. Accepted unsafe inputs total0. Unsafe inputs retain load-only producer commands. The original BPF programs have autoload=false; their object supplies real resource maps. Those maps pass through SUBMIT_RESOURCES and actual kernel shape queries before fresh B generation.
+
+observations.json and raw38.tar.gz retain complete counters, commands, stdout/stderr, the original native cases, request archives, P metadata and loader/verifier failures. This suite is the existing native-only control set. R's upstream C selftest annotations retain their own coverage and pending direct-native submission results.
