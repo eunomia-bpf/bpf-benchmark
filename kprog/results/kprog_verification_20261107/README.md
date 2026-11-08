@@ -4771,3 +4771,14 @@ STLXR686110 checks pass with UBSan; the other ten components retain their
 passing outcomes. Archive `arm_approved_fault_oracle_profiles` retains every
 original/corrected output and source pin. These are semantic oracle updates
 for the operator-approved fault model.
+
+### Reserved default-opcode probes
+
+The fixed-source full check of `02d14cb0a800df65aff834c3797d5cb02f4bdafe` exits2 with a
+value-oracle segmentation fault. Its historical default probe70 now denotes
+LDADD0x46 and reads the seeded scalar as an address. The value, flag and mul
+oracles now use255 for their existing default-hook probes; every other source
+byte is preserved. Their3078/2089/150 existing checks pass with UBSan.
+The component driver uses the production output `mut_mulroute` for the mul
+execution. Archive `arm_reserved_default_opcode` retains the original full
+outcome/all1258 root-source hashes and original/corrected component outputs.

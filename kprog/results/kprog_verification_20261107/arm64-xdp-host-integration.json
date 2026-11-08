@@ -2535,6 +2535,33 @@
       "source_immediate_alias_binding"
     ]
   },
+  "arm_reserved_default_opcode": {
+    "all_three_components_pass": true,
+    "archive_compressed_prefix_bytes": 95511705,
+    "archive_compressed_prefix_sha256": "549799663a66f503f25ed4f4c63c21ffcd583f2c72e641e4453ae9484f44b525",
+    "archive_entries": 13,
+    "archive_marker": "ARM_RESERVED_DEFAULT_OPCODE_V1",
+    "archive_raw_bytes": 803801,
+    "archive_raw_sha256": "15704a314499ac41f37da3e0bcca0ae39dc1183eb71ff3f437f68b76913bb534",
+    "cause": "Historical unsupported opcode70 now selects production LDADD0x46 and dereferences the seeded scalar. Existing default probes now select255.",
+    "every_exported_root_source_sha_verified": true,
+    "every_other_source_byte_preserved": true,
+    "full_actual_exit": 2,
+    "full_epoch": "02d14cb0a800df65aff834c3797d5cb02f4bdafe",
+    "full_root_git_sources": 1258,
+    "initial_component_driver_exit": 2,
+    "initial_component_driver_note": "value/flag pass and mul compiles; driver used the source basename for execution while production Make emits mut_mulroute. Corrected mul run exits0.",
+    "ubsan_cases": {
+      "flag": 2089,
+      "mul": 150,
+      "value": 3078
+    },
+    "updated_probe_files": [
+      "value_route_host.c",
+      "flag_route_host.c",
+      "mul_route_host.c"
+    ]
+  },
   "canonical_arm_thread_pointer_reference": {
     "archive_block_sha256": "eb85a75856a22e27078b415a310998b16e274cdd65e7b758d9da49476490ca87",
     "archive_block_sha256_before_lossless_compaction": "30c55b713c9dcfcfb5d7a97275d473abb135a96e6e29e3c0d67afc8c2a928326",

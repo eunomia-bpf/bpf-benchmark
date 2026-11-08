@@ -388,7 +388,7 @@ int main(void)
 		__u8 tag, n2, z2, c2, v2;
 		unsigned long before = unsupported_calls;
 
-		drive(70U, 1U, 2U, 0U, ARM64_WIDTH_64, 0U, &got, &tag, &n2,
+		drive(255U, 1U, 2U, 0U, ARM64_WIDTH_64, 0U, &got, &tag, &n2,
 		      &z2, &c2, &v2);
 		if (unsupported_calls == before) {
 			printf("MISMATCH unsupported call missing\n");
