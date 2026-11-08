@@ -1,0 +1,18 @@
+{
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "verifier_rejected": 1,
+  "native_archive_sha_matches": 2,
+  "source_drift": [],
+  "entry": "tail_drop_notify",
+  "error": "native relocation binding: __htab_map_lookup_elem target, pruned helper branch",
+  "processed_insns": 809,
+  "total_states": 14,
+  "peak_states": 14,
+  "max_states_per_insn": 1,
+  "kernel_log": "proof relocation unmatched chunk=1 record=1 kind=1 offset=89 target=0xffffffffb64c7800; validate_proof err=-22 prog_len=753 blob=6",
+  "commands": "sh /workspaces/.agent-state/kprog-lanes/C/cilium-matched-modules-runtime/run.sh",
+  "baseline": "matching full kernel module tree; original upstream application baseline completes",
+  "followup": "generic resource identity for dead helper instructions, preserving visited map-pointer checks"
+}

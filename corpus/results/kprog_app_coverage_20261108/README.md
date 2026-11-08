@@ -6,12 +6,12 @@ The table records the latest closed complete-application attempts. Baseline resi
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: proof stack depth | [012120](otel-fixed-stack/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
+| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: native relocation binding for pruned map helper | [021801](cilium-matched-runtime/README.md) |
 | Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: event_execve proof stack depth | [014223](tetragon-fixed-stack-retry/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [013224](tracee-fixed-stack/README.md) |
 
-Current serial trials: whole Tracee uses the generic fixed-RSP-offset candidate on12GiB/eightvCPU/20-23, followed by the complete Tetragon resource retry and new-kernel Cilium. The [OTel fixed-RSP batch012120](otel-fixed-stack/README.md) closes with3generated/compiled and2bound requests, reaching an8-byte proof-stack write at R10-520. Generic exact-width private-stack stores now receive byte/JIT/host and full-source checks. Every completed valid batch retains commands, native hashes and raw work/error logs. Generic ISA/token/link laws supply safety; historical individual-program material retains its frozen state.
+Current whole-application frontiers are OTel proof-stack depth, Tracee helper length, Tetragon stack/jump complexity and Cilium pruned-helper resource identity. The generic typed private-stack representation completes byte/JIT/host checks and full-source compiles; whole-application successors consume the merged MOV_LOAD fidelity correction. Complete matching kernel modules and the38-case native-only safety suite retain separate receipts.
 
 The [OTel aligned private-stack batch001743](otel-stack-aligned/README.md) freshly binds read_task_struct and perf_unwind_stop and continues from perf_unwind_native instruction exploration,1000001instructions/66042states. The [generic proof kfunc loader](proof-kfunc/README.md) passes20BTF/site/prototype controls and the exact original CiliumELF/matching kernelBTF call. Its whole-application successor follows Tracee serially.
 
@@ -42,3 +42,5 @@ Recorded verifier frontiers retain their separate native entries and candidate e
 | Cilium / tail_handle_ipv4_from_host | kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
 
 Each row remains verification work until its complete application cohort passes. The new registered-kfunc kernel has separate safety/runtime and environment receipts.
+
+The [Cilium matched-module batch021801](cilium-matched-runtime/README.md) reaches native relocation binding after809symbolic instructions. The [registered-kfunc38-case safety suite](kfunc-native-only-safety/README.md) executes9positive controls and rejects29unsafe submissions. Both retain exact kernel/service/native identities and independent outcome domains.
