@@ -113,10 +113,10 @@ measurement continue from the reported failure classes.
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [233455 batch](otel-cmp-identity/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: BPF stack offset -536 | [232956 batch](cilium-helper-scoped/README.md) |
+| Cilium | 60 resident | 1 | 1 | 1 | 1: BMI2 count ABI dependency | 0 | [000058 batch](cilium-live-tc/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541 batch](tetragon-stack-width/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly index range | [231936 batch](tracee-resource-scoped/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [235054 batch](tracee-narrow-identity/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -262,3 +262,6 @@ The [OTel CMP-operand identity batch233455](otel-cmp-identity/README.md) freshly
 
 
 The [Tetragon native-width stack batch234541](tetragon-stack-width/README.md) freshly generates/compiles5requests and binds4. execve_send reaches8193-jump sequence depth after165129processed instructions/1803states. Both the preceding byte-assembly and current native-width epochs retain their complete control-flow traces and source identities; the next generic representation repair follows that actual limit.
+
+
+The [Tracee narrow-value identity batch235054](tracee-narrow-identity/README.md) passes the indexed readonly-table frontier and reaches the probe-read length identity,3411processed instructions/141states. All6terminal native hashes and captured sources reconcile;5bind. The [Cilium live-TC batch000058](cilium-live-tc/README.md) binds its XDP entry and reaches cil_to_host BMI2 count-definedness. The generic count repair retains low8BZHI and low5/6variable-shift dependencies, with the complete operand-width value dependency.

@@ -1,0 +1,29 @@
+{
+  "baseline_resident": 60,
+  "generated": 1,
+  "compiled": 1,
+  "accepted_bound": 1,
+  "failed": 1,
+  "terminal_native_hashes_checked": 2,
+  "source_drift": [],
+  "artifacts": {
+    "driver.log.gz": "c3a578e5be5f519da98ba1490fe5dff2cb4426bf5c9a7595720f4c7c99a6ff5f",
+    "service.tar.gz": "75935b4853449907b8515e368c9f07bc9f19c4018f1b1f313e4514e50aa00371",
+    "launch.tar.gz": "a0e4637d17509ef6a01fea4e31ca11da6d950e7b19cd102875d390ebed7dd677",
+    "result.tar.gz": "1dcb23a8fd921b1b8fc672d773c479dafe58f8c7beb76d7326046cfd782607e5"
+  },
+  "native_entries": [
+    {
+      "entry": "cil_xdp_entry",
+      "request_id": 1,
+      "status": 0,
+      "native_sha256": "08f1bc755f3ee8c31551ce30ab99cd6730e6fcb70c4d40d269a69f38dbb257d2"
+    },
+    {
+      "entry": "cil_to_host",
+      "request_id": 2,
+      "status": -22,
+      "native_sha256": "45433af2d5efcad120a34bd476ef556d94aafc27eea1ef7abf89c868ea722d9e"
+    }
+  ]
+}
