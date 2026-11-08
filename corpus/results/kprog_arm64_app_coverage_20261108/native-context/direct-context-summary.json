@@ -1,0 +1,35 @@
+{
+  "utc": "2026-11-08T10:21:10.620333+00:00",
+  "cohort_commit": "80ae3bedab1ecdc179b497e9ffab0e26121ab348",
+  "make_exit": 0,
+  "cases": 34,
+  "counts": {
+    "valid_executed": 4,
+    "verifier_rejected": 28,
+    "specialization_rejected": 2
+  },
+  "source_prog_ids": [
+    0
+  ],
+  "original_bpf_program_loads": 0,
+  "original_companion_mode": "all programs autoload=false; resource maps created and pinned",
+  "native_executions": 4,
+  "unsafe_native_executions": 0,
+  "image_sha256": "22111ee39a193bdbdb6c188cfa0335ccea66370bbaedba37bdf4a976a38eb61f",
+  "host_guest_qemu": {
+    "host_ok": true,
+    "guest_exit": 0,
+    "qemu_exit": 0,
+    "compiler_exit": 0
+  },
+  "architecture_findings": {
+    "misaligned_sp": "verifier_rejected",
+    "overlapping_load_pair": "verifier_rejected",
+    "writeback_load_overlap": "verifier_rejected",
+    "writeback_store_overlap": "verifier_rejected",
+    "stxr_status_data_overlap": "verifier_rejected",
+    "stlxr_status_data_overlap": "verifier_rejected",
+    "stxr_status_base_overlap": "verifier_rejected",
+    "stlxr_status_base_overlap": "verifier_rejected"
+  }
+}
