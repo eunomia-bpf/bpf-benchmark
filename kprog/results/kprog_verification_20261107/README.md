@@ -22,11 +22,21 @@ specialization token also has its own row.
 | Memory-call full-frame C body model | 4/75 | 0/72 |
 | O2 C-model token-body equality | 72/75 | 71/72 |
 | Additional returning-helper interface equality | 2/75 | 0/72 |
-| Upstream machine-model sampled register-state agreement | 25/75 | ASL comparison pending |
-| Upstream model-stopped operation rows | 7/75 | ASL comparison pending |
+| Upstream machine-model sampled architectural-state agreement | 25/75 | 71/72 selected profiles |
+| Upstream model-stopped operation rows | 7/75 | 0/72 selected forms |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/72 |
 | Additional explicit-monitor-only replay | 0 | 1/72 |
 | Numeric operations awaiting selected replay | 9/75 | 4/72 |
+
+The [Arm ASL comparison](reference-arm-asl.md) records996 instruction-state
+comparisons across82 native forms and all72 current operation labels:
+972 agree across71 labels. Twelve LDADD inputs reach the Lean decode boundary.
+Twelve STLXR inputs record the explicit empty-monitor/fixed-success profile
+difference; twelve matching-success-monitor inputs agree. The observed domain
+covers X0..X30, SP, PC, NZCV, V0 and32 supplied memory bytes. Events, translation,
+access permissions, complete native-field coverage and link premises remain
+explicit interfaces. These machine-model observations preserve the separate
+hardware replay source epochs and every theorem's existing scope.
 
 The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index

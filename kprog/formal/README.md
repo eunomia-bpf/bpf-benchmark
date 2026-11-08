@@ -17,6 +17,10 @@ The reference ISA is defined once in
 These definitions cite Intel/Arm sources and are independent of generated
 implementation contracts. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.
+The [Arm ASL state comparison](../results/kprog_verification_20261107/reference-arm-asl.md)
+records972 agreeing observations across71 operation labels, plus the LDADD decode
+boundary and explicit STLXR monitor profiles. It retains its source/binary
+identities and platform premises alongside the existing x86 Sail comparison.
 
 Handler/dispatcher and specialized-token laws compose modeled registers,
 PC, ordered memory effects, faults and defined architectural outputs under
