@@ -17,3 +17,5 @@ The [exclusive prefix/backedge interface](exclusive-prefix-composition/backedge-
 The [captured host-compiler application successor](host-compile/queue-plan.json) joins34generic native-only controls with the retained original OTel/skb epoch, then whole Cilium/Tracee/OTel. Exact80source/ARM O2/sysroot and per-cohort broker lifecycle identities accompany the concrete launch sources.
 
 [Universal register-ADD retry composition](exclusive-register-composition/README.md) connects the actual operand/shift, complete state/event/fault frame and failed-cycle backedge. Seven laws,98canonical source files, the combined Exclusive/Dispatcher/Stlxr build and axiom audits exit0.
+
+[Matched host-compiler runtime](host-compile/safety/README.md) records the complete34generic suite:4positive native executions and30layered refusals, risk accepted/executed0/0. Immutable joins match34native identities and21compiler receipts. The host-compiler Cilium/Tracee/OTel launchb9e8e586 follows the original OTel/skb epoch.
