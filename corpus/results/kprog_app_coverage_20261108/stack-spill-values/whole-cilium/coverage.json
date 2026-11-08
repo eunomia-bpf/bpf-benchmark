@@ -1,0 +1,26 @@
+{
+  "application": "cilium/agent",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-08T11:56:18.338821+00:00",
+    "apps": "cilium/agent",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-stack-spill-values/trusted-59g8u8og/requests",
+    "service_state_mode": "0o700",
+    "error": "trusted service exited during registration; captured startup log: Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 331, in <module>\n    main()\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 328, in main\n    serve(args)\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 163, in serve\n    worker = adapter(args.arch)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 151, in adapter\n    spec.loader.exec_module(worker)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_specializer.py\", line 21, in <module>\n    _SPEC.loader.exec_module(gen)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/micro-prog/generate_micro_sim_proofs.py\", line 21, in <module>\n    from x86_abi import check_definedness\nModuleNotFoundError: No module named 'x86_abi'\n",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-stack-spill-values/guest.py\", line 18, in <module>\n    if not line:raise RuntimeError('trusted service exited during registration; captured startup log: '+(live/'service.log').read_text())\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: trusted service exited during registration; captured startup log: Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 331, in <module>\n    main()\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 328, in main\n    serve(args)\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 163, in serve\n    worker = adapter(args.arch)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_service.py\", line 151, in adapter\n    spec.loader.exec_module(worker)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/trusted_specializer.py\", line 21, in <module>\n    _SPEC.loader.exec_module(gen)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/stack-spill-values/service/micro-prog/generate_micro_sim_proofs.py\", line 21, in <module>\n    from x86_abi import check_definedness\nModuleNotFoundError: No module named 'x86_abi'\n\n",
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-08T11:56:18.966138+00:00",
+    "corpus_metadata": [],
+    "archive": "corpus-20261108T115628091026Z.tar.gz",
+    "archive_sha256": "3be42a1d517e2c66f50ef013d2f57976a24a01c1575d53d7fa4dbd823f7c6bc3"
+  },
+  "results": []
+}
