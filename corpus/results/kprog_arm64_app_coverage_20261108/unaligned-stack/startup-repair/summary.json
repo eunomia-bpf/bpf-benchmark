@@ -1,0 +1,12 @@
+{
+  "utc": "2026-11-08T04:52:26.701091+00:00",
+  "cause": "Legacy replay wrapper asserted8-11 while the captured transport selects16-19; exception occurred before QEMU creation.",
+  "guest_created": false,
+  "case_outcomes": 0,
+  "changes": "Transport directly supplies the declared CPU placement. The wrapper delegates subprocess creation. QEMU startup participates in the existing compiler cleanup scope.",
+  "checks": {
+    "python_syntax_files": 4,
+    "shell_syntax_exit": 0
+  },
+  "resume": "Existing34 native-only cases retain native/source/workload identities; CPU16-19 transport and fresh host compiler continue."
+}
