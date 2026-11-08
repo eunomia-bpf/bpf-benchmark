@@ -1,0 +1,83 @@
+{
+  "utc": "2026-11-08T15:11:40.294392+00:00",
+  "candidate": "inactive ghost-pointer storage initialization",
+  "canonical_source_adoption": false,
+  "header_sha256": "b6d854b034b6bfd303fa15471f45379ff0909b5f0454a47f2abc4fe092f554e9",
+  "canonical_header_sha256": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a",
+  "hosts": [
+    {
+      "name": "named-host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/named-host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/named-host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "named-host-liveness",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/named-host-liveness.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/native-mov.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/named-host-liveness"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "host_raw_logs": {
+    "named-host.run.log": "native stack spill/value lanes: 52992 cases, 0 differences\n",
+    "named-host-liveness.run.log": "native stack spill/value lanes: 552 cases, 0 differences\n"
+  },
+  "component": {
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/tracee.c",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/C/design-only/stack-ghost-init/tracee.bpf.o"
+    ],
+    "exit": 0,
+    "wall_seconds": 745.758719671052,
+    "sections": [
+      {
+        "name": "raw_tracepoint/trusted",
+        "instructions": 23746
+      }
+    ]
+  },
+  "micro_make_exit": 0,
+  "micro_compile_records": 30,
+  "native_sha256": "7479850e23454e957f4c5880a18d92a91c27dd282af52f768e4422fe9366a722",
+  "source_diff": "--- before/x86_sim_local_bpf.h\n+++ candidate/x86_sim_local_bpf.h\n@@ -249,7 +249,7 @@\n #define X86_SIM_L_SV_PTR_NAME_(I) __x86_stack_value_ptr_##I\n #define X86_SIM_L_SV_TAG(I) X86_SIM_L_SV_TAG_NAME_(I)\n #define X86_SIM_L_SV_PTR(I) X86_SIM_L_SV_PTR_NAME_(I)\n-#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I);\n+#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I)=0;\n #define X86_SIM_L_DECLARE_STACK_VALUES() X86_SIM_STACK_VALUE_WORDS(X86_SIM_L_SV_DECLARE)\n #define X86_SIM_L_SV_EACH(OP) X86_SIM_STACK_VALUE_WORDS(OP)\n #else\n@@ -257,7 +257,7 @@\n #define X86_SIM_L_SV_PTR(I) __x86_stack_value_ptrs[(I)]\n #define X86_SIM_L_DECLARE_STACK_VALUES() \\\n     __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \\\n-    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]\n+    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}\n #define X86_SIM_L_SV_EACH(OP) \\\n     _Pragma(\"unroll\") \\\n     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }\n"
+}
