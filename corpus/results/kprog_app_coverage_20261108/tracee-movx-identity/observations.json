@@ -1,0 +1,16 @@
+{
+  "generated": 6,
+  "compiled": 6,
+  "accepted_bound": 5,
+  "native_sha_matches": 6,
+  "source_drift": [],
+  "entry": "sys_exit_submit",
+  "verifier_class": "probe_read helper R2 length range",
+  "processed_insns": 2776,
+  "total_states": 107,
+  "peak_states": 104,
+  "max_states_per_insn": 4,
+  "candidate_sha256": "f981925d28acd989ca3319673914d4f639f4309cc7cf91c8a64218c8f1d76812",
+  "prior_readonly_index_frontier": "Current verifier proceeds through the readonly-table access to the later helper call",
+  "input_adoption_sha256": "7815fe3d4c358ef281bbe89b69ca828271e222e74ad6d1b5413efaf1b0b8553b"
+}
