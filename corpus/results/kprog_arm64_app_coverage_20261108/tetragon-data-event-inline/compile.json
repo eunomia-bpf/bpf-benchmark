@@ -1,0 +1,419 @@
+{
+  "utc": "2026-11-08T23:07:22.569904+00:00",
+  "commands": [
+    {
+      "phase": "native",
+      "returncode": 0
+    },
+    {
+      "phase": "baseline",
+      "returncode": 0
+    }
+  ],
+  "scope": "Private candidate: three internal inlining attributes, complete identical selected C/header source; original2048 bound/helper/output logic retained; canonicalO3/native and upstreamV61BPF",
+  "source_files": {
+    "process/argfilter_maps.h": {
+      "native": "67e3ba39cf014c808656d440a617fd2d164d764d74f795a74bb1cb9ef3b12ae6",
+      "baseline": "67e3ba39cf014c808656d440a617fd2d164d764d74f795a74bb1cb9ef3b12ae6"
+    },
+    "process/syscall64.h": {
+      "native": "3037b6650535cbb230b3bbb5d6b9e88db91881a38513310b9f96baf392fbe30e",
+      "baseline": "3037b6650535cbb230b3bbb5d6b9e88db91881a38513310b9f96baf392fbe30e"
+    },
+    "process/bpf_execve_event.c": {
+      "native": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+      "baseline": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6"
+    },
+    "process/bpf_enforcer.c": {
+      "native": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+      "baseline": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19"
+    },
+    "process/data_event.h": {
+      "native": "6a47fa117ff373a729d19eb339bee3df9a551dc0cfcacf87bb73a7004dc89077",
+      "baseline": "6a47fa117ff373a729d19eb339bee3df9a551dc0cfcacf87bb73a7004dc89077"
+    },
+    "process/bpf_generic_rawtp.c": {
+      "native": "3c60d98aa09ef237311b2af765049c62f3347eedb23eb3beb6e816e9505d5038",
+      "baseline": "3c60d98aa09ef237311b2af765049c62f3347eedb23eb3beb6e816e9505d5038"
+    },
+    "process/bpf_fork.c": {
+      "native": "5eeaf0ac35d7ce5c92c4f06af1a8ed517988542f11e1fd50acc31c9af293f3ce",
+      "baseline": "5eeaf0ac35d7ce5c92c4f06af1a8ed517988542f11e1fd50acc31c9af293f3ce"
+    },
+    "process/bpf_generic_fentry.c": {
+      "native": "07ab14f6304d59162283d17f1113f49b0b2d3f4611635e0d9cb6db223d55e986",
+      "baseline": "07ab14f6304d59162283d17f1113f49b0b2d3f4611635e0d9cb6db223d55e986"
+    },
+    "process/bpf_generic_retkprobe.c": {
+      "native": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20",
+      "baseline": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20"
+    },
+    "process/generic_calls.h": {
+      "native": "39cad3f31a5aa8de9c50ba8c6b36c15c860b14a0c7d0bd2fbe832075c4d5bbd5",
+      "baseline": "39cad3f31a5aa8de9c50ba8c6b36c15c860b14a0c7d0bd2fbe832075c4d5bbd5"
+    },
+    "process/generic_path.h": {
+      "native": "e70b5430350db6963f5e6cf5b31bc0a4a8f23739fcdf6b3ceffd2a525d055522",
+      "baseline": "e70b5430350db6963f5e6cf5b31bc0a4a8f23739fcdf6b3ceffd2a525d055522"
+    },
+    "process/bpf_generic_usdt.c": {
+      "native": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+      "baseline": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668"
+    },
+    "process/user_preload.h": {
+      "native": "b603fbb5d23eae94e17b80ae1feb92eb7f578f170fc86ff17c8d9d915ad41069",
+      "baseline": "b603fbb5d23eae94e17b80ae1feb92eb7f578f170fc86ff17c8d9d915ad41069"
+    },
+    "process/addr_lpm_maps.h": {
+      "native": "1534f46e1a9149652ddc3528dcf26ddb2d4b7a437622f92e232c22abf3be1d32",
+      "baseline": "1534f46e1a9149652ddc3528dcf26ddb2d4b7a437622f92e232c22abf3be1d32"
+    },
+    "process/bpf_mbset.h": {
+      "native": "0391f5244d7635d3f1ab8db1c2b428a2d5e6d28b7d4d87f9e60a79d519ed94fe",
+      "baseline": "0391f5244d7635d3f1ab8db1c2b428a2d5e6d28b7d4d87f9e60a79d519ed94fe"
+    },
+    "process/bpf_rate.h": {
+      "native": "f8be2a269f1a70b02be949dc13e3acae46e094cde1a768fb8c30e4627b5c7476",
+      "baseline": "f8be2a269f1a70b02be949dc13e3acae46e094cde1a768fb8c30e4627b5c7476"
+    },
+    "process/regs.h": {
+      "native": "8480f7a84c8e3dbea64a6f9daf3eaafa696a5c4d0a1b9b8064160346ae450fca",
+      "baseline": "8480f7a84c8e3dbea64a6f9daf3eaafa696a5c4d0a1b9b8064160346ae450fca"
+    },
+    "process/bpf_generic_lsm_output.c": {
+      "native": "627f36c62e7926258ad4f24538e6a2a0d5c458d21d760c4c723142e0149aa3e6",
+      "baseline": "627f36c62e7926258ad4f24538e6a2a0d5c458d21d760c4c723142e0149aa3e6"
+    },
+    "process/bpf_generic_lsm_core.c": {
+      "native": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64",
+      "baseline": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64"
+    },
+    "process/bpf_process_event.h": {
+      "native": "1d60e5f78297d2b1f3837908abf72e07db68ca3babf4cd432fbab7b1fdbb24a3",
+      "baseline": "1d60e5f78297d2b1f3837908abf72e07db68ca3babf4cd432fbab7b1fdbb24a3"
+    },
+    "process/generic_maps.h": {
+      "native": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54",
+      "baseline": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54"
+    },
+    "process/bpf_generic_kprobe.c": {
+      "native": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+      "baseline": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9"
+    },
+    "process/uprobe_offload.h": {
+      "native": "b70fccdd6b18ef0c3a8f2fef13376a5805cfadc9ad80e9213c82a153d45de07c",
+      "baseline": "b70fccdd6b18ef0c3a8f2fef13376a5805cfadc9ad80e9213c82a153d45de07c"
+    },
+    "process/bpf_generic_lsm_ima_file.c": {
+      "native": "dd0c7a431292c772e2e5178a16cd748fbfe4d59488f366c99a6e61c815f719e2",
+      "baseline": "dd0c7a431292c772e2e5178a16cd748fbfe4d59488f366c99a6e61c815f719e2"
+    },
+    "process/bpf_enforcer.h": {
+      "native": "4b4d4253cc9eea43b48ae8594c403b037fe191c4375ae7551253dbde5e752168",
+      "baseline": "4b4d4253cc9eea43b48ae8594c403b037fe191c4375ae7551253dbde5e752168"
+    },
+    "process/bpf_prog_iter.c": {
+      "native": "c60128df11eea130dd1c0f05be88fe5efd6bff3e86598f156737011c603c18e6",
+      "baseline": "c60128df11eea130dd1c0f05be88fe5efd6bff3e86598f156737011c603c18e6"
+    },
+    "process/bpf_cgroup.c": {
+      "native": "1ff6867d6d22a69e20b17ef1184522ec2c8124cdd2408ea6010b635d98f399fe",
+      "baseline": "1ff6867d6d22a69e20b17ef1184522ec2c8124cdd2408ea6010b635d98f399fe"
+    },
+    "process/bpf_execve_map_update.c": {
+      "native": "9383a4a411d087972fcec2e2c684eb649d319c9a5d31a348ac432adfe8510056",
+      "baseline": "9383a4a411d087972fcec2e2c684eb649d319c9a5d31a348ac432adfe8510056"
+    },
+    "process/cel_expr.h": {
+      "native": "fc6146362d8d8519bc29538d4d745096a8c9a813ece9e81be19d387246ac1f4e",
+      "baseline": "fc6146362d8d8519bc29538d4d745096a8c9a813ece9e81be19d387246ac1f4e"
+    },
+    "process/retprobe_map.h": {
+      "native": "9ec9fbdc261620ae7a7816630c752f14dd3f762da22dc04f7815dd0ba2559a76",
+      "baseline": "9ec9fbdc261620ae7a7816630c752f14dd3f762da22dc04f7815dd0ba2559a76"
+    },
+    "process/event_config.h": {
+      "native": "93e2e9fd0467bbb89c2ffe79dfa8fa60b6d0e1b729dedc69601e26a500c62529",
+      "baseline": "93e2e9fd0467bbb89c2ffe79dfa8fa60b6d0e1b729dedc69601e26a500c62529"
+    },
+    "process/bpf_generic_retuprobe.c": {
+      "native": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21",
+      "baseline": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21"
+    },
+    "process/heap.h": {
+      "native": "0c1599beeb1c4cbc193863a14a681944cae181c7f65e12ff8f0f179dcf932d8e",
+      "baseline": "0c1599beeb1c4cbc193863a14a681944cae181c7f65e12ff8f0f179dcf932d8e"
+    },
+    "process/bpf_generic_tracepoint.c": {
+      "native": "b399ea9b3d0f47585f3fe75c97555619b8718dac7635d846ea7c9584128a2567",
+      "baseline": "b399ea9b3d0f47585f3fe75c97555619b8718dac7635d846ea7c9584128a2567"
+    },
+    "process/string_maps.h": {
+      "native": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01",
+      "baseline": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01"
+    },
+    "process/usdt_arg.h": {
+      "native": "41259b194883b72181ecd8e8f8f18c34b297f500f9607479653fa196045deb65",
+      "baseline": "41259b194883b72181ecd8e8f8f18c34b297f500f9607479653fa196045deb65"
+    },
+    "process/bpf_exit.c": {
+      "native": "e9986d62d1c20ff4c3a8a45caa82f13c8e706a57bde47be0be11ca8f251313a1",
+      "baseline": "e9986d62d1c20ff4c3a8a45caa82f13c8e706a57bde47be0be11ca8f251313a1"
+    },
+    "process/bpf_generic_fexit.c": {
+      "native": "5f33b121e34c2a0f922e9eef9bdff832860f6f4ec0a634cde7ec509230ab9f18",
+      "baseline": "5f33b121e34c2a0f922e9eef9bdff832860f6f4ec0a634cde7ec509230ab9f18"
+    },
+    "process/generic_arg.h": {
+      "native": "a89f0c07b5883b24a8249dbebf728cd038e2e892640d2f81fcd0a69569943e70",
+      "baseline": "a89f0c07b5883b24a8249dbebf728cd038e2e892640d2f81fcd0a69569943e70"
+    },
+    "process/ratelimit_maps.h": {
+      "native": "fe5bbf555df627617e2642453f2796f42b86d2b196d4e3cb77d8a293607b14ed",
+      "baseline": "fe5bbf555df627617e2642453f2796f42b86d2b196d4e3cb77d8a293607b14ed"
+    },
+    "process/bpf_exit.h": {
+      "native": "6d9dd1094083a7a723ab337bc85b7dd3caf05fe6a80e53974e8db7411cec0115",
+      "baseline": "6d9dd1094083a7a723ab337bc85b7dd3caf05fe6a80e53974e8db7411cec0115"
+    },
+    "process/bpf_generic_uprobe.c": {
+      "native": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2",
+      "baseline": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2"
+    },
+    "process/pfilter.h": {
+      "native": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e",
+      "baseline": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e"
+    },
+    "process/bpf_loader.c": {
+      "native": "7e431388b5a2811411c7a8d50e3e3daeb02ff0e81c32155f02d05c76276bb7b0",
+      "baseline": "7e431388b5a2811411c7a8d50e3e3daeb02ff0e81c32155f02d05c76276bb7b0"
+    },
+    "process/policy_filter.h": {
+      "native": "64b160fffd7cc73b107a82de9f802f91c120b047af4a12d3a8b0c1f6a66a4aab",
+      "baseline": "64b160fffd7cc73b107a82de9f802f91c120b047af4a12d3a8b0c1f6a66a4aab"
+    },
+    "process/bpf_lsm_ima.h": {
+      "native": "dafa14da7e79941740ada2bb84b01204a6c53069b317151b283b8e4da52ccdb8",
+      "baseline": "dafa14da7e79941740ada2bb84b01204a6c53069b317151b283b8e4da52ccdb8"
+    },
+    "process/bpf_generic_lsm_ima_bprm.c": {
+      "native": "8ded6012da763fc16b12c85ee8111607581117a4649cc82d6777dcfcebe9aa51",
+      "baseline": "8ded6012da763fc16b12c85ee8111607581117a4649cc82d6777dcfcebe9aa51"
+    },
+    "process/bpf_execve_bprm_commit_creds.c": {
+      "native": "8c888c3ac938aa92603fe83895c55a8ed9bf1c60ba69e49fb7565d55c99a1480",
+      "baseline": "8c888c3ac938aa92603fe83895c55a8ed9bf1c60ba69e49fb7565d55c99a1480"
+    },
+    "alignchecker/bpf_alignchecker.c": {
+      "native": "e278be7b6f5ab4ecbab48e8148ad4f265364e26a42ea1c80e7f147c512ff4c4e",
+      "baseline": "e278be7b6f5ab4ecbab48e8148ad4f265364e26a42ea1c80e7f147c512ff4c4e"
+    },
+    "cgroup/bpf_cgroup_release.c": {
+      "native": "00a48c4b9ca1dc0b3edcb6d16b583e28bcac68516ef4e801759f700bbd91e024",
+      "baseline": "00a48c4b9ca1dc0b3edcb6d16b583e28bcac68516ef4e801759f700bbd91e024"
+    },
+    "cgroup/bpf_cgroup_rmdir.c": {
+      "native": "d1657dd8abd7388731a70e36db1d1f12919a0cece2a5310b725c906fb33c1679",
+      "baseline": "d1657dd8abd7388731a70e36db1d1f12919a0cece2a5310b725c906fb33c1679"
+    },
+    "cgroup/bpf_cgtracker.c": {
+      "native": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268",
+      "baseline": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268"
+    },
+    "cgroup/cgtracker.h": {
+      "native": "99ff07aeec09a7b45c6003c1620f8ad1d71aaeb0c89b2c8cb51644fa8b0d290e",
+      "baseline": "99ff07aeec09a7b45c6003c1620f8ad1d71aaeb0c89b2c8cb51644fa8b0d290e"
+    },
+    "cgroup/bpf_cgroup_events.h": {
+      "native": "0a8854278e935ebb1e468fc3e22eb3b4c9bf1c680a6fecc0a9a772dfb88b3eea",
+      "baseline": "0a8854278e935ebb1e468fc3e22eb3b4c9bf1c680a6fecc0a9a772dfb88b3eea"
+    },
+    "cgroup/bpf_cgroup_mkdir.c": {
+      "native": "fed080b1d8ddc0c8b4e6ec3e8660fcc820ecd0e24d502ebc65c3ccccdd73bba5",
+      "baseline": "fed080b1d8ddc0c8b4e6ec3e8660fcc820ecd0e24d502ebc65c3ccccdd73bba5"
+    },
+    "lib/err.h": {
+      "native": "195290e4be00315ce04568a76f46b99df0d57d31e6db6928d35b4e5f8ec8565a",
+      "baseline": "195290e4be00315ce04568a76f46b99df0d57d31e6db6928d35b4e5f8ec8565a"
+    },
+    "lib/data_msg.h": {
+      "native": "02982cd0f821ee7adce8dca7251c0f2f9b948664bd70b269a651121a60089723",
+      "baseline": "02982cd0f821ee7adce8dca7251c0f2f9b948664bd70b269a651121a60089723"
+    },
+    "lib/common.h": {
+      "native": "0080ce8dd3363a62b22711e0821abef889ec71eca75dd9773dcae5c83156d2a0",
+      "baseline": "0080ce8dd3363a62b22711e0821abef889ec71eca75dd9773dcae5c83156d2a0"
+    },
+    "lib/msg_types.h": {
+      "native": "3289dc1ff42a65a8ccc977cf944ad46d328da38f4e91d87ad37692af260a8e29",
+      "baseline": "3289dc1ff42a65a8ccc977cf944ad46d328da38f4e91d87ad37692af260a8e29"
+    },
+    "lib/generic.h": {
+      "native": "646ef8a0b0b5a8342467699346abfa81189e1bb19f0a0f4d9b75cc1f09857b16",
+      "baseline": "646ef8a0b0b5a8342467699346abfa81189e1bb19f0a0f4d9b75cc1f09857b16"
+    },
+    "lib/policy_conf.h": {
+      "native": "4708658f4c6ec99276dd88c9ce6a8370c048b4cb5b60abde5d6165c3077ce76e",
+      "baseline": "4708658f4c6ec99276dd88c9ce6a8370c048b4cb5b60abde5d6165c3077ce76e"
+    },
+    "lib/policy_stats.h": {
+      "native": "3e3ec9ba2e4cd46bcd0500a9276468bd1617ea0f2462903e21195066d92b7c76",
+      "baseline": "3e3ec9ba2e4cd46bcd0500a9276468bd1617ea0f2462903e21195066d92b7c76"
+    },
+    "lib/bpf_helpers.h": {
+      "native": "a4d3142a1a8d7ee71c581f4418aa232b074b333b16e8e108abbd500a8d108a0e",
+      "baseline": "a4d3142a1a8d7ee71c581f4418aa232b074b333b16e8e108abbd500a8d108a0e"
+    },
+    "lib/errmetrics.h": {
+      "native": "200edb95c5a874a262b20840e5a788fd20fb371492da665a9479832664c06c0a",
+      "baseline": "200edb95c5a874a262b20840e5a788fd20fb371492da665a9479832664c06c0a"
+    },
+    "lib/config.h": {
+      "native": "f2c6270b94c1ec522fbdb884c94daf73a0dae4b24067ae15d7bbf41a93ae5d87",
+      "baseline": "f2c6270b94c1ec522fbdb884c94daf73a0dae4b24067ae15d7bbf41a93ae5d87"
+    },
+    "lib/bpf_cred.h": {
+      "native": "278a169aa89cd820fa8a418ab560f68a604d7b6f87b86ef697f5d86aa03a2f2e",
+      "baseline": "278a169aa89cd820fa8a418ab560f68a604d7b6f87b86ef697f5d86aa03a2f2e"
+    },
+    "lib/bpf_d_path.h": {
+      "native": "01b45f7605f6064ea05b1c3689b27a4a204f0de64185963b46d230e0d9e1d63e",
+      "baseline": "01b45f7605f6064ea05b1c3689b27a4a204f0de64185963b46d230e0d9e1d63e"
+    },
+    "lib/environ_conf.h": {
+      "native": "b3500ad4eada42862f2ecbabc5ecee7367bc24fd2b815653c57179799a98b25b",
+      "baseline": "b3500ad4eada42862f2ecbabc5ecee7367bc24fd2b815653c57179799a98b25b"
+    },
+    "lib/bpf_cgroup.h": {
+      "native": "9b5bdd665f24cd126fcfe60421641eabbf51002f4bf3862166d2608f5803b8e6",
+      "baseline": "9b5bdd665f24cd126fcfe60421641eabbf51002f4bf3862166d2608f5803b8e6"
+    },
+    "lib/bpf_event.h": {
+      "native": "9105138082eba0b5e10d56c434eb09716b733e59bb0adaf0b269e62df4837e44",
+      "baseline": "9105138082eba0b5e10d56c434eb09716b733e59bb0adaf0b269e62df4837e44"
+    },
+    "lib/bpf_task.h": {
+      "native": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377",
+      "baseline": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377"
+    },
+    "lib/process.h": {
+      "native": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0",
+      "baseline": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0"
+    },
+    "errmetrics/fileids.h": {
+      "native": "72ff92ea9113f78b2585be12d3b06183a060e34a8d40de686f4146762989071a",
+      "baseline": "72ff92ea9113f78b2585be12d3b06183a060e34a8d40de686f4146762989071a"
+    },
+    "errmetrics/get_fileid.h": {
+      "native": "bdf1caf3ee856f170b6e8a31e7690110eed345dc8885fe94de6b414c054b60df",
+      "baseline": "bdf1caf3ee856f170b6e8a31e7690110eed345dc8885fe94de6b414c054b60df"
+    },
+    "libbpf/bpf_tracing.h": {
+      "native": "202f08d2d4605537f60e77a81ffb31851455569b1f00d94b2d76a3f86ebd91e8",
+      "baseline": "202f08d2d4605537f60e77a81ffb31851455569b1f00d94b2d76a3f86ebd91e8"
+    },
+    "libbpf/bpf_core_read.h": {
+      "native": "8ed6bb4ff7eee627ef35b2020ddc2b73642e35d0e5da8da33f80b07761d10b6b",
+      "baseline": "8ed6bb4ff7eee627ef35b2020ddc2b73642e35d0e5da8da33f80b07761d10b6b"
+    },
+    "windows/process_monitor.c": {
+      "native": "884e43fff45f4725da2ff41ad4a05e033ea4cca24f0902bf2d41876745d56c4a",
+      "baseline": "884e43fff45f4725da2ff41ad4a05e033ea4cca24f0902bf2d41876745d56c4a"
+    },
+    "include/vmlinux.h": {
+      "native": "747255472f09b0d9f45a4370966138676aff3b9b95cf0d93134eee0cf549168d",
+      "baseline": "747255472f09b0d9f45a4370966138676aff3b9b95cf0d93134eee0cf549168d"
+    },
+    "include/vmlinux_generated_arm64.h": {
+      "native": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae",
+      "baseline": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae"
+    },
+    "include/bpf_elf.h": {
+      "native": "daf53c12bd7e31995b02cd83429cea835f6f1989eea6b39fae6ca1fd04804f61",
+      "baseline": "daf53c12bd7e31995b02cd83429cea835f6f1989eea6b39fae6ca1fd04804f61"
+    },
+    "include/errno.h": {
+      "native": "6bc3a3456026257fefdaacc5d48ad4cd7876d7253e19ba4d0b5ce7bfee539ee7",
+      "baseline": "6bc3a3456026257fefdaacc5d48ad4cd7876d7253e19ba4d0b5ce7bfee539ee7"
+    },
+    "include/type_mapper.h": {
+      "native": "1a8d861923b10ba9f89b3f1fdf153e76c57cfc75fd0f1abaf8e66df339e2fca5",
+      "baseline": "1a8d861923b10ba9f89b3f1fdf153e76c57cfc75fd0f1abaf8e66df339e2fca5"
+    },
+    "include/api.h": {
+      "native": "eee59ea0fb6da85f7c301c2f33a25e20bb0817ca4c0c8abb67d6ccc7d93e003c",
+      "baseline": "eee59ea0fb6da85f7c301c2f33a25e20bb0817ca4c0c8abb67d6ccc7d93e003c"
+    },
+    "include/bpf_ktime.h": {
+      "native": "7516751954062bbe08d171d6bb37ae0e72887f4c0135ddd1c7a7a6ead23a9c53",
+      "baseline": "7516751954062bbe08d171d6bb37ae0e72887f4c0135ddd1c7a7a6ead23a9c53"
+    },
+    "include/compiler.h": {
+      "native": "5dba61eae7b8bba7f57b795a1ee49df98ea5ebd1d27ff7c7eeeeab200576fec1",
+      "baseline": "5dba61eae7b8bba7f57b795a1ee49df98ea5ebd1d27ff7c7eeeeab200576fec1"
+    },
+    "process/types/operations.h": {
+      "native": "6dbfbc5f12dc7cdaf3b3d7f219cb8725e4a60a15c383191088990a88d4383984",
+      "baseline": "6dbfbc5f12dc7cdaf3b3d7f219cb8725e4a60a15c383191088990a88d4383984"
+    },
+    "process/types/skb.h": {
+      "native": "e37ab29ca6f5765bd5f9d24542d2330b2200e09e6a4c1c9fe02a564360856dff",
+      "baseline": "e37ab29ca6f5765bd5f9d24542d2330b2200e09e6a4c1c9fe02a564360856dff"
+    },
+    "process/types/net_device.h": {
+      "native": "1578d70314ae74d49976a1c279d003cab282f61394183092dbe8cac49a1ad0f6",
+      "baseline": "1578d70314ae74d49976a1c279d003cab282f61394183092dbe8cac49a1ad0f6"
+    },
+    "process/types/capabilities.h": {
+      "native": "4fb13e18eee1b2e7b876a82fd75c1cd4983bd403cc892c18d531a9dd71650a08",
+      "baseline": "4fb13e18eee1b2e7b876a82fd75c1cd4983bd403cc892c18d531a9dd71650a08"
+    },
+    "process/types/bpfattr.h": {
+      "native": "70168f9bd40860eada24243573244e31e5ec2e2ed2f5953ba9fc8d29c80a06bc",
+      "baseline": "70168f9bd40860eada24243573244e31e5ec2e2ed2f5953ba9fc8d29c80a06bc"
+    },
+    "process/types/tuple.h": {
+      "native": "447633e30a81aa91200ee8581aca05dd42193afcb5081cf76293d573d64b0e98",
+      "baseline": "447633e30a81aa91200ee8581aca05dd42193afcb5081cf76293d573d64b0e98"
+    },
+    "process/types/module.h": {
+      "native": "b500387af0a91a2532cbea03f66e75c6ff720a99d3d182a1db7cf76b91af248a",
+      "baseline": "b500387af0a91a2532cbea03f66e75c6ff720a99d3d182a1db7cf76b91af248a"
+    },
+    "process/types/bpfmap.h": {
+      "native": "d8b1eba5ddda9316ec36ae683c25f2efbf04a45c96077e2598c337075fd09476",
+      "baseline": "d8b1eba5ddda9316ec36ae683c25f2efbf04a45c96077e2598c337075fd09476"
+    },
+    "process/types/perfevent.h": {
+      "native": "6a1443577807718da2fee6b53182c6cefd3919148558c673097f59305b0a53de",
+      "baseline": "6a1443577807718da2fee6b53182c6cefd3919148558c673097f59305b0a53de"
+    },
+    "process/types/sockaddr.h": {
+      "native": "3f0046d3e44687b2596aee66c54b805f1e2040c9721a695a657f9b5168d983ab",
+      "baseline": "3f0046d3e44687b2596aee66c54b805f1e2040c9721a695a657f9b5168d983ab"
+    },
+    "process/types/sock.h": {
+      "native": "c89c661b43d7d643bcbef086bac7f7d0791f89a62ce247df60048e42df4a929f",
+      "baseline": "c89c661b43d7d643bcbef086bac7f7d0791f89a62ce247df60048e42df4a929f"
+    },
+    "process/types/socket.h": {
+      "native": "a41dc7d9bf889fd03f6b479a77c831589a254b29bcd8410164e2ce80747af1a9",
+      "baseline": "a41dc7d9bf889fd03f6b479a77c831589a254b29bcd8410164e2ce80747af1a9"
+    },
+    "process/types/sockaddr_un.h": {
+      "native": "708f2c9ced650e284eb9508dcb87769eb374f21f92e7ab69c105e3f5da05a6ce",
+      "baseline": "708f2c9ced650e284eb9508dcb87769eb374f21f92e7ab69c105e3f5da05a6ce"
+    },
+    "process/types/basic.h": {
+      "native": "3fb1e20e97abb1624b4591999b0fdefe644e9f186cecfccd8805ce9e4636518a",
+      "baseline": "3fb1e20e97abb1624b4591999b0fdefe644e9f186cecfccd8805ce9e4636518a"
+    }
+  },
+  "output_files": {
+    "bpf_execve_event_v61.native.o": {
+      "sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
+      "bytes": 1026080
+    }
+  },
+  "runtime_admission_additions": 0
+}
