@@ -158,5 +158,126 @@
       }
     }
   ],
-  "raw_startup_rows": 577
+  "raw_startup_rows": 577,
+  "latest_closed_cohorts": {
+    "as_of_utc": "2026-11-08T05:16:12.507163+00:00",
+    "scope": "Completed whole-application successor cohorts on captured pre-migration runtimes; baseline resident snapshot, received service IDs and source/object counts retain separate denominators.",
+    "applications": [
+      {
+        "application": "BCC",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json",
+        "baseline_resident": 23,
+        "service_source_ids": 19,
+        "generated": 19,
+        "compiled": 19,
+        "stages": {
+          "verifier_rejected": 3,
+          "bound_accepted": 16
+        },
+        "failure_classes": {
+          "exclusive_retry_loop": 3
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/run-20261107T172354861230Z.tar.gz",
+        "raw_archive_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda"
+      },
+      {
+        "application": "OTel",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/otel-memory-replay/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+        "baseline_resident": 12,
+        "service_source_ids": 2,
+        "generated": 2,
+        "compiled": 2,
+        "stages": {
+          "bound_accepted": 1,
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "unaligned_stack_load": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/otel-memory-replay/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261108T032134244084Z.tar.gz",
+        "raw_archive_sha256": "3e3579ce0ac8f7cea1413f5f9cc141636911aabdd9bdbe1d532ae80dd0c6cddd"
+      },
+      {
+        "application": "Cilium",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/cilium-clock-replay/replay/trusted-arm64-cilium-result/coverage.json",
+        "baseline_resident": 62,
+        "service_source_ids": 1,
+        "generated": 0,
+        "compiled": 0,
+        "stages": {
+          "specialization_failed": 1
+        },
+        "failure_classes": {
+          "helper_189_finite_target_generation": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/cilium-clock-replay/replay/trusted-arm64-cilium-result/run-20261108T012315509298Z.tar.gz",
+        "raw_archive_sha256": "94707b3ba5d48c68f829ad0e1b8734ecd9fcacb42b862ad734fbc800baac77bb"
+      },
+      {
+        "application": "Tetragon",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/tetragon-startup-replay/replay/trusted-arm64-tetragon-result/coverage.json",
+        "baseline_resident": 157,
+        "service_source_ids": 1,
+        "generated": 1,
+        "compiled": 1,
+        "stages": {
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "exclusive_retry_loop": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/tetragon-startup-replay/replay/trusted-arm64-tetragon-result/run-20261107T231024944237Z.tar.gz",
+        "raw_archive_sha256": "ec3c5c275cf2c634adf4449f09d7ee8301d86d532db5cd36763bd0ba92a7fe4d"
+      },
+      {
+        "application": "Katran",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/helper-guard-runtime/replay/trusted-arm64-katran-result/coverage.json",
+        "baseline_resident": 1,
+        "service_source_ids": 1,
+        "generated": 1,
+        "compiled": 1,
+        "stages": {
+          "bound_accepted": 1
+        },
+        "failure_classes": {},
+        "application_status": [
+          "ok"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/helper-guard-runtime/replay/trusted-arm64-katran-result/run-20261108T020024886493Z.tar.gz",
+        "raw_archive_sha256": "4697279c1b0e869a2fd8873c8e089de46d83ecec88a990573f6686ac000a53ea"
+      },
+      {
+        "application": "Tracee",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/tracee-replay/trusted-arm64-tracee-result/coverage.json",
+        "baseline_resident": 151,
+        "service_source_ids": 2,
+        "generated": 2,
+        "compiled": 2,
+        "stages": {
+          "bound_accepted": 1,
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "scalar_context_memory_access": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/entry-resource-scope/tracee-replay/trusted-arm64-tracee-result/run-20261107T233753589111Z.tar.gz",
+        "raw_archive_sha256": "7d48e337ef8266abd1115abc51df054d39c78a25844241b279b43dd320f249c0"
+      }
+    ]
+  }
 }
