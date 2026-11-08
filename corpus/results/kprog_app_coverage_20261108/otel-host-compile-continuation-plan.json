@@ -1,0 +1,39 @@
+{
+  "created": "2026-11-08T04:20:33.631672+00:00",
+  "predecessor_pid": 322010,
+  "application": "otelcol-ebpf-profiler/profiling",
+  "cpus": "20-23",
+  "memory": "12G",
+  "vcpus": 8,
+  "samples": 1,
+  "duration": 2,
+  "existing_lifecycle_environment": {
+    "BPFREJIT_CORPUS_APP_TIMEOUT": "0",
+    "BPFREJIT_CORPUS_REJIT_TIMEOUT": "0"
+  },
+  "native_workload": "original captured OTel native ELF and existing two-start workload",
+  "compiler": "same fresh host broker and Clang flags; per-job source/object/wall/RSS receipts",
+  "sha256": {
+    "Makefile": "5a433a97e991b4a94112be60b6c404e6ec349f41c8d73d32d5b44bbfa99219be",
+    "Dockerfile": "740818aa655e4b8ec0def89a387d13d40ff5c478c098506b2f4db395cf477426",
+    "run.sh": "3920f19f540794020be696531739a4d462ac261558bd2775e52beaa495c1df91",
+    "queue.py": "00cbbf5ce8cdebe15ad72f0a98ab293a858d28dea5e125ee0e9a0c44e76a64c1",
+    "guest.py": "7249e78a4c0e49b939c3210a5ead0f10ebbdd69b070f6124b204e099a4a45618",
+    "guest-before.py": "eebab553094964f857d5f538837812769fffc3c4f1d1c8f9fc1175ca8c755a83",
+    "collect.py": "2acdbe3525615bd581ec5e54c100e69ade865fb387ff24c002322b430d992a66",
+    "candidate.h": "a46abc8b460350c4e0e248982b66d5bfc90e55f432e7db0078cc033cc262f1f0",
+    "clang-candidate": "28fbd84fdf2b7f0c505a9fa4d74e831530d8832357c80d53e4f50f1ccc82c263",
+    "read.h": "4554067c1e54b6a70c2f871b3e72592717dfd9a09471ba49113cd5358ccf4931",
+    "native-link-readonly-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
+    "trusted-native-loader": "6820a2e3be2014379030fd4791211ccedbdee015ce469e54a5ab6dd17b7a3ab2",
+    "libnative_loader.so": "4bb730da55d60f4434b42936f17c2d13c3a4f6b1f35f724631bb56bbca887f69",
+    "module.ko": "57e6f868da0768526965fdd0a789c4d7080358efe4439edb1f0e32c5136ceb9f",
+    "base-image.json": "6c590d42538f50ba01ce685f9c677274a59b20c723ca6189ca8dffd04d61ecb4",
+    "compiler-source.json": "dd960d5ed1d12a4a68f999b96c1bedc9be97828468c689c15c29ae73361cfa78",
+    "host-controller.py": "30cefff5e4c159b44cf0f51ccda36ac248dad31d53a923b3cc8cfeaca3e9f19e"
+  },
+  "inputs_archive_sha256": "0943d2cee99069282a6c17f7ad2524ae2591db072183fd615ad54c5a1ad58ea4",
+  "controller_pid": 334148,
+  "syntax_check": "five Python files and shell PASS",
+  "runtime_make_dry_run": 0
+}
