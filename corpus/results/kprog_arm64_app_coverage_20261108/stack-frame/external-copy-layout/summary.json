@@ -1,0 +1,33 @@
+{
+  "utc": "2026-11-08T11:45:36.195877+00:00",
+  "outcomes": {
+    "service": 0,
+    "micro": 0
+  },
+  "scope": "Private payload geometry follows proven external, private and conservative dynamic destinations; raw memory instruction bodies retained",
+  "regression": "Original external-copy fixture fails; first precision proposal also fails added SP-derived dynamic destination; final four-scene regression passes",
+  "layout": [
+    -368,
+    0,
+    [
+      -64
+    ]
+  ],
+  "compiler": {
+    "maximum_fp_minus_offset": 488,
+    "object_sha256": "33453ee29c57d751e42ee26f34de83489543b2a85af76e3bb4ce5d0e4a8c9018",
+    "layout": [
+      -368,
+      0,
+      [
+        -64
+      ]
+    ],
+    "baseline_compiler_allocated_section_identity": true,
+    "baseline_maximum_fp_minus_offset": 872
+  },
+  "canonical_sources": {
+    "kprog/arm64/micro-prog/arm64_abi.py": "4d6f06aad0db5988cb9bf410e316f0db6d08252f56fa42a961ec504201947dd0",
+    "kprog/test/check_trusted_service.py": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289"
+  }
+}

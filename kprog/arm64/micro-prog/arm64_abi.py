@@ -380,10 +380,11 @@ def collect_layout(insns, targets, decode):
                                     saved.update({start+p-origin:v for p,v in state.pointers.items() if origin<=p and p+8<=origin+length})
                                 elif origins:
                                     for position in range(max(0, length-7)): saved[start+position] = None
-                    # Helper copies may transport private pointer tags. Unknown
-                    # destinations/lengths retain the complete ghost layout.
+                    # Private copies carry pointer payloads into private storage.
+                    # Unknown destinations/lengths retain the complete ghost layout.
                     source_arg = 1 if name == 'memcpy' else HELPER_COPY_SOURCES.get(name)
-                    if effect is not None and source_arg is not None:
+                    if (effect is not None and source_arg is not None and
+                            (incoming.aliases[effect[0]] is not False or incoming.ghost[effect[0]])):
                         dst,size = effect
                         start,length = incoming.aliases[dst],incoming.maxima[size]
                         source = incoming.aliases[source_arg]

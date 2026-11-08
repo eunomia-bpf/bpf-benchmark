@@ -146,4 +146,22 @@ class TrustedMetadata(unittest.TestCase):
         expected += [ctypes.sizeof(service.Context),ctypes.sizeof(service.Map),service.Context.prog_flags.offset,service.Map.map_type.offset,service.GET_CONTEXT,service.GET_MAP]
         self.assertEqual(values,expected)
 
+class Arm64PrivateLayout(unittest.TestCase):
+    def test_memcpy_payload_geometry_tracks_private_destinations(self):
+        sys.path.insert(0,str(ROOT/'kprog/arm64/micro-prog'))
+        import generate_micro_sim_proofs as arm
+        for destination,want in [('external',[-8]),('private',[-16,-8]),('unknown',None),('dynamic-private',None)]:
+            with self.subTest(destination=destination):
+                body=[('sub',('sp','sp','#16')),('str',('x30','[sp, #8]'))]
+                if destination=='private':body.append(('mov',('x0','sp')))
+                if destination=='unknown':body.append(('mov',('x0','x3')))
+                if destination=='dynamic-private':body += [('mov',('x0','sp')),('add',('x0','x0','x3'))]
+                body += [('add',('x1','sp','#8' if destination=='private' else '#0')),
+                         ('mov',('x2','#8' if destination=='private' else '#16')),
+                         ('bl',('0 <memcpy>',)),('ldr',('x30','[sp, #8]')),
+                         ('add',('sp','sp','#16')),('ret',())]
+                insns=[arm.NativeInsn(i*4,op,args,op+' '+', '.join(args),
+                                     'memcpy' if op=='bl' else None) for i,(op,args) in enumerate(body)]
+                self.assertEqual(arm.collect_layout(insns,{},arm),(-16,0,want))
+
 if __name__=='__main__':unittest.main()
