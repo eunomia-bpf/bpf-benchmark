@@ -14,7 +14,8 @@ The shared helper-context relation translates exactly VALUE==BASE to KERNEL. Its
 | Existing micro compile controls | 29positive+1negative-native,exit0 |
 | Existing helper typed-ABI route / ID cases | 18946 / 4100,0differences,UBSan |
 | Existing universal X86MovLoadHandler / Arm64HelperArgPtrShape Lean modules | both build,exit0 |
-| Complete original Cilium and BCC/Katran successor | detached; terminal receipts follow |
+| Complete original Cilium successor | 2generated/compiled,1installed; tc_index byteAND write |
+| Complete original BCC/Katran successor | 26generated/compiled/installed; both applications ok |
 
 The first two live-context Cilium cohorts each record2generated/compiled and1installed, reaching helper25context typing. Their BCC/Katran setup commands use the initial `bcc,katran` alias and retain the corpus unknown-app error with0native submissions. The current private recipe forwards the original concrete `bcc/set,katran` application ids. Both preceding source epochs and all actual counters/errors remain in `earlier-cohorts.tar.gz`.
 
@@ -31,3 +32,9 @@ make -f "$D/bcc-katran-skb-live/Makefile" corpus STATE="$D/bcc-katran-skb-live" 
 ```
 
 `component.tar.gz` keeps the exact canonical candidate/base/patch, current source/BPF/compiler commands, all component outcomes, shared C/Lean files and whole-app launch recipes. The shared five-step kernel/module and native application inputs retain their earlier identities. V owns the universal ABI/token/link integration; the generic helper context relation applies to both ISAs.
+
+The complete current live-context Cilium startup closes at `cil_from_netdev`: native byteAND at skb.tc_index134 reaches the stock BTF writer restriction `only read is supported`, after528instructions/7states. Live cb writes and helper25context conversion precede this frontier successfully. Its2terminal native hashes match their captured inputs. The following scalar-field source epoch retains a separate whole-application receipt.
+
+The complete original BCC/Katran replay installs25BCC programs and1Katran program, and both workloads report `ok`. Its26native input hashes equal the earlier final five-step cohort. Katran native pktgen,BPF,total,VIP,LRU andTX each record2454567packets, with0LRUmisses. Receiver2454279 plus288RX-interface drops accounts for2454567; TX-interface drops0. JIT records2437119BPF runs,2437118VIP/LRU/TX and1PASS; received2395903 plus41047TX-interface and168RX-interface drops accounts for2437118TX. The original raw work, per-program counters and errors remain in each result archive. R keeps timing and same-work attribution ownership.
+
+`cilium-skb-live/` and `bcc-katran-skb-live/` retain coverage, full request/result archives and closed launch/runtime receipts. `live-context-work.json` records native-input equality and terminal application status. The current context-model correction changes B while retaining P and the shared kernel/module/runtime identities.
