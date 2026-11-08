@@ -1,0 +1,246 @@
+{
+  "created": "2026-11-08T13:12:35.197584+00:00",
+  "source_commit": "d963788c08ba40da4e2068f60efa8c14164c0a54",
+  "native_link_sha256": "015a3096a647cc8b771cbd10e0606e00f1b36b2931cf6440adfd63a87b4c8117",
+  "programs": [
+    {
+      "symbol": "global_func2",
+      "native_sha256": "d34d9646d48fa7ead3d4120f255301ef124c6aa7c625643c3d9a0a724c59b275",
+      "metadata": {
+        "prog_type": 3,
+        "section": "tc",
+        "maps": []
+      },
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func2",
+        "native_sha256": "d34d9646d48fa7ead3d4120f255301ef124c6aa7c625643c3d9a0a724c59b275"
+      },
+      "exit": 0,
+      "wall_seconds": 3.711016762070358,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/request.native.o",
+            "--symbol",
+            "global_func2",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.proof.o"
+          ],
+          "returncode": 0,
+          "stderr": "native-link: entry=global_func2 (74 bytes), 4 reachable symbol(s) total\n  - global_func2 (vaddr 0x0, 74 bytes) [entry]\n  - f1 (vaddr 0x0, 54 bytes) [entry]\n  - f2 (vaddr 0x40, 43 bytes)\n  - f3 (vaddr 0x70, 70 bytes)\nnative-link: wrote proof object 245 bytes, 7 reloc(s) -> /workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.proof.o\n"
+        },
+        {
+          "command": [
+            "/usr/lib/llvm-18/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.c",
+            "-o",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.o"
+          ],
+          "returncode": 0,
+          "stderr": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.c:118:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  118 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 415ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1373:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1373 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.c:227:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  227 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 415ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1373:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1373 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func2/trusted_x86.bpf.c:262:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]\n  262 | }\n      | ^\n3 warnings generated.\n"
+        }
+      ],
+      "sections": [
+        {
+          "name": "tc",
+          "instructions": 1174,
+          "maximum_fp_minus_offset": 1128
+        }
+      ]
+    },
+    {
+      "symbol": "global_func4",
+      "native_sha256": "8f1e134d6dbb3e85faf429fc647356d1e1ce5114820a9da00cfa7cbe94dc5a13",
+      "metadata": {
+        "prog_type": 3,
+        "section": "tc",
+        "maps": []
+      },
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func4",
+        "native_sha256": "8f1e134d6dbb3e85faf429fc647356d1e1ce5114820a9da00cfa7cbe94dc5a13"
+      },
+      "exit": 0,
+      "wall_seconds": 0.08268098905682564,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/request.native.o",
+            "--symbol",
+            "global_func4",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.proof.o"
+          ],
+          "returncode": 0,
+          "stderr": "native-link: entry=global_func4 (5 bytes), 1 reachable symbol(s) total\n  - global_func4 (vaddr 0x0, 5 bytes) [entry]\nnative-link: wrote proof object 2 bytes, 1 reloc(s) -> /workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.proof.o\n"
+        },
+        {
+          "command": [
+            "/usr/lib/llvm-18/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.bpf.c",
+            "-o",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func4/trusted_x86.bpf.o"
+          ],
+          "returncode": 0,
+          "stderr": ""
+        }
+      ],
+      "sections": [
+        {
+          "name": "tc",
+          "instructions": 28,
+          "maximum_fp_minus_offset": 0
+        }
+      ]
+    },
+    {
+      "symbol": "global_func9",
+      "native_sha256": "3f7ea3a18d729fd5d00f804b1cab388704a33e0eb6433a778966709232d61b82",
+      "metadata": {
+        "prog_type": 8,
+        "section": "cgroup_skb/ingress",
+        "maps": []
+      },
+      "exit": 1,
+      "exception": "Command '['/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '--input', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/request.native.o', '--symbol', 'global_func9', '--mode', 'proof', '--preserve-entry-abi', '--output', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/trusted_x86.proof.o']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/run.py\", line 8, in <module>\n    try:row['artifacts']=specialize(source.read_bytes(),symbol,row['metadata'],O/symbol,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['exit']=0\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 43, in specialize\n    run([native_link, \"--input\", native, \"--symbol\", entry_symbol,\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 41, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '--input', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/request.native.o', '--symbol', 'global_func9', '--mode', 'proof', '--preserve-entry-abi', '--output', '/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/trusted_x86.proof.o']' returned non-zero exit status 1.\n",
+      "wall_seconds": 0.0047605521976947784,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/request.native.o",
+            "--symbol",
+            "global_func9",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func9/trusted_x86.proof.o"
+          ],
+          "returncode": 1,
+          "stderr": "native-link: entry=global_func9 (241 bytes), 6 reachable symbol(s) total\n  - global_func9 (vaddr 0x0, 241 bytes) [entry]\n  - foo (vaddr 0x0, 30 bytes) [entry]\n  - bar (vaddr 0x20, 22 bytes)\n  - baz (vaddr 0x40, 22 bytes)\n  - qux (vaddr 0x60, 11 bytes)\n  - quux (vaddr 0x70, 12 bytes)\nError: PC32 zero-sized target  requires a readonly section or an unnamed bss section\n"
+        }
+      ],
+      "sections": []
+    },
+    {
+      "symbol": "global_func16",
+      "native_sha256": "eae981f2b4b0b759cba3ff2ed6f6104cf81d9a749d6848375c91f08dade79b07",
+      "metadata": {
+        "prog_type": 8,
+        "section": "cgroup_skb/ingress",
+        "maps": []
+      },
+      "artifacts": {
+        "native_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/request.native.o",
+        "native_proof_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.proof.o",
+        "simulator_object": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "global_func16",
+        "native_sha256": "eae981f2b4b0b759cba3ff2ed6f6104cf81d9a749d6848375c91f08dade79b07"
+      },
+      "exit": 0,
+      "wall_seconds": 0.42882191808894277,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/request.native.o",
+            "--symbol",
+            "global_func16",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.proof.o"
+          ],
+          "returncode": 0,
+          "stderr": "native-link: entry=global_func16 (26 bytes), 2 reachable symbol(s) total\n  - global_func16 (vaddr 0x0, 26 bytes) [entry]\n  - foo (vaddr 0x0, 12 bytes) [entry]\nnative-link: wrote proof object 42 bytes, 1 reloc(s) -> /workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.proof.o\n"
+        },
+        {
+          "command": [
+            "/usr/lib/llvm-18/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.bpf.c",
+            "-o",
+            "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.bpf.o"
+          ],
+          "returncode": 0,
+          "stderr": "/workspaces/.agent-state/kprog-lanes/C/design-only/kernel-selftest-frontiers/global_func16/trusted_x86.bpf.c:65:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]\n   65 | }\n      | ^\n1 warning generated.\n"
+        }
+      ],
+      "sections": [
+        {
+          "name": "cgroup_skb/egress",
+          "instructions": 44,
+          "maximum_fp_minus_offset": 48
+        }
+      ]
+    }
+  ]
+}
