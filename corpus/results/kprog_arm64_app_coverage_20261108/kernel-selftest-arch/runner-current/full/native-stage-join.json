@@ -26,7 +26,26 @@
     "generated": 20,
     "compiled": 20,
     "installed_expected_failure": 6,
-    "installed_with_test_run_error": 7
+    "installed_with_test_run_error": 7,
+    "installed_stage_agreement": {
+      "failure": {
+        "reached": 8,
+        "installed": 6,
+        "stock_verifier_rejected": 2,
+        "agrees": 2
+      },
+      "success": {
+        "reached": 7,
+        "installed": 2,
+        "stock_verifier_rejected": 5,
+        "agrees": 2
+      },
+      "coverage_native_link_failed": 5,
+      "service_requests": 20,
+      "generated": 20,
+      "compiled": 20,
+      "client_actual_executions": 1
+    }
   },
   "requests": [
     {
