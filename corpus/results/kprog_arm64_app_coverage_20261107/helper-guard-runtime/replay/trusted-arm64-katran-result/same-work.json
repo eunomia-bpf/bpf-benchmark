@@ -1,0 +1,512 @@
+{
+  "utc": "2026-11-08T03:24:39.127885+00:00",
+  "scope": "Whole Katran two-start functional work on the guarded ARM kernel-owned native-only path.",
+  "publication": "f869a5ff803fa241a39b7ff13ab7490e9c939d40",
+  "archive": "corpus/results/kprog_arm64_app_coverage_20261107/helper-guard-runtime/replay/trusted-arm64-katran-result/run-20261108T020024886493Z.tar.gz",
+  "archive_sha256": "4697279c1b0e869a2fd8873c8e089de46d83ecec88a990573f6686ac000a53ea",
+  "raw_app_member": "run/corpus-results/arm64_qemu_corpus_19700101_000044_979088/details/apps/katran.json",
+  "raw_app_sha256": "e8006965bc7bcb1fa024c5759dfada2f88750ab07757ca6a770c728df3fa229c",
+  "reader_source_sha256": "c494817756cead0d5d403c9df208ebf3db8e9b2bef899ed1f058741f1d7de518",
+  "host_ok": true,
+  "guest_exit": 0,
+  "hashes_unchanged": true,
+  "service_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "bound": 1,
+  "identity_rows": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "balancer_ingress",
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "3301efc1633671c30030862aa1044f29a48ca4bcf896cf92dff128cc67a19d27",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "624a19d8c9ddc5a5127b1f0abe2cab80628adc572fb8d066586e818c9daef7a2",
+        "request/generated/trusted_arm64.bpf.o": "c4f56b5c5d911edf4728bf2a1ac65ab015de0351d019abb007620f6b3147a644",
+        "request/generated/trusted_arm64.bpf.c": "2b6fba788a789c34c9822778b81e88dcb00bb88904657c1bfac3b1469e38e783",
+        "request/generation.metadata.json": "104978c3ecb6677f0f4b4fc33d70e487244ded28709c2dca8be76fc3cedabb05",
+        "request/kernel.facts.json": "67bcae3c240d50fb3ba1aa8ef5a210c177c24b15eb7118bd13713ba069c83921",
+        "request/source-identities.json": "c9f16f8fbcc464cd6b45775e17f3914548af6a4a114d44c9bf6ae08b56f0361a"
+      }
+    }
+  ],
+  "work": {
+    "applications": [
+      {
+        "app": "katran",
+        "app_status": "ok",
+        "app_error": "",
+        "app_result_sha256": "e8006965bc7bcb1fa024c5759dfada2f88750ab07757ca6a770c728df3fa229c",
+        "phases": {
+          "baseline": {
+            "raw_measurement_present": true,
+            "archived_coverage_equal": true,
+            "resident_program_count": 1,
+            "bpf_run_count": 24000,
+            "bpf_run_time_ns": 525440864,
+            "workloads": [
+              {
+                "name": "katran_kernel_pktgen_l2_udp",
+                "duration_seconds": 3.440504352000005,
+                "returncode": 0,
+                "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "components": [
+                  {
+                    "name": "katran_kernel_pktgen_l2_udp_thread",
+                    "duration_seconds": 3.440504352000005,
+                    "returncode": 0,
+                    "stdout_sha256": "93cd7a4b7c0df1de5a75cd2fb2615ea1c1dcca3599a0624f1b799bb36170208f",
+                    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  }
+                ]
+              }
+            ]
+          },
+          "post_rejit": {
+            "raw_measurement_present": true,
+            "archived_coverage_equal": true,
+            "resident_program_count": 1,
+            "bpf_run_count": 25473,
+            "bpf_run_time_ns": 542214208,
+            "workloads": [
+              {
+                "name": "katran_kernel_pktgen_l2_udp",
+                "duration_seconds": 3.2230401119995804,
+                "returncode": 0,
+                "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "components": [
+                  {
+                    "name": "katran_kernel_pktgen_l2_udp_thread",
+                    "duration_seconds": 3.2230401119995804,
+                    "returncode": 0,
+                    "stdout_sha256": "f962674bce4b0982037472d057197f6738cca1a74c6ad91db97e40e6e393fefb",
+                    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "published_request_fields_equal": true,
+    "host_ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "recorded_hashes_unchanged": true,
+    "initial_source_identity_count": 192,
+    "link_plans": [
+      {
+        "request_id": 1,
+        "sha256": "5261c31b5da565286d7ac6d7cb3606743ed27459ee2f49460e237d8ad15ff1c1",
+        "map_names": [
+          "ch_rings",
+          "ctl_array",
+          "fallback_cache",
+          "lru_mapping",
+          "lru_miss_stats",
+          "quic_stats_map",
+          "reals",
+          "reals_stats",
+          "server_id_map",
+          "server_id_stats",
+          "stats",
+          "vip_map",
+          "vip_miss_stats",
+          "vip_to_down_rea",
+          "vip_to_down_reals_map"
+        ],
+        "tail_call_maps": []
+      }
+    ],
+    "archive_sha256": "4697279c1b0e869a2fd8873c8e089de46d83ecec88a990573f6686ac000a53ea",
+    "published_identity_rows_equal": true,
+    "published_artifact_hash_matches": 6
+  },
+  "workload_configs_equal": true,
+  "phases": {
+    "baseline": {
+      "sent": 24000,
+      "bpf_calls": 24000,
+      "programs": [
+        {
+          "bytes_jited": 14456,
+          "bytes_xlated": 23808,
+          "id": 17,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 24000,
+          "run_time_ns_delta": 525440864,
+          "type": "xdp"
+        }
+      ],
+      "total_packets": 24000,
+      "vip_packets": 24000,
+      "xdp_tx": 24000,
+      "lru": {
+        "bytes_or_v2": 1,
+        "packets_or_v1": 24000
+      },
+      "lru_miss": {
+        "bytes_or_v2": 0,
+        "packets_or_v1": 0
+      },
+      "receiver_packets": 24000,
+      "workload_returncode": 0,
+      "component_returncodes": [
+        0
+      ],
+      "relations": {
+        "pktgen_bpf_total_vip_tx_lru_receiver_equal": true,
+        "raw_deltas_equal": true,
+        "receiver_deltas_equal": true
+      },
+      "raw_outcome_delta": {
+        "counters": {
+          "consistent_hash_drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "decap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "encap_fail": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "fallback_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 24000
+          },
+          "global_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v4": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v6": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_too_big": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lpm_src": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lru": {
+            "bytes_or_v2": 1,
+            "packets_or_v1": 24000
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "new_conn_rate": {
+            "bytes_or_v2": 100743769152,
+            "packets_or_v1": -2514
+          },
+          "pass": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "quic_icmp": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "remote_encap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "total": {
+            "bytes_or_v2": 1536000,
+            "packets_or_v1": 24000
+          },
+          "tx": {
+            "bytes_or_v2": 1536000,
+            "packets_or_v1": 24000
+          },
+          "udp_flow_migration": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "vip_0": {
+            "bytes_or_v2": 1200000,
+            "packets_or_v1": 24000
+          },
+          "xpop_decap_success": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          }
+        },
+        "interfaces": {
+          "load_balancer/katran0": {
+            "rx_bytes": 1200000,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 24000,
+            "tx_bytes": 2016000,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 24000
+          },
+          "real/real0": {
+            "rx_bytes": 2016000,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 24000,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "router/rtlb0": {
+            "rx_bytes": 2016000,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 24000,
+            "tx_bytes": 1200000,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 24000
+          },
+          "router/rtreal0": {
+            "rx_bytes": 0,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 0,
+            "tx_bytes": 2016000,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 24000
+          }
+        },
+        "real_counters": {
+          "real_1": {
+            "bytes_or_v2": 1200000,
+            "packets_or_v1": 24000
+          }
+        },
+        "reals_stats_map_ids": [
+          13
+        ],
+        "receiver": {
+          "rx_bytes": 2016000,
+          "rx_dropped": 0,
+          "rx_errors": 0,
+          "rx_packets": 24000,
+          "tx_bytes": 0,
+          "tx_dropped": 0,
+          "tx_errors": 0,
+          "tx_packets": 0
+        },
+        "stats_map_ids": [
+          6
+        ]
+      }
+    },
+    "post_rejit": {
+      "sent": 25473,
+      "bpf_calls": 25473,
+      "programs": [
+        {
+          "bytes_jited": 10264,
+          "bytes_xlated": 24,
+          "id": 32,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 25473,
+          "run_time_ns_delta": 542214208,
+          "type": "xdp"
+        }
+      ],
+      "total_packets": 25473,
+      "vip_packets": 25473,
+      "xdp_tx": 25473,
+      "lru": {
+        "bytes_or_v2": 1,
+        "packets_or_v1": 25473
+      },
+      "lru_miss": {
+        "bytes_or_v2": 0,
+        "packets_or_v1": 0
+      },
+      "receiver_packets": 25473,
+      "workload_returncode": 0,
+      "component_returncodes": [
+        0
+      ],
+      "relations": {
+        "pktgen_bpf_total_vip_tx_lru_receiver_equal": true,
+        "raw_deltas_equal": true,
+        "receiver_deltas_equal": true
+      },
+      "raw_outcome_delta": {
+        "counters": {
+          "consistent_hash_drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "decap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "drop": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "encap_fail": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "fallback_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 25473
+          },
+          "global_lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v4": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_ptb_v6": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "icmp_too_big": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lpm_src": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "lru": {
+            "bytes_or_v2": 1,
+            "packets_or_v1": 25473
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "new_conn_rate": {
+            "bytes_or_v2": 91936426672,
+            "packets_or_v1": -1223
+          },
+          "pass": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "quic_icmp": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "remote_encap": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "total": {
+            "bytes_or_v2": 1630272,
+            "packets_or_v1": 25473
+          },
+          "tx": {
+            "bytes_or_v2": 1630272,
+            "packets_or_v1": 25473
+          },
+          "udp_flow_migration": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "vip_0": {
+            "bytes_or_v2": 1273650,
+            "packets_or_v1": 25473
+          },
+          "xpop_decap_success": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          }
+        },
+        "interfaces": {
+          "load_balancer/katran0": {
+            "rx_bytes": 1273650,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 25473,
+            "tx_bytes": 2139732,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 25473
+          },
+          "real/real0": {
+            "rx_bytes": 2139732,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 25473,
+            "tx_bytes": 0,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 0
+          },
+          "router/rtlb0": {
+            "rx_bytes": 2139732,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 25473,
+            "tx_bytes": 1273650,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 25473
+          },
+          "router/rtreal0": {
+            "rx_bytes": 0,
+            "rx_dropped": 0,
+            "rx_errors": 0,
+            "rx_packets": 0,
+            "tx_bytes": 2139732,
+            "tx_dropped": 0,
+            "tx_errors": 0,
+            "tx_packets": 25473
+          }
+        },
+        "real_counters": {
+          "real_1": {
+            "bytes_or_v2": 1273650,
+            "packets_or_v1": 25473
+          }
+        },
+        "reals_stats_map_ids": [
+          34
+        ],
+        "receiver": {
+          "rx_bytes": 2139732,
+          "rx_dropped": 0,
+          "rx_errors": 0,
+          "rx_packets": 25473,
+          "tx_bytes": 0,
+          "tx_dropped": 0,
+          "tx_errors": 0,
+          "tx_packets": 0
+        },
+        "stats_map_ids": [
+          27
+        ]
+      }
+    }
+  },
+  "interpretation": "Each phase independently matches sent/BPF/total/VIP/TX/LRU/receiver packets. LRU counter second field records one miss per phase. Rate-window state words retain their exact raw deltas. QEMU measurements establish functional behavior; hardware performance follows coordinator priorities."
+}

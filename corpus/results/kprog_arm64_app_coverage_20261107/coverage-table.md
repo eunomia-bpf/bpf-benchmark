@@ -52,3 +52,11 @@ The existing generic application archive reader joins each published coverage fi
 | otel / bfaeaf240 | 12 / 163,901 | 2 | 2 / 1 / 1 | guest_oom_clang |
 | tracee / 7e35f5cb6 | 151 / 161,369 | 2 | 2 / 2 / 1 | scalar_pointer_verifier_refusal |
 | cilium / 4aa04fec4 | 62 / 124,884 | 1 | 0 / 0 / 0 | helper_identity_domain |
+
+## Guarded-module Katran successor
+
+| Application / publication | Baseline resident / BPF calls | Native resident / BPF calls | Requests | Generated / compiled / bound | Application |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Katran / f869a5ff8 | 1 / 24,000 | 1 / 25,473 | 1 | 1 / 1 / 1 | ok |
+
+[Guarded same-work counters](helper-guard-runtime/replay/trusted-arm64-katran-result/same-work.json) match pktgen/BPF/total/VIP/TX/LRU/receiver packets within each phase. Both phases record one LRU miss and0 packet/interface error/drop counters. The common kernel-owned path generates, verifies, binds and runs the one application request with matching native identities. OTel8GiB is the active successor, followed by skb adoption and the matched-module generic safety/Cilium/Tracee sequence.
