@@ -1,0 +1,56 @@
+{
+  "utc": "2026-11-08T06:59:21.473599+00:00",
+  "reason": "Five-step BCC/Katran and remaining-four successors own the application replays; consolidate two waiting older source epochs and the queued canonical stack writer",
+  "retired": [
+    {
+      "pid": 331567,
+      "command": "python3 /workspaces/.agent-state/kprog-lanes/A/host-compile/bcc-tetragon/run.py ",
+      "children": "",
+      "previous_status": {
+        "utc": "2026-11-08T04:20:02.866654+00:00",
+        "phase": "waiting_cilium_tracee_release",
+        "predecessor_status": "/workspaces/.agent-state/kprog-lanes/A/xdp-byte-helpers/app-status.json"
+      },
+      "script_sha256": "d693a0630965a5bdf56e6aecd3550028a4f529f481c1c33e1eccecc91e40ecd8",
+      "retained_launch_commit": "0638ce72937699873d143ab2dec9a54394372200",
+      "successor_pid": 666734,
+      "status_path": "/workspaces/.agent-state/kprog-lanes/A/host-compile/bcc-tetragon/status.json",
+      "retired_utc": "2026-11-08T06:59:21.512849+00:00"
+    },
+    {
+      "pid": 387692,
+      "command": "python3 /workspaces/.agent-state/kprog-lanes/A/unaligned-stack/app-run.py ",
+      "children": "",
+      "previous_status": {
+        "utc": "2026-11-08T04:52:58.023020+00:00",
+        "phase": "waiting_component_and_application_epochs",
+        "launch_commit": "c606610adfbe5d3429e791cb9600fd6bb11ff8e0",
+        "component_pid": 385933,
+        "application_pid": 324219
+      },
+      "script_sha256": "f5785e0fa37f5f7c8bdfdfa432963eb6636729286cf54d17d4b0bc4c28f08051",
+      "retained_launch_commit": "c606610adfbe5d3429e791cb9600fd6bb11ff8e0",
+      "successor_pid": 675730,
+      "status_path": "/workspaces/.agent-state/kprog-lanes/A/unaligned-stack/app-status.json",
+      "retired_utc": "2026-11-08T06:59:21.514260+00:00"
+    }
+  ],
+  "active_cohorts_retained": [
+    {
+      "pid": 324219,
+      "scope": "Current Tracee/H captured epoch"
+    },
+    {
+      "pid": 583910,
+      "scope": "Current five-step Katran"
+    },
+    {
+      "pid": 666734,
+      "scope": "Corrected BCC/Katran successor"
+    },
+    {
+      "pid": 675730,
+      "scope": "Remaining four successor"
+    }
+  ]
+}
