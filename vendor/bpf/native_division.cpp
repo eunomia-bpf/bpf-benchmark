@@ -10,6 +10,7 @@
 
 namespace {
 struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
+    static bool isRequired() { return true; }
     llvm::PreservedAnalyses run(llvm::Function &function,
                                llvm::FunctionAnalysisManager &) {
         llvm::SmallVector<llvm::BinaryOperator *> divisions;
@@ -67,7 +68,7 @@ struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
                     (word->isIntegerTy(64) ? "xorl %edx, %edx; divq $3" :
                                             "xorl %edx, %edx; divl $3");
                 auto *divide = llvm::InlineAsm::get(signature, assembly,
-                    "=&{ax},=&{dx},0,r,~{cc}", true);
+                    "=&{ax},=&{dx},0,r,~{flags}", true);
                 auto *pair = calculate.CreateCall(divide, {left, right});
                 value = calculate.CreateIntCast(calculate.CreateExtractValue(pair,
                     remainder ? 1 : 0), type, sign);
