@@ -5045,3 +5045,17 @@ and no fault. The combined85 certificate retains all83 CMOV/SETCC functions
 with identical bytes. The [original component evidence](compiled-bswap.log.gz)
 retains preprocessing, actual ELF/arrays and proof logs. Physical invocation
 ABI, architectural register mapping and compiler embedding remain interfaces.
+
+### Inactive stack ghost payload erasure
+
+`X86StackGhost` in the existing X86StackIndex module proves whole-table read
+equality after every finite save, overlap invalidation, call-frame cleanup and
+clear history when only non-STACK representatives are replaced. This includes
+zero initialization of scalar cells. Every active STACK pointer and every tag
+is retained. The exact SV_READ_ONE accumulator traversal permits any finite
+slot order, including duplicates. New laws use only `propext`; the existing
+whole-library build exits0. [Original evidence](inactive-stack-ghost.log.gz)
+retains source, failed and passing proof attempts and the full build log.
+Raw guest memory is separate. This C-model erasure result does not establish
+C definedness of an uninitialized read, actual clang path preservation, or
+physical pointer/native ABI correspondence.

@@ -28265,6 +28265,127 @@
       "stable_inputs": 224
     }
   },
+  "x86_inactive_stack_ghost_erasure": {
+    "actual_full_lake_exit": 0,
+    "actual_standalone_exit": 0,
+    "archive_block_sha256": "29b2e3acfe3dbf4cf689f5e5ce5f6ffe5d90b0237db3d8c2fbc907a4406f14dd",
+    "archive_file": "kprog/results/kprog_verification_20261107/inactive-stack-ghost.log.gz",
+    "archive_marker": "=== X86 INACTIVE STACK GHOST WHOLE TABLE ERASURE V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-base.json": {
+        "bytes": 196,
+        "sha256": "9fdbba8d2526ef67518187da58baf4f04828f42893cee02fd164a65e423b43da"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-lake.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-lake.log": {
+        "bytes": 3604,
+        "sha256": "9d23643c82589923c863a6e04694db2df6fb33240393b6885a6e3708ad33e5d0"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof-attempt1.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof-attempt1.log": {
+        "bytes": 1275,
+        "sha256": "e4f77afed6eaa0cdc7a0772328565c97aee98454629787aa46d0285f927b98b7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof-cell-only.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof-cell-only.log": {
+        "bytes": 727,
+        "sha256": "e124b19c17607b852221d4c81ca17b5fa046f762aeb377d7c69dbdd6ca81b928"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof.log": {
+        "bytes": 989,
+        "sha256": "46b67345eb49e0531aa3646439de422f38ef2d23aa33b6f062ad85120477e238"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-proof.py": {
+        "bytes": 448,
+        "sha256": "28616d87ecd61c4be29e4dae12a70e4d14eb5a162a35670afc31d397ae233e25"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-source.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-source.log": {
+        "bytes": 313,
+        "sha256": "5af7f4b5d513baf57b2b662b26568029559df9050c731efd13a4cfa641817f0c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-source.py": {
+        "bytes": 2333,
+        "sha256": "cd9cb8f83bedf1f3da217c90c9aa53ae377a6da5c63f207ddcdf0a297f6a1d06"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-source.state": {
+        "bytes": 141,
+        "sha256": "3d490d38125c3c0da2e1f1ad997c10280ed6b8e594703876f125161362f3a555"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-work/X86StackIndex-attempt1.lean": {
+        "bytes": 12176,
+        "sha256": "91b7b0baad07baa35672aad479685e4e639785ccc4ff6c7ef0e5eab065f74f81"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-work/X86StackIndex-cell-only.lean": {
+        "bytes": 12371,
+        "sha256": "dcda2792784ca8e2aae6d98fa271630e836682be6eb539f9675c0d028e44f9cd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-work/X86StackIndex.base.lean": {
+        "bytes": 5474,
+        "sha256": "0508a4acc8cb5578bb3813ff171734cd1d9a06d10bdb169547f3ac108a410c4b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-work/X86StackIndex.lean": {
+        "bytes": 15385,
+        "sha256": "e4365cfd8ec70edf3daf156fe5d825be728b0e154ad52236483d94b4db68c4f5"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86StackIndex.lean": {
+        "bytes": 15385,
+        "sha256": "e4365cfd8ec70edf3daf156fe5d825be728b0e154ad52236483d94b4db68c4f5"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 183228,
+        "sha256": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 9785184,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/inactive-ghost-work/X86StackIndex.olean",
+        "sha256": "fbc24a839d28d4c235fda8b1f89f290672fcb6558f5e66d8a4895d06c5edfd86"
+      }
+    ],
+    "domain": "All byte tags and64-bit representatives, uint32 slot coordinates, arbitrary effective widths and wrapping addresses, every finite save/erase/frame/clear action history and every finite read enumeration, including duplicate or unordered slots.",
+    "interface": "C-model metadata erasure only. Raw guest bytes/initialization/permissions stay separate. An arbitrary symbolic inactive word does not establish that reading uninitialized C storage is defined. Actual clang path preservation, physical pointer provenance/native ABI and the full simulator correspondence remain explicit.",
+    "lean_toolchain": "leanprover/lean4:v4.19.0",
+    "production_header_snapshot": {
+      "equals_head": true,
+      "head": "3bdafd8c86c5fa036f3f96143e7badf69768e7af",
+      "sha256": "7b476e6f8ff3c1a53a77010821ba59219f17555044d4bc41c917958e3b58461a"
+    },
+    "proof_axioms": [
+      "propext"
+    ],
+    "result": "Changing non-STACK payloads, including scalar-zero initialization, leaves all tags and every whole-table lookup equal after the same action history. Every active STACK representative remains unchanged. Exact read accumulator retention and current overlap/frame arithmetic are modeled.",
+    "source_commit": "2fdfd2804d81ac1db95a74315b3d24690f4b258f",
+    "source_sha256": "e4365cfd8ec70edf3daf156fe5d825be728b0e154ad52236483d94b4db68c4f5",
+    "theorems": [
+      "X86StackGhost.run_preserves",
+      "X86StackGhost.read_table_equivalent",
+      "X86StackGhost.initialized_table_read_unobservable",
+      "X86StackGhost.inactive_table_read_unobservable",
+      "X86StackGhost.active_pointer_retained"
+    ]
+  },
   "x86_lea_offset_bpf_ir": {
     "archive_block_sha256": "fdccc4577c9e1a644ff46f17aee183ff751bd5af75e3d173cfa89b889b57329b",
     "archive_marker": "=== LEA MEMORY OFFSET BPF WRAPPING IR ===",

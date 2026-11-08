@@ -78,6 +78,11 @@ control/liveness and physical frame/ABI correspondence remain explicit.
 [Composition](../tv/Composition.lean) and the
 [artifact work](../tv/README.md) track the generic link/compiler obligations.
 
+The existing X86StackIndex module also proves inactive stack-ghost payload
+initialization/replacement is erased through finite save/invalidate/frame/clear
+histories and complete lookup traversals, retaining active STACK pointers.
+This metadata C-model law leaves C definedness and compiler/physical ABI explicit.
+
 ## Run
 
 ```sh
