@@ -1,0 +1,9 @@
+{
+  "recovery_successor_exit": 0,
+  "cilium_qemu": 2276915,
+  "original_cilium_make_exit": 241,
+  "tracee_successor_terminated": 2295844,
+  "reason": "Cilium vng parent exited while its actual QEMU continued; early Tracee successor stopped to keep serial12GiB budget",
+  "followup": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-checked-offset-recovery",
+  "raw38_waiter": 2260774
+}

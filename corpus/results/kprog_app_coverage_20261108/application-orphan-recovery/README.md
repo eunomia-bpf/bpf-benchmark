@@ -1,0 +1,3 @@
+# Application guest-parent recovery
+
+Cilium vng parent exited241 while QEMU2276915 retained its disk and generated actual native request1 successfully. Its old same-name094153 summary and collector archive supplied an archive-name collision during host collection. The downstream Tracee guest started early; its QEMU2295844 was terminated, preserving Cilium and the serial12GiB lane budget. Original38 waiter2260774 waited stopped until the fresh paired Tracee successor completed. Every interrupted diagnostic and actual request log is retained below; actual terminal application acceptance stays with the fresh cohort. Runtime admission additions0.
