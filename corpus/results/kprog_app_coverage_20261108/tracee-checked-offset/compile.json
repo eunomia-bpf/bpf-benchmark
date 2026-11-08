@@ -1,0 +1,178 @@
+{
+  "utc": "2026-11-08T19:03:41.946071+00:00",
+  "paired_make_exit": 2,
+  "source_scope": "Both compiler frontends read the same complete vendor/bpf/tracee/pkg/ebpf/c tree through a private upstream directory mount; all prior source differences are captured in tracee-paired-c-tree.patch.",
+  "inventory": [
+    {
+      "file": "capture_filtering.h",
+      "selected_sha256": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+      "prior_upstream_sha256": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2"
+    },
+    {
+      "file": "common/arch.h",
+      "selected_sha256": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
+      "prior_upstream_sha256": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd"
+    },
+    {
+      "file": "common/arguments.h",
+      "selected_sha256": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97",
+      "prior_upstream_sha256": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97"
+    },
+    {
+      "file": "common/binprm.h",
+      "selected_sha256": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
+      "prior_upstream_sha256": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d"
+    },
+    {
+      "file": "common/bpf_prog.h",
+      "selected_sha256": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970",
+      "prior_upstream_sha256": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970"
+    },
+    {
+      "file": "common/buffer.h",
+      "selected_sha256": "d1f3266a8db0bf9baf21be49aaece56883573e8303e5c0c64cd5d23f24ce5b11",
+      "prior_upstream_sha256": "c97b8b1009ef202d3ac82afc0ffdf59262752524973c2bcf9b69afce3f23d6e1"
+    },
+    {
+      "file": "common/capabilities.h",
+      "selected_sha256": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87",
+      "prior_upstream_sha256": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87"
+    },
+    {
+      "file": "common/cgroups.h",
+      "selected_sha256": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51",
+      "prior_upstream_sha256": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51"
+    },
+    {
+      "file": "common/common.h",
+      "selected_sha256": "3ef7ef9ba2e3384439cf5b9e1fa06d3fd509441420f7c9b2b50bba9640187686",
+      "prior_upstream_sha256": "27318430673cbf411aa6356bb53c761f9d531e30c9511d394ccbec18d6c5427c"
+    },
+    {
+      "file": "common/consts.h",
+      "selected_sha256": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4",
+      "prior_upstream_sha256": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4"
+    },
+    {
+      "file": "common/context.h",
+      "selected_sha256": "3f75fae98f3af498bccb4df5ddc9bb5bd37199f6ebce31bcb2b14c0ac3b432db",
+      "prior_upstream_sha256": "6de3918b59da742590b53f3dd42adad6fe01b76b4dc3d89ac55022b5c4e34659"
+    },
+    {
+      "file": "common/filesystem.h",
+      "selected_sha256": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
+      "prior_upstream_sha256": "ec299a96522c3c5b1731b456b6adc8ef96f4822f06661b144159bfb78b1bbddf"
+    },
+    {
+      "file": "common/filtering.h",
+      "selected_sha256": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94",
+      "prior_upstream_sha256": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94"
+    },
+    {
+      "file": "common/hash.h",
+      "selected_sha256": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f",
+      "prior_upstream_sha256": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f"
+    },
+    {
+      "file": "common/kconfig.h",
+      "selected_sha256": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036",
+      "prior_upstream_sha256": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036"
+    },
+    {
+      "file": "common/ksymbols.h",
+      "selected_sha256": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
+      "prior_upstream_sha256": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016"
+    },
+    {
+      "file": "common/logging.h",
+      "selected_sha256": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9",
+      "prior_upstream_sha256": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9"
+    },
+    {
+      "file": "common/memory.h",
+      "selected_sha256": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
+      "prior_upstream_sha256": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a"
+    },
+    {
+      "file": "common/namespaces.h",
+      "selected_sha256": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
+      "prior_upstream_sha256": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372"
+    },
+    {
+      "file": "common/network.h",
+      "selected_sha256": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76",
+      "prior_upstream_sha256": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76"
+    },
+    {
+      "file": "common/probes.h",
+      "selected_sha256": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686",
+      "prior_upstream_sha256": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686"
+    },
+    {
+      "file": "common/signal.h",
+      "selected_sha256": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1",
+      "prior_upstream_sha256": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1"
+    },
+    {
+      "file": "common/task.h",
+      "selected_sha256": "f97496645f4c146da9078e9bf72ee96a9b8bed542e2a20f4cac40ec173e97a2a",
+      "prior_upstream_sha256": "86629847a736c97a6a2824cd935800a9a70394eff64af4e02ca8a2651f9e6edf"
+    },
+    {
+      "file": "lsmsupport/kprobe_check.bpf.c",
+      "selected_sha256": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+      "prior_upstream_sha256": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc"
+    },
+    {
+      "file": "lsmsupport/lsm_check.bpf.c",
+      "selected_sha256": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2",
+      "prior_upstream_sha256": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2"
+    },
+    {
+      "file": "lsmsupport/lsm_check_common.h",
+      "selected_sha256": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79",
+      "prior_upstream_sha256": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79"
+    },
+    {
+      "file": "maps.h",
+      "selected_sha256": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a",
+      "prior_upstream_sha256": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a"
+    },
+    {
+      "file": "tracee.bpf.c",
+      "selected_sha256": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+      "prior_upstream_sha256": "3482f305df1d892e87aa90e121edf38e1200d04f1c237cb73994434a3195e3d1"
+    },
+    {
+      "file": "tracee.h",
+      "selected_sha256": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174",
+      "prior_upstream_sha256": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174"
+    },
+    {
+      "file": "types.h",
+      "selected_sha256": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+      "prior_upstream_sha256": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea"
+    },
+    {
+      "file": "vmlinux.h",
+      "selected_sha256": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43",
+      "prior_upstream_sha256": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43"
+    },
+    {
+      "file": "vmlinux_flavors.h",
+      "selected_sha256": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082",
+      "prior_upstream_sha256": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082"
+    },
+    {
+      "file": "vmlinux_missing.h",
+      "selected_sha256": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395",
+      "prior_upstream_sha256": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395"
+    }
+  ],
+  "files": {
+    "vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h": "d1f3266a8db0bf9baf21be49aaece56883573e8303e5c0c64cd5d23f24ce5b11",
+    "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o": "025fe5e116ed994767c7142510c7b744883b0911eafe584cd06add56f16c7cd1",
+    "vendor/build/.tracee-build/none/x86/dist/tracee.bpf.o": "315ef1aeb3f82d9a68af74e0db9aba3b3e061dbb3d0795638ee94da27c93dd89",
+    "vendor/build/x86/tracee/bin/tracee": "49a746fac45caecdf7d3b1a0ccf3f84df2fa25b6a9dd23337787b20d34b99e53"
+  }
+}

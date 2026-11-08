@@ -1,0 +1,502 @@
+--- a/pkg/ebpf/c/common/buffer.h
++++ b/pkg/ebpf/c/common/buffer.h
+@@ -25,6 +25,8 @@
+ statfunc int save_sockaddr_to_buf(args_buffer_t *, struct socket *, bool, u8);
+ statfunc int save_args_to_submit_buf(event_data_t *, args_t *);
+ statfunc int events_perf_submit(program_data_t *);
++statfunc int events_perf_submit_cached_task_context(program_data_t *);
++#define events_perf_submit_hot_path(p) events_perf_submit_cached_task_context(p)
+ statfunc int signal_perf_submit(void *, controlplane_signal_t *);
+ 
+ // FUNCTIONS
+@@ -94,13 +96,9 @@
+         return 0;
+ 
+     // Save argument index (add 1 to offset later)
+-    buf->args[buf->offset] = index;
+-
+-    // Force verifier to compare size register with a bound maximum
+-    asm volatile("if %[size] < %[max_size] goto +1;\n"
+-                 "%[size] = %[max_size];\n"
+-                 :
+-                 : [size] "r"(size), [max_size] "i"(MAX_ELEMENT_SIZE));
++    buf->args[offset] = index;
++
++    update_min(size, MAX_ELEMENT_SIZE);
+ 
+     u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr
+ 
+@@ -280,29 +278,31 @@
+ {
+     // Data saved to submit buf: [index][size][ ... string ... ]
+ 
+-    if (buf->offset > ARGS_BUF_SIZE - 1)
++    u32 offset = buf->offset;
++    if (offset > ARGS_BUF_SIZE - 1)
+         return 0;
+ 
+     // Save argument index
+-    buf->args[buf->offset] = index;
++    buf->args[offset] = index;
+ 
+     // Save offset at the specified index
+-    buf->args_offset[index] = buf->offset;
++    buf->args_offset[index] = offset;
+ 
+     // Satisfy verifier for probe read
+-    if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
++    if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+         return 0;
+ 
+     // Read into buffer
+-    int sz = bpf_probe_read_str(&(buf->args[buf->offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
++    int sz = bpf_probe_read_str(&(buf->args[offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
+     if (sz > 0) {
+         barrier();
++        offset = buf->offset;
+         // Satisfy verifier for probe read
+-        if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
++        if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+             return 0;
+ 
+-        __builtin_memcpy(&(buf->args[buf->offset + 1]), &sz, sizeof(int));
+-        buf->offset += sz + sizeof(int) + 1;
++        __builtin_memcpy(&(buf->args[offset + 1]), &sz, sizeof(int));
++        buf->offset = offset + sz + sizeof(int) + 1;
+         buf->argnum++;
+         return 1;
+     }
+@@ -718,11 +718,44 @@
+     // context + argnum + arg buffer size
+     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
+ 
+-    // inline bounds check to force compiler to use the register of size
+-    asm volatile("if %[size] < %[max_size] goto +1;\n"
+-                 "%[size] = %[max_size];\n"
+-                 :
+-                 : [size] "r"(size), [max_size] "i"(MAX_EVENT_SIZE));
++    update_min(size, MAX_EVENT_SIZE);
++
++    long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
++
++    update_event_stats(p->event->context.eventid, perf_ret);
++
++    return perf_ret;
++}
++
++// Preserve Tracee's task_info cache while avoiding a second full task-context
++// read on hot-path event submission.
++statfunc int events_perf_submit_cached_task_context(program_data_t *p)
++{
++    u32 host_pid = p->event->context.task.host_pid;
++    u32 host_tid = p->event->context.task.host_tid;
++    u64 cgroup_id = p->event->context.task.cgroup_id;
++    u32 flags = p->event->context.task.flags;
++
++    __builtin_memcpy_inline(
++        &p->event->context.task, &p->task_info->context, sizeof(task_context_t));
++    p->event->context.task.host_pid = host_pid;
++    p->event->context.task.host_tid = host_tid;
++    p->event->context.task.cgroup_id = cgroup_id;
++    p->event->context.task.flags |= flags & CONTAINER_STARTED_FLAG;
++    __builtin_memcpy_inline(
++        &p->task_info->context, &p->event->context.task, sizeof(task_context_t));
++
++    // Get Stack trace
++    if (p->config->options & OPT_CAPTURE_STACK_TRACES) {
++        int stack_id = bpf_get_stackid(p->ctx, &stack_addresses, BPF_F_USER_STACK);
++        if (stack_id >= 0) {
++            p->event->context.stack_id = stack_id;
++        }
++    }
++
++    // context + argnum + arg buffer size
++    u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
++    update_min(size, MAX_EVENT_SIZE);
+ 
+     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
+ 
+@@ -736,11 +769,7 @@
+     // signal id + argnum + arg buffer size
+     u32 size = sizeof(u32) + sizeof(u8) + sig->args_buf.offset;
+ 
+-    // inline bounds check to force compiler to use the register of size
+-    asm volatile("if %[size] < %[max_size] goto +1;\n"
+-                 "%[size] = %[max_size];\n"
+-                 :
+-                 : [size] "r"(size), [max_size] "i"(MAX_SIGNAL_SIZE));
++    update_min(size, MAX_SIGNAL_SIZE);
+ 
+     long perf_ret = bpf_perf_event_output(ctx, &signals, BPF_F_CURRENT_CPU, sig, size);
+ 
+--- a/pkg/ebpf/c/common/common.h
++++ b/pkg/ebpf/c/common/common.h
+@@ -10,6 +10,8 @@
+ // PROTOTYPES
+ 
+ #define statfunc static __always_inline
++
++#define sharedfunc static __attribute__((noinline))
+ 
+ // FUNCTIONS & MACROS
+ 
+@@ -67,14 +69,10 @@
+ 
+ #ifndef update_min
+     // update_min sets __value as __max_value if __value is greater than __max_value.
+-    // It forces the check to be done via a register, which is sometimes necessary
+-    // to satisfy the eBPF verifier.
+     #define update_min(__value, __max_value)                                                       \
+         ({                                                                                         \
+-            asm volatile("if %[size] <= %[max_size] goto +1;\n"                                    \
+-                         "%[size] = %[max_size];\n"                                                \
+-                         : [size] "+r"(__value)                                                    \
+-                         : [max_size] "r"(__max_value));                                           \
++            if ((__value) > (__max_value))                                                         \
++                (__value) = (__max_value);                                                         \
+         })
+ #endif
+ 
+--- a/pkg/ebpf/c/common/context.h
++++ b/pkg/ebpf/c/common/context.h
+@@ -16,7 +16,13 @@
+ statfunc void init_task_info_scratch(u32, scratch_t *);
+ statfunc task_info_t *init_task_info(u32, u32);
+ statfunc event_config_t *get_event_config(u32, u16);
++statfunc int init_program_data_common(program_data_t *, void *, u32, struct task_struct *, int);
+ statfunc int init_program_data(program_data_t *, void *, u32);
++statfunc int init_program_data_with_task_syscall(program_data_t *,
++                                                 void *,
++                                                 u32,
++                                                 struct task_struct *,
++                                                 int);
+ statfunc int init_tailcall_program_data(program_data_t *, void *);
+ statfunc bool reset_event(event_data_t *, u32);
+ statfunc void reset_event_args_buf(event_data_t *);
+@@ -58,7 +64,7 @@
+     // the destination buffer is not padded with zeroes (see
+     // https://github.com/torvalds/linux/commit/03b9c7fa3f15f51bcd07f3828c2a01311e7746c4 and
+     // https://github.com/torvalds/linux/commit/f3f21349779776135349a8e6f114a1485b2476b7)
+-    __builtin_memset(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
++    __builtin_memset_inline(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
+     bpf_get_current_comm(&tsk_ctx->comm, sizeof(tsk_ctx->comm));
+ 
+     // UTS Name
+@@ -71,7 +77,7 @@
+ 
+ statfunc void init_proc_info_scratch(u32 pid, scratch_t *scratch)
+ {
+-    __builtin_memset(&scratch->proc_info, 0, sizeof(proc_info_t));
++    __builtin_memset_inline(&scratch->proc_info, 0, sizeof(proc_info_t));
+     bpf_map_update_elem(&proc_info_map, &pid, &scratch->proc_info, BPF_NOEXIST);
+ }
+ 
+@@ -88,7 +94,7 @@
+ 
+ statfunc void init_task_info_scratch(u32 tid, scratch_t *scratch)
+ {
+-    __builtin_memset(&scratch->task_info, 0, sizeof(task_info_t));
++    __builtin_memset_inline(&scratch->task_info, 0, sizeof(task_info_t));
+     bpf_map_update_elem(&task_info_map, &tid, &scratch->task_info, BPF_NOEXIST);
+ }
+ 
+@@ -114,7 +120,11 @@
+ }
+ 
+ // clang-format off
+-statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
++statfunc int init_program_data_common(program_data_t *p,
++                                      void *ctx,
++                                      u32 event_id,
++                                      struct task_struct *task,
++                                      int syscall_id)
+ {
+     int zero = 0;
+ 
+@@ -133,9 +143,9 @@
+ 
+     reset_event_args_buf(p->event);
+ 
+-    p->event->task = (struct task_struct *) bpf_get_current_task();
+-
+-    __builtin_memset(&p->event->context.task, 0, sizeof(p->event->context.task));
++    p->event->task = task;
++
++    __builtin_memset_inline(&p->event->context.task, 0, sizeof(p->event->context.task));
+ 
+     // get the minimal context required at this stage
+     // any other context will be initialized only if event is submitted
+@@ -145,7 +155,7 @@
+     p->event->context.eventid = event_id;
+     p->event->context.ts = get_current_time_in_ns();
+     p->event->context.processor_id = (u16) bpf_get_smp_processor_id();
+-    p->event->context.syscall = get_current_task_syscall_id();
++    p->event->context.syscall = syscall_id;
+ 
+     u32 host_pid = p->event->context.task.host_pid;
+     p->proc_info = bpf_map_lookup_elem(&proc_info_map, &host_pid);
+@@ -210,6 +220,21 @@
+ 
+     return 1;
+ }
++
++statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
++{
++    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
++    return init_program_data_common(p, ctx, event_id, task, get_current_task_syscall_id());
++}
++
++statfunc int init_program_data_with_task_syscall(program_data_t *p,
++                                                 void *ctx,
++                                                 u32 event_id,
++                                                 struct task_struct *task,
++                                                 int syscall_id)
++{
++    return init_program_data_common(p, ctx, event_id, task, syscall_id);
++}
+ // clang-format on
+ 
+ statfunc int init_tailcall_program_data(program_data_t *p, void *ctx)
+@@ -246,7 +271,8 @@
+     event->args_buf.argnum = 0;
+ 
+     // Mark all entries in args_offset as invalid (0xFF)
+-    __builtin_memset(event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
++    __builtin_memset_inline(
++        event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
+ }
+ 
+ // use this function in programs that send more than one event
+--- a/pkg/ebpf/c/common/filesystem.h
++++ b/pkg/ebpf/c/common/filesystem.h
+@@ -508,21 +508,13 @@
+ {
+     u32 len = (u32) io_data.len;
+     if (io_data.is_buf) {
+-        // inline bounds check to force compiler to use the register of len
+-        asm volatile("if %[size] < %[max_size] goto +1;\n"
+-                     "%[size] = %[max_size];\n"
+-                     :
+-                     : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
++        update_min(len, FILE_MAGIC_HDR_SIZE);
+         bpf_probe_read(header, len, io_data.ptr);
+     } else {
+         struct iovec io_vec;
+         __builtin_memset(&io_vec, 0, sizeof(io_vec));
+         bpf_probe_read(&io_vec, sizeof(struct iovec), io_data.ptr);
+-        // inline bounds check to force compiler to use the register of len
+-        asm volatile("if %[size] < %[max_size] goto +1;\n"
+-                     "%[size] = %[max_size];\n"
+-                     :
+-                     : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
++        update_min(len, FILE_MAGIC_HDR_SIZE);
+         bpf_probe_read(header, len, io_vec.iov_base);
+     }
+ }
+--- a/pkg/ebpf/c/common/task.h
++++ b/pkg/ebpf/c/common/task.h
+@@ -11,6 +11,7 @@
+ 
+ statfunc int get_task_flags(struct task_struct *task);
+ statfunc int get_current_task_syscall_id(void);
++statfunc int translate_syscall_id_for_task(struct task_struct *task, int id);
+ statfunc u32 get_task_mnt_ns_id(struct task_struct *task);
+ statfunc u32 get_task_pid_ns_for_children_id(struct task_struct *task);
+ statfunc struct pid_namespace *get_task_pid_ns(struct task_struct *task);
+@@ -40,6 +41,18 @@
+     return BPF_CORE_READ(task, flags);
+ }
+ 
++statfunc int translate_syscall_id_for_task(struct task_struct *task, int id)
++{
++    if (!is_compat(task))
++        return id;
++
++    u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
++    if (id_64 == NULL)
++        return NO_SYSCALL;
++
++    return *id_64;
++}
++
+ statfunc int get_current_task_syscall_id(void)
+ {
+     // There is no originated syscall in kernel thread context
+@@ -50,16 +63,7 @@
+ 
+     struct pt_regs *regs = get_current_task_pt_regs();
+     int id = get_syscall_id_from_regs(regs);
+-    if (is_compat(curr)) {
+-        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+-        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+-        if (id_64 == NULL)
+-            // outdated syscall list?
+-            return NO_SYSCALL;
+-
+-        id = *id_64;
+-    }
+-    return id;
++    return translate_syscall_id_for_task(curr, id);
+ }
+ 
+ statfunc u32 get_task_mnt_ns_id(struct task_struct *task)
+--- a/pkg/ebpf/c/tracee.bpf.c
++++ b/pkg/ebpf/c/tracee.bpf.c
+@@ -169,7 +169,7 @@
+ 
+     if (sys->id != SYSCALL_RT_SIGRETURN && !p.task_info->syscall_traced) {
+         save_to_submit_buf(&p.event->args_buf, (void *) &(sys->args.args[0]), sizeof(int), 0);
+-        events_perf_submit(&p);
++        events_perf_submit_hot_path(&p);
+     }
+ 
+ out:
+@@ -289,7 +289,7 @@
+ 
+     u8 ret_index = get_num_fields(p.event->config.field_types);
+     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), ret_index);
+-    events_perf_submit(&p);
++    events_perf_submit_hot_path(&p);
+ 
+ out:
+     bpf_tail_call(ctx, &sys_exit_tails, sys->id);
+@@ -306,25 +306,21 @@
+ int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
+ {
+     program_data_t p = {};
+-    if (!init_program_data(&p, ctx, RAW_SYS_ENTER))
+-        return 0;
+-
+-    if (!evaluate_scope_filters(&p))
+-        return 0;
+-
+-    // always submit since this won't be attached otherwise
+     int id = ctx->args[1];
+     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+-    if (is_compat(task)) {
+-        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+-        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+-        if (id_64 == 0)
+-            return 0;
+-
+-        id = *id_64;
+-    }
++    id = translate_syscall_id_for_task(task, id);
++    if (id == NO_SYSCALL)
++        return 0;
++
++    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_ENTER, task, id))
++        return 0;
++
++    if (!evaluate_scope_filters(&p))
++        return 0;
++
++    // always submit since this won't be attached otherwise
+     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
+-    events_perf_submit(&p);
++    events_perf_submit_hot_path(&p);
+     return 0;
+ }
+ 
+@@ -333,26 +329,22 @@
+ int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
+ {
+     program_data_t p = {};
+-    if (!init_program_data(&p, ctx, RAW_SYS_EXIT))
+-        return 0;
+-
+-    if (!evaluate_scope_filters(&p))
+-        return 0;
+-
+-    // always submit since this won't be attached otherwise
+     struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+     int id = get_syscall_id_from_regs(regs);
+     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+-    if (is_compat(task)) {
+-        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+-        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+-        if (id_64 == 0)
+-            return 0;
+-
+-        id = *id_64;
+-    }
++    id = translate_syscall_id_for_task(task, id);
++    if (id == NO_SYSCALL)
++        return 0;
++
++    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_EXIT, task, id))
++        return 0;
++
++    if (!evaluate_scope_filters(&p))
++        return 0;
++
++    // always submit since this won't be attached otherwise
+     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
+-    events_perf_submit(&p);
++    events_perf_submit_hot_path(&p);
+     return 0;
+ }
+ 
+@@ -855,7 +847,7 @@
+ #define MOD_HIDDEN                     1
+ #define MOD_NOT_HIDDEN                 0
+ 
+-void __always_inline lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
++sharedfunc void lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
+ {
+     // since this function can be called in a loop, we need to reset the buffer.
+     // it is the responsibility of the caller, however, to set program_data to
+@@ -2357,7 +2349,7 @@
+     save_str_to_buf(&p.event->args_buf, syscall_pathname, 5);
+ 
+     if (evaluate_data_filters(&p, 0))
+-        events_perf_submit(&p);
++        events_perf_submit_hot_path(&p);
+ 
+ out:
+ #ifdef EXTENDED_BUILD
+@@ -2502,7 +2494,7 @@
+         (old_slim.cap_bset != new_slim.cap_bset)                ||
+         (old_slim.cap_ambient != new_slim.cap_ambient)
+     ) {
+-        events_perf_submit(&p);
++        events_perf_submit_hot_path(&p);
+     }
+     // clang-format on
+ 
+@@ -2577,7 +2569,7 @@
+ 
+     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
+ 
+-    return events_perf_submit(&p);
++    return events_perf_submit_hot_path(&p);
+ }
+ 
+ SEC("kprobe/security_socket_create")
+@@ -3211,7 +3203,7 @@
+     // Submit io event
+     long ret = PT_REGS_RC(ctx);
+     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), 5);
+-    events_perf_submit(&p);
++    events_perf_submit_hot_path(&p);
+ 
+ tail:
+     bpf_tail_call(ctx, &prog_array, tail_call_id);
+@@ -5302,7 +5294,7 @@
+     save_to_submit_buf(&p.event->args_buf, &new_rlim_cur, sizeof(u64), 2);
+     save_to_submit_buf(&p.event->args_buf, &new_rlim_max, sizeof(u64), 3);
+ 
+-    return events_perf_submit(&p);
++    return events_perf_submit_hot_path(&p);
+ }
+ 
+ SEC("kprobe/security_settime64")
+@@ -5598,7 +5590,7 @@
+         save_to_submit_buf(&p.event->args_buf, &old_securebits, sizeof(old_securebits), 40);
+     }
+ 
+-    return events_perf_submit(&p);
++    return events_perf_submit_hot_path(&p);
+ }
+ 
+ //

@@ -96,7 +96,7 @@ statfunc int save_to_submit_buf(args_buffer_t *buf, void *ptr, u32 size, u8 inde
         return 0;
 
     // Save argument index (add 1 to offset later)
-    buf->args[buf->offset] = index;
+    buf->args[offset] = index;
 
     update_min(size, MAX_ELEMENT_SIZE);
 
@@ -278,29 +278,31 @@ statfunc int save_str_to_buf(args_buffer_t *buf, void *ptr, u8 index)
 {
     // Data saved to submit buf: [index][size][ ... string ... ]
 
-    if (buf->offset > ARGS_BUF_SIZE - 1)
+    u32 offset = buf->offset;
+    if (offset > ARGS_BUF_SIZE - 1)
         return 0;
 
     // Save argument index
-    buf->args[buf->offset] = index;
+    buf->args[offset] = index;
 
     // Save offset at the specified index
-    buf->args_offset[index] = buf->offset;
+    buf->args_offset[index] = offset;
 
     // Satisfy verifier for probe read
-    if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+    if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
         return 0;
 
     // Read into buffer
-    int sz = bpf_probe_read_str(&(buf->args[buf->offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
+    int sz = bpf_probe_read_str(&(buf->args[offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
     if (sz > 0) {
         barrier();
+        offset = buf->offset;
         // Satisfy verifier for probe read
-        if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+        if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
             return 0;
 
-        __builtin_memcpy(&(buf->args[buf->offset + 1]), &sz, sizeof(int));
-        buf->offset += sz + sizeof(int) + 1;
+        __builtin_memcpy(&(buf->args[offset + 1]), &sz, sizeof(int));
+        buf->offset = offset + sz + sizeof(int) + 1;
         buf->argnum++;
         return 1;
     }
