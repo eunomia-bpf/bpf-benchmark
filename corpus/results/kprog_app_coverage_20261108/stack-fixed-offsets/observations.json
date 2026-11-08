@@ -60,7 +60,10 @@
   ],
   "tetragon_source_sha256": "fa2f41f8a5e153b59a846970c07c920befe94f8569de37a37b6d8d07316e6a6f",
   "tetragon_object_sha256": "11aff63c38f15ad7a0c9a194944186c6e78a1df5189ebe1bda37ffb7287c3cb1",
-  "whole_otel_compile_phase": "running",
+  "whole_otel_compile_phase": "complete",
   "runtime_successor_queue": 4152726,
-  "component_archive_sha256": "44e337ceca9122162b57ac1387fdca337cca8a77b041ec6216f51e4e23d3b904"
+  "component_archive_sha256": "44e337ceca9122162b57ac1387fdca337cca8a77b041ec6216f51e4e23d3b904",
+  "whole_otel_compile_exit": 0,
+  "whole_otel_bpf_insns": 10439,
+  "whole_otel_dwarf_entries": 13
 }
