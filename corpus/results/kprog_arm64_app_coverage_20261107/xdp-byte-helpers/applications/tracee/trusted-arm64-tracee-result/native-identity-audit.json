@@ -1,0 +1,75 @@
+{
+  "utc": "2026-11-08T06:59:50.765179+00:00",
+  "kind": "tracee",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261108T051912422205Z.tar.gz",
+  "archive_sha256": "89505167f8476086a1120189bace1eb8ecc042c73531c87c9df494395a2b6515",
+  "host_reported_ok": false,
+  "hashes_unchanged": false,
+  "completed_counts": {
+    "service_accepted": 2,
+    "service_refused": 1
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 3,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "native_sha256": "7be9426a19983d42c1504433ffffe198abbc2a44917332fd999b48905f472228",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "18a829577bdd7dd503b39ac9921bbc5854c770dd046e01f2bada01db9672ba4a",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "ce87defec9adf35e64e7f46c9ad2834536dc86313ff77fcb7f6324df22900c15",
+        "request/generated/trusted_arm64.bpf.o": "f5a20c82edda7c3ab7d14890cf0c290596efe882016bb4da6cc7b1cbd122bbe8",
+        "request/generated/trusted_arm64.bpf.c": "11027d96a1bf83327a0c7b7d62e387870591eb61c54456233d62a78a304bda3c",
+        "request/generation.metadata.json": "621470a7afd80559f760777267a2fcb917ab3552e325b6168d6f3df9927e1109",
+        "request/kernel.facts.json": "1859d0856d52e2b0bf156bef3eb30f5ebd01eeee277e1622c8590d933b53aaaf",
+        "request/source-identities.json": "b4254398a06f026874c4f68c68acc6a0785254d6c1c3281d63ad2c405e5e73f1"
+      }
+    },
+    {
+      "request_id": 2,
+      "status": 0,
+      "entry": "sys_enter_init",
+      "native_sha256": "7be9426a19983d42c1504433ffffe198abbc2a44917332fd999b48905f472228",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "fd31fd65aeaeda2168f3c6c87db666cfd0b03a8275182ebb36cdad20c2c15d52",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "633ee626c07e792ba92ac5a480a752dc44bd6acab448b16faf849e0c7cb6606f",
+        "request/generated/trusted_arm64.bpf.o": "a85abf48a01a0c42972f675490a9f46fae9e411fa23007c589c4cc9ef3b038f2",
+        "request/generated/trusted_arm64.bpf.c": "ee8448968b9d206eb1847ac8949d06d21b077e41dcabaea1ae9af463762c44ac",
+        "request/generation.metadata.json": "feb265cf9d4a9853f473b26a4839881a8fe5ae7bed4defd6686fe5bdf0bc6f4c",
+        "request/kernel.facts.json": "5d920e151c8df50a2cf2b7bd6b65973d268137894f3dab28eb2048082579c5ff",
+        "request/source-identities.json": "b4254398a06f026874c4f68c68acc6a0785254d6c1c3281d63ad2c405e5e73f1"
+      }
+    },
+    {
+      "request_id": 3,
+      "status": -5,
+      "entry": "sys_enter_submit",
+      "native_sha256": "7be9426a19983d42c1504433ffffe198abbc2a44917332fd999b48905f472228",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "9652240229d72c3f97a487de740b36507d35f121bd7969457167afff59a9bbe5",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "3d3d3c6fb019d309c5664a00447ef9510148a1c61479a0168356f6f68970a232",
+        "request/generated/trusted_arm64.bpf.o": "f9a0c2dac996e599c62fafc0bd40be65b0d926409e8cdcd98b81240f9e735e8a",
+        "request/generated/trusted_arm64.bpf.c": "30f4ad35652cd5e49a4585a42829bb5e40e12928af6ea2ae89da5441744ebd41",
+        "request/generation.metadata.json": "4544b49e5cac2d48240b2dfd70a89e32fca6873ec539aa911245e67252ea842d",
+        "request/kernel.facts.json": "f3a30f1c8fafcee012dd75afd2a71e29846d0fc0712a4f1e27aaf0cff5af3c5b",
+        "request/source-identities.json": "b4254398a06f026874c4f68c68acc6a0785254d6c1c3281d63ad2c405e5e73f1"
+      }
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "fb4f1d998334396a288e679a5a2ddf698aa15d5fac39b8c829d4d452a07bccbf"
+}
