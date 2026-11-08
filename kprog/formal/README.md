@@ -47,6 +47,9 @@ typed arguments, native ABI and successful tail transfer remain explicit. Intern
 complete captured read/SP advance in both alternatives. O2 covers its default;
 O4 carries CALL -1 decode/error semantics and derives case membership for
 accepted entered states under explicit compiled-edge/stock rejection premises.
+The shared architectural-fault prefix also has actual byte decode/execution
+and a complete scratch/memory/ghost frame at every linked instruction offset,
+under literal-copy, entry/reachability, NULL-unmapped and verifier premises.
 Outer invocation/return-slot, physical memory/provenance, native-to-B entry
 coverage and C/compiler correspondence remain explicit.
 

@@ -545,3 +545,152 @@ end KProgTV.SimulatorComposition
 #print axioms KProgTV.SimulatorComposition.ud2_complete
 #print axioms KProgTV.SimulatorComposition.compiled_architectural_fault_preserved
 #print axioms KProgTV.SimulatorComposition.accepted_architectural_fault_unreachable
+
+namespace KProgTV.SimulatorComposition
+open KProgFormal KProgFormal.Reference
+
+/-- The production fault prefix at any linked instruction position. Only
+its two decoded instructions matter; bytes before/after it are arbitrary. -/
+theorem architectural_fault_embedded_prefix
+    (environment : BPF.Environment) (program : Array Reference.Byte)
+    (start : Nat) (state : BPF.State)
+    (move : BPF.decode program start = .ok ⟨0xb7, 0, 0, 0, 0⟩)
+    (store : BPF.decode program (start + 1) = .ok ⟨0x7b, 0, 0, 0, 0⟩)
+    (active : state.halted = false) (atEntry : state.pc = Int.ofNat start)
+    (unmapped : state.memory.writable 0#64 = false) :
+    BPFPath.evaluate environment program [start, start + 1] state =
+      .ok ⟨BPF.setReg { state with pc := Int.ofNat (start + 1) } 0 0,
+        [.fault (.write 0 8)], some (.write 0 8)⟩ := by
+  have permission : permitted state.memory.writable 0#64 8 = false :=
+    null_store_not_permitted state.memory unmapped
+  simp [BPFPath.evaluate, BPF.execute, BPF.source, BPF.alu, BPF.store,
+    BPF.setReg, writeMemory, permission, active, atEntry, move, store,
+    Int.natCast_add, Except.bind, Except.pure, Except.map, Bind.bind,
+    Pure.pure, Except.instMonad]
+
+/-- Actual whole-program execution uses the linked PCs and preserves the
+complete scratch/memory state, including both independent ghost indices. -/
+theorem architectural_fault_embedded_execution
+    (environment : BPF.Environment) (program : Array Reference.Byte)
+    (start : Nat) (state : BPF.State)
+    (move : BPF.decode program start = .ok ⟨0xb7, 0, 0, 0, 0⟩)
+    (store : BPF.decode program (start + 1) = .ok ⟨0x7b, 0, 0, 0, 0⟩)
+    (active : state.halted = false) (atEntry : state.pc = Int.ofNat start)
+    (unmapped : state.memory.writable 0#64 = false) :
+    Execution (BPFPath.instructionStep environment program) state
+      [.fault (.write 0 8)]
+      (BPF.setReg { state with pc := Int.ofNat (start + 1) } 0 0) :=
+  BPFPath.evaluate_sound _ _ _ _ _
+    (architectural_fault_embedded_prefix environment program start state move store active atEntry unmapped)
+
+/-- A literal copy of the fault prefix decodes at every instruction-aligned
+placement. All other bytes of the final image are unconstrained. -/
+theorem architectural_fault_embedded_decode (program : Array Reference.Byte) (start : Nat)
+    (extent : 8 * start + 16 ≤ program.size)
+    (bytes : ∀ index < 16, program[8 * start + index]! = architecturalFaultBytes[index]!) :
+    BPF.decode program start = .ok ⟨0xb7, 0, 0, 0, 0⟩ ∧
+    BPF.decode program (start + 1) = .ok ⟨0x7b, 0, 0, 0, 0⟩ := by
+  have firstExtent : ¬8 * start + 8 > program.size := by omega
+  have secondExtent : ¬8 * (start + 1) + 8 > program.size := by omega
+  have b0 : program[8 * start]! = 183 := by
+    simpa [architecturalFaultBytes] using bytes 0 (by decide)
+  have b1 : program[8 * start + 1]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 1 (by decide)
+  have b2 : program[8 * start + 2]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 2 (by decide)
+  have b3 : program[8 * start + 3]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 3 (by decide)
+  have b4 : program[8 * start + 4]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 4 (by decide)
+  have b5 : program[8 * start + 5]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 5 (by decide)
+  have b6 : program[8 * start + 6]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 6 (by decide)
+  have b7 : program[8 * start + 7]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 7 (by decide)
+  have b8 : program[8 * start + 8]! = 123 := by
+    simpa [architecturalFaultBytes] using bytes 8 (by decide)
+  have b9 : program[8 * start + 9]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 9 (by decide)
+  have b10 : program[8 * start + 10]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 10 (by decide)
+  have b11 : program[8 * start + 11]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 11 (by decide)
+  have b12 : program[8 * start + 12]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 12 (by decide)
+  have b13 : program[8 * start + 13]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 13 (by decide)
+  have b14 : program[8 * start + 14]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 14 (by decide)
+  have b15 : program[8 * start + 15]! = 0 := by
+    simpa [architecturalFaultBytes] using bytes 15 (by decide)
+  have lastExtent : ¬program.size < 8 * start + 16 := by omega
+  constructor <;> simp [BPF.decode, firstExtent, secondExtent, lastExtent, Except.bind, Bind.bind, Except.pure, Pure.pure, Except.instMonad, Nat.mul_add, Nat.add_assoc, littleEndian, b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15]
+
+/-- The byte-copy premise directly supplies actual final-program execution,
+without an opaque equality between standalone and linked evaluators. -/
+theorem architectural_fault_embedded_bytes_execution
+    (environment : BPF.Environment) (program : Array Reference.Byte)
+    (start : Nat) (state : BPF.State)
+    (extent : 8 * start + 16 ≤ program.size)
+    (bytes : ∀ index < 16, program[8 * start + index]! = architecturalFaultBytes[index]!)
+    (active : state.halted = false) (atEntry : state.pc = Int.ofNat start)
+    (unmapped : state.memory.writable 0#64 = false) :
+    Execution (BPFPath.instructionStep environment program) state
+      [.fault (.write 0 8)]
+      (BPF.setReg { state with pc := Int.ofNat (start + 1) } 0 0) := by
+  obtain ⟨move, store⟩ := architectural_fault_embedded_decode program start extent bytes
+  exact architectural_fault_embedded_execution environment program start state
+    move store active atEntry unmapped
+
+/-- Both ghosts, memory and all non-R0 registers are unchanged at the
+actual fault PC; surrounding code and initial PC do not affect the frame. -/
+theorem architectural_fault_embedded_frame (start : Nat) (state : BPF.State) :
+    let after := BPF.setReg { state with pc := Int.ofNat (start + 1) } 0 0
+    after.memory = state.memory ∧ after.unspecifiedVisit = state.unspecifiedVisit ∧
+      after.exclusiveVisit = state.exclusiveVisit ∧ after.pc = Int.ofNat (start + 1) ∧
+      after.halted = state.halted ∧ after.regs 0 = 0 ∧
+      ∀ register : BPF.Register, register ≠ 0 → after.regs register = state.regs register := by
+  refine ⟨rfl, rfl, rfl, rfl, rfl, ?_, ?_⟩
+  · simp [BPF.setReg]
+  · intro register other
+    simp [BPF.setReg, other]
+
+/-- The compiler/link interface only identifies the two literal instructions
+in the final program. Stock-verifier soundness and entry reachability then
+exclude entering the fault arm, at every linked position. -/
+theorem accepted_embedded_architectural_fault_unreachable
+    (environment : Artifact → BPF.Environment) (program : Artifact → Array Reference.Byte)
+    (entry : Artifact → NativeState → BPF.State) (position : Artifact → NativeState → Nat)
+    (entered : Artifact → NativeState → Prop)
+    (move : ∀ a state, entered a state →
+      BPF.decode (program a) (position a state) = .ok ⟨0xb7, 0, 0, 0, 0⟩)
+    (store : ∀ a state, entered a state →
+      BPF.decode (program a) (position a state + 1) = .ok ⟨0x7b, 0, 0, 0, 0⟩)
+    (active : ∀ a state, entered a state → (entry a state).halted = false)
+    (atEntry : ∀ a state, entered a state → (entry a state).pc = Int.ofNat (position a state))
+    (unmapped : ∀ a state, entered a state → (entry a state).memory.writable 0#64 = false)
+    (accepted : Artifact → Prop) (reachable : Artifact → BPF.State → Prop)
+    (entryReachable : ∀ a state, entered a state → reachable a (entry a state))
+    (verifierSound : ∀ a before trace after, accepted a → reachable a before →
+      Execution (BPFPath.instructionStep (environment a) (program a)) before trace after →
+      Event.fault (.write 0 8) ∉ trace)
+    (a : Artifact) (state : NativeState) (acceptance : accepted a) : ¬entered a state := by
+  intro reached
+  have actual := architectural_fault_embedded_execution (environment a) (program a)
+    (position a state) (entry a state) (move a state reached) (store a state reached)
+    (active a state reached) (atEntry a state reached) (unmapped a state reached)
+  have impossible := verifierSound a (entry a state) _ _ acceptance
+    (entryReachable a state reached) actual
+  exact impossible (by simp)
+
+end KProgTV.SimulatorComposition
+#print axioms KProgTV.SimulatorComposition.architectural_fault_embedded_prefix
+#print axioms KProgTV.SimulatorComposition.architectural_fault_embedded_execution
+
+#print axioms KProgTV.SimulatorComposition.architectural_fault_embedded_frame
+#print axioms KProgTV.SimulatorComposition.accepted_embedded_architectural_fault_unreachable
+
+#print axioms KProgTV.SimulatorComposition.architectural_fault_embedded_decode
+
+#print axioms KProgTV.SimulatorComposition.architectural_fault_embedded_bytes_execution

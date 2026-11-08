@@ -5215,3 +5215,17 @@ while the canonical pre-delivery PC remains4096. The ledger records this raw
 PC+2 profile difference. [Original evidence](ud2-fault-terminal.log.gz) keeps
 all source, binary identity, model warnings, observations and proof attempts.
 The new reference also reproduces all576 prior canonical JSON results exactly.
+
+### Architectural-fault prefix at every linked position
+
+`SimulatorComposition.architectural_fault_embedded_decode` derives the two
+real BPF instructions from a literal16-byte copy at any instruction-aligned
+position of the final image. `architectural_fault_embedded_bytes_execution`
+then supplies actual whole-program Execution, with exact fault PC and ordered
+write0/8 fault. The frame law preserves all other registers, complete memory,
+halted state and both ghost visits. The generic accepted-entry exclusion uses
+stock-verifier soundness and reachability. [Original proof evidence](architectural-fault-placement.log.gz)
+retains every source/log/exit, including unsuccessful development attempts.
+Actual compiler/link byte preservation, native-to-B reachability/physical ABI,
+active entry, NULL-unmapped memory and verifier soundness remain explicit.
+No per-program check or runtime admission condition is introduced.
