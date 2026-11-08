@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-08T00:55:24.460125+00:00",
+  "host_ok": false,
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_request_attempts": 1,
+  "distinct_source_prog_ids": 1,
+  "proof_generated": 1,
+  "stages": {
+    "loader_rejected": 1
+  },
+  "failure_causes": {
+    "see_exact_load_stderr": 1
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+      "entry": "trusted_entry",
+      "status": -5,
+      "stage": "loader_rejected",
+      "cause": "see_exact_load_stderr",
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": null,
+      "request_archive": "run/requests/1.failure.tar.gz",
+      "request_archive_sha256": "6a781140e478e7178896cab71fe05da7afc04d22389c05420f00dfa89fdc3fe7",
+      "failed_commands": [],
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-kfunc-resources/trusted-native-loader', 'load', '4', '1', '3', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-k8kb8za3/requests/request-bttb6_vn/generated/request.native.o', 'trusted_entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-k8kb8za3/requests/request-bttb6_vn/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-k8kb8za3/requests/request-bttb6_vn/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-entry-resources', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "load_stderr": "trusted-native-loader: native proof call has an unresolved function identity at instruction 0\n"
+    }
+  ],
+  "applications": [],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}

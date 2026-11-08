@@ -1,0 +1,1 @@
+Generic tc-control native-only registered-service control. Guest exit1, host statusFalse, Make exit2, stages{"loader_rejected": 1}. Exact raw request/generated ELF/kfunc metadata and native execution identities accompany this coherent caller/worker epoch. Universal ABI/link and whole-application composition continue.
