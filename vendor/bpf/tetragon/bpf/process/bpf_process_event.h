@@ -252,17 +252,13 @@ get_namespaces(struct msg_ns *msg, struct task_struct *task)
 	}
 
 	{
-		struct mm_struct *mm = NULL;
-		struct user_namespace *user_ns;
+		const struct cred *cred = NULL;
+		struct user_namespace *user_ns = NULL;
 
-		if (bpf_core_field_exists(mm->user_ns)) {
-			probe_read(&mm, sizeof(mm), _(&task->mm));
-			probe_read(&user_ns, sizeof(user_ns), _(&mm->user_ns));
-			probe_read(&msg->user_inum, sizeof(msg->user_inum),
-				   _(&user_ns->ns.inum));
-		} else {
-			msg->user_inum = 0;
-		}
+		probe_read(&cred, sizeof(cred), _(&task->cred));
+		probe_read(&user_ns, sizeof(user_ns), _(&cred->user_ns));
+		probe_read(&msg->user_inum, sizeof(msg->user_inum),
+			   _(&user_ns->ns.inum));
 	}
 }
 
