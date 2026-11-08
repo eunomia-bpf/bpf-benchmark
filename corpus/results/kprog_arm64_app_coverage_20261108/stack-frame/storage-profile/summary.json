@@ -1,0 +1,48 @@
+{
+  "utc": "2026-11-08T07:41:32.445704+00:00",
+  "captured_application": "whole Tracee09208 third request sys_enter_submit",
+  "profile": "ARM64 host clang18/BPFv4/4096-byte compiler setting with captured guest sysroot",
+  "byte_o3_exit": 0,
+  "packed_host_exit": 0,
+  "packed_o2_exit": 0,
+  "tag_domain": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "tag_slots": 34,
+  "byte_storage": 40,
+  "packed_storage": 24,
+  "observations": 139876,
+  "existing_skb_observations": 142080,
+  "generated_micros": 29,
+  "compiled_micros": 29,
+  "variants": {
+    "packed_o2": {
+      "optimization": "O2",
+      "header_sha256": "5dd63afbf349a695b5d5deacf7c10439017513fefce066297475694d2f6d869f",
+      "source_sha256": "30f4ad35652cd5e49a4585a42829bb5e40e12928af6ea2ae89da5441744ebd41",
+      "object_sha256": "a8f17648d6e766d10afbda18b22083f999192c48a7e16fe69720dd7ca95f3d7f",
+      "max_direct_frame_offset": 536,
+      "direct_accesses_beyond_512": 9,
+      "object_bytes": 3439520
+    },
+    "byte_o3": {
+      "optimization": "O3",
+      "header_sha256": "fdeb508bcd548d0063bf12a63ed76915319739882ab8349bacbb8f332643b1c3",
+      "source_sha256": "30f4ad35652cd5e49a4585a42829bb5e40e12928af6ea2ae89da5441744ebd41",
+      "object_sha256": "21aaaba6e9121bcbe36461c414d4fa0d7716dcc63b7f4d7c2399debbfe5503cf",
+      "max_direct_frame_offset": 560,
+      "direct_accesses_beyond_512": 34,
+      "object_bytes": 3451320
+    }
+  }
+}
