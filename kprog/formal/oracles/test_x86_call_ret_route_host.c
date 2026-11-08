@@ -236,10 +236,11 @@ dispatch:
 }
 
 /* SUB_RET preserves the complete frame while reading the old stack slot. */
-static unsigned long return_frame_cases;
-static void probe_return_frame(__u64 saved, unsigned depth, unsigned fs, unsigned profile)
+static unsigned long return_frame_cases,return_switch_hits,return_switch_fallthroughs;
+static void probe_return_frame(__u64 saved, unsigned depth, unsigned fs, unsigned profile, unsigned table)
 {
  DECL_STATE();
+ int hit=-1;
  __x86_native_stack_base=(__u64)(long)&native_call_stack[X86_SIM_STACK_BYTES];
  __u64 before[16], raw[16]; __u8 tags[16], expected[X86_SIM_STACK_BYTES];
  __u64 vector_lo=0x1122334455667788ULL^saved, vector_hi=~vector_lo;
@@ -258,7 +259,14 @@ static void probe_return_frame(__u64 saved, unsigned depth, unsigned fs, unsigne
  for(unsigned i=0;i<8;i++)__x86_stack_mem.b[at+i]=expected[at+i]=(__u8)(saved>>(8*i));
  goto dispatch;
 arrived:
+ hit=1;
+ goto observed;
+unmatched:
+ hit=0;
+observed:
  return_frame_cases++;
+ if(hit!=(table==2||(table==1&&saved==0))){printf("SUB_RET continuation table=%u saved=%llx\n",table,(unsigned long long)saved);failures++;return;}
+ if(hit)return_switch_hits++;else return_switch_fallthroughs++;
  if(__x86_sim_ret_addr!=saved){printf("SUB_RET saved word mismatch depth=%u\n",depth);failures++;return;}
  for(unsigned r=0;r<16;r++) {
   __u64 delta=r==X86_RSP?8:0;
@@ -274,7 +282,25 @@ arrived:
  }
  return;
 dispatch:
- X86_SIM_X86_SUB_RET(arrived);
+ X86_SIM_X86_SUB_RET(ret_dispatch);
+ret_dispatch:
+ if(table==1){switch(__x86_sim_ret_addr){case 0ULL:goto arrived;}}
+ else if(table==2){switch(__x86_sim_ret_addr){
+  case 0ULL:goto arrived;
+  case 1ULL:goto arrived;
+  case 0xffULL:goto arrived;
+  case 0x100ULL:goto arrived;
+  case 0x7fffULL:goto arrived;
+  case 0x8000ULL:goto arrived;
+  case 0x7fffffffULL:goto arrived;
+  case 0x80000000ULL:goto arrived;
+  case 0x7fffffffffffffffULL:goto arrived;
+  case 0x8000000000000000ULL:goto arrived;
+  case 0xffffffffffffffffULL:goto arrived;
+  case 0x1122334455667788ULL:goto arrived;
+  case 0x00ff00ff00ff00ffULL:goto arrived;
+ }}
+ goto unmatched;
 }
 
 int main(void)
@@ -440,8 +466,8 @@ int main(void)
    probe_call_frame(words[n],depth,fs,profile);
   printf("x86 CALL full frame cross-check: %lu cases\n",frame_cases);
   for(unsigned n=0;n<sizeof(words)/sizeof(words[0]);n++)for(unsigned depth=8;depth<=64;depth++)for(unsigned fs=0;fs<64;fs++)for(unsigned profile=0;profile<4;profile++)
-   probe_return_frame(words[n],depth,fs,profile);
-  printf("x86 SUB_RET full frame cross-check: %lu cases\n",return_frame_cases);
+   for(unsigned table=0;table<3;table++)probe_return_frame(words[n],depth,fs,profile,table);
+  printf("x86 SUB_RET full frame/switch cross-check: %lu cases; selected=%lu fallthrough=%lu\n",return_frame_cases,return_switch_hits,return_switch_fallthroughs);
  }
 	if (failures) {
 		printf("x86 call/ret route host cross-check: FAIL (%d/%lu)\n",

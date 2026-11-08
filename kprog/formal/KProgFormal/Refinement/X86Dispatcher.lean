@@ -4820,4 +4820,95 @@ theorem return_label_simulator_token_native_matches (env : EntryEnvironment.Envi
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
+/-- Source emission expands the finite continuation table into case/goto
+arms. The saved word is sampled at the old stack offset; each selected arm
+observes the same completed read/advance transfer. An exhausted table denotes
+the source fallthrough, whose subsequent control retains a separate relation. -/
+def generatedReturnSwitchBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) : List Reference.Word → Option (Transition Reference.X86.State)
+  | [] => none
+  | label :: rest =>
+      if returnStackWord env frame arena state = label then
+        some ⟨nativeRegisters env frame arena (registerPc (advanceStack state 8) label),
+          returnStackReads env frame arena state, none⟩
+      else generatedReturnSwitchBody env frame arena state rest
+
+/-- Specialized SUB_RET loads once, advances RSP and uses its captured
+continuation table. Membership describes the actual emitted case selection. -/
+def specializedReturnSwitch (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    Option (Transition Reference.X86.State) :=
+  if targets.contains (returnStackWord env frame arena state) then
+    some (returnLabelFrame env frame arena state) else none
+
+theorem return_switch_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    generatedReturnSwitchBody env frame arena state targets =
+      specializedReturnSwitch env frame arena state targets := by
+  induction targets with
+  | nil => rfl
+  | cons label rest ih =>
+      by_cases selected : returnStackWord env frame arena state = label
+      · simp [generatedReturnSwitchBody, specializedReturnSwitch, List.contains_cons,
+          selected, returnLabelFrame]
+      · simp only [generatedReturnSwitchBody, if_neg selected, ih]
+        simp [specializedReturnSwitch, List.contains_cons, selected, Ne.symm selected]
+
+theorem return_switch_selected (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) :
+    generatedReturnSwitchBody env frame arena state targets = some (returnLabelFrame env frame arena state) ↔
+      targets.contains (returnStackWord env frame arena state) = true := by
+  rw [return_switch_body_matches]
+  simp only [specializedReturnSwitch]
+  split <;> simp_all
+
+theorem return_switch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) (nextPc : Reference.Word)
+    (member : targets.contains (returnStackWord env frame arena state) = true)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
+    generatedReturnSwitchBody env frame arena state targets =
+      some (Reference.X86.step (.returnNear 0 nextPc) (nativeRegisters env frame arena state)) := by
+  rw [return_switch_body_matches]
+  simp only [specializedReturnSwitch, member, ↓reduceIte]
+  exact congrArg some (return_label_frame_refines env frame arena state nextPc readable canonical)
+
+/-- The existing RET token body supplies this source-emitted finite switch.
+All ignored fields and every table entry retain arbitrary values. -/
+theorem return_switch_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
+    (if targets.contains (returnStackWord env frame arena state) then
+      specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state else none) =
+      generatedReturnSwitchBody env frame arena state targets := by
+  rw [return_switch_body_matches]
+  simp only [specializedReturnLabelStep, ↓reduceIte, returnLabelRegisters, ↓reduceIte,
+    specializedReturnSwitch]
+
+theorem return_switch_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
+    (member : targets.contains (returnStackWord env frame arena state) = true)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
+    ∃ actual, generatedReturnSwitchBody env frame arena state targets = some actual ∧
+      specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step (.returnNear 0 nextPc) (nativeRegisters env frame arena state) actual := by
+  refine ⟨returnLabelFrame env frame arena state, (return_switch_selected env frame arena state targets).2 member, ?_,
+    return_label_frame_step_refines env frame arena state nextPc readable canonical⟩
+  simp only [specializedReturnLabelStep, ↓reduceIte, returnLabelRegisters, ↓reduceIte]
+
+theorem return_switch_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (targets : List Reference.Word) (nextPc : Reference.Word)
+    (member : targets.contains (returnStackWord env frame arena state) = true)
+    (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true)
+    (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step (.returnNear 0 nextPc) (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, generatedReturnSwitchBody env frame arena state targets = some actual ∧
+      Reference.X86.matchesTransition (.returnNear 0 nextPc) nativeAfter actual := by
+  refine ⟨returnLabelFrame env frame arena state, (return_switch_selected env frame arena state targets).2 member, ?_⟩
+  exact successors_match _ _ nativeAfter _ nativeStep
+    (return_label_frame_step_refines env frame arena state nextPc readable canonical)
+
 end KProgFormal.Refinement.X86Dispatcher

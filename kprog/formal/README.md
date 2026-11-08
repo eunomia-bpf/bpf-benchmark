@@ -191,3 +191,8 @@ dispatcher and branch-token equality. Readable-stack and canonical-target
 premises describe the ISA domain. Source-label/native-PC, physical memory,
 compiler and outer low32RAX/context-copy/invocation relations retain their
 explicit step(e) interfaces. The partial RET rows track this internal body.
+
+The same internal RET body composes the source-emitted finite continuation
+switch for arbitrary tables and saved words. Successful case selection has
+token-body equality and canonical-step composition; exhausted-table source
+fallthrough and native address transport retain their explicit interfaces.

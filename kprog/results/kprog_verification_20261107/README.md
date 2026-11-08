@@ -27,7 +27,8 @@ The 66 x86 O2 equalities cover46 direct bodies, seventeen generic calls and thre
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
 RET now composes its internal SUB_RET saved64word read, rawRSP+8 and full
-frame through an extended dispatcher and branch-token equality. Its coverage
+frame through an extended dispatcher and branch-token equality. The emitted
+finite continuation switch now composes the same selected-case step. Its coverage
 remains partial while the outer invocation, low32RAX/context copy and linked
 continuation relations are connected. Eight pseudo operations require
 environment/native-link binding. ARM conditional
@@ -4390,3 +4391,23 @@ cb-copy expectation. Its1171 Git sources and complete failure remain under
 `full_make_check_a391b0ebd_failure`. The existing ARM RET oracle now follows
 live-context preservation: original1/fixed0 across the same9437184 cases,
 with routing, return value and complete frame comparisons retained.
+
+### x86 finite return continuation switch
+
+Six universal laws connect the emitted case/goto list to the specialized
+SUB_RET body, select its saved64word target and compose the canonical near
+return. Tables, ignored opcode fields and initial frames remain arbitrary;
+canonical-target and readable-stack witnesses describe the ISA domain.
+Selected membership is the generated switch arm. Exhausted-table source
+fallthrough, native address/return-slot transport, physical memory/compiler
+and outer invocation remain explicit interfaces. RET retains partial status,
+with complete-token totals66 x86 and71 ARM.
+
+The existing CALL/RET oracle retains26624 CALL frames and13 routes. Its SUB_RET
+frame exercise now spans569088 cases across empty, one-entry and13-entry
+tables:204288 selected continuations and364800 fallthroughs. All13 saved words,
+57 eight-byte stack positions,64 flag combinations and4 tag profiles remain.
+Every raw/numeric/tag register, stack byte, modeled flag and vector lane is
+compared under UBSan. Exact published cdca2680d production C dependencies,
+new sources, commands, six axiom outputs, logs and binary are archived under
+`x86_return_continuation_switch`.
