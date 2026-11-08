@@ -1,0 +1,93 @@
+{
+  "created": "2026-11-08T12:51:16.690102+00:00",
+  "hosts": [
+    {
+      "name": "baseline-host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/baseline-host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/native.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/baseline-host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 1
+    },
+    {
+      "name": "host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/host.c",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/native.S",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "test_x86_pushpop_host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/test_x86_pushpop_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/test_x86_pushpop_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "name": "test_x86_pushpop_route_host",
+      "command": [
+        "cc",
+        "-O2",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Wno-attributes",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/kprog/formal/oracles",
+        "-I/workspaces/repository/kprog/x86",
+        "-I/workspaces/repository/kprog",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/test_x86_pushpop_route_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tetragon-precise-stack/pushpop/test_x86_pushpop_route_host"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "model_sha256": "66e53f785b7e79a163067ed57a052de3b6a617988508420fabf08236085c0d31",
+  "production_source_changed": false
+}
