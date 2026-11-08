@@ -2615,4 +2615,43 @@ theorem load_memory_move_refines (env : Environment) (frame : Frame) (arena : Na
       funext reg
       by_cases same : reg = destination <;> simp [same, Reference.X86.RegisterSlice.reg]
 
+
+/-- BMI memory operands capture the source and count in the incoming frame.
+The numeric writer retains RSP offsets, destination aliases and every flag. -/
+def bmiMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst : Reference.X86.Register) (count address nextPc : NativeWord) : Transition Reference.X86.State :=
+  aluSourceFrame env frame arena state (multiplyScalarWidth (X86Bzhi.readWidth width)) dst
+    (fun source => X86BmiShift.value width kind source count)
+    (fun _ => state.raw.rflags) address nextPc
+
+theorem bmi_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
+    (dst : Reference.X86.Register) (count : Reference.X86.ShiftCount) (address nextPc : NativeWord) :
+    bmiMemoryFrame env frame arena state width kind dst
+        (Reference.X86.countValue (nativeRegisters env frame arena state) count) address nextPc =
+      Reference.X86.step (.bmiShift width kind dst (.memory address) count nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86BmiShift.step_refines width kind dst (.memory address) count nextPc
+    (nativeRegisters env frame arena state) .scalar]
+  simp only [bmiMemoryFrame, aluSourceFrame, X86BmiShift.handlerStep,
+    X86Scalar.read_refines, X86Bt.read_refines, Reference.X86.scalarRead]
+  have bytes : (multiplyScalarWidth (X86Bzhi.readWidth width)).bytes = width.bytes := by cases width <;> rfl
+  have readBytes : (X86Bzhi.readWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes, readBytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, native_register_write]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = dst
+      · subst reg
+        simp only [nativeRegisters, Reference.X86.RegisterSlice.reg, ↓reduceIte]
+        rw [← X86Scalar.register_write_refines]
+        cases width <;> rfl
+      · simp only [nativeRegisters, Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
 end KProgFormal.Refinement.X86NumericAddress

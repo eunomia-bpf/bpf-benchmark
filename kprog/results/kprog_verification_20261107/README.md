@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 20/75 | 0/71 |
-| Additional partial-model handler families | 11/75 | 0 |
+| Addressed memory model / composed step | 22/75 | 0/71 |
+| Additional partial-model handler families | 9/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 56/75 | 71/71 |
+| O2 C-model token-body equality | 58/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 56 x86 O2 equalities cover44 direct bodies, ten generic calls and two
+The 58 x86 O2 equalities cover44 direct bodies, twelve generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining11 x86 reference-family handlers have partial model proofs; eight
+The remaining9 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -72,6 +72,12 @@ width and AUX fallback, full base/index/displacement fields, low destination
 lanes and canonical MOV/extension through the extended unified step.
 All flags, complete numeric frame and read/fault effects persist under the
 shared native-field, physical-memory/provenance and compiler/ABI interfaces.
+Two generic memory BMI tokens now also compose SHLX/SHRX/SARX and RORX,
+the packed high32 displacement, AUX high-byte count GPR and low-byte
+ALU/count fields through the same unified dispatcher/token step. Their full
+numeric frame retains incoming count/address aliases, native RSP/STACK
+materialization, all flags and precise read/fault events under the shared
+physical-memory, native-normalization and compiler/ABI interfaces.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -4101,3 +4107,29 @@ source manifest, CPU trace and exit receipt are archived under
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_18a049494`. Every check retains its exact published source identity.
+
+### Memory BMI dispatcher and generic-token composition
+
+`x86_bmi_memory_tokens` joins SHLX/SHRX/SARX and RORX memory sources to the
+canonical `Instruction.bmiShift` through the extended universal dispatcher and
+two generic RUN_OP tokens. Native32/64 and FLAGS0-to64, captured base/index/scale,
+packed signed high32 displacement, AUX high-byte count register and low-byte
+ALU/count fields retain their production identities. Complete numeric state,
+RSP/STACK destination materialization, all flags, ordered reads and read faults
+follow from `bmi_memory_frame_refines`. The earlier122 numeric and108 dispatcher
+theorem/module prefixes remain byte-exact. Nine public axiom audits, default
+Lean build, contract generators and semantic/source checks pass; the axiom
+inventory records `sorryAx_count=0`.
+
+The permanent UBSan oracle compares the actual generic specialized and
+interpreter bodies with real BMI2 instructions over11,907,072 cases. Its
+incoming source/count/base/index/destination aliases, all16 GPR destinations,
+heap/RSP/STACK profiles, native32/64/default widths and64 flag combinations
+retain complete raw/numeric/tag register files and both512-byte images.
+The original packing diagnostic and correction to the actual AUX high-byte
+count source remain archived with the final passing source epoch.
+The Lean/C contract, native decoding/normalization, physical-memory/provenance,
+compiler/entry/exit ABI and native-link transport retain their explicit
+universal production interfaces. Selected three-way replay identities and O4
+rows retain their existing source domains. The x86 C-model O2 total is58/75
+(44direct/12generic/2branch); the ARM C-model total remains71/71.
