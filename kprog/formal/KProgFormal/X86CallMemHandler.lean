@@ -1,3 +1,6 @@
+import KProgFormal.Refinement.X86NumericAddress
+import KProgFormal.Generated.GeneratedX86Specialization
+import KProgFormal.Generated.GeneratedX86Opcode
 import KProgFormal.Generated.GeneratedX86CallMem
 import KProgFormal.X86MemAccess
 import KProgFormal.TagErasure
@@ -196,5 +199,179 @@ theorem x86_call_mem_full_count_examples :
     x86CallMemCountSpec .callMemset 2048 0 = 2048 ∧
     x86CallMemCountSpec .callMemsetReg 1 4294967297 = 4294967297 := by
   decide
+
+namespace X86CallMemBody
+abbrev Word := Reference.Word
+open Reference
+open Refinement.X86NumericAddress
+abbrev Register := Reference.X86.Register
+
+/-- The sixteen kind6 reads follow the production helper-clobber order:
+eight GPRs, CF/ZF/SF/OF/PF/AF, then the two XMM0 halves. -/
+abbrev Fresh := Fin 16 → Word
+
+structure Frame where
+  registers : RegisterState
+  tags : Register → Byte
+
+def rawWrite (s : Frame) (r : Register) (value : Word) (tag : Byte) : Frame :=
+  ⟨⟨{ s.registers.raw with gpr := fun q => if q = r then value else s.registers.raw.gpr q },
+    fun q => if q = r then tag == 4 else s.registers.stack q⟩,
+    fun q => if q = r then tag else s.tags q⟩
+
+def clobberIndex (r : Register) : Option (Fin 16) :=
+  if r = 1 then some 0 else if r = 2 then some 1 else
+  if r = 6 then some 2 else if r = 7 then some 3 else
+  if r = 8 then some 4 else if r = 9 then some 5 else
+  if r = 10 then some 6 else if r = 11 then some 7 else none
+
+def freshFlags (fresh : Fresh) : Word :=
+  (fresh 8 &&& 1) ||| ((fresh 9 &&& 1) <<< 6) |||
+  ((fresh 10 &&& 1) <<< 7) ||| ((fresh 11 &&& 1) <<< 11) |||
+  ((fresh 12 &&& 1) <<< 2) ||| ((fresh 13 &&& 1) <<< 4)
+
+def flagsMask : Word := 0x8d5
+
+def finishClobbers (s : Frame) (fresh : Fresh) : Frame :=
+  { s with registers := { s.registers with raw := { s.registers.raw with
+    rflags := (s.registers.raw.rflags &&& ~~~flagsMask) ||| freshFlags fresh,
+    xmm0 := (fresh 14).setWidth 128 ||| ((fresh 15).setWidth 128 <<< 64) } } }
+
+/-- Sequential raw writes model the eight assignments in HELPER_CLOBBERS. -/
+def generatedClobbers (s : Frame) (fresh : Fresh) : Frame :=
+  let s := rawWrite s 1 (fresh 0) 0
+  let s := rawWrite s 2 (fresh 1) 0
+  let s := rawWrite s 6 (fresh 2) 0
+  let s := rawWrite s 7 (fresh 3) 0
+  let s := rawWrite s 8 (fresh 4) 0
+  let s := rawWrite s 9 (fresh 5) 0
+  let s := rawWrite s 10 (fresh 6) 0
+  let s := rawWrite s 11 (fresh 7) 0
+  finishClobbers s fresh
+
+/-- The independent ABI frame replaces caller registers from the supplied
+fresh stream while retaining the complete callee frame and raw memory. -/
+def clobbersSpec (s : Frame) (fresh : Fresh) : Frame :=
+  finishClobbers
+    ⟨⟨{ s.registers.raw with gpr := fun r => match clobberIndex r with
+        | some i => fresh i | none => s.registers.raw.gpr r },
+      fun r => if (clobberIndex r).isSome then false else s.registers.stack r⟩,
+      fun r => if (clobberIndex r).isSome then 0 else s.tags r⟩ fresh
+
+theorem helper_clobbers_frame (s : Frame) (fresh : Fresh) :
+    generatedClobbers s fresh = clobbersSpec s fresh := by
+  dsimp only [generatedClobbers, clobbersSpec, rawWrite]
+  congr 1
+  congr 1
+  · congr 1
+    · congr 1
+      funext r
+      rcases r with ⟨r, bound⟩
+      have choices : r = 0 ∨ r = 1 ∨ r = 2 ∨ r = 3 ∨ r = 4 ∨ r = 5 ∨ r = 6 ∨ r = 7 ∨
+          r = 8 ∨ r = 9 ∨ r = 10 ∨ r = 11 ∨ r = 12 ∨ r = 13 ∨ r = 14 ∨ r = 15 := by omega
+      rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+    · funext r
+      rcases r with ⟨r, bound⟩
+      have choices : r = 0 ∨ r = 1 ∨ r = 2 ∨ r = 3 ∨ r = 4 ∨ r = 5 ∨ r = 6 ∨ r = 7 ∨
+          r = 8 ∨ r = 9 ∨ r = 10 ∨ r = 11 ∨ r = 12 ∨ r = 13 ∨ r = 14 ∨ r = 15 := by omega
+      rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+  · funext r
+    rcases r with ⟨r, bound⟩
+    have choices : r = 0 ∨ r = 1 ∨ r = 2 ∨ r = 3 ∨ r = 4 ∨ r = 5 ∨ r = 6 ∨ r = 7 ∨
+        r = 8 ∨ r = 9 ∨ r = 10 ∨ r = 11 ∨ r = 12 ∨ r = 13 ∨ r = 14 ∨ r = 15 := by omega
+    rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+
+/-- The extracted loop reads before writing each byte, including overlapping
+buffers. Access permissions and the raw/native memory relation are interfaces. -/
+def generatedLoop (copy : Bool) (dst src value : Word) : Nat → Nat → Memory → Memory
+  | 0, _, memory => memory
+  | count + 1, index, memory =>
+      let byte := if copy then memory.value (src + BitVec.ofNat 64 index) else value.setWidth 8
+      generatedLoop copy dst src value count (index + 1)
+        (storeMemory memory (dst + BitVec.ofNat 64 index) (byte.setWidth 64) 1)
+
+/-- List execution states the ordered byte effects independently of the
+recursive C-loop model. Every read uses the preceding write's memory image. -/
+def loopSpec (kind : GeneratedX86CallMem.Kind) (dst src value : Word)
+    (count index : Nat) (memory : Memory) : Memory :=
+  (List.range' index count).foldl (fun m i =>
+    let byte := match kind with
+      | .copy => m.value (src + BitVec.ofNat 64 i)
+      | .fill => value.setWidth 8
+    storeMemory m (dst + BitVec.ofNat 64 i) (byte.setWidth 64) 1) memory
+
+theorem ordered_loop_refines (kind : GeneratedX86CallMem.Kind) (dst src value : Word)
+    (count index : Nat) (memory : Memory) :
+    generatedLoop (kind == .copy) dst src value count index memory =
+      loopSpec kind dst src value count index memory := by
+  induction count generalizing index memory with
+  | zero => rfl
+  | succ count ih =>
+      let byte : Reference.Byte := match kind with
+        | .copy => memory.value (src + BitVec.ofNat 64 index)
+        | .fill => value.setWidth 8
+      have step := ih (index + 1) (storeMemory memory (dst + BitVec.ofNat 64 index) (byte.setWidth 64) 1)
+      cases kind <;> simpa [generatedLoop, loopSpec, List.range'_succ, byte] using step
+
+def generatedBody (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (s : Frame) (fresh : Fresh) (op : X86CallMemOp) (imm nextPc : Word) : Frame :=
+  let dst := s.registers.raw.gpr 7
+  let src := s.registers.raw.gpr 6
+  let value := registerValue env frame arena s.registers 6
+  let count := generatedX86CallMemCount op imm (registerValue env frame arena s.registers 2)
+  let memory := generatedLoop (GeneratedX86CallMem.kind (x86CallMemToOp op) == .copy)
+    dst src value count 0 s.registers.raw.memory
+  let written := { s with registers := { s.registers with raw := { s.registers.raw with memory := memory } } }
+  let result := generatedClobbers (rawWrite written 0 dst (s.tags 7)) fresh
+  { result with registers := registerPc result.registers nextPc }
+
+def bodySpec (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (s : Frame) (fresh : Fresh) (op : X86CallMemOp) (imm nextPc : Word) : Frame :=
+  let memory := loopSpec (x86CallMemKindSpec op) (s.registers.raw.gpr 7) (s.registers.raw.gpr 6)
+    (registerValue env frame arena s.registers 6)
+    (x86CallMemCountSpec op imm (registerValue env frame arena s.registers 2)) 0 s.registers.raw.memory
+  let written := { s with registers := { s.registers with raw := { s.registers.raw with memory := memory } } }
+  let result := clobbersSpec (rawWrite written 0 (s.registers.raw.gpr 7) (s.tags 7)) fresh
+  { result with registers := registerPc result.registers nextPc }
+
+theorem call_mem_body_refines (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (s : Frame) (fresh : Fresh) (op : X86CallMemOp) (imm nextPc : Word) :
+    generatedBody env frame arena s fresh op imm nextPc = bodySpec env frame arena s fresh op imm nextPc := by
+  simp only [generatedBody, bodySpec, x86_call_mem_kind_refines,
+    generated_x86_call_mem_count_refines, ordered_loop_refines, helper_clobbers_frame]
+
+def opcode : X86CallMemOp → GeneratedX86Opcode.Op
+  | .callMemcpy => .callMemcpy | .callMemcpyReg => .callMemcpyReg
+  | .callMemset => .callMemset | .callMemsetReg => .callMemsetReg
+
+def token : X86CallMemOp → GeneratedX86Specialization.Op
+  | .callMemcpy => .callMemcpy | .callMemcpyReg => .callMemcpyReg
+  | .callMemset => .callMemset | .callMemsetReg => .callMemsetReg
+
+def callPrefix (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Word) (s : Frame) (fresh : Fresh)
+    (code : Nat) (imm nextPc : Word) : Option Frame :=
+  if code = GeneratedX86Opcode.code .callMemset then some (generatedBody env frame arena s fresh .callMemset imm nextPc)
+  else if code = GeneratedX86Opcode.code .callMemcpy then some (generatedBody env frame arena s fresh .callMemcpy imm nextPc)
+  else if code = GeneratedX86Opcode.code .callMemsetReg then some (generatedBody env frame arena s fresh .callMemsetReg imm nextPc)
+  else if code = GeneratedX86Opcode.code .callMemcpyReg then some (generatedBody env frame arena s fresh .callMemcpyReg imm nextPc)
+  else none
+
+theorem call_mem_token_identity (op : X86CallMemOp) :
+    GeneratedX86Specialization.dispatch (token op) = .directMacro ∧
+    GeneratedX86Specialization.tokenName (token op) = GeneratedX86Opcode.define (opcode op) := by
+  cases op <;> decide
+
+theorem call_mem_token_body_matches (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Word) (s : Frame) (fresh : Fresh)
+    (op : X86CallMemOp) (imm nextPc : Word) :
+    callPrefix env frame arena s fresh (GeneratedX86Opcode.code (opcode op)) imm nextPc =
+      some (bodySpec env frame arena s fresh op imm nextPc) := by
+  cases op <;> simp [callPrefix, opcode, GeneratedX86Opcode.code, call_mem_body_refines]
+
+end X86CallMemBody
 
 end KProgFormal

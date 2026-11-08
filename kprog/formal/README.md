@@ -5,7 +5,7 @@ P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
-implementation interface. It currently records 68 x86-64 and 71 AArch64 C-model token
+implementation interface. It currently records 72 x86-64 and 71 AArch64 C-model token
 body equalities. Full ISA and compiled-simulator closure remain active work.
 
 ## Specification and proof scope
@@ -25,7 +25,9 @@ use the reference step's observation mask; uninitialized memory has arbitrary
 values. The theorem statements and coverage rows give each operation's domain.
 The x86 pointer bodies share the extended dispatcher and refine resolved moves
 for all sixteen registers, including the RSP coordinate. Native symbol/helper
-address transport remains an explicit interface. Internal
+address transport remains an explicit interface. Four memory-call token bodies
+include sequential byte effects and the fresh caller-clobber frame; their
+native call/ABI and physical memory relations remain explicit. Internal
 RET includes its finite continuation switch; outer invocation/return-slot,
 physical memory/provenance and C/compiler correspondence remain explicit.
 

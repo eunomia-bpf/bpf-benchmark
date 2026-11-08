@@ -18,13 +18,14 @@ specialization token also has its own row.
 | Conditional modeled handler / observed dispatcher | 0 | 71/71 |
 | Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 3/75 | 0/71 |
-| Pointer-load body model / composed step (ordinary GPRs) | 2/75 | 0/71 |
-| O2 C-model token-body equality | 68/75 | 71/71 |
+| Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/71 |
+| Memory-call full-frame C body model | 4/75 | 0/71 |
+| O2 C-model token-body equality | 72/75 | 71/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
-The 68 x86 O2 equalities cover48 direct bodies, seventeen generic calls and three
+The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
 RET now composes its internal SUB_RET saved64word read, rawRSP+8 and full
@@ -34,8 +35,10 @@ remains partial while the outer invocation, low32RAX/context copy and linked
 continuation relations are connected. Eight pseudo operations require
 environment/native-link binding. Two pointer-load direct bodies additionally
 have complete raw-frame/tag equality through their production prefix; the
-extended dispatcher now composes all68 C-model token bodies and the partial
-internal RET body. The full tag map and numeric STACK predicate preserve
+extended numeric dispatcher composes68 C-model token bodies and the partial
+internal RET body. Four memory-call bodies add separate production-prefix
+equalities with exact full counts, ordered byte loops and kind6 caller
+clobbers; canonical call/native-memory linking remains explicit. The full tag map and numeric STACK predicate preserve
 their agreement through both pointer loads. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
@@ -4546,3 +4549,26 @@ compiled fault markers and two narrow-result controls. The retained tool
 returns0 against the captured published source epoch. All1263 original full
 source hashes and the original failure remain archived under
 `divide_admission_retirement`; the full-check export is retired.
+
+### Four memory-call token bodies
+
+The four memcpy/memset bodies now have generic token-name, production-prefix
+and complete modeled body equalities in `X86CallMemBody`. The proof derives
+the recursive byte loop from independent ordered-list execution, preserving
+read-before-write order and overlapping C buffers at every count. Immediate
+and numeric RDX count selection retain all64 bits. The result captures RDI's
+original raw pointer and tag in RAX before the eight caller-register writes.
+Six flag bits and both XMM0 halves receive their own fresh kind6 values;
+callee registers/tags and the remaining modeled frame persist.
+
+Default Lean build, five-law axiom audit and existing hygiene/composition
+checks pass. The existing oracle retains every original input and byte/result
+assertion, compares RAX against the saved input tag, and spans direct plus
+L_EXEC routes and all64 incoming flag patterns:8448 observations pass UBSan.
+The original oracle's post-clobber-RDI expectation fails against the same
+captured production source. Totals are72x86/71ARM C-model token equalities;
+the numeric ISA dispatcher retains68x86 bodies plus partial internal RET.
+Native call-symbol/ABI, physical memory/provenance, access faults, ISA event
+transport and C/compiler correspondence remain explicit interfaces. Exact
+sources, commands and initial elaboration diagnostics are archived under
+`x86_call_memory_tokens`.

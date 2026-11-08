@@ -16,6 +16,12 @@ typedef signed long long __s64;
 #include <stdio.h>
 #include <string.h>
 
+static __u64 fresh_values[16];
+static unsigned fresh_cursor, incoming_flags, generic_route;
+static __u64 fresh_word(void) { return fresh_values[(fresh_cursor++) & 15U]; }
+#undef X86_SIM_L_UNSPECIFIED
+#define X86_SIM_L_UNSPECIFIED() fresh_word()
+
 static int failures;
 static unsigned long cases;
 
@@ -41,11 +47,11 @@ static void snapshot_expect(void)
 /*
  * Run one block-copy / block-fill body over the modeled heap and compare the
  * whole buffer plus the result-register write against an independent byte
- * model.
+ * model and complete caller-clobber frame.
  *
  * `op_is_copy` selects `MEMCPY` (copy) vs `MEMSET` (fill); `op_is_reg` selects
- * the `*_REG` opcodes (length from `RDX`, bound from the artifact) vs the
- * immediate opcodes (length from the artifact, bound the literal 1024).
+ * the `*_REG` opcodes (length from `RDX`) vs the
+ * immediate opcodes (length from the artifact).
  * `imm` is the instruction-immediate artifact. The destination is always at
  * heap offset 0; a copy reads its source from `SRC_OFF`.
  */
@@ -61,8 +67,12 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	void *src_ptr = (void *)(heap + SRC_OFF);
 	__u64 ea;
 	unsigned i;
+	__u64 old_raw[16];
+	__u8 old_tags[16];
+	static const unsigned caller_regs[8] = {1, 2, 6, 7, 8, 9, 10, 11};
 
 	X86_SIM_L_DECLARE_STATE();
+	__u8 __x86_sim_abi_kind = 0;
     X86_SIM_L_DECLARE_STACK();
 	(void)__x86_cf;
 	(void)__x86_zf;
@@ -72,6 +82,15 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	(void)__x86_xmm0_hi;
 	(void)__x86_sim_ret_addr;
 
+	for (i = 0; i < 16; i++) {
+		X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)(0x123456780000ULL + i * 37U), i & 7U);
+		fresh_values[i] = (0x9e3779b97f4a7c15ULL * (i + 1U)) ^ imm ^ (rdx << 7) ^ incoming_flags;
+	}
+	__x86_cf = incoming_flags & 1U; __x86_zf = (incoming_flags >> 1) & 1U;
+	__x86_sf = (incoming_flags >> 2) & 1U; __x86_of = (incoming_flags >> 3) & 1U;
+	__x86_pf = (incoming_flags >> 4) & 1U; __x86_af = (incoming_flags >> 5) & 1U;
+	__x86_xmm0_lo = 0x123456789abcdef0ULL;
+	__x86_xmm0_hi = 0xfedcba9876543210ULL;
 	fill_pattern();
 	snapshot_expect();
 
@@ -92,8 +111,14 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 			exp_heap[DST_OFF + i] = (__u8)(fill_value & 0xffULL);
 	}
 
+	for (i = 0; i < 16; i++) { old_raw[i] = (__u64)(unsigned long)X86_SIM_L_READ_REG_PTR(i); old_tags[i] = X86_SIM_L_REG_TAG(i); }
+	fresh_cursor = 0;
 	/* ---- run the real body ---- */
-	if (op_is_copy && !op_is_reg)
+	if (generic_route) {
+		unsigned op = op_is_copy ? (op_is_reg ? X86_OP_CALL_MEMCPY_REG : X86_OP_CALL_MEMCPY) :
+			(op_is_reg ? X86_OP_CALL_MEMSET_REG : X86_OP_CALL_MEMSET);
+		X86_SIM_L_EXEC(op, 0, 255, 37, 0xfeU, imm);
+	} else if (op_is_copy && !op_is_reg)
 		X86_SIM_L_EXEC_CALL_MEMCPY(imm);
 	else if (op_is_copy && op_is_reg)
 		X86_SIM_L_EXEC_CALL_MEMCPY_REG(imm);
@@ -126,10 +151,25 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 		failures++;
 	}
 	cases++;
-	if (X86_SIM_L_REG_TAG(X86_RAX) != X86_SIM_L_REG_TAG(X86_RDI)) {
+	if (X86_SIM_L_REG_TAG(X86_RAX) != rdi_tag) {
 		printf("MISMATCH %s rax tag=%u want=%u\n", what,
-		       X86_SIM_L_REG_TAG(X86_RAX), X86_SIM_L_REG_TAG(X86_RDI));
+		       X86_SIM_L_REG_TAG(X86_RAX), rdi_tag);
 		failures++;
+	}
+	cases++;
+	for (i = 0; i < 16; i++) {
+		__u64 expected = i == X86_RAX ? (__u64)(unsigned long)dst_ptr : old_raw[i];
+		__u8 tag = i == X86_RAX ? rdi_tag : old_tags[i];
+		for (unsigned j = 0; j < 8; j++) if (i == caller_regs[j]) { expected = fresh_values[j]; tag = X86_SIM_TAG_SCALAR; }
+		if ((__u64)(unsigned long)X86_SIM_L_READ_REG_PTR(i) != expected || X86_SIM_L_REG_TAG(i) != tag) {
+			printf("MISMATCH %s full caller frame r%u route%u flags%u\n", what, i, generic_route, incoming_flags); failures++; return;
+		}
+	}
+	if (fresh_cursor != 16 || __x86_cf != (fresh_values[8]&1) || __x86_zf != (fresh_values[9]&1) ||
+	    __x86_sf != (fresh_values[10]&1) || __x86_of != (fresh_values[11]&1) ||
+	    __x86_pf != (fresh_values[12]&1) || __x86_af != (fresh_values[13]&1) ||
+	    __x86_xmm0_lo != fresh_values[14] || __x86_xmm0_hi != fresh_values[15]) {
+		printf("MISMATCH %s kind6 stream/flag/vector frame route%u flags%u\n", what, generic_route, incoming_flags); failures++;
 	}
 }
 
@@ -157,6 +197,8 @@ int main(void)
 	__u8 tags[] = { X86_SIM_TAG_SCALAR, X86_SIM_TAG_MAP_VALUE };
 	unsigned t;
 
+	for (incoming_flags = 0; incoming_flags < 64; incoming_flags++)
+	for (generic_route = 0; generic_route < 2; generic_route++) {
 	/* Full-count cases, including sizes beyond the removed simulator cap. */
 	check_op("memcpy/imm", 1, 0, 16, 0, 0, X86_SIM_TAG_SCALAR);
 	/* Full requested length; IMM is ignored by register-count forms. */
@@ -192,6 +234,7 @@ int main(void)
 	}
 
 	check_selectors();
+	}
 
 	if (failures != 0) {
 		printf("x86 callmem route host cross-check: FAIL (%d)\n", failures);
