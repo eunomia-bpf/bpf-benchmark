@@ -1,0 +1,5 @@
+ARM Cilium complete replay through asynchronous endpoint creation
+
+The retained complete Cilium native manifest preserves its source identity and map matching. The runner requests asynchronous endpoint creation and uses the existing endpoint-readiness waiter. The existing two-start recipe uses8vCPUs/8GiB on16-19 and the paired five-step runtime. A private source snapshot carries the generic LDADD/LDSET/LDCLR instructions, old-value destination, address-before-writeback and memory-order selection. The current canonical compiler flags and simulator remain at their published epoch. QEMU durations provide functional evidence.
+
+The existing29 microprograms generate and compile with the candidate. Preliminary offline source attempts capture the real-section and original-map declaration setup frontiers; the application run supplies map metadata through the kernel request. The terminal replay publishes raw generated B, verifier and application-work results. Architectural O1/O2 coverage for the new operation belongs to the universal token proof work.
