@@ -1,5 +1,5 @@
 {
-  "as_of_utc": "2026-11-08T14:28:33.212035+00:00",
+  "as_of_utc": "2026-11-08T22:39:23.175674+00:00",
   "scope": "Six closed first-pass application cohorts. Load attempts retain probes and retries; resident rows, service requests and application outcomes have separate denominators. Repairs and full-application replays continue.",
   "applications": [
     {
@@ -655,37 +655,36 @@
       "component_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/cilium-native-compile/summary.json"
     },
     "Tetragon": {
-      "utc": "2026-11-08T21:58:09.506419+00:00",
+      "utc": "2026-11-08T22:39:23.175674+00:00",
       "application": "Tetragon",
-      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application/trusted-arm64-tetragon-result/coverage.json",
-      "baseline_resident": 151,
-      "baseline_bpf_calls": 30020,
-      "service_source_ids": 5,
-      "generated": 5,
-      "compiled": 5,
+      "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application-v61/trusted-arm64-tetragon-result/coverage.json",
+      "baseline_resident": 155,
+      "baseline_bpf_calls": 29882,
+      "service_requests": 4,
+      "generated": 4,
+      "compiled": 4,
       "stages": {
-        "verifier_accepted_installed": 4,
+        "verifier_accepted_installed": 3,
         "verifier_rejected": 1
       },
       "failure_classes": {
-        "complexity_or_size": 1
+        "bpf_stack_extent": 1
       },
       "application_status": [
         "error"
       ],
-      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application/trusted-arm64-tetragon-result/run-20261108T191034434917Z.tar.gz",
-      "raw_archive_sha256": "3d1115698d0f840f2f90eae9781fc6014dbb20ea2a76ee3205e776c6a1248d89",
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application-v61/trusted-arm64-tetragon-result/run-20261108T220252625435Z.tar.gz",
+      "raw_archive_sha256": "1e7017864337b8fed6e04eec6d4c4f222553a5afc38d8512a07cd1ace21fa6c8",
       "host_ok": false,
       "guest_exit": 1,
-      "runtime_epoch": "Prepared paired V511 overlay; actual selected original V61",
-      "publication": "f3c999a71507129a82ee839ba1a52bd62d8e8b7b",
-      "entry": "execve_send",
-      "native_sha256": "2de9f398b896a9a34e2a4c07f0abe5f498c3ef27f9c202f408906fae7b9fc607",
-      "failure_class": "stock_verifier_jump_sequence",
-      "jump_sequence": 8193,
-      "processed_instructions": 667530,
-      "total_states": 6806,
-      "source_scope": "Kernel request selects original V61; source-edited V511 pair retains separate compiler/component evidence"
+      "publication": "bb115e2d0264af30943e59530447903c0cbcf3b1",
+      "runtime_epoch": "Captured paired V61 source3b9a5561f/model83helper RAW context",
+      "entry": "event_execve",
+      "native_sha256": "848c6da68e0e2a4f2264035dca0269759e347936fc30e76b769529a3fe1f1c84",
+      "failure_class": "bpf_stack_extent",
+      "processed_instructions": 109,
+      "variant_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application-v61/actual-variant.json",
+      "work_receipt": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application-v61/trusted-arm64-tetragon-result/work-summary.json"
     },
     "OTel": {
       "utc": "2026-11-08T19:11:54.007222+00:00",
@@ -881,6 +880,39 @@
         "verifier_processed": 667530,
         "verifier_total_states": 6806,
         "jump_sequence": 8193
+      },
+      {
+        "utc": "2026-11-08T21:58:09.506419+00:00",
+        "application": "Tetragon",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application/trusted-arm64-tetragon-result/coverage.json",
+        "baseline_resident": 151,
+        "baseline_bpf_calls": 30020,
+        "service_source_ids": 5,
+        "generated": 5,
+        "compiled": 5,
+        "stages": {
+          "verifier_accepted_installed": 4,
+          "verifier_rejected": 1
+        },
+        "failure_classes": {
+          "complexity_or_size": 1
+        },
+        "application_status": [
+          "error"
+        ],
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-source-length/application/trusted-arm64-tetragon-result/run-20261108T191034434917Z.tar.gz",
+        "raw_archive_sha256": "3d1115698d0f840f2f90eae9781fc6014dbb20ea2a76ee3205e776c6a1248d89",
+        "host_ok": false,
+        "guest_exit": 1,
+        "runtime_epoch": "Prepared paired V511 overlay; actual selected original V61",
+        "publication": "f3c999a71507129a82ee839ba1a52bd62d8e8b7b",
+        "entry": "execve_send",
+        "native_sha256": "2de9f398b896a9a34e2a4c07f0abe5f498c3ef27f9c202f408906fae7b9fc607",
+        "failure_class": "stock_verifier_jump_sequence",
+        "jump_sequence": 8193,
+        "processed_instructions": 667530,
+        "total_states": 6806,
+        "source_scope": "Kernel request selects original V61; source-edited V511 pair retains separate compiler/component evidence"
       }
     ],
     "OTel": [

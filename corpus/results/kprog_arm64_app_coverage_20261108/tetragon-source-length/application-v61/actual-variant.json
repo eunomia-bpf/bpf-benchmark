@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-08T22:39:23.175674+00:00",
+  "actual_native_variant": "V61",
+  "actual_entry": "event_execve",
+  "native_sha256": "848c6da68e0e2a4f2264035dca0269759e347936fc30e76b769529a3fe1f1c84",
+  "launch_source_member": "source/kprog/arm64/build/lse-native/tetragon/bpf_execve_event_v61.native.o",
+  "launch_source_sha256": "848c6da68e0e2a4f2264035dca0269759e347936fc30e76b769529a3fe1f1c84",
+  "request_matches_captured_native": true,
+  "request_id": 4,
+  "scope": "Actual selected paired V61 object from3b9a5561f with original helper-callback path; counted-loop successor47cfe3594 has a separate capture",
+  "native_blob_bytes": 14628,
+  "proof_stack_bytes": 480,
+  "verifier_failure": "invalid write to stack R10 off=-520 size=8",
+  "processed_instructions": 109,
+  "runtime_observation": "Startup request4 fails while initializing compiled B stack; later path/helper reasoning stays separate"
+}
