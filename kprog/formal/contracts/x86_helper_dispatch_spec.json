@@ -2,7 +2,7 @@
   "schema_version": 1,
   "operation": "x86HelperDispatch",
   "id_bits": 64,
-  "helper_count": 67,
+  "helper_count": 68,
   "default_body": "X86_SIM_L_UNSUPPORTED_HELPER()",
   "helpers": [
     {
@@ -400,6 +400,12 @@
       "define": "X86_SIM_HELPER_bpf_get_func_ret",
       "id": 184,
       "body": "X86_SIM_BPF_CALL_bpf_get_func_ret"
+    },
+    {
+      "name": "bpf_xdp_load_bytes",
+      "define": "X86_SIM_HELPER_bpf_xdp_load_bytes",
+      "id": 189,
+      "body": "X86_SIM_BPF_CALL_bpf_xdp_load_bytes"
     },
     {
       "name": "bpf_ima_file_hash",

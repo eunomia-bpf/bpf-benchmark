@@ -84,6 +84,7 @@ _ARMED = [
     ('bpf_task_pt_regs', 175, 'X86_SIM_BPF_CALL_bpf_task_pt_regs'),
     ('bpf_loop', 181, 'X86_SIM_BPF_CALL_bpf_loop'),
     ('bpf_get_func_ret', 184, 'X86_SIM_BPF_CALL_bpf_get_func_ret'),
+    ('bpf_xdp_load_bytes', 189, 'X86_SIM_BPF_CALL_bpf_xdp_load_bytes'),
     ('bpf_ima_file_hash', 193, 'X86_SIM_BPF_CALL_bpf_ima_file_hash'),
 ]
 EXPECTED = {

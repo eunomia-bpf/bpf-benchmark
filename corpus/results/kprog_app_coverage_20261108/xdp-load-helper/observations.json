@@ -1,0 +1,45 @@
+{
+  "helper": "bpf_xdp_load_bytes",
+  "linux_id": 189,
+  "helper_count": 68,
+  "slot_oracle_cases": 4100,
+  "typed_abi_oracle_cases": 18946,
+  "host_check_exit": 0,
+  "lean_exit": 0,
+  "micro_exit": 0,
+  "micro_compiles": 29,
+  "negative_compiles": 1,
+  "production_lines_added": 7,
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean": "c265223a0014cea1bb09061bcede28723a09cd8e14966b86f918adc1d98bfd5f",
+    "kprog/formal/KProgFormal/X86HelperDispatch.lean": "355472645106984c6baeb446008a10b4ff31e3329eca93cebad5c2115f7b8ef1",
+    "kprog/formal/contracts/x86_helper_dispatch_spec.json": "95a4a653c02b9c68e0b3a0f6e0b32994e21959a91cfd034e8ffdf4abe2aa4f93",
+    "kprog/formal/generated/x86_helper_dispatch.h": "68d1816d65db1a30761c77939bd7c57ce0ab323d41d555f6c47f356e6a50fd1a",
+    "kprog/formal/oracles/generated_helper_calls.h": "5c80813e1247afc82dadce8d35d51597658f72fe17651749211ee92bfc0856bc",
+    "kprog/formal/oracles/test_x86_helper_dispatch_host.c": "64599ad56347e9e1a41607c618283a84c0b730d38e7ed185c3a11194b8f0730f",
+    "kprog/formal/oracles/test_x86_helper_dispatch_route_host.c": "f1f379cac81d89681fe6ccfd113cd5f110f6c6fb39aed0a68b486716e27c1009",
+    "kprog/formal/oracles/x86_helper_environment_host.h": "aec30f9d20fba4fe355681e6a57c075b319b4890e198d32a231628c45325f5dd",
+    "kprog/formal/tools/generate_x86_helper_dispatch_spec.py": "e47f246a0e157089305b6a3734ec3beaca5ec87862b911b2d80557a2a92d68ba",
+    "kprog/x86/x86_sim_local_bpf.h": "5898e440f59c584801e48b8915ee2644fd57cfe599b82d663f8cce695443d905"
+  },
+  "applications": {
+    "cilium-final-modules": {
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "installed": 0,
+      "failed": 1
+    },
+    "tracee-final-modules": {
+      "native_requests": 2,
+      "generated": 2,
+      "compiled": 2,
+      "installed": 1,
+      "failed": 1
+    }
+  },
+  "artifact_sha256": {
+    "applications.tar.gz": "e7568200aa17a7415d51543ae369b066a56d77698bc96b25f6a3fb22f40cd0e2",
+    "component.tar.gz": "9d761e23ea8e0f5aebdf829feec4228f497229e91dcc057058382340b038b42e"
+  }
+}

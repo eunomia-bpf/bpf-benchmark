@@ -7,7 +7,7 @@ open GeneratedX86HelperDispatch (helperCount idBits helperIds helperNames
 
 /-- Independent Linux IDs, in increasing order, checked against public libbpf declarations. -/
 def x86HelperDispatchIdsSpec : List Nat :=
-  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 20, 21, 23, 25, 26, 27, 28, 32, 35, 36, 37, 38, 39, 43, 44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109, 112, 113, 114, 115, 118, 122, 124, 125, 130, 148, 152, 155, 158, 160, 173, 174, 175, 181, 184, 193]
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 20, 21, 23, 25, 26, 27, 28, 32, 35, 36, 37, 38, 39, 43, 44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109, 112, 113, 114, 115, 118, 122, 124, 125, 130, 148, 152, 155, 158, 160, 173, 174, 175, 181, 184, 189, 193]
 
 /-- Independent names in Linux numeric ID order. -/
 def x86HelperDispatchNamesSpec : List String :=
@@ -77,6 +77,7 @@ def x86HelperDispatchNamesSpec : List String :=
    "bpf_task_pt_regs",
    "bpf_loop",
    "bpf_get_func_ret",
+   "bpf_xdp_load_bytes",
    "bpf_ima_file_hash"]
 
 /-- Independent statement of the armed body macros, built from the literal
@@ -190,8 +191,8 @@ theorem x86_helper_dispatch_name_slot_roundtrip :
         (fun p => nameOfSlot p.2 = some p.1) = true := by
   refine ⟨rfl, ?_, ?_⟩ <;> native_decide
 
-/-- The armed count is67. The legacy theorem name is retained for compatibility. -/
-theorem x86_helper_dispatch_count_is_7 : helperCount = 67 := rfl
+/-- The armed count is68. The legacy theorem name is retained for compatibility. -/
+theorem x86_helper_dispatch_count_is_7 : helperCount = 68 := rfl
 
 /-- The default is a compile-time error. The legacy theorem name is retained. -/
 theorem x86_helper_dispatch_default_is_rax_zero :

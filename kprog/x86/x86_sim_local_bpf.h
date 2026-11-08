@@ -190,6 +190,7 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_task_pt_regs 175ULL
 #define X86_SIM_HELPER_bpf_loop 181ULL
 #define X86_SIM_HELPER_bpf_get_func_ret 184ULL
+#define X86_SIM_HELPER_bpf_xdp_load_bytes 189ULL
 #define X86_SIM_HELPER_bpf_ima_file_hash 193ULL
 
 /* The helper-id -> helper-body dispatch contract. Included here, after the
@@ -2800,6 +2801,9 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_get_func_ret() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u64 *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
+#define X86_SIM_BPF_CALL_bpf_xdp_load_bytes() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_load_bytes((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
+
 #define X86_SIM_BPF_CALL_bpf_ima_file_hash() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
 
@@ -3003,6 +3007,9 @@ extern void __x86_sim_unsupported_helper(void)
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ret): \
 			X86_SIM_BPF_CALL_bpf_get_func_ret(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_load_bytes): \
+			X86_SIM_BPF_CALL_bpf_xdp_load_bytes(); \
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ima_file_hash): \
 			X86_SIM_BPF_CALL_bpf_ima_file_hash(); \
