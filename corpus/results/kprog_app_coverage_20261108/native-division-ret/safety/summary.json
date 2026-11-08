@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-08T17:42:38.611967+00:00",
+  "make_exit": 0,
+  "cases": 38,
+  "stages": {
+    "specialization_rejected": 2,
+    "valid_executed": 9,
+    "verifier_rejected": 27
+  },
+  "native_risk_executions": 0,
+  "inputs": {
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "5fcca582ce5307b491515b03a017e6e9a579a2a89972a2cfe31bf72f61eeed3f",
+    "kprog/x86/x86_sim_local_bpf.h": "eba653298481574afb053754cd0f4405324a59797da361ac4bfcfe11f6fe7c80",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "c0a47723ee51e4b33dcd0a786de11196c66e37ddff0d7bd252b5549ee22d71b1",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "0843b54fa4783d60dcf40c7a2bbc57e5246101c87b02ec4015829131361ba196"
+  }
+}
