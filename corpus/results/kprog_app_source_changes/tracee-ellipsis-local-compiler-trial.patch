@@ -1,0 +1,13 @@
+--- a/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
++++ b/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
+@@ -418,2 +418,5 @@
+-    // Clamp buffer offset to prevent overflow
+-    update_min(buf->offset, ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int));
++    // Carry the existing offset cap to the helper.
++    u32 offset = buf->offset;
++    asm volatile("" : "+r"(offset));
++    update_min(offset, ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int));
++    buf->offset = offset;
+@@ -422 +425 @@
+-    int sz = bpf_probe_read_str(&(buf->args[buf->offset + sizeof(int)]), MAX_STRING_SIZE, ellipsis);
++    int sz = bpf_probe_read_str(&(buf->args[offset + sizeof(int)]), MAX_STRING_SIZE, ellipsis);

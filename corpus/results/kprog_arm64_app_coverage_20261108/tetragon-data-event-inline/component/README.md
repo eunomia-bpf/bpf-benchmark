@@ -1,3 +1,5 @@
 All ARM V61 execve entries with inlined data helpers
 
 Source e532845ab changes exactly three internal inlining attributes. Complete bodies, all bounds, helpers and descriptor/output/error values are retained. Native O3 and JIT share all99 selected C/header files; the JIT frontend continuation supplies its original generated-header language mode and three public iterator declarations. Every event_execve/execve_rate/execve_send entry is submitted with source0, complete original resource object and object-default globals. Runtime88-helper model8eac3b42a and paired88a Image/module retained. Guest2GiB12-15; load-only stages. Runtime admission additions:0.
+
+Actual2a74818f9 records3generation_failed stages with native-link Permission denied, before simulator generation. Source archive extraction retained bytes and assigned0644 to executable tools. The original TarInfo0755 modes are restored in the separate component-mode-corrected successor, which also consumes same-copy ARM loaderdc120/ba6. Original outcomes/raw remain archived; this cohort supplies infrastructure diagnostics.

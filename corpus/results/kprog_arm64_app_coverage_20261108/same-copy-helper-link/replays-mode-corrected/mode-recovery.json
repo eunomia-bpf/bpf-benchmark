@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-08T23:26:16.327329+00:00",
+  "origin": "Original source archive TarInfo modes restored; bytes retained",
+  "changes": [
+    {
+      "path": "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+      "before": "0o644",
+      "after": "0o755",
+      "sha256": "96342a06df9bff168a19ce3497d41c15f253b10088221e359c098c031b20e9a1"
+    },
+    {
+      "path": "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+      "before": "0o644",
+      "after": "0o755",
+      "sha256": "1c5e536444a81f46458cbc8ae60fffc5af88959aec734cea162d573028526c05"
+    },
+    {
+      "path": "kprog/selftests/selftests.py",
+      "before": "0o644",
+      "after": "0o755",
+      "sha256": "e1750072a7d77b57100d17089a630d7ff17a029471a16d3e5d6fcc8c4a211e09"
+    },
+    {
+      "path": "kprog/selftests/submit.py",
+      "before": "0o644",
+      "after": "0o755",
+      "sha256": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186"
+    }
+  ],
+  "prior_launch": "d35ab66f521fae9d116227bcc44a0ce8ad99ff5f"
+}
