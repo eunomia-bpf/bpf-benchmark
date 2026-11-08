@@ -4087,3 +4087,10 @@ C-model token equality, giving x86 O2 totals56/75 (44direct/10generic/2branch)
 and ARM71/71. Native field/lane normalization, physical arena/ABI memory and
 provenance, C/compiler/invocation and native-link preservation retain their
 universal completion interfaces.
+
+### Published source full check 000d86147
+
+`make check` on immutable published000d86147 exits0. All1166 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_000d86147`. Every check retains its exact published source identity.

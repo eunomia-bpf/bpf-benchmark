@@ -4221,6 +4221,28 @@
   "full_exit": 2,
   "full_head": "967fc6b49608634cd5566dfd6a2925aa828cdcbe",
   "full_log_sha256": "99ea8d210591437b72f741b2f0349eb271ca9a3b1d1415dfe495222023e970ed",
+  "full_make_check_000d86147": {
+    "actual_exit": 0,
+    "archive_block_sha256": "fab773cef82ac4a990b59ea95496989409da998e39a991fd091edfe3d9f1fd72",
+    "archive_marker": "=== FULL MAKE CHECK 000D86147 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.cpu.jsonl.gz": "fd8abe7b55123d07bab24b5f7ac00f0b58a79fbaaf2f5e2987f222046f2c22be",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.head": "0e3318183d3a4aec0e01c728e4a64aa87e3eb3b2781231473d0ea2888f89202f",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.launch.log": "bc37bcfb9217ebca16e5a4e1c87fecbb787721207961066bc08519a1bf8085bc",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.log": "f18cc658991d59b4a519b1befd785bb2f9a4d4e798e7917264d9690c8a419956",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.pid": "5addec13e45c37ba02334d9280cf8fd59656740e45aff54366f31c9e39405cbc",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.process.json": "0c7d5c31798fc7ee20be869e5a153025c99e0d83b91979f83db116627e1908ae",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.py": "efc3360c9f2783dc581da678e4710b80d9c934b6bea75bd740376a659eff4266",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.sources": "de179b2d1e7d3d92fb84b8fee1919897e5e2cbb43ddd7c09fc35f4e668a58baf",
+      "/workspaces/.agent-state/kprog-lanes/V/loadproof-full.state": "217c777999e8a1b0c724ea9b52518e408b848a65c76bec5509941693d8e1776c"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "000d86147d7df1ba3611e96aaf369ee509f9647c",
+    "scope": "Complete formal make check of the exact published source tree 000d86147d7df1ba3611e96aaf369ee509f9647c. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1166
+  },
   "full_make_check_01fba1f4d": {
     "actual_exit": 0,
     "archive_block_sha256": "a4534cff06cb8a0b714c21eb5af2fddeb939f3711598a915e01580ca582f4567",
