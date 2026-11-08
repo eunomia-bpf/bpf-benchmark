@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Andn
 import KProgFormal.Refinement.X86Popcount
 import CompiledBlocks
 import KProgFormal.Reference.X86
@@ -7328,3 +7329,334 @@ theorem compiled_execution (variant : Variant) (choices : Nat → Word)
 end KProgTV.PopcountCertificate
 #print axioms KProgTV.PopcountCertificate.compiled_all_variants
 #print axioms KProgTV.PopcountCertificate.compiled_execution
+
+namespace KProgTV.AndnCertificate
+open KProgFormal.Reference KProgTV.BPF KProgTV.BPFPath.InputBurst
+set_option maxRecDepth 100000
+set_option maxHeartbeats 1600000
+inductive Variant | word32 | word64
+
+def width : Variant → X86.CmovWidth
+  | .word32 => .w32 | .word64 => .w64
+
+def value (variant : Variant) (s : X86.State) : Word :=
+  X86.writeValue (width variant) (s.gpr 0) (X86.andNot (s.gpr 0) (s.gpr 2))
+def environment (choices : Nat → Word) : Environment where
+  unspecifiedInput := fun n => .ok (choices n)
+  immediate := fun _ _ _ => .error "external immediate"
+  helperCall := fun _ _ => .error "external helper"
+  helper := fun _ _ _ => .error "external helper"
+
+def entry (s : X86.State) (visit exclusive : Nat) : State where
+  regs := fun r => match r.val with
+    | 1 => s.gpr 0 | 2 => s.gpr 2 | 3 => 0 | 10 => 0x10000 | _ => 0
+  memory := s.memory
+  pc := 0
+  unspecifiedVisit := visit
+  exclusiveVisit := exclusive
+
+def summary (program : Array Byte) (positions : List Nat) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    Except String (Word × Memory × Nat × Nat × Bool × Option Fault × List Event) := do
+  let result ← BPFPath.evaluate (environment choices) program positions (entry s visit exclusive)
+  pure (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+    result.state.exclusiveVisit, result.state.halted, result.fault, result.events)
+
+@[simp 1100] private theorem alu_32_6 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 6 offset left right = .ok (left <<< (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.shiftLeft_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_32_7 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 7 offset left right = .ok (left >>> (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.ushiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_32_12 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 12 offset left right = .ok (left.sshiftRight' (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.sshiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_6 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 6 offset left right = .ok (left <<< (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.shiftLeft_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_7 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 7 offset left right = .ok (left >>> (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.ushiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_12 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 12 offset left right = .ok (left.sshiftRight' (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.sshiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp] private theorem alu_op_0 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 0 offset left right = .ok (left + right) := rfl
+
+@[simp] private theorem alu_op_1 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 1 offset left right = .ok (left - right) := rfl
+
+@[simp] private theorem alu_op_2 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 2 offset left right = .ok (left * right) := rfl
+
+@[simp] private theorem alu_op_4 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 4 offset left right = .ok (left ||| right) := rfl
+
+@[simp] private theorem alu_op_5 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 5 offset left right = .ok (left &&& right) := rfl
+
+@[simp] private theorem alu_op_8 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 8 offset left right = .ok (-left) := rfl
+
+@[simp] private theorem alu_op_10 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 10 offset left right = .ok (left ^^^ right) := rfl
+
+@[simp] private theorem alu_move (n : Nat) (offset : BitVec 16) (left right : BitVec n) (zero : offset = 0) : BPF.alu n 11 offset left right = .ok right := by subst offset; rfl
+
+@[simp] private theorem setReg_memory (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).memory = s.memory := rfl
+
+@[simp] private theorem setReg_pc (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).pc = s.pc := rfl
+
+@[simp] private theorem setReg_halted (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).halted = s.halted := rfl
+
+@[simp] private theorem setReg_exclusiveVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).exclusiveVisit = s.exclusiveVisit := rfl
+
+@[simp] private theorem setReg_unspecifiedVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).unspecifiedVisit = s.unspecifiedVisit := rfl
+
+@[simp] private theorem setReg_value (s : State) (r q : BPF.Register) (v : Word) :
+    (setReg s r v).regs q = (if q = r then v else s.regs q) := rfl
+
+
+
+@[simp 1200] private theorem execute_alu_tv_andn32_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_andn32 state ⟨167, 1, 0, 0#16, 4294967295#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) ^^^ ((4294967295#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_andn32_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_andn32 state ⟨95, 1, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_andn32_0 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) ^^^ ((4294967295#32).signExtend 64))
+  let s2 := setReg s1 1 ((s1.regs 1) &&& (s1.regs 2))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_andn32_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn32 (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_andn32 rest (chunk_tv_andn32_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_andn32 rest (chunk_tv_andn32_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_andn32_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_andn64_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_andn64 state ⟨167, 1, 0, 0#16, 4294967295#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) ^^^ ((4294967295#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_andn64_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_andn64 state ⟨95, 1, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_andn64_0 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) ^^^ ((4294967295#32).signExtend 64))
+  let s2 := setReg s1 1 ((s1.regs 1) &&& (s1.regs 2))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_andn64_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn64 (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_andn64 rest (chunk_tv_andn64_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_andn64 rest (chunk_tv_andn64_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_andn64_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+@[simp] private theorem burst_word32_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn32 (inputPositions 2 4 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_andn32 rest
+        (afterInputs choices s 4)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 2
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_andn32 2 4 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+
+@[simp] private theorem burst_word32_7 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn32 (inputPositions 7 7 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 7 then BPFPath.evaluate (environment choices) Compiled.tv_andn32 rest
+        (afterInputs choices s 7)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 7
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_andn32 7 7 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+
+@[simp] private theorem burst_word32_15 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn32 (inputPositions 15 14 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 15 then BPFPath.evaluate (environment choices) Compiled.tv_andn32 rest
+        (afterInputs choices s 14)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 15
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_andn32 15 14 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+
+theorem compiled_word32 (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_andn32 (0 :: (1 :: (inputPositions 2 4 (6 :: (inputPositions 7 7 (14 :: (inputPositions 15 14 (29 :: (30 :: []))))))))) choices visit exclusive s =
+      .ok (value .word32 s, s.memory, visit + 25, exclusive, true, none, []) := by
+  unfold value
+  simp [summary, afterInputs, chunk_tv_andn32_0, chunk_tv_andn64_0, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+    BPF.execute, BPF.source, entry, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+    width, X86.writeValue, X86.andNot, KProgFormal.GeneratedX86Width.narrow,
+    KProgFormal.GeneratedX86Width.mask, KProgFormal.Refinement.X86Cmov.handlerWidth,
+    Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+    generalize s.gpr 0 = old at * <;> generalize s.gpr 2 = source at * <;>
+    unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_word32
+
+@[simp] private theorem burst_word64_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_andn64 (inputPositions 2 25 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_andn64 rest
+        (afterInputs choices s 25)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 2
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_andn64 2 25 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+
+theorem compiled_word64 (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_andn64 (0 :: (1 :: (inputPositions 2 25 (27 :: (28 :: []))))) choices visit exclusive s =
+      .ok (value .word64 s, s.memory, visit + 25, exclusive, true, none, []) := by
+  unfold value
+  simp [summary, afterInputs, chunk_tv_andn32_0, chunk_tv_andn64_0, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+    BPF.execute, BPF.source, entry, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+    width, X86.writeValue, X86.andNot, KProgFormal.GeneratedX86Width.narrow,
+    KProgFormal.GeneratedX86Width.mask, KProgFormal.Refinement.X86Cmov.handlerWidth,
+    Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+    generalize s.gpr 0 = old at * <;> generalize s.gpr 2 = source at * <;>
+    unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_word64
+
+def compiled : Variant → Array Byte
+  | .word32 => Compiled.tv_andn32
+  | .word64 => Compiled.tv_andn64
+
+def positions : Variant → List Nat
+  | .word32 => (0 :: (1 :: (inputPositions 2 4 (6 :: (inputPositions 7 7 (14 :: (inputPositions 15 14 (29 :: (30 :: [])))))))))
+  | .word64 => (0 :: (1 :: (inputPositions 2 25 (27 :: (28 :: [])))))
+
+/-- Scalar ANDN value/writeback projections; full flags/register/tag frame,
+physical invocation and compiler embedding remain explicit interfaces. -/
+theorem compiled_all_variants (variant : Variant) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    summary (compiled variant) (positions variant) choices visit exclusive s =
+      .ok (value variant s, s.memory, visit + 25, exclusive, true, none, []) := by
+  cases variant with
+  | word32 => exact compiled_word32 choices visit exclusive s
+  | word64 => exact compiled_word64 choices visit exclusive s
+
+theorem compiled_execution (variant : Variant) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    ∃ result : Transition State,
+      Execution (BPFPath.instructionStep (environment choices) (compiled variant))
+        (entry s visit exclusive) result.events result.state ∧
+      (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+        result.state.exclusiveVisit, result.state.halted, result.fault, result.events) =
+      (value variant s, s.memory, visit + 25, exclusive, true, none, []) := by
+  have resultValue := compiled_all_variants variant choices visit exclusive s
+  cases evaluated : BPFPath.evaluate (environment choices) (compiled variant)
+      (positions variant) (entry s visit exclusive) with
+  | error error =>
+    simp [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] at resultValue
+  | ok result =>
+    refine ⟨result, BPFPath.evaluate_sound _ _ _ _ _ evaluated, ?_⟩
+    simpa [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] using resultValue
+end KProgTV.AndnCertificate
+#print axioms KProgTV.AndnCertificate.compiled_all_variants
+#print axioms KProgTV.AndnCertificate.compiled_execution

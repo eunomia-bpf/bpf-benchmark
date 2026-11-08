@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3) | 8/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2) | 9/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
@@ -5474,3 +5474,14 @@ vector/pair/exclusive/atomic fault prefixes, final site mapping and table
 lifetime remain explicit. Actual C/A production correspondence and NULL guest
 execution are pending; the O4 row records a partial component, with operation,
 token and replay totals unchanged.
+
+### Compiled scalar ANDN units
+
+`AndnCertificate.compiled_all_variants` and `compiled_execution` cover ANDN32/64
+with arbitrary first/destination and second source, whole memory and fresh
+stream/ghost indices. Actual decoded Execution returns canonical
+`writeValue(andNot)`, zero extending width32. All116 published predecessor
+and2 new function bytes match the combined118 object. Memory/exclusive remain
+equal, visit advances25 and fault/events are absent. [Original evidence](compiled-andn.log.gz)
+retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
+native register/tag frame, physical ABI and compiler embedding remain explicit.
