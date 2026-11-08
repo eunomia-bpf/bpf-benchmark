@@ -57,7 +57,9 @@ transport are caller/platform interfaces. The ledger distinguishes proved
 model laws, finite oracle/hardware evidence and complete-check outcomes.
 The generic readonly finite-case law also composes object identity and shifted
 aliases with canonical memory reads; final byte transfer transports its frozen
-image premise. Physical symbol/map lifetime and C/compiler transport stay explicit.
+image premise. Every permitted canonical guest write preserves the frozen
+image and its write permissions. Physical symbol/map lifetime, helper/platform
+state effects and C/compiler transport stay explicit.
 [Composition](../tv/Composition.lean) and the
 [artifact work](../tv/README.md) track the generic link/compiler obligations.
 

@@ -330,6 +330,54 @@ theorem data_load_matches (objects : List Object) (memory : Memory)
     · rw [object_load_matches _ _ _ _ _ (images object List.mem_cons_self),alias_address]
     · exact ih (fun object inside => images object (List.mem_cons_of_mem _ inside))
 
+/-- A permitted write cannot contain any byte whose canonical write permission
+is false. Architectural address arithmetic wraps at64 bits. -/
+theorem permitted_write_outside (memory : Memory) (address protectedByte : Word) (count : Nat)
+    (allowed : permitted memory.writable address count=true)
+    (frozenByte : memory.writable protectedByte=false) :
+    count≤(protectedByte-address).toNat := by
+  by_cases inside : (protectedByte-address).toNat<count
+  · have allowedByte := List.all_eq_true.mp allowed (protectedByte-address).toNat
+      (List.mem_range.mpr inside)
+    have same : address+BitVec.ofNat 64 (protectedByte-address).toNat=protectedByte := by
+      simp only [BitVec.ofNat_toNat,BitVec.setWidth_eq]
+      rw [BitVec.add_comm,BitVec.sub_add_cancel]
+    rw [same,frozenByte] at allowedByte
+    contradiction
+  · omega
+
+/-- Every successful guest store preserves the frozen object's entire image;
+write permissions persist, so the same premise applies to every later store. -/
+theorem image_store_preserved (data : List Byte) (base : Word) (memory : Memory)
+    (image : Image data base memory)
+    (frozen : ∀ i<data.length, memory.writable (base+BitVec.ofNat 64 i)=false)
+    (address value : Word) (count : Nat)
+    (allowed : permitted memory.writable address count=true) :
+    Image data base (storeMemory memory address value count) ∧
+      (storeMemory memory address value count).writable=memory.writable := by
+  refine ⟨?_,rfl⟩
+  intro i bounded
+  have outside := permitted_write_outside memory address (base+BitVec.ofNat 64 i)
+    count allowed (frozen i bounded)
+  have notInside : ¬(base+BitVec.ofNat 64 i-address).toNat<count := by omega
+  simpa only [storeMemory,notInside,ite_false] using image i bounded
+
+theorem image_write_preserved (data : List Byte) (base : Word) (memory after : Memory)
+    (image : Image data base memory)
+    (frozen : ∀ i<data.length, memory.writable (base+BitVec.ofNat 64 i)=false)
+    (address value : Word) (count : Nat) (event : Event)
+    (committed : writeMemory memory address value count=.ok (after,event)) :
+    Image data base after ∧ after.writable=memory.writable := by
+  unfold writeMemory at committed
+  split at committed
+  next allowed =>
+    have same := congrArg Prod.fst (Except.ok.inj committed)
+    change storeMemory memory address value count=after at same
+    rw [←same]
+    exact image_store_preserved data base memory image frozen address value count allowed
+  next => contradiction
+
+
 end ReadOnly
 
 end KProgTV.NativeLinkLiteral
@@ -357,3 +405,6 @@ end KProgTV.NativeLinkLiteral
 #print axioms KProgTV.NativeLinkLiteral.ReadOnly.case_domain
 #print axioms KProgTV.NativeLinkLiteral.ReadOnly.object_load_matches
 #print axioms KProgTV.NativeLinkLiteral.ReadOnly.data_load_matches
+
+#print axioms KProgTV.NativeLinkLiteral.ReadOnly.image_store_preserved
+#print axioms KProgTV.NativeLinkLiteral.ReadOnly.image_write_preserved
