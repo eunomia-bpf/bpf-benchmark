@@ -1,0 +1,29 @@
+{
+  "native_compile_exit": 0,
+  "bpf_compile_exit": 0,
+  "native_proof_link_exit": 0,
+  "named_kernel_calls": [
+    "bpf_iter_num_new",
+    "bpf_iter_num_next",
+    "bpf_iter_num_next",
+    "bpf_iter_num_destroy"
+  ],
+  "native_instructions": 36,
+  "generation": {
+    "stage": "generation_error",
+    "error_type": "ValueError",
+    "error": "undefined native ABI flags at 0x29: je     57 <numeric_iterator+0x57>",
+    "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1648, in render_program\n    stack_bytes = check_definedness(all_insns, targets, exit_addr,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 255, in check_definedness\n    flags_needed(incoming, op, where)\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 143, in flags_needed\n    raise ValueError(f'undefined native ABI flags at {where}')\nValueError: undefined native ABI flags at 0x29: je     57 <numeric_iterator+0x57>\n"
+  },
+  "source_sha256": {
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py": "cd2241f4039c07c69274f102b1401449328c7d1f74436c447f6a5f0ae2bcc8da",
+    "/workspaces/repository/kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+    "/workspaces/repository/vendor/bpf/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+    "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865",
+    "/workspaces/repository/vendor/bpf/tetragon/bpf/lib/bpf_d_path.h": "f197ba4c4d564969d154f1375542203f2c7b480fcacfc8689ce8f276064527a7",
+    "/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h": "172b866270a3637f6b9a902aa5375c1cf656cb56a6beed7c142e21d78ed09fbc"
+  },
+  "archive_sha256": "f615371f000cf6169bcf1da366a969440c06f7125ac6f22fe62fd06a38daacc8",
+  "domain": "generic standard numeric iterator callable ABI; application/native execution follows typed call modelling"
+}
