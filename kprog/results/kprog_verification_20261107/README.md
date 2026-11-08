@@ -5270,3 +5270,46 @@ effects erase; the complete ordered projected body trace remains. Existing
 retains all sources and proof attempts. Actual compiler ownership/layout,
 slot/frame liveness and body control/endpoints, physical ABI and C/compiler
 transport remain explicit interfaces; no runtime gate or per-program proof.
+
+
+### BTF probe loads and native memory faults (both ISAs)
+
+The design requires the same object, bounds and **fault behavior**
+([design](../../docs/design.md#safety-transfer-论证), source lines431-454,485-487).
+A stock BTF-pointer read can become `PROBE_MEM`: x86 clears the destination
+and advances IP on a handled fault (current kernel `arch/x86/net/bpf_jit_comp.c`
+1534-1556,2384-2481); AArch64 clears the destination and advances PC4
+(`arch/arm64/net/bpf_jit_comp.c`1146-1249,1874). The native emitters copy P
+and resolve relocations, with no corresponding per-native-load exception
+entry. The verifier restores native proof regions before context conversion
+(`kernel/bpf/verifier.c`3817-3838,26506-26546), so stock B's fixup is not
+inherited by the copied plain MOV/LDR. Without a matching exception entry,
+a native fault retains the kernel fault path, rather than zero/continue.
+[A's paired ARM audit](../../../corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/two-installed-annotations/probe-memory/README.md)
+pins the captured kernel/emitter separately from current vendored sources.
+
+O3 acceptance therefore does not establish that a protected BTF address is
+always physically readable. The universal physical entry/access relation must
+cover every legal hook invocation, including the NULL file allowed by
+`security/security.c`2496-2505. Bounded indirect dispatch and finite unsafe
+suites do not settle this memory-fault case. This identifies a simulator
+faithfulness obligation, without claiming a stock-verifier defect.
+
+O4 `TranslationValidation.block` requires the same complete ordered trace
+for every native step; `native_effects_checked` also requires actual
+`proofEntry` and `verifierSound`. Final-image byte/step preservation retains
+the plain native fault, and cannot construct OS exception recovery.
+The current Lean BPF model handles `MEM`/`MEMSX` with a read fault;
+`PROBE_MEM` zero/continue is absent. Canonical faults and UD2's explicit
+rejecting fault-prefix laws do not discharge this protected-load case.
+The compiled-B/platform and physical-entry/fault correspondence remain open
+on both ISAs. Stock acceptance alone cannot instantiate a soundness premise
+that forbids every raw modeled read fault.
+
+`btf_probe_memory_fault_boundary` records complete source hashes and numbered
+excerpts, exact O3/O4 premises, and the separate paired ARM epoch. The
+installed `no_null_check` discrepancy remains load-only; C's matched stock
+BPF baseline is separate evidence. No theorem, runtime check, gate, limit,
+fixup or relocation is added. The withdrawn post-verification optimization
+work remains stopped; native compile optimization before submission adds no
+new link step, and a new relocation kind would require its O4 law.

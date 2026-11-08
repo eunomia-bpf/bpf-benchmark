@@ -3130,6 +3130,386 @@
     ],
     "universal_domain": "Every old byte,64-bit source/register value, native register/SP/ZR alias and complete AArch64 state. Kernel u32 operation0 ADD/1 OR/otherwise AND and C u8 operand truncation are explicit."
   },
+  "btf_probe_memory_fault_boundary": {
+    "aarch64": "Stock scalar load JIT calls add_exception_handler; EX_TYPE_BPF clears dst and advances PC4. Native emitter copies P words and resolves relocations; its JIT route copies emitted words without per-load add_exception_handler. fixup_exception requires a table entry, otherwise the ordinary kernel fault path can reach die_kernel_fault. Captured paired ARM sources independently support this distinction.",
+    "current_workspace_sources": [
+      {
+        "path": "kprog/docs/design.md",
+        "ranges": [
+          {
+            "excerpt": "## Safety Transfer \u8bba\u8bc1\n\n\u6700\u5f3a\u7684\u5b89\u5168\u6027\u8bba\u8bc1\u662f\u4e00\u4e2a refinement(\u7cbe\u5316)\u8bba\u8bc1\u3002\u6ce8\u610f\u5b83\u7684\u7ec8\u70b9\u662f**\u88f8\u8dd1\u7684 P**,\u4e0d\u662f eBPF:\n\n```text\nnative program P\n  -> \u628a\u5fe0\u5b9e\u89e3\u91ca\u5668 I \u7279\u5316\u5230 P,\u5f97\u4f9b verifier \u5206\u6790\u7684 eBPF B = B_{I,P}\n  -> verifier \u63a5\u53d7 B          \uff08\u8bc1\u660e safe(I \u8dd1 P))\n  -> \u5fe0\u5b9e\u7b49\u4ef7: B \u7684\u6bcf\u4e2a\u53ef\u89c2\u6d4b\u8bbf\u5b58/\u63a7\u5236\u6d41 \u2261 P \u7684\u5bf9\u5e94\u884c\u4e3a(I \u4e0d\u63d2\u4efb\u4f55\u68c0\u67e5)\n  -> \u5185\u6838\u88f8\u8dd1 native P\n```\n\n\u5982\u679c verifier \u8bc1\u660e\u4e86 `B` \u5b89\u5168,\u4e14\u5fe0\u5b9e\u7b49\u4ef7\u6027\u8868\u660e `B` \u7684\u6bcf\u4e2a\u53ef\u89c2\u6d4b\u884c\u4e3a(\u8bbf\u5b58\u3001helper \u8c03\u7528\u3001\n\u63a7\u5236\u6d41)\u90fd\u4e0e `P` \u7684\u5bf9\u5e94\u884c\u4e3a**\u9010\u4e00\u76f8\u540c**,\u90a3\u4e48\u88f8\u8dd1 `P` \u6240\u8868\u73b0\u51fa\u7684,\u6070\u597d\u662f `B` \u88ab\u8bc1\u660e\u5b89\u5168\n\u7684\u90a3\u4e2a\u884c\u4e3a:\n\n```text\nsafe(B) and B \u2261 P faithfully  =>  safe(execute_native(P))\n```\n\n`P` \u4e0d\u662f\u56e0\u4e3a\u67d0\u4e2a\u72ec\u7acb\u7684 NativeBPF \u88ab\u9a8c\u8bc1\u8fc7\u624d\u5b89\u5168 \u2014\u2014 \u5b83\u5b89\u5168,\u662f\u56e0\u4e3a verifier \u8bc1\u660e\u4e86\"\u5fe0\u5b9e\n\u89e3\u91ca\u5668\u8dd1 P\"\u5b89\u5168,\u800c `I` \u7684\u5fe0\u5b9e\u7b49\u4ef7\u628a\u8fd9\u4efd\u8bc1\u660e\u642c\u5230\u4e86\u771f\u6b63\u88f8\u8dd1\u7684 `P` \u4e0a\u3002**\u6574\u4e2a\u8bba\u8bc1\u7684\u627f\u91cd\u5899\n\u5c31\u662f\u8fd9\u6761\u5fe0\u5b9e\u7b49\u4ef7**:`I` \u5bf9 ISA \u7684\u5efa\u6a21\u5fc5\u987b\u548c CPU \u771f\u5b9e\u6267\u884c `P` \u65f6\u7684\u8bbf\u5b58/\u63a7\u5236\u6d41/\u5f02\u5e38\u884c\u4e3a\n\u5206\u6beb\u4e0d\u5dee\u3002",
+            "first_line": 431,
+            "last_line": 454
+          },
+          {
+            "excerpt": "\u4f8b\u5982,\u4e00\u6761\u88ab\u88f8\u8dd1\u7684 native \u6307\u4ee4,\u5176\u610f\u56fe\u662f:\n\n```asm\nmov rax, [rdi + 8]\n```\n\n\u53ea\u6709\u5f53 `B_{I,P}` \u91cc\u5bf9\u5e94\u90a3\u4e00\u6b65\u901a\u8fc7\u4e00\u4e2a\u7ecf verifier \u68c0\u67e5\u7684 BPF \u6307\u9488\u3001\u4ee5**\u76f8\u540c\u7684\u8fb9\u754c\u3001\u5bf9\u8c61\u3001\nfault \u884c\u4e3a**\u505a\u540c\u4e00\u4e2a load \u65f6,\u88f8\u8dd1\u8fd9\u6761 `mov` \u624d\u5b89\u5168\u3002\u82e5 `I` \u5bf9\u8fd9\u6761\u6307\u4ee4\u7684\u5efa\u6a21\u4e0e CPU \u5b9e\u9645\n\u884c\u4e3a\u4e0d\u7b26(\u7b49\u4ef7\u65ad\u88c2),verifier \u7684\"\u5b89\u5168\"\u5c31\u4fdd\u4e0d\u4f4f\u88f8\u8dd1\u7684 `P`\u3002",
+            "first_line": 479,
+            "last_line": 487
+          }
+        ],
+        "sha256": "72d920cfbdb25c66d620919d085f7348b523d700e99b793c29061721fff542a1"
+      },
+      {
+        "path": "vendor/linux-framework/security/security.c",
+        "ranges": [
+          {
+            "excerpt": "/**\n * security_mmap_file() - Check if mmap'ing a file is allowed\n * @file: file\n * @prot: protection applied by the kernel\n * @flags: flags\n *\n * Check permissions for a mmap operation.  The @file may be NULL, e.g. if\n * mapping anonymous memory.\n *\n * Return: Returns 0 if permission is granted.\n */\nint security_mmap_file(struct file *file, unsigned long prot,\n\t\t       unsigned long flags)\n{\n\treturn call_int_hook(mmap_file, file, prot, mmap_prot(file, prot),\n\t\t\t     flags);",
+            "first_line": 2490,
+            "last_line": 2505
+          }
+        ],
+        "sha256": "c18c4fb16f63e55d47d8b577c5e64e46069fc405d3e5acdecbc48fcac682be37"
+      },
+      {
+        "path": "vendor/linux-framework/kernel/bpf/btf.c",
+        "ranges": [
+          {
+            "excerpt": "\tinfo->reg_type = PTR_TO_BTF_ID;\n\tif (prog_args_trusted(prog))\n\t\tinfo->reg_type |= PTR_TRUSTED;\n\n\tif (btf_param_match_suffix(btf, &args[arg], \"__nullable\"))\n\t\tinfo->reg_type |= PTR_MAYBE_NULL;",
+            "first_line": 6953,
+            "last_line": 6958
+          }
+        ],
+        "sha256": "4de4039c021f5219987546b239dac28e921d225ea3d77dfe54bde235e1b10934"
+      },
+      {
+        "path": "vendor/linux-framework/kernel/bpf/verifier.c",
+        "ranges": [
+          {
+            "excerpt": "\t\tcase PTR_TO_BTF_ID:\n\t\tcase PTR_TO_BTF_ID | PTR_UNTRUSTED:\n\t\t/* PTR_TO_BTF_ID | MEM_ALLOC always has a valid lifetime, unlike\n\t\t * PTR_TO_BTF_ID, and an active ref_obj_id, but the same cannot\n\t\t * be said once it is marked PTR_UNTRUSTED, hence we must handle\n\t\t * any faults for loads into such types. BPF_WRITE is disallowed\n\t\t * for this case.\n\t\t */\n\t\tcase PTR_TO_BTF_ID | MEM_ALLOC | PTR_UNTRUSTED:\n\t\tcase PTR_TO_MEM | MEM_RDONLY | PTR_UNTRUSTED:\n\t\t\tif (type == BPF_READ) {\n\t\t\t\tif (BPF_MODE(insn->code) == BPF_MEM)\n\t\t\t\t\tinsn->code = BPF_LDX | BPF_PROBE_MEM |\n\t\t\t\t\t\t     BPF_SIZE((insn)->code);\n\t\t\t\telse\n\t\t\t\t\tinsn->code = BPF_LDX | BPF_PROBE_MEMSX |\n\t\t\t\t\t\t     BPF_SIZE((insn)->code);\n\t\t\t\tenv->prog->aux->num_exentries++;\n\t\t\t}",
+            "first_line": 23028,
+            "last_line": 23046
+          },
+          {
+            "excerpt": "static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)\n{\n\tu32 i;\n\n\tfor (i = 0; i < env->kinsn_region_cnt; i++) {\n\t\tstruct bpf_insn_aux_data *aux;\n\t\tstruct bpf_prog *new_prog;\n\t\tstruct bpf_kinsn_region *region = &env->kinsn_regions[i];\n\t\tint err;\n\n\t\tnew_prog = bpf_patch_insn_data(env, region->start, region->orig, 2);\n\t\tif (!new_prog)\n\t\t\treturn -ENOMEM;\n\t\tenv->prog = new_prog;\n\t\taux = env->insn_aux_data;\n\n\t\tif (region->proof_len > 1) {\n\t\t\terr = verifier_remove_insns(env, region->start + 2,\n\t\t\t\t\t\t    region->proof_len - 1);\n\t\t\tif (err)\n\t\t\t\treturn err;\n\t\t\taux = env->insn_aux_data;",
+            "first_line": 3817,
+            "last_line": 3838
+          },
+          {
+            "excerpt": "\tret = do_check_main(env);\n\tret = ret ?: do_check_subprogs(env);\n\n\tif (ret == 0 && bpf_prog_is_offloaded(env->prog->aux))\n\t\tret = bpf_prog_offload_finalize(env);\n\nskip_full_check:\n\tkvfree(env->explored_states);\n\tenv->explored_states = NULL;\n\n\tif (ret == 0)\n\t\tret = restore_kinsn_proof_regions(env);",
+            "first_line": 26506,
+            "last_line": 26517
+          },
+          {
+            "excerpt": "\tif (ret == 0)\n\t\t/* program is valid, convert *(u32*)(ctx + off) accesses */\n\t\tret = convert_ctx_accesses(env);",
+            "first_line": 26544,
+            "last_line": 26546
+          }
+        ],
+        "sha256": "d4c17cbe2c157164658b4d20221825bca9a4510df04119a01ca0e4c3f583a9de"
+      },
+      {
+        "path": "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c",
+        "ranges": [
+          {
+            "excerpt": "\tif (kinsn->native_proof) {\n\t\tret = kinsn->emit_x86(NULL, &off, false, payload, bpf_prog, NULL);\n\t\tif (ret < 0)\n\t\t\treturn ret;\n\t\t*native_len = off;\n\t\tif (!emit)\n\t\t\treturn 0;\n\t\t*native_image = kvzalloc(off, GFP_KERNEL);\n\t\tif (!*native_image)\n\t\t\treturn -ENOMEM;\n\t\toff = 0;\n\t\tret = kinsn->emit_x86(*native_image, &off, true, payload,\n\t\t\t\t      bpf_prog, final_ip);\n\t\tif (ret < 0) {\n\t\t\tkvfree(*native_image);\n\t\t\t*native_image = NULL;\n\t\t\treturn ret;\n\t\t}\n\t\t*native_len = off;\n\t\treturn 0;",
+            "first_line": 597,
+            "last_line": 616
+          },
+          {
+            "excerpt": "bool ex_handler_bpf(const struct exception_table_entry *x, struct pt_regs *regs)\n{\n\tu32 reg = FIELD_GET(FIXUP_REG_MASK, x->fixup);\n\tu32 insn_len = FIELD_GET(FIXUP_INSN_LEN_MASK, x->fixup);\n\tbool is_arena = !!(x->fixup & FIXUP_ARENA_ACCESS);\n\tbool is_write = (reg == DONT_CLEAR);\n\tunsigned long addr;\n\ts16 off;\n\tu32 arena_reg;\n\n\tif (is_arena) {\n\t\tarena_reg = FIELD_GET(FIXUP_ARENA_REG_MASK, x->fixup);\n\t\toff = FIELD_GET(DATA_ARENA_OFFSET_MASK, x->data);\n\t\taddr = *(unsigned long *)((void *)regs + arena_reg) + off;\n\t\tbpf_prog_report_arena_violation(is_write, addr, regs->ip);\n\t}\n\n\t/* jump over faulting load and clear dest register */\n\tif (reg != DONT_CLEAR)\n\t\t*(unsigned long *)((void *)regs + reg) = 0;\n\tregs->ip += insn_len;\n\n\treturn true;",
+            "first_line": 1534,
+            "last_line": 1556
+          },
+          {
+            "excerpt": "\t\t\tif (BPF_MODE(insn->code) == BPF_PROBE_MEM ||\n\t\t\t    BPF_MODE(insn->code) == BPF_PROBE_MEMSX) {\n\t\t\t\t/* Conservatively check that src_reg + insn->off is a kernel address:\n\t\t\t\t *   src_reg + insn->off > TASK_SIZE_MAX + PAGE_SIZE\n\t\t\t\t *   and\n\t\t\t\t *   src_reg + insn->off < VSYSCALL_ADDR\n\t\t\t\t */\n\n\t\t\t\tu64 limit = TASK_SIZE_MAX + PAGE_SIZE - VSYSCALL_ADDR;\n\t\t\t\tu8 *end_of_jmp;\n\n\t\t\t\t/* movabsq r10, VSYSCALL_ADDR */\n\t\t\t\temit_mov_imm64(&prog, BPF_REG_AX, (long)VSYSCALL_ADDR >> 32,\n\t\t\t\t\t       (u32)(long)VSYSCALL_ADDR);\n\n\t\t\t\t/* mov src_reg, r11 */\n\t\t\t\tEMIT_mov(AUX_REG, src_reg);\n\n\t\t\t\tif (insn->off) {\n\t\t\t\t\t/* add r11, insn->off */\n\t\t\t\t\tmaybe_emit_1mod(&prog, AUX_REG, true);\n\t\t\t\t\tEMIT2_off32(0x81, add_1reg(0xC0, AUX_REG), insn->off);\n\t\t\t\t}\n\n\t\t\t\t/* sub r11, r10 */\n\t\t\t\tmaybe_emit_mod(&prog, AUX_REG, BPF_REG_AX, true);\n\t\t\t\tEMIT2(0x29, add_2reg(0xC0, AUX_REG, BPF_REG_AX));\n\n\t\t\t\t/* movabsq r10, limit */\n\t\t\t\temit_mov_imm64(&prog, BPF_REG_AX, (long)limit >> 32,\n\t\t\t\t\t       (u32)(long)limit);\n\n\t\t\t\t/* cmp r10, r11 */\n\t\t\t\tmaybe_emit_mod(&prog, AUX_REG, BPF_REG_AX, true);\n\t\t\t\tEMIT2(0x39, add_2reg(0xC0, AUX_REG, BPF_REG_AX));\n\n\t\t\t\t/* if unsigned '>', goto load */\n\t\t\t\tEMIT2(X86_JA, 0);\n\t\t\t\tend_of_jmp = prog;\n\n\t\t\t\t/* xor dst_reg, dst_reg */\n\t\t\t\temit_mov_imm32(&prog, false, dst_reg, 0);\n\t\t\t\t/* jmp byte_after_ldx */\n\t\t\t\tEMIT2(0xEB, 0);",
+            "first_line": 2384,
+            "last_line": 2427
+          },
+          {
+            "excerpt": "\t\t\t\tstruct exception_table_entry *ex;\n\t\t\t\tu8 *_insn = image + proglen + (start_of_ldx - temp);\n\t\t\t\ts64 delta;\n\n\t\t\t\t/* populate jmp_offset for JMP above */\n\t\t\t\tstart_of_ldx[-1] = prog - start_of_ldx;\n\n\t\t\t\tif (!bpf_prog->aux->extable)\n\t\t\t\t\tbreak;\n\n\t\t\t\tif (excnt >= bpf_prog->aux->num_exentries) {\n\t\t\t\t\tpr_err(\"ex gen bug\\n\");\n\t\t\t\t\treturn -EFAULT;\n\t\t\t\t}\n\t\t\t\tex = &bpf_prog->aux->extable[excnt++];\n\n\t\t\t\tdelta = _insn - (u8 *)&ex->insn;\n\t\t\t\tif (!is_simm32(delta)) {\n\t\t\t\t\tpr_err(\"extable->insn doesn't fit into 32-bit\\n\");\n\t\t\t\t\treturn -EFAULT;\n\t\t\t\t}\n\t\t\t\t/* switch ex to rw buffer for writes */\n\t\t\t\tex = (void *)rw_image + ((void *)ex - (void *)image);\n\n\t\t\t\tex->insn = delta;\n\n\t\t\t\tex->data = EX_TYPE_BPF;\n\n\t\t\t\tif (dst_reg > BPF_REG_9) {\n\t\t\t\t\tpr_err(\"verifier error\\n\");\n\t\t\t\t\treturn -EFAULT;\n\t\t\t\t}\n\t\t\t\t/*\n\t\t\t\t * Compute size of x86 insn and its target dest x86 register.\n\t\t\t\t * ex_handler_bpf() will use lower 8 bits to adjust\n\t\t\t\t * pt_regs->ip to jump over this x86 instruction\n\t\t\t\t * and upper bits to figure out which pt_regs to zero out.\n\t\t\t\t * End result: x86 insn \"mov rbx, qword ptr [rax+0x14]\"\n\t\t\t\t * of 4 bytes will be ignored and rbx will be zero inited.\n\t\t\t\t */\n\t\t\t\tex->fixup = FIELD_PREP(FIXUP_INSN_LEN_MASK, prog - start_of_ldx) |\n\t\t\t\t\t    FIELD_PREP(FIXUP_REG_MASK, reg2pt_regs[dst_reg]);",
+            "first_line": 2440,
+            "last_line": 2481
+          },
+          {
+            "excerpt": "\t\t\tif (src_reg == BPF_PSEUDO_KINSN_CALL) {\n\t\t\t\terr = emit_kinsn_desc_call(&prog, bpf_prog, insn,\n\t\t\t\t\t\t\t    !!rw_image,\n\t\t\t\t\t\t\t    image ? ip : NULL,\n\t\t\t\t\t\t\t    &native_image, &native_len);\n\t\t\t\tif (err)\n\t\t\t\t\treturn err;\n\t\t\t\tbreak;",
+            "first_line": 2583,
+            "last_line": 2590
+          }
+        ],
+        "sha256": "aaf3e6a0a062dc601e0e61f7c994232778ff5e6e524145ca6d8d7be142a0ba80"
+      },
+      {
+        "path": "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c",
+        "ranges": [
+          {
+            "excerpt": "bool ex_handler_bpf(const struct exception_table_entry *ex,\n\t\t    struct pt_regs *regs)\n{\n\tint dst_reg = FIELD_GET(BPF_FIXUP_REG_MASK, ex->fixup);\n\ts16 off = FIELD_GET(BPF_FIXUP_OFFSET_MASK, ex->fixup);\n\tint arena_reg = FIELD_GET(BPF_FIXUP_ARENA_REG_MASK, ex->fixup);\n\tbool is_arena = !!(ex->fixup & BPF_ARENA_ACCESS);\n\tbool is_write = (dst_reg == DONT_CLEAR);\n\tunsigned long addr;\n\n\tif (is_arena) {\n\t\taddr = regs->regs[arena_reg] + off;\n\t\tbpf_prog_report_arena_violation(is_write, addr, regs->pc);\n\t}\n\n\tif (dst_reg != DONT_CLEAR)\n\t\tregs->regs[dst_reg] = 0;\n\t/* Skip the faulting instruction */\n\tregs->pc += AARCH64_INSN_SIZE;\n\n\treturn true;",
+            "first_line": 1146,
+            "last_line": 1166
+          },
+          {
+            "excerpt": "static int add_exception_handler(const struct bpf_insn *insn,\n\t\t\t\t struct jit_ctx *ctx,\n\t\t\t\t int dst_reg)\n{\n\toff_t ins_offset;\n\ts16 off = insn->off;\n\tbool is_arena;\n\tint arena_reg;\n\tunsigned long pc;\n\tstruct exception_table_entry *ex;\n\n\tif (!ctx->image)\n\t\t/* First pass */\n\t\treturn 0;\n\n\tif (BPF_MODE(insn->code) != BPF_PROBE_MEM &&\n\t    BPF_MODE(insn->code) != BPF_PROBE_MEMSX &&\n\t    BPF_MODE(insn->code) != BPF_PROBE_MEM32 &&\n\t    BPF_MODE(insn->code) != BPF_PROBE_MEM32SX &&\n\t    BPF_MODE(insn->code) != BPF_PROBE_ATOMIC)\n\t\treturn 0;\n\n\tis_arena = (BPF_MODE(insn->code) == BPF_PROBE_MEM32) ||\n\t\t   (BPF_MODE(insn->code) == BPF_PROBE_MEM32SX) ||\n\t\t   (BPF_MODE(insn->code) == BPF_PROBE_ATOMIC);\n\n\tif (!ctx->prog->aux->extable ||\n\t    WARN_ON_ONCE(ctx->exentry_idx >= ctx->prog->aux->num_exentries))\n\t\treturn -EINVAL;\n\n\tex = &ctx->prog->aux->extable[ctx->exentry_idx];\n\tpc = (unsigned long)&ctx->ro_image[ctx->idx - 1];\n\n\t/*\n\t * This is the relative offset of the instruction that may fault from\n\t * the exception table itself. This will be written to the exception\n\t * table and if this instruction faults, the destination register will\n\t * be set to '0' and the execution will jump to the next instruction.\n\t */\n\tins_offset = pc - (long)&ex->insn;\n\tif (WARN_ON_ONCE(ins_offset >= 0 || ins_offset < INT_MIN))\n\t\treturn -ERANGE;\n\n\t/*\n\t * The offsets above have been calculated using the RO buffer but we\n\t * need to use the R/W buffer for writes.\n\t * switch ex to rw buffer for writing.\n\t */\n\tex = (void *)ctx->image + ((void *)ex - (void *)ctx->ro_image);\n\n\tex->insn = ins_offset;\n\n\tif (BPF_CLASS(insn->code) != BPF_LDX)\n\t\tdst_reg = DONT_CLEAR;\n\n\tex->fixup = FIELD_PREP(BPF_FIXUP_REG_MASK, dst_reg);\n\n\tif (is_arena) {\n\t\tex->fixup |= BPF_ARENA_ACCESS;\n\t\t/*\n\t\t * insn->src_reg/dst_reg holds the address in the arena region with upper 32-bits\n\t\t * being zero because of a preceding addr_space_cast(r<n>, 0x0, 0x1) instruction.\n\t\t * This address is adjusted with the addition of arena_vm_start (see the\n\t\t * implementation of BPF_PROBE_MEM32 and BPF_PROBE_ATOMIC) before being used for the\n\t\t * memory access. Pass the reg holding the unmodified 32-bit address to\n\t\t * ex_handler_bpf.\n\t\t */\n\t\tif (BPF_CLASS(insn->code) == BPF_LDX)\n\t\t\tarena_reg = bpf2a64[insn->src_reg];\n\t\telse\n\t\t\tarena_reg = bpf2a64[insn->dst_reg];\n\n\t\tex->fixup |=  FIELD_PREP(BPF_FIXUP_OFFSET_MASK, off) |\n\t\t\t      FIELD_PREP(BPF_FIXUP_ARENA_REG_MASK, arena_reg);\n\t}\n\n\tex->type = EX_TYPE_BPF;\n\n\tctx->exentry_idx++;\n\treturn 0;",
+            "first_line": 1170,
+            "last_line": 1249
+          },
+          {
+            "excerpt": "\tfinal_ip = ctx->ro_image ? (const u32 *)&ctx->ro_image[ctx->idx] : NULL;\n\tn_insns = kinsn->emit_arm64(scratch, &scratch_idx, ctx->write,\n\t\t\t\t    payload, bpf_prog, final_ip);\n\tif (n_insns < 0) {\n\t\tret = n_insns;\n\t\tgoto out;\n\t}\n\tif (scratch_idx != n_insns || (size_t)n_insns > max_insns) {\n\t\tret = -EFAULT;\n\t\tgoto out;\n\t}\n\n\tif (ctx->image && ctx->write) {\n\t\tfor (i = 0; i < n_insns; i++)\n\t\t\tctx->image[ctx->idx + i] = cpu_to_le32(scratch[i]);\n\t}\n\tctx->idx += n_insns;",
+            "first_line": 1276,
+            "last_line": 1292
+          },
+          {
+            "excerpt": "\t\tcase BPF_DW:\n\t\t\tif (is_lsi_offset(off_adj, 3)) {\n\t\t\t\temit(A64_LDR64I(dst, src_adj, off_adj), ctx);\n\t\t\t} else {\n\t\t\t\temit_a64_mov_i(1, tmp, off, ctx);\n\t\t\t\temit(A64_LDR64(dst, src, tmp), ctx);\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\n\t\tret = add_exception_handler(insn, ctx, dst);\n\t\tif (ret)\n\t\t\treturn ret;",
+            "first_line": 1864,
+            "last_line": 1876
+          }
+        ],
+        "sha256": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7"
+      },
+      {
+        "path": "vendor/linux-framework/arch/x86/mm/fault.c",
+        "ranges": [
+          {
+            "excerpt": "static noinline void\nkernelmode_fixup_or_oops(struct pt_regs *regs, unsigned long error_code,\n\t\t\t unsigned long address, int signal, int si_code,\n\t\t\t u32 pkey)\n{\n\tWARN_ON_ONCE(user_mode(regs));\n\n\t/* Are we prepared to handle this kernel fault? */\n\tif (fixup_exception(regs, X86_TRAP_PF, error_code, address))\n\t\treturn;\n\n\t/*\n\t * AMD erratum #91 manifests as a spurious page fault on a PREFETCH\n\t * instruction.\n\t */\n\tif (is_prefetch(regs, error_code, address))\n\t\treturn;\n\n\tpage_fault_oops(regs, error_code, address);",
+            "first_line": 718,
+            "last_line": 736
+          }
+        ],
+        "sha256": "f99b0e1f5b3a3d091388fb97410b4c37a398786abd3365756bcc804cc88aaad2"
+      },
+      {
+        "path": "vendor/linux-framework/arch/arm64/mm/extable.c",
+        "ranges": [
+          {
+            "excerpt": "bool fixup_exception(struct pt_regs *regs, unsigned long esr)\n{\n\tconst struct exception_table_entry *ex;\n\n\tex = search_exception_tables(instruction_pointer(regs));\n\tif (!ex)\n\t\treturn false;\n\n\tswitch (ex->type) {\n\tcase EX_TYPE_BPF:\n\t\treturn ex_handler_bpf(ex, regs);",
+            "first_line": 95,
+            "last_line": 105
+          }
+        ],
+        "sha256": "af6bd9610551f6b7bb369c79959ef3966528d0172cabecbefd675208f1366025"
+      },
+      {
+        "path": "vendor/linux-framework/arch/arm64/mm/fault.c",
+        "ranges": [
+          {
+            "excerpt": "\t/*\n\t * Are we prepared to handle this kernel fault?\n\t * We are almost certainly not prepared to handle instruction faults.\n\t */\n\tif (!is_el1_instruction_abort(esr) && fixup_exception(regs, esr))\n\t\treturn;\n\n\tif (WARN_RATELIMIT(is_spurious_el1_translation_fault(addr, esr, regs),\n\t    \"Ignoring spurious kernel translation fault at virtual address %016lx\\n\", addr))\n\t\treturn;\n\n\tif (is_el1_mte_sync_tag_check_fault(esr)) {\n\t\tdo_tag_recovery(addr, esr, regs);\n\n\t\treturn;\n\t}\n\n\tif (is_el1_permission_fault(addr, esr, regs)) {\n\t\tif (esr & ESR_ELx_WNR)\n\t\t\tmsg = \"write to read-only memory\";\n\t\telse if (is_el1_instruction_abort(esr))\n\t\t\tmsg = \"execute from non-executable memory\";\n\t\telse\n\t\t\tmsg = \"read from unreadable memory\";\n\t} else if (addr < PAGE_SIZE) {\n\t\tmsg = \"NULL pointer dereference\";\n\t} else {\n\t\tif (esr_fsc_is_translation_fault(esr) &&\n\t\t    kfence_handle_page_fault(addr, esr & ESR_ELx_WNR, regs))\n\t\t\treturn;\n\n\t\tmsg = \"paging request\";\n\t}\n\n\tif (efi_runtime_fixup_exception(regs, msg))\n\t\treturn;\n\n\tdie_kernel_fault(msg, addr, esr, regs);",
+            "first_line": 372,
+            "last_line": 409
+          }
+        ],
+        "sha256": "f9283ca9776f888d90da9e215fdee231f423ed4f2400cf5b63c0df49cda728b3"
+      },
+      {
+        "path": "kinsn/module/x86/bpf_x86_native_lab.c",
+        "ranges": [
+          {
+            "excerpt": "static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,\n                              const struct bpf_prog *prog, const u8 *final_ip)\n{\n    struct native_blob *blob;\n    size_t snapshot_len;\n    u32 blob_id;\n    int err = 0;\n    payload = kinsn_payload_decode(payload);\n    blob_id = payload >> 8;\n    mutex_lock(&blobs_lock);\n    blob = xa_load(&blobs, blob_id);\n    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }\n    err = native_lab_retain_program(blob->capsule, prog);\n    if (err) { mutex_unlock(&blobs_lock); return err; }\n    snapshot_len = blob->len;\n    if (emit) {\n\t\t\tu8 *emit_at = image + *off;\n\t\t\tconst u8 *final_emit_at = final_ip ? final_ip + *off : NULL;\n\t\t\tsize_t i;\n\n\t\t\tmemcpy(emit_at, blob->bytes, snapshot_len);\n\n\t\t\t/* Apply each side-band relocation after the blob lands in\n\t\t\t * final JIT memory.\n\t\t\t */\n\t\t\tfor (i = 0; i < blob->reloc_count; i++) {\n\t\t\t\tconst struct native_lab_reloc_record *r =\n\t\t\t\t\t&blob->relocs[i];\n\t\t\t\tswitch (r->kind) {\n\t\t\t\tcase NATIVE_LAB_RELOC_READONLY_DATA:\n\t\t\t\t\t/* Immutable-data binding metadata; emits no patch. */\n\t\t\t\t\tbreak;\n\t\t\t\tcase NATIVE_LAB_RELOC_MAP_POINTER:\n\t\t\t\tcase NATIVE_LAB_RELOC_MAP_VALUE:\n\t\t\t\tcase NATIVE_LAB_RELOC_HELPER_POINTER:\n\t\t\t\t\terr = native_lab_emit_literal(r,\n\t\t\t\t\t\tblob->bytes, snapshot_len, emit_at, blob->maps, blob->map_count);\n\t\t\t\t\tbreak;",
+            "first_line": 168,
+            "last_line": 205
+          }
+        ],
+        "sha256": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7"
+      },
+      {
+        "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+        "ranges": [
+          {
+            "excerpt": "static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,\n                                 const struct bpf_prog *prog, const u32 *final_ip)\n{\n    struct native_blob *blob;\n    const struct native_lab_reloc_record *relocs;\n    const u8 *native_bytes;\n    size_t native_len, reloc_count, i;\n    u32 blob_id;\n    int start_idx = *idx, err;\n\n    payload = kinsn_payload_decode(payload);\n    blob_id = payload >> 8;\n    mutex_lock(&blobs_lock);\n    blob = xa_load(&blobs, blob_id);\n    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }\n    err = native_lab_retain_program(blob->capsule, prog);\n    if (err) { mutex_unlock(&blobs_lock); return err; }\n    native_bytes = blob->bytes;\n    native_len = blob->len;\n    relocs = blob->relocs;\n    reloc_count = blob->reloc_count;\n\tif (emit) {\n\t\tfor (i = 0; i < native_len; i += sizeof(u32))\n\t\t\timage[start_idx + (i / sizeof(u32))] =\n\t\t\t\tget_unaligned_le32(native_bytes + i);\n\n\t\tfor (i = 0; i < reloc_count; i++) {\n\t\t\tconst struct native_lab_reloc_record *r = &relocs[i];\n\n\t\t\tswitch (r->kind) {\n\t\t\tcase NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE:\n\t\t\tcase NATIVE_LAB_RELOC_READONLY_DATA:\n\t\t\t\t/* Immutable-data binding metadata; emits no patch. */\n\t\t\t\tbreak;\n\t\t\tcase NATIVE_LAB_RELOC_MAP_POINTER:\n\t\t\tcase NATIVE_LAB_RELOC_MAP_VALUE:\n\t\t\tcase NATIVE_LAB_RELOC_HELPER_POINTER:\n\t\t\t\terr = native_lab_emit_literal(r,",
+            "first_line": 251,
+            "last_line": 288
+          }
+        ],
+        "sha256": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Reference/Memory.lean",
+        "ranges": [
+          {
+            "excerpt": "def readMemory (m : Memory) (address : Word) (bytes : Nat) :\n    Except Fault (Word \u00d7 Event) :=\n  if permitted m.readable address bytes then\n    .ok (wordAt m address bytes,\n      .memory .read address (bytesAt m address bytes) (initializedAt m address bytes))\n  else .error (.read address bytes)",
+            "first_line": 72,
+            "last_line": 77
+          }
+        ],
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Reference/X86.lean",
+        "ranges": [
+          {
+            "excerpt": "/-- Ordinary MOV reads its source before changing an aliased destination or\naddress register. Byte/word writes preserve other bits, E writes zero-extend,\nand every flag and vector is preserved, including on a memory fault. -/\ndef moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource)\n    (nextPc : Word) (s : State) : Transition State :=\n  match scalarRead s width src with\n  | .error fault => \u27e8s, [.fault fault], some fault\u27e9\n  | .ok (value, reads) =>\n      match scalarWrite s width dst value with\n      | .error fault => \u27e8s, reads ++ [.fault fault], some fault\u27e9\n      | .ok (result, writes) => \u27e8{ result with pc := nextPc }, reads ++ writes, none\u27e9",
+            "first_line": 548,
+            "last_line": 558
+          }
+        ],
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+        "ranges": [
+          {
+            "excerpt": "/-- Ordinary scalar memory transfer, including signed loads, exact byte\npermissions/initialization and ordered fault effects. No source register or\nmemory value is synthesized on a fault. -/\ndef memoryStep (i : MemoryInstruction) (s : State) : Transition State :=\n  match spAlignmentFault s i.base with\n  | some fault => \u27e8s, [.fault fault], some fault\u27e9\n  | none =>\n      let address := memoryBase s i.base + i.offset\n      match i.transfer with\n      | .load dst signedTo =>\n          match readMemory s.memory address i.width.bytes with\n          | .error fault => \u27e8s, [.fault fault], some fault\u27e9\n          | .ok (value, event) =>\n              \u27e8{ writeReg s dst (memoryLoadValue i.width signedTo value) with pc := s.pc + 4 }, [event], none\u27e9\n      | .store src =>\n          match writeMemory s.memory address (readReg s src) i.width.bytes with\n          | .error fault => \u27e8s, [.fault fault], some fault\u27e9\n          | .ok (memory, event) => \u27e8{ s with memory := memory, pc := s.pc + 4 }, [event], none\u27e9",
+            "first_line": 535,
+            "last_line": 552
+          }
+        ],
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      {
+        "path": "kprog/tv/BPF.lean",
+        "ranges": [
+          {
+            "excerpt": "def load (s : State) (dst : Register) (address : Word) (count : Nat)\n    (signed : Bool) : Transition State :=\n  match readMemory s.memory address count with\n  | .error reason => \u27e8s, [.fault reason], some reason\u27e9\n  | .ok (value, event) =>\n      let result := if signed then (value.setWidth (8 * count)).signExtend 64 else value\n      \u27e8setReg s dst result, [event], none\u27e9",
+            "first_line": 145,
+            "last_line": 151
+          },
+          {
+            "excerpt": "  else if cls = 1 \u2228 cls = 2 \u2228 cls = 3 then\n    let mode := i.code / 32\n    let count := match i.code / 8 % 4 with | 0 => 4 | 1 => 2 | 2 => 1 | _ => 8\n    if cls = 3 \u2227 mode = 6 then\n      if h : i.src < 11 then\n        let effect \u2190 atomic s i.dst \u27e8i.src, h\u27e9 i.offset count i.imm.toNat\n        pure { effect with state := if effect.fault.isSome then effect.state else { effect.state with pc := next.pc } }\n      else throw \"BPF atomic source outside r0-r10\"\n    else if cls = 1 \u2227 (mode = 3 \u2228 mode = 4) then\n      if i.dst = 10 then throw \"BPF load overwrites frame pointer\"\n      if h : i.src < 11 then\n        let address := s.regs \u27e8i.src, h\u27e9 + i.offset.signExtend 64\n        let effect := load s i.dst address count (mode == 4)\n        pure { effect with state := if effect.fault.isSome then effect.state else { effect.state with pc := next.pc } }\n      else throw \"BPF load base register outside r0-r10\"",
+            "first_line": 254,
+            "last_line": 268
+          }
+        ],
+        "sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      {
+        "path": "kprog/tv/Composition.lean",
+        "ranges": [
+          {
+            "excerpt": "    (native : BlockStep Native) (proof : BlockStep Proof)\n    (related : Native \u2192 Proof \u2192 Prop) : Prop where\n  block : \u2200 {n p trace n'}, related n p \u2192 native n trace n' \u2192\n    \u2203 p', Execution proof p trace p' \u2227 related n' p'",
+            "first_line": 97,
+            "last_line": 100
+          },
+          {
+            "excerpt": "theorem native_effects_checked\n    {Native Proof : Type}\n    (native : Artifact \u2192 BlockStep Native)\n    (proof : Artifact \u2192 BlockStep Proof)\n    (related : Artifact \u2192 Native \u2192 Proof \u2192 Prop)\n    (accepted : Artifact \u2192 Prop)\n    (proofEntry : Artifact \u2192 Proof \u2192 Prop)\n    (checked : Artifact \u2192 Event \u2192 Prop)\n    (verifierSound : \u2200 a, accepted a \u2192 \u2200 p trace p', proofEntry a p \u2192\n      Execution (proof a) p trace p' \u2192 \u2200 event \u2208 trace, checked a event)\n    (validated executed : Artifact)\n    (binding : executed = validated)\n    (acceptance : accepted validated)\n    (tv : TranslationValidation (native validated) (proof validated)\n      (related validated))\n    {n p trace n'} (entry : related validated n p)\n    (admittedEntry : proofEntry validated p)\n    (run : Execution (native executed) n trace n') :\n    \u2200 event \u2208 trace, checked validated event := by\n  subst executed\n  obtain \u27e8last, matching, _\u27e9 := validated_execution tv entry run\n  exact verifierSound validated acceptance p trace last admittedEntry matching",
+            "first_line": 178,
+            "last_line": 199
+          }
+        ],
+        "sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      {
+        "path": "kprog/tv/SimulatorComposition.lean",
+        "ranges": [
+          {
+            "excerpt": "theorem actual_program_effects_from_kernel_copy {Proof : Type} (actualNative : Artifact \u2192 BlockStep NativeState)\n    (image : Artifact \u2192 Memory) (env : Artifact \u2192 EntryEnvironment.Environment)\n    (frame : Artifact \u2192 EntryEnvironment.Frame) (arena : Artifact \u2192 Reference.Word)\n    (select : Artifact \u2192 Site \u2192 NativeState \u2192 Prop)\n    (coverage : \u2200 a before trace after, actualNative a before trace after \u2192\n      Execution (tokenStep (nativeToken image select a)) before trace after)\n    (related : Artifact \u2192 NativeState \u2192 NativeState \u2192 Prop)\n    (fields : FieldsAligned image select related) (transport : DefinednessTransport image select related)\n    (proof : Artifact \u2192 BlockStep Proof) (linkRelated : Artifact \u2192 NativeState \u2192 Proof \u2192 Prop)\n    (linkLaw : \u2200 a, TranslationValidation (tokenStep (specializedToken env frame arena select a)) (proof a) (linkRelated a))\n    (accepted : Artifact \u2192 Prop) (proofEntry : Artifact \u2192 Proof \u2192 Prop) (checked : Artifact \u2192 Event \u2192 Prop)\n    (verifierSound : \u2200 a, accepted a \u2192 \u2200 p trace p', proofEntry a p \u2192\n      Execution (proof a) p trace p' \u2192 \u2200 event\u2208trace, checked a event)\n    (kernelCopy : Artifact) (acceptance : accepted kernelCopy)\n    {n : NativeState} {p : Proof} {trace : List Event} {last : NativeState}\n    (entry : \u2203 s, (\u2203 i, related kernelCopy n i \u2227 i=s) \u2227 linkRelated kernelCopy s p)\n    (admitted : proofEntry kernelCopy p)\n    (run : Execution (actualNative kernelCopy) n trace last) :\n    \u2200 event\u2208trace, checked kernelCopy event := by\n  exact native_effects_checked actualNative proof\n    (fun a n p => \u2203 s, (\u2203 i, related a n i \u2227 i=s) \u2227 linkRelated a s p)\n    accepted proofEntry checked verifierSound kernelCopy kernelCopy rfl acceptance\n    (actual_program_block_validation actualNative image env frame arena select coverage related fields transport proof linkRelated linkLaw kernelCopy)",
+            "first_line": 321,
+            "last_line": 343
+          }
+        ],
+        "sha256": "2c57cf8ffc0abcfa9e593897c77fa808fa70ba29d856b115fc32993ea62c5f4d"
+      },
+      {
+        "path": "kprog/tv/NativeLinkFinalImage.lean",
+        "ranges": [
+          {
+            "excerpt": "/-- Canonical decode at the final architectural PC consumes the exact final\nbits, including relative targets computed using final_ip. -/\ntheorem finalized_decode (patches : List Patch) (storage final : Memory)\n    (scratchBase finalBase : Word) (total offset count : Nat)\n    (copied : Transfer\n      (applyTable (patches.map (staged (scratchBase-finalBase))) storage)\n      final scratchBase finalBase total)\n    (fits : offset+count\u2264total) (state : X86.State)\n    (pc : state.pc=finalBase+BitVec.ofNat 64 offset) :\n    X86.decode (bytesAt final state.pc count).toArray state=\n      X86.decode (bytesAt (applyTable patches (view storage (scratchBase-finalBase))) state.pc count).toArray state := by\n  rw [pc,finalized_fetch patches storage final scratchBase finalBase total offset count copied fits]\n\n/-- Every canonical successor is retained. Runtime fetch and data state use\nthe final PC; the temporary-storage view supplies code bytes only. -/\ndef instructionStep (code : Memory) (base : Word) (total count : Nat) : BlockStep X86.State :=\n  fun before events after =>\n    (\u2203 offset, before.pc=base+BitVec.ofNat 64 offset \u2227 offset+count\u2264total) \u2227\n    \u2203 instruction effect, X86.decode (bytesAt code before.pc count).toArray before=.ok instruction \u2227\n      X86.Step instruction before effect \u2227 effect.events=events \u2227 effect.state=after",
+            "first_line": 142,
+            "last_line": 161
+          },
+          {
+            "excerpt": "/-- This universal link transformation composes with Composition and keeps\nfull state, ordered effects, faults and every canonical allowed successor. -/\ntheorem finalized_instruction_preservation (patches : List Patch) (storage final : Memory)\n    (scratchBase finalBase : Word) (total count : Nat)\n    (copied : Transfer\n      (applyTable (patches.map (staged (scratchBase-finalBase))) storage)\n      final scratchBase finalBase total) :\n    TranslationValidation\n      (instructionStep (applyTable patches (view storage (scratchBase-finalBase))) finalBase total count)\n      (instructionStep final finalBase total count) Eq := by\n  constructor\n  intro before other events after related run\n  subst other\n  have head := (finalized_step_iff patches storage final scratchBase finalBase total count copied before after events).mpr run\n  exact \u27e8after,by simpa only [List.append_nil] using Execution.next head (Execution.refl after),rfl\u27e9",
+            "first_line": 180,
+            "last_line": 194
+          }
+        ],
+        "sha256": "622267c8289cc0b700560dc258e6d50dcda1d9228589565fbac36e2a84351eb3"
+      }
+    ],
+    "design": "kprog/docs/design.md:431-454,485-487 explicitly requires matching object, bounds and fault behavior. Five-step(c)-(d) establishes faithful B; (e)/O4 preserves it. Same-copy identity is necessary but does not construct exception recovery.",
+    "disposition": "Keep this universal interface open. Any remedy must derive actual access validity from the correctly modeled admitted execution, or explicitly preserve the submitted P fault/recovery contract through B and emission. No nonnull assumption or new runtime predicate is silently added. Coordinator/operator decides a required model change before implementation. New O4 optimization law only follows a new relocation kind posted by C.",
+    "epoch_boundary": "Current vendored hashes/numbered excerpts are not asserted to equal a running kernel binary. The captured ARM build inputs/runtime are separately pinned by A f55cf2f09 and 88a17af867. C owns matched x86 stock-BPF baseline and runtime qualification.",
+    "finding": "Stock BTF protected reads may safely recover with zero and continue, whereas the same plain native MOV/LDR retains architectural fault behavior. Retaining both load addresses alone does not establish faithfulness.",
+    "formal_boundary": "Canonical readMemory/read faults and x86 MOV/ARM scalar LDR preserve incoming state and fault. BPF.load/execute currently model MEM/MEMSX with a fault; PROBE_MEM protected zero/continue and the post-verifier recovery path are absent. A verifierSound premise forbidding these raw faults cannot be inferred from stock acceptance alone. UD2 explicit rejection-prefix laws do not cover implicit memory-load faults.",
+    "installed_annotation": "d4a23b5b0 no_null_check remains installed/load-only with both reads; no native fault was triggered in this audit. Matched stock-BPF baseline is a separate C result.",
+    "native_executions": 0,
+    "new_theorems": 0,
+    "o3_premise": "Stock acceptance concerns B under real verifier/JIT semantics and admitted entry states. It cannot establish absence of raw modeled read faults when BTF reads are protected. Physical entry/lifetime/permissions and every reachable plain native access must correspond for all legitimate hook invocations, including NULL file. Bounded indirect dispatch and finite unsafe-suite results do not discharge this obligation. This is not evidence of a stock-verifier defect.",
+    "o4_premise": "Composition.TranslationValidation.block requires every native step to have the same complete ordered proof trace and related final state. native_effects_checked additionally requires actual proofEntry, verifierSound and admitted physical entry. SimulatorComposition.actual_program_effects_from_kernel_copy leaves coverage/fields/definedness/linkLaw/entry explicit. NativeLinkFinalImage preserves exact canonical bytes/steps/faults, not OS recovery. It cannot equate a plain native fault with B zero/continue.",
+    "paired_arm_publication": "f55cf2f09b6bf98a5b804ba6362f846f80dd3d17",
+    "paired_arm_report": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/two-installed-annotations/probe-memory/report.json",
+    "paired_arm_report_sha256": "f0e33356e4c894a385e008c5981e286ec5de3d074a2d380df2043c0631c3af1e",
+    "paired_arm_runtime": {
+      "kprog/arm64/build/native-extent/Image": "5dda73cc12cf58ff3a9dcc24dc98ee9867a5cdc92515e233cfc182226570c86e",
+      "kprog/arm64/build/native-extent/kinsn/bpf_arm64_native_lab.ko": "ec9f8a08c1c3c751be0f34c8825f833d03d81dd58bad1d4c46fc59b460d71eed"
+    },
+    "paired_arm_sources": [
+      {
+        "line_ranges": [
+          [
+            1149,
+            1258
+          ],
+          [
+            1789,
+            1805
+          ],
+          [
+            1867,
+            1887
+          ]
+        ],
+        "name": "paired-bpf-jit.c",
+        "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/bpf_jit_comp.c",
+        "sha256": "1e0ab76ec8aaa4bc6cee345172154afc8efa84936b90ba854190bd160df40b7a"
+      },
+      {
+        "line_ranges": [
+          [
+            23074,
+            23101
+          ]
+        ],
+        "name": "paired-verifier.c",
+        "path": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/verifier.c",
+        "sha256": "8d0803726c9ca48e36b4921ca84cac980d94be805245c787fac767f54ca973ec"
+      },
+      {
+        "line_ranges": [
+          [
+            251,
+            300
+          ],
+          [
+            480,
+            519
+          ]
+        ],
+        "name": "paired-native-emitter.c",
+        "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/bpf_arm64_native_lab.c",
+        "sha256": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f"
+      },
+      {
+        "line_ranges": [
+          [
+            750,
+            775
+          ],
+          [
+            977,
+            1018
+          ]
+        ],
+        "name": "arm64-simulator.h",
+        "path": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+        "sha256": "79d8e79645aaaf01dc75f401018d5e192b54fd6e7e7bed39be0228188e294a95"
+      },
+      {
+        "line_ranges": [
+          [
+            452,
+            488
+          ]
+        ],
+        "name": "design.md",
+        "path": "/workspaces/repository/kprog/docs/design.md",
+        "sha256": "72d920cfbdb25c66d620919d085f7348b523d700e99b793c29061721fff542a1"
+      },
+      {
+        "line_ranges": [
+          [
+            1,
+            50
+          ]
+        ],
+        "name": "kernel-build.sh",
+        "path": "/workspaces/.agent-state/kprog-lanes/A/native-extent/inside-kernel.sh",
+        "sha256": "64776d16f146dcf716ee6ce1cd06cdcac6018be05ecc3d04c36a68613033def1"
+      }
+    ],
+    "runtime_admission_additions": 0,
+    "scope": "Read-only universal fault-semantics qualification on x86-64 and AArch64; no per-program proof or native execution.",
+    "status": "open-physical-entry-and-compiled-B-fault-correspondence",
+    "utc": "2026-11-08T22:40:33.458951+00:00",
+    "verifier_conversion": "Listed PTR_TO_BTF_ID/untrusted READs become PROBE_MEM/SX and num_exentries increments. The native-proof pipeline restores original sidecar/CALL and removes proof regions before convert_ctx_accesses, so proof-only loads receive no automatic per-native-load exception entry.",
+    "x86": "Stock JIT checks kernel address range, produces zero without the load when outside it, and registers EX_TYPE_BPF for the attempted protected load. On a handled fault ex_handler_bpf clears dst and advances IP by its instruction length. Native emitter copies P and patches relocations; its native_proof JIT route supplies no corresponding load fixup. An unhandled native page fault reaches kernelmode_fixup_or_oops/page_fault_oops."
+  },
   "canonical_arm_thread_pointer_reference": {
     "archive_block_sha256": "eb85a75856a22e27078b415a310998b16e274cdd65e7b758d9da49476490ca87",
     "archive_block_sha256_before_lossless_compaction": "30c55b713c9dcfcfb5d7a97275d473abb135a96e6e29e3c0d67afc8c2a928326",
