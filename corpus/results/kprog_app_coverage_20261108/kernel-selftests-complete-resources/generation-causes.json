@@ -1,0 +1,688 @@
+{
+  "counts": {
+    "helper 170": 2,
+    "unsupported unresolved call target in call   4b <crypto_acquire+0x4b>": 1,
+    "helper 198": 32,
+    "helper 199": 1,
+    "unsupported unresolved call target in call   2a <data_slice_out_of_bounds_skb+0x2a>": 1,
+    "unsupported unresolved call target in call   18 <data_slice_out_of_bounds_skb_meta+0x18>": 1,
+    "helper 197": 12,
+    "unsupported unresolved call target in call   2a <skb_invalid_slice_write+0x2a>": 1,
+    "unsupported unresolved call target in call   18 <skb_meta_invalid_slice_write+0x18>": 1,
+    "unsupported unresolved call target in call   31 <skb_invalid_data_slice1+0x31>": 1,
+    "unsupported unresolved call target in call   2e <skb_invalid_data_slice2+0x2e>": 1,
+    "helper 202": 8,
+    "unsupported unresolved call target in call   1b <ro_skb_meta_slice_invalid_after_payload_helper+0x1b>": 1,
+    "unsupported unresolved call target in call   1b <rw_skb_meta_slice_invalid_after_payload_helper+0x1b>": 1,
+    "unsupported unresolved call target in call   32 <xdp_invalid_data_slice1+0x32>": 1,
+    "unsupported unresolved call target in call   2f <xdp_invalid_data_slice2+0x2f>": 1,
+    "unsupported unresolved call target in call   10 <skb_invalid_ctx+0x10>": 1,
+    "unsupported unresolved call target in call   10 <skb_meta_invalid_ctx+0x10>": 1,
+    "unsupported unresolved call target in call   10 <xdp_invalid_ctx+0x10>": 1,
+    "unsupported unresolved call target in call   25 <dynptr_slice_var_len1+0x25>": 1,
+    "unsupported unresolved call target in call   24 <dynptr_slice_var_len2+0x24>": 1,
+    "unsupported unresolved call target in call   26 <invalid_slice_rdwr_rdonly+0x26>": 1,
+    "unsupported unresolved call target in call   2a <dynptr_adjust_invalid+0x2a>": 1,
+    "unsupported unresolved call target in call   20 <dynptr_is_null_invalid+0x20>": 1,
+    "unsupported unresolved call target in call   20 <dynptr_is_rdonly_invalid+0x20>": 1,
+    "unsupported unresolved call target in call   20 <dynptr_size_invalid+0x20>": 1,
+    "unsupported unresolved call target in call   25 <clone_invalid1+0x25>": 1,
+    "unsupported unresolved call target in call   27 <clone_skb_packet_data+0x27>": 1,
+    "unsupported unresolved call target in call   19 <clone_skb_packet_meta+0x19>": 1,
+    "unsupported unresolved call target in call   24 <clone_xdp_packet_data+0x24>": 1,
+    "unsupported unresolved call target in call   18 <test_dynptr_skb_small_buff+0x18>": 1,
+    "unsupported unresolved call target in call   1b <testmod_seq_empty+0x1b>": 1,
+    "unsupported unresolved call target in call   1e <testmod_seq_full+0x1e>": 1,
+    "unsupported unresolved call target in call   24 <testmod_seq_truncated+0x24>": 1,
+    "unsupported unresolved call target in call   10 <testmod_seq_getter_before_bad+0x10>": 1,
+    "unsupported unresolved call target in call   1e <testmod_seq_getter_after_bad+0x1e>": 1,
+    "unsupported unresolved call target in call   1e <testmod_seq_getter_good+0x1e>": 1,
+    "unsupported unresolved call target in call   c <test_kfunc_implicit_arg_impl_illegal+0xc>": 1,
+    "helper 154": 3,
+    "unsupported unresolved call target in call   3b <reject_bad_type_xchg+0x3b>": 1,
+    "unsupported unresolved call target in call   3b <reject_member_of_ref_xchg+0x3b>": 1,
+    "unsupported unresolved call target in call   3b <kptr_xchg_ref_state+0x3b>": 1,
+    "unsupported unresolved call target in call   3b <kptr_xchg_possibly_null+0x3b>": 1,
+    "unsupported unresolved call target in call   29 <lookup_null_bpf_tuple+0x29>": 1,
+    "unsupported unresolved call target in call   44 <lookup_null_bpf_opts+0x44>": 1,
+    "unsupported unresolved call target in call   29 <xdp_lookup_null_bpf_tuple+0x29>": 1,
+    "unsupported unresolved call target in call   44 <xdp_lookup_null_bpf_opts+0x44>": 1,
+    "Error: PC32 zero-sized target  requires a readonly section or an unnamed bss section": 1,
+    "unsupported unresolved call target in call   12 <kfunc_dynptr_nullable_test3+0x12>": 1,
+    "helper 209": 11,
+    "unsupported unresolved call target in call   21 <null_pointer+0x21>": 1,
+    "unsupported unresolved call target in call   23 <bits_copy+0x23>": 1,
+    "unsupported unresolved call target in call   2e <bits_memalloc+0x2e>": 1,
+    "unsupported unresolved call target in call   24 <bit_index+0x24>": 1,
+    "unsupported unresolved call target in call   3e <bits_too_big+0x3e>": 1,
+    "unsupported unresolved call target in call   2c <fewer_words+0x2c>": 1,
+    "unsupported unresolved call target in call   29 <zero_words+0x29>": 1,
+    "unsupported unresolved call target in call   62 <huge_words+0x62>": 1,
+    "unsupported unresolved call target in call   44 <max_words+0x44>": 1,
+    "unsupported unresolved call target in call   26 <bad_words+0x26>": 1,
+    "unsupported unresolved call target in call   6 <test_default_trusted_ptr+0x6>": 1,
+    "helper 53": 1
+  },
+  "examples": {
+    "helper 170": [
+      [
+        "async_stack_depth.c",
+        "pseudo_call_check"
+      ],
+      [
+        "async_stack_depth.c",
+        "async_call_root_check"
+      ]
+    ],
+    "unsupported unresolved call target in call   4b <crypto_acquire+0x4b>": [
+      [
+        "crypto_basic.c",
+        "crypto_acquire"
+      ]
+    ],
+    "helper 198": [
+      [
+        "dynptr_fail.c",
+        "ringbuf_missing_release1"
+      ],
+      [
+        "dynptr_fail.c",
+        "ringbuf_missing_release2"
+      ],
+      [
+        "dynptr_fail.c",
+        "ringbuf_missing_release_callback"
+      ],
+      [
+        "dynptr_fail.c",
+        "use_after_invalid"
+      ],
+      [
+        "dynptr_fail.c",
+        "ringbuf_invalid_api"
+      ],
+      [
+        "dynptr_fail.c",
+        "add_dynptr_to_map1"
+      ],
+      [
+        "dynptr_fail.c",
+        "add_dynptr_to_map2"
+      ],
+      [
+        "dynptr_fail.c",
+        "data_slice_out_of_bounds_ringbuf"
+      ],
+      [
+        "dynptr_fail.c",
+        "data_slice_use_after_release1"
+      ],
+      [
+        "dynptr_fail.c",
+        "data_slice_use_after_release2"
+      ],
+      [
+        "dynptr_fail.c",
+        "data_slice_missing_null_check1"
+      ],
+      [
+        "dynptr_fail.c",
+        "data_slice_missing_null_check2"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_write2"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_write3"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_write4"
+      ],
+      [
+        "dynptr_fail.c",
+        "global"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_read1"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_read3"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_read4"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_offset"
+      ],
+      [
+        "dynptr_fail.c",
+        "release_twice"
+      ],
+      [
+        "dynptr_fail.c",
+        "release_twice_callback"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_overwrite_ref"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_read_into_slot"
+      ],
+      [
+        "dynptr_fail.c",
+        "uninit_write_into_slot"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalid2"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate1"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate2"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate3"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate4"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate5"
+      ],
+      [
+        "dynptr_fail.c",
+        "clone_invalidate6"
+      ]
+    ],
+    "helper 199": [
+      [
+        "dynptr_fail.c",
+        "ringbuf_release_uninit_dynptr"
+      ]
+    ],
+    "unsupported unresolved call target in call   2a <data_slice_out_of_bounds_skb+0x2a>": [
+      [
+        "dynptr_fail.c",
+        "data_slice_out_of_bounds_skb"
+      ]
+    ],
+    "unsupported unresolved call target in call   18 <data_slice_out_of_bounds_skb_meta+0x18>": [
+      [
+        "dynptr_fail.c",
+        "data_slice_out_of_bounds_skb_meta"
+      ]
+    ],
+    "helper 197": [
+      [
+        "dynptr_fail.c",
+        "data_slice_out_of_bounds_map_value"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_helper1"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_helper2"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_write1"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_read2"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_from_mem_invalid_api"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_overwrite_unref"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_invalidate_slice_reinit"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_invalidate_slice_or_null"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_invalidate_slice_failure"
+      ],
+      [
+        "dynptr_fail.c",
+        "dynptr_invalidate_slice_success"
+      ],
+      [
+        "dynptr_fail.c",
+        "invalid_data_slices"
+      ]
+    ],
+    "unsupported unresolved call target in call   2a <skb_invalid_slice_write+0x2a>": [
+      [
+        "dynptr_fail.c",
+        "skb_invalid_slice_write"
+      ]
+    ],
+    "unsupported unresolved call target in call   18 <skb_meta_invalid_slice_write+0x18>": [
+      [
+        "dynptr_fail.c",
+        "skb_meta_invalid_slice_write"
+      ]
+    ],
+    "unsupported unresolved call target in call   31 <skb_invalid_data_slice1+0x31>": [
+      [
+        "dynptr_fail.c",
+        "skb_invalid_data_slice1"
+      ]
+    ],
+    "unsupported unresolved call target in call   2e <skb_invalid_data_slice2+0x2e>": [
+      [
+        "dynptr_fail.c",
+        "skb_invalid_data_slice2"
+      ]
+    ],
+    "helper 202": [
+      [
+        "dynptr_fail.c",
+        "skb_invalid_data_slice3"
+      ],
+      [
+        "dynptr_fail.c",
+        "skb_invalid_data_slice4"
+      ],
+      [
+        "dynptr_fail.c",
+        "ro_skb_slice_invalid_after_metadata_write"
+      ],
+      [
+        "dynptr_fail.c",
+        "rw_skb_slice_invalid_after_metadata_write"
+      ],
+      [
+        "dynptr_fail.c",
+        "ro_skb_meta_slice_invalid_after_payload_write"
+      ],
+      [
+        "dynptr_fail.c",
+        "rw_skb_meta_slice_invalid_after_payload_write"
+      ],
+      [
+        "dynptr_fail.c",
+        "ro_skb_meta_slice_invalid_after_metadata_write"
+      ],
+      [
+        "dynptr_fail.c",
+        "rw_skb_meta_slice_invalid_after_metadata_write"
+      ]
+    ],
+    "unsupported unresolved call target in call   1b <ro_skb_meta_slice_invalid_after_payload_helper+0x1b>": [
+      [
+        "dynptr_fail.c",
+        "ro_skb_meta_slice_invalid_after_payload_helper"
+      ]
+    ],
+    "unsupported unresolved call target in call   1b <rw_skb_meta_slice_invalid_after_payload_helper+0x1b>": [
+      [
+        "dynptr_fail.c",
+        "rw_skb_meta_slice_invalid_after_payload_helper"
+      ]
+    ],
+    "unsupported unresolved call target in call   32 <xdp_invalid_data_slice1+0x32>": [
+      [
+        "dynptr_fail.c",
+        "xdp_invalid_data_slice1"
+      ]
+    ],
+    "unsupported unresolved call target in call   2f <xdp_invalid_data_slice2+0x2f>": [
+      [
+        "dynptr_fail.c",
+        "xdp_invalid_data_slice2"
+      ]
+    ],
+    "unsupported unresolved call target in call   10 <skb_invalid_ctx+0x10>": [
+      [
+        "dynptr_fail.c",
+        "skb_invalid_ctx"
+      ]
+    ],
+    "unsupported unresolved call target in call   10 <skb_meta_invalid_ctx+0x10>": [
+      [
+        "dynptr_fail.c",
+        "skb_meta_invalid_ctx"
+      ]
+    ],
+    "unsupported unresolved call target in call   10 <xdp_invalid_ctx+0x10>": [
+      [
+        "dynptr_fail.c",
+        "xdp_invalid_ctx"
+      ]
+    ],
+    "unsupported unresolved call target in call   25 <dynptr_slice_var_len1+0x25>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_slice_var_len1"
+      ]
+    ],
+    "unsupported unresolved call target in call   24 <dynptr_slice_var_len2+0x24>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_slice_var_len2"
+      ]
+    ],
+    "unsupported unresolved call target in call   26 <invalid_slice_rdwr_rdonly+0x26>": [
+      [
+        "dynptr_fail.c",
+        "invalid_slice_rdwr_rdonly"
+      ]
+    ],
+    "unsupported unresolved call target in call   2a <dynptr_adjust_invalid+0x2a>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_adjust_invalid"
+      ]
+    ],
+    "unsupported unresolved call target in call   20 <dynptr_is_null_invalid+0x20>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_is_null_invalid"
+      ]
+    ],
+    "unsupported unresolved call target in call   20 <dynptr_is_rdonly_invalid+0x20>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_is_rdonly_invalid"
+      ]
+    ],
+    "unsupported unresolved call target in call   20 <dynptr_size_invalid+0x20>": [
+      [
+        "dynptr_fail.c",
+        "dynptr_size_invalid"
+      ]
+    ],
+    "unsupported unresolved call target in call   25 <clone_invalid1+0x25>": [
+      [
+        "dynptr_fail.c",
+        "clone_invalid1"
+      ]
+    ],
+    "unsupported unresolved call target in call   27 <clone_skb_packet_data+0x27>": [
+      [
+        "dynptr_fail.c",
+        "clone_skb_packet_data"
+      ]
+    ],
+    "unsupported unresolved call target in call   19 <clone_skb_packet_meta+0x19>": [
+      [
+        "dynptr_fail.c",
+        "clone_skb_packet_meta"
+      ]
+    ],
+    "unsupported unresolved call target in call   24 <clone_xdp_packet_data+0x24>": [
+      [
+        "dynptr_fail.c",
+        "clone_xdp_packet_data"
+      ]
+    ],
+    "unsupported unresolved call target in call   18 <test_dynptr_skb_small_buff+0x18>": [
+      [
+        "dynptr_fail.c",
+        "test_dynptr_skb_small_buff"
+      ]
+    ],
+    "unsupported unresolved call target in call   1b <testmod_seq_empty+0x1b>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_empty"
+      ]
+    ],
+    "unsupported unresolved call target in call   1e <testmod_seq_full+0x1e>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_full"
+      ]
+    ],
+    "unsupported unresolved call target in call   24 <testmod_seq_truncated+0x24>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_truncated"
+      ]
+    ],
+    "unsupported unresolved call target in call   10 <testmod_seq_getter_before_bad+0x10>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_getter_before_bad"
+      ]
+    ],
+    "unsupported unresolved call target in call   1e <testmod_seq_getter_after_bad+0x1e>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_getter_after_bad"
+      ]
+    ],
+    "unsupported unresolved call target in call   1e <testmod_seq_getter_good+0x1e>": [
+      [
+        "iters_testmod_seq.c",
+        "testmod_seq_getter_good"
+      ]
+    ],
+    "unsupported unresolved call target in call   c <test_kfunc_implicit_arg_impl_illegal+0xc>": [
+      [
+        "kfunc_implicit_args.c",
+        "test_kfunc_implicit_arg_impl_illegal"
+      ]
+    ],
+    "helper 154": [
+      [
+        "map_kptr_fail.c",
+        "marked_as_untrusted_or_null"
+      ],
+      [
+        "map_kptr_fail.c",
+        "inherit_untrusted_on_walk"
+      ],
+      [
+        "map_kptr_fail.c",
+        "mark_ref_as_untrusted_or_null"
+      ]
+    ],
+    "unsupported unresolved call target in call   3b <reject_bad_type_xchg+0x3b>": [
+      [
+        "map_kptr_fail.c",
+        "reject_bad_type_xchg"
+      ]
+    ],
+    "unsupported unresolved call target in call   3b <reject_member_of_ref_xchg+0x3b>": [
+      [
+        "map_kptr_fail.c",
+        "reject_member_of_ref_xchg"
+      ]
+    ],
+    "unsupported unresolved call target in call   3b <kptr_xchg_ref_state+0x3b>": [
+      [
+        "map_kptr_fail.c",
+        "kptr_xchg_ref_state"
+      ]
+    ],
+    "unsupported unresolved call target in call   3b <kptr_xchg_possibly_null+0x3b>": [
+      [
+        "map_kptr_fail.c",
+        "kptr_xchg_possibly_null"
+      ]
+    ],
+    "unsupported unresolved call target in call   29 <lookup_null_bpf_tuple+0x29>": [
+      [
+        "test_bpf_nf_fail.c",
+        "lookup_null_bpf_tuple"
+      ]
+    ],
+    "unsupported unresolved call target in call   44 <lookup_null_bpf_opts+0x44>": [
+      [
+        "test_bpf_nf_fail.c",
+        "lookup_null_bpf_opts"
+      ]
+    ],
+    "unsupported unresolved call target in call   29 <xdp_lookup_null_bpf_tuple+0x29>": [
+      [
+        "test_bpf_nf_fail.c",
+        "xdp_lookup_null_bpf_tuple"
+      ]
+    ],
+    "unsupported unresolved call target in call   44 <xdp_lookup_null_bpf_opts+0x44>": [
+      [
+        "test_bpf_nf_fail.c",
+        "xdp_lookup_null_bpf_opts"
+      ]
+    ],
+    "Error: PC32 zero-sized target  requires a readonly section or an unnamed bss section": [
+      [
+        "test_global_func9.c",
+        "global_func9"
+      ]
+    ],
+    "unsupported unresolved call target in call   12 <kfunc_dynptr_nullable_test3+0x12>": [
+      [
+        "test_kfunc_param_nullable.c",
+        "kfunc_dynptr_nullable_test3"
+      ]
+    ],
+    "helper 209": [
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_bad_access1"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_bad_access2"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_write_forbidden"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_null_context_write"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_null_context_read"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_discard_dynptr"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_submit_dynptr"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_invalid_return"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_reinit_dynptr_mem"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_reinit_dynptr_ringbuf"
+      ],
+      [
+        "user_ringbuf_fail.c",
+        "user_ringbuf_callback_const_ptr_to_dynptr_reg_off"
+      ]
+    ],
+    "unsupported unresolved call target in call   21 <null_pointer+0x21>": [
+      [
+        "verifier_bits_iter.c",
+        "null_pointer"
+      ]
+    ],
+    "unsupported unresolved call target in call   23 <bits_copy+0x23>": [
+      [
+        "verifier_bits_iter.c",
+        "bits_copy"
+      ]
+    ],
+    "unsupported unresolved call target in call   2e <bits_memalloc+0x2e>": [
+      [
+        "verifier_bits_iter.c",
+        "bits_memalloc"
+      ]
+    ],
+    "unsupported unresolved call target in call   24 <bit_index+0x24>": [
+      [
+        "verifier_bits_iter.c",
+        "bit_index"
+      ]
+    ],
+    "unsupported unresolved call target in call   3e <bits_too_big+0x3e>": [
+      [
+        "verifier_bits_iter.c",
+        "bits_too_big"
+      ]
+    ],
+    "unsupported unresolved call target in call   2c <fewer_words+0x2c>": [
+      [
+        "verifier_bits_iter.c",
+        "fewer_words"
+      ]
+    ],
+    "unsupported unresolved call target in call   29 <zero_words+0x29>": [
+      [
+        "verifier_bits_iter.c",
+        "zero_words"
+      ]
+    ],
+    "unsupported unresolved call target in call   62 <huge_words+0x62>": [
+      [
+        "verifier_bits_iter.c",
+        "huge_words"
+      ]
+    ],
+    "unsupported unresolved call target in call   44 <max_words+0x44>": [
+      [
+        "verifier_bits_iter.c",
+        "max_words"
+      ]
+    ],
+    "unsupported unresolved call target in call   26 <bad_words+0x26>": [
+      [
+        "verifier_bits_iter.c",
+        "bad_words"
+      ]
+    ],
+    "unsupported unresolved call target in call   6 <test_default_trusted_ptr+0x6>": [
+      [
+        "verifier_default_trusted_ptr.c",
+        "test_default_trusted_ptr"
+      ]
+    ],
+    "helper 53": [
+      [
+        "verifier_sockmap_mutate.c",
+        "test_sockops_update_dedicated"
+      ]
+    ]
+  }
+}
