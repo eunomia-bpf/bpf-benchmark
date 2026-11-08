@@ -1,0 +1,17 @@
+{
+  "application": "Tracee",
+  "entry": "sys_exit_submit",
+  "generated": 6,
+  "compiled": 6,
+  "accepted_bound": 5,
+  "verifier_rejected": 1,
+  "error_class": "readonly80-byte table index range",
+  "processed_insns": 1561,
+  "total_states": 59,
+  "native_sha_matches": 6,
+  "source_drift": [],
+  "run_exit": 0,
+  "app_status": "error",
+  "collector_exit": 1,
+  "collector_outcome": "Complete archives and coverage recorded; final assertion requires full application acceptance"
+}
