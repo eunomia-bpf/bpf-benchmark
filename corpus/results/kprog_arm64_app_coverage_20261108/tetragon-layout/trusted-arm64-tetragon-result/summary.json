@@ -1,8 +1,8 @@
 {
   "ok": false,
   "case": "tetragon",
-  "started": "2026-11-08T11:39:34.178648+00:00",
-  "archive": "run-20261108T113934178625Z.tar.gz",
+  "started": "2026-11-08T11:45:36.237746+00:00",
+  "archive": "run-20261108T114536237715Z.tar.gz",
   "command": [
     "taskset",
     "-c",
@@ -45,7 +45,7 @@
     "kprog/arm64/arm64_sim_local_bpf.h": "2c25355dfdc7d8e92bf4c4f31534a6240a7c5ebbd16e58b79b5352db8b434e45",
     "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
-    "kprog/arm64/micro-prog/arm64_abi.py": "8f9d263e70041c4f1238b69ed110f839453f83032bfea9973fef11c6d8f13843",
+    "kprog/arm64/micro-prog/arm64_abi.py": "acfe0424fa03f56e55cc899570e9fec81a7ff7cd97390ece97a3940c91739f32",
     "kprog/arm64/arm64_sim_direct.h": "9e25ebdc80cfcbcc199a9b882de47ed57632e623bdf6310bc558c01c1e176d92",
     "kinsn/module/include/native_lab_trusted_wire.h": "a775639fcebf59e94584e625c57ddb0c27cdf1d07ab431f639285c1f2b50d289",
     "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py": "ed7df9e64f0ee236609ae85b1199bf0b65b3bafe72fd7bd9ef24ea001c4efe9b",
@@ -2647,7 +2647,16 @@
   },
   "qemu_returncode": 0,
   "booted": true,
-  "guest_exit": null,
+  "guest_exit": 1,
+  "guest": {
+    "ok": false,
+    "arch": "arm64",
+    "case": "tetragon",
+    "started": "1970-01-01T00:00:16.680642+00:00",
+    "error": "tetragon corpus recorded application errors: [{\"path\": \"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000048_388295/metadata.json\", \"status\": \"error\", \"error_message\": \"corpus suite reported errors\"}]",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 110, in guest\n    summary.update(corpus_application(live, case), ok=True)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 74, in corpus_application\n    raise RuntimeError(case + \" corpus recorded application errors: \" + json.dumps(errors))\nRuntimeError: tetragon corpus recorded application errors: [{\"path\": \"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000048_388295/metadata.json\", \"status\": \"error\", \"error_message\": \"corpus suite reported errors\"}]\n",
+    "finished": "1970-01-01T00:31:21.094853+00:00"
+  },
   "hashes_after": {
     "kprog/arm64/build/design-only/Image": "22111ee39a193bdbdb6c188cfa0335ccea66370bbaedba37bdf4a976a38eb61f",
     "kprog/arm64/build/design-only/kinsn/bpf_arm64_native_lab.ko": "e60544ba542fc83b6856ec134c029b33946f8e3181422ce9ee7d11c3bd7c5b7a",
@@ -2662,7 +2671,7 @@
     "kprog/arm64/arm64_sim_local_bpf.h": "2c25355dfdc7d8e92bf4c4f31534a6240a7c5ebbd16e58b79b5352db8b434e45",
     "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "a487493436f353af4e1914ebfb9c7bcac48e4507c9041bdc9def11a0b96c41e6",
-    "kprog/arm64/micro-prog/arm64_abi.py": "8f9d263e70041c4f1238b69ed110f839453f83032bfea9973fef11c6d8f13843",
+    "kprog/arm64/micro-prog/arm64_abi.py": "acfe0424fa03f56e55cc899570e9fec81a7ff7cd97390ece97a3940c91739f32",
     "kprog/arm64/arm64_sim_direct.h": "9e25ebdc80cfcbcc199a9b882de47ed57632e623bdf6310bc558c01c1e176d92",
     "kinsn/module/include/native_lab_trusted_wire.h": "a775639fcebf59e94584e625c57ddb0c27cdf1d07ab431f639285c1f2b50d289",
     "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py": "ed7df9e64f0ee236609ae85b1199bf0b65b3bafe72fd7bd9ef24ea001c4efe9b",
@@ -5264,6 +5273,6 @@
   },
   "hashes_unchanged": true,
   "compiler_exit": 0,
-  "finished": "2026-11-08T11:41:58.559568+00:00",
-  "archive_sha256": "a6d0578a09e246d1539406c86fdac98645e45b4585e099e5d6846a49334b815b"
+  "finished": "2026-11-08T12:17:00.693886+00:00",
+  "archive_sha256": "2c97859ae5d6331fee5afac1147edc6df11951db00f1a07da607a049db50bc87"
 }
