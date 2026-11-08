@@ -170,7 +170,7 @@ ledger now carries16 epochs/222 operation-source rows/163 artifact pins;
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
-O4 coverage adds **21 universal transformation/composition rows** to
+O4 coverage adds **20 universal transformation/composition rows** to
 [coverage.tsv](coverage.tsv), alongside V's operation/token inventory.
 The five appended `o4_*` columns record preservation status, theorem,
 evidence, completion obligations and publication. `source-snapshot:` pins the
@@ -181,7 +181,6 @@ continue to count their own `row_kind` values.
 | O4 status | Rows | Scope |
 | --- | ---: | --- |
 | `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
-| `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
 | `partial-universal-component` | 7 | ARM kind2 near/far body, kind4 per-CPU MRS and kind9 exclusive/marker binding, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
 | `pending-universal-law` | 6 | Readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
@@ -194,10 +193,11 @@ composition receipt. These row counts measure components, with dependencies
 and conditional interfaces retained explicitly.
 
 The next completion steps establish actual producer layout and compiler/frame
-preservation, the remaining transformations, and production entry/binding
+preservation, the remaining transformations, and production entry/compiler
 correspondence. V supplies universal O1/O2 token and definedness laws. The
 trusted inputs are accepted-B verifier soundness, the canonical ISA semantics
-with F's hardware/QEMU fidelity evidence, and the kernel binding code. V continues these O4 rows and this summary after the three-lane handoff,
+with F's hardware/QEMU fidelity evidence. The five-step constructor uses one
+kernel copy for P, generated B and native emission. V continues these O4 rows and this summary after the three-lane handoff,
 alongside the operation/token rows and totals. Historical individual-program
 material remains frozen.
 Shared kinds5/6/7 now link to
@@ -422,6 +422,15 @@ specialized-body/compiled-B/PC/ABI composition supply the remaining production
 interfaces. Reproduce with
 `make -C kprog/tv native-link-arm-exclusive-check`.
 
+
+The five-step publication82f8e9e77 retires the runtime binding-envelope row.
+Generation/snapshot, proof-sequence and resource admission checks are outside
+the active O4 inventory. Functional relocation, map lowering, spill erasure,
+helper/kfunc/tail resolution and final-image preservation retain their rows.
+Single-kernel-copy composition corollaries use one Artifact; verifier
+acceptance and faithful simulation are the two safety facts. Mathematical
+chunk spans and partitions are supplied by producer construction. Original
+source-pinned historical receipts retain their own outcomes.
 <!-- O4 COVERAGE END -->
 
 
@@ -4473,3 +4482,21 @@ fixture's missing helper ABI base, preserving two SKB tag diagnostics and all
 under `full_make_check_db581dd6d_failure`; the corrected d816e27e8 full check
 continues with its own source identity. Exact new sources, commands and
 original elaboration diagnostics are archived under `x86_pointer_dispatcher`.
+
+### Five-step verification scope
+
+Shared publication82f8e9e77 moves Artifact identity into the single-kernel-copy
+constructor. Active O4 coverage retains20 functional rows and retires its
+runtime binding-envelope row. Three new generic composition corollaries use
+one Artifact parameter and discharge identity by reflexivity. Original semantic
+theorems remain; chunk-span/partition statements now cite construction facts.
+Exclusive coverage retains native decode, fresh marker execution and block
+preservation, with source/physical correspondence explicit.
+
+The old176 encoder ABI-admission assertions leave the entry point. Their
+compiled CL/parity and MOVX semantic helpers retain exact source bodies under
+`check_x86_encoded_handlers.py`, preserving the incremental output paths and
+existing C/LLVM cases. The ARM exclusive target drops its prerequisite on C's
+retired environment-binding fixture and keeps its semantic Lean target.
+Decisions and the design step served by retained items appear in the
+[design-only ledger](../kprog_design_only_20261108/README.md#lane-v-verification-retirement).

@@ -171,10 +171,10 @@ theorem TranslationValidation.execution {Native Proof : Type}
   intro n p events next relation run
   exact validated_execution tv relation run
 
-/-- Conditional end-to-end safety theorem. Binding is exact equality of the
-executed and validated artifacts. Verifier soundness is an explicit hypothesis
-on the accepted proof's finite executions. TranslationValidation and the entry
-relation are obligations, not axioms supplied by this file. -/
+/-- General identity transport between two names for an Artifact. The
+single-kernel-copy corollaries instantiate both names with one value.
+Verifier soundness, faithful simulation and the entry relation are explicit
+hypotheses over complete finite executions. -/
 theorem native_effects_checked
     {Native Proof : Type}
     (native : Artifact → BlockStep Native)
@@ -259,6 +259,60 @@ theorem generic_program_effects_checked {Token Native Interpreter Specialized Pr
     (generic_program_block_validation native interpreted specialized proof isaRelated specializedRelated linkRelated
       isaLaw specializationLaw linkLaw validated) entry admittedEntry run
 
+/-- Stock verification and faithful simulation refer to the same kernel
+copy by construction. Exact identity is discharged by reflexivity. -/
+theorem native_effects_from_kernel_copy
+    {Native Proof : Type}
+    (native : Artifact → BlockStep Native)
+    (proof : Artifact → BlockStep Proof)
+    (related : Artifact → Native → Proof → Prop)
+    (accepted : Artifact → Prop)
+    (proofEntry : Artifact → Proof → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ a, accepted a → ∀ p trace p', proofEntry a p →
+      Execution (proof a) p trace p' → ∀ event ∈ trace, checked a event)
+    (kernelCopy : Artifact)
+    (acceptance : accepted kernelCopy)
+    (tv : TranslationValidation (native kernelCopy) (proof kernelCopy)
+      (related kernelCopy))
+    {n p trace n'} (entry : related kernelCopy n p)
+    (admittedEntry : proofEntry kernelCopy p)
+    (run : Execution (native kernelCopy) n trace n') :
+    ∀ event ∈ trace, checked kernelCopy event := by
+  exact native_effects_checked native proof related accepted proofEntry checked verifierSound
+    kernelCopy kernelCopy rfl acceptance tv entry admittedEntry run
+
+/-- Universal O1/O2/link laws instantiate the two safety facts for one
+kernel copy, for arbitrary programs and finite native execution prefixes. -/
+theorem generic_program_effects_from_kernel_copy {Token Native Interpreter Specialized Proof : Type}
+    (native : Artifact → Token → BlockStep Native)
+    (interpreted : Artifact → Token → BlockStep Interpreter)
+    (specialized : Artifact → Token → BlockStep Specialized)
+    (proof : Artifact → BlockStep Proof)
+    (isaRelated : Artifact → Native → Interpreter → Prop)
+    (specializedRelated : Artifact → Interpreter → Specialized → Prop)
+    (linkRelated : Artifact → Specialized → Proof → Prop)
+    (isaLaw : ∀ a token, TranslationValidation (native a token) (interpreted a token) (isaRelated a))
+    (specializationLaw : ∀ a token, TranslationValidation (interpreted a token) (specialized a token)
+      (specializedRelated a))
+    (linkLaw : ∀ a, TranslationValidation (tokenStep (specialized a)) (proof a) (linkRelated a))
+    (accepted : Artifact → Prop) (proofEntry : Artifact → Proof → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ a, accepted a → ∀ p trace p', proofEntry a p →
+      Execution (proof a) p trace p' → ∀ event ∈ trace, checked a event)
+    (kernelCopy : Artifact) (acceptance : accepted kernelCopy)
+    {n p trace n'}
+    (entry : ∃ s, (∃ i, isaRelated kernelCopy n i ∧ specializedRelated kernelCopy i s) ∧
+      linkRelated kernelCopy s p)
+    (admittedEntry : proofEntry kernelCopy p)
+    (run : Execution (Execution (tokenStep (native kernelCopy))) n trace n') :
+    ∀ event ∈ trace, checked kernelCopy event := by
+  exact native_effects_checked (fun a => Execution (tokenStep (native a))) proof
+    (fun a n p => ∃ s, (∃ i, isaRelated a n i ∧ specializedRelated a i s) ∧ linkRelated a s p)
+    accepted proofEntry checked verifierSound kernelCopy kernelCopy rfl acceptance
+    (generic_program_block_validation native interpreted specialized proof isaRelated specializedRelated linkRelated
+      isaLaw specializationLaw linkLaw kernelCopy) entry admittedEntry run
+
 end KProgTV
 
 #print axioms KProgTV.validated_execution
@@ -277,3 +331,6 @@ end KProgTV
 #print axioms KProgTV.generic_program_block_validation
 
 #print axioms KProgTV.generic_program_effects_checked
+
+#print axioms KProgTV.native_effects_from_kernel_copy
+#print axioms KProgTV.generic_program_effects_from_kernel_copy

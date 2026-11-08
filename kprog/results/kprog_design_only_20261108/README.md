@@ -886,3 +886,35 @@ Safety has two facts: the stock verifier accepts B, and B faithfully simulates P
 ### ARM ABI admission battery retirement
 
 The executable `abi_check.py` battery and its `abi-effect-check`/`abi-positive-identity` launchers retire with the ABI-definedness refusal branches. The associated `abi-artifacts` launcher retires with that executable. Existing native-only and stage2 build/run targets continue to exercise instruction semantics and the stock verifier. The exact retired source and launcher epoch are retained in [ARM retirement inputs](arm64/retired-abi-admission.tar.gz); historical result archives retain their bytes. ARM safety replays use the original34 native fixtures through the five-step runtime.
+
+### Lane V verification retirement
+
+V follows the shared five-step implementation82f8e9e77. Safety uses stock
+verifier acceptance of B and faithful simulation of P; the constructor uses
+one kernel copy through generation and native emission.
+
+| Verification artifact | Decision | Design step | Result |
+| --- | --- | --- | --- |
+| FULL_ARTIFACT_BINDING active coverage row | retire | b through e construction |20 functional transformation/composition rows remain |
+| Runtime generation/snapshot, proof-sequence and resource admission claims | retire from active coverage | operator five-step scope | historical receipts keep their original source epochs |
+| Encoder ABI-definedness/refusal battery | retire | c models unspecified state in B; d verifies B |176 admission assertions leave the entry point |
+| Compiled CL/parity and MOVX semantic functions | keep | c faithful instruction handlers | same C/LLVM cases move together to check_x86_encoded_handlers.py |
+| Deleted environment-binding fixture prerequisite | retire | current request-owned construction | native-link-arm-exclusive-check retains its semantic Lean target |
+| Chunk bounds, partition and record rebase laws | keep | e functional layout | producer construction supplies their mathematical span premises |
+| Relocation, map, spill, helper/kfunc/tail and final-image laws | keep | e functional resolution | existing theorem statements and bodies retained |
+| One-copy generic checked-effects composition | keep and instantiate | b through e construction; d acceptance | one Artifact parameter, identity by reflexivity |
+
+Composition.native_effects_from_kernel_copy and
+Composition.generic_program_effects_from_kernel_copy, plus
+SimulatorComposition.actual_program_effects_from_kernel_copy, expose the
+single-copy interface. Existing general identity-transport theorems remain
+available as mathematical lemmas. NativeLinkChunkLayout documents its span
+and partition predicates as construction facts. Exclusive coverage references
+canonical decode, marker execution and block preservation; old metadata scanner
+claims leave its active theorem list while their pure lemmas remain.
+
+V preserves all existing semantic Lean theorems and C/LLVM oracle functions.
+The caller-clobber/unspecified entry model in82f8e9e77 supplies the current
+step(c) state; its per-token ABI/native-link relations continue in O1/O2.
+C's BCC/Katran and38-case safety receipts above are the published runtime
+evidence. A owns the corresponding ARM module/application/safety port.

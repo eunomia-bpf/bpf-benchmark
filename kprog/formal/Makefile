@@ -174,7 +174,7 @@ check:
 	python3 tools/check_x86_rotate_handler.py
 	python3 tools/check_x86_high_load.py
 	python3 tools/check_x86_popcount_memory.py
-	python3 tools/check_x86_flag_definedness.py
+	python3 tools/check_x86_encoded_handlers.py
 	python3 tools/check_reference_x86_condition.py
 	python3 tools/check_reference_x86_path.py
 	python3 tools/check_x86_memory_widths.py

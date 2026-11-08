@@ -315,6 +315,33 @@ theorem actual_program_effects_checked {Proof : Type} (actualNative : Artifact �
     (actual_program_block_validation actualNative image env frame arena select coverage related fields transport proof linkRelated linkLaw validated)
     entry admitted run
 
+/-- The generic native block relation and accepted B share one kernel copy.
+The construction supplies Artifact identity by reflexivity. -/
+theorem actual_program_effects_from_kernel_copy {Proof : Type} (actualNative : Artifact → BlockStep NativeState)
+    (image : Artifact → Memory) (env : Artifact → EntryEnvironment.Environment)
+    (frame : Artifact → EntryEnvironment.Frame) (arena : Artifact → Reference.Word)
+    (select : Artifact → Site → NativeState → Prop)
+    (coverage : ∀ a before trace after, actualNative a before trace after →
+      Execution (tokenStep (nativeToken image select a)) before trace after)
+    (related : Artifact → NativeState → NativeState → Prop)
+    (fields : FieldsAligned image select related) (transport : DefinednessTransport image select related)
+    (proof : Artifact → BlockStep Proof) (linkRelated : Artifact → NativeState → Proof → Prop)
+    (linkLaw : ∀ a, TranslationValidation (tokenStep (specializedToken env frame arena select a)) (proof a) (linkRelated a))
+    (accepted : Artifact → Prop) (proofEntry : Artifact → Proof → Prop) (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ a, accepted a → ∀ p trace p', proofEntry a p →
+      Execution (proof a) p trace p' → ∀ event∈trace, checked a event)
+    (kernelCopy : Artifact) (acceptance : accepted kernelCopy)
+    {n : NativeState} {p : Proof} {trace : List Event} {last : NativeState}
+    (entry : ∃ s, (∃ i, related kernelCopy n i ∧ i=s) ∧ linkRelated kernelCopy s p)
+    (admitted : proofEntry kernelCopy p)
+    (run : Execution (actualNative kernelCopy) n trace last) :
+    ∀ event∈trace, checked kernelCopy event := by
+  exact native_effects_checked actualNative proof
+    (fun a n p => ∃ s, (∃ i, related a n i ∧ i=s) ∧ linkRelated a s p)
+    accepted proofEntry checked verifierSound kernelCopy kernelCopy rfl acceptance
+    (actual_program_block_validation actualNative image env frame arena select coverage related fields transport proof linkRelated linkLaw kernelCopy)
+    entry admitted run
+
 end KProgTV.SimulatorComposition
 
 #print axioms KProgTV.SimulatorComposition.encode_native
@@ -338,3 +365,5 @@ end KProgTV.SimulatorComposition
 #print axioms KProgTV.SimulatorComposition.actual_program_block_validation
 
 #print axioms KProgTV.SimulatorComposition.actual_program_effects_checked
+
+#print axioms KProgTV.SimulatorComposition.actual_program_effects_from_kernel_copy

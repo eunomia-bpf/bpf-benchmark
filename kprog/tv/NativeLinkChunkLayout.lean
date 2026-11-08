@@ -1,8 +1,9 @@
 import NativeLinkGuardedEmission
 
-/-! The common binding validator and group cursor establish a logical byte
-partition. Local relocation records rebase into the same canonical writer
-at every final executable base. -/
+/-! Constructor-supplied chunk spans and their contiguous layout establish a
+logical byte partition. Local relocation records rebase into the canonical
+writer at every final executable base. The predicates below express these
+mathematical layout facts; callers supply their construction correspondence. -/
 namespace KProgTV.NativeLinkChunkLayout
 open KProgFormal.Reference NativeLinkPatchTable
 
@@ -11,13 +12,13 @@ structure Chunk where
   size : BitVec 32
   deriving DecidableEq
 
-/-- The successful unsigned bounds and positive native size in binding_validate. -/
+/-- A positive native chunk span lies within the complete constructor image. -/
 def ValidChunk (total : BitVec 32) (chunk : Chunk) : Prop :=
   chunk.offset.toNat≤total.toNat ∧ 0<chunk.size.toNat ∧
     chunk.size.toNat≤(total-chunk.offset).toNat
 
-/-- group_prepare starts its u32 cursor at zero, compares each chunk offset,
-adds the accepted size, and compares the final cursor with the total. -/
+/-- A contiguous u32 partition starts at the supplied cursor and ends at the
+total image size. CheckedGroup names this logical layout relation. -/
 def CheckedGroup (total : BitVec 32) : BitVec 32 → List Chunk → Prop
   | cursor,[] => cursor=total
   | cursor,chunk::rest => chunk.offset=cursor ∧ ValidChunk total chunk ∧

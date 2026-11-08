@@ -842,7 +842,7 @@ native-link-arm-placement-check: native-link-arm-helper-guard-check native-link-
 		-o ../tv/build/NativeLinkArmPlacement.olean ../tv/NativeLinkArmPlacement.lean
 
 .PHONY: native-link-arm-exclusive-check
-native-link-arm-exclusive-check: native-link-arm-helper-check bpf-check build/test-environment-binding
+native-link-arm-exclusive-check: native-link-arm-helper-check bpf-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmExclusive.olean ../tv/NativeLinkArmExclusive.lean
 
