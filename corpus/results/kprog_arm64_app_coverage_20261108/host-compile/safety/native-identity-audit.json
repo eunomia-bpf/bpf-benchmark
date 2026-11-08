@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-08T03:47:12.995348+00:00",
+  "utc": "2026-11-08T03:57:38.100876+00:00",
   "kind": "safety",
   "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
   "archive": "run-20261108T033651254997Z.tar.gz",
@@ -12,21 +12,9 @@
     "loader_rejected": 1,
     "specialization_rejected": 13
   },
-  "expected_safety_cases": 45,
+  "expected_safety_cases": 34,
   "completed_requests_or_cases": 34,
-  "not_completed": [
-    "context_field_write",
-    "valid_context_pointer_read",
-    "context_alias_write",
-    "context_scalar_alias_write",
-    "context_byte_write",
-    "context_libc_memset",
-    "context_buffer_helper",
-    "valid_context_data_high32",
-    "valid_context_end_high32",
-    "valid_context_meta_word",
-    "context_outside_object_read"
-  ],
+  "not_completed": [],
   "request_identities": [
     {
       "request_id": 1,
@@ -615,9 +603,15 @@
       }
     }
   ],
-  "identity_errors": [
-    "guest case inventory differs from frozen45 inputs"
-  ],
-  "all_recorded_identities_match": false,
-  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "fb4f1d998334396a288e679a5a2ddf698aa15d5fac39b8c829d4d452a07bccbf",
+  "expected_inventory": {
+    "publication": "973d773c348d0ffaae27adce4fdbf3829f3555d7",
+    "archive": "corpus/results/kprog_arm64_app_coverage_20261108/host-compile/safety/inputs.tar.gz",
+    "archive_sha256": "e2e8102caf66269c650396157f58684085772f8eeb9c8b5418dc2fd35a8e506d",
+    "member": "setup/fixtures/cases.json",
+    "sha256": "83ffcedc995cd96567ae02b2b978e0e36a8d5dc10dfb62f0fde60ce65a1cf4e4",
+    "cases": 34
+  }
 }
