@@ -11,7 +11,7 @@ The table records the latest closed complete-application attempt. Baseline resid
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly table index range | [034222](tracee-c-mask/README.md) |
 
-Current detached work consumes the generic typed private-stack profile with the published MOV_LOAD fidelity correction: complete OTel, Tracee and Tetragon run serially on12GiB/eightvCPU/20-23. The Cilium successor then runs the existing38-case native-only suite and the complete original application in separate fresh guests, using the generic pruned-map-helper binding correction and the matching compact kernel module tree. Each guest registers one trusted service. Actual terminal receipts determine coverage and acceptance.
+Current detached work runs the complete original OTel application with fresh host compilation. Its successor runs Cilium with the native skb data_len scalar read through the matching kernel context, followed by Tracee with the generic [MOVZX/MOVSX value identity](movx-value-identity/README.md). Each application owns one12GiB/eightvCPU/20-23guest and one registered service. The completed38-case pruned-helper suite retains9positive executions and29unsafe refusals. Actual terminal receipts determine coverage and acceptance. The [Cilium queued input record](cilium-skb-data-len-plan.json) captures its BTF field identity and launch source.
 
 Recorded frontiers retain their separate entries and candidate epochs:
 
