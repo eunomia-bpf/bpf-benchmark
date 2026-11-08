@@ -15038,6 +15038,42 @@
     "wrong_source_control_prefix": "V/load-memory-wrong-full",
     "wrong_source_verified_git_sha_count": 1140
   },
+  "helper88_generated_oracle_refresh": {
+    "archive_block_sha256": "eb4a45d271cb88c2996a659fbde2048ae94af7da58176ccdf4ee1b695ff19455",
+    "archive_file": "kprog/results/kprog_verification_20261107/helper88-oracle-refresh.log.gz",
+    "entries": 17,
+    "existing_checks": [
+      {
+        "actual_exit": 0,
+        "name": "generate_helper_oracle --check"
+      },
+      {
+        "actual_exit": 0,
+        "cases": 19458,
+        "name": "x86 helper dispatch route"
+      },
+      {
+        "actual_exit": 0,
+        "cases": 18770,
+        "name": "arm64 helper route"
+      }
+    ],
+    "failed_full_exit": 2,
+    "failed_full_reason": "Existing generate_helper_oracle --check detected stale generated_helper_calls.h.",
+    "failed_full_source": "f9898987d2f2a522bbb3a9048d19b93ae802d38e",
+    "first_oracle_failure": "Regeneration exposed ora_expected_result attempting to cast void ringbuf submit/discard results to uintptr_t.",
+    "fix": "Emit return; for void host capture stubs and numeric expected result0 for void helpers, matching the existing ARM submit/discard body convention. Other normalized typed returns stay unchanged.",
+    "registry_publication": "8eac3b42a58105c432057f6bd851d482c13d15fd",
+    "runtime_admission_additions": 0,
+    "scope": "Existing shared typed host oracle regeneration for the ARM88-helper union; no production behavior or runtime admission change.",
+    "sources": {
+      "kprog/formal/contracts/arm64_helper_idents_spec.json": "a5e22ac668810b6219cdb720cf97fe09d81af90d2b2f136b0e84d04ea24a5fc4",
+      "kprog/formal/contracts/x86_helper_dispatch_spec.json": "520e2f936a939a6823affe82414eb5248f1540ba0812cac247b42591c2a8c3b5",
+      "kprog/formal/oracles/generated_helper_calls.h": "7b333d707046e721f85733620566a9f991429abf303f0e3fa001372933f35407",
+      "kprog/formal/tools/generate_helper_oracle.py": "acd15cac18815e9591382fd59d588ea79608d659e0017161df1f3c2b37baf12a"
+    },
+    "utc": "2026-11-08T22:49:12.124004+00:00"
+  },
   "helper_route_caller_frame": {
     "archive_compressed_prefix_bytes": 92269053,
     "archive_compressed_prefix_sha256": "cbd664ba7e805024fc056d74e7d2bb4f3480d7af4671ea752ea56bb6faf816e7",

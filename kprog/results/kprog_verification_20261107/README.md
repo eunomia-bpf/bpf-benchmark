@@ -5334,3 +5334,16 @@ Memory/exclusive remain equal, visit advances23 and fault/events are absent.
 [Original evidence](compiled-popcount.log.gz) retains preprocessing, ELF,
 arrays and proof attempts. Full flags/register/tag frame, physical ABI and
 compiler embedding remain explicit interfaces.
+
+### ARM88 shared helper oracle refresh
+
+POPCNT116 full source `f9898987d` stopped at the existing shared typed oracle
+freshness comparison after ARM's88-helper registry update. Regeneration exposed
+invalid numeric casts of the two void ringbuf submit/discard results. The
+existing generator now emits a void stub return and expected result0, matching
+the production ARM convention; typed argument capture is retained. Existing
+x86 helper route19458 and ARM helper route18770 cases both pass. Generator
+freshness also passes. Original failed full and first compiler diagnostics,
+source hashes and commands are retained in `helper88-oracle-refresh.log.gz`
+and `helper88_generated_oracle_refresh`. No production behavior, runtime gate
+or new check is added. A distinct immutable-source full retry follows.

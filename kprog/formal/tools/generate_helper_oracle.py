@@ -52,10 +52,12 @@ def render_oracle(spec: dict) -> str:
         value = f"({result})(uintptr_t)ora_raw_result({row['id']}U)"
         stubs.append(f"static inline {result} {row['name']}({args})\n{{\n"
                      f"  ora_called = {row['id']}U;\n  ora_argc = {count}U;\n"
-                     + "\n".join(assignments) + f"\n  return {value};\n}}")
+                     + "\n".join(assignments)
+                     + ("\n  return;\n}" if result == "void" else f"\n  return {value};\n}}"))
         normalize.append(f"  case {row['id']}ULL:\n" + "\n".join(expected)
                          + f"\n    return {count}U;")
-        results.append(f"  case {row['id']}ULL: return (__u64)(uintptr_t)({value});")
+        results.append(f"  case {row['id']}ULL: return "
+                       + ("0;" if result == "void" else f"(__u64)(uintptr_t)({value});"))
         if pointer:
             pointers.append(f"id == {row['id']}ULL")
     return "\n".join([
