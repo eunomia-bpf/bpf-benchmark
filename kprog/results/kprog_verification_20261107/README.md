@@ -4315,3 +4315,10 @@ coherent guest-access order, native field/count/direction normalization,
 compiler/invocation/ABI and native-link relations retain their universal
 production interfaces. Source snapshots, binaries and initial import/proof
 diagnostics are archived under `X86_REP_MEMORY_TOKENS_V1`.
+
+### Published source full check 273765717
+
+`make check` on immutable published273765717 exits0. All1170 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_273765717`. Every check retains its exact published source identity.
