@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-08T10:09:29.369089+00:00",
+  "build_exit": 0,
+  "correction": "Bind paired warm cache at the KBUILD_OUTPUT exported by its generated Makefile; actual compilation/modpost/BTF now use e2d3 paired artifacts",
+  "first_failure": "Stock kernel module symbol-version mismatch before native submission",
+  "paired_crc_bpf_prog_put": "0x80db095d",
+  "paired_image_sha256": "22111ee39a193bdbdb6c188cfa0335ccea66370bbaedba37bdf4a976a38eb61f",
+  "binaries": {
+    "kprog/arm64/build/native-context/raw-probe": "9c254125d1c19dff4e2e0453a797d3afa83019013ec96f8872a57b30c5c3ab18",
+    "kprog/arm64/build/native-context/kinsn/bpf_arm64_native_lab.ko": "2a6d551cb21066481acd732c4f2f366f61b118fc2e833af5ef212db5d630a4c5",
+    "kprog/arm64/build/native-context/loader/trusted-service-client": "052f17bed0d3c002867762fb74908b46838e4ad919bb662fe34443de3ca7aee8",
+    "kprog/arm64/build/native-context/loader/libnative_loader.a": "e1f67e1362d159a4cb1eb8d50df9a0624fcb7163f8a421c7396f2f95cd95956e",
+    "kprog/arm64/build/native-context/loader/trusted-native-loader": "e10f8a1e63560431064c5c9373857962d7327338c56e6df705f4b389ab3d757a",
+    "kprog/arm64/build/native-context/loader/libnative_loader.so": "28688668a07310d593da5ce7deb31f54fe53155497076253c18bbc993b83b302",
+    "kprog/arm64/build/native-context/loader/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c"
+  }
+}
