@@ -8040,6 +8040,272 @@
       "kprog/x86/x86_sim_local_bpf.h": "5898e440f59c584801e48b8915ee2644fd57cfe599b82d663f8cce695443d905"
     }
   },
+  "upstream_x86_reference_comparison": {
+    "agreeing_numeric_operations": 25,
+    "agreeing_observations": 1464,
+    "archive_compressed_prefix_bytes": 91903100,
+    "archive_compressed_prefix_sha256": "35181bdf237ebb12fbe1c2c54d97e6967677f9995801936efdb5878ccf7dbc9f",
+    "archive_entries": 2277,
+    "archive_marker": "UPSTREAM_X86_REFERENCE_COMPARISON_V1",
+    "archive_raw_bytes": 4231923,
+    "archive_raw_sha256": "76ac6d4dc35e670547f1a3832da228e9b59afa0a1ec8a2fead81c11b1d5df466",
+    "arm_active_source": "arm-v9.4-a",
+    "arm_upstream": {
+      "commit": "7d0581642d0e3aaca367bbc5650aca7c53057543",
+      "date": "2026-10-13T12:53:58Z",
+      "files": 514,
+      "repo": "rems-project/sail-arm"
+    },
+    "cases": 1692,
+    "forms": 141,
+    "lean_binary_sha256": "f84cb2ecff4f0c68976e0c572d5b7e9fc15c3e7ab9cee7c17f39a2360d735a5a",
+    "maintained_comparison_exit": 1,
+    "model_binary_sha256": "2552c9a21608ee7ff4a31a2e8f07df93e7e7e7a32c87d943130cbbb84f0c5396",
+    "model_build_commands": [
+      {
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/bin/sail",
+          "-c",
+          "-memo_z3",
+          "-no_warn",
+          "-o",
+          "x86_emulator",
+          "prelude.sail",
+          "register_types.sail",
+          "registers.sail",
+          "register_accessors.sail",
+          "opcode_ext.sail",
+          "memory_accessors.sail",
+          "init.sail",
+          "config.sail",
+          "logging.sail",
+          "step.sail",
+          "main.sail"
+        ],
+        "exit": 0,
+        "isa": "x86",
+        "phase": "generate"
+      },
+      {
+        "command": [
+          "gcc",
+          "-O1",
+          "-DHAVE_SETCONFIG",
+          "-I/workspaces/.agent-state/kprog-lanes/V/reference-models/deps/usr/include/x86_64-linux-gnu",
+          "-I/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib",
+          "x86_emulator.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/cJSON.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/elf.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/rts.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/sail.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/sail_config.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/sail/share/sail/lib/sail_failure.c",
+          "/workspaces/.agent-state/kprog-lanes/V/reference-models/deps/usr/lib/x86_64-linux-gnu/libgmp.a",
+          "-lz",
+          "-lm",
+          "-o",
+          "x86_emulator"
+        ],
+        "exit": 0,
+        "isa": "x86",
+        "phase": "compile"
+      }
+    ],
+    "model_c_sha256": "5b401537aff110f56950172996a119500a1fc746b5e90f71f68d9a50c7fdb821",
+    "model_stop_diagnostics": {
+      "illegal_instruction": 168,
+      "unimplemented_opcode": 60
+    },
+    "model_stopped_numeric_operations": 7,
+    "model_stopped_observations": 228,
+    "per_operation": {
+      "X86_OP_ADD_IMM": {
+        "agree": 48
+      },
+      "X86_OP_ADD_REG": {
+        "agree": 48
+      },
+      "X86_OP_ALU_IMM": {
+        "agree": 288
+      },
+      "X86_OP_ALU_REG": {
+        "agree": 288
+      },
+      "X86_OP_ANDN": {
+        "model-stopped": 24
+      },
+      "X86_OP_BSWAP": {
+        "model-stopped": 24
+      },
+      "X86_OP_BT": {
+        "agree": 36
+      },
+      "X86_OP_BT_IMM": {
+        "agree": 36
+      },
+      "X86_OP_BZHI": {
+        "model-stopped": 24
+      },
+      "X86_OP_CMOV": {
+        "agree": 36
+      },
+      "X86_OP_CMP_IMM": {
+        "agree": 48
+      },
+      "X86_OP_CMP_REG": {
+        "agree": 48
+      },
+      "X86_OP_DIV": {
+        "agree": 48
+      },
+      "X86_OP_IMUL_IMM": {
+        "agree": 36
+      },
+      "X86_OP_LEA": {
+        "agree": 12
+      },
+      "X86_OP_MOVSX_REG": {
+        "agree": 36
+      },
+      "X86_OP_MOVZX_REG": {
+        "agree": 24
+      },
+      "X86_OP_MOV_IMM": {
+        "agree": 48
+      },
+      "X86_OP_MOV_REG": {
+        "agree": 48
+      },
+      "X86_OP_MULX": {
+        "model-stopped": 24
+      },
+      "X86_OP_NOP": {
+        "agree": 12
+      },
+      "X86_OP_POPCNT": {
+        "model-stopped": 36
+      },
+      "X86_OP_ROR": {
+        "agree": 36
+      },
+      "X86_OP_RORX": {
+        "model-stopped": 24
+      },
+      "X86_OP_SETCC": {
+        "agree": 24
+      },
+      "X86_OP_SHIFTX": {
+        "model-stopped": 72
+      },
+      "X86_OP_SHLD_IMM": {
+        "agree": 36
+      },
+      "X86_OP_SHRD_IMM": {
+        "agree": 36
+      },
+      "X86_OP_TEST_IMM": {
+        "agree": 48
+      },
+      "X86_OP_TEST_REG": {
+        "agree": 48
+      },
+      "X86_OP_XCHG": {
+        "agree": 48
+      },
+      "X86_OP_XOR_REG": {
+        "agree": 48
+      }
+    },
+    "sail_release": {
+      "asset_url": "https://github.com/rems-project/sail/releases/download/0.20.3-binary/sail-Linux-x86_64.tar.gz",
+      "bytes": 39386838,
+      "release": "0.20.3-binary",
+      "sha256": "8d7cd75624ece407d7001ad32905a13ae111d5cc1a055404f21510e113207e3f"
+    },
+    "scope": "Finite native-byte register/defined-flag/PC comparison in the64-bit application view (CR4=512,CET-disabled profile). Each of141 forms spans six input pairs and two carry states.25 numeric operations have1464 agreeing observations; seven rows retain228 model stops. Memory/SIMD/control/remaining forms and native/compiled/O4 premises continue independently; Arm ASL-derived model build is active.",
+    "source_epoch": "f3694975fb3427bbcfda569439875bd7c819b568",
+    "source_sha256": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+      "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+      "kprog/formal/ReferenceMain.lean": "a1ef30fa82f2bfbc28cf559cf98815edea4fff980714841530c8bf4e15aeba7d",
+      "kprog/formal/tools/compare_sail_x86.py": "9a5084f4a9b31325de7a55ebb5fb241b2a68177fc5582882a44f1bfd72c9ea18"
+    },
+    "upstream_x86": {
+      "commit": "0c6c023dccc7c20d8d9dbfc481f01d9bb49d62bf",
+      "date": "2024-11-29T10:23:07Z",
+      "files": 201,
+      "repo": "rems-project/sail-x86-from-acl2"
+    },
+    "upstream_x86_source_sha256": {
+      "sail-x86-from-acl2/README.md": "5e44846278a06d9ace245fbefd232ee6c1d499ababaabd5769eff9ae8b77d03d",
+      "sail-x86-from-acl2/model/LICENSE": "b683c3f63ee3cb0740a59bd111611f34eb32b8629f4cefbcdeafa31639c43d00",
+      "sail-x86-from-acl2/model/Makefile": "c237d56257789eb3d6818bc1196c73bb6c67d0c6b59711eb4eddbf91187d3d32",
+      "sail-x86-from-acl2/model/add_spec.sail": "906c53af7ddf16b8e18f83fde654d3e074e38f1022aa2f229c2e927b18fddf87",
+      "sail-x86-from-acl2/model/and_spec.sail": "f9a3c0f0c688be7851f7752ba7676ba5fbc9e7f1f64fdd4913af463f09b5ba6a",
+      "sail-x86-from-acl2/model/application_level_memory.sail": "505188dad643f3b52474f4baf14be1bd894143fcc3c39005f3de5989f5a8f89e",
+      "sail-x86-from-acl2/model/arith_and_logic.sail": "0f710c88a2e3127a115ca1099a1c083975c05b4415ad899a196d9e2184ac7998",
+      "sail-x86-from-acl2/model/arith_and_logic_spec.sail": "b8faad856a8156119e46c3680d522a5de81cdd7d8a83af7de593dd66e80e8d8b",
+      "sail-x86-from-acl2/model/auxiliary.sail": "787712ec5130d758cb854c6749fde6414473121130b0f8324c9b73be97f67d2b",
+      "sail-x86-from-acl2/model/bit.sail": "c82f9129fa529ad2ce18c21f51028aea47292cb4af24c222ff0761d24fae73e5",
+      "sail-x86-from-acl2/model/conditional.sail": "26ecaa0eea7a248d9d1c17210c07458a8709f0bb2f81ac0c4ed354b1eae5c4cd",
+      "sail-x86-from-acl2/model/config.sail": "bba58e1d5af2cc9401f93e80d4f4fee9602cdb191eb5196b2964c7068ff579f0",
+      "sail-x86-from-acl2/model/decoding_and_spec_utils.sail": "f4e70be76f7bb309554722f07bbe71157c08ecef1f37eb0e5cc3993e72296ea7",
+      "sail-x86-from-acl2/model/dispatch_macros.sail": "541fcf3e5e3df5dd9c83352d646815f03759369ba0500057ffb50e914506ff4d",
+      "sail-x86-from-acl2/model/divide.sail": "c8362c5341b76bcbea9899bdccee5f7785b9ff552c31d03cffd8d89472b94225",
+      "sail-x86-from-acl2/model/divide_spec.sail": "d055c6569c8f722b2b125fa73702bc19232fb16154e54541896645012b9e88c7",
+      "sail-x86-from-acl2/model/environment.sail": "33b613a3059d023a3b543b7a9ed5f28c2f80b6fefb2710844b9bdf438b5c7f25",
+      "sail-x86-from-acl2/model/evex_opcodes_dispatch.sail": "6a009dc977b3b74419a4d4b2a581b9a174352a120d17c6155587553e7819cab2",
+      "sail-x86-from-acl2/model/exchange.sail": "20e241440a735de9590818a1fcc07c21636a1d637e46241f578dc4ac146dc39f",
+      "sail-x86-from-acl2/model/init.sail": "e330b0a9b0099ba699996e3a596890df0fd9caee61e2b814569aaf1388b04b4c",
+      "sail-x86-from-acl2/model/jump_and_loop.sail": "06c3c76defaf10697bf345d7a7bbb584d3100f53014b606c2e4694768c9a2ce4",
+      "sail-x86-from-acl2/model/linear_memory.sail": "de0f6a226a8d9619359334f3a063071b9baf763f402a82105aed12b1145b4c84",
+      "sail-x86-from-acl2/model/logging.sail": "de785bad9420d481654e5cd773892bc02c526b197ceec0747a759de39310b4ea",
+      "sail-x86-from-acl2/model/main.sail": "0e125c0e38c51eb076f4d482dc81384121af464972c3b3c7c6c148780571a6e0",
+      "sail-x86-from-acl2/model/memory_accessors.sail": "b1373bc368724fb175ba2fb2482c01a5d4ce668e84eae6eed8114002d1d42fb9",
+      "sail-x86-from-acl2/model/modes.sail": "0f791685159e7ba823e008f0d557fccc7dcfa5f316dde564fb2617c04a694e06",
+      "sail-x86-from-acl2/model/mov.sail": "3ef6e82be78fcb79de1d00df72ff0c2132a4a393ca724b448be49458ae83818d",
+      "sail-x86-from-acl2/model/move.sail": "08d9815bf2c7ce204ee4e9f2ac208cae2477048b122cb29780440d44ac24af68",
+      "sail-x86-from-acl2/model/multiply.sail": "90516031b4582c583f6036fce09115fb9854e4289f7f32a1965e556e1391feb5",
+      "sail-x86-from-acl2/model/multiply_spec.sail": "47211e118e578dc123e7bfac547e9be5fbb41ccf469d314874b89537877391ba",
+      "sail-x86-from-acl2/model/opcode_ext.sail": "d33e16eb589ff6e521f9d1a2f12edc5492133cfa79c2dbd7464499420a67ff5c",
+      "sail-x86-from-acl2/model/or_spec.sail": "33510144b55a95d75ce981bd90a4dab446787ce014f20ae01b1234a972157294",
+      "sail-x86-from-acl2/model/other_non_det.sail": "910124adf8e5f07a303389e2ea58128e32c9ffbda74ec958a82e9611b80747d4",
+      "sail-x86-from-acl2/model/paging.sail": "3cd1af83bc3d141192b043e88e3f08b527b4942d0d70333dc60719a10cac3c20",
+      "sail-x86-from-acl2/model/paging_structures.sail": "92fbf3df70d6eac44418003793c5fef03ae1ceb4d46089f5f02810ba5c7f86ae",
+      "sail-x86-from-acl2/model/physical_memory.sail": "a2ee81b2527358d2d2bb7dfe1e4b82e639c1c5d80f1a8a2dbc920a879564872e",
+      "sail-x86-from-acl2/model/prefix_modrm_sib_decoding.sail": "b6a5fd1c2abd8c1c398809777467d29fa73941ddd8f4154e0769d21793f449a4",
+      "sail-x86-from-acl2/model/prelude.sail": "c8459e03dac0bd80620bfd8b91498b153e95cbb2924113f8617a3c3fcbf90bfd",
+      "sail-x86-from-acl2/model/push_and_pop.sail": "f2a484de06de98e91f749df329fca03ac9c75030e98dffeb95af15303a191d54",
+      "sail-x86-from-acl2/model/register_accessors.sail": "9a8d33be19bcd2572929685bd2861c03055914cce148661551fb5e425d39b304",
+      "sail-x86-from-acl2/model/register_readers_and_writers.sail": "8de4459b533c20147f2953f2f7a90a3fabcc9debb5f494940f3f573030b0ee5a",
+      "sail-x86-from-acl2/model/register_types.sail": "530206628dea46dbb35e559008f88ce9946ae4f97da0152154480d50ed6ea9d8",
+      "sail-x86-from-acl2/model/registers.sail": "789f81d776682f76b3b70e1a179537713c95327edef9f7eefca58f4a36992902",
+      "sail-x86-from-acl2/model/rflags_spec.sail": "2195224ef798d10d0ff7ba6a1ab56c448cbceaa8a503bce570cf5da06b9db7c8",
+      "sail-x86-from-acl2/model/rotate_and_shift.sail": "2fba5ec9ce5e519c0cea7d2b7373fe20e45846c4f141eb4d005d309ef26ca4f1",
+      "sail-x86-from-acl2/model/rotates_spec.sail": "e3ef9fd2472cad77309adf707b6bc7c769ffaf445901c921816eae6e8f99708a",
+      "sail-x86-from-acl2/model/segmentation.sail": "2f67cc9dbec9809db0020851fe38112169bb18690d9ca4b1de84e1e5a31e65e7",
+      "sail-x86-from-acl2/model/segmentation_structures.sail": "9c300456e58968db5630dd77d5bbd79f585b420bdd584012f80d6cdd3dda6176",
+      "sail-x86-from-acl2/model/segmentationinst.sail": "bba6477fc68e8c8f2cf578b3bf6f862c2057487262626514bda30348cbeb8d09",
+      "sail-x86-from-acl2/model/shifts_spec.sail": "b9aef38181aadfb1481bef64ac1c6869e43cc107a1b372757cb33ae2c7523705",
+      "sail-x86-from-acl2/model/shuffle_and_unpack.sail": "cd48bd0a6e4ca4fe11fcf0334fbba373933dbe1c24ddc46963e87e2b699a5828",
+      "sail-x86-from-acl2/model/signextend.sail": "7a988571a3fff6133c3757d997865754d5c46312cda023c42b2e1b720668f696",
+      "sail-x86-from-acl2/model/step.sail": "4f3d45bd77edb94b3ec307aa077383d2e4337185d396bda4a894823dc2c86462",
+      "sail-x86-from-acl2/model/string.sail": "9b9397027ec2ac6d75af7f0f5a49e0e4532a0fc6fd161b204e539e7cf2c3de3f",
+      "sail-x86-from-acl2/model/structures.sail": "fced32f0ec990acaf36e1e48190b94fe480a34db1c980c8744fe1fe114a1eb8f",
+      "sail-x86-from-acl2/model/sub_spec.sail": "ad76d5f6b08a99c648bc824dad5da86daefa3a1585be6209bf15d19b98980444",
+      "sail-x86-from-acl2/model/subroutine.sail": "0f415d06d8a09dba50dab30dba68d7b2eb6ecd44f8f5022fb90cc8ffd9619b2b",
+      "sail-x86-from-acl2/model/syscall.sail": "eb2bfcb5e83ee9eb68d548ab2596d64f6742355b3eb52f997818e5ac7b1db340",
+      "sail-x86-from-acl2/model/syscalls.sail": "faaf9e0646fe4e520d5ac7fde77918b0258121b53a82507cfb8644568203fb12",
+      "sail-x86-from-acl2/model/three_byte_opcodes_dispatch.sail": "1f7a32638be7197875d0828b94460314434cac53b931649c0716594c817222aa",
+      "sail-x86-from-acl2/model/top.sail": "920e6a5ac62a52c91f1632319e1b2acf434ea42d666a9c4d4731396d6fdc1a91",
+      "sail-x86-from-acl2/model/top_level_memory.sail": "05e0b4b971ccbbce073d0cb28fe05d2fbdf98b4b594158f49aecedfdb011f243",
+      "sail-x86-from-acl2/model/topfp.sail": "71050449bfe1ba77ac822a7dda43940c7b97cbe939d0aaa5306cb3031158e817",
+      "sail-x86-from-acl2/model/two_byte_opcodes_dispatch.sail": "612a6e99b0be5f734c6393a7566abd4497ad3f4bea570cc9ed5ac4f1550f4171",
+      "sail-x86-from-acl2/model/vex_opcodes_dispatch.sail": "6fcd569e9f091da7fcc85a093fbeecb5a77015ca045053ff9c4b0da6fbd9afc9",
+      "sail-x86-from-acl2/model/xor_spec.sail": "abaf22867709d9f828c9fa1b348316dad793a821cb29695a5d36e2b857f1007f"
+    }
+  },
   "x86_alu_memory_tokens": {
     "c_domain": "11 payloads, immediate/register forms, five raw width fields (default0/1/2/4/8), heap/RSP/STACK-alias bases, five correlated optional-index/scale modes, signed +/-16 displacements, all64 six-flag seeds, 19 boundary values for each data operand plus three RSP/STACK/scalar alias source cases for register arithmetic/logic. Full512-byte heap and private stack, all16 numeric GPR/tag cells and unchanged raw cells are compared between direct and interpreter bodies; independent real x86 instructions check result bytes and every architecturally defined status flag. Host red zone is disabled for flag-stack assembly.",
     "diagnostics": "Initial host fixture added the interpreter ABI-kind variable and corrected stack numeric origin to capacity512. Final checks use the archived final source and mirrored dependency hashes. Earlier Lean elaboration diagnostics and successful terminal logs are retained.",

@@ -21,6 +21,8 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/71 |
 | Memory-call full-frame C body model | 4/75 | 0/71 |
 | O2 C-model token-body equality | 72/75 | 71/71 |
+| Upstream machine-model sampled register-state agreement | 25/75 | pending ASL build |
+| Upstream model-stopped operation rows | 7/75 | pending ASL build |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -4606,3 +4608,36 @@ per-token body, field/control, physical ABI and linking obligations explicit.
 Current C-model body totals stay72x86/71ARM. Exact C/header/compiler inputs,
 ELF bytes, extracted Lean arrays, source pins and outcomes appear under
 `compiled_kind6_inputs`.
+
+### Machine-readable reference comparison
+
+Item4b now has an explicit machine-model status/evidence pair in every
+operation and token row. The maintained command is:
+
+```sh
+python3 kprog/formal/tools/compare_sail_x86.py --model /path/to/x86_emulator --output /path/to/results
+```
+
+The x86 target is [the ACL2-derived Sail model](https://github.com/rems-project/sail-x86-from-acl2/tree/0c6c023dccc7c20d8d9dbfc481f01d9bb49d62bf/model).
+Its original sources translate with Sail0.20.3; the build uses the generated
+C backend output, GCC and the public Sail runtime. The comparison executes
+141 instruction forms with six boundary-value pairs and two carry inputs,
+using the same native bytes and initial register/flags/PC state in both
+models. Full16-GPR results, defined flags and PC agree in1464 observations
+covering25 numeric operation rows. Another228 observations cover seven
+model-stopped rows:60 report an unimplemented opcode and168 report#UD.
+The pinned source contains disabled VEX opcode branches and extension hooks;
+the raw outcomes and their model-profile interpretation remain visible.
+The maintained comparison exits1 for these recorded stops. Memory, SIMD,
+control, remaining operand profiles and environment/link rows retain their
+individual comparison tasks.
+
+The Arm target is [the ASL-derived Sail model](https://github.com/rems-project/sail-arm/tree/7d0581642d0e3aaca367bbc5650aca7c53057543/arm-v9.4-a).
+Its upstream README identifies the2023-03 Arm ASL source snapshot and the
+translation/runtime layers. The lane-local Armv9.4 source build continues;
+its comparison rows carry ASL-model-build status. Earlier Armv8.5 compiler
+compatibility diagnostics and source pins remain in the receipt.
+These sampled comparisons support the canonical Lean reference. Per-form
+native/refinement, compiled-body and six O4 link premises remain tracked
+separately. C-model body counts stay72x86/71ARM; the operator's remaining-token
+TODO retains its native/compiled completion boundary.
