@@ -5162,3 +5162,12 @@ canonical target premises. Native-to-B entry/reachability, physical frame and
 outer invocation ABI, complete compiler/definedness and stock-verifier soundness
 remain explicit interfaces. [Original proof/source records](ret-unresolved-default.log.gz)
 retain the producer working-source identity separately from its publication.
+
+### Published source full check b6b8b225e
+
+`make check` on immutable publishedb6b8b225e exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_b6b8b225e`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-b6b8b225e.log.gz](full-make-check-b6b8b225e.log.gz).
