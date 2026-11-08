@@ -58,7 +58,9 @@ cannot introduce a safety fact that native execution lacks.
 The skb entry value keeps the actual kernel object through the existing
 `bpf_cast_to_kern_ctx` identity. Packet and qdisc-cb accesses select the live
 BPF context fields at the corresponding native offsets. Ordinary fields,
-including len and data_len, read the actual kernel skb bytes. Helper arguments
+including len and data_len, read the actual kernel skb bytes. Native tc_index,
+priority and mark use their corresponding live scalar fields and preserve
+all native sublanes during partial stores and arithmetic memory updates. Helper arguments
 translate the exact native context base to its original BPF-context view,
 and all other addresses keep their original value.
 
@@ -96,12 +98,8 @@ native XDP reads fail specialization. Stores and memory intrinsics use the
 actual context, so they receive the verifier's context-access checks rather
 than permissions on a private shadow.
 
-For skb micro programs, the existing entry representation remains:
-
-```text
-RDI = &guest_abi
-RSP = 0
-```
+For skb programs, RDI holds the actual kernel skb pointer obtained by
+`bpf_cast_to_kern_ctx(ctx)`; RSP starts at its modeled stack coordinate zero.
 
 The implementation entry macros are:
 
@@ -114,15 +112,15 @@ They may only:
 
 - expose the linked native ABI fields through typed context reads or guest ABI memory;
 - declare simulator-local architectural variables and modeled stack storage;
-- set ABI-defined entry state (the actual XDP context, or the skb guest ABI base).
+- set ABI-defined entry state (the actual XDP context, or the actual kernel skb base).
 
-The skb guest object mirrors the kernel BPF runtime ABI used by the linked
-native micro code:
+The live skb access projection follows the kernel BPF runtime ABI used by
+the linked native micro code:
 
 ```text
-guest_abi + 0x30: BPF-visible __sk_buff.cb[0..] scratch
-guest_abi + 0x50: BPF-visible __sk_buff.data_end
-guest_abi + 0xd0: sk_buff->data
+kernel skb + 0x30: BPF-visible __sk_buff.cb[0..] scratch
+kernel skb + 0x50: BPF-visible __sk_buff.data_end
+kernel skb + 0xd0: sk_buff->data
 ```
 
 The concrete offsets are generated for native code from kernel BTF:
@@ -145,13 +143,9 @@ turns it into a load from `skb->cb + offsetof(struct bpf_skb_data_end,
 data_end)`, and the kernel runtime fills that slot before running skb BPF
 programs. Direct-native proof must align native x86 with that same runtime ABI.
 
-For skb entries, `X86_SIM_X86_RET()` copies guest ABI `cb[0..1]` to the typed
-test-run `struct __sk_buff` output context. This is the proof representation of
-the same `bpf_skb_cb(skb)` scratch storage that native x86 writes. It must not
-modify the architectural return value: `RAX` remains the program return. In
-particular, `cgroup_skb` return values are only actions
-(`CGROUP_SKB_OK`/`CGROUP_SKB_DROP`); the 64-bit benchmark result is not encoded
-in the return value.
+For skb entries, cb stores reach the live typed context before helpers and
+tail calls. `X86_SIM_X86_RET()` returns architectural RAX. The cb[0..1]
+benchmark result remains in the same live scratch storage.
 
 The entry and return ABI macros must not change packet data, create
 per-register tags, insert bounds checks, trap, fallback, infer

@@ -6,7 +6,7 @@ The table records the latest closed whole-application attempt, including setup a
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: cil_from_netdev tc_index134 byteAND BTF readonly after528instructions/7states | [live-context source epochs](skb-live-context/README.md) |
+| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_nodeport_nat_ingress_ipv4 packetoff18/2 after415instructions | [scalar-field cohort](skb-scalar-fields/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [live-context replay](skb-live-context/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit probe-read helper length range after4310instructions/140states | [current MOVX cohort](movx-current/README.md) |
@@ -71,3 +71,5 @@ The [private flag-storage compiler measurements](flag-storage/README.md) retain7
 The [live kernel skb representation](skb-live-context/README.md) replaces padded context accesses with actual kernel fields and live packet/cb projections. Existing144640UBSan field observations,18946/4100helper cases,29+1micro compile controls and both universal context Lean modules pass. The shared exact-base helper relation removes its runtime context-null conjunct. Earlier live-context cohorts preserve their helper25CTX and setup-alias errors; the entire Cilium and original BCC/Katran successors run with one frozen source owner. Historical padded-context cohorts retain their measured loads and native work counters; current field modelling supplies their faithfulness correction.
 
 The [complete live-context replay](skb-live-context/README.md) closes26/26BCC/Katran loads and both original workloads, preserving all26native input hashes. Katran native2454567BPF/VIP/LRU/TX equals2454279received+288RX-interface drops, with0LRUmisses. Current Cilium passes helper25context typing and reaches tc_index134byteAND at528instructions/7states.
+
+The [live scalar-field representation](skb-scalar-fields/README.md) retains217600UBSan full-state observations, actual29+1micro compilation and captured wholeCilium compilation. The initial four-field whole cohort closes2generated/1installed at packetoff18/2 after415instructions. The canonical three-field profile retains queue_mapping actual kernel access, following its distinct setter behavior. Earlier private micro up-to-date receipts are preserved as command outcomes; the current phony target supplies actual compile records.

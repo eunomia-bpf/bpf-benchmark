@@ -92,6 +92,10 @@ typed BPF data/data_end fields; qdisc cb storage at0x30 selects live cb bytes.
 Register aliases use the same actual kernel address. Helpers translate its
 exact base to the original BPF context; every other address retains its bits.
 The shared context relation performs exact-base translation directly.
+Native tc_index134/u16, priority144/u32 and mark168/u32 accesses select
+the corresponding live scalar fields. Partial byte/word writes merge the
+original native field bits; MOV and arithmetic memory writers share this route.
+Other fields keep actual kernel memory access and stock permissions.
 
 Scratch writes update the live context before subsequent helpers and tail
 calls. `X86_SIM_X86_RET()` returns architectural RAX. The BCC result carried in

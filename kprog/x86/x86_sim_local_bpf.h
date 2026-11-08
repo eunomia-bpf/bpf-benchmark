@@ -1035,8 +1035,30 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_SKB_CB_READ(CTX, OFF, WIDTH) X86_SIM_L_SKB_CB_READ_BYTES((CTX),(OFF),(WIDTH))
 #define X86_SIM_L_SKB_CB_WRITE(CTX, OFF, WIDTH, VALUE) X86_SIM_L_SKB_CB_WRITE_BYTES((CTX),(OFF),(WIDTH),(VALUE))
 #endif
+/* These native scalar fields share the live BPF context value. */
+#define X86_SIM_L_SKB_SCALAR_FIELDS(X) \
+ X(tc_index,134,2) X(priority,144,4) X(mark,168,4)
+#define X86_SIM_L_SKB_SCALAR_READ_CASE(FIELD, NATIVE_OFF, BYTES) \
+ else if (__x86_sr_off >= (NATIVE_OFF) && __x86_sr_off <= (NATIVE_OFF)+(BYTES)-(__x86_sr_width)) \
+  __x86_sr_value=x86_apply_width(X86_SIM_L_SKB_FIELD(__x86_sr_ctx,FIELD) >> ((__x86_sr_off-(NATIVE_OFF))*8),(__x86_sr_width));
+#if defined(__bpf__) || defined(__BPF__)
+#define X86_SIM_L_SKB_SCALAR_STORE(CTX, FIELD, VALUE) \
+ do { __u64 __x86_ss_value=(VALUE); \
+  asm volatile("*(u32 *)(%0 + %1) = %2" : : "r"(CTX), \
+   "i"(__builtin_offsetof(struct __sk_buff,FIELD)),"r"(__x86_ss_value) : "memory"); } while(0)
+#else
+#define X86_SIM_L_SKB_SCALAR_STORE(CTX, FIELD, VALUE) ((CTX)->FIELD=(__u32)(VALUE))
+#endif
+#define X86_SIM_L_SKB_SCALAR_WRITE_CASE(FIELD, NATIVE_OFF, BYTES) \
+ else if (__x86_sw_off >= (NATIVE_OFF) && __x86_sw_off <= (NATIVE_OFF)+(BYTES)-(__x86_sw_width)) { \
+  __u64 __x86_ss_old=X86_SIM_L_SKB_FIELD(((struct __sk_buff *)__x86_sim_helper_ctx),FIELD) & ((1ULL << ((BYTES)*8))-1); \
+  __u64 __x86_ss_shift=(__x86_sw_off-(NATIVE_OFF))*8; \
+  __u64 __x86_ss_mask=x86_width_mask((__x86_sw_width)) << __x86_ss_shift; \
+  __u64 __x86_ss_new=(__x86_ss_old & ~__x86_ss_mask) | ((__x86_sw_value << __x86_ss_shift) & __x86_ss_mask); \
+  X86_SIM_L_SKB_SCALAR_STORE(((struct __sk_buff *)__x86_sim_helper_ctx),FIELD,__x86_ss_new); \
+ }
 #define X86_SIM_L_SKB_READ(BASE, OFF, WIDTH) \
- ({ __s64 __x86_sr_off = X86_SIM_L_SKB_OFFSET((BASE), (OFF)); \
+ ({ __u8 __x86_sr_width=(WIDTH); __s64 __x86_sr_off = X86_SIM_L_SKB_OFFSET((BASE), (OFF)); \
     struct __sk_buff *__x86_sr_ctx = __x86_sim_helper_ctx; \
     __u64 __x86_sr_value; \
     if (((__x86_sr_off >= X86_SKB_DATA_OFF && __x86_sr_off <= X86_SKB_DATA_OFF + 8 - (WIDTH)) || \
@@ -1047,16 +1069,23 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
       if ((WIDTH) != X86_WIDTH_64) __x86_sr_value=x86_apply_width(X86_SIM_L_CTX_NUMERIC(__x86_sr_value) >> (__x86_sr_lane*8), (WIDTH)); \
     } else if (__x86_sr_off >= X86_SKB_CB_OFF && __x86_sr_off <= X86_SKB_CB_OFF + 20 - (WIDTH)) \
       __x86_sr_value=X86_SIM_L_SKB_CB_READ(__x86_sr_ctx, __x86_sr_off-X86_SKB_CB_OFF+(__s64)__builtin_offsetof(struct __sk_buff,cb), (WIDTH)); \
+    X86_SIM_L_SKB_SCALAR_FIELDS(X86_SIM_L_SKB_SCALAR_READ_CASE) \
     else __x86_sr_value=X86_SIM_L_SKB_NATIVE_READ(X86_SIM_L_READ_REG_PTR(BASE),(OFF),(WIDTH)); \
     __x86_sr_value; })
 #define X86_SIM_L_SKB_WRITE(BASE, OFF, WIDTH, VALUE) \
- do { __s64 __x86_sw_off=X86_SIM_L_SKB_OFFSET((BASE),(OFF)); \
+ do { __u8 __x86_sw_width=(WIDTH); __s64 __x86_sw_off=X86_SIM_L_SKB_OFFSET((BASE),(OFF)); \
       __u64 __x86_sw_value=x86_apply_width((VALUE),(WIDTH)); \
       if (__x86_sw_off >= X86_SKB_CB_OFF && __x86_sw_off <= X86_SKB_CB_OFF + 20 - (WIDTH)) { \
        __s64 __x86_sw_ctx_off=__x86_sw_off-X86_SKB_CB_OFF+__builtin_offsetof(struct __sk_buff,cb); \
        X86_SIM_L_SKB_CB_WRITE(__x86_sim_helper_ctx,__x86_sw_ctx_off,(WIDTH),__x86_sw_value); \
-      } else X86_SIM_L_STORE_ADDR((__u8 *)X86_SIM_L_READ_REG_PTR(BASE)+(OFF),(WIDTH),__x86_sw_value); \
+      } X86_SIM_L_SKB_SCALAR_FIELDS(X86_SIM_L_SKB_SCALAR_WRITE_CASE) \
+      else X86_SIM_L_STORE_ADDR((__u8 *)X86_SIM_L_READ_REG_PTR(BASE)+(OFF),(WIDTH),__x86_sw_value); \
  } while (0)
+
+#define X86_SIM_L_WRITE_MEM_VALUE(BASE, OFF, ADDR, WIDTH, VALUE) \
+ do { if (__x86_sim_abi_kind == KPROG_ABI_KIND_SKB && X86_SIM_L_REG_TAG(BASE) == X86_SIM_TAG_ABI) \
+       X86_SIM_L_SKB_WRITE((BASE),(OFF),(WIDTH),(VALUE)); \
+      else X86_SIM_L_STORE_ADDR((ADDR),(WIDTH),(VALUE)); } while(0)
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
@@ -1621,7 +1650,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
-			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+			X86_SIM_L_WRITE_MEM_VALUE((DST),__x86_l_disp,__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
 	} while (0)
@@ -1665,7 +1694,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
-			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+			X86_SIM_L_WRITE_MEM_VALUE((DST),__x86_l_disp,__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
 	} while (0)
@@ -1708,7 +1737,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
-			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+			X86_SIM_L_WRITE_MEM_VALUE((DST),__x86_l_disp,__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
 	} while (0)
