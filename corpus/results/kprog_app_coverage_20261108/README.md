@@ -7,7 +7,7 @@ The table records the latest closed complete-application attempts. Baseline resi
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: proof stack depth | [012120](otel-fixed-stack/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
-| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [005356](tetragon-typed-read/README.md) |
+| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: event_execve proof stack depth | [014223](tetragon-fixed-stack-retry/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: helper length range | [013224](tracee-fixed-stack/README.md) |
 
@@ -30,3 +30,15 @@ The [whole Tracee typed-read batch005903](tracee-typed-read/README.md) freshly g
 The [whole Cilium original-BTF batch010928](cilium-original-btf/README.md) freshly generates/compiles2requests and binds1. The TC request now passes loader/BTF/transport checks and reaches kernel native-region call identity before0processedinstructions. Both terminal native hashes/source pins reconcile; canonical-vmlinux guard validation and a private kernel/module build follow.
 
 The [explicit-RSP displacement component](stack-fixed-offsets/README.md) passes45forms/184320BPF-JIT, UBSan host and independent byte observations. Complete original Tetragon and OTel sources compile to1355and10439BPF instructions, respectively; prior typed-read epochs retain4826and40034. These are completed mechanism/compiler measurements. Whole-application verifier, behavior and timing results follow their actual terminal batches.
+
+Recorded verifier frontiers retain their separate native entries and candidate epochs:
+
+| Application / entry | Recorded frontier | Complete batch |
+| --- | --- | --- |
+| OTel / perf_unwind_native | R10-520 proof-stack write | [012120](otel-fixed-stack/README.md) |
+| Tetragon / event_execve | R10-888 proof-stack write | [014223](tetragon-fixed-stack-retry/README.md) |
+| Tetragon / execve_send |8193-jump sequence | [005356](tetragon-typed-read/README.md) |
+| Tracee / sys_exit_submit | probe_read length range | [013224](tracee-fixed-stack/README.md) |
+| Cilium / tail_handle_ipv4_from_host | kernel native-region kfunc identity | [010928](cilium-original-btf/README.md) |
+
+Each row remains verification work until its complete application cohort passes. The new registered-kfunc kernel has separate safety/runtime and environment receipts.
