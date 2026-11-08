@@ -1,0 +1,60 @@
+{
+  "utc": "2026-11-08T14:08:49.396918+00:00",
+  "change": "Native-proof ARM JIT queries the existing emitter for exact immutable chunk extent, then allocates that scratch extent",
+  "previous_descriptor_bytes": 16384,
+  "controls": {
+    "small": {
+      "ok": true,
+      "retval": 2,
+      "qemu_exit": 0,
+      "guest_exit": 0,
+      "compiler_exit": 0,
+      "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+      "linked_blobs": [
+        {
+          "archive_member": "request/generated/kernel-link/a3b96cd11e604ee6.blob.bin",
+          "bytes": 12,
+          "sha256": "22a162190063f9ba0f860bdb5fac2560dafc8b851cecc02693074c87bf800edb"
+        }
+      ],
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/native-extent/control-small/trusted-arm64-service-result/run-20261108T140420320969Z.tar.gz",
+      "archive_sha256": "4d80fb0837f9b9044c444d1efc27c8b3525e89d6e5220233210d757ddabb8ed8"
+    },
+    "large": {
+      "ok": true,
+      "retval": 2,
+      "qemu_exit": 0,
+      "guest_exit": 0,
+      "compiler_exit": 0,
+      "native_sha256": "15937badc32c1dcb687b8f88f6454a96e55d7f2aa0486bb6b33ac0e9c08f9905",
+      "linked_blobs": [
+        {
+          "archive_member": "request/generated/kernel-link/5069d3a8dfacd29f.blob.bin",
+          "bytes": 32780,
+          "sha256": "2a2fd15415bd02048b7da9396b87e436184987134b60679ccc569c80598e4d69"
+        }
+      ],
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/native-extent/control-large/trusted-arm64-service-result/run-20261108T140509249306Z.tar.gz",
+      "archive_sha256": "64f47aa2582a86a73063e3be462edb911d73a9dbd8c8713e3e208f321b7161fb"
+    }
+  },
+  "component_checks": {
+    "kernel_patch": "idempotence/conflict PASS",
+    "incremental_image": "exit0",
+    "paired_module": "exit0"
+  },
+  "source_sha256": {
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f",
+    "kprog/tv/native-proof-regions.patch": "c4e4f6d072448fb133702eba47e91c1c0b843aeb73cbb9ef891e6beb1ca41ea3"
+  },
+  "kernel_source_sha256": "1e0ab76ec8aaa4bc6cee345172154afc8efa84936b90ba854190bd160df40b7a",
+  "runtime_sha256": {
+    "kprog/arm64/build/native-extent/Image": "5dda73cc12cf58ff3a9dcc24dc98ee9867a5cdc92515e233cfc182226570c86e",
+    "kprog/arm64/build/native-extent/kinsn/bpf_arm64_native_lab.ko": "ec9f8a08c1c3c751be0f34c8825f833d03d81dd58bad1d4c46fc59b460d71eed"
+  },
+  "ordinary_kinsn": "Existing descriptor sizing retained",
+  "simulator": "Existing instruction/token C bodies retained",
+  "errors": "Existing callback errors and scratch allocation failure; existing output count/extent handling retained",
+  "runtime_admission_additions": 0,
+  "active_applications": "Byte Tetragon and queued tag-source applications retain their already captured Image/module epochs"
+}

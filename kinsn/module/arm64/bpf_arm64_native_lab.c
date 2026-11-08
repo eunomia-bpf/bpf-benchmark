@@ -21,7 +21,6 @@
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_ARM64
 #include "native_lab_trusted.h"
-#define NATIVE_LAB_MAX_BLOB_BYTES (16 * 1024)
 #define NATIVE_LAB_STACK_RESERVE_BYTES 512
 #define NATIVE_LAB_RELOC_HELPER_CALL_ARM64	2
 #define NATIVE_LAB_RELOC_HELPER_CALL_ARM64_BL26	3
@@ -516,7 +515,6 @@ out:
 const struct bpf_kinsn bpf_arm64_native_lab_desc = {
     .owner = THIS_MODULE, .max_insn_cnt = U32_MAX,
     .native_proof = true, .native_stack_depth = NATIVE_LAB_STACK_RESERVE_BYTES,
-    .max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
     .instantiate_insn = instantiate_native_lab, .emit_arm64 = emit_native_lab_arm64,
 };
 static const struct bpf_kinsn *bpf_arm64_native_lab_kinsn_descs[2];

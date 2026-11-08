@@ -1,0 +1,9 @@
+Exact native chunk sizing for the ARM JIT
+
+The native-proof ARM JIT queries its existing emit_arm64 callback with emit=false to obtain the immutable native chunk length, then allocates that exact scratch extent. The native lab descriptor retires its fixed16KiB capacity. Ordinary kinsn descriptors keep their existing sizing path. Callback errors and allocation failures retain their functional step(e) roles; the existing output count/extent handling stays in place.
+
+The same retained warm kernel tree builds the incremental Image and paired module. Existing kernel-patch idempotence/conflict checks pass. Two complete full-system QEMU controls freshly generate and compile B, pass the stock verifier, install the native kernel copy and return2. Small control and large control both close with guest/QEMU/compiler exit0. The large control uses8,192NOP operations followed by the same MOV/RET result, with an actual linked native blob of32,780bytes. Its complete native ELF, generated B, compiler, loader and kernel logs accompany the raw success archive.
+
+The simulator instruction/token bodies keep their existing bytes. This increment changes temporary allocation and native descriptor sizing. Runtime admission additions:0. Active byte-source Tetragon and queued tag-source applications retain their already captured Image/module bytes; subsequent runtime adoption uses the paired Image/module in built/ from inputs.tar.gz.
+
+summary.json records every source/runtime identity and actual result. inputs.tar.gz includes source, exact build/Make commands, the built paired Image/module and native extent control. Existing cached rootfs/loader inputs are pinned in each control summary. Reproduce in the Workspace with make -f /workspaces/.agent-state/kprog-lanes/A/native-extent/Makefile control-small and control-large after the captured incremental build. QEMU timing provides functional evidence.

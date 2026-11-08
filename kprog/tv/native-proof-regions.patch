@@ -290,3 +290,25 @@ diff --git a/kernel/bpf/btf.c b/kernel/bpf/btf.c
 @@ -9038 +9038 @@
 -			if (!kinsn || kinsn->owner != kset->owner) {
 +			if (kinsn && kinsn->owner != kset->owner) {
+
+diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
+--- a/arch/arm64/net/bpf_jit_comp.c
++++ b/arch/arm64/net/bpf_jit_comp.c
+@@ -1268,4 +1268,13 @@
+-	if (!kinsn->max_emit_bytes || kinsn->max_emit_bytes % sizeof(*scratch))
+-		return -EINVAL;
+-
+-	max_insns = kinsn->max_emit_bytes / sizeof(*scratch);
++	if (kinsn->native_proof) {
++		n_insns = kinsn->emit_arm64(NULL, &scratch_idx, false,
++					payload, bpf_prog, NULL);
++		if (n_insns < 0)
++			return n_insns;
++		max_insns = n_insns;
++		scratch_idx = 0;
++	} else {
++		if (!kinsn->max_emit_bytes ||
++		    kinsn->max_emit_bytes % sizeof(*scratch))
++			return -EINVAL;
++		max_insns = kinsn->max_emit_bytes / sizeof(*scratch);
++	}
