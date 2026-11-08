@@ -2,18 +2,20 @@
 
 The table records the latest closed whole-application attempt, including setup and compiler-transport outcomes. Baseline resident census and observed terminal service requests retain distinct domains. Every attempt starts the original upstream application and preserves its native inputs, work counters and terminal logs. BCC and Katran complete the five-step native arm and have R timing ownership. The remaining four applications continue through the frontiers below.
 
-The OTel, Tracee and Tetragon rows cite their latest closed whole-application cohorts, published as18cd77b94, c55adfb2c and0948fa51b. The original OTel→Tracee→Tetragon (`tetragon/observer`, image `sha256:61077624ab8e63a5692e4f4d4a2796783adbcd0d4971e020041eb4876e85c121`) queue has completed with one12GiB guest and the existing two-second workload. OTel/Tracee retain captured modeld963788c0; Tetragon captures the generic helper-frame origin correction75d2c8813. Each terminal receipt supplies its own source, native input, work counters and verifier frontier.
+The current four-application cohort is [4e9a9c7b1](undefined-flags/four-apps-retry/README.md), captured on the canonical c1f6 PF/AF model and original native inputs. Fourteen terminal service requests generate14 and compile13, with10 installed,3 verifier rejections and1 compiler SIGKILL. Each application's original baseline completes and its native startup reaches the recorded frontier. Baseline resident counts come from this exact cohort; Cilium has60 resident programs in this startup. Whole Cilium with approved generic native-division lowering is running as its successor.
 
-| Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
+| Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/compiler errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
-| BCC | 25 | 25 | 25 | 25 | 0 | 0: 0 | [current canonical PF/AF and paired-runtime replay](undefined-flags/bcc-katran/README.md) |
-| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native invalid write to stack R10 off=-528 size=8 | [canonical stack spill whole cohort](stack-spill-values/otel-stack-values/README.md) |
-| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_netdev R0 invalid mem access 'scalar' | [private stack spill whole cohort](stack-spill-values/whole-cilium-retry/README.md) |
-| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send branch complexity: sequence of8193jumps | [canonical stack spill whole cohort](stack-spill-values/tetragon-stack-values/README.md) |
-| Katran | 1 | 1 | 1 | 1 | 0 | 0: 0 | [current canonical PF/AF and packet accounting](undefined-flags/bcc-katran/README.md) |
-| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit invalid access to map value, value_size=32536 off=65677 size=4096 | [private initialized ghost whole cohort](stack-ghost-init/README.md) |
+| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [current canonical PF/AF and paired-runtime replay](undefined-flags/bcc-katran/README.md) |
+| OTel | 13 resident | 3 | 2 | 2 | 1: perf_unwind_native compiler SIGKILL | 0 | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
+| Cilium | 60 resident | 4 | 4 | 3 | 0 | 1: tail_handle_ipv4_from_host packet offset30/size4; length-derived end comparison | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
+| Tetragon | 287 resident | 4 | 4 | 3 | 0 | 1: execve_send sequence of8193jumps | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [current canonical PF/AF and packet accounting](undefined-flags/bcc-katran/README.md) |
+| Tracee | 151 resident | 3 | 3 | 2 | 0 | 1: sys_enter_submit invalid read from stack off-288+0/size8 | [canonical PF/AF whole cohort](undefined-flags/four-apps-retry/README.md) |
 
-The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
+The [approved return-default38-case replay](native-division-ret/safety/README.md), b844cf955, executes all9 positive controls and records27 stock-verifier rejections plus2 generation coverage failures. Every original unsafe native input uses load-only submission; actual unsafe native executions0. The original DIV cases exercise exact architectural #DE semantics. The [native compiler lowering component](native-division-ret/README.md) records2030051 independent scalar, optnone, live-condition and fixed-vector results for total native-input division.
+
+The [complete-resource x86 kernel-C successor](kernel-selftests-whole-resources/README.md), 448d7ff35, captures all239 earlier native entries with original annotations,39 complete original BPF resource source units/38 successful resource compilations, upstream bpf_testmod and the current helper194 loader/linker. Its sole12GiB guest follows actual Cilium completion. The earlier [direct native table](kernel-selftests-direct/README.md) retains its239 native outcomes, and the [resource type observation](kernel-selftests-direct/README.md) carries the original FWD/STRUCT investigation where available. Historical application frontiers retain their own source epochs below.
 
 Recorded frontiers retain their separate entries and candidate epochs:
 
