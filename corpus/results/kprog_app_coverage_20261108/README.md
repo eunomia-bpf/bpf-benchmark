@@ -5,7 +5,7 @@ The table records the latest closed complete-application attempts. Baseline resi
 | Application | Baseline census | Generated | Compiled | Bound | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json) |
-| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [001743](otel-stack-aligned/README.md) |
+| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [004333](otel-typed-read/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 1: original kfunc BTF linkage | 0 | [003807](cilium-kfunc/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541](../kprog_app_coverage_20261107/tetragon-stack-width/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [complete runtime](../kprog_app_coverage_20261107/katran-tagged-storage/README.md) |
@@ -20,3 +20,5 @@ The [Tracee aligned-stack batch002731](tracee-stack-aligned/README.md) retains6f
 The [generic narrow register-read representation](typed-read-identity/README.md) passes10width/lane forms and655360BPF-JIT/host/byte observations. Its32-bit read emits a verifier-visible MOV32, and8/16-bit reads emit exact masks. The whole-OTel source compile and serial OTel/Tetragon/Tracee runtime trials retain their separate completion records.
 
 The [Cilium kfunc batch003807](cilium-kfunc/README.md) freshly generates/compiles2requests and binds1, then reaches libbpf-normalized extern linkage at the next TC proof. The common loader successor reads original declarations from the same ELF snapshot and retains the kernel prototype matcher.
+
+The [whole OTel typed-read batch004333](otel-typed-read/README.md) preserves3fresh generation/compilation and2bound loads and reaches1000001verifier instructions/65666states. The complete fixed-input result continues from control/state exploration. Whole Tetragon is now active, followed by Tracee and then the Cilium original-BTF successor.
