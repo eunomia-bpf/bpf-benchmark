@@ -205,6 +205,8 @@ check:
 	./build/test_x86_alu_memory_frame_host
 	$(CC) -Wall -Wextra -O2 -mno-red-zone -fsanitize=undefined -fno-sanitize-recover=all -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_alu_source_frame_host.c -o build/test_x86_alu_source_frame_host
 	./build/test_x86_alu_source_frame_host
+	$(CC) -Wall -Wextra -O2 -mno-red-zone -fsanitize=undefined -fno-sanitize-recover=all -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_imul_memory_frame_host.c -o build/test_x86_imul_memory_frame_host
+	./build/test_x86_imul_memory_frame_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_shiftx_rorx_route_host.c -o build/test_x86_shiftx_rorx_route_host
 	./build/test_x86_shiftx_rorx_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_movx_route_host.c -o build/test_x86_movx_route_host

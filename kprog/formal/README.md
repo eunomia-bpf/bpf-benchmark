@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-52 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
+53 x86 register/control/memory tokens and 71 ARM tokens across numeric bodies and emitted-return control; full raw ISA
 and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
@@ -60,7 +60,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Forty direct, ten generic and two branch token bodies have semantic
+Forty-one direct, ten generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -81,6 +81,9 @@ full-frame read/modify/write and fault law for immediate and register tokens.
 Memory-source ADD/ADC/SUB/SBB/AND/OR/XOR/IMUL also retain captured
 addresses, full numeric destination writeback, defined flags and read/fault
 effects through the same extended dispatcher/token interface.
+Three-operand memory IMUL also composes its packed low32 immediate and
+signed high32 displacement, absent/exact memory-width byte, sign extension,
+CF/OF and full numeric destination through the same dispatcher/token step.
 Their field binding carries packed-immediate/full-register displacement,
 low source lanes and CL counting; source-lane normalization and physical
 arena/permission correspondence remain explicit production interfaces. ARM numeric3/4

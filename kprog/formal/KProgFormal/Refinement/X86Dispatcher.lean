@@ -3204,4 +3204,157 @@ theorem source_simulator_token_native_matches (env : EntryEnvironment.Environmen
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
+/-- The memory-width byte is absent or matches the native IMUL operand.
+The packed high32 displacement and low32 immediate retain separate fields. -/
+def imulMemoryRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  if code = GeneratedX86Opcode.code .imulMemImm then do
+    let width ← cmovWidthOf flags
+    if GeneratedX86MemAux.memWidth aux = 0 ∨ GeneratedX86MemAux.memWidth aux = BitVec.ofNat 32 width.bytes then do
+      let destination ← registerOf dst
+      let address ← memoryAddressRegisters env frame arena state src aux (((value >>> 32).setWidth 32).signExtend 64)
+      pure (multiplyMemoryImmediateFrame env frame arena state width destination value address nextPc)
+    else none
+  else none
+
+inductive ImulMemoryBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | fields (width : Reference.X86.CmovWidth) (destination : Register) (base index : Option Register)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (memoryField : GeneratedX86MemAux.memWidth aux = 0 ∨
+        GeneratedX86MemAux.memWidth aux = BitVec.ofNat 32 width.bytes)
+      (destinationField : dst = registerByte destination) (baseField : src = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      ImulMemoryBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .imulMemImm)
+        (.multiply width destination
+          (.memory (leaAddress nativeState base index aux (((value >>> 32).setWidth 32).signExtend 64)))
+          (some (value.setWidth 32)) nextPc)
+
+theorem imul_memory_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : ImulMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    imulMemoryRegisters env frame arena code flags aux dst src value nextPc state =
+      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+  cases binding with
+  | fields width destination base index widthField memoryField destinationField baseField indexField =>
+      simp only [imulMemoryRegisters, if_pos rfl, ↓reduceIte,
+        cmov_width_binding_decodes flags width widthField, Option.bind_some]
+      change (if GeneratedX86MemAux.memWidth aux = 0 ∨ GeneratedX86MemAux.memWidth aux = BitVec.ofNat 32 width.bytes
+        then _ else _) = _
+      rw [if_pos memoryField, destinationField, register_of_byte]
+      rw [memory_address_registers_refine env frame arena state src base index aux _ baseField indexField]
+      change some (multiplyMemoryImmediateFrame env frame arena state width destination value
+        (leaAddress (nativeRegisters env frame arena state) base index aux (((value >>> 32).setWidth 32).signExtend 64)) nextPc) = _
+      exact congrArg some (multiply_memory_immediate_frame_refines env frame arena state width destination value _ nextPc)
+
+def dispatchImulStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match dispatchSourceStep env frame arena current code flags aux dst src value nextPc state with
+  | some result => some result
+  | none => imulMemoryRegisters env frame arena code flags aux dst src value nextPc state
+
+theorem before_imul_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) :
+    dispatchSourceStep env frame arena current (GeneratedX86Opcode.code .imulMemImm) flags aux dst src value nextPc state = none := by
+  rfl
+
+inductive ImulStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | earlier (code : Nat) (native : Reference.X86.Instruction)
+      (fields : SourceStepBinding flags aux dst src value nextPc nativeState code native) :
+      ImulStepBinding flags aux dst src value nextPc nativeState code native
+  | source (native : Reference.X86.Instruction)
+      (fields : ImulMemoryBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .imulMemImm) native) :
+      ImulStepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .imulMemImm) native
+
+theorem imul_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, dispatchImulStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | earlier code native fields =>
+      obtain ⟨actual, dispatched, refined⟩ := source_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      exact ⟨actual, by simp only [dispatchImulStep, dispatched], refined⟩
+  | source native fields =>
+      apply exact_dispatch_refines
+      rw [dispatchImulStep, before_imul_memory_none]
+      exact imul_memory_registers_refine env frame arena _ flags aux dst src value nextPc state native fields
+
+def specializedImulStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  if token = .imulMemImm then imulMemoryRegisters env frame arena (GeneratedX86Opcode.code .imulMemImm) flags aux dst src value nextPc state
+  else specializedSourceStep env frame arena current token flags aux dst src value nextPc state
+
+def imulStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
+  if token = .imulMemImm then some .imulMemImm else sourceStepTokenOpcode token
+
+theorem imul_step_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (selected : imulStepTokenOpcode token = some opcode) :
+    (GeneratedX86Specialization.dispatch token = .directMacro ∨
+      GeneratedX86Specialization.dispatch token = .genericRunOp ∨
+      GeneratedX86Specialization.dispatch token = .branchHandler) ∧
+      GeneratedX86Specialization.tokenName token = GeneratedX86Opcode.define opcode := by
+  cases token <;> simp only [imulStepTokenOpcode, sourceStepTokenOpcode, memoryStepTokenOpcode, stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+private theorem earlier_token_excludes_imul_memory (token : GeneratedX86Specialization.Op)
+    (opcode : GeneratedX86Opcode.Op) (selected : sourceStepTokenOpcode token = some opcode) :
+    GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .imulMemImm := by
+  cases token <;> simp only [sourceStepTokenOpcode, memoryStepTokenOpcode, stepTokenOpcode, registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+theorem imul_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (selected : imulStepTokenOpcode token = some opcode) :
+    specializedImulStep env frame arena current token flags aux dst src value nextPc state =
+      dispatchImulStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+  by_cases source : token = .imulMemImm
+  · subst token
+    simp only [imulStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
+    subst opcode
+    rw [specializedImulStep, if_pos rfl, dispatchImulStep, before_imul_memory_none]
+  · have earlier : sourceStepTokenOpcode token = some opcode := by
+      simpa only [imulStepTokenOpcode, source, ↓reduceIte] using selected
+    have separate := earlier_token_excludes_imul_memory token opcode earlier
+    simp only [specializedImulStep, source, ↓reduceIte]
+    rw [source_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    unfold dispatchImulStep
+    cases dispatched : dispatchSourceStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      simp [dispatched, imulMemoryRegisters, separate]
+
+theorem imul_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : imulStepTokenOpcode token = some opcode)
+    (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) :
+    ∃ actual, specializedImulStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  rw [imul_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
+  exact imul_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+
+theorem imul_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (native : Reference.X86.Instruction) (selected : imulStepTokenOpcode token = some opcode)
+    (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, specializedImulStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refined⟩ := imul_simulator_token_step_refines env frame arena current token opcode
+    flags aux dst src value nextPc state native selected binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
+
 end KProgFormal.Refinement.X86Dispatcher

@@ -2511,4 +2511,50 @@ theorem multiply_source_frame_refines (env : Environment) (frame : Frame) (arena
       funext reg
       by_cases same : reg = dst <;> simp [same, nativeRegisters, Reference.X86.RegisterSlice.reg]
 
+/-- The packed low32 immediate is extended at the selected product width.
+Its operand bits coincide with the native IMUL immediate at that width. -/
+theorem multiply_memory_immediate_bits (width : Reference.X86.CmovWidth) (raw : NativeWord) :
+    (GeneratedX86Signed.signExtend
+      (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth (multiplyScalarWidth width)))
+      (X86Cmov.handlerWidth width)).setWidth width.bits =
+      (Reference.X86.multiplyImmediate width (raw.setWidth 32)).setWidth width.bits := by
+  rw [X86Multiply.signed_lane_refines]
+  exact multiply_alu_immediate_bits width raw
+
+/-- IMUL's memory source and packed immediate are captured before the
+scalarizing destination write; CF/OF use the same original operands. -/
+def multiplyMemoryImmediateFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (raw address nextPc : NativeWord) : Transition Reference.X86.State :=
+  let right := GeneratedX86Signed.signExtend
+    (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth (multiplyScalarWidth width))) (X86Cmov.handlerWidth width)
+  aluSourceFrame env frame arena state (multiplyScalarWidth width) dst
+    (fun source => X86Multiply.value width (GeneratedX86Signed.signExtend source (X86Cmov.handlerWidth width)) right)
+    (fun source => X86Multiply.flags width source right state.raw.rflags) address nextPc
+
+theorem multiply_memory_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (raw address nextPc : NativeWord) :
+    multiplyMemoryImmediateFrame env frame arena state width dst raw address nextPc =
+      Reference.X86.step (.multiply width dst (.memory address) (some (raw.setWidth 32)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits := multiply_memory_immediate_bits width raw
+  have values (source : NativeWord) := multiply_value_operand_bits width _ _ source
+    (Reference.X86.multiplyImmediate width (raw.setWidth 32)) (X86Multiply.signed_lane_refines width source) bits
+  have flags (source : NativeWord) := multiply_flags_operand_bits width source _ source
+    (Reference.X86.multiplyImmediate width (raw.setWidth 32)) state.raw.rflags rfl bits
+  simp only [multiplyMemoryImmediateFrame, aluSourceFrame, X86Scalar.read_refines, Reference.X86.scalarRead,
+    Reference.X86.step, Reference.X86.multiplyStep]
+  have bytes : (multiplyScalarWidth width).bytes = width.bytes := by cases width <;> rfl
+  rw [bytes]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [native_register_pc, native_register_flags, native_register_write, multiply_scalar_write, values, flags]
+      congr 1
+      congr 1
+      funext reg
+      by_cases same : reg = dst <;> simp [same, nativeRegisters, Reference.X86.RegisterSlice.reg]
+
 end KProgFormal.Refinement.X86NumericAddress
