@@ -1,0 +1,36 @@
+{
+  "host_cases": 164864,
+  "helper_identities": 80,
+  "finite_scalar_refusals": 4,
+  "baseline_regressions": 3,
+  "joined_dispatches": 1,
+  "lean_theorems": 4,
+  "lean_audits": 4,
+  "source_pins": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "875c1c270b137d9fdf56f0a3b069f9309992c80492b8abaaee1fb5e4b987b150",
+    "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "a65fb8609273d464cf557908a738bdb005fe0732f72a9e846785dd3b1671722a",
+    "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "ca85097909d6e4ac72ce64ef79ce76c38d0b7fdde605b5c47811dc2bb2e03949",
+    "kprog/formal/oracles/test_arm64_helper_idents_host.c": "1492bd7ffb422642a8c3356b5376e6949f87be6bdf6849fb423fbf9cc4ccb46b",
+    "kprog/formal/tools/generate_arm64_helper_idents_spec.py": "77cea1bb043b4bc358c30de339a4904f1c0b1a30335d37445428bdb57a1551d7",
+    "kprog/formal/contracts/arm64_helper_idents_spec.json": "4901f427923ffc9fdb9cc40c10050beefba6eb60885e3ad2cad2c5435ce9b4a0",
+    "kprog/formal/generated/arm64_helper_idents.h": "654f7571b470988c2b0ac869587a2aa9e59f9d99b9a67cebb893aeaf3eeec21c",
+    "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "cdc910a8a08d13e5e421304149f4e7f28c2d724f40d5eac1a07124ab79eaecd1"
+  },
+  "qemu_controls": {
+    "valid": {
+      "commit": "def37ce5d82ec528f79dca228f0987650ea72f47",
+      "host_ok": true,
+      "stages": {
+        "bound_accepted": 1
+      }
+    },
+    "bounds": {
+      "commit": "95afbf3074ad0806f096d6e47b17a29c1d7f19d9",
+      "host_ok": true,
+      "stages": {
+        "bound_accepted": 1
+      }
+    }
+  },
+  "production_status": "Candidate source with adoption after the captured original application and skb epochs."
+}
