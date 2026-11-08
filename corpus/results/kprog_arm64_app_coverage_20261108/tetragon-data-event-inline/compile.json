@@ -10,8 +10,12 @@
       "returncode": 2
     },
     {
-      "phase": "baseline_retry",
+      "phase": "first_extension_mode",
       "returncode": 2
+    },
+    {
+      "phase": "baseline_retry",
+      "returncode": 0
     }
   ],
   "scope": "Private candidate: three internal inlining attributes, complete identical selected C/header source; original2048 bound/helper/output logic retained; canonicalO3/native and upstreamV61BPF",
@@ -417,6 +421,10 @@
     "bpf_execve_event_v61.native.o": {
       "sha256": "aea71837b9022060955e913cb8ee744ffe038f4df76e23e371be0eb56f4532f9",
       "bytes": 1026080
+    },
+    "bpf/bpf_execve_event_v61.o": {
+      "sha256": "56f062678f643e563ddf9d8650d80d25a430b0fdb07f6fc9c7f22b82cd94f168",
+      "bytes": 1225544
     }
   },
   "runtime_admission_additions": 0,
