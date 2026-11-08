@@ -3871,6 +3871,26 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_c68a23e2d": {
+    "actual_exit": 0,
+    "archive_block_sha256": "59468390e5389d584cc26f703a65baadb15d0ffc1ffc3df286eb8342d0031652",
+    "archive_marker": "=== FULL MAKE CHECK C68A23E2D PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.cpu.jsonl.gz": "d1afe61c047847e44dda81aa888b32ee544ca3d62c25cc29e08678743fd84dea",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.head": "aa432afad7034d3b8fe16b6540c904ccbd6d795cb2a3bfb5bb72e063a8b948c4",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.launch.log": "237ba6acc12dfbca435f042f8d755384dfc908d2a3f90339622620925631dfce",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.log": "a625ecb094a98e94c06451e876311bf54b181491285f5fd56e99a246809a8696",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.py": "1b5f895842f2c7e1534a4b19f81397a6da17ce894e4c36f62da6af8ce5bc0026",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.sources": "e8adee8d29c7d4bc5493e91cab6a2808c685eacd21b29cf67521fb4139315ec2",
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-full.state": "93ea97fd77cb6bb241dc6b71562566f453a511fd121d910539de1fd409c39229"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "c68a23e2dc554ca8a9ddf2fe52c4f226ea903954",
+    "scope": "Complete formal make check of the exact published source tree c68a23e2dc554ca8a9ddf2fe52c4f226ea903954. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1160
+  },
   "full_make_check_fe6049ac8": {
     "actual_exit": 0,
     "archive_block_sha256": "ae7fbf95a3428a2f16667cd64482db4c2475f1c23bcccbe95f8662f6d961c906",

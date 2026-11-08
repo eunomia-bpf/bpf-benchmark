@@ -3857,3 +3857,10 @@ are7 conditional,7 component,6 pending and1 trusted implementation; operation/
 token and replay totals retain their published domains. V continues the O4
 line following the three-lane handoff. The prior published `a2fb22739` complete
 formal check separately passed in `full_make_check_a2fb22739`.
+
+### Published source full check c68a23e2d
+
+`make check` on immutable publishedc68a23e2d exits0. All1160 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_c68a23e2d`. Every check retains its exact published source identity.
