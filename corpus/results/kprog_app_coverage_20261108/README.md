@@ -4,11 +4,11 @@ The table records the latest closed whole-application attempt, including setup a
 
 | Application | Baseline census | Generated | Compiled | Installed | Submission/specialization/loader errors | Verifier rejections | Raw evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
-| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
+| BCC | 25 | 25 | 25 | 25 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: perf_unwind_native verifier exploration1000001instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: tail_handle_ipv4_from_netdev R0 invalid mem access 'scalar' | [private stack spill whole cohort](stack-spill-values/whole-cilium-retry/README.md) |
 | Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: event_execve stack write R10-944/8 after482instructions | [whole five-step cohort](whole-five-step-0700/README.md) |
-| Katran | 1 | 1 | 1 | 1 | 0 | 0 | [canonical scalar replay](skb-scalar-fields/README.md) |
+| Katran | 1 | 1 | 1 | 1 | 0 | 0: 0 | [canonical stack spill replay](stack-spill-values/bcc-katran/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: sys_exit_submit invalid access to map value, value_size=32536 off=65677 size=4096 | [generic C-copy whole cohort](readonly-c-loads/whole-tracee-retry/README.md) |
 
 The latest closed cohorts run complete Cilium, Tracee, Tetragon and OTel with the final-vmlinux module package, captured sources and a writable shared compiler directory. Each application owns one 12 GiB/eight-vCPU guest on CPUs20-23 and one registered service. The [final-source38-case safety replay](five-step-x86-replay/README.md) executes9 positive controls and records27 stock-verifier refusals plus2 generation coverage failures. Historical whole-app coverage frontiers and their source epochs remain below.
