@@ -1,0 +1,56 @@
+{
+  "counts": {
+    "catalog_rows": 1,
+    "attempted": 1,
+    "submitted": 0,
+    "installed": 0,
+    "verifier_rejected": 0,
+    "generation_failed": 0,
+    "compilation_failed": 0,
+    "resource_failed": 1,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 0,
+    "failure_agrees": 0,
+    "failure_installed": 0,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  },
+  "programs": [
+    {
+      "source_prog_id": 0,
+      "stage": "resource_failed",
+      "native_sha256": "e7fbba5daec9258341e25e91f7d7712b4f960bcb7b82ad052113cd290c44edda",
+      "error": "[Errno 9] maps/BTF object load: Bad file descriptor",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 302, in direct\n    metadata, fds, details = resources.load(row[\"bpf_object\"])\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 194, in load\n    self.ok(self.lib.bpf_object__load(self.obj), \"maps/BTF object load\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 165, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 9] maps/BTF object load: Bad file descriptor\n",
+      "file": "bpf_execve_event.c",
+      "program": "execve_send",
+      "section": "tracepoint",
+      "expect": "success",
+      "returncode": 1,
+      "stdout": "{\"source_prog_id\": 0, \"stage\": \"resource_failed\", \"native_sha256\": \"e7fbba5daec9258341e25e91f7d7712b4f960bcb7b82ad052113cd290c44edda\", \"error\": \"[Errno 9] maps/BTF object load: Bad file descriptor\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 302, in direct\\n    metadata, fds, details = resources.load(row[\\\"bpf_object\\\"])\\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 194, in load\\n    self.ok(self.lib.bpf_object__load(self.obj), \\\"maps/BTF object load\\\")\\n  File \\\"/workspaces/repository/kprog/selftests/submit.py\\\", line 165, in ok\\n    raise OSError(-rc, operation + \\\": \\\" + os.strerror(-rc))\\nOSError: [Errno 9] maps/BTF object load: Bad file descriptor\\n\"}\n",
+      "stderr": "libbpf: Error in bpf_create_map_xattr(execve_calls): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_maps_heap): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_prefix_maps.inner): -EINVAL. Retrying without BTF.\nlibbpf: Error in bpf_create_map_xattr(string_postfix_maps.inner): -EINVAL. Retrying without BTF.\nlibbpf: map 'execve_calls': failed to initialize slot [0] to prog 'execve_rate' fd=-2: -EBADF\nlibbpf: failed to load object '/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event_v511.bpf.o'\n",
+      "command": [
+        "/usr/bin/python3",
+        "/workspaces/repository/kprog/selftests/submit.py",
+        "direct",
+        "arm64",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-ppjahr34/service-state/trusted-ddchgx0o",
+        "/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event__execve_send.native.o",
+        "{\"file\": \"bpf_execve_event.c\", \"program\": \"execve_send\", \"section\": \"tracepoint\", \"body\": \"c\", \"expect\": \"success\", \"path\": \"/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c\", \"compiled\": true, \"entry\": true, \"bpf_object\": \"/workspaces/repository/kprog/arm64/build/kernel-selftests-current/bpf_execve_event_v511.bpf.o\"}"
+      ]
+    }
+  ],
+  "skipped": [],
+  "invocation": {
+    "table": "/workspaces/repository/kprog/arm64/build/kernel-selftests-current",
+    "arch": "arm64",
+    "out": "/workspaces/repository/kprog/arm64/build/trusted-transport/trusted-ppjahr34/out",
+    "limit": 0,
+    "only": "",
+    "micro_exec": null
+  },
+  "source_scope": "Direct load-only native P with source_prog_id 0; maps/BTF and installed-stage agreement"
+}

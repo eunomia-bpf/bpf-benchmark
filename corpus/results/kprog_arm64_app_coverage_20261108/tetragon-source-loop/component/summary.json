@@ -1,0 +1,30 @@
+{
+  "utc": "2026-11-08T17:57:21.376570+00:00",
+  "make_exit": 0,
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "compiler_exit": 0,
+    "qemu_returncode": 0,
+    "archive_sha256": "de162dbd5cf08d3a7324f50fc68944ea706340c0347b63071600b4906db8706d"
+  },
+  "counts": {
+    "catalog_rows": 1,
+    "attempted": 1,
+    "submitted": 0,
+    "installed": 0,
+    "verifier_rejected": 0,
+    "generation_failed": 0,
+    "compilation_failed": 0,
+    "resource_failed": 1,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 0,
+    "failure_agrees": 0,
+    "failure_installed": 0,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  }
+}
