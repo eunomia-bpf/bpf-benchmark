@@ -4174,3 +4174,10 @@ memory/provenance, C/Lean and compiler/entry/exit ABI/native-link transport
 retain their explicit universal interfaces. Current three-way replay and O4
 source epochs retain their domains. x86 C-model O2 totals60/75
 (44direct/14generic/2branch); ARM C-model O2 totals71/71.
+
+### Published source full check 1262fbdab
+
+`make check` on immutable published1262fbdab exits0. All1167 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_1262fbdab`. Every check retains its exact published source identity.

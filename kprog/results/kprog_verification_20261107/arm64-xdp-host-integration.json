@@ -4405,6 +4405,28 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_1262fbdab": {
+    "actual_exit": 0,
+    "archive_block_sha256": "4db2cff510d56284f6cbd07432a3dc22ce7b08c616aa80bd75f1d0a7cf084e57",
+    "archive_marker": "=== FULL MAKE CHECK 1262FBDAB PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.cpu.jsonl.gz": "3ef46e02a7494c9583ea300f97ba1732bac4c773aa7934d8bae8b9f3fd9c0938",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.head": "4365de7eb227f8c73c0e026e3d40a18f028253a412a04fab2f2865bfe0d6945a",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.launch.log": "ca4f92403548e34b707af24a2de06fd15ba6d6e6f1e9869b993bde193be1a894",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.log": "b76bd707259809778a7960c269d23cec6876ffee71ef5d3cc63d0a802c1dcc2c",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.pid": "b6f64a89725b0bbdd1d56c558fdc89af219f608e5c927797ab053e4b5338d073",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.process.json": "19f18a8742254cdc7f2d356f1b1378559c637f21f4c740930c5dfbb3ef8d15de",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.py": "6613ec75ed936b58a79734a41d6711242b9a67c6c0475e45f9d835987138d319",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.sources": "9218934dcc5e68dc4b1f1e3c4e89f6dfb800ef25f36bc3435beb39eddff02a1d",
+      "/workspaces/.agent-state/kprog-lanes/V/bmimem-full.state": "760c0dcd9c9834a203c64dc27aea44c124c1169e52e29b8d5112767cc8d8c2d5"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "1262fbdab1fe0d3d9bd694dc6df7c8e1d252b45e",
+    "scope": "Complete formal make check of the exact published source tree 1262fbdab1fe0d3d9bd694dc6df7c8e1d252b45e. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1167
+  },
   "full_make_check_18a049494": {
     "actual_exit": 0,
     "archive_block_sha256": "d6b1b4ddb0cee93eb9e31c1d8c47c5d6d3e38ace6c19d0329a3f9591e1aa78ea",
