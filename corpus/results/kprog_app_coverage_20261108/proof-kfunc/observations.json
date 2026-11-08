@@ -1,0 +1,23 @@
+{
+  "build_exit": 0,
+  "service_checks": 12,
+  "relocation_checks": 20,
+  "actual_whole_cilium_kfunc_relocations": 1,
+  "kfunc": "bpf_cast_to_kern_ctx",
+  "elf_call_offset": 24,
+  "source_and_binary_sha256": {
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "54c0873f22d563aea0e2ecb92e153d52ad658872cc3e2ddbc206265c2ee1c49a",
+    "/workspaces/repository/vendor/libbpf/src/relo_core.h": "d82819c5ca7e1b4a5e09f8462d4a839db4322b84f35d1f9650bc9fa2898ecb94",
+    "/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a": "79fe9c97c5b4d9853c8d592b280473f70f8399dd0c729178fd58fcf1b57ae6dc",
+    "/workspaces/.agent-state/kprog-lanes/C/proof-kfunc/libnative_loader.so": "4bb730da55d60f4434b42936f17c2d13c3a4f6b1f35f724631bb56bbca887f69",
+    "/workspaces/.agent-state/kprog-lanes/C/proof-kfunc/trusted-native-loader": "6820a2e3be2014379030fd4791211ccedbdee015ce469e54a5ab6dd17b7a3ab2",
+    "/workspaces/.agent-state/kprog-lanes/C/proof-kfunc/kernel.btf": "75fe34c0e2e1da4cee5a0989934299c4d078460b31b4c611fcaf359101c74dc2",
+    "/workspaces/.agent-state/kprog-lanes/C/proof-kfunc/helper.inc": "abd5d1aea620e714a690f8671fe3089f3e02ad061389dcdda415deeacdf145e0",
+    "/workspaces/.agent-state/kprog-lanes/C/cilium-packet-frontier/bmi2/request/generated/trusted_x86.bpf.o": "02c538790c8f065825b7334eb914eff36c590040873671443821e39703abd8aa"
+  },
+  "artifact_sha256": {
+    "build.log.gz": "296b9ef5cdc69754e86ea6a80e6c8490f57488a2fbcffdbd9f4aabb1b94fc296",
+    "check.log.gz": "6185223723f7a22eb899d98cfe52e57e310c34224db40cea7cd1d7ca55dcfc78",
+    "inputs.tar.gz": "b3a49de1e3ce8886a8e078202a020c9ccd0de091558529c54702c4c5963f4a89"
+  }
+}

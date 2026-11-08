@@ -16,6 +16,9 @@
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
 #include <bpf/libbpf.h>
+extern "C" {
+#include "../../../vendor/libbpf/src/relo_core.h"
+}
 #include <dirent.h>
 #include <gelf.h>
 #include <libelf.h>
@@ -5158,6 +5161,29 @@ SimulatorObject open_simulator_proof(
     return object;
 }
 
+// Use the pinned libbpf prototype matcher for proof-side vmlinux kfuncs.
+// Module calls retain their FD-array binding through the ordinary object path.
+void relocate_vmlinux_proof_call(const btf *local, const btf *kernel,
+    const char *name, const GElf_Sym &symbol, int64_t addend, bpf_insn &insn)
+{
+    if (!name || symbol.st_shndx != SHN_UNDEF ||
+        GELF_ST_BIND(symbol.st_info) != STB_GLOBAL || addend ||
+        insn.code != (BPF_JMP | BPF_CALL) || insn.dst_reg ||
+        insn.src_reg != BPF_PSEUDO_CALL || insn.off || insn.imm != -1)
+        fail("invalid source proof kfunc call relocation");
+    const int local_id = local ? btf__find_by_name_kind(local, name, BTF_KIND_FUNC) : -1;
+    const int kernel_id = kernel ? btf__find_by_name_kind(kernel, name, BTF_KIND_FUNC) : -1;
+    if (local_id <= 0 || kernel_id <= 0)
+        fail("source proof kfunc requires matching vmlinux BTF: " + std::string(name));
+    const auto *declaration = btf__type_by_id(local, local_id);
+    const auto *target = btf__type_by_id(kernel, kernel_id);
+    if (btf_vlen(declaration) != BTF_FUNC_EXTERN ||
+        bpf_core_types_are_compat(local, declaration->type, kernel, target->type) <= 0)
+        fail("source proof kfunc prototype differs from vmlinux: " + std::string(name));
+    insn.src_reg = BPF_PSEUDO_KFUNC_CALL;
+    insn.imm = kernel_id;
+}
+
 void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &path, const std::string &entry,
     const std::vector<ProofSourceMapBinding> &bindings,
     const std::vector<NativeSourceMapBinding> &manifest_bindings,
@@ -5208,6 +5234,7 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
         std::memcmp(proof.data(), static_cast<const char *>(code_data->d_buf) + begin, selected->st_size))
         fail("source proof entry bytes differ from selected BPF program");
     std::set<uint64_t> patched;
+    std::unique_ptr<btf, decltype(&btf__free)> kernel_btf(nullptr, btf__free);
     std::unordered_map<uint32_t, int> map_fds, readonly_fds;
     section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
@@ -5233,12 +5260,25 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
             }
             if (relocation.r_offset < begin || relocation.r_offset - begin >= selected->st_size) continue;
             const uint64_t offset = relocation.r_offset - begin;
-            if (GELF_R_TYPE(relocation.r_info) != R_BPF_64_64 || offset % sizeof(bpf_insn) ||
-                offset / sizeof(bpf_insn) + 1 >= proof.size() || !patched.insert(offset).second)
-                fail("invalid source proof map relocation site/type");
+            if (offset % sizeof(bpf_insn) || !patched.insert(offset).second)
+                fail("invalid source proof relocation site");
             GElf_Sym symbol{};
             if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
             const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
+            if (GELF_R_TYPE(relocation.r_info) == R_BPF_64_32) {
+                if (!kernel_btf) {
+                    btf *loaded = btf__load_vmlinux_btf();
+                    const long err = libbpf_get_error(loaded);
+                    if (err || !loaded) fail("load proof kfunc vmlinux BTF");
+                    kernel_btf.reset(loaded);
+                }
+                relocate_vmlinux_proof_call(bpf_object__btf(object), kernel_btf.get(), name,
+                    symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)]);
+                continue;
+            }
+            if (GELF_R_TYPE(relocation.r_info) != R_BPF_64_64 ||
+                offset / sizeof(bpf_insn) + 1 >= proof.size())
+                fail("invalid source proof map relocation site/type");
             if (symbol.st_shndx != SHN_UNDEF) {
                 GElf_Shdr data_section{};
                 Elf_Scn *data_scn = elf_getscn(elf.get(), symbol.st_shndx);
