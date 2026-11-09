@@ -5675,3 +5675,12 @@ An invalid BTF read is the explicit raw unreadable-memory premise, not a
 successful zero read. Physical exception/SMAP behavior, exact metadata target,
 C's early failure branch, O2/O3 projection and compiler embedding remain open;
 this does not assert that the physical x86 SMAP case is repaired.
+
+### Published source full check 98122928d
+
+`make check` on immutable published98122928d exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_98122928d`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-98122928d.log.gz](full-make-check-98122928d.log.gz).
