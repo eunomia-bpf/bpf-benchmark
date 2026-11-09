@@ -1,0 +1,9 @@
+# x86 SMAP protected-load dispatch case
+
+The authorized full-word NULL-BTF guest establishes two registered native exception entries, exact stock search results for both sites, a live-file control result0xffffffff, then a kernel NULL fault at address0x70. Its complete diagnostic epoch is [a10dd3ae5](../null-btf/stock-search-diagnostics/README.md); evidence.json retains the original observed lines and current source/runtime hashes.
+
+The current x86 do_user_addr_fault SMAP branch reaches page_fault_oops when the access is supervisor-mode and AC is clear. It executes before exception-table recovery. Stock BPF JIT addresses this low-address case in its emitted protected-load sequence. Native P retains its submitted bytes and its registered EX_TYPE_BPF entries, so this early branch remains the concrete dispatch frontier.
+
+candidate.patch adds linux/extable.h and, inside the existing SMAP branch, sends a PC with an existing BPF exception entry to the existing fixup_exception handler. The stock BPF handler clears the saved destination GPR and advances by the encoded instruction length. Remaining fault dispatch and SMAP flags retain their current definitions; P's bytes, load sites and exception table retain their definitions. The candidate introduces a fault-path lookup conditional. The coordinator case00:38 requests its disposition under the operator rule for new checks. Current production source/kernel retains its published bytes.
+
+The patch applies to the captured current source; evidence.json records the actual git apply --check outcome. Following disposition, the existing incremental kernel cache and matched module build supply the authorized live-file/NULL guest replay, followed by the original38 cases and complete BCC/Katran work. The simulator's generic protected-read recovery arms retain a separate correspondence obligation.

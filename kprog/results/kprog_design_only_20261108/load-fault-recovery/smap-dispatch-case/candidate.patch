@@ -1,0 +1,23 @@
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -19,6 +19,7 @@
+ #include <linux/mm_types.h>
+ #include <linux/mm.h>			/* find_and_lock_vma() */
+ #include <linux/vmalloc.h>
++#include <linux/extable.h>
+ 
+ #include <asm/cpufeature.h>		/* boot_cpu_has, ...		*/
+ #include <asm/traps.h>			/* dotraplinkage, ...		*/
+@@ -1253,6 +1254,11 @@
+ 	if (unlikely(cpu_feature_enabled(X86_FEATURE_SMAP) &&
+ 		     !(error_code & X86_PF_USER) &&
+ 		     !(regs->flags & X86_EFLAGS_AC))) {
++		/* Native BPF loads carry the stock recovery entry. */
++		if (search_bpf_extables(regs->ip) &&
++		    fixup_exception(regs, X86_TRAP_PF, error_code, address))
++			return;
++
+ 		/*
+ 		 * No extable entry here.  This was a kernel access to an
+ 		 * invalid pointer.  get_kernel_nofault() will not get here.

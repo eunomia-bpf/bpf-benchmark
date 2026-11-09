@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-09T00:59:34.504582+00:00",
+  "case": "x86 SMAP fault dispatch reaches existing BPF recovery",
+  "coordinator_notice": "2026-11-09T00:38:32.000545+00:00",
+  "candidate_status": "prepared for coordinator disposition",
+  "apply_check": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "diagnostic_commit": "a10dd3ae5621cd983aaa91d78ff81296c792ca8f",
+  "diagnostic_path": "kprog/results/kprog_design_only_20261108/load-fault-recovery/null-btf/stock-search-diagnostics",
+  "diagnostic_lines": [
+    "[   27.032664] native_load_fault: entry=ffffffffc0401670 extable=ffffffffc0401694 count=2",
+    "[   27.034015] native_load_fault: site=0 pc=ffffffffc040167e fixup=5003 data=7",
+    "[   27.035714] native_load_fault: site=1 pc=ffffffffc0401681 fixup=5004 data=7",
+    "[   27.037351] native_load_fault: prog=ffffcc5c40199000 auxprog=ffffcc5c40199000 registered=1 start=ffffffffc0401670 end=ffffffffc0401693 funcs=0",
+    "[   27.039946] native_load_fault: auxprog extable=ffffffffc0401694 count=2",
+    "[   27.042731] native_load_fault: lookup registration=0",
+    "[   27.081034] native_load_fault: lookup site=0 result=ffffffffc0401694",
+    "[   27.082612] native_load_fault: lookup site=1 result=ffffffffc04016a0",
+    "[   27.084286] native_load_fault: control=ffffffff",
+    "[   27.085423] BUG: kernel NULL pointer dereference, address: 0000000000000070",
+    "[   27.105703] RAX: 0000000000000000 RBX: 00000000ffffffff RCX: ffffffff91776d08",
+    "[   27.114187] CR2: 0000000000000070 CR3: 000000000618b005 CR4: 0000000000772ef0",
+    "[   27.128815] RSP: 002b:00007ffc68fa5398 EFLAGS: 00000246 ORIG_RAX: 0000000000000139",
+    "[   27.129922] RAX: ffffffffffffffda RBX: 00007ffc68fa54f0 RCX: 00007f30af1a652d",
+    "[   27.140163] CR2: 0000000000000070",
+    "[   27.145716] RAX: 0000000000000000 RBX: 00000000ffffffff RCX: ffffffff91776d08",
+    "[   27.152927] CR2: 0000000000000070 CR3: 000000000618b005 CR4: 0000000000772ef0"
+  ],
+  "source_sha256": {
+    "vendor/linux-framework/arch/x86/mm/fault.c": "f99b0e1f5b3a3d091388fb97410b4c37a398786abd3365756bcc804cc88aaad2",
+    "vendor/linux-framework/arch/x86/mm/extable.c": "b846f8989e4e9dc88eaae1fd8962616ac3231ca9f7a4c8430f732f1b77e99be6",
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "da0ad168a22e617498285391a0a9b263b7a8a2b5fa189493358c3b7560d84a03",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "a7de6824e381036c75b224207ba937e9e63ed5b8cc8afaa5953f342ea20bc8ef",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "1b42ffa33fc95ef82fa7969e546760831f4827a4ff27f64ac34748086283cd3f"
+  },
+  "candidate_sha256": "7b75f3db4f284dad11773c575a3527942e6f928f89f3b7b5ab5c785f2035be74"
+}
