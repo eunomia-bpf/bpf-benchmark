@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-08T23:55:55.426604+00:00",
+  "shared_source": "5598b93219eaaaf69c5b17b1bf64955d5a3927ed",
+  "runtime_admission_additions": 0,
+  "host_exit": 0,
+  "kernel_exit": 0,
+  "module_exit": 0,
+  "sha256": {
+    "Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
+    "bpf_arm64_native_lab.ko": "f6b505632f9917dda372159744515eaacbd4744127d74b97f1f4e69efd105396",
+    "bpf_testmod.ko": "fc2f84c38c387534423d1c8d80e258b606241a18d4972b835109ef2738abccee",
+    "native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+    "libnative_loader.so": "4e7b20b2da3c267d2c36dba56fa69ce2444a2558f0196c60df72222c07585b22",
+    "trusted-native-loader": "8847668a99d646a06f30f4dda5466e9500ae1046dc78ba445a7579ccf41a9464",
+    "trusted-service-client": "534c87b635271eb796908a3f9e6c33b8444d259e170de875a58dfee4e7d22d82"
+  },
+  "source_commit": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795"
+}
