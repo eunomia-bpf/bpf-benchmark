@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T00:51:25.768666+00:00",
+  "utc": "2026-11-09T00:52:22.661462+00:00",
   "head": "bfd15434357aba3f85b226288ede40d2c586e33b",
   "closed_cohorts": {
     "BCC and Katran": {
@@ -181,11 +181,9 @@
   "active": {
     "cilium-map-caller-frame": {
       "directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame",
-      "controller_pid": 2631951,
+      "controller_pid": 2638985,
       "status": {
-        "state": "requires_continuation",
-        "error": "Command '['taskset', '-c', '20-23', 'make', '-f', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/Makefile', 'image']' returned non-zero exit status 2.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/controller.py\", line 11, in <module>\n    (G/'image.exit').write_text(str(p.returncode)+'\\n');p.check_returncode()\n                                                        ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['taskset', '-c', '20-23', 'make', '-f', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/Makefile', 'image']' returned non-zero exit status 2.\n"
+        "state": "queued_after_tracee"
       }
     },
     "tracee-clamp-macro": {
