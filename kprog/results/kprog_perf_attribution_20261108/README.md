@@ -466,6 +466,63 @@ at 3,210.4 then 216.7 ns. So the archived counts came from a collection step
 this rebuilt definition does not perform, and the comparison above is
 throughput only.
 
+### The May-29 runs: equal work, and what they can and cannot say
+
+The operator's condition for counting a restored number is that both arms did
+equal work. For Katran the May-29 runner records no outcome map, so the
+evidence is the generator's own per-worker counts, which is the whole of the
+work the XDP program was handed:
+
+| arm | sample | worker 0 | worker 1 | worker 2 | worker 3 | total |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| JIT | 0 | 150,618,020 | 150,165,135 | 153,118,220 | 109,115 | 454,010,490 |
+| JIT | 1 | 143,017,657 | 150,042,959 | 66,732 | 150,321,456 | 443,448,804 |
+| JIT | 2 | 150,329,194 | 148,899 | 144,829,239 | 149,643,432 | 444,950,764 |
+| native | 0 | 146,783,377 | 23,204,237 | 120,426,228 | 146,796,863 | 437,210,705 |
+| native | 1 | 174,371 | 149,145,733 | 145,720,257 | 148,882,776 | 443,923,137 |
+| native | 2 | 956 | 148,835,804 | 147,603,104 | 144,916,061 | 441,355,925 |
+
+Every sample in both arms shows three workers at about 150 million packets and
+one in cold start, which is the reference's own pattern. The arm totals are
+454.0/443.4/445.0 M against 437.2/443.9/441.4 M -- within 4%, with the
+deficit in the native arm's first sample being its smaller third worker.
+Both arms are running `Flags: FLOW_RND`, `flows: 65535`, `flowlen: 1`.
+
+So the work is equal and the throughput comparison above is like for like.
+What the May-29 definition cannot supply is the per-program split: its
+driver writes `"bpf": {}` for the measured arms (`corpus/driver.py`, the
+`_no_ebpf` result builder) and collects no program table, while the archived
+2026-05-29 JSON does carry 13 programs and `native_tracer_e` at 3210.4 then
+216.7 ns. Those archived counters came from a collection step this tree does
+not perform, so 142.4-versus-178 ns per invocation **cannot be recomputed
+from the rebuilt definition** and the restored number is reported here as
+throughput only.
+
+### Katran on the current ABI: the regalloc9 candidate does not reach native
+
+The P lane C published as `97a8dbaaa` was overlaid into the restored
+current-ABI image and run unbound (`BPFREJIT_SHIM_NATIVE_LOADER=post`, the
+manifest set, no `REQUIRE_BOUND_PROOF`): run
+`x86_kvm_corpus_20261109_142708_149898`, status ok, 3 samples per arm.
+
+**Zero programs were replaced**, so the run is eBPF against eBPF and its
+1,839,790 / 1,844,605 pps 1.003x ratio is not a native/JIT number:
+
+```
+native-loader failed prog=balancer_ingres
+  manifest=/opt/bpf-benchmark/native-bpf/x86_64/katran/manifest.json
+  error=open /sys/kernel/debug/bpf_x86_native_lab/blob0: No such file or directory
+```
+
+The candidate itself is intact -- all four objects match the request's
+`summary.json` sha256, and the image's `balancer.native.o` is the
+candidate's `509cb2cc...` rather than the baseline `ba252e03...`. The gap is
+the transport: the shim opens `bpf_x86_native_lab/blob<N>` and neither
+`trusted_service.py` in this workspace populates it. Lane C's own receipt
+for the same candidate reads `native_requests: 1, compiled: 1,
+installed: 0, failed: 1` (`809c71b76`), which is the same gap seen from
+their side.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
