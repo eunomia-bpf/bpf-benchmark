@@ -26,12 +26,37 @@ static void zero_base(void)
     __u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
     ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1, 0, ARM64_WIDTH_64);
     visits=0; draw=0;
-    int recovered=ARM64_SIM_L_READ_FAULT(ARM64_X1);
+    int recovered=ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,0,0);
     CHECK(recovered, "zero SCALAR base selects recovery with success draw");
     if (recovered) {
         ARM64_SIM_RUN_KNOWN_OP3(ARM64_OP_LOAD, ARM64_X2, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,ARM64_MEM_POST),8);
         CHECK(ARM64_SIM_L_READ_REG_RAW(ARM64_X2)==0 && ARM64_SIM_L_READ_REG_RAW(ARM64_X1)==0,"zero recovery preserves base and clears destination");
     }
+}
+static void effective_address(void)
+{
+    ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK();
+    __u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;
+    __u64 word=0x1234;
+    __u32 indexed=ARM64_AUX_MEM(ARM64_X2,ARM64_MOD_NONE,0,0);
+    ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1,0,ARM64_WIDTH_64);
+    ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X2,&word,ARM64_SIM_TAG_ABI);
+    draw=0;
+    ARM64_SIM_L_EXEC(ARM64_OP_LOAD,ARM64_X0,ARM64_X1,ARM64_X2,ARM64_REG_NONE,ARM64_WIDTH_64,indexed,0);
+    CHECK(ARM64_SIM_L_READ_REG_RAW(ARM64_X0)==word,"zero base plus owned index follows successful effective address");
+    ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X2,0,ARM64_WIDTH_64);
+    for (unsigned address=0;address<4097;++address) {
+        ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1,address,ARM64_WIDTH_64);
+        CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,0,0)==(address<4096),"zero-page boundary selects forced recovery");
+    }
+    ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1,0,ARM64_WIDTH_64);
+    CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,0,4096)==0,"displaced zero base reaches mapped-address choice");
+    ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X1,4096,ARM64_WIDTH_64);
+    CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,0,-1)==1,"negative displacement enters zero page");
+    CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,ARM64_MEM_PRE),-1)==1,"pre-index effective address precedes recovery");
+    CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,ARM64_MEM_POST),-1)==0,"post-index recovery uses the original address");
+    draw=1;
+    CHECK(ARM64_SIM_L_READ_FAULT(ARM64_X1,ARM64_REG_NONE,0,0)==1,"other addresses retain the environment fault arm");
 }
 static void copy_source(unsigned tag, unsigned length)
 {
@@ -87,7 +112,7 @@ static void vector_read(unsigned op, unsigned flags, unsigned via, unsigned sele
 }
 int main(void)
 {
-    zero_base();
+    zero_base(); effective_address();
     for(unsigned n=0;n<=8;n+=8) { copy_source(ARM64_SIM_TAG_SCALAR,n);copy_source(ARM64_SIM_TAG_ABI,n); }
     const unsigned ops[]={ARM64_OP_LOAD_D0,ARM64_OP_LOAD_Q0};
     for(unsigned oi=0;oi<2;++oi)

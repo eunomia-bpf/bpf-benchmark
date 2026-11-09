@@ -277,7 +277,7 @@ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-if (ARM64_SIM_L_READ_FAULT(SRC)) { \
+if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) { \
                 ARM64_SIM_L_CLEAR_READ_DEST(DST); \
                 break; \
             } \
@@ -299,7 +299,7 @@ if (ARM64_SIM_L_READ_FAULT(SRC)) { \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-if (ARM64_SIM_L_READ_FAULT(SRC)) { \
+if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) { \
                 ARM64_SIM_L_CLEAR_READ_DEST(DST); \
                 break; \
             } \

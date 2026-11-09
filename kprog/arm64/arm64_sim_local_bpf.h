@@ -203,14 +203,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
  * Hosts may supply a dynamic choice to exercise both outcomes explicitly.
  */
 #ifndef ARM64_SIM_L_READ_FAULT
-#define ARM64_SIM_L_READ_FAULT(BASE) \
+#define ARM64_SIM_L_READ_FAULT(BASE, INDEX, AUX, IMM) \
     (((BASE) != ARM64_SP && \
       ARM64_SIM_L_REG_TAG(BASE) != ARM64_SIM_TAG_STACK && \
       ARM64_SIM_L_REG_TAG(BASE) != ARM64_SIM_TAG_RELOC_ADDR && \
       !((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) && \
         ARM64_SIM_L_REG_TAG(BASE) == ARM64_SIM_TAG_ABI)) && \
      ((ARM64_SIM_L_REG_TAG(BASE) == ARM64_SIM_TAG_SCALAR && \
-       ARM64_SIM_L_READ_REG_RAW(BASE) == 0) || \
+       (__u64)(ARM64_SIM_L_READ_REG_RAW(BASE) + \
+       (__u64)ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + \
+       (__u64)KPROG_ARM64_MEM_PREPOST_PRE_DELTA((AUX), (IMM))) < 4096ULL) || \
       ARM64_SIM_L_UNSPECIFIED()))
 #endif
 #define ARM64_SIM_L_CLEAR_READ_DEST(DST) \
@@ -1188,7 +1190,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			KPROG_ARM64_DQ_MEM_OP_STORE_Q0_ACCESS;          \
 		int __a64_dq_load =                                   \
 			__a64_dq_access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD;\
-		if (__a64_dq_load && ARM64_SIM_L_READ_FAULT(BASE))        \
+		if (__a64_dq_load && ARM64_SIM_L_READ_FAULT((BASE), (INDEX), (AUX), (IMM)))        \
 			break;                                             \
 		unsigned __a64_dq_lanes = __a64_dq_idx ==             \
 				KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX ?   \
@@ -1293,7 +1295,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
             (__a64_pm_load ? (DST) : (SRC)), (AUX));                      \
         ARM64_SIM_L_WRITEBACK_OVERLAP((BASE),                             \
             (__a64_pm_load ? (SRC) : (SRC2)), (AUX));                     \
-        if (__a64_pm_load && ARM64_SIM_L_READ_FAULT(BASE)) {               \
+        if (__a64_pm_load && ARM64_SIM_L_READ_FAULT((BASE), (INDEX), (AUX), (IMM))) {               \
             ARM64_SIM_L_CLEAR_READ_DEST(DST);                             \
             ARM64_SIM_L_CLEAR_READ_DEST(SRC);                             \
             break;                                                       \
@@ -1450,7 +1452,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 #define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
  do { \
         ARM64_SIM_L_SP_ALIGNMENT(BASE); \
-    if (ARM64_SIM_L_READ_FAULT(BASE)) { \
+    if (ARM64_SIM_L_READ_FAULT((BASE), ARM64_REG_NONE, 0, 0)) { \
         ARM64_SIM_L_CLEAR_READ_DEST(DST); \
         break; \
     } \
@@ -1669,7 +1671,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			}                                                 \
 		} else if (KPROG_ARM64_DISP_LOAD_HANDLED(OP)) {                \
-            if (ARM64_SIM_L_READ_FAULT(SRC)) {                            \
+            if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) {                            \
                 ARM64_SIM_L_CLEAR_READ_DEST(DST);                         \
                 break;                                                   \
             }                                                            \
@@ -1687,7 +1689,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_LDRSX_HANDLED(OP)) {                \
-            if (ARM64_SIM_L_READ_FAULT(SRC)) {                            \
+            if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) {                            \
                 ARM64_SIM_L_CLEAR_READ_DEST(DST);                         \
                 break;                                                   \
             }                                                            \
