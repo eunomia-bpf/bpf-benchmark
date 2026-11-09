@@ -18,6 +18,10 @@ int main(int argc,char **argv) {
         native_loader::FdLoadOptions options;
         options.original_prog_fd=source;options.native_object_path=argv[2];options.symbol_name="entry";
         options.native_link_path=argv[3];
+        bpf_map_info map_info{};__u32 map_size=sizeof(map_info);
+        if(bpf_obj_get_info_by_fd(counter,&map_info,&map_size))throw std::runtime_error("counter info");
+        options.trusted_maps.push_back({"tail_counter_value",map_info.id,0});
+
         options.source_insns.assign(bpf_program__insns(program),bpf_program__insns(program)+bpf_program__insn_cnt(program));
         setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF","1",1);
         auto native=native_loader::load_from_fd(options);
@@ -25,17 +29,22 @@ int main(int argc,char **argv) {
         bpf_prog_info info{};__u32 size=sizeof(info);
         if(bpf_obj_get_info_by_fd(native.prog_fd,&info,&size))throw std::runtime_error("native info");
         std::vector<unsigned char> image(info.jited_prog_len);
+        info={};size=sizeof(info);info.jited_prog_len=image.size();
         info.jited_prog_insns=reinterpret_cast<__u64>(image.data());
         if(bpf_obj_get_info_by_fd(native.prog_fd,&info,&size))throw std::runtime_error("native image");
-        int jit_depth=0;
+        int jit_depth=0,jit_pop=-1;
         for(size_t i=0;i+11<=image.size();i++) {
             if(image[i]==0x48&&image[i+1]==0x8b&&(image[i+2]==0x80||image[i+2]==0x85)&&
                image[i+7]==0x48&&image[i+8]==0x83&&image[i+9]==0x38&&image[i+10]==33) {
                 int32_t disp;__builtin_memcpy(&disp,image.data()+i+3,4);jit_depth=-disp-16;
             }
         }
-        std::printf("{\"jit_stack_depth\":%d}\n",jit_depth);
-        if(jit_depth<=0)throw std::runtime_error("stackful JIT frame");
+        for(size_t i=0;i+9<=image.size();i++) {
+            if(image[i]==0x58&&image[i+1]==0x58&&image[i+2]==0x48&&image[i+3]==0x81&&image[i+4]==0xc4)
+                __builtin_memcpy(&jit_pop,image.data()+i+5,4);
+        }
+        std::printf("{\"jit_stack_depth\":%d,\"jit_stack_pop\":%d}\n",jit_depth,jit_pop);
+        if(jit_depth<=0||jit_pop!=jit_depth)throw std::runtime_error("stackful JIT frame");
         __u32 key=0;
         for(int fd:std::vector<int>{source,native.prog_fd}) {
             __u64 count=0;
