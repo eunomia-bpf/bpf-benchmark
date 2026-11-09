@@ -35,3 +35,5 @@ Application result publication: six existing coverage/log files for the closed x
 Historical replay captures: four tracked output paths retain their published Git capture. Their subsequent replay bytes and the corresponding Tetragon runtime are published in `historical-replay-overwrites.tar.gz`, with hash correspondence in `historical-replay-overwrites.json`. The BCC replay summary and runtime also match the committed `bcc-execution-queued/startup-libaio` capture. The ARM input archive has identical member contents across both gzip wrappers. The selftest replay records 315 resource failures at the bpffs setup stage; its complete raw table is retained in the archive. The older controllers record terminal states.
 
 closed-broker-runs: 9 raw paths (94953 bytes) preserved in 6 closed groups; status 142 ? 135. Per-file content hashes and destinations: `closed-broker-runs-moves.json.gz`. Deferred units: 2.
+
+completed-arm-replay: 1 raw paths (3124 bytes) preserved in 1 closed groups; status 143 ? 144. Per-file content hashes and destinations: `completed-arm-replay-moves.json.gz`. Deferred units: 0.
