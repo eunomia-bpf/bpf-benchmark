@@ -393,3 +393,95 @@ theorem accepted_result_bounds (width : ScalarWidth) (negative : Bool)
     omega
 
 end KProgFormal.Refinement.X86Divide.SignedArithmetic
+
+namespace KProgFormal.Refinement.X86Divide.Capture
+open Reference
+open Reference.X86 (ScalarWidth)
+open KProgFormal.X86SignedDivision
+
+def highWord (width : ScalarWidth) (s : Reference.X86.State) : Reference.Word :=
+  if width = .w8 then s.gpr 0 >>> 8 else s.gpr 2
+
+theorem dividend_value (width : ScalarWidth) (s : Reference.X86.State) :
+    (join (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).toNat =
+      Reference.X86.divideDividend width s := by
+  rw [join_to_nat]
+  cases width <;> simp [highWord, X86Scalar.handlerWidth, x86WidthBitsSpec,
+    Reference.X86.divideDividend, Reference.X86.ScalarWidth.bits,
+    Reference.X86.ScalarWidth.bytes, BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow] <;> omega
+
+theorem dividend_integer (width : ScalarWidth) (s : Reference.X86.State) :
+    (join (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).toInt =
+      (BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt := by
+  have value := dividend_value width s
+  have bound := (join (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).isLt
+  rw [value] at bound
+  have numericBound : Reference.X86.divideDividend width s < 2 ^ (2 * width.bits) := by
+    cases width <;> exact bound
+  have sameNat : (join (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).toNat =
+      (BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toNat := by
+    rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt numericBound]
+    exact value
+  cases width <;> exact congrArg BitVec.toInt (BitVec.eq_of_toNat_eq sameNat)
+
+/-- The actual masked 64-bit limb sequence yields the canonical signed
+AX/DX:AX/EDX:EAX/RDX:RAX magnitude from the same captured input state. -/
+theorem dividend_magnitude (width : ScalarWidth) (s : Reference.X86.State) :
+    (sourcePairMagnitude (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).toNat =
+      (BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt.natAbs := by
+  rw [source_pair_magnitude_to_nat, dividend_integer]
+
+theorem word_negative {bits : Nat} (value : BitVec bits) :
+    value.msb = decide (value.toInt < 0) := by
+  cases sign : value.msb with
+  | false =>
+      have positive := BitVec.toInt_nonneg_of_msb_false sign
+      simp [Nat.not_lt.mpr, Int.not_lt.mpr positive]
+  | true =>
+      have negative := BitVec.toInt_neg_of_msb_true sign
+      simp [negative]
+
+def sourceNegative (width : ScalarWidth) (value : Reference.Word) : Bool :=
+  maskedLimb (X86Scalar.handlerWidth width) value &&&
+    (1 <<< (x86WidthBitsSpec (X86Scalar.handlerWidth width) - 1)) != 0
+
+theorem dividend_negative (width : ScalarWidth) (s : Reference.X86.State) :
+    sourceNegative width (highWord width s) =
+      decide ((BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt < 0) := by
+  have bits : sourceNegative width (highWord width s) =
+      (join (X86Scalar.handlerWidth width) (highWord width s) (s.gpr 0)).msb := by
+    cases width <;> simp [sourceNegative, maskedLimb, join, X86Scalar.handlerWidth,
+      x86WidthBitsSpec] <;> bv_decide
+  rw [bits, word_negative, dividend_integer]
+
+theorem divisor_negative (width : ScalarWidth) (operand : Reference.Word) :
+    sourceNegative width operand = decide ((operand.setWidth width.bits).toInt < 0) := by
+  have bits : sourceNegative width operand = (operand.setWidth width.bits).msb := by
+    cases width <;> simp [sourceNegative, maskedLimb, X86Scalar.handlerWidth,
+      x86WidthBitsSpec, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes] <;> bv_decide
+  rw [bits, word_negative]
+
+def divisorMagnitude (width : ScalarWidth) (operand : Reference.Word) : Reference.Word :=
+  let raw := maskedLimb (X86Scalar.handlerWidth width) operand
+  if sourceNegative width operand then maskedLimb (X86Scalar.handlerWidth width) (0 - raw) else raw
+
+theorem divisor_magnitude (width : ScalarWidth) (operand : Reference.Word) :
+    (divisorMagnitude width operand).toNat = (operand.setWidth width.bits).toInt.natAbs := by
+  have exactBits : divisorMagnitude width operand = (operand.setWidth width.bits).abs.setWidth 64 := by
+    cases width <;> simp [divisorMagnitude, sourceNegative, maskedLimb, X86Scalar.handlerWidth,
+      x86WidthBitsSpec, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+      BitVec.abs_eq] <;> bv_decide
+  rw [exactBits]
+  rw [BitVec.toNat_setWidth]
+  have modulus : 2 ^ width.bits ≤ 2 ^ 64 := by cases width <;> decide
+  have bound := Nat.lt_of_lt_of_le (operand.setWidth width.bits).abs.isLt modulus
+  rw [Nat.mod_eq_of_lt bound]
+  exact magnitude_to_nat _
+
+theorem quotient_negative (width : ScalarWidth) (s : Reference.X86.State) (operand : Reference.Word) :
+    Bool.xor (sourceNegative width (highWord width s)) (sourceNegative width operand) =
+      (decide ((BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt < 0) !=
+        decide ((operand.setWidth width.bits).toInt < 0)) := by
+  rw [dividend_negative, divisor_negative]
+
+end KProgFormal.Refinement.X86Divide.Capture
