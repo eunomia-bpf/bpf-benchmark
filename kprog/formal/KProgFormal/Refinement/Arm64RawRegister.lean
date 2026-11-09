@@ -2606,3 +2606,195 @@ end KProgFormal.Refinement.Arm64RawRegister.Reduction
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.reached
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.production
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.emission_step_refines
+
+
+namespace KProgFormal.Refinement.Arm64RawRegister.Arithmetic
+open Reference
+open Reference.AArch64 (Register RegisterRef Width)
+
+/-- ADD retains the captured byte tag. Materialization commutes with the
+wrapping pointer increment for every raw word, entry origin and byte tag. -/
+theorem materialize_add (origins : Origins) (word rhs : Word) (tag : Byte) :
+    materialize origins (word + rhs) tag =
+      materialize origins word tag + rhs := by
+  by_cases stack : tag = 4 <;> by_cases ret : tag = 10 <;>
+    simp [materialize, GeneratedPtrAdd.bits, GeneratedPtrAdd.tag, stack, ret]
+  all_goals bv_decide
+
+theorem materialize_sub (origins : Origins) (word rhs : Word) (tag : Byte) :
+    materialize origins (word - rhs) tag = materialize origins word tag - rhs := by
+  have subtract_bits (a b : Word) : a + -b = a - b := Arm64Arithmetic.AluDispatch.pointer_sub a b
+  simpa only [subtract_bits] using materialize_add origins word (-rhs) tag
+
+/-- The ADD/SUB AUX domain of EXEC_ALU retains its production branch order:
+full-width SP/STACK coordinate write, STACK SUB, tagged pointer ADD, then
+scalar width write. Operands and provenance are captured before writeback. -/
+def body (subtract immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (origins : Origins) (state : State) :
+    Transition State :=
+  let captured := MoveAddress.readTagged state src
+  let left := FlagArithmetic.readData origins state src
+  let selected := GeneratedArm64AluOperand.rhs
+    (if GeneratedArm64AluOperandSelect.immediate (if immediate then .aluImm else .aluReg)
+      then .immediate else .register)
+    value (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (readRegister origins state rhs) ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let operation := Arm64Arithmetic.AluDispatch.arithmetic subtract
+  let result := GeneratedArm64AluResult.result operation left selected
+  let next := if width = .w64 ∧ dst = .stack ∧ captured.2 = 4 then
+      MoveAddress.writeTagged origins state dst
+        (GeneratedPtrAdd.bits captured.1 (if subtract then -selected else selected)) 4
+    else if GeneratedArm64AluHandler.useStackSub (Arm64Register.handlerWidth width) operation
+      (decide (dst = .stack)) (captured.2 == 4) then
+      MoveAddress.writeTagged origins state dst (GeneratedPtrAdd.bits captured.1 (-selected)) 4
+    else if GeneratedArm64AluHandler.usePointer (Arm64Register.handlerWidth width) operation
+      (decide (dst = .stack)) (captured.2 == 0) then
+      MoveAddress.writeTagged origins state dst (GeneratedPtrAdd.bits captured.1 selected)
+        (GeneratedPtrAdd.tag captured.2)
+    else MoveAddress.writeWidth origins state dst result width
+  ⟨advance next, [], none⟩
+
+theorem body_projects (subtract immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (body subtract immediate aux width dst src rhs value origins state) =
+      Arm64Arithmetic.AluDispatch.rawStep subtract immediate
+        ((MoveAddress.readTagged state src).2 == 0) ((MoveAddress.readTagged state src).2 == 4)
+        aux width dst src rhs value (image origins state) := by
+  have captured := MoveAddress.read_tagged_materializes origins state src
+  have subtract_bits (a b : Word) : a + -b = a - b := Arm64Arithmetic.AluDispatch.pointer_sub a b
+  by_cases stack : (MoveAddress.readTagged state src).2 = 4
+  all_goals by_cases scalar : (MoveAddress.readTagged state src).2 = 0
+  all_goals cases width <;> cases subtract <;> cases dst <;>
+    simp_all [body, observe, advance_refines, MoveAddress.write_tagged_projects,
+      MoveAddress.write_width_projects, materialize_add, materialize_sub, MoveAddress.read_tagged_materializes,
+      FlagArithmetic.read_data_refines, read_refines, Arm64Register.read_refines,
+      Arm64Arithmetic.AluDispatch.rawStep,
+      Arm64Arithmetic.AluDispatch.arithmetic, GeneratedArm64AluHandler.useStackSub,
+      GeneratedArm64AluHandler.usePointer, GeneratedArm64AluResult.result,
+      Arm64Register.handlerWidth, GeneratedPtrAdd.bits, Arm64Arithmetic.AluDispatch.pointer_sub,
+      GeneratedPtrAdd.tag, Arm64Move.width_write_refines,
+      Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+  all_goals try rfl
+
+
+theorem production (subtract immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (origins : Origins) (state : State)
+    (operation : (GeneratedArm64Aux.b0 aux).toNat =
+      GeneratedArm64AluDecode.code (Arm64Arithmetic.AluDispatch.arithmetic subtract)) :
+    some (observe origins (body subtract immediate aux width dst src rhs value origins state)) =
+      Arm64Dispatcher.dispatch (Arm64Dispatcher.aluCode immediate) aux width
+        (Arm64Move.Fields.encode dst) (Arm64Move.Fields.encode src) (Arm64Register.registerCode rhs) value
+        ((MoveAddress.readTagged state src).2 == 0) ((MoveAddress.readTagged state src).2 == 4)
+        (image origins state) := by
+  rw [Arm64Dispatcher.alu_reached, operation, Arm64Dispatcher.decode_alu_code]
+  change some (observe origins (body subtract immediate aux width dst src rhs value origins state)) = some _
+  dsimp only
+  rw [Arm64Dispatcher.alu_arithmetic_body]
+  exact congrArg some (body_projects subtract immediate aux width dst src rhs value origins state)
+
+theorem alias_production (subtract : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (unused2 : Byte) (origins : Origins) (state : State)
+    (operation : (GeneratedArm64Aux.b0 aux).toNat =
+      GeneratedArm64AluDecode.code (Arm64Arithmetic.AluDispatch.arithmetic subtract)) :
+    some (observe origins (body subtract true aux width dst src rhs value origins state)) =
+      Arm64Dispatcher.dispatch (if subtract then 4 else 3) aux width
+        (Arm64Move.Fields.encode dst) (Arm64Move.Fields.encode src) unused2 value
+        ((MoveAddress.readTagged state src).2 == 0) ((MoveAddress.readTagged state src).2 == 4)
+        (image origins state) := by
+  have alias : (if subtract then 4 else 3) = 3 ∨ (if subtract then 4 else 3) = 4 := by cases subtract <;> decide
+  rw [Arm64Dispatcher.immediate_alias_dispatch _ alias]
+  have ignored := Arm64Dispatcher.dispatch_immediate_ignores_src2 aux width
+    (Arm64Move.Fields.encode dst) (Arm64Move.Fields.encode src) unused2 (Arm64Register.registerCode rhs)
+    value ((MoveAddress.readTagged state src).2 == 0) ((MoveAddress.readTagged state src).2 == 4) (image origins state)
+  exact (production subtract true aux width dst src rhs value origins state operation).trans ignored.symm
+
+theorem immediate_refines (subtract : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (body subtract true aux width dst src rhs value origins state) =
+      Reference.AArch64.step (.arithmeticImmediate width subtract false dst src value) (image origins state) := by
+  rw [body_projects, Arm64Arithmetic.AluDispatch.raw_step_refines]
+  rfl
+
+theorem register_refines (subtract : Bool) (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (lane3 : Byte) (origins : Origins) (state : State) :
+    observe origins (body subtract false
+      (Arm64Arithmetic.AluDispatch.packedAux subtract (Arm64Arithmetic.registerModifier width kind amount)
+        (BitVec.ofNat 8 amount.val) lane3) width dst src rhs value origins state) =
+      Reference.AArch64.step (.arithmeticRegister width subtract false dst src rhs kind amount) (image origins state) := by
+  apply Option.some.inj
+  rw [production _ _ _ _ _ _ _ _ _ _ (Arm64Arithmetic.AluDispatch.packed_operation subtract _ _ _)]
+  exact Arm64Dispatcher.arithmetic_register_refines subtract _ _ width dst src rhs kind amount value lane3 (image origins state)
+
+theorem extended_refines (subtract plainSource : Bool) (width : Width)
+    (kind : Reference.AArch64.RegisterExtend) (amount : Fin 5)
+    (dst src : RegisterRef) (rhs : Register) (value : Word) (lane3 : Byte) (origins : Origins) (state : State) :
+    observe origins (body subtract false
+      (Arm64Arithmetic.AluDispatch.packedAux subtract
+        (Arm64Arithmetic.extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+        (BitVec.ofNat 8 amount.val) lane3) width dst src rhs value origins state) =
+      Reference.AArch64.step (.arithmeticExtended width subtract false dst src rhs kind amount) (image origins state) := by
+  apply Option.some.inj
+  rw [production _ _ _ _ _ _ _ _ _ _ (Arm64Arithmetic.AluDispatch.packed_operation subtract _ _ _)]
+  exact Arm64Dispatcher.arithmetic_extended_refines subtract _ _ plainSource width dst src rhs kind amount value lane3 (image origins state)
+
+/-- Normalized native fields select the arithmetic AUX domain; the complete
+previous raw/source emission relation remains available through leading. -/
+inductive Emission where
+  | leading (emission : Reduction.Emission)
+  | arithmetic (subtract immediate : Bool) (aux : BitVec 32) (width : Width)
+      (dst src : RegisterRef) (rhs : Register) (value : Word)
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .leading emission => Reduction.dispatchEmission nativeAddress emission origins state
+  | .arithmetic subtract immediate aux width dst src rhs value =>
+      some (body subtract immediate aux width dst src rhs value origins state)
+
+inductive Binding (nativeAddress : Word → Word) (pc : Word) : Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Reduction.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Reduction.Binding nativeAddress pc emission instruction) :
+      Binding nativeAddress pc (.leading emission) instruction
+  | immediate (subtract : Bool) (width : Width) (dst src : RegisterRef) (rhs : Register)
+      (value : Word) (lane1 lane2 lane3 : Byte) :
+      Binding nativeAddress pc
+        (.arithmetic subtract true (Arm64Arithmetic.AluDispatch.immediateAux subtract lane1 lane2 lane3) width dst src rhs value)
+        (.arithmeticImmediate width subtract false dst src value)
+  | register (subtract : Bool) (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+      (dst src : RegisterRef) (rhs : Register) (value : Word) (lane3 : Byte) :
+      Binding nativeAddress pc
+        (.arithmetic subtract false
+          (Arm64Arithmetic.AluDispatch.packedAux subtract (Arm64Arithmetic.registerModifier width kind amount)
+            (BitVec.ofNat 8 amount.val) lane3) width dst src rhs value)
+        (.arithmeticRegister width subtract false dst src rhs kind amount)
+  | extended (subtract plainSource : Bool) (width : Width) (kind : Reference.AArch64.RegisterExtend) (amount : Fin 5)
+      (dst src : RegisterRef) (rhs : Register) (value : Word) (lane3 : Byte) :
+      Binding nativeAddress pc
+        (.arithmetic subtract false
+          (Arm64Arithmetic.AluDispatch.packedAux subtract
+            (Arm64Arithmetic.extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+            (BitVec.ofNat 8 amount.val) lane3) width dst src rhs value)
+        (.arithmeticExtended width subtract false dst src rhs kind amount)
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound =>
+      exact Reduction.emission_step_refines nativeAddress emission origins state instruction bound
+  | immediate => exact congrArg some (immediate_refines _ _ _ _ _ _ _ origins state)
+  | register => exact congrArg some (register_refines _ _ _ _ _ _ _ _ _ origins state)
+  | extended => exact congrArg some (extended_refines _ _ _ _ _ _ _ _ _ _ origins state)
+
+end KProgFormal.Refinement.Arm64RawRegister.Arithmetic
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.materialize_add
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.alias_production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.extended_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.emission_step_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.materialize_sub

@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 53/74 |
-| Raw register dispatcher arm composition | 32/75 | 53/74 |
+| Raw register handler refinement | 32/75 | 55/74 |
+| Raw register dispatcher arm composition | 32/75 | 55/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6761,3 +6761,26 @@ native producer policy retains its domain; these laws cover implemented
 simulator bodies. Native decode/field extraction, C interpretation, entry
 origins and physical/compiler transport retain their existing interfaces.
 The sole complete-check queue retains its published source epochs.
+
+### ARM raw ADD/SUB provenance and SP refinement
+
+Raw ADD/SUB captures the incoming source word and byte tag before writeback.
+Materialization commutes with wrapping addition and subtraction for all entry
+origins, words and tags. The actual full-width SP/STACK coordinate branch,
+STACK subtraction and tagged pointer addition project to the canonical
+arithmetic step. Scalar and STACK selectors derive from the captured tag.
+
+Immediate aliases3/4 reach the shared production dispatcher with arbitrary
+ignored SRC2 bytes. Shifted and extended register forms bind their native
+modifier/amount domains; the complete raw/native architectural image composes
+with55 completed numeric rows and six source branch families. ALU_IMM/REG
+retain partial raw coverage for their arithmetic AUX selectors; their logical
+selectors continue separately.
+
+Nine new laws and170 preceding audits compile with module/root exit0 and
+sorryAx0. The [raw arithmetic receipt](arm-raw-arithmetic.log.gz) retains the
+source/interface identities and actual diagnostics. Native field extraction,
+C/union interpretation, entry origins, ghost stack lifetime and physical/
+compiler transport retain their existing interfaces. C/A own the coordinated
+forwarding and RET equality representation changes; this proof uses captured
+architectural words/tags and their numeric image.
