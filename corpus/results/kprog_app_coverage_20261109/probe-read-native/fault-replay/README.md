@@ -1,0 +1,3 @@
+# Protected native probe-read actual guest semantics
+
+Original published live/NULL module, probe driver and control expectations retain their bytes. Four native P variants use the current producer wrapper at1/2/4/8byte widths. Live input checks an odd file-position value, legitimate zero data and original-helper NULL-address error; NULL input routes through a high unmapped source ending at address wraparound. Return codes and cleared output words are folded into the original module control/null results. The unbound load arm measures actual producer semantics with stock exception-table recovery; generation-bound acceptance remains separate. Every width and guest result stays in summary.json/raw.

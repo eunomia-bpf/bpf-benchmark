@@ -1,0 +1,55 @@
+{
+  "source_commit": "77c02c3083a3c527815acaca0453c34db53df081",
+  "guest_exit": 0,
+  "widths": [
+    {
+      "width_bytes": 1,
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/width1.native.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/native_load_fault_module.ko"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: create kernel native chunk: Bad file descriptor\n"
+    },
+    {
+      "width_bytes": 2,
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/width2.native.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/native_load_fault_module.ko"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: create kernel native chunk: Bad file descriptor\n"
+    },
+    {
+      "width_bytes": 4,
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/width4.native.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/native_load_fault_module.ko"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: create kernel native chunk: Bad file descriptor\n"
+    },
+    {
+      "width_bytes": 8,
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/width8.native.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/probe-read-fault/native_load_fault_module.ko"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: create kernel native chunk: Bad file descriptor\n"
+    }
+  ],
+  "mode": "unbound native producer semantics with original guest module; separate from generation-bound acceptance",
+  "matched_runtime": {
+    "native-link": "9aa6aacf54d0a272869dbe2a7b61606e641d6a657ac27d19b18fb4991d027afb",
+    "bpf_x86_native_lab.ko": "5256dee2d07acba00a138b3300e3b3a5e6a381d5a3aa32fec3f174a206b5f812"
+  }
+}
