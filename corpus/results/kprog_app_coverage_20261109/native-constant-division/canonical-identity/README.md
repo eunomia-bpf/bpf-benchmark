@@ -1,0 +1,7 @@
+# Actual canonical native producer identity alongside paired compiler controls
+
+Completed SMAP cohort605968ec9 supplies the original native ELF bytes archived by the kernel service. summary.json compares every executable section with the retained paired division-pass producers and the new target-BTF BCC O3 control. All nine application objects retain their exact hashes, entries and service archive identities.
+
+The actual canonical Katran balancer ELF is ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20, which equals the constant-division candidate ELF. Both already contain0 DIV instructions; the separate compiler control contains2 DIV instructions. Consequently this candidate represents the same Katran P as the measured canonical SMAP cohort. R can measure the explicit paired compiler control/candidate while keeping that actual canonical identity visible. Throughput deltas require actual selected-arm work measurements.
+
+Target-BTF BCC O3 control executable sections equal canonical for ['vfsstat.native.o', 'opensnoop.native.o', 'biosnoop.native.o', 'capable.native.o', 'syscount.native.o']. Every other object retains its full per-section difference in summary.json. Full ELF identities also carry source/debug/header metadata. This records the actual P comparison basis alongside the existing queued whole-app runs; all current native/workload/kernel snapshots remain captured.
