@@ -1,0 +1,16 @@
+{
+  "source": "5d8c38d3aeee2909b9dee59178f990f675786f30",
+  "make_exit": 0,
+  "cases": 38,
+  "stages": {
+    "accepted_finding": 2,
+    "specialization_rejected": 1,
+    "valid_executed": 9,
+    "verifier_rejected": 26
+  },
+  "accepted_findings": [
+    "immediate_push_branch",
+    "stack_base_flags"
+  ],
+  "native_risk_executions": 0
+}
