@@ -1,0 +1,35 @@
+{
+  "utc": "2026-11-09T09:38:44.695687+00:00",
+  "apps": [
+    {
+      "app": "otelcol-ebpf-profiler",
+      "native_objects": 16,
+      "manifest_entries": 26,
+      "commit": "b120d49fe209706f07843943af1e2595929796b7",
+      "path": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/otelcol-ebpf-profiler"
+    },
+    {
+      "app": "tracee",
+      "native_objects": 3,
+      "manifest_entries": 114,
+      "commit": "29e8c1bf01a88a49a41b2235a1e1d4d5db0b9eeb",
+      "path": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tracee"
+    },
+    {
+      "app": "tetragon",
+      "native_objects": 62,
+      "manifest_entries": 237,
+      "commit": "174e4a6be1fecb32e7bbc409d48709207e593e19",
+      "path": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon"
+    },
+    {
+      "app": "cilium",
+      "native_objects": 4,
+      "manifest_entries": 68,
+      "commit": "b316f05479f2048ab98adb2a7505ada52135f3bb",
+      "path": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium"
+    }
+  ],
+  "kernel_commit": "7806405ddb781d77e16bafefa6546d59f45f59b8",
+  "framework_freeze": "9f3855f6f"
+}
