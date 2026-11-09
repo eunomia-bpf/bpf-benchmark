@@ -1,0 +1,56 @@
+{
+  "objects": [
+    {
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "source_object": "/workspaces/repository/vendor/build/.bcc-libbpf/none/x86/output/capable.bpf.o",
+      "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
+      "snapshot": "/var/tmp/kprog-tmp/A/resource-runtime-config/inputs/capable.bpf.o",
+      "entry": "kprobe__cap_capable_entry",
+      "source_program_ids": [
+        52,
+        58
+      ],
+      "map_info": [
+        {
+          "btf_id": 25,
+          "bytes_key": 4,
+          "bytes_memlock": 8192,
+          "bytes_value": 16,
+          "flags": 1152,
+          "frozen": 1,
+          "id": 45,
+          "max_entries": 1,
+          "name": "capable_.rodata",
+          "type": "array"
+        },
+        {
+          "btf_id": 43,
+          "bytes_key": 4,
+          "bytes_memlock": 312,
+          "bytes_value": 4,
+          "flags": 0,
+          "frozen": 0,
+          "id": 21,
+          "max_entries": 1,
+          "name": "cgroup_map",
+          "type": "cgroup_array"
+        },
+        {
+          "btf_id": 25,
+          "bytes_key": 8,
+          "bytes_memlock": 918688,
+          "bytes_value": 8,
+          "flags": 0,
+          "frozen": 0,
+          "id": 19,
+          "max_entries": 10240,
+          "name": "start",
+          "type": "hash"
+        }
+      ]
+    }
+  ],
+  "instances": 2,
+  "source": "retained baseline kernel map inventory"
+}

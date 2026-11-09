@@ -214,7 +214,7 @@ def libbpf_resource_object(path, directory, lib):
 
 class ObjectResources:
     """A libbpf object containing maps/BTF and autoload=false programs."""
-    def __init__(self, arch, path, program, directory=None):
+    def __init__(self, arch, path, program, directory=None, map_info=()):
         loader_directory, _ = tools_for_arch(arch)
         self.obj = None
         self.pins = None
@@ -267,6 +267,10 @@ class ObjectResources:
         if not self.program:
             raise OSError(errno.ENOENT, "program context symbol " + program)
         self.maps = []
+        self.configured_maps = []
+        for field in ("key_size", "value_size", "max_entries"):
+            self.bind("bpf_map__" + field, c.c_uint32, c.c_void_p)
+            self.bind("bpf_map__set_" + field, c.c_int, c.c_void_p, c.c_uint32)
         item = None
         while True:
             item = self.lib.bpf_object__next_map(self.obj, item)
@@ -274,6 +278,18 @@ class ObjectResources:
                 break
             self.ok(self.lib.bpf_map__set_pin_path(
                 item, os.fsencode(self.pins / str(len(self.maps)))), "set_pin_path")
+            name = self.lib.bpf_map__name(item).decode()
+            profiles = [info for info in map_info if info["name"] in (name, name[:15])]
+            if len(profiles) == 1:
+                profile = profiles[0]
+                for field, inventory_field in (("key_size", "bytes_key"),
+                                                ("value_size", "bytes_value"),
+                                                ("max_entries", "max_entries")):
+                    value = profile.get(field, profile.get(inventory_field, 0))
+                    if value and not getattr(self.lib, "bpf_map__" + field)(item):
+                        self.ok(getattr(self.lib, "bpf_map__set_" + field)(item, value),
+                                "configure map " + field)
+                        self.configured_maps.append(dict(name=name, field=field, value=value))
             self.maps.append(item)
 
     def bind(self, name, result, *arguments):
@@ -373,7 +389,8 @@ class ObjectResources:
             section=section, maps=pins, pin_root=str(self.pins),
             attach_target_resolution=target_error,
             resource_globalized_entries=self.globalized_entries,
-            resource_view="maps-and-btf", resource_pinning=self.pinning)
+            resource_view="maps-and-btf", resource_pinning=self.pinning,
+            resource_configured_maps=self.configured_maps)
 
     def close(self):
         if self.obj:
@@ -423,7 +440,8 @@ def direct(arch, state, native, row):
         result["native_sha256"] = hashlib.sha256(native_bytes).hexdigest()
         # Allocation before __init__ keeps cleanup available for libbpf errors.
         resources = ObjectResources.__new__(ObjectResources)
-        resources.__init__(arch, row["bpf_object"], row["program"], state)
+        resources.__init__(arch, row["bpf_object"], row["program"], state,
+                           row.get("map_info", ()))
         metadata, fds, details = resources.load(row["bpf_object"])
         entry_bytes = row["program"].encode()
         meta_bytes = json.dumps(metadata, separators=(",", ":")).encode()

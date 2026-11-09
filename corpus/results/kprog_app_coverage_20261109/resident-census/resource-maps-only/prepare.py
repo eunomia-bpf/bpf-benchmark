@@ -13,7 +13,7 @@ def guest(d):
         resource=submit.ObjectResources.__new__(submit.ObjectResources)
         row=dict(application=group["application"],resident_instances=group["resident_instances"],source_object=group["source_object"],source_sha256=group["source_sha256"],entry=group["entry"])
         try:
-            resource.__init__("x86",group["snapshot"],group["entry"],state)
+            resource.__init__("x86",group["snapshot"],group["entry"],state,group.get("map_info",()))
             metadata,fds,details=resource.load(group["snapshot"])
             row.update(stage="resources_prepared",metadata=metadata,resources=details,map_count=len(fds))
         except Exception as error:

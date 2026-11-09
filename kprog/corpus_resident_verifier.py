@@ -54,7 +54,8 @@ def guest(scratch):
             elif resource["resource_stage"] != "source_object_captured":
                 result.update(stage="resource_failed", diagnostic=resource["resource_stage"])
             else:
-                record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"])
+                record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"],
+                              map_info=row.get("map_info", ()))
                 with contextlib.redirect_stdout(io.StringIO()) as captured:
                     submit.direct("x86", state, Path(selected[0]["native_object"]), record)
                 output = captured.getvalue()
