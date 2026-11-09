@@ -89,6 +89,9 @@
     {"id": 191, "name": "bpf_copy_from_user_task"},
     {"id": 193, "name": "bpf_ima_file_hash"},
     {"id": 194, "name": "bpf_kptr_xchg"},
-    {"id": 195, "name": "bpf_map_lookup_percpu_elem"}
+    {"id": 195, "name": "bpf_map_lookup_percpu_elem"},
+    {"id": 198, "name": "bpf_ringbuf_reserve_dynptr"},
+    {"id": 199, "name": "bpf_ringbuf_submit_dynptr"},
+    {"id": 200, "name": "bpf_ringbuf_discard_dynptr"}
   ]
 }

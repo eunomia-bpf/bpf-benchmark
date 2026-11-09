@@ -116,6 +116,10 @@ EXPECTED: list[tuple[int, str]] = [
     (193, "bpf_ima_file_hash"),
     (194, "bpf_kptr_xchg"),
     (195, "bpf_map_lookup_percpu_elem"),
+    (198, "bpf_ringbuf_reserve_dynptr"),
+    (199, "bpf_ringbuf_submit_dynptr"),
+    (200, "bpf_ringbuf_discard_dynptr"),
+
 ]
 
 # Every `ARM64_SIM_BPF_CALL_<name>(` macro the sim header defines: body and
