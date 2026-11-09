@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Observation-only B compiler matching the 8192-byte test kernel."""
+import json
+import os
+import sys
+
+compiler = "/usr/lib/llvm-18/bin/clang"
+arguments = [
+    "-bpf-stack-size=8192" if arg.startswith("-bpf-stack-size=") else arg
+    for arg in sys.argv[1:]
+]
+if not any(arg.startswith("-bpf-stack-size=") for arg in arguments):
+    arguments += ["-mllvm", "-bpf-stack-size=8192"]
+command = [compiler, *arguments]
+print("large-stack observation effective compiler: " + json.dumps(command),
+      file=sys.stderr, flush=True)
+os.execv(compiler, command)

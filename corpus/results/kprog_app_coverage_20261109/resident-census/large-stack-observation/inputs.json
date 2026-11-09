@@ -1,0 +1,36 @@
+{
+  "kind": "input_preparation_stage",
+  "source_head": "6ca7e8cb0769650565708cd27ee9d7b6a1661819",
+  "programs": 549,
+  "unique_resident_keys": 549,
+  "applications": {
+    "tetragon/observer": 287,
+    "bcc/set": 25,
+    "katran": 1,
+    "cilium/agent": 72,
+    "otelcol-ebpf-profiler/profiling": 13,
+    "tracee/monitor": 151
+  },
+  "resources": {
+    "source_object_captured": 549
+  },
+  "source_files": 172,
+  "native_link_sha256": "45a83095da15e14b22f8cca9d596cea5356cdc3a3141e2ec73921bc5a573232c",
+  "native_link_source": "C/stock-entry stock-entry-frame build at413fd7595",
+  "runtime_sha256": {
+    "kprog_stock.ko": "6fc61d7578a26d4c86563da47bdb2bdb341f7d00826cebed48657ff798f6a25e",
+    "libnative_loader.so": "580852d479d5e13433d57cc3c5b822e2c119191564ebbd09fddf92111ae196f8",
+    "trusted-native-loader": "fd7820d758e9ba7a21dcdf378e0a691b047184660688c76bca7789ad13446170"
+  },
+  "kernel_patch_files": [
+    "kprog/stock-path/x86-entry-frame.patch",
+    "kprog/stock-path/large-stack-observation.patch"
+  ],
+  "kernel_build_status": "canonical source-location disposition pending",
+  "native_execution_requests": 0,
+  "native_body_groups": 247,
+  "candidate_groups": 247,
+  "b_generation": "pending observation kernel",
+  "stock_verifier": "pending observation kernel",
+  "capacity_patch_status": "constant/history draft; fixed64-slot precision/liveness/linked-register representations require extension"
+}

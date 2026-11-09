@@ -1,0 +1,43 @@
+{
+  "kind": "compiler_stack_capacity_observation",
+  "source": "int observation(int x) { volatile char bytes[4097]; bytes[4096]=(char)x; asm volatile(\"\" : : \"r\"(bytes) : \"memory\"); return bytes[4096]; }\n",
+  "native_execution_requests": 0,
+  "rows": [
+    {
+      "label": "original4096",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-target",
+        "bpf",
+        "-O2",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-c",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/compiler-profile.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/original4096.o"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "/var/tmp/kprog-tmp/A/large-stack-observation/compiler-profile.c:1:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n    1 | int observation(int x) { volatile char bytes[4097]; bytes[4096]=(char)x; asm volatile(\"\" : : \"r\"(bytes) : \"memory\"); return bytes[4096]; }\n      |     ^\n1 error generated.\n"
+    },
+    {
+      "label": "observation8192",
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang-large-stack",
+        "-target",
+        "bpf",
+        "-O2",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-c",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/compiler-profile.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/observation8192.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "large-stack observation effective compiler: [\"/usr/lib/llvm-18/bin/clang\", \"-target\", \"bpf\", \"-O2\", \"-mllvm\", \"-bpf-stack-size=8192\", \"-c\", \"/var/tmp/kprog-tmp/A/large-stack-observation/compiler-profile.c\", \"-o\", \"/var/tmp/kprog-tmp/A/large-stack-observation/observation8192.o\"]\n"
+    }
+  ]
+}
