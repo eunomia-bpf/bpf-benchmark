@@ -987,6 +987,25 @@ run's log shows it is the app exiting during startup, with libbpf skipping
 the baseline arm on the restored workload and reports that the native arm
 needs C.
 
+### The restore is validated against the reference's own throughput
+
+The baseline arm's JIT throughput now matches the reference, and the
+pre-restore shape was inflated:
+
+| run | samples | median pps |
+| --- | ---: | ---: |
+| reference 2026-05-29 (`..._061439_040837`) | 12 | 820,622 |
+| pre-restore current (`..._20261108_232046_843736`) | 1 | **1,276,704** |
+| restored current (`..._20261109_020512_391104`) | 4 | **882,409** |
+
+The pre-restore single-worker busy-polled shape drove 55% more packets per
+second than the reference, which is the whole reason its native/JIT ratio
+looked worse: with the transport drained and one worker on a dedicated
+vCPU, the workload was measuring the balancer against a queue that never
+filled. Restoring four workers with random flows brings the baseline within
+7.5% of the reference's median, so the comparison is against the same
+workload again.
+
 ### The native arm's blocker, located
 
 The restored workload's baseline arm passes and its native arm fails at the
