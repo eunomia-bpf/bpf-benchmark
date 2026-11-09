@@ -625,6 +625,25 @@ The payloads themselves are intact -- all four regalloc9 objects match the
 request's `summary.json` sha256, and the image's `balancer.native.o` is the
 candidate's `509cb2cc...`, not the baseline `ba252e03...`.
 
+**The cause is a loader/module mismatch, not the producers.** Traced to the
+two binaries:
+
+| side | evidence |
+| --- | --- |
+| `libnative_loader.so` (the 11-07 staged build) | writes `/sys/kernel/debug/bpf_x86_native_lab/blob%u`, plus `.relocs`, `.proof`, `.generation` |
+| `bpf_x86_native_lab.ko` in this tree | creates `native_submit`, `specializer`, `map_ptr`, `map_value_ptr`, `map_update_elem` -- **no `blob%u`** |
+| `blob%u` in any module source | only `kprog/x86/native_lab/tests/poc.c`, a test |
+| the 2026-05-29 loader | no `blob%u`; it uses `.blob.bin` and the specializer |
+
+So the current loader asks for upload nodes the current module does not
+create. The fix is on lane C's side: either the module creates the blob
+nodes, or the loader uses `native_submit`, which is what the module actually
+exposes. It also explains why the 2026-05-29 definition works on the same
+kernel -- its loader never asks for a blob.
+
+Re-ran Katran unbound without the trusted service (`..._163935_656575`) to
+rule the service out: same failure, both arms `jited 13641`, no replacement.
+
 One earlier BCC control run (`..._20261109_102148_078721`) is a different
 failure worth keeping distinct: it replaced 8 programs and had 3 refused with
 `trusted specializer refused native program: Input/output error`, the older
