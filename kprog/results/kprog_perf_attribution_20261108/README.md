@@ -962,3 +962,27 @@ Both are back at their 2026-05-29 values:
 Nothing else in `runner/libs/workload.py`, `runner/libs/app_runners`,
 `corpus/driver.py`, `corpus/config`, `micro/driver.py`, `micro/config`,
 `micro/programs` or the Makefile recipes and knobs was touched.
+
+### The restore verified on the baseline arm
+
+The first run on the restored workload shows the shape is back. Katran's
+baseline arm completed with the reference's own structure:
+
+| sample | pktgen threads | pps per thread |
+| --- | --- | --- |
+| 0 | 0, 1, 2, 3 | 856,953 / 405 / 898,249 / 898,512 |
+| 1 | 0, 1, 2, 3 | 139 / 867,763 / 874,213 / 880,282 |
+| 2 | 0, 1, 2, 3 | 887,663 / 893,484 / 899,599 / 1,052 |
+
+Four workers per sample on threads 0-3, each with its own device alias, and
+one worker per sample still in its cold start -- which is exactly the pattern
+the 2026-05-29 reference shows (its twelve samples carry a 12,717 and a
+40,809 pps outlier among the ~850,000 ones).
+
+The native arm did not complete: the Katran server exits before the shim
+tracks its programs, so the app never reaches `balancer_ingress`. Under the
+task's division that is a binding/startup failure for lane C, and the earlier
+run's log shows it is the app exiting during startup, with libbpf skipping
+`.eh_frame` sections in its stderr tail. The timing below therefore covers
+the baseline arm on the restored workload and reports that the native arm
+needs C.
