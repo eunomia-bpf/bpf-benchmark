@@ -1,0 +1,1202 @@
+{
+  "utc": "2026-11-09T06:11:07.165449+00:00",
+  "scope": "Complete ARM BCC then paired Tracee; P compiler scalar probe-read lowering; current replays complete first",
+  "compiler_publication": "8a3dc898b781eb97786e8bbadb8ab7a8333f266c",
+  "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+  "applications": {
+    "bcc": {
+      "base_archive": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/applications/launch-inputs.tar.gz",
+      "base_archive_sha256": "c43eb44a7c85a0a10af358ab93efb2f7fcc0a9dc39c6f3802aa3da720d7a28f0",
+      "delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-input-delta.tar.gz",
+      "delta_archive_sha256": "ca661e6edf930113414504026d05f5d64bdefece848299f45199de589c667f2f",
+      "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "files": {
+        "mount.py": "cf322014deffd00065316b0d6ed686cff7862dd625a2bf32409b56d8cef70945",
+        "input.py": "29cefe0080ea723db6c5351583205971ea9b9c74aa30a1463cf2a26e5d4d9d28",
+        "Makefile": "a7e5d8bb4b53a075ff86a0cf1ec16973f63e597c4f0b9c7f3449fd99d30c7b2b",
+        "katran-transport.py": "3b604106f2624cce6658917973faeb14690fc628eb5868ea0d84b1e91f77a375",
+        "transport.py": "b6876682fc69d0d92e892eb74b77da114551bbbe4c5d6a0b039335a32128098d",
+        "bcc-transport.py": "b6876682fc69d0d92e892eb74b77da114551bbbe4c5d6a0b039335a32128098d",
+        "controller.py": "e248a36e4175e303a439d077f6eb421d441b4fbe896ad275f8075404bcaa9446",
+        "bcc-workload.py": "c7a28ff24a911869f6b04986b6811634a8bf001e4815f6ddf44e0c01998f55b2",
+        "manifests/katran.json": "d151a76f7f3dab99a35709cd59142f7548f4677ea402d7e54e8882fc5b10c337",
+        "manifests/bcc.json": "5717aefb13b8485c51d4cd61acfaa8e796426ef9d7477f5de60eb06f811e75b9",
+        "source/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "source/kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
+        "source/kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+        "source/kprog/trusted_compile.py": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
+        "source/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "source/bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+        "source/kprog/test/check_trusted_service.py": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289",
+        "source/kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+        "source/kprog/tv/test_kernel_patch.py": "f20f671db113dc067bd09b31d55d08e6cb6917fd8c8af2531b76f77d5ee73294",
+        "source/kprog/tv/native-proof-regions.patch": "f08d38c07b9608e2f3d62c8e5b85426a3beb1c583a3fb3ab8be184560146b2e6",
+        "source/kprog/selftests/submit.py": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186",
+        "source/kprog/selftests/selftests.py": "53ff916a5a90a0300c5581b9084fa84f91f0d3256a5cbe450d37857cab070383",
+        "source/kprog/fidelity/tcb.py": "f3420c7a27cbf5417f7f71b9fa23da503b88a6faad0f6f7fefce10dd1f3452bb",
+        "source/kprog/fidelity/negative.py": "ba7ba4b0f54fbef8cb25ac0abf7d9b59d8b7ed75f970d5809eedb6be4f38ee77",
+        "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+        "source/kprog/x86/x86_sim_local_bpf.h": "fdbc77ec619332139009ea3e66d40152fab85aa05a3174d8c048020896123279",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "efdf501218d45cbd8f0779aeb3bbaa1ae4f4d1aa7747dd985bffca0cbf775092",
+        "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
+        "source/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
+        "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+        "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+        "source/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py": "ba427648704edb8ee2ce8412616cd29ec12e2e91f3cf46f6a07334edf7555fd5",
+        "source/kprog/selftests/__pycache__/selftests.cpython-312.pyc": "84a2d2c915f06b497f7e17727d6dd9a5a8c4973af49b129f73506ba186ff3b61",
+        "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928",
+        "source/kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
+        "source/kprog/x86/native_lab/native_link/Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+        "source/kprog/x86/native_lab/native_link/Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+        "source/kprog/x86/native_lab/native_link/src/main.rs": "fc059a7cb799fe8569bbc00e845ff5ca3ce4dc6f22a51b524bee0f292ae89607",
+        "source/kprog/x86/native_lab/native_link/src/x86.rs": "bf235f60cd37da7326d988c60c6eb333074956adbe9c7127fdeda5ad52b7d074",
+        "source/kprog/formal/tools/generate_arm64_helper_idents_spec.py": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+        "source/kprog/formal/generated/arm64_shift.h": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+        "source/kprog/formal/generated/x86_mem_offset.h": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99",
+        "source/kprog/formal/generated/x86_bzhi.h": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c",
+        "source/kprog/formal/generated/arm64_alu_handler.h": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843",
+        "source/kprog/formal/generated/x86_shift_count.h": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35",
+        "source/kprog/formal/generated/arm64_reduction.h": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab",
+        "source/kprog/formal/generated/arm64_alu_operand.h": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427",
+        "source/kprog/formal/generated/x86_xchg.h": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+        "source/kprog/formal/generated/arm64_stack_tag.h": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783",
+        "source/kprog/formal/generated/x86_bt.h": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575",
+        "source/kprog/formal/generated/x86_andn.h": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295",
+        "source/kprog/formal/generated/arm64_movk.h": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063",
+        "source/kprog/formal/generated/x86_write_width_arm.h": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735",
+        "source/kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+        "source/kprog/formal/generated/x86_helper_dispatch.h": "a8e04dc636c756c2aa5a152f67eedb95b7abdfb87d257a6540c53e48b7021e7b",
+        "source/kprog/formal/generated/arm64_mem_base_src.h": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f",
+        "source/kprog/formal/generated/x86_cc_decode.h": "338b989d7d3c62adb6c6c43b269f69abc6582ada7d7bb981dcf4e862fe73bf68",
+        "source/kprog/formal/generated/x86_setcc_mem.h": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c",
+        "source/kprog/formal/generated/arm64_flag_operand.h": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+        "source/kprog/formal/generated/x86_dispatch_family.h": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c",
+        "source/kprog/formal/generated/x86_popcount.h": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2",
+        "source/kprog/formal/generated/arm64_ldrsx.h": "20e2d1ed13f2780872631360ce0deb911a1140601e9f29c6d8ff5436847e6a90",
+        "source/kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+        "source/kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+        "source/kprog/formal/generated/arm64_ccmp_decode.h": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+        "source/kprog/formal/generated/arm64_alu_operand_select.h": "6604e16f46f5a59bb8a2946821e341bf01842d2b919273af7b9648c722d35f54",
+        "source/kprog/formal/generated/x86_bzhi_flags.h": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef",
+        "source/kprog/formal/generated/arm64_store_bytes.h": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc",
+        "source/kprog/formal/generated/arm64_mov.h": "80ead9db28172eb01f442b54d4db4264a00482b349f23368a1a28a6938441395",
+        "source/kprog/formal/generated/arm64_flag_handler.h": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564",
+        "source/kprog/formal/generated/arm64_flags.h": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9",
+        "source/kprog/formal/generated/arm64_vreg_field.h": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141",
+        "source/kprog/formal/generated/x86_stack_write_lanes.h": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5",
+        "source/kprog/formal/generated/arm64_mem_dispatch.h": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d",
+        "source/kprog/formal/generated/arm64_stlxr.h": "23e346ca5b8c4d0e11397b9cf8ce925d30250de28746ff8ad6ea92c2db9f1991",
+        "source/kprog/formal/generated/arm64_load_tag.h": "92ac76aabe42dc0d9d701b07b06bd82f65da613864ff6ca59a91f70a9764c9c4",
+        "source/kprog/formal/generated/x86_shift_flags.h": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770",
+        "source/kprog/formal/generated/x86_store.h": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2",
+        "source/kprog/formal/generated/x86_sbb_result.h": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7",
+        "source/kprog/formal/generated/x86_add_flags.h": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd",
+        "source/kprog/formal/generated/x86_signed.h": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+        "source/kprog/formal/generated/x86_doubleshift.h": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5",
+        "source/kprog/formal/generated/arm64_helper_arg_ptr.h": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199",
+        "source/kprog/formal/generated/x86_bitops.h": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+        "source/kprog/formal/generated/arm64_width.h": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1",
+        "source/kprog/formal/generated/x86_rep_movs.h": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f",
+        "source/kprog/formal/generated/x86_mem_aux.h": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f",
+        "source/kprog/formal/generated/arm64_reg_dispatch.h": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb",
+        "source/kprog/formal/generated/arm64_stack_write_lanes.h": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf",
+        "source/kprog/formal/generated/x86_xmm0.h": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848",
+        "source/kprog/formal/generated/x86_imul_flags.h": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2",
+        "source/kprog/formal/generated/arm64_load_bytes.h": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571",
+        "source/kprog/formal/generated/arm64_branch_emit.h": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+        "source/kprog/formal/generated/x86_movx_shape.h": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3",
+        "source/kprog/formal/generated/arm64_branch.h": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+        "source/kprog/formal/generated/arm64_adrp.h": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
+        "source/kprog/formal/generated/x86_opcode.h": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031",
+        "source/kprog/formal/generated/x86_reg_lane_aux.h": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc",
+        "source/kprog/formal/generated/arm64_mem_prepost.h": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765",
+        "source/kprog/formal/generated/arm64_imm_operand.h": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643",
+        "source/kprog/formal/generated/arm64_extrev.h": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+        "source/kprog/formal/generated/arm64_dispatch_singleton.h": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac",
+        "source/kprog/formal/generated/arm64_mod.h": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+        "source/kprog/formal/generated/arm64_dispatch_family.h": "b6e1d9ccb0aa7c430136b7e86c21f99fb3b8c5812a957d06f2b8a27d22304d02",
+        "source/kprog/formal/generated/x86_dispatch_singleton.h": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972",
+        "source/kprog/formal/generated/arm64_stack_read_tag_source.h": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987",
+        "source/kprog/formal/generated/arm64_write_arm.h": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665",
+        "source/kprog/formal/generated/x86_reg_write.h": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994",
+        "source/kprog/formal/generated/abi_load.h": "c4dae571789dc6d938ec993cf391428d3cd8ceb8ba55f27fa9443dbc4daa9546",
+        "source/kprog/formal/generated/x86_mem_index.h": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e",
+        "source/kprog/formal/generated/arm64_pair_load_tag.h": "e2f1240bbfb737e06784063ba783f71c8bd19043aa43db4322793ea0b7463399",
+        "source/kprog/formal/generated/arm64_ldrsx_op.h": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d",
+        "source/kprog/formal/generated/x86_ptr_write.h": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f",
+        "source/kprog/formal/generated/arm64_vreg.h": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0",
+        "source/kprog/formal/generated/x86_div.h": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2",
+        "source/kprog/formal/generated/x86_branch_emit.h": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d",
+        "source/kprog/formal/generated/arm64_mem_index_value.h": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e",
+        "source/kprog/formal/generated/x86_mov_load.h": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d",
+        "source/kprog/formal/generated/arm64_pair_mem.h": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6",
+        "source/kprog/formal/generated/x86_alu_decode.h": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c",
+        "source/kprog/formal/generated/x86_width.h": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe",
+        "source/kprog/formal/generated/arm64_logic_flag_handler.h": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+        "source/kprog/formal/generated/x86_adc.h": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c",
+        "source/kprog/formal/generated/x86_pushpop.h": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499",
+        "source/kprog/formal/generated/x86_aux_flags.h": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283",
+        "source/kprog/formal/generated/x86_immediate.h": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013",
+        "source/kprog/formal/generated/arm64_dq_mem_extra.h": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b",
+        "source/kprog/formal/generated/x86_alu_flag_arm.h": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed",
+        "source/kprog/formal/generated/x86_shift_result.h": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+        "source/kprog/formal/generated/arm64_csel_ptr.h": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5",
+        "source/kprog/formal/generated/arm64_stack_index.h": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+        "source/kprog/formal/generated/arm64_stack_arm.h": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce",
+        "source/kprog/formal/generated/arm64_bitfield.h": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210",
+        "source/kprog/formal/generated/arm64_csel.h": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+        "source/kprog/formal/generated/arm64_cond.h": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+        "source/kprog/formal/generated/arm64_stack_arena.h": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+        "source/kprog/formal/generated/x86_sub_flags.h": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9",
+        "source/kprog/formal/generated/ptr_add.h": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d",
+        "source/kprog/formal/generated/x86_sbb_flags.h": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2",
+        "source/kprog/formal/generated/x86_alu_result.h": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac",
+        "source/kprog/formal/generated/x86_cond.h": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef",
+        "source/kprog/formal/generated/arm64_alu_result.h": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7",
+        "source/kprog/formal/generated/x86_callmem.h": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988",
+        "source/kprog/formal/generated/arm64_cc_decode.h": "a22666da330cad56f9fcbe1b142d9b4083b0dc47820cb82e84dcb5240fadd74c",
+        "source/kprog/formal/generated/arm64_mul.h": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b",
+        "source/kprog/formal/generated/x86_popcnt_flags.h": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02",
+        "source/kprog/formal/generated/x86_movbe.h": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440",
+        "source/kprog/formal/generated/x86_reg_dispatch.h": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c",
+        "source/kprog/formal/generated/x86_not.h": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a",
+        "source/kprog/formal/generated/x86_full_condition.h": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0",
+        "source/kprog/formal/generated/x86_specialization.h": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690",
+        "source/kprog/formal/generated/arm64_unary.h": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0",
+        "source/kprog/formal/generated/x86_mem_dispatch.h": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635",
+        "source/kprog/formal/generated/x86_mulx_arm.h": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966",
+        "source/kprog/formal/generated/x86_cmpop.h": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725",
+        "source/kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "source/kprog/formal/generated/arm64_fmov.h": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30",
+        "source/kprog/formal/generated/x86_doubleshift_arm.h": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de",
+        "source/kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+        "source/kprog/formal/generated/x86_setcc.h": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
+        "source/kprog/formal/generated/arm64_decode.h": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
+        "source/kprog/formal/generated/arm64_stack_write_tag_action.h": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
+        "source/kprog/formal/generated/arm64_helper_idents.h": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e",
+        "source/kprog/formal/generated/x86_reg_presence.h": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
+        "source/kprog/formal/generated/arm64_orn.h": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
+        "source/kprog/formal/generated/arm64_ccmp_handler.h": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+        "source/kprog/formal/generated/arm64_cneg.h": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df",
+        "source/kprog/formal/generated/x86_logic_flags.h": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7",
+        "source/kprog/formal/generated/control_flow_trace.h": "9700892f1ef5e5323e9d4599e59015ade53908f39ca29346b0bd0f9638a67c5a",
+        "source/kprog/formal/generated/x86_stack_arm.h": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb",
+        "source/kprog/formal/generated/arm64_mem_write_arm.h": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8",
+        "source/kprog/formal/generated/arm64_reg_presence.h": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb",
+        "source/kprog/formal/generated/arm64_mem_offset.h": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5",
+        "source/kprog/formal/generated/arm64_aux.h": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592",
+        "source/kprog/formal/generated/arm64_fmov_dest.h": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a",
+        "source/kprog/formal/generated/arm64_dq_mem.h": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09",
+        "source/kprog/formal/generated/arm64_mem_index.h": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b",
+        "source/kprog/formal/generated/x86_bswap.h": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604",
+        "source/kprog/formal/generated/x86_stack_arena.h": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16",
+        "source/kprog/formal/generated/arm64_byte_lane.h": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
+        "source/kprog/formal/oracles/test_arm64_helper_idents_host.c": "3cbf89b85007bfc71abd8fbf413e5e86d860080aba9b5d465528539ae5f9097c",
+        "source/kprog/formal/contracts/arm64_helper_idents_spec.json": "a5e22ac668810b6219cdb720cf97fe09d81af90d2b2f136b0e84d04ea24a5fc4",
+        "source/kprog/formal/KProgFormal/Arm64HelperIdents.lean": "309b49bc86a13493e8d4d48b92fea2911015a4616b359e89f181eec441855d23",
+        "source/kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "e0a36206edc38c1d925e89f4fdb7f773dca3061d135da22e16e732a11c164ba2",
+        "source/kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
+        "source/kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
+        "source/kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+        "source/kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
+        "source/kprog/arm64/micro-prog/test_read_recovery.py": "b0c84acab702b9b5fd52035270208978c2219228b85e4075c78bbe35995776d0",
+        "source/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b5d9bdb9877aeba971cb12df2352966d755c4948e0a828a896819506bdcd9780",
+        "source/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+        "source/kprog/arm64/build/app-verified-stage/katran/balancer.native.o": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+        "source/kprog/arm64/build/app-verified-stage/katran/healthchecking_ipip.native.o": "ab0b571c0c62c58ffd1695b478e2fee7a29028015c9c01d117c8b1764afb1dc6",
+        "source/kprog/arm64/build/app-verified-stage/katran/xdp_root.native.o": "2edeaa3477e5f9d9579a480379458b1cdfd85daf32f1b0a8ecbf950380816341",
+        "source/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+        "source/kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0",
+        "source/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+        "source/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+        "source/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+        "source/kprog/arm64/build/app-verified-stage/bcc/capable.native.o": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+        "source/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+        "source/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_7.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_4.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_0.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_5.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_6.native.o": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/source_map.native.o": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_2.native.o": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_3.native.o": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+        "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_1.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_7.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_4.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_0.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_5.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_6.native.o": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/source_map.native.o": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_2.native.o": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_3.native.o": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+        "source/kprog/arm64/build/app-verified-stage/bcc/startup/startup_1.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/native-extent/kinsn/bpf_testmod.ko": "87b7d1651fdff71cee43a0f133f6866e79e68cf7866402d9a7becf3a5ce95be1",
+        "source/kprog/libnativeloader/src/native_loader_link_schema.hpp": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8",
+        "source/kprog/libnativeloader/src/native_loader.cpp": "ec162515898d0f7959ee7220c2628715c29ec12eacbd0322679b9dd700e016c2",
+        "source/kprog/libnativeloader/src/native_loader_manifest.hpp": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+        "source/kprog/libnativeloader/include/native_loader.hpp": "89f4f112bde0f9332b4dc9a8c997dfc7235c4d17b041151648180ffdf3437573",
+        "source/vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+        "source/kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+        "source/kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+        "source/kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+        "source/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "source/kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+        "source/kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+        "source/kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+        "source/kinsn/module/include/native_lab_binding.h": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+        "source/kinsn/module/x86/bpf_x86_native_lab.c": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7",
+        "source/kinsn/module/arm64/Makefile": "cb04c24ff4b7f21df2c42223422251c63f81829ca5dd877ff68a91c0f925ff52",
+        "source/kinsn/module/arm64/bpf_arm64_native_lab.c": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f",
+        "source/runner/build-arm64-llvmbpf/micro_exec": "1806afa502e54f65450e27530ba83daa94733651bb0b074553b2ba659659238c",
+        "source/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+        "source/runner/build-arm64-llvmbpf/native_loader/trusted-service-client": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb",
+        "source/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d"
+      },
+      "native_replacements": [
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+          "sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/opensnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+          "sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/opensnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+          "sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/capable.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+          "sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/capable.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o",
+          "sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcplife.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/biosnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/biosnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/biosnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+          "sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/biosnoop.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+          "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/syscount.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+          "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/syscount.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
+        }
+      ],
+      "manifest_rows": 32,
+      "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned"
+    },
+    "tracee": {
+      "base_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch-inputs.tar.gz",
+      "base_archive_sha256": "31d763972a55e21207fbc3d02fb3352b2ca37ee2eac63d37f0b8c4c3ad2ec2b9",
+      "delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-input-delta.tar.gz",
+      "delta_archive_sha256": "525195ddbf8f0313b4b5f1b1e15418accbbfd21fa8778a382c7254d607a5525a",
+      "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "files": {
+        "mount.py": "f3fa4d676f4e3fb56658195d40c58f5406f12e56b45693ef8aa487f36764eb60",
+        "Makefile": "8b7bc7d62b05586f4009281f0c6fcd4bc0a8208713e715f730793c61cf82288a",
+        "transport.py": "3b604106f2624cce6658917973faeb14690fc628eb5868ea0d84b1e91f77a375",
+        "controller.py": "69d1deae04beae4353bb077dfecab0ac7671497cdb1bf25cfa7f5136f8a50c03",
+        "manifests/tracee.json": "4ec8eee18421ed8ba78bde78f115210bf9d75cb3b4efd0069ef8d5383f32cf66",
+        "source/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "source/kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
+        "source/kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+        "source/kprog/trusted_compile.py": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
+        "source/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "source/bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+        "source/kprog/test/check_trusted_service.py": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289",
+        "source/kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+        "source/kprog/tv/test_kernel_patch.py": "f20f671db113dc067bd09b31d55d08e6cb6917fd8c8af2531b76f77d5ee73294",
+        "source/kprog/tv/native-proof-regions.patch": "f08d38c07b9608e2f3d62c8e5b85426a3beb1c583a3fb3ab8be184560146b2e6",
+        "source/kprog/selftests/submit.py": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186",
+        "source/kprog/selftests/selftests.py": "53ff916a5a90a0300c5581b9084fa84f91f0d3256a5cbe450d37857cab070383",
+        "source/kprog/fidelity/tcb.py": "f3420c7a27cbf5417f7f71b9fa23da503b88a6faad0f6f7fefce10dd1f3452bb",
+        "source/kprog/fidelity/negative.py": "ba7ba4b0f54fbef8cb25ac0abf7d9b59d8b7ed75f970d5809eedb6be4f38ee77",
+        "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+        "source/kprog/x86/x86_sim_local_bpf.h": "fdbc77ec619332139009ea3e66d40152fab85aa05a3174d8c048020896123279",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "efdf501218d45cbd8f0779aeb3bbaa1ae4f4d1aa7747dd985bffca0cbf775092",
+        "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
+        "source/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
+        "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+        "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+        "source/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py": "ba427648704edb8ee2ce8412616cd29ec12e2e91f3cf46f6a07334edf7555fd5",
+        "source/kprog/selftests/__pycache__/selftests.cpython-312.pyc": "84a2d2c915f06b497f7e17727d6dd9a5a8c4973af49b129f73506ba186ff3b61",
+        "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928",
+        "source/kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
+        "source/kprog/x86/native_lab/native_link/Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+        "source/kprog/x86/native_lab/native_link/Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+        "source/kprog/x86/native_lab/native_link/src/main.rs": "fc059a7cb799fe8569bbc00e845ff5ca3ce4dc6f22a51b524bee0f292ae89607",
+        "source/kprog/x86/native_lab/native_link/src/x86.rs": "bf235f60cd37da7326d988c60c6eb333074956adbe9c7127fdeda5ad52b7d074",
+        "source/kprog/formal/tools/generate_arm64_helper_idents_spec.py": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+        "source/kprog/formal/generated/arm64_shift.h": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+        "source/kprog/formal/generated/x86_mem_offset.h": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99",
+        "source/kprog/formal/generated/x86_bzhi.h": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c",
+        "source/kprog/formal/generated/arm64_alu_handler.h": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843",
+        "source/kprog/formal/generated/x86_shift_count.h": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35",
+        "source/kprog/formal/generated/arm64_reduction.h": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab",
+        "source/kprog/formal/generated/arm64_alu_operand.h": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427",
+        "source/kprog/formal/generated/x86_xchg.h": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+        "source/kprog/formal/generated/arm64_stack_tag.h": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783",
+        "source/kprog/formal/generated/x86_bt.h": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575",
+        "source/kprog/formal/generated/x86_andn.h": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295",
+        "source/kprog/formal/generated/arm64_movk.h": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063",
+        "source/kprog/formal/generated/x86_write_width_arm.h": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735",
+        "source/kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+        "source/kprog/formal/generated/x86_helper_dispatch.h": "a8e04dc636c756c2aa5a152f67eedb95b7abdfb87d257a6540c53e48b7021e7b",
+        "source/kprog/formal/generated/arm64_mem_base_src.h": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f",
+        "source/kprog/formal/generated/x86_cc_decode.h": "338b989d7d3c62adb6c6c43b269f69abc6582ada7d7bb981dcf4e862fe73bf68",
+        "source/kprog/formal/generated/x86_setcc_mem.h": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c",
+        "source/kprog/formal/generated/arm64_flag_operand.h": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+        "source/kprog/formal/generated/x86_dispatch_family.h": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c",
+        "source/kprog/formal/generated/x86_popcount.h": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2",
+        "source/kprog/formal/generated/arm64_ldrsx.h": "20e2d1ed13f2780872631360ce0deb911a1140601e9f29c6d8ff5436847e6a90",
+        "source/kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+        "source/kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+        "source/kprog/formal/generated/arm64_ccmp_decode.h": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+        "source/kprog/formal/generated/arm64_alu_operand_select.h": "6604e16f46f5a59bb8a2946821e341bf01842d2b919273af7b9648c722d35f54",
+        "source/kprog/formal/generated/x86_bzhi_flags.h": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef",
+        "source/kprog/formal/generated/arm64_store_bytes.h": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc",
+        "source/kprog/formal/generated/arm64_mov.h": "80ead9db28172eb01f442b54d4db4264a00482b349f23368a1a28a6938441395",
+        "source/kprog/formal/generated/arm64_flag_handler.h": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564",
+        "source/kprog/formal/generated/arm64_flags.h": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9",
+        "source/kprog/formal/generated/arm64_vreg_field.h": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141",
+        "source/kprog/formal/generated/x86_stack_write_lanes.h": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5",
+        "source/kprog/formal/generated/arm64_mem_dispatch.h": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d",
+        "source/kprog/formal/generated/arm64_stlxr.h": "23e346ca5b8c4d0e11397b9cf8ce925d30250de28746ff8ad6ea92c2db9f1991",
+        "source/kprog/formal/generated/arm64_load_tag.h": "92ac76aabe42dc0d9d701b07b06bd82f65da613864ff6ca59a91f70a9764c9c4",
+        "source/kprog/formal/generated/x86_shift_flags.h": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770",
+        "source/kprog/formal/generated/x86_store.h": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2",
+        "source/kprog/formal/generated/x86_sbb_result.h": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7",
+        "source/kprog/formal/generated/x86_add_flags.h": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd",
+        "source/kprog/formal/generated/x86_signed.h": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+        "source/kprog/formal/generated/x86_doubleshift.h": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5",
+        "source/kprog/formal/generated/arm64_helper_arg_ptr.h": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199",
+        "source/kprog/formal/generated/x86_bitops.h": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+        "source/kprog/formal/generated/arm64_width.h": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1",
+        "source/kprog/formal/generated/x86_rep_movs.h": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f",
+        "source/kprog/formal/generated/x86_mem_aux.h": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f",
+        "source/kprog/formal/generated/arm64_reg_dispatch.h": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb",
+        "source/kprog/formal/generated/arm64_stack_write_lanes.h": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf",
+        "source/kprog/formal/generated/x86_xmm0.h": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848",
+        "source/kprog/formal/generated/x86_imul_flags.h": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2",
+        "source/kprog/formal/generated/arm64_load_bytes.h": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571",
+        "source/kprog/formal/generated/arm64_branch_emit.h": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+        "source/kprog/formal/generated/x86_movx_shape.h": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3",
+        "source/kprog/formal/generated/arm64_branch.h": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+        "source/kprog/formal/generated/arm64_adrp.h": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
+        "source/kprog/formal/generated/x86_opcode.h": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031",
+        "source/kprog/formal/generated/x86_reg_lane_aux.h": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc",
+        "source/kprog/formal/generated/arm64_mem_prepost.h": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765",
+        "source/kprog/formal/generated/arm64_imm_operand.h": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643",
+        "source/kprog/formal/generated/arm64_extrev.h": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+        "source/kprog/formal/generated/arm64_dispatch_singleton.h": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac",
+        "source/kprog/formal/generated/arm64_mod.h": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+        "source/kprog/formal/generated/arm64_dispatch_family.h": "b6e1d9ccb0aa7c430136b7e86c21f99fb3b8c5812a957d06f2b8a27d22304d02",
+        "source/kprog/formal/generated/x86_dispatch_singleton.h": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972",
+        "source/kprog/formal/generated/arm64_stack_read_tag_source.h": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987",
+        "source/kprog/formal/generated/arm64_write_arm.h": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665",
+        "source/kprog/formal/generated/x86_reg_write.h": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994",
+        "source/kprog/formal/generated/abi_load.h": "c4dae571789dc6d938ec993cf391428d3cd8ceb8ba55f27fa9443dbc4daa9546",
+        "source/kprog/formal/generated/x86_mem_index.h": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e",
+        "source/kprog/formal/generated/arm64_pair_load_tag.h": "e2f1240bbfb737e06784063ba783f71c8bd19043aa43db4322793ea0b7463399",
+        "source/kprog/formal/generated/arm64_ldrsx_op.h": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d",
+        "source/kprog/formal/generated/x86_ptr_write.h": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f",
+        "source/kprog/formal/generated/arm64_vreg.h": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0",
+        "source/kprog/formal/generated/x86_div.h": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2",
+        "source/kprog/formal/generated/x86_branch_emit.h": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d",
+        "source/kprog/formal/generated/arm64_mem_index_value.h": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e",
+        "source/kprog/formal/generated/x86_mov_load.h": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d",
+        "source/kprog/formal/generated/arm64_pair_mem.h": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6",
+        "source/kprog/formal/generated/x86_alu_decode.h": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c",
+        "source/kprog/formal/generated/x86_width.h": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe",
+        "source/kprog/formal/generated/arm64_logic_flag_handler.h": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+        "source/kprog/formal/generated/x86_adc.h": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c",
+        "source/kprog/formal/generated/x86_pushpop.h": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499",
+        "source/kprog/formal/generated/x86_aux_flags.h": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283",
+        "source/kprog/formal/generated/x86_immediate.h": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013",
+        "source/kprog/formal/generated/arm64_dq_mem_extra.h": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b",
+        "source/kprog/formal/generated/x86_alu_flag_arm.h": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed",
+        "source/kprog/formal/generated/x86_shift_result.h": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+        "source/kprog/formal/generated/arm64_csel_ptr.h": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5",
+        "source/kprog/formal/generated/arm64_stack_index.h": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+        "source/kprog/formal/generated/arm64_stack_arm.h": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce",
+        "source/kprog/formal/generated/arm64_bitfield.h": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210",
+        "source/kprog/formal/generated/arm64_csel.h": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+        "source/kprog/formal/generated/arm64_cond.h": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+        "source/kprog/formal/generated/arm64_stack_arena.h": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+        "source/kprog/formal/generated/x86_sub_flags.h": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9",
+        "source/kprog/formal/generated/ptr_add.h": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d",
+        "source/kprog/formal/generated/x86_sbb_flags.h": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2",
+        "source/kprog/formal/generated/x86_alu_result.h": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac",
+        "source/kprog/formal/generated/x86_cond.h": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef",
+        "source/kprog/formal/generated/arm64_alu_result.h": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7",
+        "source/kprog/formal/generated/x86_callmem.h": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988",
+        "source/kprog/formal/generated/arm64_cc_decode.h": "a22666da330cad56f9fcbe1b142d9b4083b0dc47820cb82e84dcb5240fadd74c",
+        "source/kprog/formal/generated/arm64_mul.h": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b",
+        "source/kprog/formal/generated/x86_popcnt_flags.h": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02",
+        "source/kprog/formal/generated/x86_movbe.h": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440",
+        "source/kprog/formal/generated/x86_reg_dispatch.h": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c",
+        "source/kprog/formal/generated/x86_not.h": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a",
+        "source/kprog/formal/generated/x86_full_condition.h": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0",
+        "source/kprog/formal/generated/x86_specialization.h": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690",
+        "source/kprog/formal/generated/arm64_unary.h": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0",
+        "source/kprog/formal/generated/x86_mem_dispatch.h": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635",
+        "source/kprog/formal/generated/x86_mulx_arm.h": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966",
+        "source/kprog/formal/generated/x86_cmpop.h": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725",
+        "source/kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "source/kprog/formal/generated/arm64_fmov.h": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30",
+        "source/kprog/formal/generated/x86_doubleshift_arm.h": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de",
+        "source/kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+        "source/kprog/formal/generated/x86_setcc.h": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
+        "source/kprog/formal/generated/arm64_decode.h": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
+        "source/kprog/formal/generated/arm64_stack_write_tag_action.h": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
+        "source/kprog/formal/generated/arm64_helper_idents.h": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e",
+        "source/kprog/formal/generated/x86_reg_presence.h": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
+        "source/kprog/formal/generated/arm64_orn.h": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
+        "source/kprog/formal/generated/arm64_ccmp_handler.h": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+        "source/kprog/formal/generated/arm64_cneg.h": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df",
+        "source/kprog/formal/generated/x86_logic_flags.h": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7",
+        "source/kprog/formal/generated/control_flow_trace.h": "9700892f1ef5e5323e9d4599e59015ade53908f39ca29346b0bd0f9638a67c5a",
+        "source/kprog/formal/generated/x86_stack_arm.h": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb",
+        "source/kprog/formal/generated/arm64_mem_write_arm.h": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8",
+        "source/kprog/formal/generated/arm64_reg_presence.h": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb",
+        "source/kprog/formal/generated/arm64_mem_offset.h": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5",
+        "source/kprog/formal/generated/arm64_aux.h": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592",
+        "source/kprog/formal/generated/arm64_fmov_dest.h": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a",
+        "source/kprog/formal/generated/arm64_dq_mem.h": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09",
+        "source/kprog/formal/generated/arm64_mem_index.h": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b",
+        "source/kprog/formal/generated/x86_bswap.h": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604",
+        "source/kprog/formal/generated/x86_stack_arena.h": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16",
+        "source/kprog/formal/generated/arm64_byte_lane.h": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
+        "source/kprog/formal/oracles/test_arm64_helper_idents_host.c": "7f4a7018cca96e8facbd666be751be4f2a252e815f8ea24510a2964c991ccd4c",
+        "source/kprog/formal/contracts/arm64_helper_idents_spec.json": "7f2b36457ff74b73be12e12510ae1b55b2ef707f908b7c8377efaf7be7727b93",
+        "source/kprog/formal/KProgFormal/Arm64HelperIdents.lean": "fa32d86e603e98bc40ba547a20679bca0f1d745208e93740cc999eba331177d3",
+        "source/kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "3997febb0eb1e310f6375f8a004e9812fa9f52473e356f950ced2884e6311307",
+        "source/kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
+        "source/kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
+        "source/kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+        "source/kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
+        "source/kprog/arm64/micro-prog/test_read_recovery.py": "b0c84acab702b9b5fd52035270208978c2219228b85e4075c78bbe35995776d0",
+        "source/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b5d9bdb9877aeba971cb12df2352966d755c4948e0a828a896819506bdcd9780",
+        "source/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+        "source/kprog/arm64/build/app-verified-stage/tracee/lsm_check.native.o": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+        "source/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+        "source/kprog/arm64/build/app-verified-stage/tracee/kprobe_check.native.o": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_7.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_4.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_0.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_5.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_6.native.o": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/source_map.native.o": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_2.native.o": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_3.native.o": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+        "source/kprog/arm64/build/app-verified-stage/tracee/startup/startup_1.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+        "source/kprog/arm64/build/native-extent/kinsn/bpf_testmod.ko": "87b7d1651fdff71cee43a0f133f6866e79e68cf7866402d9a7becf3a5ce95be1",
+        "source/kprog/arm64/build/app-runtime-v35/root/artifacts/tracee/bin/tracee": "f4141c9b715d2173130c7ee492c8057caa02aa274ba51314154ca9d9bb385377",
+        "source/kprog/libnativeloader/src/native_loader_link_schema.hpp": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8",
+        "source/kprog/libnativeloader/src/native_loader.cpp": "1f48ebc162bb8a8ae8452682d42e8acaf617f4202aba59bf517ab57b901abf68",
+        "source/kprog/libnativeloader/src/native_loader_manifest.hpp": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+        "source/kprog/libnativeloader/include/native_loader.hpp": "89f4f112bde0f9332b4dc9a8c997dfc7235c4d17b041151648180ffdf3437573",
+        "source/vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+        "source/kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+        "source/kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+        "source/kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+        "source/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "source/kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+        "source/kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+        "source/kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+        "source/kinsn/module/include/native_lab_binding.h": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+        "source/kinsn/module/x86/bpf_x86_native_lab.c": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7",
+        "source/kinsn/module/arm64/Makefile": "cb04c24ff4b7f21df2c42223422251c63f81829ca5dd877ff68a91c0f925ff52",
+        "source/kinsn/module/arm64/bpf_arm64_native_lab.c": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f",
+        "source/runner/build-arm64-llvmbpf/micro_exec": "1806afa502e54f65450e27530ba83daa94733651bb0b074553b2ba659659238c",
+        "source/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+        "source/runner/build-arm64-llvmbpf/native_loader/trusted-service-client": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb",
+        "source/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d"
+      },
+      "native_replacements": [
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/lsm_check.native.o",
+          "sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/lsm_support/lsm_check.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/kprobe_check.native.o",
+          "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/lsm_support/kprobe_check.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        },
+        {
+          "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+          "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+          "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.o"
+        }
+      ],
+      "manifest_rows": 123,
+      "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned"
+    }
+  },
+  "runtime": {
+    "bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
+    "Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
+    "native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+    "libnative_loader.so": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+    "trusted-service-client": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb",
+    "trusted-native-loader": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d",
+    "bpf_testmod.ko": "5babd44d352a0837176bd8821fdf971431f2b73ee0aa9af4377eb7b0fba0d364"
+  },
+  "predecessors": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/controller.pid",
+      "pid": 2792901
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-unix-length/application/controller.pid",
+      "pid": 2801443
+    }
+  ],
+  "runtime_admission_additions": 0
+}
