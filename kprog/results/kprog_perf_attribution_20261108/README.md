@@ -766,6 +766,44 @@ The last one is the general lesson: the loader and the module are one
 transport, so they move together. That is also the current-ABI blocker
 recorded above, seen from the other side.
 
+### Component walk, step 2: the link boundary. It is where the interface moved
+
+Step 2 keeps the kernel from step 1 and replaces only `native-link` with the
+current build. The native arm does not load:
+
+| run | step | native arm |
+| --- | --- | --- |
+| `..._181234_983977` | 1: current kernel, May-29 link | **loads**, 136.4 ns/run |
+| `..._190057_967714` | 2: step 1 + current `native-link` | `error=native-link kernel failed (rc=1)` |
+
+Reproduced outside the corpus path, and the message names the change:
+
+```
+native-link: wrote proof object 8266 bytes, 65 reloc(s)
+Error: x86 bpf_map_lookup_elem native call 0 in balancer_ingress is missing
+       link-plan lookup_sites metadata
+```
+
+So the two-pass link still produces the reference's own proof object -- 8,266
+bytes, 65 relocations, the exact figures this report records for the 2026-05-29
+object -- but the kernel pass now **requires a `--link-plan`** carrying
+`lookup_sites` metadata:
+
+```
+--link-plan <LINK_PLAN>
+    Versioned structured link plan containing helper/map/callsite facts.
+    This is the stable loader/native-link boundary for kernel mode
+```
+
+The May-29 loader does not supply one, so the current linker refuses. This is
+the component change the operator's walk was for: the loader/native-link
+boundary moved from "here is a proof object" to "here is a proof object plus a
+versioned link plan", and it is what breaks a mixed pair.
+
+That also reframes the current-ABI blocker: the blob-node and link-plan
+requirements are two halves of the same interface change, and a matching
+loader/transfer pair is what both need.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
