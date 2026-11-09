@@ -21,14 +21,14 @@ Contents:
 The experiment tested whether native x86 generated from the micro C programs
 could be mechanically translated into handcraft BPF:
 
-- non-control-flow x86 instructions become machine-level kinsn;
+- non-control-flow x86 instructions become machine-level kinsns;
 - final x86 emission is one named x86 instruction per kinsn;
 - verifier-facing `instantiate_insn()` proves enough BPF semantics for load;
 - program-level control flow remains verifier-visible ordinary BPF branch,
   call, and exit instructions.
 
 The broader question was whether this could replace or bypass bpfopt by running
-"native-like" code through kinsn.
+"native-like" code through kinsns.
 
 ## Result
 
@@ -113,7 +113,7 @@ BPF branch relocation.
 
 ### Raw BPF Control Flow Was Necessary
 
-Branch kinsn and proof-offset payloads were the wrong direction for this
+Branch kinsns and proof-offset payloads were the wrong direction for this
 experiment. Userspace would have to provide verifier-facing branch offsets that
 are not x86 operands. That creates an unsafe and hard-to-maintain boundary.
 
@@ -177,12 +177,12 @@ Use it as an archived oracle for:
 
 - seeing which native x86 instruction forms matter;
 - checking what final JIT parity might buy;
-- understanding verifier failure modes for candidate kinsn.
+- understanding verifier failure modes for candidate kinsns.
 
 The active kinsn direction should be:
 
-- bpfopt or LLVM backend emits kinsn only for basic-block-local patterns;
-- no branch kinsn in the default model;
+- bpfopt or LLVM backend emits kinsns only for basic-block-local patterns;
+- no branch kinsns in the default model;
 - no whole-function x86 emulation;
 - no global shadow flags as a default proof mechanism;
 - verifier-facing proofs stay small and local.

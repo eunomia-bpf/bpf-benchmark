@@ -1,4 +1,4 @@
-/* Auto-generated from /workspaces/repository/vendor/build/x86/linux/vmlinux. DO NOT EDIT. */
+/* Auto-generated from /home/yunwei37/workspace/bpf-benchmark/vendor/build/x86/linux/vmlinux. DO NOT EDIT. */
 #pragma once
 #define K_SK_BUFF_CB_OFFSET 40u
 #define K_SK_BUFF_LEN_OFFSET 112u
@@ -13,8 +13,6 @@
 #define K_BPF_ARRAY_PTRS_OFFSET 304u
 #define K_BPF_ARRAY_PPTRS_OFFSET 304u
 #define K_BPF_MAP_MAX_ENTRIES_OFFSET 68u
-#define K_BPF_PROG_BPF_FUNC_OFFSET 72u
-#define K_X86_BPF_TAIL_CALL_OFFSET 12u
 #define K_HTAB_ELEM_LRU_NODE_OFFSET 16u
 #define K_HTAB_ELEM_KEY_OFFSET 48u
 #define K_BPF_LRU_NODE_REF_OFFSET 19u

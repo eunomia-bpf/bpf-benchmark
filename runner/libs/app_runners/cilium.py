@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, run_command, tail_text
-from ..app_outcomes import cilium_outcome_snapshot, run_with_outcomes
 from ..benchmark_net import (
     BENCHMARK_IFACE,
     BENCHMARK_IFACE_CIDR,
@@ -24,7 +23,7 @@ from ..benchmark_net import (
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
-from .native_loader_env import native_loader_enabled, native_loader_manifest_env
+from .native_loader_env import native_loader_manifest_env
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
@@ -256,12 +255,7 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
         self._pause_agent()
         try:
-            return run_with_outcomes(
-                lambda: run_named_workload(
-                    self.workload_kind, seconds, network_device=self.device
-                ),
-                cilium_outcome_snapshot,
-            )
+            return run_named_workload(self.workload_kind, seconds, network_device=self.device)
         finally:
             self._resume_agent()
 
@@ -275,12 +269,7 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
         self._pause_agent()
         try:
-            return run_with_outcomes(
-                lambda: run_named_workload(
-                    requested_kind, seconds, network_device=self.device
-                ),
-                cilium_outcome_snapshot,
-            )
+            return run_named_workload(requested_kind, seconds, network_device=self.device)
         finally:
             self._resume_agent()
 
@@ -351,15 +340,6 @@ class CiliumRunner(NativeProcessRunner):
 
 
     def _command_env(self) -> Mapping[str, str] | None:
-        if native_loader_enabled():
-            from ..cilium_native_build import prepare_cilium_native_runtime
-
-            configured = os.environ.get("BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR", "").strip()
-            if not configured:
-                raise RuntimeError(
-                    "Cilium native loader requires BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR"
-                )
-            return prepare_cilium_native_runtime(Path(configured))
         env = native_loader_manifest_env("cilium")
         return env or None
 
@@ -491,7 +471,7 @@ class CiliumRunner(NativeProcessRunner):
             ],
             "mac": peer_mac,
             "state": "waiting-for-identity",
-            "sync-build-endpoint": False,
+            "sync-build-endpoint": True,
         }
         try:
             response = _api_json(

@@ -22,16 +22,9 @@ ARCH     ?= x86
 BZIMAGE  ?= $(X86_RUNTIME_KERNEL_IMAGE)
 SAMPLES  ?= 3
 WORKLOAD_DURATION ?=
-CILIUM_PROFILE_ARM ?= all
-CILIUM_PROFILE_ORDER ?= both
-CILIUM_PROFILE_DURATION ?= 60
-CILIUM_PROFILE_OUTPUT_DIR ?=
-CILIUM_PROFILE_CPUS ?= 0-7
 TIMEOUT  ?= 7200
 BENCH    ?=
 FUZZ_ROUNDS ?= 1000
-MERLIN_COMPILETIME_MODE ?= none
-MERLIN_BUILD_DIR ?= $(ROOT_DIR)/.cache/third-party-smoke/build/merlin-v0.01-llvm18
 DOCKER_BUILD_CACHE_KEEP_STORAGE ?= 50GB
 CPU_GOVERNOR_FILES := $(wildcard /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor)
 CPU_POLICY_MAX_FREQ_FILES := $(wildcard /sys/devices/system/cpu/cpufreq/policy[0-7]/scaling_max_freq)
@@ -91,14 +84,11 @@ VM_EXECUTABLE := $(VM_EXECUTABLE.$(RUN_KEY))
 VM_CPUS.kvm-x86 := 8
 VM_CPUS.qemu-arm64 := 2
 VM_CPUS := $(or $(VM_CPUS),$(VM_CPUS.$(RUN_KEY)))
-VM_CPU_PIN.kvm-x86 := 0-7
-VM_CPU_PIN := $(VM_CPU_PIN.$(RUN_KEY))
 VM_MEM.kvm-x86 := 64G
 VM_MEM.qemu-arm64 := 2G
 VM_MEM := $(or $(VM_MEM),$(VM_MEM.$(RUN_KEY)))
 VNG = $(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose \
-	--cpus "$(VM_CPUS)" $(if $(VM_CPU_PIN),--pin "$(VM_CPU_PIN)") --mem "$(VM_MEM)" \
-	--rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
+	--cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
 	--append "loglevel=7 panic=30 oops=panic"
 
 RUN_REMOTE_PYTHON_BIN ?= python3
@@ -175,21 +165,12 @@ KEEP_WORKDIRS ?=
 SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS TEST_MODE WORKLOAD_DURATION \
 	KEEP_WORKDIRS BPFREJIT_BENCH_PASSES BPFREJIT_CORPUS_APPS SKIP_REJIT CPU STRICT_ENV SHUFFLE_SEED \
 	REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY PERF_COUNTERS \
-	BPFREJIT_BRANCH_PROFILE_ROOT \
-	MERLIN_ARTIFACT_MODE MERLIN_COMPILETIME_MODE \
 	BPFREJIT_CORPUS_APP_TIMEOUT BPFREJIT_CORPUS_REJIT_TIMEOUT \
 	BPFREJIT_CORPUS_WORKLOAD_ONLY BPFREJIT_CORPUS_BPF_STATS \
-	BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY \
 	BPFREJIT_SHIM_NATIVE_LOADER BPFREJIT_SHIM_NATIVE_MANIFEST \
-	BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS \
+	BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT \
 	BPFREJIT_NATIVE_LOADER_SO \
-	BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF \
-	BPFREJIT_NATIVE_LINK_BINARY BPFREJIT_NATIVE_DISABLE_MAP_LOWERING \
-	BPFREJIT_FTRACE_FUNCTION_PROFILE BPFREJIT_FTRACE_FUNCTIONS \
-	BPFREJIT_KPROBE_FUNCTION_COUNTS BPFREJIT_KPROBE_FUNCTIONS \
-	BPFREJIT_TRACEE_STOP_MODE BPFREJIT_TRACEE_EVENTS \
-	CILIUM_PROFILE_ARM CILIUM_PROFILE_OUTPUT_DIR \
-	CILIUM_PROFILE_PERF_ROOT CILIUM_PROFILE_CODE_ROOT
+	BPFREJIT_NATIVE_LINK_BINARY
 export $(SUITE_ENV_NAMES)
 
 # Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
@@ -215,7 +196,7 @@ RUNTIME_DOCKER = docker run --rm --privileged --pid=host --network=host --ipc=ho
 RUNTIME_DOCKER_RUN = $(RUNTIME_DOCKER) -v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
 
 .PHONY: check validate lint clean \
-	selftest negative-test test micro corpus profile-cilium all terminate kvm-host-cpu \
+	selftest negative-test test micro corpus all terminate kvm-host-cpu \
 	clean-build clean-results clean-vm-tmp clean-docker-cache
 
 validate:
@@ -226,7 +207,7 @@ check:
 
 lint:
 	find "$(ROOT_DIR)" \
-		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/llvm-backend" -o -path "$(ROOT_DIR)/docs/archive" -o -path "$(ROOT_DIR)/kprog/docs/archive" -o -path "$(ROOT_DIR)/kinsn/docs/archive" -o -path "$(ROOT_DIR)/rejit/docs/archive" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
+		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/docs/tmp" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
 
 selftest: selftest-$(RUN_KEY)
@@ -280,21 +261,6 @@ kvm-host-cpu:
 micro: micro-$(RUN_KEY)
 corpus: corpus-$(RUN_KEY)
 
-# Profiling is deliberately separate from the timing targets.  The host
-# controller gates guest-only PMU counters at the corpus measurement markers;
-# the guest suite records call graphs while reusing corpus.driver unchanged.
-profile-cilium:
-	CILIUM_PROFILE_ARM="$(CILIUM_PROFILE_ARM)" \
-	CILIUM_PROFILE_ORDER="$(CILIUM_PROFILE_ORDER)" \
-	CILIUM_PROFILE_DURATION="$(CILIUM_PROFILE_DURATION)" \
-	CILIUM_PROFILE_OUTPUT_DIR="$(CILIUM_PROFILE_OUTPUT_DIR)" \
-	CILIUM_PROFILE_CPUS="$(CILIUM_PROFILE_CPUS)" \
-	"$(PYTHON)" -m corpus.profiling.host
-
-__profile-cilium-vm: runtime-kernel-image kvm-host-cpu
-	test -x "$(CILIUM_PROFILE_GUEST_SCRIPT)"
-	$(VNG) --exec "$(CILIUM_PROFILE_GUEST_SCRIPT)"
-
 micro-kvm-x86 micro-qemu-arm64 micro-docker-x86: RUNTIME_SUITE := micro
 corpus-kvm-x86 corpus-qemu-arm64 corpus-docker-x86: RUNTIME_SUITE := corpus
 micro-kvm-x86 corpus-kvm-x86: runtime-kernel-image kvm-host-cpu
@@ -317,9 +283,7 @@ micro-qemu-arm64 corpus-qemu-arm64: $(ARM64_QEMU_ROOT_READY)
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	cp -a "$(ARM64_QEMU_WORKSPACE)/$(RUNTIME_RESULT_DIR)/." "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)/"
 
-micro-docker-x86: x86-runner-runtime-image-tar
-corpus-docker-x86: x86-runner-runtime-host-docker-image-tar
-micro-docker-x86 corpus-docker-x86:
+micro-docker-x86 corpus-docker-x86: x86-runner-runtime-image-tar
 	$(MAKE) __runtime-host-$(RUNTIME_SUITE) $(RUN_MAKE_VARS)
 
 micro-aws-x86 micro-aws-arm64: AWS_SUITE := micro
@@ -332,11 +296,9 @@ micro-% corpus-% selftest-% negative-test-% test-%:
 
 __runtime-host-micro __runtime-vm-micro: RUNTIME_RESULT_DIR := micro/results
 __runtime-host-corpus __runtime-vm-corpus: RUNTIME_RESULT_DIR := corpus/results
-__runtime-vm-profile-cilium: RUNTIME_RESULT_DIR := corpus/results
 __runtime-vm-test: RUNTIME_RESULT_DIR := tests/results
 __runtime-host-micro __runtime-vm-micro: RUNTIME_SUITE_MODULE := runner.suites.micro
 __runtime-host-corpus __runtime-vm-corpus: RUNTIME_SUITE_MODULE := corpus.driver
-__runtime-vm-profile-cilium: RUNTIME_SUITE_MODULE := corpus.profiling.guest
 __runtime-vm-test: RUNTIME_SUITE_MODULE := runner.suites.test
 
 __runtime-host-micro:
@@ -346,7 +308,7 @@ __runtime-host-micro:
 
 __runtime-host-corpus:
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
-	docker load -i "$(RUNTIME_IMAGE_TAR)" >/dev/null
+	sudo "$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
 	$(RUNTIME_DOCKER_RUN)
 
 __runtime-vm-docker:
@@ -354,31 +316,20 @@ __runtime-vm-docker:
 	truncate -s "$${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
 	mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
 	mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
-	"$(RUNNER_DIR)/scripts/start-vm-docker"
+	dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
+	for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
+	docker info >/dev/null
 
 __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(if $(and $(filter __runtime-vm-micro,$@),$(filter native_kernel native_proof,$(RUNTIMES))),PATH="/usr/lib/llvm-18/bin:$$PATH" $(PYTHON) $(ROOT_DIR)/kprog/trusted_service.py --arch $(if $(filter x86_64,$(RUN_TARGET_ARCH)),1,2) \
-	  --endpoint /sys/kernel/debug/bpf_$(if $(filter x86_64,$(RUN_TARGET_ARCH)),x86,arm64)_native_lab/specializer \
-	  --state /run/bpf-benchmark-trusted-$(RUN_TOKEN) \
-	  --module $(if $(filter x86_64,$(RUN_TARGET_ARCH)),$(HOST_KINSN_DIR_X86)/bpf_x86_native_lab.ko,$(HOST_KINSN_DIR_ARM64)/bpf_arm64_native_lab.ko) \
-	  --native-link $(NATIVE_LINK_DIR)/target/$(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUST_TARGET)/)release/native-link \
-	  --loader $(ROOT_DIR)/runner/build-$(if $(filter x86_64,$(RUN_TARGET_ARCH)),llvmbpf,arm64-llvmbpf)/native_loader/trusted-native-loader \
-	  --results $(ROOT_DIR)/micro/results/trusted-service-$(RUN_TOKEN).tar.gz --run )$(RUNTIME_DOCKER_RUN)
-
-__runtime-vm-profile-cilium: __runtime-vm-docker
-	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
-	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -e PYTHONPATH="$(CILIUM_PROFILE_CODE_ROOT):$(ROOT_DIR)" \
-		-v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" \
-		"$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
+	$(RUNTIME_DOCKER_RUN)
 
 arm64-qemu-root: $(ARM64_QEMU_ROOT)
 
 $(ARM64_QEMU_ROOT): $(ARM64_QEMU_ROOT_READY)
 
-$(ARM64_QEMU_ROOT_READY): arm64-runner-runtime-image-tar $(RUNNER_DIR)/scripts/qemu-arm64-init
+$(ARM64_QEMU_ROOT_READY): $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(RUNNER_DIR)/scripts/qemu-arm64-init
 	test -n "$(ARM64_QEMU_BIN)"
 	install -d "$(ARTIFACT_ROOT)"
 	rm -rf "$(ARM64_QEMU_ROOT_TMP)"
@@ -391,10 +342,7 @@ $(ARM64_QEMU_ROOT_READY): arm64-runner-runtime-image-tar $(RUNNER_DIR)/scripts/q
 		trap - EXIT; \
 			rm -rf "$(ARM64_QEMU_ROOT)"; \
 			mv "$(ARM64_QEMU_ROOT_TMP)" "$(ARM64_QEMU_ROOT)"
-	sed "s|__BPFREJIT_IMAGE_WORKSPACE__|$(ROOT_DIR)|g" "$(RUNNER_DIR)/scripts/qemu-arm64-init" \
-		>"$(ARM64_QEMU_ROOT)/qemu-init.tmp"
-	install -m 0755 "$(ARM64_QEMU_ROOT)/qemu-init.tmp" "$(ARM64_QEMU_ROOT)/qemu-init"
-	rm -f "$(ARM64_QEMU_ROOT)/qemu-init.tmp"
+	install -m 0755 "$(RUNNER_DIR)/scripts/qemu-arm64-init" "$(ARM64_QEMU_ROOT)/qemu-init"
 
 all: test micro corpus
 
@@ -428,12 +376,12 @@ clean-build:
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"
 	rm -rf "$(ROOT_DIR)"/vendor/build
-	rm -rf "$(ROOT_DIR)"/kinsn/module/x86/build "$(ROOT_DIR)"/kinsn/module/arm64/build
+	rm -rf "$(ROOT_DIR)"/module/x86/build "$(ROOT_DIR)"/module/arm64/build
 	rm -rf "$(ROOT_DIR)"/kprog/test/build-x86 "$(ROOT_DIR)"/kprog/test/build-arm64
 
 clean-results:
-	@# results retention is manual; see docs/archive/shared/p89_disk_audit.md
-	@echo "Result cleanup is manual; see docs/archive/shared/p89_disk_audit.md"
+	@# results retention is manual; see docs/tmp/p89_disk_audit.md
+	@echo "Result cleanup is manual; see docs/tmp/p89_disk_audit.md"
 
 clean-vm-tmp:
 	-find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/*.img' -type f -delete
@@ -443,4 +391,4 @@ clean-docker-cache:
 	@echo "Docker build cache is not pruned automatically."
 	@echo "After confirming no image build is active, run:"
 	@echo "  docker buildx prune --keep-storage $(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
-	@echo "See docs/archive/shared/docker-build-cache-gc.md"
+	@echo "See docs/tmp/docker-build-cache-gc.md"

@@ -57,8 +57,6 @@ service:
   telemetry:
     logs:
       level: info
-    metrics:
-      level: none
   pipelines:
     profiles:
       receivers: [profiling]

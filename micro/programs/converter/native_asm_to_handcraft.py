@@ -454,7 +454,7 @@ def translate(insn: NativeInsn) -> Translation:
         target_addr = parse_branch_target(ops[0]) if len(ops) == 1 else None
         if target_addr is None:
             return Translation("warning-unmapped", (), f"cannot parse x86 branch target: {insn.raw}")
-        return Translation("control-flow-gap", (), f"{op} must be emitted as ordinary BPF control-flow; branch kinsn are not supported", target_addr)
+        return Translation("control-flow-gap", (), f"{op} must be emitted as ordinary BPF control-flow; branch kinsns are not supported", target_addr)
     if op == "jmp" and len(ops) == 1:
         target_addr = parse_branch_target(ops[0])
         if target_addr is None:

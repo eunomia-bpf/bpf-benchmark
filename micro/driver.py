@@ -51,9 +51,9 @@ RUNTIME_COMMANDS = {
     "kernel": "test-run",
     "kernel_rejit": "test-run",
     "native_kernel": "run-native-kernel",
-    "native_proof": "run-native-kernel",
+    "native_proof": "test-run",
 }
-NATIVE_ARTIFACT_RUNTIMES = {"native", "native_kernel", "native_proof"}
+NATIVE_ARTIFACT_RUNTIMES = {"native", "native_kernel"}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -208,10 +208,15 @@ def require_suite_artifacts(
             if benchmark.native_object_path is None:
                 raise RuntimeError(f"{benchmark.name} is missing a native artifact path")
             required_paths.append(benchmark.native_object_path)
-        if {"native_kernel", "native_proof"} & selected_runtime_names:
+        if "native_kernel" in selected_runtime_names:
             if benchmark.native_kernel_object_path is None:
                 raise RuntimeError(f"{benchmark.name} is missing a native_kernel artifact path")
             required_paths.append(benchmark.native_kernel_object_path)
+        if "native_proof" in selected_runtime_names:
+            if benchmark.proof_object_path is None or benchmark.proof_compile_metadata_path is None:
+                raise RuntimeError(f"{benchmark.name} is missing native_proof artifact paths")
+            required_paths.append(benchmark.proof_object_path)
+            required_paths.append(benchmark.proof_compile_metadata_path)
     require_existing_paths(required_paths)
 
 
@@ -258,7 +263,7 @@ def build_runner_command(
     if runner_command is None:
         raise RuntimeError(f"unsupported micro runtime: {runtime.name}")
     command = [str(runner_binary), runner_command]
-    if runtime.name in {"native_kernel", "native_proof"}:
+    if runtime.name == "native_kernel":
         # Pick the native kernel program type from benchmark tags so the
         # runner builds the right BPF stub (XDP vs sched_cls vs cgroup_skb).
         tags = set(benchmark.tags)
@@ -271,11 +276,16 @@ def build_runner_command(
         command.append("--wait-signal")
 
     program_path = benchmark.object_path
+    if runtime.name == "native_proof":
+        if benchmark.proof_object_path is None:
+            raise RuntimeError(f"{benchmark.name} is missing a proof object path")
+        program_path = benchmark.proof_object_path
+
     command.extend(["--program", str(program_path)])
     if runtime.name in NATIVE_ARTIFACT_RUNTIMES:
         native_path = (
             benchmark.native_kernel_object_path
-            if runtime.name in {"native_kernel", "native_proof"}
+            if runtime.name == "native_kernel"
             else benchmark.native_object_path
         )
         if native_path is None:
@@ -349,6 +359,27 @@ def run_runtime_sample(command: list[str], runtime_name: str, *, cwd: Path) -> d
     if runtime_name == "kernel_rejit":
         return run_rejit_sample(command, cwd=cwd)
     return run_single_sample(command, cwd=cwd)
+
+
+def enrich_native_proof_sample(sample: dict[str, Any], benchmark: CatalogTarget) -> dict[str, Any]:
+    metadata_path = benchmark.proof_compile_metadata_path
+    if metadata_path is None:
+        raise RuntimeError(f"{benchmark.name} is missing proof compile metadata path")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    proof_compile_ns = int(metadata["compile_ns"])
+    runner_compile_ns = int(sample.get("compile_ns") or 0)
+    phases = dict(sample.get("phases_ns") or {})
+    phases["proof_compile_ns"] = proof_compile_ns
+    sample["phases_ns"] = phases
+    sample["proof_compile_ns"] = proof_compile_ns
+    sample["runner_compile_ns"] = runner_compile_ns
+    sample["proof_compile"] = {
+        "arch": metadata.get("arch"),
+        "source": metadata.get("source"),
+        "object": metadata.get("object"),
+        "command": metadata.get("command"),
+    }
+    return sample
 
 
 def _dump_stem(benchmark_name: str, runtime_name: str, sample_idx: int | None = None) -> str:
@@ -623,6 +654,8 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     for _ in range(max(0, warmups)):
                         sample = run_runtime_sample(warmup_command, runtime.name, cwd=ROOT_DIR)
+                        if runtime.name == "native_proof":
+                            sample = enrich_native_proof_sample(sample, benchmark)
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                             raise RuntimeError(
                                 f"{benchmark.name}/{runtime.name} warmup result mismatch: "
@@ -646,7 +679,7 @@ def main(argv: list[str] | None = None) -> int:
                         inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                         dump_jit_path = None
                         dump_xlated_path = None
-                        if runtime.name in {"kernel", "kernel_rejit", "llvmbpf", "native_kernel", "native_proof"}:
+                        if runtime.name in {"kernel", "kernel_rejit", "llvmbpf", "native_kernel"}:
                             dump_jit_path, dump_xlated_path = _jit_dump_paths(
                                 artifact_dir,
                                 _dump_stem(benchmark.name, runtime.name, sample_idx),
@@ -664,6 +697,8 @@ def main(argv: list[str] | None = None) -> int:
                             dump_xlated_path=dump_xlated_path,
                         )
                         sample = run_runtime_sample(command, runtime.name, cwd=ROOT_DIR)
+                        if runtime.name == "native_proof":
+                            sample = enrich_native_proof_sample(sample, benchmark)
                         sample["sample_index"] = sample_idx
 
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:

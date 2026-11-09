@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ctypes
 import errno
-import json
 import os
 import platform
 import shlex
@@ -14,7 +13,6 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
-from ..app_outcomes import katran_outcome_snapshot, run_with_outcomes
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
@@ -60,6 +58,7 @@ ROUTER_CLIENT_IFACE = "rtcl0"
 CLIENT_IFACE = "client0"
 ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
+
 LB_IP = "192.0.2.2"
 ROUTER_LB_IP = "192.0.2.1"
 CLIENT_IP = "10.0.0.2"
@@ -181,34 +180,6 @@ def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check
     return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check)
 
 
-def _namespace_ifindex(namespace: str, iface: str) -> int:
-    completed = ns_exec_command(
-        namespace, [ip_binary(), "-j", "link", "show", "dev", iface]
-    )
-    payload = json.loads(completed.stdout or "[]")
-    if not isinstance(payload, list) or not payload:
-        raise RuntimeError(f"could not resolve ifindex for {namespace}/{iface}")
-    return int(payload[0]["ifindex"])
-
-
-def _update_katran_route_map(namespace: str, ifindex: int) -> int:
-    map_ids = [
-        int(record["id"])
-        for record in _map_show_records()
-        if str(record.get("name") or "") == "katran_route"
-    ]
-    if not map_ids:
-        raise RuntimeError("Katran transport devmap was not loaded")
-    map_id = max(map_ids)
-    value = int(ifindex).to_bytes(4, "little")
-    ns_exec_command(namespace, [
-        resolve_bpftool_binary(), "map", "update", "id", str(map_id),
-        "key", "hex", "00", "00", "00", "00",
-        "value", "hex", *(f"{byte:02x}" for byte in value),
-    ])
-    return map_id
-
-
 def link_exists(name: str) -> bool:
     return Path("/sys/class/net").joinpath(name).exists()
 
@@ -303,8 +274,6 @@ class KatranDsrTopology:
         self.router_peer_iface = router_peer_iface or None
         self.lb_ifindex = 0
         self.created_hc_ifaces: list[str] = []
-        self.peer_xdp_path = ""
-        self.route_map_id = 0
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
@@ -349,23 +318,6 @@ class KatranDsrTopology:
         _nsc(CLIENT_NS, "link", "set", "dev", CLIENT_IFACE, "up")
         _nsc(REAL_NS, "addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE)
         _nsc(REAL_NS, "link", "set", "dev", REAL_IFACE, "up")
-        # Keep the outcome path entirely in XDP: Katran still encapsulates and
-        # returns XDP_TX, the router peer redirects that frame to the backend
-        # veth, and the backend XDP sink accounts it in interface RX counters.
-        # This avoids making skb allocation/routing the benchmark bottleneck.
-        peer_xdp = _resolve_katran_bpf_artifact("bpf/katran_transport.bpf.o")
-        ns_exec_command(REAL_NS, [
-            ip_binary(), "link", "set", "dev", REAL_IFACE,
-            "xdp", "obj", str(peer_xdp), "sec", "xdp/receiver_sink",
-        ])
-        ns_exec_command(ROUTER_NS, [
-            ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
-            "xdp", "obj", str(peer_xdp), "sec", "xdp/router_redirect",
-        ])
-        self.peer_xdp_path = str(peer_xdp)
-        self.route_map_id = _update_katran_route_map(
-            ROUTER_NS, _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
-        )
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
         _nsc(REAL_NS, "addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0")
@@ -403,11 +355,7 @@ class KatranDsrTopology:
     def metadata(self) -> dict[str, object]:
         return {"namespaces": {"router": ROUTER_NS, "client": CLIENT_NS, "real": REAL_NS},
                 "iface": self.iface, "router_peer_iface": self.router_peer_iface, "lb_ifindex": self.lb_ifindex,
-                "healthcheck_ifaces": list(self.created_hc_ifaces),
-                "peer_xdp_path": self.peer_xdp_path,
-                "peer_xdp_iface": ROUTER_LB_IFACE,
-                "receiver_xdp_iface": REAL_IFACE,
-                "route_map_id": self.route_map_id}
+                "healthcheck_ifaces": list(self.created_hc_ifaces)}
 
     def close(self) -> None: self.cleanup()
     def __exit__(self, exc_type, exc, tb) -> None: self.close()
@@ -666,7 +614,6 @@ DEFAULT_WRK_THREADS = 4
 DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_PKTGEN_PKT_SIZE = 64
 DEFAULT_PKTGEN_CLONE_SKB = 0
-DEFAULT_PKTGEN_SRC_PORT = 10000
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
 KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
@@ -797,12 +744,8 @@ class KatranRunner(AppRunner):
         duration_s = max(1, int(float(seconds)))
         ensure_kernel_module_loaded("pktgen")
         self._pktgen_write(PKTGEN_CTRL, "reset")
-        # The 2026-05-29 workload: four pktgen workers on threads 0-3, each
-        # with its own device alias, driving the random-flow packet shape.
-        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}"
-                        for thread_id in KATRAN_PKTGEN_THREAD_IDS)
-        for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases,
-                                    strict=True):
+        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}" for thread_id in KATRAN_PKTGEN_THREAD_IDS)
+        for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True):
             thread_path = f"/proc/net/pktgen/kpktgend_{thread_id}"
             self._pktgen_write(thread_path, "rem_device_all")
             self._pktgen_write(thread_path, f"add_device {alias}")
@@ -862,8 +805,7 @@ class KatranRunner(AppRunner):
                         "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
                         "proto": UDP_PROTO},
             )
-            for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases,
-                                            strict=True)
+            for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True)
         )
         return WorkloadResult(
             workload_name="katran_kernel_pktgen_l2_udp",
@@ -894,12 +836,8 @@ class KatranRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
         if self.workload_kind == "xdp_pktgen":
-            return run_with_outcomes(
-                lambda: self._run_pktgen_workload(seconds), katran_outcome_snapshot
-            )
-        return run_with_outcomes(
-            lambda: self._run_network_workload(seconds), katran_outcome_snapshot
-        )
+            return self._run_pktgen_workload(seconds)
+        return self._run_network_workload(seconds)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()

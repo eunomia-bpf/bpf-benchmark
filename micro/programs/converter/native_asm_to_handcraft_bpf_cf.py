@@ -2,7 +2,7 @@
 """Translate x86 native asm text into a handcraft.c candidate.
 
 This experimental variant keeps branch/call/exit as ordinary BPF control-flow
-instructions instead of emitting branch kinsn.  It is intentionally separate
+instructions instead of emitting branch kinsns.  It is intentionally separate
 from native_asm_to_handcraft.py so the strict machine-kinsn path remains visible.
 """
 

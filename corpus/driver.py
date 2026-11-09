@@ -8,10 +8,10 @@ import signal
 import shutil
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -25,18 +25,18 @@ from runner.libs.benchmark_catalog import (
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_yaml
+from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
     LifecycleRunResult,
     wait_for_suite_quiescence,
 )
 from runner.libs.kinsn import prepare_kinsn_modules
 from runner.libs import rejit_plan
-from runner.libs.bpf_evidence import capture_bpf_evidence
 from runner.libs.rejit import (
-    _list_app_shim_program_ids,
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
+    snapshot_app_maps,
     skip_rejit_disables_shim,
     skip_rejit_enabled,
 )
@@ -64,21 +64,9 @@ DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 _CORPUS_APPS_ENV = "BPFREJIT_CORPUS_APPS"
 _CORPUS_APP_TIMEOUT_ENV = "BPFREJIT_CORPUS_APP_TIMEOUT"
 _CORPUS_REJIT_TIMEOUT_ENV = "BPFREJIT_CORPUS_REJIT_TIMEOUT"
-_CORPUS_NATIVE_LOADER_POST_ONLY_ENV = "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY"
 _DEFAULT_CORPUS_APP_TIMEOUT_S = 1800.0
 _DEFAULT_CORPUS_REJIT_TIMEOUT_S = 900.0
 _TIMEOUT_STACK: list[tuple[float, str, float]] = []
-_NATIVE_LOADER_ENV_NAMES = (
-    "BPFREJIT_SHIM_NATIVE_LOADER",
-    "BPFREJIT_SHIM_NATIVE_MANIFEST",
-    "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT",
-    "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS",
-    "BPFREJIT_NATIVE_LOADER_SO",
-    "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF",
-    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF",
-    "BPFREJIT_NATIVE_LINK_BINARY",
-    "BPFREJIT_NATIVE_DISABLE_MAP_LOWERING",
-)
 
 
 class _AppLifecycleComplete(Exception):
@@ -122,19 +110,6 @@ def _skip_rejit_enabled() -> bool:
         raise SystemExit(str(exc)) from exc
 
 
-def _local_docker_executor(args: argparse.Namespace) -> bool:
-    return str(getattr(args, "executor", "")).strip() == "local-docker"
-
-
-def _wait_for_suite_quiescence(args: argparse.Namespace) -> None:
-    if _local_docker_executor(args):
-        # Host Docker shares the host-wide BPF program table with unrelated
-        # workloads, so the global count is not an isolation signal here.
-        time.sleep(2.0)
-        return
-    wait_for_suite_quiescence()
-
-
 def _keep_workdirs_enabled() -> bool:
     raw = _env_str("KEEP_WORKDIRS").lower()
     if raw in ("", "0"):
@@ -165,74 +140,15 @@ def _env_bool(name: str, default: bool = False) -> bool:
     raise SystemExit(f"{name} must be boolean: empty, 0/1, false/true, no/yes, or off/on")
 
 
-def _native_loader_phase() -> str:
-    mode = _env_str(_CORPUS_NATIVE_LOADER_POST_ONLY_ENV).lower()
-    if mode in {"1", "true", "yes", "on", "post", "post_only", "post-only", "post_rejit"}:
-        return "post"
-    if mode not in {"", "0", "false", "no", "off"}:
-        raise SystemExit(
-            f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV} must be boolean or post-only mode"
-        )
+def _native_loader_post_only_enabled() -> bool:
     raw = _env_str("BPFREJIT_SHIM_NATIVE_LOADER").lower()
     if not raw or raw in {"0", "false", "no", "off", "1", "true", "yes", "on"}:
-        return "off"
+        return False
     if raw in {"post", "post_only", "post-only", "post_rejit"}:
-        return "post"
-    if raw in {"baseline", "baseline_only", "baseline-only", "pre", "pre_only", "pre-only"}:
-        return "baseline"
+        return True
     raise SystemExit(
-        "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, post, or baseline"
+        "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, or post"
     )
-
-
-def _validate_native_loader_skip_rejit(
-    *,
-    skip_rejit: bool,
-    native_loader_phase: str,
-) -> None:
-    if not (skip_rejit and native_loader_phase != "off"):
-        return
-    raise SystemExit(
-        "native-loader single-phase mode is incompatible with SKIP_REJIT; "
-        "unset SKIP_REJIT to benchmark native replacement, or unset "
-        f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV}/BPFREJIT_SHIM_NATIVE_LOADER=post "
-        "to run a no-ReJIT diagnostic"
-    )
-
-
-def _effective_rejit_enabled_passes(*, native_loader_phase: str) -> list[str]:
-    enabled_passes = benchmark_rejit_enabled_passes()
-    if native_loader_phase != "off" and "BPFREJIT_BENCH_PASSES" not in os.environ:
-        return []
-    return enabled_passes
-
-
-def _current_native_loader_env() -> dict[str, str]:
-    return {
-        name: value
-        for name in _NATIVE_LOADER_ENV_NAMES
-        if (value := os.environ.get(name)) is not None
-    }
-
-
-def _active_native_loader_env_keys(*, include_control_env: bool = True) -> list[str]:
-    names = _NATIVE_LOADER_ENV_NAMES
-    if include_control_env:
-        names = (*names, _CORPUS_NATIVE_LOADER_POST_ONLY_ENV)
-    return sorted(name for name in names if os.environ.get(name) is not None)
-
-
-def _enable_native_loader_env(saved_env: Mapping[str, str]) -> dict[str, str | None]:
-    updates: dict[str, str | None] = {name: None for name in _NATIVE_LOADER_ENV_NAMES}
-    updates.update(saved_env)
-    updates["BPFREJIT_SHIM_NATIVE_LOADER"] = "1"
-    return updates
-
-
-def _disable_native_loader_env() -> dict[str, str | None]:
-    updates: dict[str, str | None] = {name: None for name in _NATIVE_LOADER_ENV_NAMES}
-    updates[_CORPUS_NATIVE_LOADER_POST_ONLY_ENV] = None
-    return updates
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -258,12 +174,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ):
         if not value:
             raise SystemExit(f"{name} is required; run corpus through Make")
-    skip_rejit = _skip_rejit_enabled()
-    native_loader_phase = _native_loader_phase()
-    _validate_native_loader_skip_rejit(
-        skip_rejit=skip_rejit,
-        native_loader_phase=native_loader_phase,
-    )
     ns = argparse.Namespace(
         workspace=str(ROOT_DIR),
         target_arch=target_arch,
@@ -280,7 +190,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         warmups=_env_int("WARMUPS", 1),
         app_timeout_s=_env_float(_CORPUS_APP_TIMEOUT_ENV, _DEFAULT_CORPUS_APP_TIMEOUT_S),
         rejit_timeout_s=_env_float(_CORPUS_REJIT_TIMEOUT_ENV, _DEFAULT_CORPUS_REJIT_TIMEOUT_S),
-        skip_rejit=skip_rejit,
+        skip_rejit=_skip_rejit_enabled(),
         keep_failure_artifacts=_keep_workdirs_enabled(),
         workload_only=_env_bool("BPFREJIT_CORPUS_WORKLOAD_ONLY"),
         collect_bpf_stats=_env_bool("BPFREJIT_CORPUS_BPF_STATS", True),
@@ -327,14 +237,6 @@ def _build_runner_artifacts(
     result_details = runner.artifacts.get("result_details")
     if isinstance(result_details, Mapping):
         artifacts["result_details"] = dict(result_details)
-    process_output = getattr(runner, "process_output", None)
-    if isinstance(process_output, Mapping) and process_output:
-        details = dict(artifacts.get("result_details") or {})
-        details["process_output"] = dict(process_output)
-        command_used = getattr(runner, "command_used", None)
-        if isinstance(command_used, Sequence) and not isinstance(command_used, (str, bytes, bytearray)):
-            details["command_used"] = [str(part) for part in command_used]
-        artifacts["result_details"] = details
     return artifacts
 
 
@@ -352,105 +254,6 @@ def _runner_pids(app: AppSpec, runner: AppRunner) -> list[int]:
     if not result:
         raise RuntimeError(f"{app.name}: runner did not expose any shim pids")
     return result
-
-
-def _capture_phase_bpf_evidence(
-    app: AppSpec,
-    phase: str,
-    app_pids: Sequence[int],
-    artifact_session: ArtifactSession | None,
-    program_name_log: Path | None = None,
-) -> Path | None:
-    if artifact_session is None:
-        return None
-    program_ids = sorted(
-        {
-            program_id
-            for pid in app_pids
-            for program_id in _list_app_shim_program_ids(int(pid))
-        }
-    )
-    return capture_bpf_evidence(
-        output_root=artifact_session.run_dir / "details" / "bpf-evidence",
-        app_name=app.name,
-        phase=phase,
-        program_ids=program_ids,
-        program_name_log=program_name_log,
-    )
-
-
-def _kernel_name_signature(payload: Mapping[str, object], field: str) -> object:
-    """Return a live-graph signature at the kernel's 15-byte program-name granularity.
-
-    A load-time rewrite such as kinsn can leave programs without BTF function
-    names, so only their truncated kernel names are visible while the other arm
-    shows full names.
-    """
-    items = payload.get(field)
-    if not isinstance(items, list):
-        return items
-    if field == "inventory_signature":
-        counts: dict[tuple[str, str], int] = {}
-        for item in items:
-            key = (str(item["type"]), str(item["name"])[:15])
-            counts[key] = counts.get(key, 0) + int(item["count"])
-        return [
-            {"type": type_name, "name": name, "count": count}
-            for (type_name, name), count in sorted(counts.items())
-        ]
-    return sorted(
-        ({**item, "program_name": str(item["program_name"])[:15]} for item in items),
-        key=lambda item: json.dumps(item, sort_keys=True),
-    )
-
-
-def _validate_cilium_live_inventory_parity(
-    baseline_dir: Path, post_dir: Path, *, kernel_names: bool = False
-) -> None:
-    """Fail unless both arms run the same live programs on the same attachments.
-
-    With ``kernel_names`` the arms are compared at kernel-name granularity; use
-    it when no arm's names come from a native-loader log.
-    """
-    def load(path: Path) -> Mapping[str, object]:
-        payload = json.loads((path / "live-program-graph.json").read_text(encoding="utf-8"))
-        if not isinstance(payload, Mapping):
-            raise RuntimeError(f"invalid Cilium live-program graph: {path}")
-        return payload
-
-    def signature(payload: Mapping[str, object], field: str) -> object:
-        if kernel_names:
-            return _kernel_name_signature(payload, field)
-        return payload.get(field)
-
-    baseline = load(baseline_dir)
-    post = load(post_dir)
-    mismatches = {
-        field: {"baseline": signature(baseline, field), "post_rejit": signature(post, field)}
-        for field in ("inventory_signature", "attachment_signature")
-        if signature(baseline, field) != signature(post, field)
-    }
-    parity_path = post_dir.parent / "inventory-parity.json"
-    parity_path.write_text(
-        json.dumps(
-            {
-                "status": "fail" if mismatches else "pass",
-                "name_granularity": "kernel" if kernel_names else "full",
-                "mismatches": mismatches,
-                "baseline_live_program_count": len(baseline.get("live_program_ids", [])),
-                "post_rejit_live_program_count": len(post.get("live_program_ids", [])),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    if mismatches:
-        raise RuntimeError(
-            "Cilium JIT/native live program inventory differs: "
-            + json.dumps(mismatches, sort_keys=True)
-        )
 
 
 def _build_app_error_result(
@@ -554,21 +357,18 @@ def _sanitize_app_filename(app_name: str) -> str:
 
 
 @contextmanager
-def _temporary_env(updates: Mapping[str, str | None]):
+def _temporary_env(updates: Mapping[str, str]):
     previous: dict[str, str | None] = {key: os.environ.get(key) for key in updates}
     try:
-        _apply_env_updates(updates)
+        for key, value in updates.items():
+            os.environ[key] = str(value)
         yield
     finally:
-        _apply_env_updates(previous)
-
-
-def _apply_env_updates(updates: Mapping[str, str | None]) -> None:
-    for key, value in updates.items():
-        if value is None:
-            os.environ.pop(key, None)
-        else:
-            os.environ[key] = str(value)
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 def _arm_timeout_timer() -> None:
@@ -642,6 +442,20 @@ def _loadtime_reports_path(
         reports_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-loadtime-reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     return reports_dir / f"{_sanitize_app_filename(app.name)}.jsonl"
+
+
+def _map_snapshot_path(
+    app: AppSpec,
+    *,
+    artifact_session: ArtifactSession | None,
+) -> Path:
+    if artifact_session is not None:
+        snapshot_dir = artifact_session.run_dir / "details" / "map-snapshots"
+    else:
+        snapshot_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-map-snapshots"
+    path = snapshot_dir / _sanitize_app_filename(app.name)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def _shim_log_path(
@@ -727,44 +541,6 @@ def _write_incremental_app_result(
         metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
 
 
-def _measure_app_phase_with_stats(
-    *,
-    workspace: Path,
-    collect_bpf_stats: bool,
-    app_pids: Sequence[int],
-    runner: AppRunner,
-    workload_seconds: float,
-    samples: int,
-    warmups: int,
-) -> dict[str, object]:
-    def die(message: str) -> None:
-        raise RuntimeError(message)
-
-    if collect_bpf_stats:
-        _set_bpf_stats_enabled(workspace, True, die=die)
-    try:
-        return measure_app_phase(
-            app_pids=app_pids,
-            runner=runner,
-            workload_seconds=workload_seconds,
-            samples=samples,
-            warmups=warmups,
-        )
-    finally:
-        if collect_bpf_stats:
-            _set_bpf_stats_enabled(workspace, False, die=die)
-
-
-def _disable_bpf_stats_after_stop(workspace: Path, collect_bpf_stats: bool) -> None:
-    if not collect_bpf_stats:
-        return
-
-    def die(message: str) -> None:
-        raise RuntimeError(message)
-
-    _set_bpf_stats_enabled(workspace, False, die=die)
-
-
 def run_suite(
     args: argparse.Namespace,
     suite: AppSuite,
@@ -772,11 +548,6 @@ def run_suite(
     artifact_session: "ArtifactSession | None" = None,
     partial_results: "dict[str, dict[str, object]] | None" = None,
 ) -> dict[str, object]:
-    workspace = ROOT_DIR
-    if artifact_session is not None:
-        os.environ["BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR"] = str(
-            artifact_session.run_dir / "details" / "cilium-native-config"
-        )
     suite_path = suite.manifest_path.resolve()
     workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
@@ -784,44 +555,26 @@ def run_suite(
     skip_rejit = bool(getattr(args, "skip_rejit", False))
     workload_only = bool(getattr(args, "workload_only", False))
     collect_bpf_stats = bool(getattr(args, "collect_bpf_stats", True))
-    native_loader_phase = _native_loader_phase()
-    _validate_native_loader_skip_rejit(
-        skip_rejit=skip_rejit,
-        native_loader_phase=native_loader_phase,
-    )
-    phase_native_env = _current_native_loader_env()
-    if native_loader_phase == "post":
-        _apply_env_updates(_disable_native_loader_env())
-    elif native_loader_phase == "baseline":
-        _apply_env_updates(_enable_native_loader_env(phase_native_env))
-    _print_progress(
-        "native_loader_mode",
-        phase=native_loader_phase,
-        saved_env_keys=sorted(phase_native_env),
-        active_env_keys=_active_native_loader_env_keys(),
-    )
+    native_loader_post_only = _native_loader_post_only_enabled()
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
-    apply_enabled_passes = _effective_rejit_enabled_passes(
-        native_loader_phase=native_loader_phase
-    )
+    apply_enabled_passes = benchmark_rejit_enabled_passes()
 
-    # Kinsn modules are only valid on the benchmark kernel that built them.
-    # Host Docker runs on the host kernel and must not install image modules.
-    should_load_kinsn = (
-        not workload_only
-        and not skip_rejit_disables_shim()
-        and not _local_docker_executor(args)
-    )
-    kinsn_module_metadata = prepare_kinsn_modules() if should_load_kinsn else {}
-    for app in suite.apps:
+    # Load all kinsn .ko modules into the running kernel before any app
+    # starts. Stock-kernel BTF probing happens inside shim_init via
+    # kinsnprober; that probe needs the modules already resident, otherwise
+    # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
+    # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
+    kinsn_module_metadata = {} if workload_only else prepare_kinsn_modules()
+    stats_context = enable_bpf_stats() if collect_bpf_stats else nullcontext({"mode": "disabled"})
+    with stats_context:
+        for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
             lifecycle: LifecycleRunResult | None = None
             startup_error = ""
             phase = ""
-            baseline_evidence_dir: Path | None = None
             try:
                 with _timeout_scope(float(getattr(args, "app_timeout_s", 0.0) or 0.0),
                                     f"{app.name} app lifecycle"):
@@ -855,48 +608,19 @@ def run_suite(
                             phase=phase,
                             status="ok",
                         )
-                        _wait_for_suite_quiescence(args)
+                        wait_for_suite_quiescence()
                         raise _AppLifecycleComplete
 
-                    phase = "baseline_start"
-                    _print_progress(
-                        "phase_start",
-                        app=app.name,
-                        runner=app.runner,
-                        phase=phase,
-                        workload=app.workload_for("corpus"),
-                    )
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                    baseline_env: dict[str, str | None] = {
+                    with _temporary_env({
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
                         "BPFREJIT_SHIM_LOG": str(_shim_log_path(
                             app,
                             "baseline",
                             artifact_session=artifact_session,
                         )),
-                    }
-                    _print_progress(
-                        "native_loader_phase_env",
-                        app=app.name,
-                        runner=app.runner,
-                        phase=phase,
-                        active_env_keys=_active_native_loader_env_keys(),
-                        temporary_set_keys=sorted(
-                            key for key, value in baseline_env.items() if value is not None
-                        ),
-                        temporary_unset_keys=sorted(
-                            key for key, value in baseline_env.items() if value is None
-                        ),
-                    )
-                    with _temporary_env(baseline_env):
+                    }):
                         runner.start()
-                    _print_progress(
-                        "phase_done",
-                        app=app.name,
-                        runner=app.runner,
-                        phase=phase,
-                        status="ok",
-                    )
                     lifecycle = LifecycleRunResult(
                         baseline=None,
                         rejit_result=None,
@@ -904,20 +628,6 @@ def run_suite(
                         artifacts=_build_runner_artifacts(app, runner),
                     )
                     app_pids = _runner_pids(app, runner)
-                    baseline_name_log = None
-                    if app.runner == "cilium" and native_loader_phase == "baseline":
-                        baseline_name_log = _shim_log_path(
-                            app,
-                            "baseline",
-                            artifact_session=artifact_session,
-                        )
-                    baseline_evidence_dir = _capture_phase_bpf_evidence(
-                        app,
-                        "baseline",
-                        app_pids,
-                        artifact_session,
-                        baseline_name_log,
-                    )
                     workload_name = _app_workload_name(app)
 
                     phase = "baseline"
@@ -929,9 +639,7 @@ def run_suite(
                         workload=workload_name,
                         samples=samples,
                     )
-                    lifecycle.baseline = _measure_app_phase_with_stats(
-                        workspace=workspace,
-                        collect_bpf_stats=collect_bpf_stats,
+                    lifecycle.baseline = measure_app_phase(
                         app_pids=app_pids,
                         runner=runner,
                         workload_seconds=workload_seconds,
@@ -946,63 +654,39 @@ def run_suite(
                         status="ok",
                     )
 
-                    phase = "baseline_stop"
-                    try:
-                        _print_progress(
-                            "phase_start",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                        )
-                        runner.stop()
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="runner_stop_done",
-                        )
-                        runner = None
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="quiesce_start",
-                        )
-                        _wait_for_suite_quiescence(args)
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="quiesce_done",
-                        )
-                        _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="bpf_stats_disabled",
+                    baseline_map_snapshot_path: Path | None = None
+                    if not skip_rejit and "map_inline" in apply_enabled_passes:
+                        phase = "map_snapshot"
+                        baseline_map_snapshot_path = _map_snapshot_path(
+                            app,
+                            artifact_session=artifact_session,
                         )
                         _print_progress(
-                            "phase_done",
+                            "map_snapshot_start",
                             app=app.name,
                             runner=app.runner,
-                            phase=phase,
+                        )
+                        snapshot_app_maps(
+                            app_pids=app_pids,
+                            output_dir=baseline_map_snapshot_path,
+                        )
+                        _print_progress(
+                            "map_snapshot_done",
+                            app=app.name,
+                            runner=app.runner,
                             status="ok",
                         )
+
+                    phase = "baseline_stop"
+                    try:
+                        runner.stop()
+                        runner = None
+                        wait_for_suite_quiescence()
                     except Exception as stop_exc:
                         raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
 
-                    if skip_rejit_disables_shim():
-                        lifecycle.rejit_result = {"status": "skipped", "mode": "skip_rejit_all"}
-                        raise _AppLifecycleComplete
-
                     phase = "loadtime_plan"
-                    loadtime_env: dict[str, str | None] = {
-                        "BPFREJIT_REPO_ROOT": str(REPO_ROOT),
+                    loadtime_env: dict[str, str] = {
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
                         "BPFREJIT_SHIM_LOG": str(_shim_log_path(
                             app,
@@ -1010,44 +694,11 @@ def run_suite(
                             artifact_session=artifact_session,
                         )),
                     }
-                    if native_loader_phase == "post":
-                        loadtime_env.update(_enable_native_loader_env(phase_native_env))
-                    elif native_loader_phase == "baseline":
-                        loadtime_env.update(_disable_native_loader_env())
-                    _print_progress(
-                        "native_loader_phase_env",
-                        app=app.name,
-                        runner=app.runner,
-                        phase="post_rejit_start",
-                        active_env_keys=_active_native_loader_env_keys(),
-                        temporary_set_keys=sorted(
-                            key for key, value in loadtime_env.items() if value is not None
-                        ),
-                        temporary_unset_keys=sorted(
-                            key for key, value in loadtime_env.items() if value is None
-                        ),
-                    )
+                    if native_loader_post_only:
+                        loadtime_env["BPFREJIT_SHIM_NATIVE_LOADER"] = "1"
                     if skip_rejit:
                         _print_progress("rejit_skipped", app=app.name, runner=app.runner)
                         lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
-                    elif native_loader_phase != "off" and not apply_enabled_passes:
-                        lifecycle.rejit_result = {
-                            "status": "ok",
-                            "mode": (
-                                ("verified_native_loader" if str(phase_native_env.get(
-                                    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", ""
-                                )).lower() in {"1", "true", "yes", "on"} else "native_loader")
-                                if native_loader_phase == "post"
-                                else "jit_restart_after_native"
-                            ),
-                            "enabled_passes": [],
-                        }
-                        _print_progress(
-                            "loadtime_plan_done",
-                            app=app.name,
-                            runner=app.runner,
-                            status=str(lifecycle.rejit_result["mode"]),
-                        )
                     else:
                         _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
                         plan_path, _plan_payload = _write_loadtime_plan(
@@ -1061,6 +712,10 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
+                        if baseline_map_snapshot_path is not None:
+                            loadtime_env["BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT"] = str(
+                                baseline_map_snapshot_path
+                            )
                         lifecycle.rejit_result = {
                             "status": "ok",
                             "mode": "loadtime",
@@ -1068,6 +723,10 @@ def run_suite(
                             "report_path": str(reports_path),
                             "enabled_passes": list(apply_enabled_passes),
                         }
+                        if baseline_map_snapshot_path is not None:
+                            lifecycle.rejit_result["map_snapshot_path"] = str(
+                                baseline_map_snapshot_path
+                            )
                         _print_progress(
                             "loadtime_plan_done",
                             app=app.name,
@@ -1076,50 +735,12 @@ def run_suite(
                         )
 
                     phase = "post_rejit_start"
-                    _print_progress(
-                        "phase_start",
-                        app=app.name,
-                        runner=app.runner,
-                        phase=phase,
-                        workload=app.workload_for("corpus"),
-                    )
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                     with _timeout_scope(float(getattr(args, "rejit_timeout_s", 0.0) or 0.0),
                                         f"{app.name} loadtime rejit"):
                         with _temporary_env(loadtime_env):
                             runner.start()
-                    _print_progress(
-                        "phase_done",
-                        app=app.name,
-                        runner=app.runner,
-                        phase=phase,
-                        status="ok",
-                    )
                     app_pids = _runner_pids(app, runner)
-                    post_name_log = None
-                    if app.runner == "cilium" and native_loader_phase == "post":
-                        post_name_log = _shim_log_path(
-                            app,
-                            "post_rejit",
-                            artifact_session=artifact_session,
-                        )
-                    post_evidence_dir = _capture_phase_bpf_evidence(
-                        app,
-                        "post_rejit",
-                        app_pids,
-                        artifact_session,
-                        post_name_log,
-                    )
-                    if (
-                        app.runner == "cilium"
-                        and baseline_evidence_dir is not None
-                        and post_evidence_dir is not None
-                    ):
-                        _validate_cilium_live_inventory_parity(
-                            baseline_evidence_dir,
-                            post_evidence_dir,
-                            kernel_names=native_loader_phase == "off",
-                        )
 
                     phase = "post_rejit"
                     _print_progress(
@@ -1130,9 +751,7 @@ def run_suite(
                         workload=workload_name,
                         samples=samples,
                     )
-                    lifecycle.post_rejit = _measure_app_phase_with_stats(
-                        workspace=workspace,
-                        collect_bpf_stats=collect_bpf_stats,
+                    lifecycle.post_rejit = measure_app_phase(
                         app_pids=app_pids,
                         runner=runner,
                         workload_seconds=workload_seconds,
@@ -1149,51 +768,9 @@ def run_suite(
 
                     phase = "post_rejit_stop"
                     try:
-                        _print_progress(
-                            "phase_start",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                        )
                         runner.stop()
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="runner_stop_done",
-                        )
                         runner = None
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="quiesce_start",
-                        )
-                        _wait_for_suite_quiescence(args)
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="quiesce_done",
-                        )
-                        _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
-                        _print_progress(
-                            "phase_step",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            step="bpf_stats_disabled",
-                        )
-                        _print_progress(
-                            "phase_done",
-                            app=app.name,
-                            runner=app.runner,
-                            phase=phase,
-                            status="ok",
-                        )
+                        wait_for_suite_quiescence()
                     except Exception as stop_exc:
                         raise RuntimeError(f"post app stop failed: {stop_exc}") from stop_exc
             except _AppLifecycleComplete:
@@ -1204,7 +781,7 @@ def run_suite(
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase in {"baseline_start", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
+                    if phase in {"map_snapshot", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
                         _print_progress(
                             "phase_error",
                             app=app.name,
@@ -1229,20 +806,10 @@ def run_suite(
                         runner.stop()
                     except Exception as stop_exc:
                         stop_error = str(stop_exc)
-                    if lifecycle is not None:
-                        lifecycle.artifacts.update(_build_runner_artifacts(app, runner))
                     try:
-                        _wait_for_suite_quiescence(args)
+                        wait_for_suite_quiescence()
                     except Exception as quiesce_exc:
                         quiesce_error = str(quiesce_exc)
-                    if not stop_error:
-                        try:
-                            _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
-                        except Exception as stats_exc:
-                            quiesce_error = (
-                                f"{quiesce_error}; bpf stats disable failed: {stats_exc}"
-                                if quiesce_error else f"bpf stats disable failed: {stats_exc}"
-                            )
                 if lifecycle is not None:
                     lifecycle.stop_error = stop_error
                     if quiesce_error:
@@ -1308,7 +875,6 @@ def build_run_metadata(
     *,
     resolved_samples: int,
     resolved_workload_seconds: float,
-    enabled_passes: Sequence[str] | None = None,
 ) -> dict[str, object]:
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1319,7 +885,7 @@ def build_run_metadata(
         "workload_only": bool(getattr(args, "workload_only", False)),
         "bpf_stats": bool(getattr(args, "collect_bpf_stats", True)),
     }
-    metadata.update(benchmark_run_provenance(enabled_passes=enabled_passes))
+    metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
     return metadata
 
@@ -1343,39 +909,15 @@ def _finalize_partial(
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
-    detail_payloads: dict[str, object] = {}
-    apps_done = 0
-    for app in getattr(suite, "apps", []):
-        app_name = str(getattr(app, "name", ""))
-        if not app_name:
-            continue
-        result = partial_results.get(app_name)
-        if result is None:
-            result = {
-                "app": app_name,
-                "status": "error",
-                "error": error_message,
-                "baseline": None,
-                "post_rejit": None,
-                "rejit_result": None,
-            }
-        elif str(result.get("status") or "error") == "ok":
-            apps_done += 1
-        detail_payloads[
-            f"apps/{_sanitize_app_filename(app_name)}.json"
-        ] = result
     session.write(
         status="error",
         progress_payload={
             "suite": "corpus",
             "status": "error",
-            "apps_done": apps_done,
-            "total_apps": len(getattr(suite, "apps", [])),
             "failed_at": datetime.now(timezone.utc).isoformat(),
             "error_message": error_message,
         },
         result_payload=payload,
-        detail_payloads=detail_payloads,
         error_message=error_message,
     )
     return payload
@@ -1399,9 +941,8 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_setup_die)
     if bool(getattr(args, "collect_bpf_stats", True)):
         ensure_bpf_stats_enabled(workspace, _setup_die)
-        _set_bpf_stats_enabled(workspace, False)
     else:
-        _set_bpf_stats_enabled(workspace, False)
+        _disable_bpf_stats(workspace)
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _setup_die)
     # Apply runtime env to current process (PATH, LD_LIBRARY_PATH, BPFREJIT_*, etc.)
@@ -1412,34 +953,25 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
     return workspace
 
 
-def _set_bpf_stats_enabled(
-    workspace: Path,
-    enabled: bool,
-    *,
-    die: Callable[[str], object] | None = None,
-) -> None:
-    if die is None:
-        die = _setup_die
+def _disable_bpf_stats(workspace: Path) -> None:
     sysctl_bin = shutil.which("sysctl")
-    value = "1" if enabled else "0"
     if sysctl_bin:
         run_checked(
-            [sysctl_bin, "-q", "-w", f"kernel.bpf_stats_enabled={value}"],
+            [sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=0"],
             cwd=workspace,
             env={"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"},
-            die=die,
+            die=_setup_die,
         )
     else:
         run_checked(
-            ["sh", "-c", f"printf '{value}\\n' > /proc/sys/kernel/bpf_stats_enabled"],
+            ["sh", "-c", "printf '0\\n' > /proc/sys/kernel/bpf_stats_enabled"],
             cwd=workspace,
             env=os.environ.copy(),
-            die=die,
+            die=_setup_die,
         )
     stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
-    if stats_path.read_text(encoding="utf-8").strip() != value:
-        action = "enable" if enabled else "disable"
-        die(f"failed to {action} kernel.bpf_stats_enabled={value}")
+    if stats_path.read_text(encoding="utf-8").strip() != "0":
+        _setup_die("failed to disable kernel.bpf_stats_enabled=0")
 
 
 def _setup_die(message: str) -> None:
@@ -1453,10 +985,6 @@ def main(argv: list[str] | None = None) -> int:
     suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
     resolved_workload_seconds = _workload_seconds(args)
     resolved_samples = _sample_count(args)
-    native_loader_phase = _native_loader_phase()
-    effective_enabled_passes = _effective_rejit_enabled_passes(
-        native_loader_phase=native_loader_phase
-    )
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
     progress_payload: dict[str, object] = {
@@ -1476,7 +1004,6 @@ def main(argv: list[str] | None = None) -> int:
             args,
             resolved_samples=resolved_samples,
             resolved_workload_seconds=resolved_workload_seconds,
-            enabled_passes=effective_enabled_passes,
         )
         metadata["status"] = status
         metadata["started_at"] = session_started_at
