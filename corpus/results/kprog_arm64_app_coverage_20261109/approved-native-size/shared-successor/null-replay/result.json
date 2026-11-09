@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-09T07:10:06.160070+00:00",
+  "make_exit": 0,
+  "approved_shared_rules_adopted": 0,
+  "additional_runtime_admission_rules": 0,
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "compiler_exit": 0
+  },
+  "guest": {
+    "ok": true,
+    "scope": "Authorized ARM full-word NULL BTF load recovery",
+    "probe_exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
+  }
+}
