@@ -68,7 +68,7 @@
 | O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 0/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
-| 编译字节级证明 | 13/75 个操作，141 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
+| 编译字节级证明 | 14/75 个操作，146 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
 | O4 链接步骤（22 行，两个 ISA 合计） | 7 条件式、14 部分、1 待证 | 同左 | V |
 
 - [ ] **V** 上表每一行做到满额。
@@ -89,6 +89,8 @@
 - [ ] **V** RET source-coordinate/coherence 与 ARM RET source 批次全量检查（已合入排队源 35e73c955；当前唯一 d399 full 完成后复用增量缓存）。
 - [ ] **V** RET 栈生命周期/owned-read 组件批次全量检查（与后续源坐标和 ARM RET 合为排队源 35e73c955；当前唯一 full 源 d39918760，沿用共享增量缓存）。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
+- [x] **V** compiled ROR：五个真实 BPF 单元覆盖 8 位低/高字节及 16/32/64 位，任意 value/count/fresh 输入、reference scalar 写回和完整 memory/visit/halt/fault/events 观察；组合对象 146 个函数，原 141 字节保持（本提交，compiled14/75）。
+- [ ] **V** compiled ROR 与前序 RET source 模型合并批次全量检查（本提交；复用共享增量缓存和唯一 full 队列）。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
 - [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。

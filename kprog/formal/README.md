@@ -42,6 +42,13 @@ outer source callee/SP guards derive the native ABI contract. Actual producer
 operand/table extraction and physical LR/code-PC/compiler transport remain
 explicit; ARM RET retains its partial category.
 
+Actual compiled scalar coverage is14 of75 x86 operations across146 combined
+units, including two partial returning-helper units. Classic ROR adds five
+width/lane units with arbitrary values, counts and fresh inputs; actual BPF
+execution preserves memory/exclusive state and consumes the23 captured input
+positions. Whole flags/tag/frame and physical/compiler embedding retain their
+explicit simulator interfaces.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

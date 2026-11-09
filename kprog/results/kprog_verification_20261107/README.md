@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 71/75 | 73/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12; ROR5) | 14/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 63/75 | 74/74 selected profiles |
@@ -6309,3 +6309,20 @@ with sorryAx0 and executable-reduction bridges0. Generic TV composition retains
 five inherited bridges. Actual producer operand/case extraction, physical
 LR/code-address/entry/result and C/B/compiler transport remain active. ARM RET
 stays partial, ARM C-model73/74 and x86 C-model71/75/compiled13/75 retain scope.
+
+### Actual compiled classic ROR scalar units
+
+Five actual production-dispatcher units cover 8-bit low/high lanes and16/32/64-bit
+ROR for every64-bit input value/count and every fresh stream/initial visit.
+`RorCertificate.compiled_all_variants` and `compiled_execution` prove the exact
+reference scalar writeback, preserved memory/exclusive visit,23 fresh inputs,
+halted result and empty fault/events. Both zero/nonzero count CFG paths are
+covered. The [compiled receipt](compiled-ror.log.gz) retains actual expanded C,
+BPF objects/decoded arrays, compiler identity, commands and semantic proof logs.
+Standalone and combined new function bytes match; all141 prior function bytes
+retain their baseline identities in the146-function combined object. Every
+preceding certificate declaration retains its source prefix. Current scalar
+compiled coverage is14/75; complete flags/tag/frame, all-register/physical ABI
+and whole-program compiler embedding remain explicit interfaces. The existing
+full-check entry point compiles these same fixture functions and certificate.
+The final combined/full proof run follows the current sole full's publication.

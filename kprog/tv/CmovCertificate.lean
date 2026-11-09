@@ -9796,3 +9796,1569 @@ theorem compiled_execution (variant : Variant) (choices : Nat → Word)
 end KProgTV.LeaCertificate
 #print axioms KProgTV.LeaCertificate.compiled_all_variants
 #print axioms KProgTV.LeaCertificate.compiled_execution
+
+
+
+
+
+namespace KProgTV.RorCertificate
+open KProgFormal.Reference KProgTV.BPF KProgTV.BPFPath.InputBurst
+set_option maxRecDepth 100000
+set_option maxHeartbeats 1600000
+inductive Variant | byteLow | byteHigh | word16 | word32 | word64
+
+def width : Variant → X86.ScalarWidth
+  | .byteLow => .w8
+  | .byteHigh => .w8
+  | .word16 => .w16
+  | .word32 => .w32
+  | .word64 => .w64
+
+def slice : Variant → X86.RegisterSlice
+  | .byteLow => .low 0
+  | .byteHigh => .high 0
+  | .word16 => .low 0
+  | .word32 => .low 0
+  | .word64 => .low 0
+
+def value (variant : Variant) (s : X86.State) : Word :=
+  X86.scalarWriteValue (s.gpr 0)
+    (X86.rotateRightValue (width variant) (X86.scalarRegisterValue s (width variant) (slice variant)) (s.gpr 2))
+    (width variant) (slice variant)
+def environment (choices : Nat → Word) : Environment where
+  unspecifiedInput := fun n => .ok (choices n)
+  immediate := fun _ _ _ => .error "external immediate"
+  helperCall := fun _ _ => .error "external helper"
+  helper := fun _ _ _ => .error "external helper"
+
+def entry (s : X86.State) (visit exclusive : Nat) : State where
+  regs := fun r => match r.val with
+    | 1 => s.gpr 0 | 2 => s.gpr 2 | 3 => 0 | 10 => 0x10000 | _ => 0
+  memory := s.memory
+  pc := 0
+  unspecifiedVisit := visit
+  exclusiveVisit := exclusive
+
+def summary (program : Array Byte) (positions : List Nat) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    Except String (Word × Memory × Nat × Nat × Bool × Option Fault × List Event) := do
+  let result ← BPFPath.evaluate (environment choices) program positions (entry s visit exclusive)
+  pure (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+    result.state.exclusiveVisit, result.state.halted, result.fault, result.events)
+
+@[simp 1100] private theorem alu_32_6 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 6 offset left right = .ok (left <<< (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.shiftLeft_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_32_7 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 7 offset left right = .ok (left >>> (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.ushiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_32_12 (offset : BitVec 16) (left right : BitVec 32) :
+    BPF.alu 32 12 offset left right = .ok (left.sshiftRight' (right &&& 31)) := by
+  simp only [BPF.alu, BitVec.sshiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 32 = right.toNat &&& 31 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 5).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_6 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 6 offset left right = .ok (left <<< (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.shiftLeft_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_7 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 7 offset left right = .ok (left >>> (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.ushiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp 1100] private theorem alu_64_12 (offset : BitVec 16) (left right : BitVec 64) :
+    BPF.alu 64 12 offset left right = .ok (left.sshiftRight' (right &&& 63)) := by
+  simp only [BPF.alu, BitVec.sshiftRight_eq', BitVec.toNat_and, BitVec.toNat_ofNat]
+  have count : right.toNat % 64 = right.toNat &&& 63 :=
+    (Nat.and_two_pow_sub_one_eq_mod right.toNat 6).symm
+  rw [count]
+  rfl
+
+@[simp] private theorem alu_op_0 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 0 offset left right = .ok (left + right) := rfl
+
+@[simp] private theorem alu_op_1 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 1 offset left right = .ok (left - right) := rfl
+
+@[simp] private theorem alu_op_2 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 2 offset left right = .ok (left * right) := rfl
+
+@[simp] private theorem alu_op_4 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 4 offset left right = .ok (left ||| right) := rfl
+
+@[simp] private theorem alu_op_5 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 5 offset left right = .ok (left &&& right) := rfl
+
+@[simp] private theorem alu_op_8 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 8 offset left right = .ok (-left) := rfl
+
+@[simp] private theorem alu_op_10 (n : Nat) (offset : BitVec 16) (left right : BitVec n) : BPF.alu n 10 offset left right = .ok (left ^^^ right) := rfl
+
+@[simp] private theorem alu_move (n : Nat) (offset : BitVec 16) (left right : BitVec n) (zero : offset = 0) : BPF.alu n 11 offset left right = .ok right := by subst offset; rfl
+
+@[simp] private theorem setReg_memory (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).memory = s.memory := rfl
+
+@[simp] private theorem setReg_pc (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).pc = s.pc := rfl
+
+@[simp] private theorem setReg_halted (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).halted = s.halted := rfl
+
+@[simp] private theorem setReg_exclusiveVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).exclusiveVisit = s.exclusiveVisit := rfl
+
+@[simp] private theorem setReg_unspecifiedVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).unspecifiedVisit = s.unspecifiedVisit := rfl
+
+@[simp] private theorem setReg_value (s : State) (r q : BPF.Register) (v : Word) :
+    (setReg s r v).regs q = (if q = r then v else s.regs q) := rfl
+
+
+
+
+
+@[simp 1100] private theorem wide_literal_4294967294 :
+    ((4294967294#32).setWidth 64 ||| ((0#32).setWidth 64 <<< (32 : Nat))) = 4294967294#64 := by
+  native_decide
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨191, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨87, 3, 0, 0#16, 255#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) &&& ((255#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_0 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 1)
+  let s2 := setReg s1 3 ((s1.regs 3) &&& ((255#32).signExtend 64))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_27 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨127, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) >>> ((state.regs 2) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_28 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨183, 4, 0, 0#16, 8#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((8#32).signExtend 64), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_27 (s : State) : State :=
+  let s1 := setReg s 3 ((s.regs 3) >>> ((s.regs 2) &&& 63#64))
+  let s2 := setReg s1 4 ((8#32).signExtend 64)
+  { s2 with pc := 29 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_27 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (27 :: (28 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 27 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_27 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 27
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_27 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_27, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_29 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨31, 4, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) - (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_30 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨191, 2, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_29 (s : State) : State :=
+  let s1 := setReg s 4 ((s.regs 4) - (s.regs 2))
+  let s2 := setReg s1 2 (s1.regs 1)
+  { s2 with pc := 31 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_29 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (29 :: (30 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 29 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_29 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 29
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_29 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_29, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_31 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨111, 2, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) <<< ((state.regs 4) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_32 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨87, 2, 0, 0#16, 254#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) &&& ((254#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_31 (s : State) : State :=
+  let s1 := setReg s 2 ((s.regs 2) <<< ((s.regs 4) &&& 63#64))
+  let s2 := setReg s1 2 ((s1.regs 2) &&& ((254#32).signExtend 64))
+  { s2 with pc := 33 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_31 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (31 :: (32 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 31 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_31 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 31
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_31 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_31, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_33 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨79, 2, 3, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) ||| (state.regs 3)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_34 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨191, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 2), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_33 (s : State) : State :=
+  let s1 := setReg s 2 ((s.regs 2) ||| (s.regs 3))
+  let s2 := setReg s1 3 (s1.regs 2)
+  { s2 with pc := 35 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_33 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (33 :: (34 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 33 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_33 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 33
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_33 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_33, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_35 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨87, 1, 0, 0#16, 4294967040#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& ((4294967040#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8lo_36 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8lo state ⟨79, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) ||| (state.regs 1)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8lo_35 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) &&& ((4294967040#32).signExtend 64))
+  let s2 := setReg s1 3 ((s1.regs 3) ||| (s1.regs 1))
+  { s2 with pc := 37 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8lo_35 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (35 :: (36 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 35 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_35 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 35
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest (chunk_tv_ror8lo_35 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8lo_35, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨191, 4, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨119, 4, 0, 0#16, 8#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) >>> (((8#32).signExtend 64) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_0 (s : State) : State :=
+  let s1 := setReg s 4 (s.regs 1)
+  let s2 := setReg s1 4 ((s1.regs 4) >>> (((8#32).signExtend 64) &&& 63#64))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_2 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨191, 3, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 4), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_3 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨87, 3, 0, 0#16, 255#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) &&& ((255#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_2 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 4)
+  let s2 := setReg s1 3 ((s1.regs 3) &&& ((255#32).signExtend 64))
+  { s2 with pc := 4 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (2 :: (3 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_2 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 2
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_2 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_2, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_29 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨127, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) >>> ((state.regs 2) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_30 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨183, 5, 0, 0#16, 8#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 5 ((8#32).signExtend 64), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_29 (s : State) : State :=
+  let s1 := setReg s 3 ((s.regs 3) >>> ((s.regs 2) &&& 63#64))
+  let s2 := setReg s1 5 ((8#32).signExtend 64)
+  { s2 with pc := 31 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_29 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (29 :: (30 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 29 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_29 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 29
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_29 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_29, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_31 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨31, 5, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 5 ((state.regs 5) - (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_32 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨111, 4, 5, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) <<< ((state.regs 5) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_31 (s : State) : State :=
+  let s1 := setReg s 5 ((s.regs 5) - (s.regs 2))
+  let s2 := setReg s1 4 ((s1.regs 4) <<< ((s1.regs 5) &&& 63#64))
+  { s2 with pc := 33 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_31 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (31 :: (32 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 31 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_31 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 31
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_31 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_31, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_33 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨87, 4, 0, 0#16, 254#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) &&& ((254#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_34 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨79, 4, 3, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) ||| (state.regs 3)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_33 (s : State) : State :=
+  let s1 := setReg s 4 ((s.regs 4) &&& ((254#32).signExtend 64))
+  let s2 := setReg s1 4 ((s1.regs 4) ||| (s1.regs 3))
+  { s2 with pc := 35 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_33 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (33 :: (34 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 33 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_33 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 33
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_33 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_33, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_35 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨191, 3, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 4), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_36 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨87, 1, 0, 0#16, 4294902015#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& ((4294902015#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_35 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 4)
+  let s2 := setReg s1 1 ((s1.regs 1) &&& ((4294902015#32).signExtend 64))
+  { s2 with pc := 37 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_35 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (35 :: (36 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 35 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_35 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 35
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_35 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_35, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_37 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨103, 3, 0, 0#16, 8#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) <<< (((8#32).signExtend 64) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror8hi_38 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror8hi state ⟨79, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) ||| (state.regs 1)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror8hi_37 (s : State) : State :=
+  let s1 := setReg s 3 ((s.regs 3) <<< (((8#32).signExtend 64) &&& 63#64))
+  let s2 := setReg s1 3 ((s1.regs 3) ||| (s1.regs 1))
+  { s2 with pc := 39 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror8hi_37 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (37 :: (38 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 37 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_37 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 37
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest (chunk_tv_ror8hi_37 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror8hi_37, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨191, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨87, 3, 0, 0#16, 65535#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) &&& ((65535#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_0 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 1)
+  let s2 := setReg s1 3 ((s1.regs 3) &&& ((65535#32).signExtend 64))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_27 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨127, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) >>> ((state.regs 2) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_28 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨183, 4, 0, 0#16, 16#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((16#32).signExtend 64), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_27 (s : State) : State :=
+  let s1 := setReg s 3 ((s.regs 3) >>> ((s.regs 2) &&& 63#64))
+  let s2 := setReg s1 4 ((16#32).signExtend 64)
+  { s2 with pc := 29 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_27 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (27 :: (28 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 27 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_27 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 27
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_27 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_27, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_29 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨31, 4, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) - (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_30 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨191, 2, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_29 (s : State) : State :=
+  let s1 := setReg s 4 ((s.regs 4) - (s.regs 2))
+  let s2 := setReg s1 2 (s1.regs 1)
+  { s2 with pc := 31 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_29 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (29 :: (30 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 29 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_29 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 29
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_29 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_29, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_31 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨111, 2, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) <<< ((state.regs 4) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_32 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨87, 2, 0, 0#16, 65534#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) &&& ((65534#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_31 (s : State) : State :=
+  let s1 := setReg s 2 ((s.regs 2) <<< ((s.regs 4) &&& 63#64))
+  let s2 := setReg s1 2 ((s1.regs 2) &&& ((65534#32).signExtend 64))
+  { s2 with pc := 33 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_31 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (31 :: (32 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 31 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_31 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 31
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_31 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_31, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_33 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨79, 2, 3, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) ||| (state.regs 3)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_34 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨191, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 2), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_33 (s : State) : State :=
+  let s1 := setReg s 2 ((s.regs 2) ||| (s.regs 3))
+  let s2 := setReg s1 3 (s1.regs 2)
+  { s2 with pc := 35 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_33 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (33 :: (34 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 33 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_33 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 33
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_33 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_33, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_35 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨87, 1, 0, 0#16, 4294901760#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& ((4294901760#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror16_36 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror16 state ⟨79, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) ||| (state.regs 1)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror16_35 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) &&& ((4294901760#32).signExtend 64))
+  let s2 := setReg s1 3 ((s1.regs 3) ||| (s1.regs 1))
+  { s2 with pc := 37 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror16_35 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (35 :: (36 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 35 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_35 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 35
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest (chunk_tv_ror16_35 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror16_35, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨191, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨103, 3, 0, 0#16, 32#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) <<< (((32#32).signExtend 64) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror32_0 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 1)
+  let s2 := setReg s1 3 ((s1.regs 3) <<< (((32#32).signExtend 64) &&& 63#64))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror32_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror32_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_28 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨127, 3, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) >>> ((state.regs 2) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_29 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨183, 4, 0, 0#16, 32#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((32#32).signExtend 64), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror32_28 (s : State) : State :=
+  let s1 := setReg s 3 ((s.regs 3) >>> ((s.regs 2) &&& 63#64))
+  let s2 := setReg s1 4 ((32#32).signExtend 64)
+  { s2 with pc := 30 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror32_28 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (28 :: (29 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 28 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_28 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 28
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_28 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror32_28, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_30 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨31, 4, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) - (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_31 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨111, 1, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) <<< ((state.regs 4) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror32_30 (s : State) : State :=
+  let s1 := setReg s 4 ((s.regs 4) - (s.regs 2))
+  let s2 := setReg s1 1 ((s1.regs 1) <<< ((s1.regs 4) &&& 63#64))
+  { s2 with pc := 32 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror32_30 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (30 :: (31 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 30 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_30 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 30
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_30 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror32_30, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_wide_tv_ror32_32 (environment : BPF.Environment) (state : State)
+    (position : state.pc = 32) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨0x18, 2, 0, 0#16, 4294967294#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 2 } 2 4294967294#64, [], none⟩ := by
+  simp [BPF.execute, position, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_34 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨95, 1, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) &&& (state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror32_32 (s : State) : State :=
+  let s1 := setReg s 2 4294967294#64
+  let s2 := setReg s1 1 ((s1.regs 1) &&& (s1.regs 2))
+  { s2 with pc := 35 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror32_32 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (32 :: (34 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 32 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_32 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 32
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_32 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror32_32, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_35 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨79, 1, 3, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) ||| (state.regs 3)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror32_36 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror32 state ⟨191, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror32_35 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) ||| (s.regs 3))
+  let s2 := setReg s1 3 (s1.regs 1)
+  { s2 with pc := 37 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror32_35 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (35 :: (36 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 35 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_35 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 35
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest (chunk_tv_ror32_35 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror32_35, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_0 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨191, 4, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 (state.regs 2), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_1 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨87, 4, 0, 0#16, 63#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 4 ((state.regs 4) &&& ((63#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror64_0 (s : State) : State :=
+  let s1 := setReg s 4 (s.regs 2)
+  let s2 := setReg s1 4 ((s1.regs 4) &&& ((63#32).signExtend 64))
+  { s2 with pc := 2 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror64_0 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror64 (0 :: (1 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_0 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 0
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_0 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror64_0, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_2 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨191, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 (state.regs 1), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_3 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨127, 3, 4, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) >>> ((state.regs 4) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror64_2 (s : State) : State :=
+  let s1 := setReg s 3 (s.regs 1)
+  let s2 := setReg s1 3 ((s1.regs 3) >>> ((s1.regs 4) &&& 63#64))
+  { s2 with pc := 4 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror64_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror64 (2 :: (3 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_2 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 2
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_2 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror64_2, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_4 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨135, 2, 0, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 (-(state.regs 2)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_5 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨87, 2, 0, 0#16, 63#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 2 ((state.regs 2) &&& ((63#32).signExtend 64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror64_4 (s : State) : State :=
+  let s1 := setReg s 2 (-(s.regs 2))
+  let s2 := setReg s1 2 ((s1.regs 2) &&& ((63#32).signExtend 64))
+  { s2 with pc := 6 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror64_4 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror64 (4 :: (5 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 4 then BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_4 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 4
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_4 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror64_4, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_6 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨111, 1, 2, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 1 ((state.regs 1) <<< ((state.regs 2) &&& 63#64)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+@[simp 1200] private theorem execute_alu_tv_ror64_7 (environment : BPF.Environment) (state : State) :
+    BPF.execute environment Compiled.tv_ror64 state ⟨79, 3, 1, 0#16, 0#32⟩ =
+      .ok ⟨setReg { state with pc := state.pc + 1 } 3 ((state.regs 3) ||| (state.regs 1)), [], none⟩ := by
+  simp [BPF.execute, BPF.source, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+    alu_32_6, alu_32_7, alu_64_6, alu_64_7, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad,
+    -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+
+
+def chunk_tv_ror64_6 (s : State) : State :=
+  let s1 := setReg s 1 ((s.regs 1) <<< ((s.regs 2) &&& 63#64))
+  let s2 := setReg s1 3 ((s1.regs 3) ||| (s1.regs 1))
+  { s2 with pc := 8 }
+
+@[simp 1100] private theorem evaluate_chunk_tv_ror64_6 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror64 (6 :: (7 :: rest)) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 6 then BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_6 s)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [BPFPath.evaluate, active]
+  | false =>
+    by_cases position : s.pc = 6
+    · cases remaining : BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest (chunk_tv_ror64_6 s) <;>
+        simp_all [BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+        chunk_tv_ror64_6, setReg, alu_move, alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+        alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+        active, position, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+        -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq']
+    · simp [BPFPath.evaluate, active, position]
+
+@[simp] private theorem burst_byteLow_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (inputPositions 2 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest
+        (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 2
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror8lo 2 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_byteLow_11 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8lo (inputPositions 11 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 11 then BPFPath.evaluate (environment choices) Compiled.tv_ror8lo rest
+        (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 11
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror8lo 11 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_byteLow (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_ror8lo (if (s.gpr 2 &&& 7#64) = 0#64 then (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (35 :: (36 :: (37 :: (38 :: [])))))))))) else (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: []))))))))))))))))))) choices visit exclusive s =
+      .ok (value .byteLow s, s.memory, visit + 23, exclusive, true, none, []) := by
+  unfold value
+  by_cases zero : (s.gpr 2 &&& 7#64) = 0#64
+  all_goals
+    try simp only [zero, ite_true, ite_false]
+    simp [summary, afterInputs, chunk_tv_ror8lo_0, chunk_tv_ror8lo_27, chunk_tv_ror8lo_29, chunk_tv_ror8lo_31, chunk_tv_ror8lo_33, chunk_tv_ror8lo_35, chunk_tv_ror8hi_0, chunk_tv_ror8hi_2, chunk_tv_ror8hi_29, chunk_tv_ror8hi_31, chunk_tv_ror8hi_33, chunk_tv_ror8hi_35, chunk_tv_ror8hi_37, chunk_tv_ror16_0, chunk_tv_ror16_27, chunk_tv_ror16_29, chunk_tv_ror16_31, chunk_tv_ror16_33, chunk_tv_ror16_35, chunk_tv_ror32_0, chunk_tv_ror32_28, chunk_tv_ror32_30, chunk_tv_ror32_32, chunk_tv_ror32_35, chunk_tv_ror64_0, chunk_tv_ror64_2, chunk_tv_ror64_4, chunk_tv_ror64_6, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.comparison, entry, zero, alu_move,
+      alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+      alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      width, slice, X86.scalarRegisterValue, X86.scalarWriteValue, X86.rotateRightValue,
+      X86.ScalarWidth.bits, X86.ScalarWidth.bytes, X86.RegisterSlice.shift, X86.RegisterSlice.reg, X86.legacyCount,
+      Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+      generalize s.gpr 0 = original at * <;> generalize s.gpr 2 = count at * <;>
+      unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_byteLow
+
+@[simp] private theorem burst_byteHigh_4 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (inputPositions 4 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 4 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest
+        (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 4
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror8hi 4 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_byteHigh_13 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror8hi (inputPositions 13 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 13 then BPFPath.evaluate (environment choices) Compiled.tv_ror8hi rest
+        (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 13
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror8hi 13 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_byteHigh (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_ror8hi (if (s.gpr 2 &&& 7#64) = 0#64 then (0 :: (1 :: (2 :: (3 :: (inputPositions 4 8 (12 :: (inputPositions 13 15 (28 :: (36 :: (37 :: (38 :: (39 :: (40 :: []))))))))))))) else (0 :: (1 :: (2 :: (3 :: (inputPositions 4 8 (12 :: (inputPositions 13 15 (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: (39 :: (40 :: []))))))))))))))))))))) choices visit exclusive s =
+      .ok (value .byteHigh s, s.memory, visit + 23, exclusive, true, none, []) := by
+  unfold value
+  by_cases zero : (s.gpr 2 &&& 7#64) = 0#64
+  all_goals
+    try simp only [zero, ite_true, ite_false]
+    simp [summary, afterInputs, chunk_tv_ror8lo_0, chunk_tv_ror8lo_27, chunk_tv_ror8lo_29, chunk_tv_ror8lo_31, chunk_tv_ror8lo_33, chunk_tv_ror8lo_35, chunk_tv_ror8hi_0, chunk_tv_ror8hi_2, chunk_tv_ror8hi_29, chunk_tv_ror8hi_31, chunk_tv_ror8hi_33, chunk_tv_ror8hi_35, chunk_tv_ror8hi_37, chunk_tv_ror16_0, chunk_tv_ror16_27, chunk_tv_ror16_29, chunk_tv_ror16_31, chunk_tv_ror16_33, chunk_tv_ror16_35, chunk_tv_ror32_0, chunk_tv_ror32_28, chunk_tv_ror32_30, chunk_tv_ror32_32, chunk_tv_ror32_35, chunk_tv_ror64_0, chunk_tv_ror64_2, chunk_tv_ror64_4, chunk_tv_ror64_6, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.comparison, entry, zero, alu_move,
+      alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+      alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      width, slice, X86.scalarRegisterValue, X86.scalarWriteValue, X86.rotateRightValue,
+      X86.ScalarWidth.bits, X86.ScalarWidth.bytes, X86.RegisterSlice.shift, X86.RegisterSlice.reg, X86.legacyCount,
+      Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+      generalize s.gpr 0 = original at * <;> generalize s.gpr 2 = count at * <;>
+      unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_byteHigh
+
+@[simp] private theorem burst_word16_2 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (inputPositions 2 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 2 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest
+        (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 2
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror16 2 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_word16_11 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror16 (inputPositions 11 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 11 then BPFPath.evaluate (environment choices) Compiled.tv_ror16 rest
+        (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 11
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror16 11 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_word16 (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_ror16 (if (s.gpr 2 &&& 15#64) = 0#64 then (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (35 :: (36 :: (37 :: (38 :: [])))))))))) else (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: []))))))))))))))))))) choices visit exclusive s =
+      .ok (value .word16 s, s.memory, visit + 23, exclusive, true, none, []) := by
+  unfold value
+  by_cases zero : (s.gpr 2 &&& 15#64) = 0#64
+  all_goals
+    try simp only [zero, ite_true, ite_false]
+    simp [summary, afterInputs, chunk_tv_ror8lo_0, chunk_tv_ror8lo_27, chunk_tv_ror8lo_29, chunk_tv_ror8lo_31, chunk_tv_ror8lo_33, chunk_tv_ror8lo_35, chunk_tv_ror8hi_0, chunk_tv_ror8hi_2, chunk_tv_ror8hi_29, chunk_tv_ror8hi_31, chunk_tv_ror8hi_33, chunk_tv_ror8hi_35, chunk_tv_ror8hi_37, chunk_tv_ror16_0, chunk_tv_ror16_27, chunk_tv_ror16_29, chunk_tv_ror16_31, chunk_tv_ror16_33, chunk_tv_ror16_35, chunk_tv_ror32_0, chunk_tv_ror32_28, chunk_tv_ror32_30, chunk_tv_ror32_32, chunk_tv_ror32_35, chunk_tv_ror64_0, chunk_tv_ror64_2, chunk_tv_ror64_4, chunk_tv_ror64_6, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.comparison, entry, zero, alu_move,
+      alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+      alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      width, slice, X86.scalarRegisterValue, X86.scalarWriteValue, X86.rotateRightValue,
+      X86.ScalarWidth.bits, X86.ScalarWidth.bytes, X86.RegisterSlice.shift, X86.RegisterSlice.reg, X86.legacyCount,
+      Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+      generalize s.gpr 0 = original at * <;> generalize s.gpr 2 = count at * <;>
+      unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_word16
+
+@[simp] private theorem burst_word32_3 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (inputPositions 3 8 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 3 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest
+        (afterInputs choices s 8)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 3
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror32 3 8 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp] private theorem burst_word32_12 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror32 (inputPositions 12 15 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 12 then BPFPath.evaluate (environment choices) Compiled.tv_ror32 rest
+        (afterInputs choices s 15)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 12
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror32 12 15 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_word32 (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_ror32 (if (s.gpr 2 &&& 31#64) = 0#64 then (0 :: (1 :: (2 :: (inputPositions 3 8 (11 :: (inputPositions 12 15 (27 :: (37 :: (38 :: []))))))))) else (0 :: (1 :: (2 :: (inputPositions 3 8 (11 :: (inputPositions 12 15 (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (34 :: (35 :: (36 :: (37 :: (38 :: [])))))))))))))))))) choices visit exclusive s =
+      .ok (value .word32 s, s.memory, visit + 23, exclusive, true, none, []) := by
+  unfold value
+  by_cases zero : (s.gpr 2 &&& 31#64) = 0#64
+  all_goals
+    try simp only [zero, ite_true, ite_false]
+    simp [summary, afterInputs, chunk_tv_ror8lo_0, chunk_tv_ror8lo_27, chunk_tv_ror8lo_29, chunk_tv_ror8lo_31, chunk_tv_ror8lo_33, chunk_tv_ror8lo_35, chunk_tv_ror8hi_0, chunk_tv_ror8hi_2, chunk_tv_ror8hi_29, chunk_tv_ror8hi_31, chunk_tv_ror8hi_33, chunk_tv_ror8hi_35, chunk_tv_ror8hi_37, chunk_tv_ror16_0, chunk_tv_ror16_27, chunk_tv_ror16_29, chunk_tv_ror16_31, chunk_tv_ror16_33, chunk_tv_ror16_35, chunk_tv_ror32_0, chunk_tv_ror32_28, chunk_tv_ror32_30, chunk_tv_ror32_32, chunk_tv_ror32_35, chunk_tv_ror64_0, chunk_tv_ror64_2, chunk_tv_ror64_4, chunk_tv_ror64_6, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.comparison, entry, zero, alu_move,
+      alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+      alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      width, slice, X86.scalarRegisterValue, X86.scalarWriteValue, X86.rotateRightValue,
+      X86.ScalarWidth.bits, X86.ScalarWidth.bytes, X86.RegisterSlice.shift, X86.RegisterSlice.reg, X86.legacyCount,
+      Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+      generalize s.gpr 0 = original at * <;> generalize s.gpr 2 = count at * <;>
+      unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_word32
+
+@[simp] private theorem burst_word64_8 (choices : Nat → Word) (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment choices) Compiled.tv_ror64 (inputPositions 8 23 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 8 then BPFPath.evaluate (environment choices) Compiled.tv_ror64 rest
+        (afterInputs choices s 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 8
+    · simpa [active, position] using
+        (evaluate_burst (environment choices) choices Compiled.tv_ror64 8 23 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_word64 (choices : Nat → Word) (visit exclusive : Nat) (s : X86.State) :
+    summary Compiled.tv_ror64 (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: []))))))))))) choices visit exclusive s =
+      .ok (value .word64 s, s.memory, visit + 23, exclusive, true, none, []) := by
+  unfold value
+  by_cases zero : (s.gpr 2 &&& 63#64) = 0#64
+  all_goals
+    try simp only [zero, ite_true, ite_false]
+    simp [summary, afterInputs, chunk_tv_ror8lo_0, chunk_tv_ror8lo_27, chunk_tv_ror8lo_29, chunk_tv_ror8lo_31, chunk_tv_ror8lo_33, chunk_tv_ror8lo_35, chunk_tv_ror8hi_0, chunk_tv_ror8hi_2, chunk_tv_ror8hi_29, chunk_tv_ror8hi_31, chunk_tv_ror8hi_33, chunk_tv_ror8hi_35, chunk_tv_ror8hi_37, chunk_tv_ror16_0, chunk_tv_ror16_27, chunk_tv_ror16_29, chunk_tv_ror16_31, chunk_tv_ror16_33, chunk_tv_ror16_35, chunk_tv_ror32_0, chunk_tv_ror32_28, chunk_tv_ror32_30, chunk_tv_ror32_32, chunk_tv_ror32_35, chunk_tv_ror64_0, chunk_tv_ror64_2, chunk_tv_ror64_4, chunk_tv_ror64_6, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+      BPF.execute, BPF.source, BPF.comparison, entry, zero, alu_move,
+      alu_op_0, alu_op_1, alu_op_2, alu_op_4, alu_op_5, alu_op_8, alu_op_10,
+      alu_32_6, alu_32_7, alu_64_6, alu_64_7,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+      width, slice, X86.scalarRegisterValue, X86.scalarWriteValue, X86.rotateRightValue,
+      X86.ScalarWidth.bits, X86.ScalarWidth.bytes, X86.RegisterSlice.shift, X86.RegisterSlice.reg, X86.legacyCount,
+      Nat.add_assoc, -BitVec.shiftLeft_eq', -BitVec.ushiftRight_eq', -BitVec.sshiftRight_eq'] <;>
+      generalize s.gpr 0 = original at * <;> generalize s.gpr 2 = count at * <;>
+      unfold Word at * <;> bv_decide (config := { timeout := 120 })
+#print axioms compiled_word64
+
+def compiled : Variant → Array Byte
+  | .byteLow => Compiled.tv_ror8lo
+  | .byteHigh => Compiled.tv_ror8hi
+  | .word16 => Compiled.tv_ror16
+  | .word32 => Compiled.tv_ror32
+  | .word64 => Compiled.tv_ror64
+
+def positions (variant : Variant) (s : X86.State) : List Nat := match variant with
+  | .byteLow => (if (s.gpr 2 &&& 7#64) = 0#64 then (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (35 :: (36 :: (37 :: (38 :: [])))))))))) else (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: [])))))))))))))))))))
+  | .byteHigh => (if (s.gpr 2 &&& 7#64) = 0#64 then (0 :: (1 :: (2 :: (3 :: (inputPositions 4 8 (12 :: (inputPositions 13 15 (28 :: (36 :: (37 :: (38 :: (39 :: (40 :: []))))))))))))) else (0 :: (1 :: (2 :: (3 :: (inputPositions 4 8 (12 :: (inputPositions 13 15 (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: (39 :: (40 :: [])))))))))))))))))))))
+  | .word16 => (if (s.gpr 2 &&& 15#64) = 0#64 then (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (35 :: (36 :: (37 :: (38 :: [])))))))))) else (0 :: (1 :: (inputPositions 2 8 (10 :: (inputPositions 11 15 (26 :: (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (33 :: (34 :: (35 :: (36 :: (37 :: (38 :: [])))))))))))))))))))
+  | .word32 => (if (s.gpr 2 &&& 31#64) = 0#64 then (0 :: (1 :: (2 :: (inputPositions 3 8 (11 :: (inputPositions 12 15 (27 :: (37 :: (38 :: []))))))))) else (0 :: (1 :: (2 :: (inputPositions 3 8 (11 :: (inputPositions 12 15 (27 :: (28 :: (29 :: (30 :: (31 :: (32 :: (34 :: (35 :: (36 :: (37 :: (38 :: []))))))))))))))))))
+  | .word64 => (0 :: (1 :: (2 :: (3 :: (4 :: (5 :: (6 :: (7 :: (inputPositions 8 23 (31 :: (32 :: [])))))))))))
+
+/-- Actual ROR bytes implement every scalar width and both byte lanes for
+all value/count/fresh inputs. Flags, tags, other registers and physical ABI
+retain their explicit whole-simulator transport interfaces. -/
+theorem compiled_all_variants (variant : Variant) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    summary (compiled variant) (positions variant s) choices visit exclusive s =
+      .ok (value variant s, s.memory, visit + 23, exclusive, true, none, []) := by
+  cases variant with
+  | byteLow => exact compiled_byteLow choices visit exclusive s
+  | byteHigh => exact compiled_byteHigh choices visit exclusive s
+  | word16 => exact compiled_word16 choices visit exclusive s
+  | word32 => exact compiled_word32 choices visit exclusive s
+  | word64 => exact compiled_word64 choices visit exclusive s
+
+theorem compiled_execution (variant : Variant) (choices : Nat → Word)
+    (visit exclusive : Nat) (s : X86.State) :
+    ∃ result : Transition State,
+      Execution (BPFPath.instructionStep (environment choices) (compiled variant))
+        (entry s visit exclusive) result.events result.state ∧
+      (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+        result.state.exclusiveVisit, result.state.halted, result.fault, result.events) =
+      (value variant s, s.memory, visit + 23, exclusive, true, none, []) := by
+  have resultValue := compiled_all_variants variant choices visit exclusive s
+  cases evaluated : BPFPath.evaluate (environment choices) (compiled variant)
+      (positions variant s) (entry s visit exclusive) with
+  | error error =>
+    simp [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] at resultValue
+  | ok result =>
+    refine ⟨result, BPFPath.evaluate_sound _ _ _ _ _ evaluated, ?_⟩
+    simpa [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] using resultValue
+end KProgTV.RorCertificate
+#print axioms KProgTV.RorCertificate.compiled_all_variants
+#print axioms KProgTV.RorCertificate.compiled_execution
