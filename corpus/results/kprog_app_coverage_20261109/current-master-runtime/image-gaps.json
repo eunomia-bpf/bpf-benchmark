@@ -1,0 +1,11 @@
+{
+  "utc": "2026-11-09T10:55:17.465404+00:00",
+  "kernel_release": "7.0.0-rc2",
+  "matching_config_sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+  "shared_root_config": "/boot/config-7.0.0-rc2",
+  "shared_root_config_sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+  "division_plugin_recipe": "runner/containers/runner-runtime.Dockerfile:199",
+  "boot_config_recipe": "runner/containers/runner-runtime.Dockerfile:134-142",
+  "current_runtime_layer": "COPY native_compat.h native_division.so /usr/local/lib/bpfrejit/native/",
+  "source_policy": "all edits master; committed read-only exports feed successors"
+}
