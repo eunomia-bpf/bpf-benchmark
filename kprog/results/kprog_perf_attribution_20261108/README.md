@@ -336,7 +336,7 @@ time share stays the one the earlier sections measure.
 | direct tail-call linking | tail-call maps | 262 |
 | subprogram inlining | call sites into reachable subprograms | in `resources` |
 | load-time constant specialization | map lookups against frozen maps | in `lookup_kinds` |
-| entry and return bridge | fixed per invocation | 1 per program |
+| entry and return bridge | fixed per invocation | 6 cycles, 11-20% of a hot program's cycles |
 | compiler flags | the whole body | all |
 
 ### Caveat
@@ -588,7 +588,7 @@ carry, the candidates rank as:
 | direct tail-call linking | tail calls | 4.3% | 0% | 0% | 0.1% |
 | compiler flags | the whole body | all | all | all | all |
 | subprogram inlining | inlined-but-called bodies | needs the caller graph | | | |
-| entry and return bridge | fixed per invocation | 1 per invocation | | | |
+| entry and return bridge | fixed per invocation | 11-20% of cycles | | | |
 
 Read per application, the order is: map-lookup and helper lowering first,
 because it is the largest category in all four (14.5% to 79.7%); then
