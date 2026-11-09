@@ -1,0 +1,71 @@
+{
+  "objects": 6,
+  "resident_instances": 238,
+  "resource_instances": {
+    "resource_failed": 238
+  },
+  "application_source_program_loads": 0,
+  "native_execution_requests": 0,
+  "programs": [
+    {
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "source_object": "/workspaces/repository/vendor/build/.bcc-libbpf/none/x86/output/capable.bpf.o",
+      "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
+      "entry": "kprobe__cap_capable_entry",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-n70qia6e'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-n70qia6e'\n"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 1,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd.o",
+      "source_sha256": "b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c",
+      "entry": "cil_xdp_entry",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y02du9_y'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y02du9_y'\n"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 35,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.o",
+      "source_sha256": "c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8",
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-gb4tk6ds'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-gb4tk6ds'\n"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 36,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.o",
+      "source_sha256": "30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28",
+      "entry": "tail_handle_arp",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y9pwogal'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y9pwogal'\n"
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "resident_instances": 13,
+      "source_object": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/otel-embedded.bpf.o",
+      "source_sha256": "c977ee7fc191812d39883816e6acb9bb15d929b606842f3a92a461469e30cac2",
+      "entry": "perf_unwind_stop",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-8eojxigm'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-8eojxigm'\n"
+    },
+    {
+      "application": "tracee/monitor",
+      "resident_instances": 151,
+      "source_object": "/var/tmp/kprog-tmp/C/bcc-native-profile-runtime/image/tracee.bpf.o",
+      "source_sha256": "f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca",
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "stage": "resource_failed",
+      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-b989oyh6'",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-b989oyh6'\n"
+    }
+  ]
+}
