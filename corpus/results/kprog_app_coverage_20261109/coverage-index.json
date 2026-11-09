@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T06:39:44.833531+00:00",
+  "utc": "2026-11-09T07:30:45.538957+00:00",
   "head": "4dabac7c5c68dd3f067c8326d06bd926c3d65755",
   "closed_cohorts": {
     "BCC and Katran": {
@@ -1693,7 +1693,14 @@
     "valid_executed": 9,
     "verifier_rejected": 28,
     "generation_failed": 1,
-    "risky_native_executions": 0
+    "risky_native_executions": 0,
+    "approved_single_native_size_bound": {
+      "source": "c2b96d6c313fb7bf7e6df48caffa8df694b40b05",
+      "guest": "239945626793bd026a806b96d5c802b7281ea597",
+      "cases": 24,
+      "matching": 24,
+      "scope": "x86 chunk extent >=1GiB returns E2BIG using existing allocation/copy cleanup; shared ELF request retains ordinary allocation"
+    }
   },
   "root_frontier": {
     "scope": "x86 SMAP dispatch before protected-read recovery",
@@ -3233,7 +3240,36 @@
     "Os": "f828386bdb07c64422e8c2e837c97e226a8af4ae",
     "constant_division": "68b47d23849a633b705fbe573ad84bd5516148b7",
     "readonly_config": "be9dee5a8d61d72f5d5b910dee0ff83a992e59de",
-    "readonly_config_actual_compiled_B": "cbd1b10971c0f65337e7e0858acd0c53ac47778f"
+    "readonly_config_actual_compiled_B": "cbd1b10971c0f65337e7e0858acd0c53ac47778f",
+    "Os_terminal": {
+      "native_requests": 13,
+      "generated": 11,
+      "compiled": 10,
+      "installed": 8,
+      "failed": 5,
+      "commit": "be57b243b81f9fff04b6e73abac9268d28af3269",
+      "frontier": "corpus/results/kprog_app_coverage_20261109/native-size-runtime/frontier"
+    },
+    "complete_bcc_fixed_config": {
+      "compile": "7ccdcff49e9cc87e553d1ad3ad00fc3be0ed7831",
+      "actual_B": "83eaec6138ab96e3d909ff68c625451d8ea826ba",
+      "control_compiled": 24,
+      "candidate_compiled": 24,
+      "entries_per_arm": 25,
+      "frontier": "runqlat sched_switch signed IDIV",
+      "application_queue": "810425b5cbca3c641b165b97882dcafc06be0b4e",
+      "timing_request": "2959596808b696b3737e5d7d0e96678519f18e56"
+    }
   },
-  "helper_frame_source": "53dc94561176cede93c8d3ece262fa1628d85738"
+  "helper_frame_source": "53dc94561176cede93c8d3ece262fa1628d85738",
+  "active_compiler_successor": {
+    "state": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/constant-profile",
+    "purpose": "Native frontend consumes34 fixed bindings before existing early division pass/O3; actual C/JIT/workload retain bytes"
+  },
+  "current_guest_sequence": [
+    "constant division BCC/Katran",
+    "Cilium checksum-frame",
+    "paired syscount fixed config",
+    "paired complete BCC fixed config"
+  ]
 }
