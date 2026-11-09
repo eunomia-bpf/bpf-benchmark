@@ -723,6 +723,49 @@ runs:
   `cp -a ... /lib/modules/<release>` needs the image's tree, which every
   recipe already provides through `/artifacts`.
 
+### Component walk, step 1: the kernel. It costs nothing, and it changes the ratio
+
+The walk replaces one component and keeps the rest at 2026-05-29. Step 1
+keeps the May-29 runner, loader, link path and native objects and takes only
+the current kernel image, config, modules and kinsn modules. Run
+`x86_kvm_corpus_20261109_181234_983977`, status ok, 3 samples per arm,
+180 s each:
+
+| arm | invocations | ns per invocation | pps | `jited` |
+| --- | ---: | ---: | ---: | ---: |
+| JIT | 1,342,280,271 | **168.7** | 842,340 | 13,641 |
+| native | 1,463,108,721 | **136.4** | 902,082 | **10,196** |
+
+**1.236x per invocation, 1.071x throughput**, native doing 1.09x the work.
+The native arm replaced `balancer_ingres` and the kernel holds a 10,196-byte
+native program against the JIT's 13,641, so this is native.
+
+Compare the same definition on its own kernel (`..._153901_098451`):
+JIT 176.5, native 144.8, 1.219x. So the current kernel makes **both arms
+faster** -- JIT 176.5 to 168.7, native 144.8 to 136.4 -- and leaves the
+ratio essentially where it was, 1.219x to 1.236x. The kernel is not the
+component that moved Katran's cost per invocation.
+
+That is the first half of the operator's question answered by measurement
+rather than by reading: the kernel accounts for a 4% absolute improvement in
+both arms, and none of the native-specific gap.
+
+#### What the walk took to run, because it is not obvious from the recipes
+
+Getting step 1 to run took four corrections, each a real mismatch rather than
+a mistake in the recipe:
+
+| symptom | cause |
+| --- | --- |
+| `modpost: "bpf_x86_native_thunk" undefined` | `kinsn/module/x86` declares it `extern` (`bpf_x86_native_lab.c:25`), nothing defines it, and the kernel that was installed did not export it. `kprog/tv/native-branch-thunks.patch` defines and exports it; the kernel needed rebuilding with that patch. |
+| `insmod: Invalid parameters` on `bpf_x86_alu.ko` | the recipe booted `KDIR` = the May-29 kernel while using modules built for the current one. Modules follow the kernel exactly. |
+| `modules.dep` missing from the installed tree | `DEPMOD=true make modules_install` skips depmod; the install path needs the alias and dep maps present. |
+| `open .../blob0: No such file or directory` | the May-29 loader expects `blob%ld` debugfs nodes, which the **May-29** module creates and the current module does not (`debugfs_create_file` loop at `module/x86/bpf_x86_native_lab.c:606`). A kernel walk must rebuild the May-29 module source for the new kernel, not reuse either tree's build. |
+
+The last one is the general lesson: the loader and the module are one
+transport, so they move together. That is also the current-ABI blocker
+recorded above, seen from the other side.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
