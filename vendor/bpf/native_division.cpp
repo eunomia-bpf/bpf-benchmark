@@ -10,6 +10,9 @@
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/PassPlugin.h>
 #include <llvm/TargetParser/Triple.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar/SROA.h>
+#include <llvm/Transforms/Scalar/SimplifyCFG.h>
 
 namespace {
 struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
@@ -236,6 +239,11 @@ extern "C" LLVM_ATTRIBUTE_WEAK llvm::PassPluginLibraryInfo llvmGetPassPluginInfo
             builder.registerOptimizerLastEPCallback(
                 [](llvm::ModulePassManager &passes, llvm::OptimizationLevel) {
                     passes.addPass(NativeArrayLookups());
+                    llvm::FunctionPassManager cleanup;
+                    cleanup.addPass(llvm::SROAPass(llvm::SROAOptions::ModifyCFG));
+                    cleanup.addPass(llvm::InstCombinePass());
+                    cleanup.addPass(llvm::SimplifyCFGPass());
+                    passes.addPass(llvm::createModuleToFunctionPassAdaptor(std::move(cleanup)));
                 });
 #endif
         }};

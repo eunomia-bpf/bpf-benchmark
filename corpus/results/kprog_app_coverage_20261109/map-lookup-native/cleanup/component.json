@@ -1,0 +1,20 @@
+[
+  {
+    "profile": "control",
+    "object_sha256": "4735f862207ec7f7687a25d5937551b1c927b2fd62ecd7e2b6263a051cb95efa",
+    "executable_bytes": 9978,
+    "stack_allocations": [
+      "1d: 48 81 ec d8 00 00 00         \tsubq\t$0xd8, %rsp"
+    ],
+    "lowered_sites": 14
+  },
+  {
+    "profile": "candidate",
+    "object_sha256": "161672fa97c903f48a225337762bb81704c089e9cf7800c7cfeaa9b320947407",
+    "executable_bytes": 9758,
+    "stack_allocations": [
+      "1d: 48 81 ec d8 00 00 00         \tsubq\t$0xd8, %rsp"
+    ],
+    "lowered_sites": 14
+  }
+]
