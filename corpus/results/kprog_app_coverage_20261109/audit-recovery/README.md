@@ -41,3 +41,11 @@ The original positive tail regression exposed the ABI scanner treating an existi
 ## Step 4: original BPF frontend and affected source units
 
 The Tetragon JIT build uses its original upstream C/frontend/helper assembly. Five canonical header inputs carry the recorded path-loop/length/data-event/namespace changes through a Clang file overlay; all source edits remain in the main checkout. The broad native compatibility tree is retired from the JIT frontend. Existing debug-function identities select62 affected ELF units;32 remaining upstream objects retain their bytes. Shared ELF program sections keep the upstream sibling function sources. Original generic_calls helper masks and their BPF assembly stay upstream. Tracee uses its existing paired main buffer/clamp unit; support objects and userspace binary come from the upstream image. The Makefile paired-source target records exact source membership, commands, original/selected hashes and build output under C/audit-recovery. The same-model whole-application startup measures the resulting baseline and native coverage.
+
+## Fixed replay inputs
+
+The final safety/census prepare target stores regular copies of the kernel, module, loader and native-link beside the selected committed model. All subsequent guests use those same files, while current build caches keep their own paths. Selftest native objects rebuild from the original published C with the restored compiler flags. The original selftest and ISA case annotations remain in the replay input tables. This is experiment input selection and archiving; runtime admission predicates added0.
+
+## Canonical kernel source pin
+
+The parent kernel gitlink selects the combined kinsn-free source 7d6b7d663680309da44f7a1a7904c93db90baffe. It includes the approved x86 six-register frame and A approved ARM full frame, original stock verifier, ordinary subprogram path and existing relocation kinds. The existing CK worktree supplies incremental builds; the existing vendor working files remain available to their readers. Fresh checkouts select this single kernel line. Historical May29 direct-native measurements retain their recorded image/kernel artifacts.
