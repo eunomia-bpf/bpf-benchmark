@@ -1,0 +1,122 @@
+{
+  "utc": "2026-11-09T10:44:18.223082+00:00",
+  "source_publication": "e2e6dc6c034375365d6f359f5faca766e360a271",
+  "make_exit": 2,
+  "cases": 48,
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 34,
+    "specialization_rejected": 4,
+    "accepted_finding": 6
+  },
+  "negative_native_test_run": 0,
+  "positive_results": [
+    {
+      "name": "valid_control",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_copy_restore",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_alias_load",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_spill_restore",
+      "stage": "valid_executed",
+      "returncode": 0
+    }
+  ],
+  "accepted_load_only": [
+    {
+      "name": "unpaired_stxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 22,
+        "source_prog_id": 144,
+        "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+        "started": "1970-01-01T00:07:02.419752+00:00",
+        "prog_id": 145,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/22.success.tar.gz",
+        "finished": "1970-01-01T00:07:27.014309+00:00"
+      }
+    },
+    {
+      "name": "unpaired_stlxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 24,
+        "source_prog_id": 157,
+        "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+        "started": "1970-01-01T00:08:04.399279+00:00",
+        "prog_id": 158,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/24.success.tar.gz",
+        "finished": "1970-01-01T00:08:24.895092+00:00"
+      }
+    },
+    {
+      "name": "paired_stxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 26,
+        "source_prog_id": 170,
+        "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+        "started": "1970-01-01T00:09:01.805374+00:00",
+        "prog_id": 171,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/26.success.tar.gz",
+        "finished": "1970-01-01T00:09:14.748668+00:00"
+      }
+    },
+    {
+      "name": "paired_stlxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 28,
+        "source_prog_id": 183,
+        "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+        "started": "1970-01-01T00:09:37.913435+00:00",
+        "prog_id": 184,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/28.success.tar.gz",
+        "finished": "1970-01-01T00:09:56.633296+00:00"
+      }
+    },
+    {
+      "name": "entry_return_address_flags",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 34,
+        "source_prog_id": 220,
+        "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+        "started": "1970-01-01T00:11:31.172976+00:00",
+        "prog_id": 221,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/34.success.tar.gz",
+        "finished": "1970-01-01T00:11:43.929370+00:00"
+      }
+    },
+    {
+      "name": "stack_base_flags",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 44,
+        "source_prog_id": 281,
+        "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+        "started": "1970-01-01T00:14:34.136036+00:00",
+        "prog_id": 282,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3v7a1_c0/requests/44.success.tar.gz",
+        "finished": "1970-01-01T00:14:47.076798+00:00"
+      }
+    }
+  ],
+  "runtime_admission_additions": 0
+}
