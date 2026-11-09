@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 55/74 |
-| Raw register dispatcher arm composition | 32/75 | 55/74 |
+| Raw register handler refinement | 32/75 | 57/74 |
+| Raw register dispatcher arm composition | 32/75 | 57/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6784,3 +6784,18 @@ C/union interpretation, entry origins, ghost stack lifetime and physical/
 compiler transport retain their existing interfaces. C/A own the coordinated
 forwarding and RET equality representation changes; this proof uses captured
 architectural words/tags and their numeric image.
+
+### ARM raw logical ALU completion
+
+AND/BIC/EOR/ORR now compose with raw ADD/SUB through ALU_IMM/REG and the
+57-operation emission theorem. STACK ORR modifies the captured raw coordinate;
+its small-RHS result materializes to native ORR under the explicit16-byte
+entry-origin alignment premise. The preceding55 operation bindings retain
+their origin domains. Immediate SRC2 bytes and unused amounts stay arbitrary;
+all four native shifts, register aliases/ZR and SP immediate destinations
+retain their field domains. BIC immediate uses the normalized complement form.
+
+Eight new laws and179 prior audits compile with module/root exit0 and
+sorryAx0. The [logical ALU receipt](arm-raw-logical.log.gz) retains diagnostics
+and source identities. Entry-origin establishment, native fields, C/union,
+ghost lifetime and physical/compiler transport retain explicit interfaces.

@@ -78678,5 +78678,24 @@
     "archive_sha256": "99b51020a7beb7799e6be6dc35497f213f5b77c405cc244a0c0424abe82a15e3",
     "source_sha256": "008b146abba4856c789f8495267a594b42b3f61bb418c90f4dd7e929d47e7ef8",
     "scope": "Captured raw word/all tags determine scalar/STACK conditions; wrapping add/sub materialization, full-width SP/STACK coordinate branch, STACK SUB/tagged ADD/scalar writes, immediate aliases3/4 and native shifted/extended fields. Full raw/native image and unified55numeric+6source emission. ALU logical domains continue. Entry/C union/native field/ghost lifetime/physical/compiler interfaces explicit; C/A coordinated forwarding/RET representation changes retain their ownership."
+  },
+  "arm64_raw_logical_alu_refinement": {
+    "operations": [
+      "ARM64_OP_ALU_IMM",
+      "ARM64_OP_ALU_REG"
+    ],
+    "raw_operation_count": 57,
+    "source_branch_count": 6,
+    "new_audits": 8,
+    "total_audits": 187,
+    "module_exit": 0,
+    "root_exit": 0,
+    "sorryAx": 0,
+    "theorem": "KProgFormal.Refinement.Arm64RawRegister.Logical.emission_step_refines",
+    "production": "KProgFormal.Refinement.Arm64RawRegister.Logical.production/production_immediate_unused",
+    "archive": "arm-raw-logical.log.gz",
+    "archive_sha256": "6abb758498ce696b7205744342ea57ef55554214c7f277080ea905051e7f4764",
+    "source_sha256": "62cfba6dbb3ec273be5a309829782435ad5a37c7771815fa94d3c4ce1ee3ab75",
+    "scope": "Four logical AUX selectors complete raw ALU_IMM/REG alongside ADD/SUB. Captured raw/tag materialization; actual STACK ORR low-bit path with small RHS and explicit entrySPorigin16 alignment; full architecture/events/fault/PC; native shifts/omitted modifier/SP/ZR/aliases and arbitrary unused immediate SRC2. BIC immediate normalized complement form. Unified57numeric+6source emission preserves prior55 origin domains. Native/C/entry/ghost/physical/compiler interfaces explicit."
   }
 }

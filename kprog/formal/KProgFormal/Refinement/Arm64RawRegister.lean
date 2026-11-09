@@ -2798,3 +2798,201 @@ end KProgFormal.Refinement.Arm64RawRegister.Arithmetic
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.extended_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.emission_step_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Arithmetic.materialize_sub
+
+
+namespace KProgFormal.Refinement.Arm64RawRegister.Logical
+open Reference
+open Reference.AArch64 (Register RegisterRef Width ShiftKind)
+open Arm64Logic.ImmediateDispatch (Logical)
+
+/-- The raw STACK ORR path changes only the low four bits. At an aligned
+entry stack origin, its materialized result is the native ORR result. -/
+theorem stack_orr_materializes (origins : Origins) (word rhs : Word)
+    (aligned : origins.stack &&& 15 = 0) (small : rhs < 16) :
+    materialize origins (word ||| rhs) (4#8) = materialize origins word (4#8) ||| rhs := by
+  simp only [materialize, ↓reduceIte]
+  bv_decide
+
+def body (op : Logical) (immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst : RegisterRef) (src rhs : Register) (value : Word) (origins : Origins) (state : State) :
+    Transition State :=
+  let captured := ConditionalSelect.readTagged state src
+  let left := readRegister origins state src
+  let selected := GeneratedArm64AluOperand.rhs
+    (if GeneratedArm64AluOperandSelect.immediate (if immediate then .aluImm else .aluReg)
+      then .immediate else .register)
+    value (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (readRegister origins state rhs) ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let operation := Arm64Logic.ImmediateDispatch.alu op
+  let result := GeneratedArm64AluResult.result operation left selected
+  let next := if width = .w64 ∧ operation = .orr ∧ captured.2 = 4 ∧ selected < 16 then
+      MoveAddress.writeTagged origins state dst
+        (GeneratedPtrAdd.bits captured.1 (selected &&& ~~~captured.1)) 4
+    else MoveAddress.writeWidth origins state dst result width
+  ⟨advance next, [], none⟩
+
+theorem body_projects (op : Logical) (immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst : RegisterRef) (src rhs : Register) (value : Word) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0) :
+    observe origins (body op immediate aux width dst src rhs value origins state) =
+      Arm64Dispatcher.aluBody (Arm64Logic.ImmediateDispatch.alu op) immediate
+        ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+        aux width (Arm64Move.Fields.encode dst) (Arm64Register.registerCode src)
+        (Arm64Register.registerCode rhs) value (image origins state) := by
+  have captured := ConditionalSelect.read_tagged_materializes origins state src
+  have paths := Arm64Logic.ImmediateDispatch.no_arithmetic_pointer_branch op width
+    (decide (dst = .stack)) ((ConditionalSelect.readTagged state src).2 == 0)
+    ((ConditionalSelect.readTagged state src).2 == 4)
+  simp only [body, observe, advance_refines, Arm64Dispatcher.aluBody, Arm64Dispatcher.aluRhs,
+    Arm64Move.Fields.register_read, Arm64Move.Fields.typed_write, Arm64Dispatcher.encoded_stack,
+    paths.1, paths.2, Bool.false_eq_true, ↓reduceIte]
+  by_cases stack : (ConditionalSelect.readTagged state src).2 = 4
+  all_goals by_cases narrow : width = .w64
+  all_goals by_cases disjunction : Arm64Logic.ImmediateDispatch.alu op = .orr
+  all_goals by_cases small :
+    Arm64Dispatcher.aluRhs immediate aux width (Arm64Register.registerCode rhs) value (image origins state) < 16
+  all_goals
+    simp_all [read_refines, Arm64Register.read_refines, Arm64Dispatcher.aluRhs,
+      Arm64Move.Fields.register_read, MoveAddress.write_tagged_projects, MoveAddress.write_width_projects,
+      stack_orr_materializes, ConditionalSelect.read_tagged_materializes,
+      Arm64Logic.ImmediateDispatch.pointer_orr, Arm64Move.width_write_refines]
+  all_goals try (cases dst <;> rfl)
+  have large (v : Word) (h : 16#64 ≤ v) : ¬ v < 16#64 := by bv_decide
+  have outside := large _ small
+  simp only [if_neg outside, MoveAddress.write_width_projects, Arm64Move.width_write_refines]
+  cases dst <;> simp [MoveAddress.writeWidth, writeRegister, image]
+
+
+theorem production (op : Logical) (immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst : RegisterRef) (src rhs : Register) (value : Word) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0)
+    (operation : (GeneratedArm64Aux.b0 aux).toNat =
+      GeneratedArm64AluDecode.code (Arm64Logic.ImmediateDispatch.alu op)) :
+    some (observe origins (body op immediate aux width dst src rhs value origins state)) =
+      Arm64Dispatcher.dispatch (Arm64Dispatcher.aluCode immediate) aux width
+        (Arm64Move.Fields.encode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value
+        ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+        (image origins state) := by
+  rw [Arm64Dispatcher.alu_reached, operation, Arm64Dispatcher.decode_alu_code]
+  exact congrArg some (body_projects op immediate aux width dst src rhs value origins state aligned)
+
+theorem production_immediate_unused (op : Logical) (aux : BitVec 32) (width : Width)
+    (dst : RegisterRef) (src rhs : Register) (unused2 : Byte) (value : Word) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0)
+    (operation : (GeneratedArm64Aux.b0 aux).toNat =
+      GeneratedArm64AluDecode.code (Arm64Logic.ImmediateDispatch.alu op)) :
+    some (observe origins (body op true aux width dst src rhs value origins state)) =
+      Arm64Dispatcher.dispatch (Arm64Dispatcher.aluCode true) aux width
+        (Arm64Move.Fields.encode dst) (Arm64Register.registerCode src) unused2 value
+        ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+        (image origins state) := by
+  have ignored := Arm64Dispatcher.dispatch_immediate_ignores_src2 aux width
+    (Arm64Move.Fields.encode dst) (Arm64Register.registerCode src) unused2 (Arm64Register.registerCode rhs)
+    value ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+    (image origins state)
+  exact (production op true aux width dst src rhs value origins state aligned operation).trans ignored.symm
+
+theorem immediate_refines (op : Logical) (width : Width) (dst : RegisterRef) (src rhs : Register)
+    (value : Word) (lane1 lane2 lane3 : Byte) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0) :
+    observe origins (body op true (Arm64Logic.ImmediateDispatch.packedAux op lane1 lane2 lane3)
+      width dst src rhs value origins state) =
+      Reference.AArch64.step (.logicImmediate width (Arm64Logic.ImmediateDispatch.operation op) dst src value)
+        (image origins state) := by
+  apply Option.some.inj
+  rw [production _ _ _ _ _ _ _ _ _ _ aligned (Arm64Logic.ImmediateDispatch.packed_operation op _ _ _)]
+  exact Arm64Dispatcher.logic_immediate_refines op _ _ width dst src (Arm64Register.registerCode rhs)
+    value lane1 lane2 lane3 (image origins state)
+
+theorem register_refines (op : Logical) (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src rhs : Register) (value : Word) (lane3 : Byte) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0) :
+    observe origins (body op false
+      (Arm64Logic.ImmediateDispatch.registerAux op (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane3)
+      width (Arm64Move.scalarDestination dst) src rhs value origins state) =
+      Reference.AArch64.step (.logic ⟨width, Arm64Logic.ImmediateDispatch.operation op, kind, amount, dst, src, rhs⟩)
+        (image origins state) := by
+  apply Option.some.inj
+  rw [production _ _ _ _ _ _ _ _ _ _ aligned (Arm64Logic.ImmediateDispatch.register_aux_operation op _ _ _)]
+  simpa only [Arm64Move.Fields.encode_scalar] using
+    Arm64Dispatcher.logic_register_refines op
+      ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+      width kind amount dst src rhs value lane3 (image origins state)
+
+theorem unmodified_refines (op : Logical) (width : Width) (dst src rhs : Register)
+    (value : Word) (amount lane3 : Byte) (origins : Origins) (state : State)
+    (aligned : origins.stack &&& 15 = 0) :
+    observe origins (body op false (Arm64Logic.ImmediateDispatch.registerAux op .none amount lane3)
+      width (Arm64Move.scalarDestination dst) src rhs value origins state) =
+      Reference.AArch64.step (.logic ⟨width, Arm64Logic.ImmediateDispatch.operation op, .lsl,
+        ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩) (image origins state) := by
+  apply Option.some.inj
+  rw [production _ _ _ _ _ _ _ _ _ _ aligned (Arm64Logic.ImmediateDispatch.register_aux_operation op _ _ _)]
+  simpa only [Arm64Move.Fields.encode_scalar] using
+    Arm64Dispatcher.logic_unmodified_refines op
+      ((ConditionalSelect.readTagged state src).2 == 0) ((ConditionalSelect.readTagged state src).2 == 4)
+      width dst src rhs value amount lane3 (image origins state)
+
+inductive Emission where
+  | leading (emission : Arithmetic.Emission)
+  | logical (op : Logical) (immediate : Bool) (aux : BitVec 32) (width : Width)
+      (dst : RegisterRef) (src rhs : Register) (value : Word)
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .leading emission => Arithmetic.dispatchEmission nativeAddress emission origins state
+  | .logical op immediate aux width dst src rhs value =>
+      some (body op immediate aux width dst src rhs value origins state)
+
+/-- Entry alignment belongs to the added logical forms. Every earlier raw
+binding retains its existing origin domain through leading. -/
+inductive Binding (origins : Origins) (nativeAddress : Word → Word) (pc : Word) :
+    Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Arithmetic.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Arithmetic.Binding nativeAddress pc emission instruction) :
+      Binding origins nativeAddress pc (.leading emission) instruction
+  | immediate (op : Logical) (width : Width) (dst : RegisterRef) (src rhs : Register)
+      (value : Word) (lane1 lane2 lane3 : Byte) (aligned : origins.stack &&& 15 = 0) :
+      Binding origins nativeAddress pc
+        (.logical op true (Arm64Logic.ImmediateDispatch.packedAux op lane1 lane2 lane3) width dst src rhs value)
+        (.logicImmediate width (Arm64Logic.ImmediateDispatch.operation op) dst src value)
+  | register (op : Logical) (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+      (dst src rhs : Register) (value : Word) (lane3 : Byte) (aligned : origins.stack &&& 15 = 0) :
+      Binding origins nativeAddress pc
+        (.logical op false
+          (Arm64Logic.ImmediateDispatch.registerAux op (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane3)
+          width (Arm64Move.scalarDestination dst) src rhs value)
+        (.logic ⟨width, Arm64Logic.ImmediateDispatch.operation op, kind, amount, dst, src, rhs⟩)
+  | unmodified (op : Logical) (width : Width) (dst src rhs : Register)
+      (value : Word) (amount lane3 : Byte) (aligned : origins.stack &&& 15 = 0) :
+      Binding origins nativeAddress pc
+        (.logical op false (Arm64Logic.ImmediateDispatch.registerAux op .none amount lane3)
+          width (Arm64Move.scalarDestination dst) src rhs value)
+        (.logic ⟨width, Arm64Logic.ImmediateDispatch.operation op, .lsl,
+          ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩)
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding origins nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound =>
+      exact Arithmetic.emission_step_refines nativeAddress emission origins state instruction bound
+  | immediate op width dst src rhs value lane1 lane2 lane3 aligned =>
+      exact congrArg some (immediate_refines op width dst src rhs value lane1 lane2 lane3 origins state aligned)
+  | register op width kind amount dst src rhs value lane3 aligned =>
+      exact congrArg some (register_refines op width kind amount dst src rhs value lane3 origins state aligned)
+  | unmodified op width dst src rhs value amount lane3 aligned =>
+      exact congrArg some (unmodified_refines op width dst src rhs value amount lane3 origins state aligned)
+
+end KProgFormal.Refinement.Arm64RawRegister.Logical
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.stack_orr_materializes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.production_immediate_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.unmodified_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.emission_step_refines
