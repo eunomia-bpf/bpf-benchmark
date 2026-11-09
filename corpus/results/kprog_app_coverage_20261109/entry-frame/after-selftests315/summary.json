@@ -1,0 +1,91 @@
+{
+  "model_head": "96b561e22981f4a5a0b03ec5b7b0374998e546ed",
+  "kernel_base": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "entry_contract": "physical six-register entry save and restore; B retains SP and return-target checks",
+  "counts": {
+    "catalog_rows": 1917,
+    "attempted": 315,
+    "submitted": 285,
+    "installed": 17,
+    "verifier_rejected": 66,
+    "generation_failed": 202,
+    "compilation_failed": 0,
+    "resource_failed": 30,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 63,
+    "failure_agrees": 62,
+    "failure_installed": 1,
+    "success": 20,
+    "success_agrees": 16,
+    "success_installed": 16
+  },
+  "by_expect": {
+    "failure": {
+      "generation_failed": 132,
+      "verifier_rejected": 62,
+      "installed": 1,
+      "resource_failed": 23
+    },
+    "success": {
+      "installed": 16,
+      "resource_failed": 7,
+      "generation_failed": 70,
+      "verifier_rejected": 4
+    }
+  },
+  "native_execution_requests": 0,
+  "comparison": {
+    "source": "/var/tmp/kprog-tmp/C/stock-entry/replays/9cbac28ec5d31bd689b5875820e2bf639af4fd25/selftests315/out/submissions.json",
+    "stage_changes": [
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_overwrite_unref",
+        "expect": "success",
+        "before": "verifier_rejected",
+        "after": "installed"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_invalidate_slice_success",
+        "expect": "success",
+        "before": "verifier_rejected",
+        "after": "installed"
+      },
+      {
+        "file": "verifier_lsm.c",
+        "program": "no_null_check",
+        "expect": "failure",
+        "before": "installed",
+        "after": "verifier_rejected"
+      },
+      {
+        "file": "verifier_sockmap_mutate.c",
+        "program": "test_xdp",
+        "expect": "success",
+        "before": "verifier_rejected",
+        "after": "installed"
+      }
+    ]
+  },
+  "installed_failure_findings": [
+    {
+      "file": "dynptr_fail.c",
+      "program": "test_dynptr_reg_type",
+      "native_sha256": "3217480e7d540c5e83bfddd6ffd7f0155f4c6824902b7e2d614af5d6b6c24697",
+      "prog_id": 520
+    }
+  ],
+  "suite_exit": 0,
+  "guest_exit": 0,
+  "make_exit": 0,
+  "runtime": {
+    "/var/tmp/kprog-tmp/C/stock-entry/kernel-build/arch/x86/boot/bzImage": "f408b40e9b5fb6743d8ca1a49e27af5c33fc3dddc4c08b914c79af36bf6c0000",
+    "/var/tmp/kprog-tmp/C/stock-entry/module/kprog_stock.ko": "4ebb2d5edc1c5cf602cf7605920a01f321843d4a75c729635c2ee1b9061a2297",
+    "/var/tmp/kprog-tmp/C/stock-entry/native-link-target/release/native-link": "97226f64e37319a85e2defc63dfc2f6a52288db61436a12f7def0fbee0f6a5c5",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/libnative_loader.so": "580852d479d5e13433d57cc3c5b822e2c119191564ebbd09fddf92111ae196f8",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/trusted-native-loader": "fd7820d758e9ba7a21dcdf378e0a691b047184660688c76bca7789ad13446170"
+  },
+  "input_catalog_sha256": "b728f554a7461ebd45669bb6bd7ce93974c83e8cde5213d314626e74cec660ee"
+}
