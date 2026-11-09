@@ -311,3 +311,53 @@ theorem pair_magnitude_to_nat (width : X86Width) (high low : BitVec 64) :
   exact magnitude_to_nat _
 
 end KProgFormal.X86SignedDivision
+
+namespace KProgFormal.X86SignedDivision
+
+/-- The source computes a 64-bit mask from the resolved native width. -/
+def maskedLimb (width : X86Width) (value : BitVec 64) : BitVec 64 :=
+  value &&& ((BitVec.allOnes 64) >>> (64 - x86WidthBitsSpec width))
+
+theorem masked_limb_refines (width : X86Width) (value : BitVec 64) :
+    maskedLimb width value = (value.setWidth (x86WidthBitsSpec width)).setWidth 64 := by
+  cases width <;> simp [maskedLimb, x86WidthBitsSpec] <;> bv_decide
+
+/-- Normalized source sequence: mask both captured 64-bit limbs, test the
+captured high sign bit, negate the low limb in 64 bits, mask it, then add its
+zero carry to the complemented high limb and mask the result. -/
+def sourcePairMagnitude (width : X86Width) (high low : BitVec 64) : BitVec (2 * x86WidthBitsSpec width) :=
+  let highWord := maskedLimb width high
+  let lowWord := maskedLimb width low
+  if highWord &&& (1 <<< (x86WidthBitsSpec width - 1)) != 0 then
+    let lowMagnitude := maskedLimb width (0 - lowWord)
+    let highMagnitude := maskedLimb width ((~~~highWord) + (if lowMagnitude == 0 then 1 else 0))
+    join width highMagnitude lowMagnitude
+  else join width highWord lowWord
+
+theorem source_pair_magnitude_matches (width : X86Width) (high low : BitVec 64) :
+    sourcePairMagnitude width high low = pairMagnitude width high low := by
+  cases width <;> simp [sourcePairMagnitude, maskedLimb, pairMagnitude, join,
+    x86WidthBitsSpec] <;> bv_decide
+
+theorem join_eq_add (width : X86Width) (high low : BitVec 64) :
+    join width high low =
+      ((high.setWidth (x86WidthBitsSpec width)).setWidth (2 * x86WidthBitsSpec width) <<<
+        x86WidthBitsSpec width) +
+      (low.setWidth (x86WidthBitsSpec width)).setWidth (2 * x86WidthBitsSpec width) := by
+  cases width <;> simp [join, x86WidthBitsSpec] <;> bv_decide
+
+theorem join_to_nat (width : X86Width) (high low : BitVec 64) :
+    (join width high low).toNat =
+      high.toNat % (2 ^ x86WidthBitsSpec width) * (2 ^ x86WidthBitsSpec width) +
+        low.toNat % (2 ^ x86WidthBitsSpec width) := by
+  rw [join_eq_add]
+  cases width <;> simp [x86WidthBitsSpec, BitVec.toNat_add, BitVec.toNat_shiftLeft,
+    BitVec.toNat_setWidth] <;> omega
+
+/-- Complete unsigned magnitude of the original signed double-width value,
+including the most-negative dividend at every width. -/
+theorem source_pair_magnitude_to_nat (width : X86Width) (high low : BitVec 64) :
+    (sourcePairMagnitude width high low).toNat = (join width high low).toInt.natAbs := by
+  rw [source_pair_magnitude_matches, pair_magnitude_to_nat]
+
+end KProgFormal.X86SignedDivision
