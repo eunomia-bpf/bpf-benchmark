@@ -5,10 +5,10 @@ P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
-implementation interface. It currently records72 x86-64 C-model token-body equalities and73 of74
+implementation interface. It currently records71 x86-64 complete current C-model token-body equalities and73 of74
 AArch64 operation bodies, plus an explicit current RET exit-contract interface
 and two returning-helper interface equalities. LDADD/STADD0x46, LDSET/STSET0x47 and LDCLR/STCLR0x48 share canonical atomic access, typed success laws and unified token bindings. Additional helper macro-routing and two-mode RET control laws retain their
-parametric/source bindings and do not increase the72 complete x86 bodies.
+parametric/source bindings and do not increase the71 complete current x86 bodies.
 Full ISA and compiled-simulator closure remain active work.
 
 ## Specification and proof scope
@@ -25,8 +25,8 @@ records5016 agreeing observations across74 operation labels and explicit STLXR
 monitor profiles. LDADD adds1344 agreeing cases and stated atomic/compiler premises. It retains its source/binary
 identities and platform premises alongside the [x86 Sail comparison](../results/kprog_verification_20261107/reference-x86-sail.md),
 which, together with the [direct ACL2 comparison](../results/kprog_verification_20261107/reference-x86-acl2.md),
-records58 agreeing operation labels, seven model-stopped labels and two explicit
-state-difference labels. ACL28.7 retains72 memory-SHIFTX PC-1 observations
+records63 agreeing operation labels and four ANDN/BZHI model-stopped labels
+in the current selected comparison. Historical source epochs retain their observations. ACL28.7 retains72 memory-SHIFTX PC-1 observations
 with matching GPR/flags/XMM/memory, plus48 REP element/whole-step differences.
 Original source/certificate diagnostics and separate CPU evidence remain recorded.
 

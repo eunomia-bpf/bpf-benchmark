@@ -5876,8 +5876,21 @@ Each original RCX3 input takes4 operational steps to canonical completion.
 This finite alignment adds no production bound or whole-domain grain theorem.
 
 C sourcebc0b5b1c5 expands REP MOVS from the old capped/IMM-count body to
-actual fullRCX. All bounded component laws remain; the current token row is
-partial until the expanded C-loop/count correspondence is proved. The current
-complete C-model family tally is71/75; canonical unbounded reference and the
-48 sampled official-model grain agreements retain their existing scope.
-This later production source is outside immutable full66b998528.
+actual fullRCX. The [32 success-path laws](rep-full-count-success.log.gz),
+published as `ecf6001dca4fddd93aab9fc232fe33223d4d4ab0`, compose the full-count indexed loop,
+sequential overlap and fault prefixes, numeric/raw/tag frame, token body and
+dispatcher step. The native64/DF-clear successful normal-access profile is
+explicit. Recovery-choice coupling, primitive/provenance/lifetime, physical
+access/ABI and compiled B remain active interfaces. The current row is
+`partial-current-full-count-success-model`; the complete C-model family tally
+stays71/75. Prior bounded laws and48 sampled official-model grain agreements
+retain their existing domains.
+
+The [current fixture receipt](rep-current-fixtures.log.gz), published as
+`2d8fb3ac005b1c02c8af4d9c132d950aee109696`, records singleton582, dedicated REP127,
+specialization534 and fullframe665600 cases, including332800 same-image overlaps,
+all exit0 against the captured published fullRCX header. The singleton expected
+model uses actualRCX and sequential element sampling. It also records the
+original full `d4b1da6b478e7dfbaa3147f58301d3c5258cf079` failure at that fixture.
+The sole successor full check runs at `2d8fb3ac005b1c02c8af4d9c132d950aee109696`;
+its eventual result has its own immutable source receipt.
