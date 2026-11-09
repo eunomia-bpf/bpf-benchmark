@@ -1,0 +1,56 @@
+{
+  "utc": "2026-11-09T06:57:07.499066+00:00",
+  "source_commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
+  "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
+  "prior_overlay": {
+    "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h"
+    ],
+    "utc": "2026-11-09T06:51:13.923107+00:00",
+    "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+    "prior_overlay": {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "paths": [
+        "kprog/arm64/arm64_sim_local_bpf.h"
+      ],
+      "utc": "2026-11-09T06:31:36.178532+00:00",
+      "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+      "derived_header": "kprog/arm64/arm64_sim_direct.h",
+      "derivation": "Existing owning Makefile target with existing libbpf host include"
+    },
+    "derived_header": "kprog/arm64/arm64_sim_direct.h",
+    "derivation": "Existing owning Makefile target with existing libbpf host include"
+  },
+  "applications": {
+    "bcc": {
+      "header_sha256": "7d100984405db1c4f49fb87abc067593e018f692163a61147cdb835ef50c5438",
+      "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+      "delta_archive_sha256": "28ca5980d8770a13a84e057c268b0fe1d21e058721f0076c52c3e6d1928ec465",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/bcc/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    },
+    "tracee": {
+      "header_sha256": "7d100984405db1c4f49fb87abc067593e018f692163a61147cdb835ef50c5438",
+      "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+      "delta_archive_sha256": "738930fe5d584c5b8cc4d1fa8497503dd55fbb212a2532b3d2943d3b87ab6680",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/tracee/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    }
+  },
+  "runtime_admission_additions": 0
+}
