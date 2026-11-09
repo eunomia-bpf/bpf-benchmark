@@ -8,3 +8,6 @@ The initial header rollback trial reversed5d8c38d3a and retained four unmappedXD
 
 
 The native XDP context repair uses the existing bpf_cast_to_kern_ctx entry representation, with offsets measured from that native ABI base. The three packet pointer fields retain their live verifier-context mapping; other native reads use the existing physical memory primitive shared with SKB. The former compile-error branch is retired. Current rebuilt Katran P compiles successfully; native-context-observation.json/raw records the actual compiler source/hash/commands. Generic runtime predicate additions0. The complete application replay uses the committed source export and preserves each failed program as eBPF.
+
+
+The emitted-B compiler diagnostic keeps the rebuilt P and immutable044d model headers fixed, using the existing O2 choice. Compilation succeeds and the largest observed BPF stack offset remains1120, equal to O3. Compiler optimization level alone leaves the actual stack frontier present. Full native P inlining instead folds3hash calls with actual complete payload32dadc6b6; its whole-app successor is queued after original38.

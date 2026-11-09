@@ -1,0 +1,27 @@
+{
+  "source_commit": "044d32e09e21e8fd885517fffaa5c12125fe8a30",
+  "command": [
+    "/usr/lib/llvm-18/bin/clang",
+    "-g",
+    "-O2",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/var/tmp/kprog-tmp/C/katran-regression-current/native-context/generated/trusted_x86.bpf.c",
+    "-o",
+    "/var/tmp/kprog-tmp/C/katran-regression-current/compiler-o2/trusted_x86.bpf.o"
+  ],
+  "compiler_exit": 0,
+  "stack_max_byte_offset": 1120,
+  "object_bytes": 1689824
+}
