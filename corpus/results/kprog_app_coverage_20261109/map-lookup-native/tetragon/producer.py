@@ -62,6 +62,7 @@ def prepare():
     for label in ['control', 'candidate']:
         directory = STATE / label
         directory.mkdir(exist_ok=True)
+        (directory / 'compile.exit').unlink(missing_ok=True)
         command = ['clang-18', '-x', 'c++', '-fPIC', '-shared',
                    str(ROOT / 'vendor/bpf/native_division.cpp'), *flags, '-O2']
         if label == 'candidate':
@@ -93,18 +94,21 @@ def build():
     for label in ['control', 'candidate']:
         directory = STATE / label
         plugin = directory / 'native_division.so'
-        run(['make', '-C', str(ROOT / 'vendor/bpf'), '-f', str(source / 'native-only.mk'),
-             '-o', str(header), '-o', str(plugin), 'native-tetragon', 'ARCH=x86',
-             'KERNEL_RELEASE=7.0.0-rc2+', 'NATIVE_OUT=' + str(directory / 'native'),
-             'NATIVE_STAGE_ROOT=' + str(directory / 'stage'),
-             'NATIVE_DIVISION_PLUGIN=' + str(plugin), 'TETRAGON_VMLINUX_H=' + str(header),
-             'NATIVE_LINK=/var/tmp/kprog-tmp/C/stock-entry/native-link-before'],
-            directory / 'compile.log')
+        compiled = directory / 'compile.exit'
+        if not compiled.exists() or compiled.read_text().strip() != '0':
+            run(['make', '-C', str(ROOT / 'vendor/bpf'), '-f', str(source / 'native-only.mk'),
+                 '-o', str(header), '-o', str(plugin), 'native-tetragon', 'ARCH=x86',
+                 'KERNEL_RELEASE=7.0.0-rc2+', 'NATIVE_OUT=' + str(directory / 'native'),
+                 'NATIVE_STAGE_ROOT=' + str(directory / 'stage'),
+                 'NATIVE_DIVISION_PLUGIN=' + str(plugin), 'TETRAGON_VMLINUX_H=' + str(header),
+                 'NATIVE_LINK=/var/tmp/kprog-tmp/C/stock-entry/native-link-before'],
+                directory / 'compile.log')
         native = directory / 'native/tetragon'
         command = ['python3', str(ROOT / 'vendor/bpf/write_native_manifest.py'),
             '--app', 'tetragon', '--llvm-nm', 'llvm-nm-18', '--dedupe-program', 'last',
             '--source-object-root', str(STATE / 'jit'), '--helper-disambiguate', '174',
-            '--source-library', str(library), '--output', str(native / 'manifest.json')]
+            '--source-library', str(library), '--bpftool',
+            str(ROOT / 'vendor/build/x86/bpftool/bin/bpftool'), '--output', str(native / 'manifest.json')]
         for path in sorted(native.glob('*.native.o')):
             command += ['--object', str(path)]
         run(command, directory / 'manifest.log')

@@ -10,3 +10,5 @@ setsid nohup taskset -c 20-23 nice -n 10 make -f corpus/results/kprog_app_covera
 ```
 
 All compilation outputs, source exports and runtime copies live under the lane C temporary root. Master owns this producer recipe; the archived source input retains its committed bytes. Benchmark framework/workload files retain the frozen9f3855f6f definition. Native compiler observations, verifier acceptance and application timing retain separate receipts.
+
+Manifest generation uses the repository-built bpftool explicitly. The build resumes completed native compilation within the same prepared input epoch; prepare refreshes both plugins and their compile-stage receipts. The initial control completed62objects before manifest startup encountered the bpftool PATH dependency; that diagnostic is retained in control/manifest-first.log. Source, flags and existing compiled objects retain their bytes while manifest generation and the candidate phase continue.
