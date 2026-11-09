@@ -181,3 +181,52 @@ end KProgTV.NativeLinkArmPerCpu
 #print axioms KProgTV.NativeLinkArmPerCpu.resolved_value
 #print axioms KProgTV.NativeLinkArmPerCpu.resolved_result
 #print axioms KProgTV.NativeLinkArmPerCpu.denied_result
+
+namespace KProgTV.NativeLinkArmPerCpu
+open KProgFormal.Reference KProgTV NativeLinkArmHelper
+open KProgTV.NativeLinkFinalImage (Transfer)
+
+/-- The final copied MRS implements canonical scalar materialization for this
+invocation's resolved thread-pointer profile, retaining the complete step. -/
+theorem accepted_final_resolved_site (code emitted final : Memory)
+    (temporaryBase finalBase : Word) (offset : BitVec 32) (length : Nat) (vhe : Bool)
+    (accepted : checkedCode code (temporaryBase+offset.zeroExtend 64) offset length vhe=some emitted)
+    (copied : Transfer emitted final temporaryBase finalBase length)
+    (before after : AArch64.State) (events : List Event) (perCpu : Word)
+    (profile : before.threadPointer (selectedSource vhe)=some perCpu) :
+    decodedSite final (finalBase+offset.zeroExtend 64) before events after ↔
+      symbolicSite (finalBase+offset.zeroExtend 64) (.moveImmediate .w64 10 perCpu)
+        before events after := by
+  have decoded := accepted_final_decode code emitted final temporaryBase finalBase
+    offset length vhe accepted copied
+  have same := resolved_value before vhe perCpu profile
+  constructor
+  · intro run
+    obtain ⟨position,effect,step,trace,state⟩ := site_reflects final _ _ decoded before after events run
+    refine ⟨position,effect,?_,trace,state⟩
+    simpa only [AArch64.Step,same] using step
+  · rintro ⟨position,effect,step,trace,state⟩
+    refine ⟨position,selectedInstruction vhe,effect,?_,?_,trace,state⟩
+    · rw [position]
+      exact decoded
+    · simpa only [AArch64.Step,same] using step
+
+/-- The copied native instruction changes X10 and PC exactly as the resolved
+reference move. Every other canonical state field and the empty trace follow. -/
+theorem accepted_final_resolved_frame (code emitted final : Memory)
+    (temporaryBase finalBase : Word) (offset : BitVec 32) (length : Nat) (vhe : Bool)
+    (accepted : checkedCode code (temporaryBase+offset.zeroExtend 64) offset length vhe=some emitted)
+    (copied : Transfer emitted final temporaryBase finalBase length)
+    (before after : AArch64.State) (events : List Event) (perCpu : Word)
+    (profile : before.threadPointer (selectedSource vhe)=some perCpu) :
+    decodedSite final (finalBase+offset.zeroExtend 64) before events after ↔
+      before.pc=finalBase+offset.zeroExtend 64 ∧ events=[] ∧
+      after={AArch64.writeReg before 10 perCpu with pc:=before.pc+4} := by
+  rw [accepted_final_resolved_site code emitted final temporaryBase finalBase
+    offset length vhe accepted copied before after events perCpu profile]
+  simp [symbolicSite,AArch64.Step,AArch64.step,AArch64.narrow,AArch64.Width.bits,
+    eq_comm,and_assoc,and_left_comm,and_comm]
+
+end KProgTV.NativeLinkArmPerCpu
+#print axioms KProgTV.NativeLinkArmPerCpu.accepted_final_resolved_site
+#print axioms KProgTV.NativeLinkArmPerCpu.accepted_final_resolved_frame

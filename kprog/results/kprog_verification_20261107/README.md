@@ -5732,3 +5732,17 @@ C-model token-body rows plus this explicit exit interface. Earlier return
 routing laws retain their source/model statements. S13 composes the current
 predicate with physical entry/unwind and compiler/frame premises; S7 supplies
 stack-lifetime and exit execution evidence.
+
+### Final ARM per-CPU profile and widening-oracle ABI
+
+Two kind4 laws compose the final copied MRS and the entered EL1/EL2 profile
+into canonical X10 materialization, with exact complete state, PC4 and empty
+trace. Existing native-link-arm-percpu-check exits0; both laws use
+propext/Quot.sound. Physical CPU/preemption/EL/VHE/profile, producer/C fields,
+copy/fixup/lifetime and compiler/entry premises remain explicit.
+
+Full sourceae09b665d exits2 at widening case3, which writes BH/BX and returns.
+The existing widening and CL/parity fixtures now preserve RBX via R8;19host/BPF
+widening cases,5invalid width/REX controls,3072CL cases and both packet parity
+programs pass. [Original proof/oracle/failed-full receipts](percpu-final-profile.log.gz)
+retain the exact full source manifest, log, CPU and exit.

@@ -78,9 +78,11 @@ int main(void) {
         "-I" + str(ROOT.parents[1] / "vendor/libbpf/src"), str(path), "-o", str(folder / "counts")], check=True)
     subprocess.run([str(folder / "counts")], check=True)
     for op in ("shld", "shrd"):
-        body = [("mov", ("ecx", "DWORD PTR [rdi]")), ("mov", ("ebx", "1")),
+        body = [("mov", ("r8", "rbx")),
+                ("mov", ("ecx", "DWORD PTR [rdi]")), ("mov", ("ebx", "1")),
                 ("cmp", ("ecx", "ebx")), (op, ("ecx", "ebx", "cl")), ("cmovp", ("ecx", "ebx")),
-                ("setnp", ("al",)), ("jp", ("7",)), ("mov", ("eax", "2")), ("ret", ())]
+                ("setnp", ("al",)), ("jp", ("8",)), ("mov", ("eax", "2")),
+                ("mov", ("rbx", "r8")), ("ret", ())]
         insns = [g.NativeInsn(i, mnemonic + " " + ",".join(args), mnemonic, args)
                  for i, (mnemonic, args) in enumerate(body)]
         compile_flags = ["clang-18", "-g", "-O2", "-target", "bpf", "-D__TARGET_ARCH_x86",
@@ -98,7 +100,7 @@ int main(void) {
         # Positive CL/parity programs obtain packet data before the DWORD
         # load. Rebase the original jump so it still targets mov eax,2.
         packet_body = [("mov", ("rdi", "QWORD PTR [rdi]"))] + [
-            (mnemonic, ("8",) if mnemonic == "jp" else args) for mnemonic, args in body]
+            (mnemonic, ("9",) if mnemonic == "jp" else args) for mnemonic, args in body]
         packet_insns = [g.NativeInsn(i, mnemonic + " " + ",".join(args), mnemonic, args)
                         for i, (mnemonic, args) in enumerate(packet_body)]
         path = folder / f"{op}.bpf.c"
@@ -120,6 +122,8 @@ def check_compiled_movx():
                         ("movsx" if signed else "movzx", (dst,high))]
                 if width == 16: body.append(("movzx", ("eax",dst)))
                 elif dst != "eax": body.append(("mov", ("eax",dst)))
+                if base == "rbx":
+                    body = [("mov", ("r8", "rbx"))] + body + [("mov", ("rbx", "r8"))]
                 body.append(("ret", ()))
                 cases.append((body, (0xFF80 if width == 16 else 0xFFFFFF80) if signed else 0x80))
     for op, value, tail, expected in (("cbw","0x80",[("movzx",("eax","ax"))],0xFF80),

@@ -23154,6 +23154,411 @@
       "kprog/tv/test_arm_percpu_emitter.py": "6d4be22257e372a89df293a4c90b52bd3c0193108ed08cb7181f8e5abc2a6f09"
     }
   },
+  "percpu_final_profile_composition": {
+    "actual_existing_check_exit": 0,
+    "archive_block_sha256": "8a864d91eebb825546afb427d4358dd16713abe6594e04aa351bec39efcfd5c1",
+    "archive_file": "kprog/results/kprog_verification_20261107/percpu-final-profile.log.gz",
+    "archive_marker": "=== FINAL ARM PERCPU PROFILE AND ORACLE ABI V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.archive-writer.py": {
+        "bytes": 4531,
+        "sha256": "be047e12b317fcea959c36bc16d67fa3b07e32d7605cfa2c40e26828bceca643"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.cpu.jsonl.gz": {
+        "bytes": 43230,
+        "sha256": "3cccfceb4dc6ffff2402b74f74ae9a2fdfcf6b52259ecee74fe8bba2be5f66e6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.head": {
+        "bytes": 41,
+        "sha256": "1df87bc841ce4ac585de36b74cb91c482b9d0e0595742169a5550841e3244941"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.launch.log": {
+        "bytes": 102,
+        "sha256": "97fe694d3ab728a5236efb3742482d542dfea8979d65cd8fe298d17105ad6282"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.log": {
+        "bytes": 227857,
+        "sha256": "6cd2de2a04f74143b8df487833a3a9881748a00a825d16bd5584582f83c16f34"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.py": {
+        "bytes": 4302,
+        "sha256": "dea1742c362d4aca0bf8038ac0f0269039c2712387bc5594075da8199d2b8828"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.sources": {
+        "bytes": 144775,
+        "sha256": "28633f7a98423d35e61254764eeba12e54db71b8aa66c2bfe872fae848431773"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-live-stack-full.state": {
+        "bytes": 52,
+        "sha256": "736dd4edcdc9c0cba5f391c4114e2ee210782349f519dadf5491dfdd92c882a8"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/encoded-handlers-abi-check.console.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/encoded-handlers-abi-check.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/encoded-handlers-abi-check.log": {
+        "bytes": 4324,
+        "sha256": "53c57d74e66e2b72969eb70a69e845d5524e5f773e9719ca5b3af6e04d0e997b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/encoded-handlers-abi-check.py": {
+        "bytes": 399,
+        "sha256": "e29251481eadc21f461b53b4dbf761fb3143da2ed8c02c49d7c19e2cb643f571"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/encoded-handlers-abi.base.py": {
+        "bytes": 9015,
+        "sha256": "bbdd9db99a91b57d0db9dfb8b291d648deba9b0856e8f4eb1ca54978475668ec"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.console.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.log": {
+        "bytes": 32367,
+        "sha256": "9880be6c7b2d1db0dcabfb3839271d18aaa64138982a6273df74b40d37e56881"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.log.attempt1": {
+        "bytes": 35117,
+        "sha256": "6675b42e527f1195c0edad3e623bd30ec6c953cf103c5d7352ac4d2190569cc6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile-check.py": {
+        "bytes": 392,
+        "sha256": "0533b8e44419c7fccbf97f9dbee18a4f0e095d44c1dc375eb942496a9b4bb1a1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile.base.lean": {
+        "bytes": 10479,
+        "sha256": "e86769f9b2c8921ffd07356496e770e88bc06974e6bf823f800270e929cf6076"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/percpu-final-profile.fragment.lean": {
+        "bytes": 2891,
+        "sha256": "a6ce1a0fc94ef0a74ff24403b177e454172a3783cd0e97a7e2091a15682eeb4c"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-0": {
+        "bytes": 16488,
+        "sha256": "5e10dcad4915b48f34e77585e02d8c3198fbea0de4b5f0ca41c3af20146b92f9"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-0.c": {
+        "bytes": 630,
+        "sha256": "0fe230b35a58ef3feb698f4664aa68035e8924e68839415a1d6644ed14fcc5dd"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-0.o": {
+        "bytes": 928,
+        "sha256": "39fe07d3283cf2eab0b1bfa27a4555ab082a1a599b5b494494ad13efd91c3b84"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-1": {
+        "bytes": 16488,
+        "sha256": "452e666fae2bac492d757b01fcf511c9c5b13f815ef5ef83bfcd635ba1c6ed3d"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-1.c": {
+        "bytes": 630,
+        "sha256": "93189fed222990de41c935fe5ce1d536ec4c4d45dc58aa6531ee30f8c935ffba"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-1.o": {
+        "bytes": 928,
+        "sha256": "f60e3db71261a4904ed7bd139760c4c5cf306e187f3b01af1607aec7b38e5c48"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-10": {
+        "bytes": 16496,
+        "sha256": "54ac5f73b8f332eec0a60362198436384c4b2d4424e8441d5df136bd481e5001"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-10.c": {
+        "bytes": 631,
+        "sha256": "fa74285e79577169f38368bf38ead0de2f36ba91f40e987cb7687ef28776c53f"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-10.o": {
+        "bytes": 928,
+        "sha256": "339a3d5b87d517dad3a2037a2a876cc8a9a6729f7f70b2851d0723b783df9ebc"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-11": {
+        "bytes": 16496,
+        "sha256": "29f0ae20eef045d1fc13ea0b6335d64b6db68e3093cf12a6a2db723fb38f0961"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-11.c": {
+        "bytes": 807,
+        "sha256": "1ea8bc0a229a52a841ad9f347d8c3868a22914a1be412f269e8af4a0c56781f8"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-11.o": {
+        "bytes": 928,
+        "sha256": "761706feea5098e43e560f967925ade742873d6778dba422eff925708a91da9d"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-12": {
+        "bytes": 16496,
+        "sha256": "8fabcfe4180aa98d46e7c04afe46980f6128b13c2841f62efaf8e5966f2d84cf"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-12.c": {
+        "bytes": 508,
+        "sha256": "519063685272061deba60be7322d3864066e2440751380934c0496aeb5df73a3"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-12.o": {
+        "bytes": 928,
+        "sha256": "ae2ead3606f34105124bdeb3a81cfd7a3c9bf4127681420d8afb4897537b5728"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-13": {
+        "bytes": 16496,
+        "sha256": "80c7e6ca1228ca26b941e9359c56df58a6533900a6a02a2f7af7f274741d2cad"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-13.c": {
+        "bytes": 598,
+        "sha256": "7aaa604872ce7d4f77f91a5e5ddf94e0ed22a52ee72c539fce4daa37eb16dd88"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-13.o": {
+        "bytes": 928,
+        "sha256": "f4c88e1ca59796908eb6334d76bbd58f6ede9c028e52fa77a8366f689042225f"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-14": {
+        "bytes": 16496,
+        "sha256": "d976c920f93760db30fe4dac09ef46650e8bbc3b08622ad6c8d44828177313e9"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-14.c": {
+        "bytes": 598,
+        "sha256": "b94cb4c55e8e14ed87c7fca4b3db1b43855d91a9dedbe5b7cf3e300029f4f625"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-14.o": {
+        "bytes": 928,
+        "sha256": "a330dc2dddfd6a3b93d303e4ff593eebaaedfeb292a7b3db755e427f119c70dd"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-15": {
+        "bytes": 16496,
+        "sha256": "1dc9682d06881975829dd9f1cdf694e1925d789e5fa0c08d0759b887327a250a"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-15.c": {
+        "bytes": 774,
+        "sha256": "a0a640e7ea58bf9745a627409c8162bb2116d347cc6e678202f7e4e20c5ddd47"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-15.o": {
+        "bytes": 928,
+        "sha256": "502d4af44256d10863775bec6484a1565a9d7e40b4d16044663344b3b00bff4b"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-16": {
+        "bytes": 16496,
+        "sha256": "c8972c1feac14d435056a733f021e88a12bfd756f8c7f2d8d6bd2a34b00b9fd6"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-16.c": {
+        "bytes": 565,
+        "sha256": "87af8271bb4745be53d317aea2f78c81996125c9220669af0e676c37f7e640c5"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-16.o": {
+        "bytes": 928,
+        "sha256": "5816182ade96c199b9e9497d8cbeb5c1782a56385500836e1b01456c7fe47b1a"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-17": {
+        "bytes": 16496,
+        "sha256": "a1e455a5a8b7a2612b373459be6c545c92a702c3bf82acc9f752400b75dcd8e9"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-17.c": {
+        "bytes": 447,
+        "sha256": "1a742acb86127e26e91bc3586da9ad0abd2a8e111e11754cccdcef10b5ee8b6b"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-17.o": {
+        "bytes": 928,
+        "sha256": "d36d5b3ea14de31ee51442106508e10549c881628af32424d6af714d126b705f"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-18": {
+        "bytes": 16496,
+        "sha256": "5d421bd002d6ee825ded50054b249a6cd1674a692ce4704fdb7e007f6de052db"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-18.c": {
+        "bytes": 556,
+        "sha256": "f6dfdea03973f2b3840e6375ee3a1a69196a028f830774fb543c3142c8495399"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-18.o": {
+        "bytes": 928,
+        "sha256": "4396ebe2c50de2b0d9dfacfe8859603d75d3e03241b4b43b1b582d8cd2e29c4a"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-2": {
+        "bytes": 16488,
+        "sha256": "d81ea4198f7fe4d7b8613bbfd8532d2cb1f30126a89dc12d651a301ab5b315bb"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-2.c": {
+        "bytes": 630,
+        "sha256": "b73ecc4d6b26413b5dade1c043e84b92497cc74d62540f7650dc87591526ada4"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-2.o": {
+        "bytes": 928,
+        "sha256": "0f79df21841ea184ca794ed4ce5433d0ed04832508a0232dda5c26de47bebec5"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-3": {
+        "bytes": 16488,
+        "sha256": "e762cc27046f0f12b6c2655bdcb65b0a5babf80c6223c3eeabffb0895fd7ac90"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-3.c": {
+        "bytes": 806,
+        "sha256": "6b562a59b46cf681fd3f132c81240b43dff518e0e78184ae606184c9561a00c3"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-3.o": {
+        "bytes": 928,
+        "sha256": "c0e82312c66fd89a937b9bd9e3429ec52f6abdf9d69975244f9056c5c58e988c"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-4": {
+        "bytes": 16488,
+        "sha256": "dcfb214b061996e64291f2f0f155e09200a4c8f66b4f8408325d11f54b0f5c90"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-4.c": {
+        "bytes": 507,
+        "sha256": "9d05388818534097079e592a442c5808221fefa2634c5b7b64319536a292dad8"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-4.o": {
+        "bytes": 920,
+        "sha256": "e6e98eb93bbe65f3d41dc53edcab12bddd2423a178d7a453dc982f0213061c14"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-5": {
+        "bytes": 16488,
+        "sha256": "a19d1500b1e65113674dc934d16d701a7ae8fe8730e5917e5759735643646168"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-5.c": {
+        "bytes": 597,
+        "sha256": "ffedfa3a70b4814e290aa6fec29eb472911df7836c6151766e5728aa3646df93"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-5.o": {
+        "bytes": 920,
+        "sha256": "1dcbbf794767a96892579a6ea48b56cb5a12f3494b42983c8b86c042a8f74be8"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-6": {
+        "bytes": 16488,
+        "sha256": "3024d4fa10ee35e6920c1541464104cce223fa6f9066a4917d6334391ebee043"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-6.c": {
+        "bytes": 597,
+        "sha256": "bddca4a579d1d9444901f5ccc62c10d38f449be9356d1f9083ccfda19002563f"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-6.o": {
+        "bytes": 920,
+        "sha256": "d87053c19ccfe8b9bb8c8dbbb2f95a398768e3dfa1bad81dbd92ff5342b89837"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-7": {
+        "bytes": 16488,
+        "sha256": "956965ba0f2d40ef9a19d00baccf9b52cb67f34c74682a394d7d0b325a345f22"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-7.c": {
+        "bytes": 773,
+        "sha256": "19acd22ebd146a93cd681051763670ef5e9ccc8f0e5f5739bdd3829b4663aa71"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-7.o": {
+        "bytes": 920,
+        "sha256": "b8dd79897d77a401de4838119fb37f4e947fc2a08649468ca9cd4f5b9cd1ab4d"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-8": {
+        "bytes": 16488,
+        "sha256": "ff29264aed751cd26cee314034fc5efca27912523a1a42381a81c7146da5a836"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-8.c": {
+        "bytes": 630,
+        "sha256": "ca19e2a9d802a8b4c3dc5d378fcbde29ef3d8d7d4ff8de1875305847dd49e58b"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-8.o": {
+        "bytes": 928,
+        "sha256": "72331058eaa5eb931e0324a971e6f404173838223947151b061650a6b4242c7e"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-9": {
+        "bytes": 16488,
+        "sha256": "fdc48afbf9a5d6b6d6bfe107b5e8edccae8920d284c9693e50e176461b338903"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-9.c": {
+        "bytes": 630,
+        "sha256": "22eb3bd5a885cee764cbf2201059bd44f3328536a6361eafc3ca7dd84a596690"
+      },
+      "/workspaces/repository/kprog/formal/build/movx-encoding/case-9.o": {
+        "bytes": 928,
+        "sha256": "7bce46ba0fe6045782e084f69ff91740c4a3d813f3a174395d580eb4a75aa4ee"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/counts": {
+        "bytes": 20600,
+        "sha256": "2adcdcdd6da35ed598626d174b37d022c9c81a433d678a5b77e8a491ba6d322f"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/counts.c": {
+        "bytes": 3273,
+        "sha256": "78c8032fc7fd342bb8801f9bf87c04ca767e0d19ff0061d1ba28f5861fdd8b8c"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shld.bpf.c": {
+        "bytes": 1410,
+        "sha256": "861705e6a5feeb397df76b4bfa901456f94f8cd6c728cb10b6709856c14146c7"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shld.bpf.o": {
+        "bytes": 19248,
+        "sha256": "96563e67e8dc4c92926faac474b0fe88a4d5d521399e8c9a7a39456bd3da8381"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shld.context.c": {
+        "bytes": 1251,
+        "sha256": "1e07a61bce1c263401e433c3a94f816daf3ad6cba2c2ddd7147d96b4f0c63a6e"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shld.context.log": {
+        "bytes": 2876,
+        "sha256": "811fee080b3f6765a1ef1413e6c2903bc34582c6890ef79f1a7d12630a81f8d4"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shrd.bpf.c": {
+        "bytes": 1410,
+        "sha256": "bbecaab8bb3a42e60ce404de6e6ace9ef186d05bb1304d0af077f79052717bf1"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shrd.bpf.o": {
+        "bytes": 19680,
+        "sha256": "518251b93fcbfe39d1eafe2d487070275450749de36f7a21e1db9107b4e8b07b"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shrd.context.c": {
+        "bytes": 1251,
+        "sha256": "375276893b0f14bb4093ae074f6c9cf88963d8c711fe22296f6c4c3f2f3df2f1"
+      },
+      "/workspaces/repository/kprog/formal/build/x86_flag_conditions/shrd.context.log": {
+        "bytes": 2876,
+        "sha256": "3577543474b8073a6f39fd156451a9cb7b063d7d36aea6deb344c1f7730d4ed4"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/formal/tools/check_x86_encoded_handlers.py": {
+        "bytes": 9215,
+        "sha256": "0a30c6e9ae7f6a3148162527332db333b59c06a3a5d899c79d62653ead9a915c"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkArmHelper.lean": {
+        "bytes": 38440,
+        "sha256": "66a37c9f89145cc296e7247845cc750e1359008a04b7e651976d39008ef4a169"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkArmPerCpu.lean": {
+        "bytes": 13370,
+        "sha256": "d47522c0c627e0f16043a71de3cb562148e44a84748d18e5808efe143987e2f0"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 42975,
+        "sha256": "9daff915a10b152d2520edf1dc9515b9e0375db3c0f7f852621de65bb70cefb5"
+      }
+    },
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "domain": "Complete copied kind4 MRS byte step iff canonical w64 X10 materialization for this entered state and its selected EL1/EL2 thread-pointer profile. Exact whole-state frame, PC4 and empty trace.",
+    "existing_oracle_exit": 0,
+    "existing_oracle_results": "19rendered host/BPF widening cases plus5invalid width/REX controls;3072CL shift cases and both packet parity programs retain their native callee-saved RBX using caller-saved R8.",
+    "preceding_full": {
+      "actual_exit": 2,
+      "reason": "MOVX case3 writes BH/BX then returns under new callee-save exit contract. Original full log/source manifest/CPU/exit archived.",
+      "source": "ae09b665d2da6648d855da089e66efb4b1ab96b8"
+    },
+    "premises": "Successful existing checked emitter and whole-pack Transfer, actual before-state threadPointer(selectedSource vhe)=some perCpu. Physical CPU/preemption/EL/VHE, producer/site/C correspondence, final-copy/fixup separation/lifetime and invocation/compiler ABI remain explicit.",
+    "theorems": [
+      "KProgTV.NativeLinkArmPerCpu.accepted_final_resolved_site",
+      "KProgTV.NativeLinkArmPerCpu.accepted_final_resolved_frame"
+    ]
+  },
   "popcount_live_stack_fixture": {
     "actual_existing_tool_exit": 0,
     "archive_block_sha256": "03cabadc7dfe348c7476d7bf7b0161e958905094472911a98eae224fc929d704",

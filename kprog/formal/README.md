@@ -197,3 +197,8 @@ Canonical ARM LDP recovery also proves first-element, second-element and
 FEAT_LSE2 double-width fault paths, retaining ordered read events and clearing
 both whole X destinations from the input frame before PC4 continuation.
 Physical site/frame, pre/post writeback and compiled-B/O3 bindings remain explicit.
+
+Kind4 per-CPU final-byte laws compose the selected entered thread-pointer
+profile with canonical X10 materialization, preserving the full state and
+empty trace through the final copied word. Physical CPU/profile and C/compiler
+entry/copy/lifetime bindings remain explicit.
