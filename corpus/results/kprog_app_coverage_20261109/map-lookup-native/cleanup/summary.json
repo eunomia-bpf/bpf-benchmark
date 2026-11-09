@@ -1,0 +1,74 @@
+{
+  "source_commit": "85d7ff891fb3a5a1671b4a11e62017e0b4730636",
+  "change": "standard LLVM SROA, InstCombine and SimplifyCFG after pre-submission array lookup lowering; matched original source and allocator9 flags",
+  "profiles": {
+    "control": {
+      "objects": [
+        {
+          "object": "balancer.native.o",
+          "sha256": "4735f862207ec7f7687a25d5937551b1c927b2fd62ecd7e2b6263a051cb95efa",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "executable_bytes": 9978,
+          "lowered_sites": 14
+        },
+        {
+          "object": "healthchecking.native.o",
+          "sha256": "d40e760bb13bb060cab70fd3cb6b60b20a93d65f5db294e6097168fe21a29a19",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "executable_bytes": 1438,
+          "lowered_sites": 5
+        },
+        {
+          "object": "healthchecking_ipip.native.o",
+          "sha256": "866100131e99d7783803a33d1e50c146053c837eaa3fc4b8535c290c2e1b711f",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "executable_bytes": 497,
+          "lowered_sites": 2
+        },
+        {
+          "object": "xdp_root.native.o",
+          "sha256": "1ff98b28a12013d4e076079c71f016ad629ea938f4d625d3b2761c3bd59420e4",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "executable_bytes": 94,
+          "lowered_sites": 0
+        }
+      ],
+      "plugin_sha256": "639ebc22dac73ba730164b9f01b707c3256a15b9ec9756f20b1517d5126ed498",
+      "lowered_sites": 21
+    },
+    "candidate": {
+      "objects": [
+        {
+          "object": "balancer.native.o",
+          "sha256": "161672fa97c903f48a225337762bb81704c089e9cf7800c7cfeaa9b320947407",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "executable_bytes": 9758,
+          "lowered_sites": 14
+        },
+        {
+          "object": "healthchecking.native.o",
+          "sha256": "143b72578a03ea8a55b4e179584d0242dd244a37eff3ff93e43fc3bd4866160b",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "executable_bytes": 1328,
+          "lowered_sites": 5
+        },
+        {
+          "object": "healthchecking_ipip.native.o",
+          "sha256": "8e05ea4c1c8f6ba24ff94585dfb80b6dbb0448bffc38b4aac6fea3ad4a7e694c",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "executable_bytes": 486,
+          "lowered_sites": 2
+        },
+        {
+          "object": "xdp_root.native.o",
+          "sha256": "1ff98b28a12013d4e076079c71f016ad629ea938f4d625d3b2761c3bd59420e4",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "executable_bytes": 94,
+          "lowered_sites": 0
+        }
+      ],
+      "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+      "lowered_sites": 21
+    }
+  }
+}
