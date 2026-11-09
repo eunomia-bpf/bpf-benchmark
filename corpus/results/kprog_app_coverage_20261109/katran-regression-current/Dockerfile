@@ -8,4 +8,4 @@ COPY config /boot/config-7.0.0-rc2
 
 COPY framework/ /workspaces/repository/
 ENV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1
-ENV BPFREJIT_BENCH_PASSES=""
+ENV SKIP_REJIT=norejit
