@@ -43,6 +43,7 @@ typedef signed short __s16;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 static unsigned long unsupported_calls;
@@ -216,9 +217,13 @@ static __u64 model_mem_read(unsigned base, unsigned index, unsigned aux,
 	__u64 bv = m_base_val(base);
 	__u8 src = KPROG_ARM64_MEM_READ_SRC(base == ARM64_SP, tag, width);
 
-	if (src == KPROG_ARM64_MEM_SRC_STACK)
-		return stack_read((__u32)(ARM64_SIM_STACK_BIAS +
-					  ((__s64)bv + off)), width);
+	if (src == KPROG_ARM64_MEM_SRC_STACK) {
+        __s64 at = (__s64)bv + off;
+        /* The host fresh input supplies zero below the live SP. */
+        if (at < msp)
+            return 0;
+        return stack_read((__u32)(ARM64_SIM_STACK_BIAS + at), width);
+    }
 	if (src == KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD)
 		return heap_read(bv + (__u64)off, width);
 	if (src == KPROG_ARM64_MEM_SRC_RELOC_PTR)
@@ -228,9 +233,11 @@ static __u64 model_mem_read(unsigned base, unsigned index, unsigned aux,
 
 static void model_writeback(unsigned base, __s64 imm)
 {
-	if (base == ARM64_SP)
-		msp += imm;
-	else
+	if (base == ARM64_SP) {
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, msp, msp + imm);
+        msp += imm;
+    } else
 		mreg[base] = mreg[base] + (__u64)imm;
 }
 
@@ -240,6 +247,8 @@ static void model_write_reg_width(unsigned reg, __u64 value, unsigned width)
 	__u64 next = KPROG_ARM64_APPLY_WIDTH(value, width);
 
 	if (reg == ARM64_SP) {
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, msp, (__s64)next);
 		msp = (__s64)next;
 	} else if (reg != ARM64_XZR && reg != ARM64_REG_NONE) {
 		if (width == ARM64_WIDTH_32)
