@@ -20,7 +20,7 @@ specialization token also has its own row.
 | Control handler model / composed step | 3/75 | 0/74 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
-| O2 C-model token-body equality | 72/75 | 73/74 |
+| O2 C-model token-body equality | 71/75 | 73/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
@@ -62,11 +62,11 @@ X0..X30, SP, PC, NZCV, V0 and32 memory bytes. Events, translation, access permis
 interthread ordering and compiler/link premises retain their stated interfaces.
 
 S4 adds two parametric shared-macro routing laws and a two-mode RET control
-model. These do not increase the72 complete C-model token count; the
+model. These do not complete the partial helper/RET C-model tokens; the
 [source/model review](s4-o2-review.md) records their precise boundary. S5/S6
 add nine partial universal O4 components with explicit production goals.
 
-The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
+The previously recorded72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
 RET now composes its internal SUB_RET saved64word read, rawRSP+8 and full
@@ -5874,3 +5874,10 @@ The [REP grain replay](reference-x86-rep-grain.log.gz) retains the original
 48 single-element differences and a separate48-case composed observation.
 Each original RCX3 input takes4 operational steps to canonical completion.
 This finite alignment adds no production bound or whole-domain grain theorem.
+
+C sourcebc0b5b1c5 expands REP MOVS from the old capped/IMM-count body to
+actual fullRCX. All bounded component laws remain; the current token row is
+partial until the expanded C-loop/count correspondence is proved. The current
+complete C-model family tally is71/75; canonical unbounded reference and the
+48 sampled official-model grain agreements retain their existing scope.
+This later production source is outside immutable full66b998528.
