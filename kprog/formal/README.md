@@ -11,6 +11,15 @@ and two returning-helper interface equalities. LDADD/STADD0x46, LDSET/STSET0x47 
 parametric/source bindings and do not increase the71 complete current x86 bodies.
 Full ISA and compiled-simulator closure remain active work. The production DIV signed AUX1 branch has its canonical signed reference and554 semantic scenes. Signed/unsigned AUXbit0 dispatch and arbitrary fresh flags compose through the generic step/token laws. The current signed DIV raw/tag body directly executes all four widths of word arithmetic, the complete restoring loop/zero-high fast path, word-limit comparison and unsigned sign restoration, composing captured operands and whole state/fresh flags through current dispatcher/O2 laws. Both unsigned and signed domains now meet the concrete C-model token category used by the other complete rows. C-source extraction, compiled-B and physical/ABI transport remain explicit interfaces.
 
+`X86RemainingTokenO2.StackRelease` adds seventeen universal component laws for
+internal RET lifetime: ordered fresh-byte writes over the released signed
+interval, clearing every declared below-SP word tag/valid field, preserving
+pointer/scalar payloads and live cells, pre-release saved-word capture and
+selected/default token transport. Sparse declared-word lists and arbitrary fresh
+bytes are quantified. Source owned-read/forwarding, signed-coordinate validity,
+live-stack/native-memory representation and compiler/physical transport remain
+explicit interfaces; RET retains its partial category.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

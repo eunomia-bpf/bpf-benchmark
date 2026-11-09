@@ -74734,5 +74734,72 @@
       "vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865"
     },
     "source_stable": true
+  },
+  "x86_ret_stack_release_component": {
+    "status": "partial-source-lifetime-component",
+    "proof": {
+      "laws": [
+        "clear_idempotent",
+        "visit_cell",
+        "body_matches",
+        "released_byte",
+        "retained_byte",
+        "released_cell",
+        "payload_preserved",
+        "fresh_locality",
+        "sub_return_matches",
+        "saved_word_captured",
+        "sub_return_frame_projection",
+        "sub_return_live_bytes",
+        "token_body_matches",
+        "token_default",
+        "released_word_invalid",
+        "live_cell_preserved",
+        "sub_return_frame_retained"
+      ],
+      "compile": [
+        {
+          "module": "KProgFormal/X86RemainingTokenO2",
+          "exit": 0,
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/ret-stack-release/olean/KProgFormal/X86RemainingTokenO2.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+          ],
+          "source_sha256": "1ca2a979aef4120a880bb75d23ebf0db13e63c344e7ec1999297298f4aab25a0"
+        }
+      ],
+      "audit_exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 0,
+      "audit_input": "import KProgFormal.X86RemainingTokenO2\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.clear_idempotent\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.visit_cell\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_byte\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.retained_byte\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_cell\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.payload_preserved\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.fresh_locality\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.saved_word_captured\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_frame_projection\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_live_bytes\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.token_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.token_default\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_word_invalid\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.live_cell_preserved\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_frame_retained\n"
+    },
+    "integration": {
+      "audit_input": "import SimulatorComposition\nimport ControlABIComposition\nimport KProgFormal.X86RemainingTokenO2\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n#print axioms KProgFormal.X86RemainingTokenO2.ret_contract_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.ret_invocation_contract\n#print axioms KProgFormal.X86RemainingTokenO2.ret_subroutine_guard_preserves\n",
+      "exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 5
+    },
+    "source": {
+      "head": "28c69f02154e66def12d730eb93a48734a0fbd64",
+      "header": "kprog/x86/x86_sim_local_bpf.h",
+      "sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891",
+      "bindings": {
+        "visit": "unrolled ordered byte/declared-word assignments; sparse generated word lists quantified",
+        "body": "STACK_RELEASE signed interval fresh bytes followed by STACK_VALUES_CALL_FRAME",
+        "Cell": "pointer/tag/scalar/valid separate source fields; clear sets tag0/valid0 only",
+        "subReturn": "STACK_READ owned-read primitive captured before raw wrapping RSP+8; source OLD is signed newSP-8",
+        "source_profile": "signed newSP-8 representable and source stack addressing/access/read forwarding interpretation are explicit interfaces",
+        "native_frame": "canonical native memory retained; source stack image/word ghosts carried separately; live-byte and live-cell preservation proved",
+        "token": "existing historical native-read token composed with source-release component under explicit read/projection interface"
+      },
+      "runtime_additions": 0
+    },
+    "scope": "Source stack-byte image and declared word representatives accompany the historical canonical native-frame projection. Signed newSP-8 range and owned-read/forwarding/live-memory relations remain source interfaces. Producer mode and actual C/B/compiler/physical transport remain active; current RET partial, Cmodel71/75 and compiled13/75 unchanged.",
+    "archive": "ret-stack-release.log.gz"
   }
 }

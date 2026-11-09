@@ -6239,3 +6239,20 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_099a096fb`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-099a096fb.log.gz](full-make-check-099a096fb.log.gz).
+
+### Internal RET stack lifetime component
+
+`X86RemainingTokenO2.StackRelease` proves seventeen universal laws for the
+existing source release sequence. Ordered byte assignments equal the independent
+signed half-open interval specification. Every declared word below the new SP
+gets scalar tag0 and valid0; pointer/scalar payloads and live word representatives
+retain their input values. The saved word is captured before RSP advance and
+release; selected and unresolved token outcomes carry the same stack image.
+Arbitrary stack size, sparse declarations and fresh byte streams are quantified.
+The [source/proof receipt](ret-stack-release.log.gz) records exact macro identities,
+formal root/TV compiles and audits. All17 component audits pass with sorryAx0 and
+executable-reduction bridges0; generic TV composition retains its inherited
+bridges. Source read/forwarding and live-stack/native-memory representation,
+signed subtraction domain, producer mode and C/B/compiler/physical interfaces
+remain active. RET stays partial; current C-model71/75 and compiled13/75 totals
+retain their scope.

@@ -75,7 +75,9 @@
 - [x] **V** DIV：signed/unsigned 当前具体 C-model 全分支，word 算术直接执行于 raw/tag handler，并接入字段、dispatcher 和 O2 token 定理（本提交；71/75）。
 - [ ] **V** 全 simulator 的 C 源解释与 Lean C-model 对应关系（包括 DIV、ROR、ANDN/BZHI 等当前 C-model）；编译 B 与物理内存/入口/ABI 对应关系继续按各项收尾。
 - [x] **V** RET：现有 x86/ARM callee 标签/值/SP 退出判定、正常返回的完整 frame、x86 RET token guard，以及 native-return/JIT-result 的 callee/SP 前提组合（本提交，15 条组件定理）。
-- [ ] **V** RET：内部返回 STACK_RELEASE 的 valid/tag 清除与栈生命周期、两 ISA 的 return-mode 及 x86 saved-return/ARM LR 映射、实际 C/B/编译/物理入口出口对应关系。
+- [x] **V** RET：内部 STACK_RELEASE 的区间 fresh 字节、已声明 below-SP word 的 tag/valid 清除、payload/live cell 保留、saved-word 捕获与 selected/default token 组合（本提交，17 条组件定理）。
+- [ ] **V** RET：owned-read/forwarding 与 live-stack/native-memory 映射、signed subtraction 源域、两 ISA 的 return-mode 及 x86 saved-return/ARM LR 映射、实际 C/B/编译/物理入口出口对应关系。
+- [ ] **V** RET 栈生命周期组件批次全量检查（本提交；沿用共享增量缓存，当前唯一 full 源 d39918760）。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
