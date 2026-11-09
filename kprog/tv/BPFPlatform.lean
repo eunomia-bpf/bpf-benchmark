@@ -32,19 +32,53 @@ def expand (env : BPF.Environment) (expansion : Expansion) (state : BPF.State) :
       else .ok { result with state := { result.state with
         pc := if result.fault.isSome then state.pc else state.pc + 1 } }
 
+/-- Kernel-internal non-arena BTF load opcodes after verifier conversion:
+PROBE_MEM byte/half/word/dword and PROBE_MEMSX byte/half/word.
+This opcode domain belongs to the platform, not raw pre-verifier BPF. -/
+def kernelProbe (instruction : BPF.Instruction) : Bool :=
+  decide (instruction.code ∈ ([0x21,0x29,0x31,0x39,0x41,0x49,0x51] : List Nat))
+
+def probeCount (instruction : BPF.Instruction) : Nat :=
+  match instruction.code / 8 % 4 with | 0 => 4 | 1 => 2 | 2 => 1 | _ => 8
+
+/-- A protected read uses the ordinary raw load on success. A read failure
+clears the whole BPF destination and is no longer terminal. The raw diagnostic
+fault event is retained; its platform observation/O3 interpretation is explicit. -/
+def probeLoad (state : BPF.State) (destination : BPF.Register)
+    (address : Word) (count : Nat) (signed : Bool) : Transition BPF.State :=
+  let raw := BPF.load state destination address count signed
+  match raw.fault with
+  | none => raw
+  | some _ => { raw with state := BPF.setReg state destination 0, fault := none }
+
+/-- Kernel probe loads use the same register invariants as ordinary BPF
+loads. Only their protected access behavior differs. The actual kernel's
+address guard, memory/exception class and converted opcode remain premises. -/
+def probeExecute (state : BPF.State) (instruction : BPF.Instruction) :
+    Except String (Transition BPF.State) := do
+  if instruction.dst = 10 then throw "BPF load overwrites frame pointer"
+  if h : instruction.src < 11 then
+    let address := state.regs ⟨instruction.src,h⟩ + instruction.offset.signExtend 64
+    let effect := probeLoad state instruction.dst address (probeCount instruction)
+      (instruction.code / 32 == 2)
+    pure { effect with state := { effect.state with pc := state.pc+1 } }
+  else throw "BPF load base register outside r0-r10"
+
 def step (env : Environment) (program : Array Byte) (state : BPF.State) :
     Except String (Transition BPF.State) := do
   if state.halted then throw "BPF execution already returned"
   if state.pc < 0 then throw "BPF PC before artifact"
   let instruction ← BPF.decode program state.pc.toNat
-  match ← env.access state.pc instruction with
-  | none => BPF.execute env.bpf program state instruction
-  | some expansion =>
-      if expansion.original != instruction then
-        throw "kernel context expansion does not match original instruction"
-      if instruction.code % 8 ∉ [1, 2, 3] then
-        throw "kernel context expansion replaces a nonmemory instruction"
-      expand env.bpf expansion state
+  if kernelProbe instruction then probeExecute state instruction
+  else
+    match ← env.access state.pc instruction with
+    | none => BPF.execute env.bpf program state instruction
+    | some expansion =>
+        if expansion.original != instruction then
+          throw "kernel context expansion does not match original instruction"
+        if instruction.code % 8 ∉ [1, 2, 3] then
+          throw "kernel context expansion replaces a nonmemory instruction"
+        expand env.bpf expansion state
 
 /-- Every accepted expansion is an actual execution of the captured physical
 BPF bytes, preserving all registers, memory, faults and ordered effects.
@@ -243,3 +277,115 @@ end KProgTV.BPFPlatform
 
 #print axioms KProgTV.BPFPlatform.returning_helper_argument
 #print axioms KProgTV.BPFPlatform.returning_helper_frame
+
+namespace KProgTV.BPFPlatform
+open KProgFormal.Reference
+
+theorem probe_load_success (state : BPF.State) (destination : BPF.Register)
+    (address : Word) (count : Nat) (signed : Bool) (value : Word) (event : Event)
+    (read : readMemory state.memory address count = .ok (value,event)) :
+    probeLoad state destination address count signed =
+      BPF.load state destination address count signed := by
+  simp [probeLoad,BPF.load,read]
+
+theorem probe_load_fault (state : BPF.State) (destination : BPF.Register)
+    (address : Word) (count : Nat) (signed : Bool)
+    (fault : readMemory state.memory address count = .error (.read address count)) :
+    probeLoad state destination address count signed =
+      ⟨BPF.setReg state destination 0,[.fault (.read address count)],none⟩ := by
+  simp [probeLoad,BPF.load,fault]
+
+theorem probe_load_raw_trace (state : BPF.State) (destination : BPF.Register)
+    (address : Word) (count : Nat) (signed : Bool) :
+    (probeLoad state destination address count signed).events =
+      (BPF.load state destination address count signed).events := by
+  dsimp only [probeLoad]
+  split <;> rfl
+
+theorem probe_load_frame (state : BPF.State) (destination : BPF.Register)
+    (address : Word) (count : Nat) (signed : Bool) :
+    (probeLoad state destination address count signed).state.memory = state.memory ∧
+    (probeLoad state destination address count signed).state.pc = state.pc ∧
+    (probeLoad state destination address count signed).state.halted = state.halted ∧
+    (probeLoad state destination address count signed).state.unspecifiedVisit = state.unspecifiedVisit ∧
+    (probeLoad state destination address count signed).state.exclusiveVisit = state.exclusiveVisit ∧
+    (∀ register, register ≠ destination →
+      (probeLoad state destination address count signed).state.regs register = state.regs register) := by
+  cases read : readMemory state.memory address count with
+  | error reason =>
+      simp [probeLoad,BPF.load,read,BPF.setReg]
+      intro register different same
+      exact (different same).elim
+  | ok result =>
+      rcases result with ⟨value,event⟩
+      simp [probeLoad,BPF.load,read,BPF.setReg]
+      intro register different same
+      exact (different same).elim
+
+theorem probe_execute_fault (state : BPF.State) (instruction : BPF.Instruction)
+    (base : BPF.Register) (source : instruction.src = base.val)
+    (general : instruction.dst ≠ 10)
+    (fault : readMemory state.memory
+      (state.regs base+instruction.offset.signExtend 64) (probeCount instruction) =
+      .error (.read (state.regs base+instruction.offset.signExtend 64) (probeCount instruction))) :
+    probeExecute state instruction = .ok
+      ⟨BPF.setReg { state with pc := state.pc+1 } instruction.dst 0,
+        [.fault (.read (state.regs base+instruction.offset.signExtend 64) (probeCount instruction))],none⟩ := by
+  simp [probeExecute,source,base.isLt,general,
+    probe_load_fault state instruction.dst _ _ _ fault,BPF.setReg,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+theorem probe_execute_success (state : BPF.State) (instruction : BPF.Instruction)
+    (base : BPF.Register) (source : instruction.src = base.val)
+    (general : instruction.dst ≠ 10) (value : Word) (event : Event)
+    (read : readMemory state.memory
+      (state.regs base+instruction.offset.signExtend 64) (probeCount instruction) = .ok (value,event)) :
+    probeExecute state instruction = .ok
+      ⟨BPF.setReg { state with pc := state.pc+1 } instruction.dst
+        (if instruction.code/32 == 2 then
+          (value.setWidth (8*probeCount instruction)).signExtend 64 else value),[event],none⟩ := by
+  simp [probeExecute,source,base.isLt,general,probeLoad,BPF.load,read,BPF.setReg,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Actual decoded post-verifier protected opcode at its real BPF PC selects
+the platform rule. No per-program certificate or invented read value is used. -/
+theorem step_probe (environment : Environment) (program : Array Byte) (state : BPF.State)
+    (instruction : BPF.Instruction)
+    (active : state.halted = false) (position : 0 ≤ state.pc)
+    (decoded : BPF.decode program state.pc.toNat = .ok instruction)
+    (recognized : kernelProbe instruction = true) :
+    step environment program state = probeExecute state instruction := by
+  simp [step,active,Int.not_lt.mpr position,decoded,recognized,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+end KProgTV.BPFPlatform
+#print axioms KProgTV.BPFPlatform.probe_load_success
+#print axioms KProgTV.BPFPlatform.probe_load_fault
+#print axioms KProgTV.BPFPlatform.probe_load_raw_trace
+#print axioms KProgTV.BPFPlatform.probe_load_frame
+#print axioms KProgTV.BPFPlatform.probe_execute_fault
+#print axioms KProgTV.BPFPlatform.probe_execute_success
+#print axioms KProgTV.BPFPlatform.step_probe
+
+namespace KProgTV.BPFPlatform
+open KProgFormal.Reference
+
+/-- One actual decoded kernel probe-load step clears and continues on the
+modeled read failure. The theorem holds at every program/PC, not one fixture. -/
+theorem step_probe_fault (environment : Environment) (program : Array Byte) (state : BPF.State)
+    (instruction : BPF.Instruction) (base : BPF.Register)
+    (active : state.halted = false) (position : 0 ≤ state.pc)
+    (decoded : BPF.decode program state.pc.toNat = .ok instruction)
+    (recognized : kernelProbe instruction = true)
+    (source : instruction.src = base.val) (general : instruction.dst ≠ 10)
+    (fault : readMemory state.memory
+      (state.regs base+instruction.offset.signExtend 64) (probeCount instruction) =
+      .error (.read (state.regs base+instruction.offset.signExtend 64) (probeCount instruction))) :
+    step environment program state = .ok
+      ⟨BPF.setReg { state with pc := state.pc+1 } instruction.dst 0,
+        [.fault (.read (state.regs base+instruction.offset.signExtend 64) (probeCount instruction))],none⟩ :=
+  (step_probe environment program state instruction active position decoded recognized).trans
+    (probe_execute_fault state instruction base source general fault)
+
+end KProgTV.BPFPlatform
+#print axioms KProgTV.BPFPlatform.step_probe_fault

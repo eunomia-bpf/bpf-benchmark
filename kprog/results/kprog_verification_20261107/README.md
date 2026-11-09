@@ -5558,3 +5558,24 @@ fault site, B protected-read/fault arms, physical entry/memory/exception profile
 ordered-prefix/event projection/O3 predicates or compiled-B interfaces. The
 O4 status and operation/token/replay totals remain partial and unchanged;
 x86 and real ARM hardware recovery are separate evidence.
+
+### Kernel BPF protected-load platform step
+
+`BPFPlatform.step` now interprets the seven non-arena kernel-internal
+PROBE_MEM/SX byte/half/word/dword load codes (signed loads through word).
+Eight universal laws preserve ordinary successful values/sign extension and
+prove failed-read whole-destination zero, PC+1 continuation, memory/other
+register/ghost-frame preservation, raw diagnostic trace and actual decoded
+platform-step selection. Existing `bpf-check private-spill-projection-check`
+passes; all new laws use only `propext`/`Quot.sound`.
+[Original evidence](kernel-bpf-protected-load.log.gz) retains failed/passing
+proofs, commands and exact source/kernel inputs.
+
+Raw ISA, `BPF.execute/load` and `BPFPath` stay unchanged. Actual verifier
+conversion/context/opcode mapping, physical permissions/x86 address guard and
+exception class remain interfaces. Handled faults retain their diagnostic
+event, not an invented successful zero-valued read; native/B projection and
+O3 checked events must account for it. Auxiliary AX, arena modes and native
+partial/ALU/SP/pair/vector/exclusive/atomic fault prefixes require their stated
+relations. This supplies B-side semantics, not complete native/B refinement
+or a new runtime check; operation/token totals and O4 partial status stay.

@@ -165,6 +165,10 @@ ARM native-marker and paired-register fields likewise compose with whole-X/PC4
 recovery, X5/XZR semantics and the actual raw fault state. Production site/frame
 and B ordered-prefix correspondence remain explicit.
 
+BPFPlatform also models seven kernel-internal nonarena PROBE_MEM/SX load
+codes with full success/fault/frame and decoded-step laws. Actual conversion,
+physical guard and O3/native fault-prefix correspondence remain explicit.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.
