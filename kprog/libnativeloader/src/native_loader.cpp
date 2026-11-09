@@ -500,9 +500,7 @@ constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
 constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v67";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
-constexpr size_t kInitialVerifierLogSize = 256 * 1024;
 constexpr size_t kMaxVerifierLogSize = 16 * 1024 * 1024;
-constexpr size_t kVerifierLogGrowthSlop = 4096;
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -1248,36 +1246,6 @@ int open_prog_fd_by_id_required(uint32_t id, const char *field_name)
     return fd;
 }
 
-bool verifier_log_was_truncated(const std::vector<char> &verifier_log,
-                                uint32_t log_true_size)
-{
-    return log_true_size > verifier_log.size() ||
-           (!verifier_log.empty() && verifier_log.back() != '\0');
-}
-
-size_t next_verifier_log_size(size_t current_size, uint32_t log_true_size)
-{
-    if (current_size >= kMaxVerifierLogSize) {
-        return 0;
-    }
-
-    size_t requested = log_true_size != 0
-        ? static_cast<size_t>(log_true_size)
-        : current_size;
-    if (requested > kMaxVerifierLogSize - kVerifierLogGrowthSlop) {
-        requested = kMaxVerifierLogSize;
-    } else {
-        requested += kVerifierLogGrowthSlop;
-    }
-
-    const size_t doubled = current_size > kMaxVerifierLogSize / 2
-        ? kMaxVerifierLogSize
-        : current_size * 2;
-    const size_t next_size = std::min(kMaxVerifierLogSize,
-                                      std::max(requested, doubled));
-    return next_size > current_size ? next_size : 0;
-}
-
 int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
                                   const StubLoadAttrs &attrs,
                                   int attach_prog_fd,
@@ -1329,37 +1297,15 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
     const unsigned int attr_size =
         static_cast<unsigned int>(offsetof(union bpf_attr, keyring_id) +
                                   sizeof(attr.keyring_id));
-    int saved_errno = 0;
-    for (int attempt = 0; attempt < 8; attempt++) {
-        if (collect_log) {
-            std::fill(verifier_log.begin(), verifier_log.end(), '\0');
-            attr.log_size = static_cast<uint32_t>(verifier_log.size());
-            attr.log_buf = ptr_to_u64(verifier_log.data());
-        }
-        attr.log_true_size = 0;
-
-        const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
-        if (rc >= 0) {
-            log_true_size = attr.log_true_size;
-            return static_cast<int>(rc);
-        }
-        saved_errno = errno;
-        log_true_size = attr.log_true_size;
-        if (saved_errno == EAGAIN) {
-            continue;
-        }
-        if (collect_log && saved_errno == ENOSPC &&
-            verifier_log_was_truncated(verifier_log, log_true_size)) {
-            const size_t next_size =
-                next_verifier_log_size(verifier_log.size(), log_true_size);
-            if (next_size != 0) {
-                verifier_log.assign(next_size, '\0');
-                continue;
-            }
-        }
-        return -saved_errno;
+    if (collect_log) {
+        attr.log_size = static_cast<uint32_t>(verifier_log.size());
+        attr.log_buf = ptr_to_u64(verifier_log.data());
     }
-    return -(saved_errno != 0 ? saved_errno : EAGAIN);
+    attr.log_true_size = 0;
+    const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
+    const int saved_errno = errno;
+    log_true_size = attr.log_true_size;
+    return rc >= 0 ? static_cast<int>(rc) : -saved_errno;
 }
 
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
@@ -1490,7 +1436,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
-    std::vector<char> verifier_log;
+    std::vector<char> verifier_log(kMaxVerifierLogSize, '\0');
     uint32_t log_true_size = 0;
     {
         std::ostringstream msg;
@@ -1516,27 +1462,17 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         prog_name, insns, fd_array, verifier_log, log_true_size);
     if (fd < 0) {
         const int primary_error = fd;
-        verifier_log.assign(kInitialVerifierLogSize, '\0');
-        const int diagnostic_error = bpf_prog_load_native_stub_raw(
-            prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(), source_btf_fd.get(),
-            prog_name, insns, fd_array, verifier_log, log_true_size);
-        if (diagnostic_error >= 0) {
-            return diagnostic_error;
-        }
         {
             std::ostringstream msg;
             msg << "stub-load-syscall-failed"
                 << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
                 << " err=" << primary_error
-                << " diagnostic_err=" << diagnostic_error
                 << " log_true_size=" << log_true_size
                 << " log_buf_size=" << verifier_log.size();
             native_loader_kmsg_line(msg.str());
         }
         std::string message = std::string("BPF_PROG_LOAD native_lab stub: ")
             + libbpf_error_string(primary_error);
-        message += "\ndiagnostic BPF_PROG_LOAD: "
-            + libbpf_error_string(diagnostic_error);
         message += "\nstub verifier_log_size=" + std::to_string(verifier_log.size())
             + " log_true_size=" + std::to_string(log_true_size);
         message += "\nstub fd_array_cnt=" + std::to_string(fd_array.size())

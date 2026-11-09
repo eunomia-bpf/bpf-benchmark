@@ -1,0 +1,5 @@
+# Single native load attempt with first-attempt diagnostics
+
+Coordinator decision2026-11-09 08:50 UTC: one load attempt per armed image; the first attempt supplies its log buffer and its existing failure is final. The shared native loader now supplies its existing16MiB log allocation before BPF_PROG_LOAD. Diagnostic retry, EAGAIN replay and log-growth replay are removed; the syscall result and errno return directly. The current error message retains the first call's verifier log and kernel tail.
+
+The syscall-interposition control exercises success, EAGAIN, ENOSPC, EINVAL, ENOMEM and E2BIG: each makes exactly1BPF_PROG_LOAD with log_level1 and populated buffer, retains log_true_size42 and returns its original FD/error. Six controls pass. The private incremental CMake cache produces the static/shared libraries and trusted loader/client, with complete target logs and SHA256s. Active application guests retain their captured binaries. Raw source/patch/commands/diagnostics/binaries accompany this receipt. New admission predicates0; the approved single-attempt error path preserves the submitted-image lifecycle.

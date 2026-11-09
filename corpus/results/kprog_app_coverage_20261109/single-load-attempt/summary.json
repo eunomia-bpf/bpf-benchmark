@@ -1,0 +1,40 @@
+{
+  "inputs": {
+    "approval": "COORDINATOR DECISIONS 2026-11-09 08:50 UTC: one load attempt per armed image, first-attempt log buffer, existing error final",
+    "source_head": "bc0b5b1c51b76b2a4afda019e59618f1562be769",
+    "initial_log_buffer": "existing16MiB maximum allocation",
+    "new_admission_predicates": 0
+  },
+  "controls": {
+    "command": [
+      "c++",
+      "-std=c++20",
+      "-O2",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-I/workspaces/repository/kprog/libnativeloader/include",
+      "-I/workspaces/repository/kprog/libnativeloader/src",
+      "-I/workspaces/repository/micro/programs/build-x86",
+      "-I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include",
+      "-I/workspaces/repository/vendor/libbpf/include",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "/var/tmp/kprog-tmp/C/single-load-attempt/syscall-count.cpp",
+      "/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+      "-Wl,--gc-sections",
+      "-lelf",
+      "-lz",
+      "-ldl",
+      "-pthread",
+      "-o",
+      "/var/tmp/kprog-tmp/C/single-load-attempt/syscall-count"
+    ],
+    "compile_exit": 0,
+    "run_exit": 0
+  },
+  "artifacts": {
+    "trusted-native-loader": "5505258c1320b6913243cce4ed063d3cce4196291226ca5bb21e232231979755",
+    "trusted-service-client": "669839e1b81cc030893c0c3cf77bb8de78fe5dcb26c223f6752a9c526cb0a7d8",
+    "libnative_loader.a": "fa31d6f542cafb1ef515abfaa446ba890b5f77a4f56e6842ea5acd6623dc29b2",
+    "libnative_loader.so": "6fd5ced543b2467c7455fd3fc1c457a399af8d82e912bbe11ee56cf4657dd4e6"
+  }
+}
