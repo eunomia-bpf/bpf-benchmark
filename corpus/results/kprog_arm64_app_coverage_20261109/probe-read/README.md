@@ -2,12 +2,15 @@
 
 Actual optimized ARM native IR from the existing8BCC and3paired Tracee translation units. The application C, native production recipe, division lowering, benchmark framework and current running replay epochs retain their captured definitions.
 
-Successful IR compiles: 11/11. Static probe-read helper calls: 61. Scalar kernel-read candidates with a constant single-load width and an unused helper return: 46.
+Successful IR compiles: 11/11. Static probe-read helper calls: 23665. Scalar kernel-read candidates with a constant single-load width and an unused helper return: 17981.
 
 | Helper | Static calls |
 | --- | ---: |
-| probe_read_kernel | 56 |
-| probe_read_kernel_str | 3 |
+| probe_read | 1679 |
+| probe_read_kernel | 19746 |
+| probe_read_kernel_str | 1510 |
+| probe_read_str | 717 |
+| probe_read_user | 11 |
 | probe_read_user_str | 2 |
 
 ## Lowering interface
