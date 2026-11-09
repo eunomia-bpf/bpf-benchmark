@@ -197,8 +197,6 @@ def active_namespace(work):
 def shard(scratch, original, group, cpu):
     work = scratch / "workers" / group["body_sha256"][:16]
     work.mkdir(parents=True, exist_ok=True)
-    if (work / "stock-results.json").exists():
-        return collect_outcome(work, group, cpu)
     active = active_namespace(work)
     if active is not None:
         try:
@@ -209,6 +207,8 @@ def shard(scratch, original, group, cpu):
                 os.close(descriptor)
         except ProcessLookupError:
             pass
+        return collect_outcome(work, group, cpu)
+    if (work / "stock-results.json").exists():
         return collect_outcome(work, group, cpu)
     inventory = json.loads((original / "run-inventory.json").read_text())
     resources = json.loads((original / "resource-index.json").read_text())
