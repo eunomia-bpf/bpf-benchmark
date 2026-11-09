@@ -1,0 +1,60 @@
+{
+  "controller": 3230778,
+  "dependency": 3126829,
+  "model_base": "cc245743cfc34f873fe51c79864756873ccf4f27",
+  "source_layers": [
+    "df6f934d0c094196d69a1977d0de6b861a0b8822 REP_STOS tested header/generator"
+  ],
+  "cases": [
+    {
+      "name": "stos8_valid",
+      "positive": true,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 1,
+      "count": 65
+    },
+    {
+      "name": "stos16_valid",
+      "positive": true,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 2,
+      "count": 65
+    },
+    {
+      "name": "stos32_valid",
+      "positive": true,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 4,
+      "count": 65
+    },
+    {
+      "name": "stos64_valid",
+      "positive": true,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 8,
+      "count": 8
+    },
+    {
+      "name": "stos_zero_null",
+      "positive": true,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 8,
+      "count": 0
+    },
+    {
+      "name": "stos_write_null",
+      "positive": false,
+      "expected_packet_u64": 0,
+      "expected_retval": 2,
+      "width": 8,
+      "count": 1
+    }
+  ],
+  "negative_test_run_calls": 0,
+  "result": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-frozen-config-set-application/safety-control/rep-stos/summary.json"
+}

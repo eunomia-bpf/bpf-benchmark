@@ -1,0 +1,5 @@
+# Generic STOS stock-verifier and native-result observations
+
+The existing waiting full-BCC original38 guest first observes six generic STOS cases on its captured model plus the exact tested df6f header/generator. Five positive cases cover four widths, counts beyond64 on byte/word/dword, arithmetic-flag preservation, complete last-element contents and zero-count NULL destination. They execute only after the stock verifier accepts their generated B and compare packet0/XDPreturn2. The NULL destination with count1 is load-only, with TEST_RUNcalls0. Original38 fixture bytes and annotations retain their definitions.
+
+The observer records every compiler/service/verifier/result and closes its service before the existing original38 replay. The existing2GiB serial slot and subsequent12GiB full paired BCC arms retain their controller and work recipe. The source layer is documented in the full-BCC inputs; all existing active guest lifetimes remain intact. These are generic ISA operation cases, referenced to Intel SDM STOS/REP, with existing service/stock-verifier dispatch. Production runtime admission additions0.

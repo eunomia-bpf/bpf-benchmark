@@ -217,7 +217,7 @@
     "source/kprog/fidelity/reference_check.py": "5ea8c03e03dc74c374a24137344eeb92d152b1fdd962161052b3474b97358348",
     "source/kprog/fidelity/x86_reference_path.py": "ca41a0cd58bef1befa759dbbcc57dd9f41d4568b7a387ae7bb1698f1b3dd5349",
     "source/kprog/test-others/native_lab_attach.hpp": "82049f9a017c1623b8d57d4a1ff1cf53a4cbc66dfc484c3f9bf1d713ab309891",
-    "source/kprog/x86/x86_sim_local_bpf.h": "e5209c7135b333201c66086d7bd1050abf4c929e665f5ed9a0023c74756f780b",
+    "source/kprog/x86/x86_sim_local_bpf.h": "2e52507f3f489973b32b32455f6e0d20fd2c6503740f02ea40c293c1791efaaa",
     "source/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
     "source/kprog/x86/run_app_sim_smoke.py": "ca86b8003d61c88ccbdb64fd59ce1c1bd4e26a40c3126b1f59dfe1917d86d2a3",
     "source/kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
@@ -240,7 +240,7 @@
     "source/kprog/x86/micro-prog/generated_x86_cc_decode.py": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
     "source/kprog/x86/micro-prog/generated_x86_full_condition.py": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
     "source/kprog/x86/micro-prog/generated_x86_reg_lane_aux.py": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9",
-    "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "3164076013a1759fb91809ca3c48b7b4c508e8f860649cfc6107dd027415c9ca",
+    "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "f9e933f42eb121e1a15ae66a885688ab4a481add1e468d06efce585c8a2530df",
     "source/kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
     "source/kprog/x86/native_lab/native_link/target/release/native-link": "a58076fb72ebbfcf11ee1316d8cd622cda4426e5682daa7ee5ae22be87e1ddd4",
     "source/kprog/formal/tools/generate_arm64_unary_spec.py": "73cf66c46f06d54a62dc33125a89bdfa96629d4a54d7a694caa1329a4aa850bc",
@@ -662,5 +662,14 @@
     }
   ],
   "prior_queue": "810425b5cbca3c641b165b97882dcafc06be0b4e",
-  "controller_pid": 3230778
+  "source_layers": [
+    "df6f934d0c094196d69a1977d0de6b861a0b8822 REP_STOS tested header/generator"
+  ],
+  "rep_stos_guest": {
+    "cases": 6,
+    "positive": 5,
+    "negative_load_only": 1,
+    "negative_test_run_calls": 0,
+    "state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-frozen-config-set-application/safety-control/rep-stos"
+  }
 }
