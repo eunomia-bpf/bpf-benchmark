@@ -168,7 +168,7 @@ static void check_load(const char *what, __u8 op, __u8 dst, __u8 src,
 	X86_SIM_L_WRITE_REG_WIDTH(dst, 0xdeadbeefcafef00dULL, X86_WIDTH_64);
 	if (index_reg != X86_REG_NONE)
 		X86_SIM_L_WRITE_REG_WIDTH(index_reg, index_val, X86_WIDTH_64);
-	X86_SIM_L_WRITE_REG_PTR_TAG(src, src == X86_RSP ? (void *)0
+	X86_SIM_L_WRITE_REG_PTR_TAG(src, src == X86_RSP ? (void *)(long)-(__s64)X86_SIM_STACK_BYTES
 							: (void *)heap,
 				    base_tag);
 
@@ -211,7 +211,8 @@ static void check_load(const char *what, __u8 op, __u8 dst, __u8 src,
 	}
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_MOV_LOAD(op, dst, src, flags, aux, imm);
+	X86_SIM_L_EXEC_MOV_LOAD(op, dst, src, flags, aux,
+        imm + (src == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	/* ---- compare the whole modeled state ---- */
 	cases++;
@@ -277,6 +278,7 @@ static void check_read_src_macro(void)
 				__u8 want;
 
 				X86_SIM_L_DECLARE_STATE();
+                X86_SIM_L_DECLARE_STACK();
 				X86_SIM_L_WRITE_REG_PTR_TAG(reg, 0, tag);
 
 				if (reg == X86_RSP)

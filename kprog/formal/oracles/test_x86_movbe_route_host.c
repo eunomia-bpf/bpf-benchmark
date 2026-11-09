@@ -150,7 +150,8 @@ static void check_store(const char *what, __u8 dst, __u8 src_reg, __u8 flags,
 	}
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_MOVBE_STORE(dst, src_reg, flags, aux, imm);
+	if (dst == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_MOVBE_STORE(dst, src_reg, flags, aux, imm + (dst == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	/* ---- compare the whole modeled state ---- */
 	cases++;
@@ -242,7 +243,8 @@ static void check_load(const char *what, __u8 dst, __u8 src_reg, __u8 flags,
 				       : (prior_dst & ~mask) | (value & mask);
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_MOVBE_LOAD(dst, src_reg, flags, aux, imm);
+	if (src_reg == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_MOVBE_LOAD(dst, src_reg, flags, aux, imm + (src_reg == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	got = X86_SIM_L_READ_REG_WIDTH_SHIFT(dst, X86_WIDTH_64, 0U);
 	tag = X86_SIM_L_REG_TAG(dst);
@@ -311,6 +313,7 @@ static void check_frame(unsigned store, unsigned flags, unsigned data_reg,
 	target = base_kind == 0 ? (__u64)-16 : base_kind == 2 ? arena - 16 : (__u64)(unsigned long)&h[96];
 	disp = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
 	memory = base_kind == 0 || base_kind == 2 ? &es[X86_SIM_STACK_BYTES - 16] : &eh[96];
+    __u64 prior_sp = r[X86_RSP];
 	if (store) {
 		value = native_cell(r, tags, data_reg, arena, native_base);
 		for (i = 0; i < width; i++) memory[i] = (__u8)(value >> (8 * (width - i - 1)));
@@ -322,6 +325,12 @@ static void check_frame(unsigned store, unsigned flags, unsigned data_reg,
 		r[data_reg] = data_reg == X86_RSP ? value - native_base : value;
 		tags[data_reg] = X86_SIM_TAG_SCALAR;
 	}
+    /* Native RSP writeback releases only this private interval. */
+    if (!store && data_reg == X86_RSP && (__s64)r[X86_RSP] > (__s64)prior_sp)
+        for (i = 0; i < X86_SIM_STACK_BYTES; i++) {
+            __s64 at = (__s64)i - (__s64)X86_SIM_STACK_BYTES;
+            if (at >= (__s64)prior_sp && at < (__s64)r[X86_RSP]) es[i] = 0;
+        }
 	if (via)
 		X86_SIM_L_EXEC(store ? X86_OP_MOVBE_STORE : X86_OP_MOVBE_LOAD,
 			store ? br : data_reg, store ? data_reg : br, flags, aux, disp);

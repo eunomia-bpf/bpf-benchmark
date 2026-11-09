@@ -19,6 +19,7 @@
  * Exit status is 0 on an exact match, 1 on any mismatch.
  */
 #define X86_SIM_ENABLE_STACK
+#define X86_SIM_STACK_BYTES 4096U
 typedef unsigned char __u8;
 typedef unsigned short __u16;
 typedef unsigned int __u32;
@@ -91,6 +92,14 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 	(void)__x86_xmm0_hi;
 	(void)__x86_sim_ret_addr;
 
+    /* STACK provenance names the allocated private arena. Heap-tagged
+     * copies keep the original buffers; the STACK destination keeps a
+     * complete buffer image in that arena and is copied back for comparison. */
+    __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    if (dst_tag == X86_SIM_TAG_STACK) {
+        memcpy((void *)__x86_stack_mem.b, route_dst, ROUTE_BUF_BYTES);
+        dst = (__u8 *)(void *)__x86_stack_mem.b + dst_off;
+    }
 	/* The count is the raw immediate, not RCX; RCX holds a sentinel the
 	 * body must overwrite at the fixed 64-bit width. */
 	X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0xdeadbeefcafef00dULL,
@@ -164,6 +173,8 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 		}
 	}
 
+    if (dst_tag == X86_SIM_TAG_STACK)
+        memcpy(route_dst, (const void *)__x86_stack_mem.b, ROUTE_BUF_BYTES);
 	if (memcmp(route_dst, route_dst_expected, ROUTE_BUF_BYTES)) {
 		unsigned b;
 

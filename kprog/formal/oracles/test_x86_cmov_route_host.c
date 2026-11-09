@@ -467,6 +467,7 @@ static void check_condition_frame(unsigned set, unsigned flags, unsigned data_re
 	off = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
 	imm = set ? off : (((__u64)(__u32)off << 32) | 0x89abcdefULL);
 	memory = bk == 0 || bk == 2 ? &es[X86_SIM_STACK_BYTES - 16] : &eh[96];
+    __u64 prior_sp = r[X86_RSP];
 	if (set) memory[0] = (__u8)taken;
 	else {
 		for (i = 0; i < w; i++) value |= (__u64)memory[i] << (8 * i);
@@ -478,6 +479,12 @@ static void check_condition_frame(unsigned set, unsigned flags, unsigned data_re
 			tags[data_reg] = X86_SIM_TAG_SCALAR;
 		}
 	}
+    /* A taken SP write, including dword zero extension, releases bytes. */
+    if (!set && data_reg == X86_RSP && (__s64)r[X86_RSP] > (__s64)prior_sp)
+        for (i = 0; i < X86_SIM_STACK_BYTES; i++) {
+            __s64 at = (__s64)i - (__s64)X86_SIM_STACK_BYTES;
+            if (at >= (__s64)prior_sp && at < (__s64)r[X86_RSP]) es[i] = 0;
+        }
 	if (via) X86_SIM_L_EXEC(set ? X86_OP_SETCC_MEM : X86_OP_CMOV_MEM,
 		set ? br : data_reg, set ? X86_REG_NONE : br, flags, aux, imm);
 	else if (set) X86_SIM_L_EXEC_SETCC_MEM(br, aux, imm);

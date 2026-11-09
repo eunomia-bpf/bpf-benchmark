@@ -210,11 +210,21 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 		__u64 value = model_load(mframe, (__s64)mreg[X86_RSP], w);
 
 		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] + w);
+        for (i = 0; i < FRAME; i++) {
+            __s64 at = (__s64)i - (__s64)FRAME;
+            if (at >= rsp && at < (__s64)mreg[X86_RSP]) mframe[i] = 0;
+        }
+        __s64 advanced_sp = (__s64)mreg[X86_RSP];
 		__u64 old = dst == X86_RSP ? mreg[dst] + native_base :
 			mtag[dst] == X86_SIM_TAG_STACK ? mreg[dst] - arena_top + native_base : mreg[dst];
 		__u64 result = model_write(old, value, w);
 		mreg[dst] = dst == X86_RSP ? result - native_base : result;
 		mtag[dst] = X86_SIM_TAG_SCALAR;
+        if (dst == X86_RSP && (__s64)mreg[X86_RSP] > advanced_sp)
+            for (i = 0; i < FRAME; i++) {
+                __s64 at = (__s64)i - (__s64)FRAME;
+                if (at >= advanced_sp && at < (__s64)mreg[X86_RSP]) mframe[i] = 0;
+            }
 
 	}
 	mrsp = (__s64)mreg[X86_RSP];
@@ -350,6 +360,17 @@ static void check_memory_step(unsigned pop, unsigned flags, unsigned base_kind,
 	}
 	for (i = 0; i < w; i++) value |= (__u64)source[i] << (8 * i);
 	for (i = 0; i < w; i++) destination[i] = (__u8)(value >> (8 * i));
+    /* Keep the original source/destination aliases at SP-32. A below-SP
+     * source is observed through the fixed host fresh word; POP releases
+     * its consumed slot and forgets destination bytes below the new SP. */
+    if (!pop && (base_kind == 0 || base_kind == 2) && targets[slot] < -32)
+        for (i = 0; i < w; i++) destination[i] = 0;
+    if (pop) {
+        for (i = 0; i < w; i++) es[FRAME - 32 + i] = 0;
+        if (base_kind == 0 || base_kind == 2)
+            for (i = 0; i < w; i++)
+                if (targets[slot] + (__s64)i < (__s64)mr[X86_RSP]) destination[i] = 0;
+    }
 	if (via)
 		X86_SIM_L_EXEC(pop ? X86_OP_POP : X86_OP_PUSH, pop ? br : X86_REG_NONE,
 			pop ? X86_REG_NONE : br, flags, aux, disp);

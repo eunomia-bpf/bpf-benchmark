@@ -256,7 +256,8 @@ static void probe_return_frame(__u64 saved, unsigned depth, unsigned fs, unsigne
  __x86_xmm0_lo=vector_lo;__x86_xmm0_hi=vector_hi;
  for(unsigned r=0;r<16;r++){before[r]=X86_SIM_L_READ_REG(r);raw[r]=(__u64)(long)X86_SIM_L_REG_VALUE(r);tags[r]=X86_SIM_L_REG_TAG(r);}
  unsigned at=X86_SIM_STACK_BYTES-depth;
- for(unsigned i=0;i<8;i++)__x86_stack_mem.b[at+i]=expected[at+i]=(__u8)(saved>>(8*i));
+ /* SUB_RET reads the saved word, then releases its eight private bytes. */
+ for(unsigned i=0;i<8;i++){__x86_stack_mem.b[at+i]=(__u8)(saved>>(8*i));expected[at+i]=0;}
  goto dispatch;
 arrived:
  hit=1;

@@ -1318,6 +1318,9 @@ static __u64 scene_barrier_lanes(unsigned sel)
 		mtag[X86_RBP] = X86_SIM_TAG_STACK;
 		RAX_SET(0x59ULL);
 		COMPARE_REGFILE("bar_lea", 0xDEAD0068ULL);
+        /* The LEA body is observed above; its enclosing native function
+         * restores the callee-save register before the invocation RET. */
+        X86_SIM_L_WRITE_REG_WIDTH(X86_RBP, (__u64)(long)__x86_entry_rbp, X86_WIDTH_64);
 		X86_SIM_X86_RET();
 	}
 	}

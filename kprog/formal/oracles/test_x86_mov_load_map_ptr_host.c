@@ -670,6 +670,14 @@ static void production_pointer_frame(unsigned op,unsigned dst,__u32 aux,__u8 fla
    fprintf(stderr,"pointer frame op=%x dst=%u r=%u aux=%x flags=%u direct=%u\n",op,dst,r,aux,flags,direct);mismatches++;return;
   }
  }
+ /* Physical pointer writeback to RSP releases the corresponding private bytes. */
+ if(dst==X86_RSP){
+  __s64 prior=(__s64)raw[X86_RSP],after=(__s64)(value-__x86_native_stack_base);
+  if(after>prior)for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++){
+   __s64 at=(__s64)i-(__s64)X86_SIM_STACK_BYTES;
+   if(at>=prior&&at<after)memory[i]=0;
+  }
+ }
  for(unsigned i=0;i<X86_SIM_STACK_BYTES;i++)if(__x86_stack_mem.b[i]!=memory[i]){mismatches++;return;}
  if(__x86_xmm0_lo!=0x0123456789abcdefULL||__x86_xmm0_hi!=0xfedcba9876543210ULL||__x86_cf!=!!(fs&1)||__x86_pf!=!!(fs&2)||__x86_af!=!!(fs&4)||__x86_zf!=!!(fs&8)||__x86_sf!=!!(fs&16)||__x86_of!=!!(fs&32)){mismatches++;return;}
  production_frames++;

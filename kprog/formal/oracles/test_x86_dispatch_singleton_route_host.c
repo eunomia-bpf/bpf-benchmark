@@ -868,8 +868,20 @@ static void alu_flags_into(struct snap *b, unsigned alu, __u8 seed_cf,
 }
 
 /* The host kind6 profile supplies zero for each caller word. */
+/* Fixed host fresh words are zero. An SP transition releases the
+ * half-open private interval; other bytes retain the complete model image. */
+static void model_stack_release(struct snap *b, __u64 prior, __u64 current)
+{
+    if ((__s64)current <= (__s64)prior) return;
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++) {
+        __s64 at = (__s64)i - (__s64)X86_SIM_STACK_BYTES;
+        if (at >= (__s64)prior && at < (__s64)current) b->stack[i] = 0;
+    }
+}
+
 static void model_helper_clobbers(struct snap *b)
 {
+    model_stack_release(b, -(__u64)X86_SIM_STACK_BYTES, b->x[X86_RSP]);
     static const unsigned caller[] = {
         X86_RCX, X86_RDX, X86_RSI, X86_RDI, X86_R8, X86_R9, X86_R10, X86_R11,
     };
@@ -1583,6 +1595,7 @@ static void model_pop(unsigned dst, unsigned flags, const struct snap *seed,
 	__u64 v = arena_read(b, wi, w);
 
 	b->x[X86_RSP] = (unsigned long)(__u64)(long)((long)b->x[X86_RSP] + w);
+    model_stack_release(b, b->x[X86_RSP] - w, b->x[X86_RSP]);
 	b->x[dst] = model_partial_write(b->x[dst], v, w);
 	b->t[dst] = X86_SIM_TAG_SCALAR;
 
@@ -1610,6 +1623,7 @@ static void apply_model(unsigned op, unsigned dst, unsigned src,
 			unsigned flags, unsigned aux, __u64 imm,
 			const struct snap *seed, struct snap *b)
 {
+    __u64 prior_sp = b->x[X86_RSP];
 	switch (op) {
 	case X86_OP_NOP:
 		break;
@@ -1746,6 +1760,7 @@ static void apply_model(unsigned op, unsigned dst, unsigned src,
 	default:
 		break;
 	}
+    model_stack_release(b, prior_sp, b->x[X86_RSP]);
 }
 /* ---- Checks ------------------------------------------------------------ */
 

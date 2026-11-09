@@ -38,7 +38,7 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=0;
  __x86_native_stack_base=(__u64)(long)&native_stack[BYTES];
  for(unsigned r=0;r<16;r++)X86_SIM_L_WRITE_REG_WIDTH(r,cell(r),8);
- __x86_rsp.ptr=(void *)(long)-256;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[128],X86_SIM_TAG_STACK);
+ __x86_rsp.ptr=(void *)(long)-(__s64)BYTES;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[128],X86_SIM_TAG_STACK);
  unsigned si,di,so,dof;locations(profile,seed,&si,&di,&so,&dof);
  __u8 *images[]={source,destination,(__u8 *)(void *)__x86_stack_mem.b};
  for(unsigned i=0;i<BYTES;i++)for(unsigned n=0;n<3;n++)images[n][i]=byte(i,n,seed);

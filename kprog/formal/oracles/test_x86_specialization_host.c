@@ -329,6 +329,8 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 			X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, 2,             \
 						  X86_WIDTH_64);          \
 		}                                                         \
+        X86_SIM_L_STACK_VALUES_CLEAR();                                  \
+        memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);          \
 	} while (0)
 
 #define TAKE_SNAP(S)                                                       \
