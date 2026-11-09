@@ -1,0 +1,1402 @@
+{
+  "utc": "2026-11-09T05:47:47.434408+00:00",
+  "scope": "Read-only inventory of actual optimized native IR for all8BCC and paired Tracee translation units",
+  "source_tracee": "61c85aa5febf1b6bd8acf8a37104469d90faa32a",
+  "plugin_sha256": "61cfaf9983c1871a7b0fa5e3a35e2fc24a78fdad56fe2146bc06097ba7f7c252",
+  "units": [
+    {
+      "unit": "bcc/capable",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/capable.ll",
+        "bcc/libbpf-tools/capable.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/capable.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "d8ae28aafe1996780ad7276fd8390a319934f8a828c4b9967c0b8e72ad09df78",
+      "bytes": 3469575
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/biosnoop.ll",
+        "bcc/libbpf-tools/biosnoop.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/biosnoop.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "d46f6a69f85df580940916f4405b091f899ea8a6319a761bc1761da7fd979653",
+      "bytes": 3484207
+    },
+    {
+      "unit": "bcc/vfsstat",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/vfsstat.ll",
+        "bcc/libbpf-tools/vfsstat.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/vfsstat.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "2a1973c1e29aa7e8b72feb9913baae6172e69626c667a96d6d328c05b086fabc",
+      "bytes": 26858
+    },
+    {
+      "unit": "bcc/opensnoop",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/opensnoop.ll",
+        "bcc/libbpf-tools/opensnoop.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/opensnoop.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "a6f5c93233a742f7510ddcc74c6fbff40ecd1fc1d5c8a7d759c6401f10b456da",
+      "bytes": 63377
+    },
+    {
+      "unit": "bcc/syscount",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/syscount.ll",
+        "bcc/libbpf-tools/syscount.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/syscount.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "f6cb58ea88058d5018a62216824db02d972bbb054b6390e74f69abeac81c3a2d",
+      "bytes": 3441426
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/tcpconnect.ll",
+        "bcc/libbpf-tools/tcpconnect.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/tcpconnect.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "eb7a2f1d14a865ea3fea2b2e3d81b29162ca7cc5daea6835a523ba90654add68",
+      "bytes": 3494769
+    },
+    {
+      "unit": "bcc/tcplife",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/tcplife.ll",
+        "bcc/libbpf-tools/tcplife.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/tcplife.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "d726d4ba29d3c77c775f410fd39b79d6cf3fd6f503b70160c7ea726d4c495a56",
+      "bytes": 3561965
+    },
+    {
+      "unit": "bcc/runqlat",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools",
+        "-I/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/runqlat.ll",
+        "bcc/libbpf-tools/runqlat.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/bcc/runqlat.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "2a0d90ca81606fe3c8482527d80cfb575988ac95092e25f97687f38c87565996",
+      "bytes": 3504079
+    },
+    {
+      "unit": "tracee/tracee",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-D__TARGET_ARCH_arm64",
+        "-D__BPF_TRACING__",
+        "-DCORE",
+        "-DCOMMON_BUILD",
+        "-I/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/tracee.ll",
+        "tracee/pkg/ebpf/c/tracee.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/tracee.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "3035e5f4ffff5ffd4a5f6f7c27eb6f810e59d281f077dd3264bf861a5ab6c6a6",
+      "bytes": 80654408
+    },
+    {
+      "unit": "tracee/lsm_support/kprobe_check",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-D__TARGET_ARCH_arm64",
+        "-D__BPF_TRACING__",
+        "-I/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/lsmsupport",
+        "-I/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/lsm_support/kprobe_check.ll",
+        "tracee/pkg/ebpf/c/lsmsupport/kprobe_check.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/lsm_support/kprobe_check.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "869a33a78b0fa05142043cd2383c26f2cc42bbd50bf6d60bf8d5afbb6ef5969a",
+      "bytes": 16411
+    },
+    {
+      "unit": "tracee/lsm_support/lsm_check",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-D__TARGET_ARCH_arm64",
+        "-D__BPF_TRACING__",
+        "-I/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/lsmsupport",
+        "-I/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/lsm_support/lsm_check.ll",
+        "tracee/pkg/ebpf/c/lsmsupport/lsm_check.bpf.c",
+        "-S",
+        "-emit-llvm",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/probe-read/IR/tracee/lsm_support/lsm_check.d"
+      ],
+      "compile_exit": 0,
+      "sha256": "aa67e62500095993325cf53619b3d609de547fd5887fa71e08e15b153c9e74e2",
+      "bytes": 12482
+    }
+  ],
+  "dependencies": {
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/capable.bpf.c": {
+      "sha256": "2146c2f3b30f3f70268b806a728e49be109dd8ed4430713aa88cb28070c64529",
+      "bytes": 3736
+    },
+    "/workspaces/repository/vendor/bpf/native_compat.h": {
+      "sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+      "bytes": 39516
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h": {
+      "sha256": "542114e2d5d456ba323322a26c95b2a7e03160825baff790c6b9ba768d985f01",
+      "bytes": 2728202
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/capable.h": {
+      "sha256": "ab54049e839fbd8ad1160c1d9478812bab332f8d9347ee905d70c232209e3fba",
+      "bytes": 463
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c": {
+      "sha256": "122b0835099ac0c299b1d003c6a8f046d547309347122a88cd674b241e6fc2d4",
+      "bytes": 4457
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.h": {
+      "sha256": "363db4463211fe3a5f75ee310dbe82e9566a6688058cb43bf8b5f738e53c5277",
+      "bytes": 465
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/core_fixes.bpf.h": {
+      "sha256": "f1d643e718026ed183efa13be9aa924e141e2ec8474fe39ef835b7384179469f",
+      "bytes": 4095
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/vfsstat.bpf.c": {
+      "sha256": "906a49977073624ce798f8a8195baec36845c0e4707dc2b253ec6c7177b04d3d",
+      "bytes": 1298
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/vfsstat.h": {
+      "sha256": "89bcdbaa84fa1d4424f311632f26f751fc68f3acad1b19a4d967c934bd6a7d8d",
+      "bytes": 224
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/opensnoop.bpf.c": {
+      "sha256": "8c322242892208993e5df9cf221049d481447e8d7436c7cdba202c3c25c6b3f3",
+      "bytes": 3346
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/opensnoop.h": {
+      "sha256": "c17a8205071f9034ccccc931bf8ca0fd76292806155db829f536440d086064f7",
+      "bytes": 439
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/syscount.bpf.c": {
+      "sha256": "64c7af7ac28b2732f1710b1c52b664c6f170b29631a0e04d6b4066da9f43f4c2",
+      "bytes": 2847
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/syscount.h": {
+      "sha256": "51f19dcfd7aa42f1d5fdde1b677b977712484985a641c7ca8ccc22c6a1318dd8",
+      "bytes": 274
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/maps.bpf.h": {
+      "sha256": "8757fc29f36b9e5533ed33b7103b9f33d8426d6c749b46c50a0c34a77e0a0225",
+      "bytes": 556
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/tcpconnect.bpf.c": {
+      "sha256": "376221e5307c8d2a2f1228efd68409e4e5b5ed762d569a3b3aa20dd46c5ff96f",
+      "bytes": 5383
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/tcpconnect.h": {
+      "sha256": "e84fecc9c3e23f8cbdccb24a39cd1c9943d1968c38ac9d018b2def1eb831c8d7",
+      "bytes": 732
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/tcplife.bpf.c": {
+      "sha256": "51b8cad1b03fa262df3751e3304053a9523d98577b7ecfcf8a41463714b611b0",
+      "bytes": 4218
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/tcplife.h": {
+      "sha256": "34277826c2eb0f315d5f119cbe0f94d81549a8effb53934c6d0865cffdb5c38f",
+      "bytes": 455
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/runqlat.bpf.c": {
+      "sha256": "3001976a0ad976e1a4416dc13286ec2d554abbfcd68442fe17630755c867a753",
+      "bytes": 4088
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/runqlat.h": {
+      "sha256": "b95ea24c6f8c442a4cd2d5a8d6de11eedd62d5f49dfce266f4c522ce5c55f2cf",
+      "bytes": 241
+    },
+    "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/bits.bpf.h": {
+      "sha256": "593a6425c4cd04bd03cb55aa14dcbf3f1c2751b1b4746a4fb96e7219e081a263",
+      "bytes": 638
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c": {
+      "sha256": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+      "bytes": 276106
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/vmlinux.h": {
+      "sha256": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43",
+      "bytes": 29097
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/vmlinux_flavors.h": {
+      "sha256": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082",
+      "bytes": 2923
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/vmlinux_missing.h": {
+      "sha256": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395",
+      "bytes": 9530
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/types.h": {
+      "sha256": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+      "bytes": 28386
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/consts.h": {
+      "sha256": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4",
+      "bytes": 2335
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/maps.h": {
+      "sha256": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a",
+      "bytes": 20995
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/capture_filtering.h": {
+      "sha256": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+      "bytes": 6332
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/filesystem.h": {
+      "sha256": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
+      "bytes": 17139
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h": {
+      "sha256": "808798e9f2fb67090052f26b8d0453a02881fc760f324b7f4a789ac32cff81cc",
+      "bytes": 25400
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/context.h": {
+      "sha256": "3f75fae98f3af498bccb4df5ddc9bb5bd37199f6ebce31bcb2b14c0ac3b432db",
+      "bytes": 10922
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/logging.h": {
+      "sha256": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9",
+      "bytes": 1832
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/common.h": {
+      "sha256": "c33baf52ff4ec2b99413299d483d67e9120514b7697aa7e1e5c652f3bdeaf959",
+      "bytes": 3179
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/task.h": {
+      "sha256": "f97496645f4c146da9078e9bf72ee96a9b8bed542e2a20f4cac40ec173e97a2a",
+      "bytes": 6744
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/arch.h": {
+      "sha256": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
+      "bytes": 17082
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h": {
+      "sha256": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
+      "bytes": 1070
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/cgroups.h": {
+      "sha256": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51",
+      "bytes": 2238
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/hash.h": {
+      "sha256": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f",
+      "bytes": 3034
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/network.h": {
+      "sha256": "94d9496a0e5deec729f076da6a50bee6ddea6b3e4d1e9e077c47a0313f3899b7",
+      "bytes": 19222
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/memory.h": {
+      "sha256": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
+      "bytes": 8896
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/ksymbols.h": {
+      "sha256": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
+      "bytes": 1269
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.h": {
+      "sha256": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174",
+      "bytes": 3044
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/arguments.h": {
+      "sha256": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97",
+      "bytes": 1183
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/binprm.h": {
+      "sha256": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
+      "bytes": 998
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/bpf_prog.h": {
+      "sha256": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970",
+      "bytes": 534
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/capabilities.h": {
+      "sha256": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87",
+      "bytes": 1087
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/filtering.h": {
+      "sha256": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94",
+      "bytes": 18662
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/kconfig.h": {
+      "sha256": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036",
+      "bytes": 426
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/probes.h": {
+      "sha256": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686",
+      "bytes": 13397
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/signal.h": {
+      "sha256": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1",
+      "bytes": 472
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/lsmsupport/kprobe_check.bpf.c": {
+      "sha256": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+      "bytes": 581
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/lsmsupport/lsm_check_common.h": {
+      "sha256": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79",
+      "bytes": 469
+    },
+    "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/lsmsupport/lsm_check.bpf.c": {
+      "sha256": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2",
+      "bytes": 598
+    }
+  },
+  "helper_counts": {
+    "probe_read_kernel": 56,
+    "probe_read_user_str": 2,
+    "probe_read_kernel_str": 3
+  },
+  "scalar_kernel_read_candidates": 46,
+  "candidate_sizes": {
+    "8": 9,
+    "4": 29,
+    "2": 8
+  },
+  "candidates_by_unit": {
+    "bcc/biosnoop": 11,
+    "bcc/tcpconnect": 8,
+    "bcc/tcplife": 15,
+    "bcc/runqlat": 12
+  },
+  "sites": [
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%29 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %2, i32 noundef 8, ptr noundef nonnull %28) #7, !dbg !30772"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%33 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %10, i32 noundef 4, ptr noundef nonnull %30) #7, !dbg !30776"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%37 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %11, i32 noundef 4, ptr noundef nonnull %36) #7, !dbg !30778"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%64 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %3, i32 noundef 8, ptr noundef nonnull %63) #7, !dbg !30817"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%68 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %6, i32 noundef 4, ptr noundef nonnull %65) #7, !dbg !30821"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_insert",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%72 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %7, i32 noundef 4, ptr noundef nonnull %71) #7, !dbg !30823"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_issue",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%33 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %2, i32 noundef 8, ptr noundef nonnull %32) #7, !dbg !30899"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_issue",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%37 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 4, ptr noundef nonnull %34) #7, !dbg !30903"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_issue",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%41 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %6, i32 noundef 4, ptr noundef nonnull %40) #7, !dbg !30905"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_complete",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%36 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 8, ptr noundef %35) #7, !dbg !31010"
+    },
+    {
+      "unit": "bcc/biosnoop",
+      "function": "block_rq_complete",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%39 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 8, ptr noundef nonnull %38) #7, !dbg !31010"
+    },
+    {
+      "unit": "bcc/opensnoop",
+      "function": "tracepoint__syscalls__sys_exit_open",
+      "helper_id": 114,
+      "helper": "probe_read_user_str",
+      "constant_size": 255,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%29 = call i64 @bpf_probe_read_user_str(ptr noundef nonnull %27, i32 noundef 255, ptr noundef %28) #6, !dbg !370"
+    },
+    {
+      "unit": "bcc/opensnoop",
+      "function": "tracepoint__syscalls__sys_exit_openat",
+      "helper_id": 114,
+      "helper": "probe_read_user_str",
+      "constant_size": 255,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%29 = call i64 @bpf_probe_read_user_str(ptr noundef nonnull %27, i32 noundef 255, ptr noundef %28) #6, !dbg !433"
+    },
+    {
+      "unit": "bcc/syscount",
+      "function": "sys_exit",
+      "helper_id": 115,
+      "helper": "probe_read_kernel_str",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%78 = call i64 @bpf_probe_read_kernel_str(ptr noundef nonnull %2, i32 noundef 8, ptr noundef nonnull %77) #5, !dbg !30814"
+    },
+    {
+      "unit": "bcc/syscount",
+      "function": "sys_exit",
+      "helper_id": 115,
+      "helper": "probe_read_kernel_str",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%82 = call i64 @bpf_probe_read_kernel_str(ptr noundef nonnull %79, i32 noundef 16, ptr noundef nonnull %81) #5, !dbg !30814"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%23 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 2, ptr noundef nonnull %22) #6, !dbg !30793"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%26 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %6, i32 noundef 2, ptr noundef nonnull %25) #6, !dbg !30794"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%53 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %3, i32 noundef 4, ptr noundef nonnull %52) #6, !dbg !30835"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%55 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %54, i32 noundef 4, ptr noundef %18) #6, !dbg !30836"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%79 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %2, i32 noundef 4, ptr noundef nonnull %78) #6, !dbg !30928"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v4_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%81 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %80, i32 noundef 4, ptr noundef %18) #6, !dbg !30929"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%23 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 2, ptr noundef nonnull %22) #6, !dbg !31022"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%26 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %6, i32 noundef 2, ptr noundef nonnull %25) #6, !dbg !31023"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%53 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %3, i32 noundef 16, ptr noundef nonnull %52) #6, !dbg !31048"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%56 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %54, i32 noundef 16, ptr noundef nonnull %55) #6, !dbg !31049"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%80 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %2, i32 noundef 16, ptr noundef nonnull %79) #6, !dbg !31099"
+    },
+    {
+      "unit": "bcc/tcpconnect",
+      "function": "tcp_v6_connect_ret",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%83 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %81, i32 noundef 16, ptr noundef nonnull %82) #6, !dbg !31100"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%20 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %6, i32 noundef 2, ptr noundef nonnull %19) #6, !dbg !31487"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%25 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %7, i32 noundef 2, ptr noundef nonnull %24) #6, !dbg !31495"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%34 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %8, i32 noundef 2, ptr noundef nonnull %33) #6, !dbg !31503"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 2,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%51 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %9, i32 noundef 2, ptr noundef nonnull %50) #6, !dbg !31528"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%68 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 8, ptr noundef nonnull %67) #6, !dbg !31549"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%70 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %10, i32 noundef 4, ptr noundef nonnull %69) #6, !dbg !31551"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%77 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %11, i32 noundef 4, ptr noundef nonnull %69) #6, !dbg !31565"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%81 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %12, i32 noundef 4, ptr noundef nonnull %69) #6, !dbg !31569"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%98 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %13, i32 noundef 4, ptr noundef nonnull %69) #6, !dbg !31590"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%127 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %14, i32 noundef 8, ptr noundef nonnull %126) #6, !dbg !31617"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%131 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %130, i32 noundef 8, ptr noundef nonnull %129) #6, !dbg !31619"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%146 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %141, i32 noundef 16, ptr noundef nonnull %145) #6, !dbg !31658"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%152 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %15, i32 noundef 4, ptr noundef nonnull %151) #6, !dbg !31662"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%153 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 4, ptr noundef nonnull %15) #6, !dbg !31664"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%155 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %16, i32 noundef 4, ptr noundef nonnull %154) #6, !dbg !31665"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%156 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %149, i32 noundef 4, ptr noundef nonnull %16) #6, !dbg !31667"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%159 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %17, i32 noundef 16, ptr noundef nonnull %158) #6, !dbg !31669"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%160 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 16, ptr noundef nonnull %17) #6, !dbg !31671"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%162 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %18, i32 noundef 16, ptr noundef nonnull %161) #6, !dbg !31672"
+    },
+    {
+      "unit": "bcc/tcplife",
+      "function": "inet_sock_set_state",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%163 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %149, i32 noundef 16, ptr noundef nonnull %18) #6, !dbg !31674"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_sched_wakeup",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%15 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 4, ptr noundef nonnull %14) #5, !dbg !30836"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_sched_wakeup",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%18 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 4, ptr noundef nonnull %17) #5, !dbg !30838"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_sched_wakeup_new",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%15 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 4, ptr noundef nonnull %14) #5, !dbg !30884"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_sched_wakeup_new",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%18 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 4, ptr noundef nonnull %17) #5, !dbg !30886"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%19 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %8, i32 noundef 4, ptr noundef %0) #5, !dbg !30994"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%24 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %11, i32 noundef 4, ptr noundef nonnull %23) #5, !dbg !30998"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%27 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %12, i32 noundef 4, ptr noundef nonnull %26) #5, !dbg !31000"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%42 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %9, i32 noundef 4, ptr noundef nonnull %41) #5, !dbg !31020"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%55 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %10, i32 noundef 4, ptr noundef nonnull %54) #5, !dbg !31034"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 8,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%66 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %4, i32 noundef 8, ptr noundef nonnull %65) #5, !dbg !31069"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%69 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %5, i32 noundef 4, ptr noundef nonnull %68) #5, !dbg !31072"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%73 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %3, i32 noundef 16, ptr noundef nonnull %72) #5, !dbg !31074"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 113,
+      "helper": "probe_read_kernel",
+      "constant_size": 4,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": true,
+      "line": "%77 = call i64 @bpf_probe_read_kernel(ptr noundef nonnull %10, i32 noundef 4, ptr noundef nonnull %76) #5, !dbg !31075"
+    },
+    {
+      "unit": "bcc/runqlat",
+      "function": "handle_switch",
+      "helper_id": 115,
+      "helper": "probe_read_kernel_str",
+      "constant_size": 16,
+      "return_value_used": false,
+      "scalar_kernel_read_candidate": false,
+      "line": "%94 = call i64 @bpf_probe_read_kernel_str(ptr noundef nonnull %89, i32 noundef 16, ptr noundef nonnull %93) #5, !dbg !31112"
+    }
+  ],
+  "runtime_admission_additions": 0
+}
