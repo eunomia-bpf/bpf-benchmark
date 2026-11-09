@@ -25,6 +25,5 @@ if __name__ == "__main__":
     build.mkdir(exist_ok=True)
     with (build / "kernel-patch.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        for name in ("native-proof-regions.patch", "native-branch-thunks.patch"):
-            apply(root / "vendor/linux-framework",
-                  Path(__file__).with_name(name).read_bytes())
+        apply(root / "vendor/linux-framework",
+              Path(__file__).with_name("native-proof-regions.patch").read_bytes())

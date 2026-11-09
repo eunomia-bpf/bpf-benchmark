@@ -49,7 +49,7 @@ TETRAGON_CEL_SOURCE_LIBRARY := $(TETRAGON_NATIVE_STAGE_OUT)/cel-defaults.bpf.o
 CILIUM_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/cilium
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
-NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mretpoline-external-thunk -mfunction-return=thunk-extern -fcf-protection=branch -mgeneral-regs-only \
+NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only \
 		-mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -mno-sse4a -msoft-float) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics \
 		-ffixed-x18 -ffixed-x26 -ffixed-x27 \

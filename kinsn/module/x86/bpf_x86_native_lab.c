@@ -22,7 +22,6 @@
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
 #include "native_lab_trusted.h"
 #define NATIVE_LAB_RELOC_HELPER_CALL_REL32 1
-extern void *bpf_x86_native_thunk(u32 selector, bool call);
 #define NATIVE_LAB_ABI_RBX 1U
 #define NATIVE_LAB_ABI_R13 2U
 #define NATIVE_LAB_ABI_R14 4U
@@ -218,21 +217,6 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					err = native_lab_emit_literal(r,
 						blob->bytes, snapshot_len, emit_at, blob->maps, blob->map_count);
 					break;
-
-				case NATIVE_LAB_RELOC_X86_THUNK: {
-                    void *target = bpf_x86_native_thunk(r->target & 0xff,
-                        (r->target & 0x100) != 0);
-                    s64 displacement;
-                    s32 field;
-
-                    if (IS_ERR(target)) { err = PTR_ERR(target); break; }
-                    displacement = (s64)(unsigned long)target -
-                        (s64)(unsigned long)(final_emit_at + r->offset + 4);
-                    field = displacement;
-                    if ((s64)field != displacement) { err = -ERANGE; break; }
-                    memcpy(emit_at + r->offset, &field, sizeof(field));
-                    break;
-                }
 
 				case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
 				case NATIVE_LAB_RELOC_X86_TAIL_STACK: {

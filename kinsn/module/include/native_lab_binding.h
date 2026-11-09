@@ -24,8 +24,6 @@
 /* x86 JIT frame immediates, resolved from the final physical stack depth. */
 #define NATIVE_LAB_RELOC_X86_TAIL_COUNT 10U
 #define NATIVE_LAB_RELOC_X86_TAIL_STACK 11U
-/* rel32 field of a compiler or native-tail external thunk transfer. */
-#define NATIVE_LAB_RELOC_X86_THUNK 12U
 
 static inline int native_lab_reloc_patch_size(__u32 kind)
 {

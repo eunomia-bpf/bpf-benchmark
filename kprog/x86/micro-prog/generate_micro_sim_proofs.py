@@ -267,19 +267,7 @@ def parse_native_link_blob(
         if insn.reloc_symbol in symbols else insn
         for insn in parse_asm_text(disasm.stdout)
     ]
-    normalized = []
-    for insn in insns:
-        if insn.reloc_symbol == "__x86_return_thunk":
-            insn = replace(insn, mnemonic="ret", operands=(), reloc_symbol=None,
-                           reloc_type=None, reloc_target=None)
-        elif insn.reloc_symbol and insn.reloc_symbol.startswith("__x86_indirect_thunk_"):
-            reg = insn.reloc_symbol.removeprefix("__x86_indirect_thunk_")
-            if reg_info(reg) is None:
-                raise ValueError(f"unknown external thunk register: {reg}")
-            insn = replace(insn, operands=(reg,), reloc_symbol=None,
-                           reloc_type=None, reloc_target=None)
-        normalized.append(insn)
-    return normalized, section_size(proof_obj, ".text"), rodata16
+    return insns, section_size(proof_obj, ".text"), rodata16
 
 
 def parse_proof_object_program(
@@ -297,7 +285,6 @@ def normalize_native_link_entry_returns(
         if (
             insn.mnemonic == "jmp"
             and insn.operands
-            and has_direct_branch_target(insn.operands[0])
             and branch_target(insn.operands[0]) == blob_len
         ):
             out.append(
@@ -330,7 +317,6 @@ def parse_native_linked_program(
             for insn in insns
             if insn.mnemonic in CC_AUX or insn.mnemonic == "jmp"
             if insn.operands
-            if has_direct_branch_target(insn.operands[0])
             if branch_target(insn.operands[0]) not in insn_addrs
         ]]
     )

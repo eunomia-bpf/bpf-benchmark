@@ -1,0 +1,41 @@
+{
+  "kernel_head": "e1e9040825d42853adc8eff90a928b3fac31937a",
+  "verifier_matches_stock": true,
+  "files": {
+    "kernel-build/arch/x86/boot/bzImage": {
+      "bytes": 15233536,
+      "sha256": "3f7aa7457066953bb44ab946051d23e9f2655964af8f2181e336cbb7e86a3fed"
+    },
+    "module/kprog_stock.ko": {
+      "bytes": 668864,
+      "sha256": "63bcef80f70b8e0bd56f9c42d9612a9c0401bc727b93f82c05a9053e056a0009"
+    },
+    "native-link-target/release/native-link": {
+      "bytes": 2827888,
+      "sha256": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7"
+    },
+    "loader-build/libnative_loader.so": {
+      "bytes": 2747632,
+      "sha256": "1cec041a5d09a7a2d93210c8dc09897f7caaefd276df9d9b0821fd3ff7e87e34"
+    },
+    "loader-build/trusted-native-loader": {
+      "bytes": 2026240,
+      "sha256": "6de3db9404673f3529ab2195b8a70a807d9cd5217e2100c1244a6f494b5060e1"
+    }
+  },
+  "kernel_module_build_exit": 0,
+  "initial_tail_test_pass": 18,
+  "initial_tail_test_total": 19,
+  "followup_legacy_tail_tests": 19,
+  "followup_stock_tail_tests": 19,
+  "followup_linker_build_exit": 0,
+  "initial_loader_build_exit": 2,
+  "followup_loader_build_exit": 0,
+  "loader_offsets": {
+    "kernel_bpf_func_offset": 72,
+    "jit_tail_call_offset": 12,
+    "kernel_source": "e1e9040825d4",
+    "base_header": "micro/programs/build-x86/kernel_offsets.h"
+  },
+  "added_runtime_checks": 0
+}
