@@ -2,7 +2,7 @@
   "objects": 1,
   "resident_instances": 2,
   "resource_instances": {
-    "resource_failed": 2
+    "resources_prepared": 2
   },
   "application_source_program_loads": 0,
   "native_execution_requests": 0,
@@ -13,9 +13,155 @@
       "source_object": "/workspaces/repository/vendor/build/.bcc-libbpf/none/x86/output/capable.bpf.o",
       "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
       "entry": "kprobe__cap_capable_entry",
-      "stage": "resource_failed",
-      "error": "[Errno 22] maps/BTF object prepare: Invalid argument",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 17, in guest\n    metadata,fds,details=resource.load(group[\"snapshot\"])\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 332, in load\n    self.ok(self.lib.bpf_object__prepare(self.obj), \"maps/BTF object prepare\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 303, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object prepare: Invalid argument\n"
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 13,
+          "source_func_type_id": 51,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "start",
+            "map_id": 2,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_map",
+            "map_id": 3,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 4,
+            "value_offset": null
+          },
+          {
+            "name": "stackmap",
+            "map_id": 5,
+            "value_offset": null
+          },
+          {
+            "name": "info",
+            "map_id": 6,
+            "value_offset": null
+          },
+          {
+            "name": "seen",
+            "map_id": 7,
+            "value_offset": null
+          },
+          {
+            "name": "capable.rodata",
+            "map_id": 9,
+            "value_offset": null
+          },
+          {
+            "name": "my_pid",
+            "map_id": 9,
+            "value_offset": 0
+          },
+          {
+            "name": "unique_type",
+            "map_id": 9,
+            "value_offset": 4
+          },
+          {
+            "name": "kernel_stack",
+            "map_id": 9,
+            "value_offset": 8
+          },
+          {
+            "name": "user_stack",
+            "map_id": 9,
+            "value_offset": 9
+          },
+          {
+            "name": "filter_cg",
+            "map_id": 9,
+            "value_offset": 10
+          },
+          {
+            "name": "targ_pid",
+            "map_id": 9,
+            "value_offset": 12
+          },
+          {
+            "name": "capable.kconfig",
+            "map_id": 10,
+            "value_offset": null
+          },
+          {
+            "name": "LINUX_KERNEL_VERSION",
+            "map_id": 10,
+            "value_offset": 0
+          }
+        ]
+      },
+      "resources": {
+        "section": "kprobe/cap_capable",
+        "maps": [
+          {
+            "name": "start",
+            "map_id": 2
+          },
+          {
+            "name": "cgroup_map",
+            "map_id": 3
+          },
+          {
+            "name": "events",
+            "map_id": 4
+          },
+          {
+            "name": "stackmap",
+            "map_id": 5
+          },
+          {
+            "name": "info",
+            "map_id": 6
+          },
+          {
+            "name": "seen",
+            "map_id": 7
+          },
+          {
+            "name": "capable.rodata",
+            "map_id": 9
+          },
+          {
+            "name": "capable.kconfig",
+            "map_id": 10
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-swves61s",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": [
+          {
+            "name": "stackmap",
+            "field": "value_size",
+            "value": 1016
+          },
+          {
+            "name": "stackmap",
+            "field": "max_entries",
+            "value": 1024
+          }
+        ]
+      },
+      "map_count": 8
     }
   ]
 }
