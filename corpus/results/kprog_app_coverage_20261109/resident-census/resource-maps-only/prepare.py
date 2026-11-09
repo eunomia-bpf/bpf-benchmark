@@ -4,6 +4,7 @@ from pathlib import Path
 import argparse,collections,datetime,hashlib,importlib.util,json,os,shutil,subprocess,sys,tarfile,traceback
 R=Path("/workspaces/repository")
 def guest(d):
+    subprocess.run(["mount", "-t", "bpf", "bpffs", "/sys/fs/bpf"], check=True)
     spec=importlib.util.spec_from_file_location("resource_submit",R/"kprog/selftests/submit.py")
     submit=importlib.util.module_from_spec(spec);spec.loader.exec_module(submit)
     rows=[]
