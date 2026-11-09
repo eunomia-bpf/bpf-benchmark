@@ -187,8 +187,15 @@ Two facts follow:
 2. **The native-specific share is 0.87x to 1.23x.** After dividing out what
    the JIT arm also lost: bcc **0.866x** (the native arm lost *less* than
    the JIT arm), tetragon 1.061x, otelcol 1.114x, cilium 1.158x, katran
-   1.228x. Four of five are within 1.06x to 1.23x; bcc is below 1, which
-   means its native path is not the slower one there.
+   1.228x. Four of five are within 1.06x to 1.23x; bcc is below 1.
+
+   **bcc's figure is the weakest of the five** and is reported as such: its
+   15 shared programs span 0.61x to 9.31x on the native arm and 0.68x to
+   4.29x on the JIT arm, because the eight tools it runs are unrelated
+   workloads and one median over all of them carries little. What it does
+   say is that bcc's native path is not the arm that got slower there, which
+   is consistent with its BPF time being 2.35 s against a minute-scale
+   workload: the ratio is insensitive to the native path by construction.
 
 That is why cilium's reference 2.358x is now 1.229x: its native arm lost
 1.292x, but its JIT arm lost 1.116x, so the ratio collapses by most of the
