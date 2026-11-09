@@ -186,3 +186,7 @@ tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 - **systemd**: Ubuntu default packages compiled without BPF framework
 - **loxilb**: no arm64 support
 - **calico**: BPF dataplane requires K8s pod model; bare-metal single-veth setup architecturally incompatible (Felix removes host IP from WEP iface)
+
+## One tree, one branch
+
+Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. A read-only export of a committed revision may feed a guest or a full check. Commit and push every step at once ("做一步 commit push 一步").
