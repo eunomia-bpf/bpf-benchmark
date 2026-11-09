@@ -1,0 +1,5 @@
+--- a/vendor/bpf/tracee/pkg/ebpf/c/common/network.h
++++ b/vendor/bpf/tracee/pkg/ebpf/c/common/network.h
+@@ -394 +394 @@
+-    int len = BPF_CORE_READ(addr, len);
++    u32 len = BPF_CORE_READ(addr, len);
