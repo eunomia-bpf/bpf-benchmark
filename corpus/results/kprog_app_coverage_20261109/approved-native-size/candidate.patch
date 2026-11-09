@@ -1,0 +1,11 @@
+--- a/kinsn/module/include/native_lab_trusted.h
++++ b/kinsn/module/include/native_lab_trusted.h
+@@ -152,6 +152,8 @@
+ 	} else if (copy_from_user(&request, argument, sizeof(request))) {
+ 		return -EFAULT;
+ 	}
++	if (request.native_size >= (1U << 30))
++		return -E2BIG;
+ 	capsule = kzalloc(sizeof(*capsule), GFP_KERNEL);
+ 	if (!capsule)
+ 		return -ENOMEM;
