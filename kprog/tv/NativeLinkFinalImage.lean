@@ -417,3 +417,134 @@ theorem arm64_resume_x5 (state : AArch64.State) :
 
 end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.arm64_resume_x5
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- Native GPR encoding to the x86-64 pt_regs byte layout. These are the
+published emitter's offsetof values, not BPF register numbers. Physical
+structure layout and complete saved-frame coverage remain source premises. -/
+def x86SavedOffset (register : X86.Register) : BitVec 8 :=
+  match register.val with
+  | 0 => 80 | 1 => 88 | 2 => 96 | 3 => 40
+  | 4 => 152 | 5 => 32 | 6 => 104 | 7 => 112
+  | 8 => 72 | 9 => 64 | 10 => 56 | 11 => 48
+  | 12 => 24 | 13 => 16 | 14 => 8 | _ => 0
+
+theorem x86_saved_offset_injective :
+    ∀ first second : X86.Register,
+      x86SavedOffset first = x86SavedOffset second → first = second := by decide
+
+/-- No native GPR slot aliases DONT_CLEAR1, saved RIP128 or RFLAGS144. -/
+theorem x86_saved_offset_separated : ∀ register : X86.Register,
+    x86SavedOffset register ≠ 1 ∧ x86SavedOffset register ≠ 128 ∧
+      x86SavedOffset register ≠ 144 := by decide
+
+def x86SavedDestination : Option X86.Register → BitVec 8
+  | none => 1
+  | some register => x86SavedOffset register
+
+/-- The module emits u16 length | (u32 saved-frame byte offset << 8).
+The canonical decoded x86 length supplies the no-high-length-bits premise. -/
+def x86LoadFixup (length : BitVec 16) (destination : Option X86.Register) : BitVec 32 :=
+  length.zeroExtend 32 ||| ((x86SavedDestination destination).zeroExtend 32 <<< 8)
+
+theorem x86_fixup_length (length : BitVec 16) (destination : Option X86.Register) :
+    (x86LoadFixup length destination).setWidth 8 = length.setWidth 8 := by
+  unfold x86LoadFixup
+  bv_decide
+
+theorem x86_fixup_destination (length : BitVec 16) (destination : Option X86.Register)
+    (fits : (length.setWidth 8).zeroExtend 16 = length) :
+    ((x86LoadFixup length destination >>> 8).setWidth 8) = x86SavedDestination destination := by
+  unfold x86LoadFixup
+  bv_decide
+
+/-- The ordinary non-arena load encoding never sets the arena marker. -/
+theorem x86_fixup_not_arena (length : BitVec 16) (destination : Option X86.Register) :
+    (x86LoadFixup length destination).getLsbD 31 = false := by
+  unfold x86LoadFixup
+  bv_decide
+
+/-- Actual stock saved-frame clear, projected through the native GPR map.
+An offset of1 is resume-only; a real GPR at offset0 is cleared normally. -/
+def x86HandlerGpr (fixup : BitVec 32) (saved : BitVec 8 → Word)
+    (register : X86.Register) : Word :=
+  let offset := (fixup >>> 8).setWidth 8
+  if offset = 1 then saved (x86SavedOffset register)
+  else if x86SavedOffset register = offset then 0 else saved (x86SavedOffset register)
+
+theorem x86_encoded_handler_gpr (length : BitVec 16) (destination : Option X86.Register)
+    (fits : (length.setWidth 8).zeroExtend 16 = length)
+    (saved : BitVec 8 → Word) (register : X86.Register) :
+    x86HandlerGpr (x86LoadFixup length destination) saved register =
+      if destination = some register then 0 else saved (x86SavedOffset register) := by
+  unfold x86HandlerGpr
+  rw [x86_fixup_destination length destination fits]
+  cases destination with
+  | none => simp [x86SavedDestination]
+  | some destination =>
+      have notSentinel := (x86_saved_offset_separated destination).1
+      have identical : x86SavedOffset register = x86SavedOffset destination ↔ register = destination :=
+        ⟨x86_saved_offset_injective register destination,congrArg x86SavedOffset⟩
+      simp only [x86SavedDestination,notSentinel,if_false,identical,Option.some.injEq]
+      by_cases same : register = destination
+      · subst register; simp
+      · simp [same,Ne.symm same]
+
+/-- The emitter's signed32 relative insn field. Its representable distance
+comes from actual allocator/text-table placement, not a new runtime gate. -/
+def x86ExceptionRelative (instruction field : Word) : BitVec 32 :=
+  (instruction-field).setWidth 32
+
+theorem x86_exception_relative_resolves (instruction field : Word)
+    (fits : (x86ExceptionRelative instruction field).signExtend 64 = instruction-field) :
+    field+(x86ExceptionRelative instruction field).signExtend 64 = instruction := by
+  rw [fits]
+  bv_decide
+
+/-- Text and exception-table field can move together without changing the
+stored relative bits. The resolved target remains the actual final PC. -/
+theorem x86_exception_relative_rebase (instruction field delta : Word) :
+    x86ExceptionRelative (instruction+delta) (field+delta) =
+      x86ExceptionRelative instruction field := by
+  unfold x86ExceptionRelative
+  bv_decide
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.x86_saved_offset_injective
+#print axioms KProgTV.NativeLinkFinalImage.x86_saved_offset_separated
+#print axioms KProgTV.NativeLinkFinalImage.x86_fixup_length
+#print axioms KProgTV.NativeLinkFinalImage.x86_fixup_destination
+#print axioms KProgTV.NativeLinkFinalImage.x86_fixup_not_arena
+#print axioms KProgTV.NativeLinkFinalImage.x86_encoded_handler_gpr
+#print axioms KProgTV.NativeLinkFinalImage.x86_exception_relative_resolves
+#print axioms KProgTV.NativeLinkFinalImage.x86_exception_relative_rebase
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- The real fixup bitfield and saved-frame map implement the existing
+whole-GPR/PC recovery model. The physical frame projection and canonical
+instruction-length field are explicit, once-for-all representation premises. -/
+theorem x86_encoded_handler_refines (length : BitVec 16)
+    (destination : Option X86.Register)
+    (fits : (length.setWidth 8).zeroExtend 16 = length)
+    (saved : BitVec 8 → Word) (state : X86.State)
+    (frame : ∀ register, saved (x86SavedOffset register) = state.gpr register) :
+    (∀ register, x86HandlerGpr (x86LoadFixup length destination) saved register =
+      (x86LoadResume destination length.toNat state).gpr register) ∧
+    state.pc+BitVec.ofNat 64 ((x86LoadFixup length destination).setWidth 8).toNat =
+      (x86LoadResume destination length.toNat state).pc := by
+  have sameLength : (length.setWidth 8).toNat = length.toNat := by
+    rw [←fits]
+    simp <;> omega
+  constructor
+  · intro register
+    rw [x86_encoded_handler_gpr length destination fits saved register]
+    simp only [x86LoadResume,frame]
+  · rw [x86_fixup_length,sameLength]
+    rfl
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.x86_encoded_handler_refines

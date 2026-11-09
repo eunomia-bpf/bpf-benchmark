@@ -18869,6 +18869,7 @@
         "sha256": "c1d926986c02b5f8741251b5a45043c0202d6f119470f0a5aed950bbcdb909f7"
       }
     ],
+    "encoded_x86_followup": "x86_exception_table_recovery",
     "existing_integration_command": "make -C kprog/tv native-link-final-image-check",
     "make_change": "Existing native-link-final-image-check builds the newly imported canonical AArch64 dependency; no new target, runtime check or admission gate.",
     "native_executions": 0,
@@ -35284,6 +35285,213 @@
     "selector_original_misalignment_failure": "Synthetic oracle_mem pointer load at original line459 failed UBSan alignment; replaced only fixture dereference with memcpy preserving4675cases. Production pointer reader already has host unaligned type.",
     "ubsan_route_checks": 1671239,
     "ubsan_selector_checks": 4675
+  },
+  "x86_exception_table_recovery": {
+    "actual_existing_integration_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "f2839388c347e23e175260f5d24a8c76cc49cb38ce5bfde5e4d134dc7b1bafa4",
+    "archive_file": "kprog/results/kprog_verification_20261107/x86-exception-table-recovery.log.gz",
+    "archive_marker": "=== X86 EXCEPTION TABLE RECOVERY V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/extable-frame-layout-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-frame-layout.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-frame-layout.json": {
+        "bytes": 683,
+        "sha256": "156d65003fde86c877d139694406ff24868937584eec85bce2f1140dbfa8a78c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-frame-layout.log": {
+        "bytes": 2006,
+        "sha256": "c305216fadd9b9b63d8e27d9517ef1eda285828f2542aef5cb9529261d5e069c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-frame-layout.py": {
+        "bytes": 1082,
+        "sha256": "1d2931836084df8810c1ecc0d2979c8c28893e5a77f59d66b9fd1563f914c0f2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-integrated-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-integrated.log": {
+        "bytes": 21126,
+        "sha256": "0c15b15e0739a7b7611c8016d9bf05306ebfd1b10ebfc8d162e31d62bd95b468"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-integrated.sh": {
+        "bytes": 256,
+        "sha256": "cb49216c2a954ec2347be6500c1a7016803c0408c150553915ee7c58356502c4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.exit.attempt2": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.log": {
+        "bytes": 4119,
+        "sha256": "d1f7b21cd0ffd56d9081bada1bceeab6a4aef95125927d24848e917fa512ec8d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.log.attempt1": {
+        "bytes": 3979,
+        "sha256": "81e2d41071c0b4b6cb90a54b325b4b7c0d0d89d906a31e023a54e3b75bfc4bf6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.log.attempt2": {
+        "bytes": 4542,
+        "sha256": "0a20bfa137dcce32d3f5861392b60387cb299794713e33b2acd3e68de16ac21f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-proof.sh": {
+        "bytes": 405,
+        "sha256": "0fe87fa7349776a164e4ee22bf2403fcba2b90e91e1163937da35403528e275e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-work/NativeLinkFinalImage.lean": {
+        "bytes": 29662,
+        "sha256": "91a8c33576e10d82632792f2cf5df7aeef07f6104f29b575ddca379a9b1716eb"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-work/NativeLinkFinalImage.lean.attempt1": {
+        "bytes": 28385,
+        "sha256": "947f802264edbfcbd3cc76d264983c7b64f0c3a5f02930220882910512bdff6f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/extable-work/NativeLinkFinalImage.lean.attempt2": {
+        "bytes": 29652,
+        "sha256": "c123d8f4c3a329c6e44179107c96ead75c5742927587c37d955a419850061607"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean": {
+        "bytes": 89883,
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45135,
+        "sha256": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 29662,
+        "sha256": "91a8c33576e10d82632792f2cf5df7aeef07f6104f29b575ddca379a9b1716eb"
+      },
+      "/workspaces/repository/vendor/linux-framework/arch/x86/include/asm/ptrace.h": {
+        "bytes": 12313,
+        "sha256": "bbaaaff47b9a803931cb7b5678a9975bc07c92c8006e8e4d215d0ca8efd7fa7c"
+      },
+      "/workspaces/repository/vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": {
+        "bytes": 120841,
+        "sha256": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1"
+      },
+      "git:5598b93219eaaaf69c5b17b1bf64955d5a3927ed:kinsn/module/x86/bpf_x86_native_lab.c": {
+        "bytes": 16481,
+        "sha256": "da0ad168a22e617498285391a0a9b263b7a8a2b5fa189493358c3b7560d84a03"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 29219600,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/extable-work/NativeLinkFinalImage.olean",
+        "sha256": "e45676d36625555cd02fa9e3220816df62564199769316f13e91a38fb8bf9165"
+      }
+    ],
+    "existing_integration_command": "make -C kprog/tv native-link-final-image-check",
+    "frame_layout_observation": {
+      "after_mtime_ns": 1794181896154599751,
+      "before_mtime_ns": 1794181896154599751,
+      "binary": "/workspaces/repository/kprog/tv/build-kernel-x86/vmlinux",
+      "binary_sha256": "7868f79ae923ba4ac1fcbdb2db7e2aec14eff8ac3015acc5869e1aad1933ae06",
+      "bytes": 408974128,
+      "command": [
+        "pahole",
+        "-F",
+        "btf",
+        "-C",
+        "pt_regs",
+        "/workspaces/repository/kprog/tv/build-kernel-x86/vmlinux"
+      ],
+      "exit": 0,
+      "inode_after": 397268,
+      "inode_before": 397268,
+      "scope": "Read-only BTF layout observation of existing shared x86 compiled kernel; no rebuild, test target, admission check or full-simulator completion claim.",
+      "utc": "2026-11-08T23:58:52.120790+00:00"
+    },
+    "frame_layout_scope": "Read-only pahole BTF observation of the existing408974128-byte shared vmlinux. Exact binary SHA/inode/mtime and complete typed output retained; no private binary copy or rebuild. This matches the stated compiled kernel layout, not every build or physical exception frame.",
+    "native_executions": 0,
+    "null_native_guest_execution": "No execution claimed here. Initial published C a081 guest ended at module insertion/symbol versions, before native execution; C runtime continuation remains separate.",
+    "observed_native_offsets": {
+      "R10": 56,
+      "R11": 48,
+      "R12": 24,
+      "R13": 16,
+      "R14": 8,
+      "R15": 0,
+      "R8": 72,
+      "R9": 64,
+      "RAX": 80,
+      "RBP": 32,
+      "RBX": 40,
+      "RCX": 88,
+      "RDI": 112,
+      "RDX": 96,
+      "RSI": 104,
+      "RSP": 152
+    },
+    "premises": [
+      "Canonical decoded x86 length supplies zero upper8 bits of transported u16 length; real x86 decoded instruction length is1..15. No new runtime limit is introduced.",
+      "Physical pt_regs saved frame maps all native GPRs to the listed8-byte slots and includes actual values at the exception; current compiled BTF observation supports this layout for its exact binary.",
+      "Signed32 relative insn displacement is representable for the actual final text/table allocation. Actual exception lookup, RX field address, ordering, allocation/copy registration and lifetime remain implementation premises.",
+      "The table destination matches actual decoder site and the final instruction PC/extent after relocations/helper expansion; complete producer site coverage remains a theorem/interface.",
+      "Stock non-arena read-recovery exception-class behavior, B protected-read execution and raw-to-platform observation/O3 checked events, partial/ALU/implicit/multiple/writeback/vector/exclusive fault prefixes and physical compiler/entry correspondence remain open."
+    ],
+    "prior_reference_component": "registered_load_recovery_reference",
+    "production_emitter_commit": "5598b93219eaaaf69c5b17b1bf64955d5a3927ed",
+    "production_emitter_file": "kinsn/module/x86/bpf_x86_native_lab.c",
+    "production_emitter_sha256": "da0ad168a22e617498285391a0a9b263b7a8a2b5fa189493358c3b7560d84a03",
+    "result": "All16 native GPR encoding offsets are injective and disjoint from DONT_CLEAR1/RIP128/RFLAGS144. Actual u16length|(savedOffset<<8) retains low8 length and selected offset under canonical length fit, with arena bit31 clear. The actual stock clear projected through the saved-frame map equals existing whole-GPR recovery; decoded length advances the same PC. Signed32 relative insn resolves to the final native load PC under placement range and rebases identically when text/field move together.",
+    "runtime_admission_additions": 0,
+    "scope": "Nine universal O4 x86 exception-table encoding and stock saved-frame recovery components for the published native load-site emitter. Complete native/B load-fault correspondence remains open.",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/Makefile": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146",
+      "kprog/tv/NativeLinkFinalImage.lean": "91a8c33576e10d82632792f2cf5df7aeef07f6104f29b575ddca379a9b1716eb",
+      "vendor/linux-framework/arch/x86/include/asm/ptrace.h": "bbaaaff47b9a803931cb7b5678a9975bc07c92c8006e8e4d215d0ca8efd7fa7c",
+      "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1"
+    },
+    "status": "partial-universal-component",
+    "theorems": [
+      "KProgTV.NativeLinkFinalImage.x86_saved_offset_injective",
+      "KProgTV.NativeLinkFinalImage.x86_saved_offset_separated",
+      "KProgTV.NativeLinkFinalImage.x86_fixup_length",
+      "KProgTV.NativeLinkFinalImage.x86_fixup_destination",
+      "KProgTV.NativeLinkFinalImage.x86_fixup_not_arena",
+      "KProgTV.NativeLinkFinalImage.x86_encoded_handler_gpr",
+      "KProgTV.NativeLinkFinalImage.x86_exception_relative_resolves",
+      "KProgTV.NativeLinkFinalImage.x86_exception_relative_rebase",
+      "KProgTV.NativeLinkFinalImage.x86_encoded_handler_refines"
+    ],
+    "trust": "Offset-map laws use propext; bitfield/address proofs and the composed law reuse the existing BV reduction bridge (Classical.choice/Lean.ofReduceBool/propext/Quot.sound). No sorryAx or new axioms.",
+    "utc": "2026-11-09T00:01:20.475267+00:00"
   },
   "x86_flag_definedness_packet_fixture": {
     "archive_block_sha256": "b50b8806657ce27fd993d132b269ef227385c56fb613f12291eaa6f2fb46baa7",

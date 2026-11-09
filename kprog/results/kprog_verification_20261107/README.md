@@ -5485,3 +5485,24 @@ and2 new function bytes match the combined118 object. Memory/exclusive remain
 equal, visit advances25 and fault/events are absent. [Original evidence](compiled-andn.log.gz)
 retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
 native register/tag frame, physical ABI and compiler embedding remain explicit.
+
+### x86 exception-table encoding and physical saved-frame map
+
+Nine further universal laws connect the published5598 native load-site emitter
+to stock saved-frame recovery: all16 native GPR offsets are distinct and avoid
+DONT_CLEAR1, saved RIP and RFLAGS; fixup length/register masks and the non-arena
+bit decode correctly; the projected handler clear and PC advance implement the
+existing recovery model. Signed32 exception-entry offsets resolve to the actual
+final native PC under their placement premise and rebase with text/table.
+Existing `native-link-final-image-check` passes. These bitfield/address proofs
+reuse the stated BV reduction bridge. [Original evidence](x86-exception-table-recovery.log.gz)
+retains sources, failed/passing attempts, commands and the exact published emitter.
+
+A read-only BTF observation of the existing compiled x86 vmlinux confirms the
+listed8-byte saved-GPR offsets, including real R15 at0 and RSP at152, RIP128
+and RFLAGS144. Binary SHA/inode/mtime and full typed layout are retained; no
+kernel rebuild or private binary copy was made. Actual exception-frame mapping,
+canonical length, representable final text/table distance, lookup/site completeness,
+registration/order/lifetime, B protected-load/trace and remaining fault-prefix
+correspondence stay explicit. No NULL guest execution or complete O4 law is
+claimed; operation/token totals and the partial recovery-row status stay unchanged.

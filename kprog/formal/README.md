@@ -157,6 +157,10 @@ Conditional scalar read-recovery laws above the raw ISA account for stock-frame
 x86/ARM zero-and-resume, including nativeX5/XZR and the raw fault prefix.
 Actual site/table/exception-class/B-observation and O3 correspondence stay open.
 
+x86 exception-table encoding also composes saved-GPR offsets, fixup fields and
+relative final-PC entries with whole-register/PC recovery. Actual frame/site/table
+lifetime and B/physical fault correspondence remain explicit.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.
