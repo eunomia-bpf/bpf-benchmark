@@ -401,7 +401,9 @@ static void shim_native_loader_log_jit_dump(const char *label, int fd) {
 /* Verified startup must not confuse a synchronous proof wait with an idle
  * program set. The outer syscall scope includes capture and state insertion. */
 static unsigned shim_native_loads_inflight;
-static unsigned shim_native_bound_completed;
+/* The legacy wire field native_bound_completed counts completed bound
+ * attempts, including an eBPF fallback. Replacement outcomes stay in the log. */
+static unsigned shim_native_loads_completed;
 struct shim_native_load_scope { int active; };
 static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
     if (scope->active)
@@ -494,6 +496,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
              &source_context, &result);
     --shim_native_loader_active;
+    if (shim_native_loader_requires_bound_proof())
+        __atomic_add_fetch(&shim_native_loads_completed, 1, __ATOMIC_SEQ_CST);
     if (load_status != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
@@ -611,8 +615,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              manifest, prog->bytecode_path);
     kmsg_line("native replaced name=%s original_fd=%ld native_fd=%d",
               prog_name ? prog_name : "", original_fd, result.prog_fd);
-    if (shim_native_loader_requires_bound_proof())
-        __atomic_add_fetch(&shim_native_bound_completed, 1, __ATOMIC_SEQ_CST);
     return result.prog_fd;
 }
 

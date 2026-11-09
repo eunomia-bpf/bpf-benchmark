@@ -1692,7 +1692,7 @@ static void emit_list_progs(int cli) {
     len += snprintf(buf + len, cap - len,
                     "{\"ok\":true,\"native_loads_inflight\":%u,\"native_bound_completed\":%u,\"progs\":[",
                     __atomic_load_n(&shim_native_loads_inflight, __ATOMIC_SEQ_CST),
-                    __atomic_load_n(&shim_native_bound_completed, __ATOMIC_SEQ_CST));
+                    __atomic_load_n(&shim_native_loads_completed, __ATOMIC_SEQ_CST));
     int first = 1;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
