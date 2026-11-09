@@ -1,0 +1,150 @@
+{
+  "producer_head": "e645123fc6d2b3c408835882c241201fbe454830",
+  "compile_exit": 0,
+  "profiles": [
+    {
+      "profile": "inline",
+      "original_commands": "/var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/commands.json",
+      "removed_compiler_flags": [
+        "-fcf-protection=branch",
+        "-mfunction-return=thunk-extern",
+        "-mretpoline-external-thunk"
+      ],
+      "objects": [
+        {
+          "name": "balancer.native.o",
+          "sha256": "e04e3d209162c47e092c0993fe49bd8b8de22e11a0d356a24ca7767c8945511d",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/balancer.c",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking.native.o",
+          "sha256": "95ba51d37f41e2da02d3900a0a285a5b3ab0f7a7fa41893f7924bd88a1f32547",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking.c",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking_ipip.native.o",
+          "sha256": "2472101c4f4792ee0df2e0732114730604b15186dbecfd35e8b1b752422ba2c1",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking_ipip.c",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+          "undefined_symbols": []
+        },
+        {
+          "name": "xdp_root.native.o",
+          "sha256": "51ea675e1ebf07f6032f58bd9409d8b28e75551d41da3e5e266cdb4f364eb7fd",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/xdp_root.c",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+          "undefined_symbols": []
+        }
+      ],
+      "manifest_rows": 4,
+      "manifest_sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+      "payload": "/var/tmp/kprog-tmp/C/direct-native-katran-handoff/rebuilt/inline.tar.gz",
+      "payload_sha256": "a474964eaf3331eb95b4cbe1e3079edfbe268a016cb90573f0696b6aabe2ccd0",
+      "published_payload": "direct-inline.tar.gz"
+    },
+    {
+      "profile": "array-cleanup",
+      "original_commands": "/var/tmp/kprog-tmp/C/map-lookup-native/cleanup/candidate/commands.json",
+      "removed_compiler_flags": [
+        "-fcf-protection=branch",
+        "-mfunction-return=thunk-extern",
+        "-mretpoline-external-thunk"
+      ],
+      "objects": [
+        {
+          "name": "balancer.native.o",
+          "sha256": "ba1680f63a2d8c89085c49cd802c1d0e71b542e42e2b895ddf68aa421a83ed2e",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/balancer.c",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking.native.o",
+          "sha256": "e18b9228ae9b18a2b59d08ae1b7fbeec74aa445cc3cf555e0ed35a0effa35bb5",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking.c",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking_ipip.native.o",
+          "sha256": "4a6e6a0ded199d8098e03e74efebd6269a6ba2b323e3be69502a6d64eb278aa0",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking_ipip.c",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+          "undefined_symbols": []
+        },
+        {
+          "name": "xdp_root.native.o",
+          "sha256": "73276f8c890f912ba063004a2f6c88e7c388b8a5762dd864e5472af9f8995088",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/xdp_root.c",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+          "undefined_symbols": []
+        }
+      ],
+      "manifest_rows": 4,
+      "manifest_sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+      "payload": "/var/tmp/kprog-tmp/C/direct-native-katran-handoff/rebuilt/array-cleanup.tar.gz",
+      "payload_sha256": "e10b330f8aae345fd5081588298fd8a574c777845e5cde04d5a6b214c3bcc2c5",
+      "published_payload": "direct-array-cleanup.tar.gz"
+    },
+    {
+      "profile": "percpu-array",
+      "original_commands": "/var/tmp/kprog-tmp/C/map-lookup-native/percpu-array/candidate/commands.json",
+      "removed_compiler_flags": [
+        "-fcf-protection=branch",
+        "-mfunction-return=thunk-extern",
+        "-mretpoline-external-thunk"
+      ],
+      "objects": [
+        {
+          "name": "balancer.native.o",
+          "sha256": "9c56bdaaff6823162de224b631d8413fed722616da0f0b879edd4b7f7f80bf0a",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/balancer.c",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "plugin_sha256": "9b0cc7d23caa47abf1996f29160da7724fe11f60e13034ec62cb643ad96a1f02",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking.native.o",
+          "sha256": "55d04357777738ea915ca463f74f7c56e9b7cb8056ba8ac2c2df68e598ed175d",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking.c",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "plugin_sha256": "9b0cc7d23caa47abf1996f29160da7724fe11f60e13034ec62cb643ad96a1f02",
+          "undefined_symbols": []
+        },
+        {
+          "name": "healthchecking_ipip.native.o",
+          "sha256": "8a3dda9bf58ae8a977b93b121ae66ffe5949ebaae6eda586691d9a4810b623cf",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/healthchecking_ipip.c",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "plugin_sha256": "9b0cc7d23caa47abf1996f29160da7724fe11f60e13034ec62cb643ad96a1f02",
+          "undefined_symbols": []
+        },
+        {
+          "name": "xdp_root.native.o",
+          "sha256": "51ea675e1ebf07f6032f58bd9409d8b28e75551d41da3e5e266cdb4f364eb7fd",
+          "source": "/workspaces/repository/vendor/bpf/katran/katran/lib/bpf/xdp_root.c",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "plugin_sha256": "9b0cc7d23caa47abf1996f29160da7724fe11f60e13034ec62cb643ad96a1f02",
+          "undefined_symbols": []
+        }
+      ],
+      "manifest_rows": 4,
+      "manifest_sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+      "payload": "/var/tmp/kprog-tmp/C/direct-native-katran-handoff/rebuilt/percpu-array.tar.gz",
+      "payload_sha256": "165a744c20e667c857ab33b88891249f0c2f8ee57b2fad3c7cad2e9e49e0e48f",
+      "published_payload": "direct-percpu-array.tar.gz"
+    }
+  ]
+}

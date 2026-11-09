@@ -23,3 +23,9 @@ Example overlay command for the existing direct-native recipe:
 
 R retains its existing May29 image and module selection for the object-only
 cohort. The payload manifest records each member hash and undefined-symbol list.
+
+The archives above preserve the old external-thunk profiles. Their undefined-symbol lists expose the original thunk requirements. The current Makefile payloads target recompiles each original command/plugin profile after removing the retpoline, return-thunk and ENDBR compiler flags. Rebuilt complete archives and commands go under /var/tmp/kprog-tmp/C/direct-native-katran-handoff/rebuilt. R receives that direct-instruction successor after compiler completion.
+
+## Current direct-instruction payloads
+
+All three profiles recompile at exit0 with their original optimization flags/plugin and original Katran C, after removing the three hardening flags. Every complete manifest has4 rows and all12 native objects have empty undefined-symbol lists. R uses direct-inline.tar.gz, direct-array-cleanup.tar.gz and direct-percpu-array.tar.gz for the original three candidates, in that order. The direct-payloads.json receipt records full commands, source/plugin/object hashes and the original profile path. The direct-build-raw archive retains each command, plugin binary, compiler/manifest output and complete payload. Existing May29 JIT objects and workload retain their bytes.
