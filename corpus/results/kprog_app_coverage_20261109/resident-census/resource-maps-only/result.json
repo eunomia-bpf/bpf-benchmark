@@ -2,7 +2,8 @@
   "objects": 6,
   "resident_instances": 238,
   "resource_instances": {
-    "resource_failed": 238
+    "resource_failed": 74,
+    "resources_prepared": 164
   },
   "application_source_program_loads": 0,
   "native_execution_requests": 0,
@@ -14,8 +15,8 @@
       "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
       "entry": "kprobe__cap_capable_entry",
       "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-n70qia6e'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-n70qia6e'\n"
+      "error": "[Errno 22] maps/BTF object prepare: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 17, in guest\n    metadata,fds,details=resource.load(group[\"snapshot\"])\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 228, in load\n    self.ok(self.lib.bpf_object__prepare(self.obj), \"maps/BTF object prepare\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 199, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object prepare: Invalid argument\n"
     },
     {
       "application": "cilium/agent",
@@ -24,8 +25,8 @@
       "source_sha256": "b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c",
       "entry": "cil_xdp_entry",
       "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y02du9_y'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y02du9_y'\n"
+      "error": "[Errno 22] bpf_object__open_file",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 16, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 170, in __init__\n    raise OSError(-error if error else c.get_errno(), \"bpf_object__open_file\")\nOSError: [Errno 22] bpf_object__open_file\n"
     },
     {
       "application": "cilium/agent",
@@ -34,8 +35,8 @@
       "source_sha256": "c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8",
       "entry": "tail_handle_snat_fwd_ipv4",
       "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-gb4tk6ds'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-gb4tk6ds'\n"
+      "error": "[Errno 22] bpf_object__open_file",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 16, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 170, in __init__\n    raise OSError(-error if error else c.get_errno(), \"bpf_object__open_file\")\nOSError: [Errno 22] bpf_object__open_file\n"
     },
     {
       "application": "cilium/agent",
@@ -44,8 +45,8 @@
       "source_sha256": "30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28",
       "entry": "tail_handle_arp",
       "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y9pwogal'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-y9pwogal'\n"
+      "error": "[Errno 22] bpf_object__open_file",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 16, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 170, in __init__\n    raise OSError(-error if error else c.get_errno(), \"bpf_object__open_file\")\nOSError: [Errno 22] bpf_object__open_file\n"
     },
     {
       "application": "otelcol-ebpf-profiler/profiling",
@@ -53,9 +54,501 @@
       "source_object": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/otel-embedded.bpf.o",
       "source_sha256": "c977ee7fc191812d39883816e6acb9bb15d929b606842f3a92a461469e30cac2",
       "entry": "perf_unwind_stop",
-      "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-8eojxigm'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-8eojxigm'\n"
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 0,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 14,
+          "source_func_type_id": 371,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "custom_context_map",
+            "map_id": 5,
+            "value_offset": null
+          },
+          {
+            "name": "dotnet_procs",
+            "map_id": 6,
+            "value_offset": null
+          },
+          {
+            "name": "hotspot_procs",
+            "map_id": 7,
+            "value_offset": null
+          },
+          {
+            "name": "trace_events",
+            "map_id": 8,
+            "value_offset": null
+          },
+          {
+            "name": "apm_int_procs",
+            "map_id": 9,
+            "value_offset": null
+          },
+          {
+            "name": "go_labels_procs",
+            "map_id": 10,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "map_id": 12,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "map_id": 14,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "map_id": 16,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "map_id": 18,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "map_id": 20,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "map_id": 22,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "map_id": 24,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "map_id": 26,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "map_id": 28,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "map_id": 30,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "map_id": 32,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "map_id": 34,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "map_id": 36,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "map_id": 38,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "map_id": 40,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "map_id": 42,
+            "value_offset": null
+          },
+          {
+            "name": "unwind_info_array",
+            "map_id": 43,
+            "value_offset": null
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "map_id": 44,
+            "value_offset": null
+          },
+          {
+            "name": "sched_times",
+            "map_id": 45,
+            "value_offset": null
+          },
+          {
+            "name": "kprobe_progs",
+            "map_id": 46,
+            "value_offset": null
+          },
+          {
+            "name": "perl_procs",
+            "map_id": 47,
+            "value_offset": null
+          },
+          {
+            "name": "php_procs",
+            "map_id": 48,
+            "value_offset": null
+          },
+          {
+            "name": "py_procs",
+            "map_id": 49,
+            "value_offset": null
+          },
+          {
+            "name": "ruby_procs",
+            "map_id": 50,
+            "value_offset": null
+          },
+          {
+            "name": "system_analysis",
+            "map_id": 51,
+            "value_offset": null
+          },
+          {
+            "name": "kernel_stackmap",
+            "map_id": 52,
+            "value_offset": null
+          },
+          {
+            "name": "pid_events",
+            "map_id": 53,
+            "value_offset": null
+          },
+          {
+            "name": "reported_pids",
+            "map_id": 54,
+            "value_offset": null
+          },
+          {
+            "name": "inhibit_events",
+            "map_id": 55,
+            "value_offset": null
+          },
+          {
+            "name": "report_events",
+            "map_id": 56,
+            "value_offset": null
+          },
+          {
+            "name": "v8_procs",
+            "map_id": 57,
+            "value_offset": null
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 58,
+            "value_offset": null
+          },
+          {
+            "name": "metrics",
+            "map_id": 59,
+            "value_offset": null
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 60,
+            "value_offset": null
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 61,
+            "value_offset": null
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 62,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.str1.16",
+            "map_id": 64,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 65,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.var",
+            "map_id": 66,
+            "value_offset": null
+          },
+          {
+            "name": "filter_error_frames",
+            "map_id": 66,
+            "value_offset": 0
+          },
+          {
+            "name": "filter_idle_frames",
+            "map_id": 66,
+            "value_offset": 1
+          },
+          {
+            "name": "inverse_pac_mask",
+            "map_id": 66,
+            "value_offset": 8
+          },
+          {
+            "name": "off_cpu_threshold",
+            "map_id": 66,
+            "value_offset": 16
+          },
+          {
+            "name": "tpbase_offset",
+            "map_id": 66,
+            "value_offset": 24
+          },
+          {
+            "name": "task_stack_offset",
+            "map_id": 66,
+            "value_offset": 32
+          },
+          {
+            "name": "stack_ptregs_offset",
+            "map_id": 66,
+            "value_offset": 36
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 66,
+            "value_offset": 40
+          }
+        ]
+      },
+      "resources": {
+        "section": "perf_event/unwind_stop",
+        "maps": [
+          {
+            "name": "custom_context_map",
+            "map_id": 5
+          },
+          {
+            "name": "dotnet_procs",
+            "map_id": 6
+          },
+          {
+            "name": "hotspot_procs",
+            "map_id": 7
+          },
+          {
+            "name": "trace_events",
+            "map_id": 8
+          },
+          {
+            "name": "apm_int_procs",
+            "map_id": 9
+          },
+          {
+            "name": "go_labels_procs",
+            "map_id": 10
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "map_id": 12
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "map_id": 14
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "map_id": 16
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "map_id": 18
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "map_id": 20
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "map_id": 22
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "map_id": 24
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "map_id": 26
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "map_id": 28
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "map_id": 30
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "map_id": 32
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "map_id": 34
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "map_id": 36
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "map_id": 38
+          },
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "map_id": 40
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "map_id": 42
+          },
+          {
+            "name": "unwind_info_array",
+            "map_id": 43
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "map_id": 44
+          },
+          {
+            "name": "sched_times",
+            "map_id": 45
+          },
+          {
+            "name": "kprobe_progs",
+            "map_id": 46
+          },
+          {
+            "name": "perl_procs",
+            "map_id": 47
+          },
+          {
+            "name": "php_procs",
+            "map_id": 48
+          },
+          {
+            "name": "py_procs",
+            "map_id": 49
+          },
+          {
+            "name": "ruby_procs",
+            "map_id": 50
+          },
+          {
+            "name": "system_analysis",
+            "map_id": 51
+          },
+          {
+            "name": "kernel_stackmap",
+            "map_id": 52
+          },
+          {
+            "name": "pid_events",
+            "map_id": 53
+          },
+          {
+            "name": "reported_pids",
+            "map_id": 54
+          },
+          {
+            "name": "inhibit_events",
+            "map_id": 55
+          },
+          {
+            "name": "report_events",
+            "map_id": 56
+          },
+          {
+            "name": "v8_procs",
+            "map_id": 57
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 58
+          },
+          {
+            "name": "metrics",
+            "map_id": 59
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 60
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 61
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 62
+          },
+          {
+            "name": ".rodata.str1.16",
+            "map_id": 64
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 65
+          },
+          {
+            "name": ".rodata.var",
+            "map_id": 66
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-ppis_i9s",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [
+          "kprobe_unwind_dotnet",
+          "perf_unwind_dotnet",
+          "kprobe_go_labels",
+          "perf_go_labels",
+          "kprobe_unwind_hotspot",
+          "perf_unwind_hotspot",
+          "kprobe_unwind_stop",
+          "perf_unwind_stop",
+          "kprobe_unwind_native",
+          "perf_unwind_native",
+          "kprobe_unwind_perl",
+          "perf_unwind_perl",
+          "kprobe_unwind_php",
+          "perf_unwind_php",
+          "kprobe_unwind_python",
+          "perf_unwind_python",
+          "kprobe_unwind_ruby",
+          "perf_unwind_ruby",
+          "kprobe_unwind_v8",
+          "perf_unwind_v8"
+        ],
+        "resource_view": "maps-and-btf"
+      },
+      "map_count": 45
     },
     {
       "application": "tracee/monitor",
@@ -63,9 +556,885 @@
       "source_object": "/var/tmp/kprog-tmp/C/bcc-native-profile-runtime/image/tracee.bpf.o",
       "source_sha256": "f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca",
       "entry": "tracepoint__raw_syscalls__sys_enter",
-      "stage": "resource_failed",
-      "error": "[Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-b989oyh6'",
-      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 15, in guest\n    resource.__init__(\"x86\",group[\"snapshot\"],group[\"entry\"],state)\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 136, in __init__\n    self.pins = pathlib.Path(tempfile.mkdtemp(prefix=\"kprog-selftest-\",\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/sys/fs/bpf/kprog-selftest-b989oyh6'\n"
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 17,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 15,
+          "source_func_type_id": 480,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 68,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 69,
+            "value_offset": null
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 70,
+            "value_offset": null
+          },
+          {
+            "name": "config_map",
+            "map_id": 71,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 72,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 73,
+            "value_offset": null
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 74,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 75,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 76,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 77,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 78,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 79,
+            "value_offset": null
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 80,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 81,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 83,
+            "value_offset": null
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 84,
+            "value_offset": null
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 85,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array",
+            "map_id": 86,
+            "value_offset": null
+          },
+          {
+            "name": "containers_map",
+            "map_id": 87,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 88,
+            "value_offset": null
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 89,
+            "value_offset": null
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 90,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 91,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 92,
+            "value_offset": null
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 93,
+            "value_offset": null
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 94,
+            "value_offset": null
+          },
+          {
+            "name": "args_map",
+            "map_id": 95,
+            "value_offset": null
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 96,
+            "value_offset": null
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 97,
+            "value_offset": null
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 98,
+            "value_offset": null
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 99,
+            "value_offset": null
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 100,
+            "value_offset": null
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 101,
+            "value_offset": null
+          },
+          {
+            "name": "bufs",
+            "map_id": 102,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 103,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 104,
+            "value_offset": null
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 105,
+            "value_offset": null
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 106,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 107,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 108,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 109,
+            "value_offset": null
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 110,
+            "value_offset": null
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 111,
+            "value_offset": null
+          },
+          {
+            "name": "logs_count",
+            "map_id": 112,
+            "value_offset": null
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 113,
+            "value_offset": null
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 114,
+            "value_offset": null
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 115,
+            "value_offset": null
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 116,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 117,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 119,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 120,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 122,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 123,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 125,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 126,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 128,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 129,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 131,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 132,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 134,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 135,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 137,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 138,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 140,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 141,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 143,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 144,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 146,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 147,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 149,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 150,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 152,
+            "value_offset": null
+          },
+          {
+            "name": "events_map",
+            "map_id": 153,
+            "value_offset": null
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 155,
+            "value_offset": null
+          },
+          {
+            "name": "logs",
+            "map_id": 156,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 157,
+            "value_offset": null
+          },
+          {
+            "name": "file_writes",
+            "map_id": 158,
+            "value_offset": null
+          },
+          {
+            "name": "signals",
+            "map_id": 159,
+            "value_offset": null
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 160,
+            "value_offset": null
+          },
+          {
+            "name": "inodemap",
+            "map_id": 161,
+            "value_offset": null
+          },
+          {
+            "name": "sockmap",
+            "map_id": 162,
+            "value_offset": null
+          },
+          {
+            "name": "entrymap",
+            "map_id": 163,
+            "value_offset": null
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 164,
+            "value_offset": null
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 165,
+            "value_offset": null
+          },
+          {
+            "name": "modules_map",
+            "map_id": 166,
+            "value_offset": null
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 167,
+            "value_offset": null
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 168,
+            "value_offset": null
+          },
+          {
+            "name": "tracee.rodata",
+            "map_id": 169,
+            "value_offset": null
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+            "map_id": 169,
+            "value_offset": 0
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT",
+            "map_id": 169,
+            "value_offset": 4
+          },
+          {
+            "name": "type_size_table",
+            "map_id": 169,
+            "value_offset": 8
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 170,
+            "value_offset": null
+          },
+          {
+            "name": "tracee.bss",
+            "map_id": 171,
+            "value_offset": null
+          },
+          {
+            "name": "start_scan_time_init_shown_mods",
+            "map_id": 171,
+            "value_offset": 0
+          },
+          {
+            "name": "last_module_insert_time",
+            "map_id": 171,
+            "value_offset": 8
+          },
+          {
+            "name": "hidden_old_mod_scan_done",
+            "map_id": 171,
+            "value_offset": 16
+          },
+          {
+            "name": "use_security_bprm_creds_for_exec",
+            "map_id": 171,
+            "value_offset": 17
+          },
+          {
+            "name": "alerted_find_vma_unsupported",
+            "map_id": 171,
+            "value_offset": 18
+          }
+        ]
+      },
+      "resources": {
+        "section": "raw_tracepoint/sys_enter",
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 68
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 69
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 70
+          },
+          {
+            "name": "config_map",
+            "map_id": 71
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 72
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 73
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 74
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 75
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 76
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 77
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 78
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 79
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 80
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 81
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 83
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 84
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 85
+          },
+          {
+            "name": "prog_array",
+            "map_id": 86
+          },
+          {
+            "name": "containers_map",
+            "map_id": 87
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 88
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 89
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 90
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 91
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 92
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 93
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 94
+          },
+          {
+            "name": "args_map",
+            "map_id": 95
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 96
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 97
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 98
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 99
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 100
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 101
+          },
+          {
+            "name": "bufs",
+            "map_id": 102
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 103
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 104
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 105
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 106
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 107
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 108
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 109
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 110
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 111
+          },
+          {
+            "name": "logs_count",
+            "map_id": 112
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 113
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 114
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 115
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 116
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 117
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 119
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 120
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 122
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 123
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 125
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 126
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 128
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 129
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 131
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 132
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 134
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 135
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 137
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 138
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 140
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 141
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 143
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 144
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 146
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 147
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 149
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 150
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 152
+          },
+          {
+            "name": "events_map",
+            "map_id": 153
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 155
+          },
+          {
+            "name": "logs",
+            "map_id": 156
+          },
+          {
+            "name": "events",
+            "map_id": 157
+          },
+          {
+            "name": "file_writes",
+            "map_id": 158
+          },
+          {
+            "name": "signals",
+            "map_id": 159
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 160
+          },
+          {
+            "name": "inodemap",
+            "map_id": 161
+          },
+          {
+            "name": "sockmap",
+            "map_id": 162
+          },
+          {
+            "name": "entrymap",
+            "map_id": 163
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 164
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 165
+          },
+          {
+            "name": "modules_map",
+            "map_id": 166
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 167
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 168
+          },
+          {
+            "name": "tracee.rodata",
+            "map_id": 169
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 170
+          },
+          {
+            "name": "tracee.bss",
+            "map_id": 171
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-qzia4b80",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf"
+      },
+      "map_count": 90
     }
   ]
 }
