@@ -1,0 +1,92 @@
+{
+  "utc": "2026-11-09T01:07:14.947127+00:00",
+  "source": "0558869442396f5e0554116115cbd20673ec9086",
+  "publication": "a09c58cc85846e08e052f4c46a91b6b99ed30b22",
+  "family_annotations": 86,
+  "native_entries": 81,
+  "before_counts": {
+    "generated_compiled": 16,
+    "generation_or_compile_failed": 65
+  },
+  "after_counts": {
+    "generated_compiled": 20,
+    "generation_or_compile_failed": 61
+  },
+  "newly_compiled": [
+    {
+      "file": "dynptr_fail.c",
+      "program": "invalid_helper1",
+      "expect": "failure",
+      "native_sha256": "fd78ca199c8d2be61c87d9a3eaa0153ebdafa27c37ed59c095abe7af71e7c03d",
+      "stage": "generated_compiled"
+    },
+    {
+      "file": "dynptr_fail.c",
+      "program": "dynptr_from_mem_invalid_api",
+      "expect": "failure",
+      "native_sha256": "64d6d359fb0079710d810475a7408264261e55c62df5a35f317a59258901c68e",
+      "stage": "generated_compiled"
+    },
+    {
+      "file": "dynptr_fail.c",
+      "program": "dynptr_overwrite_unref",
+      "expect": "success",
+      "native_sha256": "ef4c44504c886016ee5142d80f54f935a7cf60c6fca476d949c07244b92ad894",
+      "stage": "generated_compiled"
+    },
+    {
+      "file": "dynptr_fail.c",
+      "program": "dynptr_overwrite_ref",
+      "expect": "failure",
+      "native_sha256": "4e1760386cf04f6931ae0d55283ccbec0b30f6a78f31946978e93ba2f3efcacd",
+      "stage": "generated_compiled"
+    }
+  ],
+  "remaining_first_frontiers": [
+    {
+      "cause": "invalid indirect target scalar:0xcb",
+      "count": 17
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_from_skb",
+      "count": 12
+    },
+    {
+      "cause": "invalid indirect target scalar:0xc9",
+      "count": 8
+    },
+    {
+      "cause": "invalid indirect target scalar:0xca",
+      "count": 8
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_from_skb_meta",
+      "count": 6
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_from_xdp",
+      "count": 5
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_adjust",
+      "count": 1
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_is_null",
+      "count": 1
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_is_rdonly",
+      "count": 1
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_size",
+      "count": 1
+    },
+    {
+      "cause": "unresolved native ABI external call bpf_dynptr_clone",
+      "count": 1
+    }
+  ],
+  "runtime_admission_additions": 0
+}
