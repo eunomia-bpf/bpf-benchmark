@@ -1,0 +1,169 @@
+{
+  "utc": "2026-11-09T08:20:40.154305+00:00",
+  "source_publication": "72985658142245b3278aa2b5713753dfb5a33016",
+  "base": "f42150d7eaf40713eb79fb841da34799675b77ed",
+  "existing_host_controls": {
+    "compilers": [
+      "gcc",
+      "clang18"
+    ],
+    "exit_changed_registers_and_SP": 12,
+    "preserved_frames": "PASS",
+    "stack_lifetime": "PASS",
+    "helper_and_libc_output": "PASS"
+  },
+  "micro": {
+    "positive_compiled": 29,
+    "negative_compiled": 1,
+    "make_exit": 0
+  },
+  "matched_original_BCC": {
+    "entries": [
+      "sys_enter",
+      "kprobe__cap_capable_entry"
+    ],
+    "parent_compiles": 2,
+    "candidate_compiles": 2,
+    "source_C": "Exact original actual service requests2/3, retained in raw archive",
+    "candidate_IR": "Caller-frame entry scalar-value comparisons fold; existing return target/ABI fault branch remains"
+  },
+  "pair_host": {
+    "parent_diagnostics": 128,
+    "candidate_diagnostics": 128,
+    "scope": "Original legacy pair fixture; both source cohorts retain its original setup"
+  },
+  "representation": "Full aligned scalar64 stores cache exact value and scalar tag. Every existing tag update invalidates the cache. Raw volatile loads/stores and existing exit conditions stay emitted.",
+  "universal_interface": "Generic raw-memory/scalar-payload correspondence and compiled C transport remain V-owned",
+  "runtime_admission_additions": 0,
+  "commands": [
+    {
+      "name": "micro",
+      "command": [
+        "make",
+        "-C",
+        "kprog/arm64",
+        "micro-proofs-build",
+        "PROOF_BUILD_DIR=/var/tmp/kprog-tmp/A/frame-equality/micro",
+        "NEGATIVE_PROOF_BUILD_DIR=/var/tmp/kprog-tmp/A/frame-equality/micro/negative",
+        "NEGATIVE_NATIVE_BUILD_DIR=/workspaces/repository/kprog/arm64/build/negative-native",
+        "SYS_INCLUDE_FLAGS=-I/workspaces/repository/kprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "candidate-bpf-2",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-Ikprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/A/frame-equality/2/request/generated/trusted_arm64.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/frame-equality/candidate-2.bpf.o"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "candidate-bpf-3",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-Ikprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/A/frame-equality/3/request/generated/trusted_arm64.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/frame-equality/candidate-3.bpf.o"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "parent-bpf-2",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-Ikprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/A/frame-equality/2/request/generated/trusted_arm64.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/frame-equality/parent-2.bpf.o"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "parent-bpf-3",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-Ikprog/arm64/build/app-runtime-v35/root/usr/include/aarch64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/A/frame-equality/3/request/generated/trusted_arm64.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/frame-equality/parent-3.bpf.o"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "parent-pair-compile",
+      "command": [
+        "gcc",
+        "-include",
+        "kprog/formal/oracles/arm64_entry_environment_host.h",
+        "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+        "-include",
+        "kprog/formal/oracles/arm64_exclusive_choice_host.h",
+        "-O2",
+        "-I.",
+        "-Ikprog/formal",
+        "-Ikprog/arm64",
+        "-Ivendor/libbpf/src",
+        "kprog/formal/oracles/test_arm64_pair_mem_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/frame-equality/parent-pair"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "parent-pair",
+      "command": [
+        "/var/tmp/kprog-tmp/A/frame-equality/parent-pair"
+      ],
+      "exit": 1
+    }
+  ]
+}

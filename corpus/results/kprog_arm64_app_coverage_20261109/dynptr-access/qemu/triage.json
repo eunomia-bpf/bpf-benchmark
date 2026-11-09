@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T08:17:21.537171+00:00",
+  "utc": "2026-11-09T08:20:40.154305+00:00",
   "publication": "f4cc8d549939a7f37581e072947e85d977554f30",
   "source": "6737766140096384da964e3044d16bf662365f16",
   "counts": {
@@ -61,10 +61,11 @@
   "runtime_admission_additions": 0,
   "installed_rule": {
     "program": "test_dynptr_reg_type",
-    "kernel_annotation_rule": "Original BPF global-function verification rejects the dynptr argument register type; whole opaque dynptr stack placement is required at that BPF call boundary.",
-    "native_P": "Native C compilation inlines the test-only global call, retaining the resulting native instructions and its local dynptr memory; the original eBPF global-call register boundary is represented by the original BPF build.",
-    "B": "B simulates that compiled native P through the native helper/stack sequence and installs. Its outcome is counted at installed stage against the original failure annotation.",
-    "prior_triage": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/runner-current/full/installed-annotation-triage.json",
-    "next": "S16/coordinator recovery-aware accepted-case classification retains the original annotation and native compile distinction."
+    "kernel_annotation_rule": "Original annotation: arg#0 expected pointer to stack or const struct bpf_dynptr. The published C casts a NULL task_struct pointer to const struct bpf_dynptr* and calls a globally typed BPF function.",
+    "native_P": "Actual ARM ELF retains a direct BL to global_call_bpf_dynptr. The callee ignores its pointer argument, allocates16stackbytes, stores zero atSP+8, returns zero, and performs zero dereferences of the nominal dynptr argument.",
+    "B": "B simulates the retained direct call, local stack store, constant result and return; it installs. The native P carries the emitted machine effects while the eBPF annotation checks the original global-function BTF argument boundary.",
+    "prior_triage": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/agreement.md",
+    "next": "S16/coordinator recovery-aware accepted-case classification retains the original annotation and native compile distinction.",
+    "native_disassembly": "frame-equality/raw.tar.gz:dynptr-reg-type.native.o"
   }
 }
