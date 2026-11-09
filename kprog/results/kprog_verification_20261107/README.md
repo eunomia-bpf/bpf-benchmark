@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 48/74 |
-| Raw register dispatcher arm composition | 32/75 | 48/74 |
+| Raw register handler refinement | 32/75 | 51/74 |
+| Raw register dispatcher arm composition | 32/75 | 51/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6716,3 +6716,30 @@ original proof diagnostic and final logs. Entry origin identity, source/C-union
 interpretation, native encoding and physical/compiler transport remain explicit
 generic interfaces. B forwarding and callee-storage work retains its coordinator
 pause. The sole fixed-source full check has its own source identity and outcome.
+
+### ARM raw MOV and resolved-address refinement
+
+MOV_REG now captures the complete incoming raw word/tag before writing its
+GPR, SP or ZR destination. Its64-bit arm copies the complete byte tag, and its
+32-bit arm scalarizes the width result. SP32 reads carry raw relative SP and
+STACK4; SP writes retain a STACK-relative value or subtract the entry stack
+origin from the materialized input. The modulo64 coordinate roundtrip holds
+for every raw word and base. XZR/aliases, all256 tags and full architectural
+state compose with the existing native MOV step and production prefix.
+
+The shared width-write projection also covers the bitmask MOV_IMM alias with
+an SP destination. GOT and RODATA address writes retain their generated tags7
+and8. Their reference step follows the explicit resolved-IMM/native-PC-relative
+address identity. Arbitrary unused AUX/SRC/IMM fields and ignored address widths retain their domains
+where the production prefix ignores them. The normalized emission theorem
+composes51 numeric raw operations and the six source branch families.
+
+Sixteen new and148 preceding laws audit with module/root0, sorryAx0 and
+119 inherited Lean.ofReduceBool dependencies. The
+[raw move/address receipt](arm-raw-move-address.log.gz) retains the exact prior
+public source prefix, canonical ISA/generated/C interfaces, compiled module
+and complete proof diagnostics. Entry origin identity, source/C union payload
+interpretation, ghost stack release, native encoding/relocation identity and
+physical/compiler transport remain explicit generic interfaces. B forwarding
+and its RET components retain the coordinator pause. Complete make-check
+receipts carry their own frozen source epochs and actual outcomes.

@@ -62,20 +62,20 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
-ARM raw handler/dispatcher refinement covers48/74 operations: immediate moves,
+ARM raw handler/dispatcher refinement covers51/74 operations: immediate moves,
 multiply/divide, shift/unary, ORN, extract/reverse/extension, conditional select
-bitfields, conditional compare, logical flags and arithmetic flags.
-One hundred and forty-eight laws audit and compile with module/root0 and sorryAx0. All raw64-bit
+bitfields, conditional compare, logical flags, arithmetic flags, MOV_REG and resolved GOT/RODATA addresses.
+One hundred and sixty-four laws audit and compile with module/root0 and sorryAx0. All raw64-bit
 words, byte tags, STACK4/RETURN10 materialization, register aliases/XZR and the
-complete architectural image compose through one48-operation emission step theorem.
+complete architectural image compose through one51-operation emission step theorem.
 CSEL/X retains its selected raw word/tag; scalar results use width/scalar-tag
-writes. CCMP updates NZCV and preserves its complete raw GPR/tag frame. ANDS/BICS scalarize their destination; TST preserves the full raw tag map. ADDS/SUBS/CMP/CMN retain SP32-source materialization, shifted/extended operands and the full compare-only frame. SHIFT and conditions consume the actual whole AUX, while unary uses
+writes. CCMP updates NZCV and preserves its complete raw GPR/tag frame. ANDS/BICS scalarize their destination; TST preserves the full raw tag map. ADDS/SUBS/CMP/CMN retain SP32-source materialization, shifted/extended operands and the full compare-only frame. MOV retains full raw/tag copies and SP coordinate writes; address writes retain generated GOT7/RODATA8 tags and resolved-IMM identities. SHIFT and conditions consume the actual whole AUX, while unary uses
 AUX byte1/byte2. Native widths, amount/alias domains and NV normalization stay
 explicit. The ledger retains production dispatcher equalities and arbitrary
 unused-field domains. Entry origin identity, C extraction/union and physical/
 compiler transport remain interfaces independent of B forwarding storage. Six
 additional source-emitted branch families (B/B.cond/CBZ/CBNZ/TBZ/TBNZ) compose
-with these48 numeric operations through one source-emission step theorem.
+with these51 numeric operations through one source-emission step theorem.
 Source/current/next/target label-to-native-address identities stay explicit;
 NZCV/value/bit tests derive the outcome and preserve the entire data/tag frame.
 Their source-operation/token rows retain a separate6/6 raw count.

@@ -2281,3 +2281,234 @@ end KProgFormal.Refinement.Arm64RawRegister.FlagArithmetic
 #print axioms KProgFormal.Refinement.Arm64RawRegister.FlagArithmetic.extended_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.FlagArithmetic.step_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.FlagArithmetic.emission_step_refines
+
+
+namespace KProgFormal.Refinement.Arm64RawRegister.MoveAddress
+open Reference
+open Reference.AArch64 (Register Gpr RegisterRef Width)
+
+def readTagged (state : State) : RegisterRef → Word × Byte
+  | .general r => ConditionalSelect.readTagged state (Arm64Move.arithmeticRegister r)
+  | .zero => ConditionalSelect.readTagged state 31
+  | .stack => (state.raw.sp, 4)
+
+theorem read_tagged_materializes (origins : Origins) (state : State) (src : RegisterRef) :
+    materialize origins (readTagged state src).1 (readTagged state src).2 =
+      Arm64Move.readData (image origins state) src := by
+  cases src with
+  | general r =>
+      change materialize origins (ConditionalSelect.readTagged state (Arm64Move.arithmeticRegister r)).1
+        (ConditionalSelect.readTagged state (Arm64Move.arithmeticRegister r)).2 =
+        Arm64Register.readReg (image origins state) (Arm64Move.arithmeticRegister r)
+      rw [ConditionalSelect.read_tagged_materializes, read_refines, Arm64Register.read_refines]
+  | zero =>
+      change materialize origins (ConditionalSelect.readTagged state 31).1 (ConditionalSelect.readTagged state 31).2 =
+        Arm64Register.readReg (image origins state) 31
+      rw [ConditionalSelect.read_tagged_materializes, read_refines, Arm64Register.read_refines]
+  | stack => simp [readTagged, Arm64Move.readData, image, materialize]
+
+/-- The architectural/raw payload part of WRITE_REG_PTR_TAG includes the
+STACK-relative SP arm. Ghost stack ownership/release is the existing memory
+representation interface, separate from this whole architectural image. -/
+def writeTagged (origins : Origins) (state : State) (dst : RegisterRef) (word : Word) (tag : Byte) : State :=
+  match dst with
+  | .general r => ConditionalSelect.writeTagged state (Arm64Move.arithmeticRegister r) word tag
+  | .zero => ConditionalSelect.writeTagged state 31 word tag
+  | .stack => { state with raw := { state.raw with sp := if tag = 4 then word else materialize origins word tag - origins.stack } }
+
+theorem coordinate_roundtrip (value base : Word) : value - base + base = value := by bv_decide
+
+theorem write_tagged_projects (origins : Origins) (state : State) (dst : RegisterRef) (word : Word) (tag : Byte) :
+    image origins (writeTagged origins state dst word tag) =
+      Reference.AArch64.writeData (image origins state) dst (materialize origins word tag) .w64 := by
+  cases dst with
+  | general r =>
+      simp [writeTagged, ConditionalSelect.write_tagged_projects, Reference.AArch64.writeData,
+        Reference.AArch64.narrow, Reference.AArch64.Width.bits, Reference.AArch64.writeReg,
+        Arm64Move.arithmeticRegister]
+  | zero =>
+      simp only [writeTagged, ConditionalSelect.write_tagged_projects, Reference.AArch64.writeData,
+        Reference.AArch64.writeReg]
+      congr 1
+      funext r
+      have outside : r.val ≠ (31 : Register).val := by change r.val ≠ 31; omega
+      simp [outside, image]
+  | stack =>
+      by_cases relative : tag = 4
+      · simp [writeTagged, image, Reference.AArch64.writeData, Reference.AArch64.narrow,
+          Reference.AArch64.Width.bits, materialize, relative, coordinate_roundtrip]
+      · simp only [writeTagged, relative, ↓reduceIte, image, coordinate_roundtrip, Reference.AArch64.writeData]
+        rfl
+
+def writeWidth (origins : Origins) (state : State) (dst : RegisterRef) (value : Word) (width : Width) : State :=
+  match dst with
+  | .general r => writeRegister state (Arm64Move.arithmeticRegister r) value width
+  | .zero => writeRegister state 31 value width
+  | .stack => { state with raw := { state.raw with sp := Arm64Register.writeValue width value - origins.stack } }
+
+theorem write_width_projects (origins : Origins) (state : State) (dst : RegisterRef) (value : Word) (width : Width) :
+    image origins (writeWidth origins state dst value width) =
+      Arm64Move.widthWrite (image origins state) dst value width := by
+  cases dst with
+  | general r => rw [writeWidth, write_refines, Arm64Move.widthWrite, Arm64Register.write_refines]
+  | zero => rw [writeWidth, write_refines, Arm64Move.widthWrite, Arm64Register.write_refines]
+  | stack => simp only [writeWidth, image, coordinate_roundtrip, Arm64Move.widthWrite]
+
+def move (width : Width) (dst src : RegisterRef) (origins : Origins) (state : State) : Transition State :=
+  let next := if GeneratedArm64Mov.ptrTagPath .movReg (Arm64Register.handlerWidth width) then
+    let captured := readTagged state src
+    writeTagged origins state dst captured.1 captured.2
+    else writeWidth origins state dst (FlagArithmetic.readData origins state src) width
+  ⟨advance next, [], none⟩
+
+theorem move_projects (width : Width) (dst src : RegisterRef) (origins : Origins) (state : State) :
+    observe origins (move width dst src origins state) = Arm64Move.rawStep .movReg width dst src 0 (image origins state) := by
+  cases width <;> simp only [move, GeneratedArm64Mov.ptrTagPath, Arm64Register.handlerWidth,
+    Bool.false_eq_true, ↓reduceIte, observe, advance_refines, write_tagged_projects, write_width_projects,
+    read_tagged_materializes, FlagArithmetic.read_data_refines, Arm64Move.rawStep,
+    Arm64Move.operandOp, GeneratedArm64ImmOperand.immediate, Arm64Move.width_write_refines]
+  all_goals cases dst <;> rfl
+
+theorem move_refines (width : Width) (dst src : RegisterRef) (origins : Origins) (state : State) :
+    observe origins (move width dst src origins state) =
+      Reference.AArch64.step (.moveRegister width dst src) (image origins state) := by
+  rw [move_projects, Arm64Move.raw_register_refines]
+
+theorem move_production (width : Width) (dst src : RegisterRef) (aux : BitVec 32) (unusedValue : Word)
+    (origins : Origins) (state : State) :
+    some (observe origins (move width dst src origins state)) =
+      Arm64Dispatcher.dispatchPrefix (GeneratedArm64Mov.code .movReg) aux width
+        (Arm64Move.Fields.encode dst) (Arm64Move.Fields.encode src) unusedValue (image origins state) := by
+  rw [move_refines, Arm64Dispatcher.move_register_refines]
+
+/-- Full-width MOV copies the captured incoming byte tag to a GPR destination;
+SP and ZR destinations retain the complete GPR tag map. Narrow MOV scalarizes. -/
+theorem move_tag_frame (width : Width) (dst src : RegisterRef) (origins : Origins) (state : State) (r : Gpr) :
+    (move width dst src origins state).state.tags r =
+      match dst with
+      | .general target => if r.val = target.val then
+          (if width = .w64 then (readTagged state src).2 else 0) else state.tags r
+      | _ => state.tags r := by
+  have outside : r.val ≠ 31 := by omega
+  cases width <;> cases dst <;>
+    simp [move, GeneratedArm64Mov.ptrTagPath, Arm64Register.handlerWidth, advance,
+      writeTagged, writeWidth, ConditionalSelect.writeTagged, writeRegister,
+      Arm64Register.write_selection, Arm64Move.arithmeticRegister, outside]
+  all_goals intro equal; change r.val = 31 at equal; omega
+
+def immediate (width : Width) (dst : RegisterRef) (value : Word) (origins : Origins) (state : State) : Transition State :=
+  ⟨advance (writeWidth origins state dst value width), [], none⟩
+
+theorem immediate_projects (width : Width) (dst : RegisterRef) (value : Word) (origins : Origins) (state : State) :
+    observe origins (immediate width dst value origins state) = Arm64Move.rawStep .movImm width dst .zero value (image origins state) := by
+  simp only [immediate, observe, advance_refines, write_width_projects, Arm64Move.rawStep,
+    GeneratedArm64Mov.ptrTagPath, Arm64Move.operandOp, GeneratedArm64ImmOperand.immediate,
+    Bool.false_eq_true, ↓reduceIte]
+  cases dst <;> rfl
+
+theorem immediate_bitmask_refines (width : Width) (dst : RegisterRef) (value : Word) (origins : Origins) (state : State) :
+    observe origins (immediate width dst value origins state) =
+      Reference.AArch64.step (.logicImmediate width (.disjunction false) dst 31 value) (image origins state) := by
+  rw [immediate_projects, Arm64Move.immediate_bitmask_refines]
+
+theorem immediate_production (width : Width) (dst : RegisterRef) (value : Word) (aux : BitVec 32) (unusedSrc : Byte)
+    (origins : Origins) (state : State) :
+    some (observe origins (immediate width dst value origins state)) =
+      Arm64Dispatcher.dispatchPrefix (GeneratedArm64Mov.code .movImm) aux width
+        (Arm64Move.Fields.encode dst) unusedSrc value (image origins state) := by
+  rw [immediate_bitmask_refines, Arm64Dispatcher.move_bitmask_refines]
+
+def address (op : GeneratedArm64Adrp.Op) (dst : Register) (value : Word) (state : State) : Transition State :=
+  ⟨advance (ConditionalSelect.writeTagged state dst value (BitVec.ofNat 8 (GeneratedArm64Adrp.tag op))), [], none⟩
+
+theorem address_projects (op : GeneratedArm64Adrp.Op) (dst : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (address op dst value state) =
+      Arm64Dispatcher.addressBody (Arm64Register.registerCode dst) value (image origins state) := by
+  cases op <;> simp only [address, observe, advance_refines, ConditionalSelect.write_tagged_projects,
+    GeneratedArm64Adrp.tag, materialize, ↓reduceIte, Arm64Dispatcher.addressBody,
+    Arm64Move.Fields.register_write, Arm64Register.write_refines, Reference.AArch64.narrow,
+    Reference.AArch64.Width.bits]
+  all_goals simp [materialize, ConditionalSelect.writeTagged, image]
+
+theorem address_refines (op : GeneratedArm64Adrp.Op) (page : Bool) (dst : Register) (displacement : Word)
+    (origins : Origins) (state : State) :
+    observe origins (address op dst (Arm64Branch.pcAddress page state.raw.pc displacement) state) =
+      Reference.AArch64.step (.pcAddress page dst displacement) (image origins state) := by
+  have numeric := Arm64Dispatcher.address_refines op page dst displacement 0 .w64 255 (image origins state)
+  have reached : Arm64Dispatcher.dispatchPrefix (GeneratedArm64Adrp.code op) 0 .w64
+      (Arm64Register.registerCode dst) 255 (Arm64Branch.pcAddress page state.raw.pc displacement) (image origins state) =
+      some (Arm64Dispatcher.addressBody (Arm64Register.registerCode dst)
+        (Arm64Branch.pcAddress page state.raw.pc displacement) (image origins state)) := by cases op <;> rfl
+  change Arm64Dispatcher.dispatchPrefix (GeneratedArm64Adrp.code op) 0 .w64
+    (Arm64Register.registerCode dst) 255 (Arm64Branch.pcAddress page state.raw.pc displacement) (image origins state) = _ at numeric
+  rw [reached] at numeric
+  exact (address_projects op dst _ origins state).trans (Option.some.inj numeric)
+
+theorem address_tag_frame (op : GeneratedArm64Adrp.Op) (dst : Register) (value : Word) (state : State) (r : Gpr) :
+    (address op dst value state).state.tags r =
+      if r.val = dst.val then BitVec.ofNat 8 (GeneratedArm64Adrp.tag op) else state.tags r := by
+  simp [address, advance, ConditionalSelect.writeTagged, Arm64Register.write_selection]
+
+theorem address_production (op : GeneratedArm64Adrp.Op) (dst : Register) (value : Word) (aux : BitVec 32)
+    (width : Width) (unusedSrc : Byte) (origins : Origins) (state : State) :
+    some (observe origins (address op dst value state)) =
+      Arm64Dispatcher.dispatchPrefix (GeneratedArm64Adrp.code op) aux width (Arm64Register.registerCode dst)
+        unusedSrc value (image origins state) := by
+  have reached : Arm64Dispatcher.dispatchPrefix (GeneratedArm64Adrp.code op) aux width
+      (Arm64Register.registerCode dst) unusedSrc value (image origins state) =
+      some (Arm64Dispatcher.addressBody (Arm64Register.registerCode dst) value (image origins state)) := by cases op <;> rfl
+  rw [reached, address_projects]
+
+inductive Emission where
+  | leading (emission : FlagArithmetic.Emission)
+  | move (width : Width) (dst src : RegisterRef)
+  | immediate (width : Width) (dst : RegisterRef) (value : Word)
+  | address (op : GeneratedArm64Adrp.Op) (dst : Register) (value : Word)
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .leading emission => FlagArithmetic.dispatchEmission nativeAddress emission origins state
+  | .move width dst src => some (move width dst src origins state)
+  | .immediate width dst value => some (immediate width dst value origins state)
+  | .address op dst value => some (address op dst value state)
+
+inductive Binding (nativeAddress : Word → Word) (pc : Word) : Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : FlagArithmetic.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : FlagArithmetic.EmissionBinding nativeAddress pc emission instruction) :
+      Binding nativeAddress pc (.leading emission) instruction
+  | move (width : Width) (dst src : RegisterRef) :
+      Binding nativeAddress pc (.move width dst src) (.moveRegister width dst src)
+  | immediate (width : Width) (dst : RegisterRef) (value : Word) :
+      Binding nativeAddress pc (.immediate width dst value) (.logicImmediate width (.disjunction false) dst 31 value)
+  | address (op : GeneratedArm64Adrp.Op) (page : Bool) (dst : Register) (displacement : Word) :
+      Binding nativeAddress pc (.address op dst (Arm64Branch.pcAddress page pc displacement)) (.pcAddress page dst displacement)
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound => exact FlagArithmetic.emission_step_refines nativeAddress emission origins state instruction bound
+  | move width dst src => exact congrArg some (move_refines width dst src origins state)
+  | immediate width dst value => exact congrArg some (immediate_bitmask_refines width dst value origins state)
+  | address op page dst displacement => exact congrArg some (address_refines op page dst displacement origins state)
+
+end KProgFormal.Refinement.Arm64RawRegister.MoveAddress
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.read_tagged_materializes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.coordinate_roundtrip
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.write_tagged_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.write_width_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.move_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.move_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.move_production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.move_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.immediate_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.immediate_bitmask_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.immediate_production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.emission_step_refines

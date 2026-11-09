@@ -78569,5 +78569,72 @@
       }
     ],
     "scope": "Eightflagarith ops:SP32/ZR31/readmaterialization, actualoperandrouting/selector/arithmeticresultNZCV, nativeWXshift/extensions/plainSource, scalarwidthtagwrite orcompareframe. Allaliases/tags/unusedbytesincl255/REGIMM/fullarchitecture. Threeproductiondispatcher equalities/eightnumericstep/normalized48numeric+6sourceemissionstep. Nativeencoding/entry/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
+  },
+  "arm64_raw_move_address_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "f7610f949fdf1c2ff519a81754fcf1a7551f89e7a3f680b51a802eb2618dacf8",
+      "sorryAx": 0,
+      "reduction_bridge": 119,
+      "scope": "RawMOV_REG/SP32/ZR31/alltagcopy and widthwrite, immediatebitmaskSP alias, ADRP GOT7/RODATA8 tagwrite. Complete architectural projection/native PC-relative IMM identity and normalized51numeric/sixsource emission step. Source/C union/ghostrelease/nativeencoding/entry/physical/compiler interfaces explicit."
+    },
+    "operations": [
+      "ARM64_OP_MOV_REG",
+      "ARM64_OP_ADRP_GOT",
+      "ARM64_OP_ADRP_RODATA"
+    ],
+    "raw_operation_count": 51,
+    "source_branch_count": 6,
+    "new_audits": 16,
+    "total_audits": 164,
+    "additional_alias": "MOV_IMM bitmaskSP",
+    "archive": "arm-raw-move-address.log.gz",
+    "source_interfaces": [
+      {
+        "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+        "bytes": 66804
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Reference/Memory.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+        "bytes": 3740
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Refinement/Arm64Move.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "b40c5d0e25ff16400849f5a688afd0babf9a4f09d6441d7aea235bd56f915590",
+        "bytes": 17070
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+        "bytes": 331150
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Adrp.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "0eea797253a0c065d2b5ea2d61301b830beb62214a98cb83936c6dbb25d22cd0",
+        "bytes": 816
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Mov.lean",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "efb7d9926d7f44bd6258631d047ca1f5c49fd91173c5b64f2fe4627013c06295",
+        "bytes": 1124
+      },
+      {
+        "path": "kprog/arm64/arm64_sim_local_bpf.h",
+        "commit": "eb70f237ca94146625731e0e26246f26557e3cc6",
+        "sha256": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+        "bytes": 156664
+      }
+    ],
+    "scope": "RawMOV_REG/alltags/capturedwordtag/SP32/ZR31/W64copy/W32scalarwrite, bitmaskMOVIMMSPalias, ADRPGOT7/RODATA8 withnativeIMM-PCidentity. Fullarchitecture, productionprefix andnormalized51numeric+6sourceemissionstep. Entry/C union/ghostrelease/nativeencoding/relocation/physical/compiler interfaces explicit; Bforwarding/layoutRETpause retained."
   }
 }

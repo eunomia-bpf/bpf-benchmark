@@ -80,7 +80,7 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 48/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 51/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
@@ -102,6 +102,8 @@
 - [ ] **V** raw CCMP/logical flags（40数值操作+6源分支）与交换ADD64观察器合并后的完整make check；保留既有增量cache与精确源/实际exit。
 - [x] **V** ARM raw ADDS/SUBS/CMP/CMN八操作：SP32/ZR31与全部tag物化、实际SRC/SRC2或DST/SRC角色、immediate/shift/extend、arithmetic result/NZCV、width/tag写回或完整compare raw/tag frame；production dispatcher与48数值+六源分支normalized emission step，新增12条及前136条审计/模块/root通过（本提交，raw48/74）。
 - [ ] **V** raw arithmetic flags（48数值操作+6源分支）批次的完整make check，接续当前固定40操作源的sole full，复用增量cache并保留各自源/actual exit。
+- [x] **V** ARM raw MOV_REG/ADRP_GOT/ADRP_RODATA：捕获raw/tag、W64复制/W32 scalar化、SP32/ZR31和SP相对坐标往返、MOV_IMM bitmask SP alias、GOT7/RODATA8及resolved IMM/native PC绑定；完整architecture/tag frame、production prefix和51数值+六源分支emission step，新增16条及前148条审计/模块/root通过（本提交，raw51/74）。
+- [ ] **V** raw move/address（51数值操作+6源分支）批次完整make check，接续当前sole full并复用共享增量cache；保留各自固定源/actual exit。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
