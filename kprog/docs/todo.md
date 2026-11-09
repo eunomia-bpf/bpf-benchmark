@@ -25,6 +25,9 @@
 - [x] **C** 原生替换失败后保留 eBPF，完整 Katran 两个工作阶段继续运行，recipe 位于冻结路径之外（7734afc52、725e45398；248ebacee、13c38586e，TODO 启用时补记）。
 - [ ] **C** 05-29 driver 缺少的运行需求放进 shim、loader 或冻结路径之外的 recipe，让 verified 一侧在恢复后的框架上跑通。
 - [ ] **R** AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）。
+- [ ] **Claude subagent** 直接 native 的 blob 端点放回 R 专用测量模块（82f8e9e77 删除，R 的两次全长 run 因此是 eBPF 对 eBPF）。
+- [ ] **R** 统一 pps 口径：843,755 接近单 worker，四 worker 合计约 250 万。
+- [ ] **C** 优化顺序改为 Tetragon、Cilium、OTel、Tracee，Katran 放最后。
 - [ ] **协调者** 用重测结果更新论文 §6。
 
 ## 2. 应用覆盖
@@ -34,7 +37,7 @@
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
-- [ ] **A** 这 275 个程序的静态结果，按 native body 分组并行：27 个候选入口组；实际 linked body 27 组，完成 20 组，覆盖 268/275 加权实例。模型 4f5b7ae6d；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。
+- [ ] **A** 这 275 个程序的静态结果，按 native body 分组并行：27 个候选入口组；实际 linked body 27 组，完成 27 组，覆盖 275/275 加权实例。模型 4f5b7ae6d；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。
 - [x] **A/C** 资源准备 238/238 完成：Tracee 151、OTel 13（3daeea9b2），Cilium 72（aba3e9d46），BCC 2（7b4876f7a）；汇总 bc3104df7，本提交补记统一 TODO。通用路径适配局部入口符号、资源专用重定位视图、临时 pinning 生命周期和原应用运行时 map 参数。Cilium 的 CILIUM_PIN_REPLACE=16 与 BCC stackmap 的空模板字段均按实际 loader 语义处理。
 - [x] **A** 23 条数字开头 ELF 名称的元数据语法修复：原始 kernel metadata/facts 全部规范化，23 份 map 声明编译与 ELF 名称保留通过，现有 6 项元数据测试通过（eeec0f52a，本提交补记统一 TODO）。
 - [x] **A** 静态普查合并发布保留 previous-results 路径与 worker PID 各自语义；已完成的 guest 记录可独立发布，运行中的 275 行批次沿用原 guest 和模型。本提交修复 harness 的变量覆盖，代码位于冻结路径之外。 每行携带模型提交号，合并表保留各版本的实际行数。
@@ -48,6 +51,9 @@
 - [ ] **C** verifier 拒绝 4（scalar memory access）、编译失败 1、context 下沉 1；23 条名称问题的后续 native 阶段由上述 274 行回放记录。
 - [ ] **C** x86-64 六个应用全部走通 verified 路径。
 - [ ] **A** AArch64 QEMU 上六个应用全部走通（Tracee 启动窗口按 05-29 框架处理）。
+- [ ] **A** 放大 MAX_BPF_STACK 的测试内核，一次看清 549 个程序在 512 字节栈墙之后的失败类。
+- [ ] **A** 按 `design.md` 的 region 切分做 spike：B 按基本块拆成 noinline 子函数，量 actions、process_filter、generic_kprobe_ 的栈深和 clang 时间。
+- [ ] **R/C** 应用级 B 生成时间（clang 单个 body 12–2,819 秒，最高 15.1 GB），论文的 54.52x 只来自 micro。
 - [ ] **C** 100–100K 规模扫描，verifier 时间和内存。
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
@@ -59,6 +65,7 @@
 - [x] 间接分支加固 retpoline/ITS 和 BTI（S15，165ac4100）。
 - [x] 安全用例 x86 47、ARM 48，接受的 8 例为良性恢复读，配对的写入变体被 verifier 拒绝（S16，ec468f0f7）。
 - [x] 每个 armed 镜像只加载一次（fb23a234d、d140d92ab）。
+- [ ] **C** 入口桩保存恢复六个 callee-saved 寄存器，B 删掉对应比较；这个相等分支是最大的单一拒绝原因（105 个 Tetragon 实例及 Katran、OTel、Cilium、BCC）。
 - [ ] **C** RSP 位移候选：clang inbounds GEP 对区域外访问的影响（compiled-B 义务）。
 
 ## 4. 安全：证明（对所有程序，一次证完；禁止逐程序）
