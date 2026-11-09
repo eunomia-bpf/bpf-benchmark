@@ -1,0 +1,54 @@
+{
+  "utc": "2026-11-09T15:07:36.860910+00:00",
+  "source_commit": "128684fa0f3a0ffa735cb38353d978085622d9fe",
+  "sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "ed027ab4ab61e66aaacc7e6c481377b8fcfc92ae3037bf2dcec5f31b22912f86",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02d19b0cf0fe3228c194dc76414a44e89258e03e969d21cb5b7a3e86f195640",
+    "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+    "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/image/libnative_loader.so": "6fd5ced543b2467c7455fd3fc1c457a399af8d82e912bbe11ee56cf4657dd4e6",
+    "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime/trusted-native-loader": "5505258c1320b6913243cce4ed063d3cce4196291226ca5bb21e232231979755",
+    "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime/bpf_x86_native_lab.ko": "5256dee2d07acba00a138b3300e3b3a5e6a381d5a3aa32fec3f174a206b5f812"
+  },
+  "module_debugfs_endpoints": [
+    "debugfs_create_file(\"native_submit\", 0600, debugfs_root, NULL, &native_lab_trusted_fops);",
+    "debugfs_create_file(\"specializer\", 0600, debugfs_root, (void *)1, &native_lab_trusted_fops);",
+    "debugfs_create_file(\"map_ptr\", 0600, debugfs_root, NULL, &map_ptr_fops);",
+    "debugfs_create_file(\"map_value_ptr\", 0600, debugfs_root, NULL, &map_value_ptr_fops);",
+    "debugfs_create_file(\"map_update_elem\", 0600, debugfs_root, NULL, &map_update_elem_fops);"
+  ],
+  "client_submission": "NATIVE_LAB_TRUSTED_SUBMIT / SUBMIT_RESOURCES then WAIT on native_submit",
+  "worker_upload": "NATIVE_LAB_TRUSTED_CHUNK on the registered specializer FD, using request_id",
+  "unbound_current_loader": "The existing branch continues into upload_native_chunks with default trusted_service_fd=-1 when REQUIRE_BOUND_PROOF is unset; this current source requires the registered request path for chunk upload.",
+  "R_observed_error": "open /sys/kernel/debug/bpf_x86_native_lab/blob0: No such file or directory",
+  "R_run": "x86_kvm_corpus_20261109_142708_149898",
+  "verified_observation": {
+    "source_commit": "ebe984e0f63440ba244f43096d10a73412194391",
+    "producer": "/var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/native/katran",
+    "make_exit": 0,
+    "native_requests": 1,
+    "generated": 1,
+    "compiled": 1,
+    "installed": 0,
+    "failed": 1,
+    "app_outcomes": [
+      {
+        "application": "katran",
+        "status": "ok",
+        "error": ""
+      }
+    ]
+  },
+  "verified_programs": [
+    {
+      "status": -5,
+      "entry": "balancer_ingress",
+      "native_sha256": "d57a7d8cb9c5cb1979095d8605ccfa59410a3c2f1b13aa898f37fa2ef49d6332",
+      "generated": true,
+      "compiled": true,
+      "verifier_excerpt": [
+        "R0 invalid mem access 'scalar'",
+        "processed 1509 insns (limit 1000000) max_states_per_insn 0 total_states 29 peak_states 29 mark_read 0"
+      ]
+    }
+  ]
+}
