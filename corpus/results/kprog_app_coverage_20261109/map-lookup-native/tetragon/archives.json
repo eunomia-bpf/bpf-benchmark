@@ -1,0 +1,67 @@
+{
+  "control": {
+    "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/control-payload.tar.gz",
+    "bytes": 27604811,
+    "sha256": "8004ba831b528c15ffb2a6e385a8845eb2edc51a60ef4cb4fd7bb360bbb12b20",
+    "files": [
+      {
+        "name": "control-payload.tar.gz",
+        "bytes": 27604811,
+        "sha256": "8004ba831b528c15ffb2a6e385a8845eb2edc51a60ef4cb4fd7bb360bbb12b20"
+      }
+    ]
+  },
+  "candidate": {
+    "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/candidate-payload.tar.gz",
+    "bytes": 27692944,
+    "sha256": "7f82302dab9b65a998005c5a4262fed088bc76154daacc7ffcb2af16fb7a49ba",
+    "files": [
+      {
+        "name": "candidate-payload.tar.gz",
+        "bytes": 27692944,
+        "sha256": "7f82302dab9b65a998005c5a4262fed088bc76154daacc7ffcb2af16fb7a49ba"
+      }
+    ]
+  },
+  "jit": {
+    "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/paired-jit.tar.gz",
+    "bytes": 31578319,
+    "sha256": "a9f220de161c127cd58f2b7d8f9985e46bba50db451406085bb1f6e90811f001",
+    "files": [
+      {
+        "name": "paired-jit.tar.gz",
+        "bytes": 31578319,
+        "sha256": "a9f220de161c127cd58f2b7d8f9985e46bba50db451406085bb1f6e90811f001"
+      }
+    ]
+  },
+  "raw": {
+    "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/build-raw.tar.gz",
+    "bytes": 2332845,
+    "sha256": "a08ef755842261f0c6f3c0e53348847fc773877271f5dbfc5595814f30311f7f",
+    "files": [
+      {
+        "name": "build-raw.tar.gz",
+        "bytes": 2332845,
+        "sha256": "a08ef755842261f0c6f3c0e53348847fc773877271f5dbfc5595814f30311f7f"
+      }
+    ]
+  },
+  "zero_site_before": {
+    "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/zero-sites-before.tar.gz",
+    "bytes": 56314210,
+    "sha256": "a1b3f27af3afbc92da92e7711fda8fac154c5cc607a88bd8641bb82cef943e6a",
+    "files": [
+      {
+        "name": "zero-sites-before.tar.gz.part00",
+        "bytes": 48000000,
+        "sha256": "6326ea0082146d24817a7b1de65a0de8be784808f682bf47f147b4ccf06cc922"
+      },
+      {
+        "name": "zero-sites-before.tar.gz.part01",
+        "bytes": 8314210,
+        "sha256": "f5c0967fbb5048cd12e3e54555c63576833a574aabc8480e68997b09cab97e4d"
+      }
+    ]
+  }
+}

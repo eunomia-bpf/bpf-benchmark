@@ -1,0 +1,923 @@
+{
+  "source_commit": "ea6221c5f056e0018ed80e061603c575811ea644",
+  "input": {
+    "committed_input_blob": "405d7fb2a54ded2039eec829ab51473e0eb7d4aa",
+    "input_path": "corpus/results/kprog_app_coverage_20261109/current-abi-app-payloads/tetragon/producer.tar.gz",
+    "source_epoch": {
+      "utc": "2026-11-09T09:31:00.932490+00:00",
+      "head": "d1b4ac1b78a438e0caef9914b981218e3ffd59c0",
+      "frozen_workload": "9f3855f6f",
+      "target_kernel": "/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build/vmlinux",
+      "source_trees": {
+        "otel": "current tracked vendor/bpf/otel",
+        "tracee": "/workspaces/.agent-state/kprog-lanes/C/design-only/tracee-clamp-macro/tree",
+        "tetragon": "/workspaces/.agent-state/kprog-lanes/C/design-only/tetragon-paired-source/tree"
+      },
+      "profile": "current O3 native flags; full original object manifests; live generation occurs from submitted P"
+    },
+    "source_files": {
+      "inputs.json": "66090d1564544360aadab6eb3e06edb9226bdfffa168d9d2043dad2f8c08aa1d",
+      "native-only.mk": "52d7d7c741cb377c0ee8c744f4266082723d5716854d1cfda4e6809db59ca68c",
+      "source/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+      "source/tetragon/.gitignore": "59f8a4a842b6822b3a5200a773319a98ae135af9467b164d053e0cb8131cf958",
+      "source/tetragon/Makefile": "2fe0213c5371abf51f57541d6529da734ed436779f895f114fa38c4a7753af53",
+      "source/tetragon/Makefile.defs": "1f063099f6a635a536744b882d0355eaeb481f2d959c875980ac4172b766546b",
+      "source/tetragon/LICENSE.GPL-2.0": "0d5bf346df9e635a29dcdddf832dc5b002ca6cdc1c5c9c6c567d2a61bb0c5c15",
+      "source/tetragon/LICENSE.BSD-2-Clause": "87f5bcd709fb87016ce5ddbf19186fa4813846641eb74e9b119afa9a03b29406",
+      "source/tetragon/COPYING": "8ed6cdbc047edbcea7b48dd24bb87f65ab8626a12efc3fb5189ce3ef04c60992",
+      "source/tetragon/process/bpf_exit.c": "e9986d62d1c20ff4c3a8a45caa82f13c8e706a57bde47be0be11ca8f251313a1",
+      "source/tetragon/process/bpf_mbset.h": "0391f5244d7635d3f1ab8db1c2b428a2d5e6d28b7d4d87f9e60a79d519ed94fe",
+      "source/tetragon/process/bpf_loader.c": "7e431388b5a2811411c7a8d50e3e3daeb02ff0e81c32155f02d05c76276bb7b0",
+      "source/tetragon/process/generic_calls.h": "33b55e40ebd0f7d2b74d9221bdb1ff9e33f9e84b54c46131233d2322834c7d1a",
+      "source/tetragon/process/generic_path.h": "e70b5430350db6963f5e6cf5b31bc0a4a8f23739fcdf6b3ceffd2a525d055522",
+      "source/tetragon/process/pfilter.h": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e",
+      "source/tetragon/process/regs.h": "8480f7a84c8e3dbea64a6f9daf3eaafa696a5c4d0a1b9b8064160346ae450fca",
+      "source/tetragon/process/syscall64.h": "3037b6650535cbb230b3bbb5d6b9e88db91881a38513310b9f96baf392fbe30e",
+      "source/tetragon/process/bpf_generic_rawtp.c": "3c60d98aa09ef237311b2af765049c62f3347eedb23eb3beb6e816e9505d5038",
+      "source/tetragon/process/bpf_generic_lsm_core.c": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64",
+      "source/tetragon/process/bpf_generic_fentry.c": "07ab14f6304d59162283d17f1113f49b0b2d3f4611635e0d9cb6db223d55e986",
+      "source/tetragon/process/addr_lpm_maps.h": "1534f46e1a9149652ddc3528dcf26ddb2d4b7a437622f92e232c22abf3be1d32",
+      "source/tetragon/process/ratelimit_maps.h": "fe5bbf555df627617e2642453f2796f42b86d2b196d4e3cb77d8a293607b14ed",
+      "source/tetragon/process/heap.h": "0c1599beeb1c4cbc193863a14a681944cae181c7f65e12ff8f0f179dcf932d8e",
+      "source/tetragon/process/bpf_execve_event.c": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+      "source/tetragon/process/retprobe_map.h": "9ec9fbdc261620ae7a7816630c752f14dd3f762da22dc04f7815dd0ba2559a76",
+      "source/tetragon/process/generic_arg.h": "a89f0c07b5883b24a8249dbebf728cd038e2e892640d2f81fcd0a69569943e70",
+      "source/tetragon/process/bpf_rate.h": "f8be2a269f1a70b02be949dc13e3acae46e094cde1a768fb8c30e4627b5c7476",
+      "source/tetragon/process/bpf_enforcer.c": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+      "source/tetragon/process/bpf_generic_uprobe.c": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2",
+      "source/tetragon/process/bpf_generic_fexit.c": "5f33b121e34c2a0f922e9eef9bdff832860f6f4ec0a634cde7ec509230ab9f18",
+      "source/tetragon/process/bpf_process_event.h": "391de1c10e562f209a97395dcb328bdeb16c37c97cccc7d6794c0a5b765998dd",
+      "source/tetragon/process/cel_expr.h": "fc6146362d8d8519bc29538d4d745096a8c9a813ece9e81be19d387246ac1f4e",
+      "source/tetragon/process/bpf_prog_iter.c": "c60128df11eea130dd1c0f05be88fe5efd6bff3e86598f156737011c603c18e6",
+      "source/tetragon/process/bpf_cgroup.c": "1ff6867d6d22a69e20b17ef1184522ec2c8124cdd2408ea6010b635d98f399fe",
+      "source/tetragon/process/bpf_generic_retkprobe.c": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20",
+      "source/tetragon/process/bpf_enforcer.h": "4b4d4253cc9eea43b48ae8594c403b037fe191c4375ae7551253dbde5e752168",
+      "source/tetragon/process/usdt_arg.h": "41259b194883b72181ecd8e8f8f18c34b297f500f9607479653fa196045deb65",
+      "source/tetragon/process/bpf_generic_usdt.c": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+      "source/tetragon/process/bpf_fork.c": "5eeaf0ac35d7ce5c92c4f06af1a8ed517988542f11e1fd50acc31c9af293f3ce",
+      "source/tetragon/process/bpf_execve_bprm_commit_creds.c": "8c888c3ac938aa92603fe83895c55a8ed9bf1c60ba69e49fb7565d55c99a1480",
+      "source/tetragon/process/bpf_execve_map_update.c": "9383a4a411d087972fcec2e2c684eb649d319c9a5d31a348ac432adfe8510056",
+      "source/tetragon/process/argfilter_maps.h": "67e3ba39cf014c808656d440a617fd2d164d764d74f795a74bb1cb9ef3b12ae6",
+      "source/tetragon/process/bpf_lsm_ima.h": "dafa14da7e79941740ada2bb84b01204a6c53069b317151b283b8e4da52ccdb8",
+      "source/tetragon/process/data_event.h": "6b88ef8ca96a8001e9891f7b6eae06b5e54127359d12969940e17e0728b932f6",
+      "source/tetragon/process/bpf_generic_lsm_output.c": "627f36c62e7926258ad4f24538e6a2a0d5c458d21d760c4c723142e0149aa3e6",
+      "source/tetragon/process/string_maps.h": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01",
+      "source/tetragon/process/bpf_generic_kprobe.c": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+      "source/tetragon/process/bpf_generic_tracepoint.c": "b399ea9b3d0f47585f3fe75c97555619b8718dac7635d846ea7c9584128a2567",
+      "source/tetragon/process/generic_maps.h": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54",
+      "source/tetragon/process/bpf_generic_retuprobe.c": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21",
+      "source/tetragon/process/bpf_generic_lsm_ima_bprm.c": "8ded6012da763fc16b12c85ee8111607581117a4649cc82d6777dcfcebe9aa51",
+      "source/tetragon/process/event_config.h": "93e2e9fd0467bbb89c2ffe79dfa8fa60b6d0e1b729dedc69601e26a500c62529",
+      "source/tetragon/process/policy_filter.h": "64b160fffd7cc73b107a82de9f802f91c120b047af4a12d3a8b0c1f6a66a4aab",
+      "source/tetragon/process/user_preload.h": "b603fbb5d23eae94e17b80ae1feb92eb7f578f170fc86ff17c8d9d915ad41069",
+      "source/tetragon/process/bpf_generic_lsm_ima_file.c": "dd0c7a431292c772e2e5178a16cd748fbfe4d59488f366c99a6e61c815f719e2",
+      "source/tetragon/process/bpf_exit.h": "6d9dd1094083a7a723ab337bc85b7dd3caf05fe6a80e53974e8db7411cec0115",
+      "source/tetragon/process/uprobe_offload.h": "b70fccdd6b18ef0c3a8f2fef13376a5805cfadc9ad80e9213c82a153d45de07c",
+      "source/tetragon/errmetrics/fileids.h": "72ff92ea9113f78b2585be12d3b06183a060e34a8d40de686f4146762989071a",
+      "source/tetragon/errmetrics/get_fileid.h": "bdf1caf3ee856f170b6e8a31e7690110eed345dc8885fe94de6b414c054b60df",
+      "source/tetragon/include/vmlinux_generated_arm64.h": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae",
+      "source/tetragon/include/type_mapper.h": "1a8d861923b10ba9f89b3f1fdf153e76c57cfc75fd0f1abaf8e66df339e2fca5",
+      "source/tetragon/include/compiler.h": "5dba61eae7b8bba7f57b795a1ee49df98ea5ebd1d27ff7c7eeeeab200576fec1",
+      "source/tetragon/include/errno.h": "6bc3a3456026257fefdaacc5d48ad4cd7876d7253e19ba4d0b5ce7bfee539ee7",
+      "source/tetragon/include/vmlinux_generated_x86.h": "73fe1217cc39dfb136e107343b2aad6deecfef343672a0945c4c07ac06dfe102",
+      "source/tetragon/include/bpf_elf.h": "daf53c12bd7e31995b02cd83429cea835f6f1989eea6b39fae6ca1fd04804f61",
+      "source/tetragon/include/vmlinux.h": "747255472f09b0d9f45a4370966138676aff3b9b95cf0d93134eee0cf549168d",
+      "source/tetragon/include/api.h": "eee59ea0fb6da85f7c301c2f33a25e20bb0817ca4c0c8abb67d6ccc7d93e003c",
+      "source/tetragon/include/bpf_ktime.h": "7516751954062bbe08d171d6bb37ae0e72887f4c0135ddd1c7a7a6ead23a9c53",
+      "source/tetragon/windows/process_monitor.c": "884e43fff45f4725da2ff41ad4a05e033ea4cca24f0902bf2d41876745d56c4a",
+      "source/tetragon/cgroup/bpf_cgroup_release.c": "00a48c4b9ca1dc0b3edcb6d16b583e28bcac68516ef4e801759f700bbd91e024",
+      "source/tetragon/cgroup/bpf_cgtracker.c": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268",
+      "source/tetragon/cgroup/bpf_cgroup_events.h": "0a8854278e935ebb1e468fc3e22eb3b4c9bf1c680a6fecc0a9a772dfb88b3eea",
+      "source/tetragon/cgroup/bpf_cgroup_rmdir.c": "d1657dd8abd7388731a70e36db1d1f12919a0cece2a5310b725c906fb33c1679",
+      "source/tetragon/cgroup/bpf_cgroup_mkdir.c": "fed080b1d8ddc0c8b4e6ec3e8660fcc820ecd0e24d502ebc65c3ccccdd73bba5",
+      "source/tetragon/cgroup/cgtracker.h": "99ff07aeec09a7b45c6003c1620f8ad1d71aaeb0c89b2c8cb51644fa8b0d290e",
+      "source/tetragon/lib/data_msg.h": "02982cd0f821ee7adce8dca7251c0f2f9b948664bd70b269a651121a60089723",
+      "source/tetragon/lib/err.h": "195290e4be00315ce04568a76f46b99df0d57d31e6db6928d35b4e5f8ec8565a",
+      "source/tetragon/lib/policy_conf.h": "4708658f4c6ec99276dd88c9ce6a8370c048b4cb5b60abde5d6165c3077ce76e",
+      "source/tetragon/lib/policy_stats.h": "3e3ec9ba2e4cd46bcd0500a9276468bd1617ea0f2462903e21195066d92b7c76",
+      "source/tetragon/lib/config.h": "f2c6270b94c1ec522fbdb884c94daf73a0dae4b24067ae15d7bbf41a93ae5d87",
+      "source/tetragon/lib/bpf_event.h": "9105138082eba0b5e10d56c434eb09716b733e59bb0adaf0b269e62df4837e44",
+      "source/tetragon/lib/errmetrics.h": "200edb95c5a874a262b20840e5a788fd20fb371492da665a9479832664c06c0a",
+      "source/tetragon/lib/generic.h": "646ef8a0b0b5a8342467699346abfa81189e1bb19f0a0f4d9b75cc1f09857b16",
+      "source/tetragon/lib/bpf_helpers.h": "a4d3142a1a8d7ee71c581f4418aa232b074b333b16e8e108abbd500a8d108a0e",
+      "source/tetragon/lib/common.h": "0080ce8dd3363a62b22711e0821abef889ec71eca75dd9773dcae5c83156d2a0",
+      "source/tetragon/lib/bpf_d_path.h": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+      "source/tetragon/lib/bpf_task.h": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377",
+      "source/tetragon/lib/msg_types.h": "3289dc1ff42a65a8ccc977cf944ad46d328da38f4e91d87ad37692af260a8e29",
+      "source/tetragon/lib/bpf_cred.h": "278a169aa89cd820fa8a418ab560f68a604d7b6f87b86ef697f5d86aa03a2f2e",
+      "source/tetragon/lib/environ_conf.h": "b3500ad4eada42862f2ecbabc5ecee7367bc24fd2b815653c57179799a98b25b",
+      "source/tetragon/lib/bpf_cgroup.h": "9b5bdd665f24cd126fcfe60421641eabbf51002f4bf3862166d2608f5803b8e6",
+      "source/tetragon/lib/process.h": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0",
+      "source/tetragon/libbpf/bpf_tracing.h": "202f08d2d4605537f60e77a81ffb31851455569b1f00d94b2d76a3f86ebd91e8",
+      "source/tetragon/libbpf/bpf_core_read.h": "8ed6bb4ff7eee627ef35b2020ddc2b73642e35d0e5da8da33f80b07761d10b6b",
+      "source/tetragon/alignchecker/bpf_alignchecker.c": "e278be7b6f5ab4ecbab48e8148ad4f265364e26a42ea1c80e7f147c512ff4c4e",
+      "source/tetragon/process/types/tuple.h": "447633e30a81aa91200ee8581aca05dd42193afcb5081cf76293d573d64b0e98",
+      "source/tetragon/process/types/basic.h": "3fb1e20e97abb1624b4591999b0fdefe644e9f186cecfccd8805ce9e4636518a",
+      "source/tetragon/process/types/operations.h": "6dbfbc5f12dc7cdaf3b3d7f219cb8725e4a60a15c383191088990a88d4383984",
+      "source/tetragon/process/types/perfevent.h": "6a1443577807718da2fee6b53182c6cefd3919148558c673097f59305b0a53de",
+      "source/tetragon/process/types/sockaddr.h": "3f0046d3e44687b2596aee66c54b805f1e2040c9721a695a657f9b5168d983ab",
+      "source/tetragon/process/types/bpfattr.h": "70168f9bd40860eada24243573244e31e5ec2e2ed2f5953ba9fc8d29c80a06bc",
+      "source/tetragon/process/types/module.h": "b500387af0a91a2532cbea03f66e75c6ff720a99d3d182a1db7cf76b91af248a",
+      "source/tetragon/process/types/net_device.h": "1578d70314ae74d49976a1c279d003cab282f61394183092dbe8cac49a1ad0f6",
+      "source/tetragon/process/types/capabilities.h": "4fb13e18eee1b2e7b876a82fd75c1cd4983bd403cc892c18d531a9dd71650a08",
+      "source/tetragon/process/types/sock.h": "c89c661b43d7d643bcbef086bac7f7d0791f89a62ce247df60048e42df4a929f",
+      "source/tetragon/process/types/bpfmap.h": "d8b1eba5ddda9316ec36ae683c25f2efbf04a45c96077e2598c337075fd09476",
+      "source/tetragon/process/types/socket.h": "a41dc7d9bf889fd03f6b479a77c831589a254b29bcd8410164e2ce80747af1a9",
+      "source/tetragon/process/types/sockaddr_un.h": "708f2c9ced650e284eb9508dcb87769eb374f21f92e7ab69c105e3f5da05a6ce",
+      "source/tetragon/process/types/skb.h": "e37ab29ca6f5765bd5f9d24542d2330b2200e09e6a4c1c9fe02a564360856dff"
+    },
+    "plugin_source_sha256": "6531f6e9066cc0e05e8850f26ffbb017dd03f9f954b3e0a40f80850da5fb5568",
+    "producer_head": "ea6221c5f056e0018ed80e061603c575811ea644",
+    "layout": {
+      "vmlinux": "/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build/vmlinux",
+      "offsets": {
+        "bpf_map.max_entries": 68,
+        "bpf_array.elem_size": 288,
+        "bpf_array.index_mask": 292,
+        "bpf_array.value": 304
+      },
+      "raw": {
+        "bpf_map": "struct bpf_map {\n\tu8                         sha[32];              /*     0    32 */\n\tconst struct bpf_map_ops  * ops;                 /*    32     8 */\n\tstruct bpf_map *           inner_map_meta;       /*    40     8 */\n\tvoid *                     security;             /*    48     8 */\n\tenum bpf_map_type          map_type;             /*    56     4 */\n\tu32                        key_size;             /*    60     4 */\n\t/* --- cacheline 1 boundary (64 bytes) --- */\n\tu32                        value_size;           /*    64     4 */\n\tu32                        max_entries;          /*    68     4 */\n\tu64                        map_extra;            /*    72     8 */\n\tu32                        map_flags;            /*    80     4 */\n\tu32                        id;                   /*    84     4 */\n\tstruct btf_record *        record;               /*    88     8 */\n\tint                        numa_node;            /*    96     4 */\n\tu32                        btf_key_type_id;      /*   100     4 */\n\tu32                        btf_value_type_id;    /*   104     4 */\n\tu32                        btf_vmlinux_value_type_id; /*   108     4 */\n\tstruct btf *               btf;                  /*   112     8 */\n\tstruct obj_cgroup *        objcg;                /*   120     8 */\n\t/* --- cacheline 2 boundary (128 bytes) --- */\n\tchar                       name[16];             /*   128    16 */\n\tstruct mutex               freeze_mutex __attribute__((__aligned__(8))); /*   144    32 */\n\tatomic64_t                 refcnt;               /*   176     8 */\n\tatomic64_t                 usercnt;              /*   184     8 */\n\t/* --- cacheline 3 boundary (192 bytes) --- */\n\tunion {\n\t\tstruct work_struct work;                 /*   192    32 */\n\t\tstruct callback_head rcu __attribute__((__aligned__(8))); /*   192    16 */\n\t} __attribute__((__aligned__(8)));               /*   192    32 */\n\tatomic64_t                 writecnt;             /*   224     8 */\n\tspinlock_t                 owner_lock __attribute__((__aligned__(4))); /*   232     4 */\n\n\t/* XXX 4 bytes hole, try to pack */\n\n\tstruct bpf_map_owner *     owner;                /*   240     8 */\n\tbool                       bypass_spec_v1;       /*   248     1 */\n\tbool                       frozen;               /*   249     1 */\n\tbool                       free_after_mult_rcu_gp; /*   250     1 */\n\tbool                       free_after_rcu_gp;    /*   251     1 */\n\n\t/* XXX 4 bytes hole, try to pack */\n\n\t/* --- cacheline 4 boundary (256 bytes) --- */\n\tatomic64_t                 sleepable_refcnt;     /*   256     8 */\n\ts64 *                      elem_count;           /*   264     8 */\n\tu64                        cookie;               /*   272     8 */\n\tchar *                     excl_prog_sha;        /*   280     8 */\n\n\t/* size: 288, cachelines: 5, members: 34 */\n\t/* sum members: 280, holes: 2, sum holes: 8 */\n\t/* forced alignments: 3 */\n\t/* last cacheline: 32 bytes */\n} __attribute__((__aligned__(8)));\n\n",
+        "bpf_array": "struct bpf_array {\n\tstruct bpf_map             map __attribute__((__aligned__(8))); /*     0   288 */\n\t/* --- cacheline 4 boundary (256 bytes) was 32 bytes ago --- */\n\tu32                        elem_size;            /*   288     4 */\n\tu32                        index_mask;           /*   292     4 */\n\tstruct bpf_array_aux *     aux;                  /*   296     8 */\n\tunion {\n\t\tstruct {\n\t\t\tstruct {\n\t\t\t} __empty_value;                 /*   304     0 */\n\t\t\tchar       value[0];             /*   304     0 */\n\t\t} __attribute__((__aligned__(8))) __attribute__((__aligned__(8)));       /*   304     0 */\n\t\tstruct {\n\t\t\tstruct {\n\t\t\t} __empty_ptrs;                  /*   304     0 */\n\t\t\tvoid *     ptrs[0];              /*   304     0 */\n\t\t} __attribute__((__aligned__(8))) __attribute__((__aligned__(8)));       /*   304     0 */\n\t\tstruct {\n\t\t\tstruct {\n\t\t\t} __empty_pptrs;                 /*   304     0 */\n\t\t\tvoid *     pptrs[0];             /*   304     0 */\n\t\t} __attribute__((__aligned__(8))) __attribute__((__aligned__(8)));       /*   304     0 */\n\t} __attribute__((__aligned__(8)));               /*   304     0 */\n\n\t/* size: 304, cachelines: 5, members: 5 */\n\t/* forced alignments: 2 */\n\t/* last cacheline: 48 bytes */\n} __attribute__((__aligned__(8)));\n\n"
+      }
+    },
+    "jit_files": {
+      "bpf_multi_retkprobe_v53.o": "353cc8de472d3d6178c88768d4e616cd8b701b461f39cacdb4a2d39b437d56b5",
+      "bpf_fork_v511.o": "ccf4dc0c29630c8f21307322e24c1c76e10d490b2062c62acf975934ed69f12d",
+      "bpf_generic_kprobe_v511.o": "4da03a24c17059359f0cbfde2cb37255b524539c7b3124f9191fa5443a43de1d",
+      "bpf_generic_retkprobe_v53.o": "2c21676bc9099665d43641f8137b5f0ee7fe66d29a8af82f66bbc475724c6972",
+      "bpf_execve_event_v61.o": "b373f3111d34b1dc3036aabfaff2f74433de1c350bfa6d029f49b58dc1ca2487",
+      "bpf_multi_kprobe_v511.o": "2d13db0cec28c9b38a93da4ae8a6466b5cbe9702b82d9039b70f4a0f088e645b",
+      "bpf_generic_fexit_v511.o": "91477e27af33bb66683dbc1be7ed2a80612428513c3e93c2e29e96145a52c354",
+      "bpf_execve_map_update_v61.o": "a9070b5d6291be84c9361c60f181be561bf498223f22a8738af50887b6440cd3",
+      "bpf_generic_lsm_output_v61.o": "2b51ac0992b74435dae67d4a5906c87746f17ea1b7f9e657bfea8777aef471d8",
+      "bpf_generic_lsm_core_v61.o": "477ff9c31a712c16471e3012f1a6ee7ea68e64f7b404b49c92a9670c6c6ccf2a",
+      "bpf_multi_kprobe_v61.o": "a91447126e38feed6e896f4ca850d7c4885611e50287dfb2a89561871a17d8fb",
+      "bpf_generic_retkprobe_v61.o": "55b2fef917d2d275578d1f4e27bd79f3ac0641a7c66f256c49953a335ee8c7bc",
+      "bpf_execve_map_update_v53.o": "270db33f100da71c981b51d85e84f0308024d60fac31ffb17b4a0b4de28edd5c",
+      "bpf_generic_retuprobe_v511.o": "0a76c69fe85dadfde250f52267ea0e39f9cfebbb0e0dccaa7e5e38b931b111c3",
+      "bpf_generic_fentry_v511.o": "6155caf96ba5ff386aff575342b078fb25c597883e3336dca640a48d67b08113",
+      "bpf_generic_usdt_v61.o": "be955d8f4128fc7cd213916c2261bbb171441257df163a0e61301dbecbf5ddf6",
+      "bpf_multi_retkprobe_v61.o": "8242be00874c69b80e9978953c071fc69ebac0087c21ac41bb449afc85be50f3",
+      "bpf_generic_uprobe_v53.o": "0eed8e05d741d7ba0f217d071b4469b5a898c7017a750428c714aa472763ded3",
+      "bpf_generic_lsm_ima_bprm_v61.o": "eabff871260950d5a844d19f9aa86855872d3f0386c0d46cc26ec7a01e6cc35c",
+      "bpf_multi_retuprobe_v511.o": "26a0e3b68d6f41fd9ebdaa45843d7e464d56a71278bb6971d8a52bcd78277b04",
+      "bpf_multi_usdt_v511.o": "02d59c9054f799ffc63b9d066e3443be0c615089e8c21cbe50ae5e204427ef66",
+      "bpf_multi_retkprobe_v511.o": "783652e248f8dafe0be3ae7b55c68c45d668f31d9c070af1c135a9f6366e85d5",
+      "bpf_cgroup_mkdir_v511.o": "f4f59e6adc67081aea27e55eb552ec6c2a74a6571034105600ec8cfbda737c46",
+      "bpf_generic_fexit_v61.o": "1c93cd031d951f919b1546d1ef980d84dfa49aea8951076237ad7069bd769586",
+      "bpf_execve_event_v53.o": "2a1dd59af9b1298426442418e41403c33fc942ee107f731aa7353c8e8edf36c0",
+      "bpf_multi_retuprobe_v61.o": "c2e4cebdf55610baf64e075751526810bdef01a2d21a473b179cf77eb58b7dcf",
+      "bpf_fork_v310.o": "419f7dbb46486108b073d7a99b21caacb432fcff3f7ca9c9e9d92114c9793d85",
+      "bpf_generic_lsm_ima_bprm_v511.o": "86f2b7106111869641475245d0f84b697fe53905a52d6c832f70b937b310d49b",
+      "bpf_generic_tracepoint_v511.o": "9c453534262e93979f191a663d039a11616e84d6574b822cf331ee753837806d",
+      "bpf_generic_kprobe_v53.o": "d41abb76ce720cfc8e340661f0c09ac84b765c70eff0119a98a0cc98727cf924",
+      "bpf_generic_retuprobe_v61.o": "9d45521c9389e169201c0e1ecfd1360be0e3ee92b214e6f8b20065d3745b925e",
+      "bpf_generic_usdt_v511.o": "640b85398c5344b8e6c694c06b3c5a43d68a0a7e5e192f0370db7ea9851d0877",
+      "bpf_generic_fexit_v53.o": "2b3479c8bdc81d4150c4e81ed0ae4476c22a4a0136fa1307106a45a103af0984",
+      "bpf_generic_lsm_output_v511.o": "fb1fc62de17346f50541997f2f7980da5ee185cf7aa040127ba42745d6cafcc4",
+      "bpf_exit_v511.o": "d47a2f2c754ca2219c87271c1bc2dc4c9b40756ae92dbbfacd026ec25e5ea72f",
+      "bpf_generic_uprobe_v511.o": "dc2584c9890f570aaa48b99510d8a3d759d5a6f44349e59bc11a8dc9ec71a744",
+      "bpf_generic_usdt_v53.o": "7242471fc98429d78e5ff682b0be78e172dddd3b95a3cde7728dabdde66b215c",
+      "bpf_loader_v511.o": "20b2dd14abd25e8e75ba55bae8e13fd2a00f2c364f5bd76a53ceb803cc0d37d3",
+      "bpf_cgroup_release_v511.o": "bbe87d80aa06525cd8abf968f90d1cc4a0ec63232b93c5c1a724400e82c253ee",
+      "bpf_execve_event_v511.o": "08668c0b31d03dc6ae13b0410c285c42f02a8343418aa6bdb6c48e510aa94275",
+      "bpf_generic_fentry_v61.o": "b9525eab6ccd262f82decb934e45fb90461eb021f0a82b00642dd681ff7ab96c",
+      "bpf_generic_lsm_ima_file_v61.o": "34cb071e2f1003c8664d20674c9f98e718adb86df9ceb53ca8ff34acb8cdab79",
+      "bpf_generic_uprobe_v61.o": "b03629859896a446c35870459e0f8499c233857a7d137794933881af45a9f5b7",
+      "bpf_generic_lsm_core_v511.o": "6757e980f3439195617054b67c09917ed6092bb18b0f76ba83d7fdb618ae2f7c",
+      "bpf_generic_kprobe_v61.o": "2ca6606e54bbf07c4c71331e51730c6974b6c843c9984d68306110ae1a5da4d1",
+      "bpf_generic_fentry_v53.o": "6003933d0362cc6e8e4700f3adcd6d59059d98a2ae843dee81a4012a8a2e4edb",
+      "bpf_multi_uprobe_v511.o": "1b204503d9ac958aeec7ce3c0d624dde683e6a5423f4710ffc53c38d20b8e996",
+      "bpf_generic_tracepoint_v61.o": "9ca8cdf5e24b1938a843956d3f851d21cc970df957e6c947afc37ab474903957",
+      "bpf_multi_uprobe_v61.o": "d86f6019a38b744336c2c990e99b0a91482fab64d9d7f5b6fa85c9a25c316d3c",
+      "bpf_generic_retuprobe_v53.o": "8cd6d0bb1f6ab4addeea3cbe29ed2e1aca1d1500f0dee911a6475c725bf3f6b3",
+      "bpf_generic_retkprobe_v511.o": "ed6c227bc83d4afda0e7e716ab3cf27240a276c8d334b74c4cef4bbb22b8d195",
+      "bpf_generic_tracepoint_v53.o": "264cdbb14a492162bfb83c18ee90b01075eb4a66655a76975944eccd94d3e268",
+      "bpf_generic_rawtp_v53.o": "503be1d232e4cdf97b0ce2ee5e6cbae11ac488594c764d84264ec635f9f1d9ee",
+      "bpf_generic_lsm_ima_file_v511.o": "32506696dec8c137b19884cfc76fb91b366970733fa9673fb71cfecf974400cb",
+      "bpf_multi_kprobe_v53.o": "9a3f5db221a816f0262ab7b635f26b96db67de28f7b62d5789934183c1151bbc",
+      "bpf_exit_v310.o": "eb7193fb1c244559ce12e8faec46b025ceab2d5bb82980cbca07ba3679205cf1",
+      "bpf_execve_event_v310.o": "7a414441c966930308820647e1c107dfc687a5830842440f40e863c3c3da1451",
+      "bpf_generic_rawtp_v511.o": "04831b58a783ddc640d214bcf8b144a3074e7b526b3d7c17326a206bc6564928",
+      "bpf_cgroup_rmdir_v511.o": "89707140847578764bb0651d4146cb04534a9a2d9398c6aec17270f6e8dbb7dc",
+      "bpf_generic_rawtp_v61.o": "d84a5dcc0adec97345e77ec19d10ec8762530efaa59681cd90a3c8bb7b4f9101",
+      "bpf_multi_usdt_v61.o": "bf9cac4b289e5ad50faf58bcbf2dcb0060cea3515faf34960bb4c606271aa0c5",
+      "bpf_execve_map_update_v511.o": "a9070b5d6291be84c9361c60f181be561bf498223f22a8738af50887b6440cd3"
+    }
+  },
+  "profiles": {
+    "control": {
+      "native_objects": 62,
+      "manifest_entries": 237,
+      "map_lowered_sites": 0,
+      "percpu_lowered_sites": 0,
+      "objects": [
+        {
+          "object": "bpf_cgroup_mkdir_v511.native.o",
+          "sha256": "03d4b340518b24d490d4b919794f992a1b7025ea6d3e686aaeea26f91781a037",
+          "executable_bytes": 1701
+        },
+        {
+          "object": "bpf_cgroup_release_v511.native.o",
+          "sha256": "874f5200605032b0ca28f7d961f1e3b8a02cde728d58166937d0d5db94ad4dad",
+          "executable_bytes": 1398
+        },
+        {
+          "object": "bpf_cgroup_rmdir_v511.native.o",
+          "sha256": "1ed4753cdcb6e0f201ac7c66b6e55beb4fcec915ea7afe16c5d61585edb194c3",
+          "executable_bytes": 1398
+        },
+        {
+          "object": "bpf_execve_event_v310.native.o",
+          "sha256": "f5248a4070afeed82ecf7687a70acc08292d3cf56e6315ad383f785ce2fa002e",
+          "executable_bytes": 16355
+        },
+        {
+          "object": "bpf_execve_event_v511.native.o",
+          "sha256": "76395ae201229f559a2fb3261fdeb2a7fa46cc7096b133bf7ec4e557924d09f9",
+          "executable_bytes": 18305
+        },
+        {
+          "object": "bpf_execve_event_v53.native.o",
+          "sha256": "31b3037ea2734f1820f7335e031a41b0af46ebb81052cc770704400d91eedb7b",
+          "executable_bytes": 15695
+        },
+        {
+          "object": "bpf_execve_event_v61.native.o",
+          "sha256": "1c697aab1c4581f1b0f23e8d9614f829b331b2eadf26b90334584a85d96fe4c4",
+          "executable_bytes": 17252
+        },
+        {
+          "object": "bpf_execve_map_update_v511.native.o",
+          "sha256": "62fd3cedc2ac294bf1ccaafea87b12a388441f8dfac71a78eb0c3b2c4662d8a0",
+          "executable_bytes": 302
+        },
+        {
+          "object": "bpf_execve_map_update_v53.native.o",
+          "sha256": "9014b62521ff5bc6fc768756255039f4e996fff9149600b40990b1c23fd7fc6a",
+          "executable_bytes": 182
+        },
+        {
+          "object": "bpf_execve_map_update_v61.native.o",
+          "sha256": "62fd3cedc2ac294bf1ccaafea87b12a388441f8dfac71a78eb0c3b2c4662d8a0",
+          "executable_bytes": 302
+        },
+        {
+          "object": "bpf_exit_v310.native.o",
+          "sha256": "2c3b2c6e0503b30c0099a0ccaf18440bd5d6e9071e83d872fbcb5064ced7c975",
+          "executable_bytes": 1240
+        },
+        {
+          "object": "bpf_exit_v511.native.o",
+          "sha256": "31b1b62a9b6e1e89a2664521c403ad8bcc4700662ca45453fafe05d7f92576c8",
+          "executable_bytes": 1619
+        },
+        {
+          "object": "bpf_fork_v310.native.o",
+          "sha256": "ff8c228445216a759296f1913783d0a54279fc56e9909543142930b07b9f24a5",
+          "executable_bytes": 2595
+        },
+        {
+          "object": "bpf_fork_v511.native.o",
+          "sha256": "9fcba323913de5f79372f0d86c9b8dab9824ed3ed333c104ab19c3a6779b42e5",
+          "executable_bytes": 4369
+        },
+        {
+          "object": "bpf_generic_fentry_v511.native.o",
+          "sha256": "b2e8ed6d3427822bd68dca1b36b271fd58e5c47e0220f72a172a5f6ed69d3642",
+          "executable_bytes": 106096
+        },
+        {
+          "object": "bpf_generic_fentry_v53.native.o",
+          "sha256": "e832004a279e3b746bf235b9faf6964a1860eaa9673053675237346391c5b7c1",
+          "executable_bytes": 101488
+        },
+        {
+          "object": "bpf_generic_fentry_v61.native.o",
+          "sha256": "1d14a61e179cd273cc43d027161d43cff0bd98dad7a0ae41e6e729fc776459b3",
+          "executable_bytes": 44296
+        },
+        {
+          "object": "bpf_generic_fexit_v511.native.o",
+          "sha256": "aa79264047297a6ea5fdffb1a8aa4464ad8a12225f2ceb5ff9a1f2561b47eed9",
+          "executable_bytes": 32223
+        },
+        {
+          "object": "bpf_generic_fexit_v53.native.o",
+          "sha256": "7832b398066554a262759c1a2405e102d7ace5869f53239973015d432608fe77",
+          "executable_bytes": 29650
+        },
+        {
+          "object": "bpf_generic_fexit_v61.native.o",
+          "sha256": "d3ad79e3b04095cc6466b29a577eed3d98e98f4c4ba21437ab842ddd5a1be369",
+          "executable_bytes": 27873
+        },
+        {
+          "object": "bpf_generic_kprobe_v511.native.o",
+          "sha256": "ad3125fce9fe34939c52a013909e059984b863bd11c7e0cc07107a47274639d5",
+          "executable_bytes": 108056
+        },
+        {
+          "object": "bpf_generic_kprobe_v53.native.o",
+          "sha256": "dcbbde55b17036231e2becff8a125d7d6cb2f251161733a0d2855a2f1dd7bd80",
+          "executable_bytes": 103080
+        },
+        {
+          "object": "bpf_generic_kprobe_v61.native.o",
+          "sha256": "2a0c5195d42f4d2554c8438472bac64cc9225308941359003a3c3da07ef9d4b2",
+          "executable_bytes": 45980
+        },
+        {
+          "object": "bpf_generic_lsm_core_v511.native.o",
+          "sha256": "04364fbb72c5dba2fbcd0a45c6feadd672e91377be0233fda00dd7e89de70d48",
+          "executable_bytes": 104416
+        },
+        {
+          "object": "bpf_generic_lsm_core_v61.native.o",
+          "sha256": "d77f31d236f407eee4f45b9e507511a90c095a1025fde8d93656859c84b8a185",
+          "executable_bytes": 42559
+        },
+        {
+          "object": "bpf_generic_lsm_ima_bprm_v511.native.o",
+          "sha256": "592453155743d47cc7645db240cfdbb85abd53f30c4ad7dfb96f46be1f68cf3a",
+          "executable_bytes": 151
+        },
+        {
+          "object": "bpf_generic_lsm_ima_bprm_v61.native.o",
+          "sha256": "8f9afe0ca0fc07ff6f77cb5579802dc0a0a4d14d6b4cabc55415c924c379cc55",
+          "executable_bytes": 151
+        },
+        {
+          "object": "bpf_generic_lsm_ima_file_v511.native.o",
+          "sha256": "11ef94a0e408b703450d2f52165b6d1c6a4d7015ab6ca6f2305f495cf8f99587",
+          "executable_bytes": 146
+        },
+        {
+          "object": "bpf_generic_lsm_ima_file_v61.native.o",
+          "sha256": "c65f1b4655b93b99c519cd544e8e027547eabcfea5b20b87744c63b7b54e4dbb",
+          "executable_bytes": 146
+        },
+        {
+          "object": "bpf_generic_lsm_output_v511.native.o",
+          "sha256": "9bde5dfaa15a8e43ae1bef3822fa01c854a3032328f875a2c141ba66c16ecb47",
+          "executable_bytes": 2072
+        },
+        {
+          "object": "bpf_generic_lsm_output_v61.native.o",
+          "sha256": "8f7ddf17ebd095d1f70d0b2918e62544c51eafbf45cc48d622a74aa7ad708eac",
+          "executable_bytes": 2072
+        },
+        {
+          "object": "bpf_generic_rawtp_v511.native.o",
+          "sha256": "f50ea8dbaee4ebd96cda190afda3f0b896f812540c946ce42c00a1073b606428",
+          "executable_bytes": 105552
+        },
+        {
+          "object": "bpf_generic_rawtp_v53.native.o",
+          "sha256": "a38255c970d9191ec02cdbacf79d1cd0489e900fb81303b49c3abf40f02830f1",
+          "executable_bytes": 100944
+        },
+        {
+          "object": "bpf_generic_rawtp_v61.native.o",
+          "sha256": "b78d37ee267d44838e8173861ef8aae6df121a01ebb7279be9d17a8160319a82",
+          "executable_bytes": 43752
+        },
+        {
+          "object": "bpf_generic_retkprobe_v511.native.o",
+          "sha256": "2b2329f91a74d7ef35a58584fc5e7227fb965959ed576a40c8f29a5b448249dd",
+          "executable_bytes": 32259
+        },
+        {
+          "object": "bpf_generic_retkprobe_v53.native.o",
+          "sha256": "ffda1fd2dd33316522bd1ee5d266291eff49a6fb4164c4869282a5177fc9af9d",
+          "executable_bytes": 29456
+        },
+        {
+          "object": "bpf_generic_retkprobe_v61.native.o",
+          "sha256": "304457be93f3f1c5be68592ed62348f91abd34e3bcf0fce06c89057bd219d498",
+          "executable_bytes": 27772
+        },
+        {
+          "object": "bpf_generic_retuprobe_v511.native.o",
+          "sha256": "45e16791afee2ae009316d8560abad1d614697b4aeacfd8f8da94408f0e45c75",
+          "executable_bytes": 32241
+        },
+        {
+          "object": "bpf_generic_retuprobe_v53.native.o",
+          "sha256": "7c97d4f20aa66fee10b4fdc460ba0681d8b6d9b15f375f4e3ece097a9ad792df",
+          "executable_bytes": 29693
+        },
+        {
+          "object": "bpf_generic_retuprobe_v61.native.o",
+          "sha256": "17f6eef8dc05606c03c5641d698cc1d83a67df1c4db7a09c2034af46e87b9c2e",
+          "executable_bytes": 27769
+        },
+        {
+          "object": "bpf_generic_tracepoint_v511.native.o",
+          "sha256": "c3d684ce883098853e8ebcba60d3814542dbcb789e714acaa012c97f34f5d13a",
+          "executable_bytes": 61422
+        },
+        {
+          "object": "bpf_generic_tracepoint_v53.native.o",
+          "sha256": "76e0902c86ebb2192a3f4ef08293c270603cd7ecca64f880c32bd218f52888ca",
+          "executable_bytes": 56528
+        },
+        {
+          "object": "bpf_generic_tracepoint_v61.native.o",
+          "sha256": "58e7e860195f42315f0009663ffcf7bd853784dc3bca9f2caf5601d9fe4cb20f",
+          "executable_bytes": 55132
+        },
+        {
+          "object": "bpf_generic_uprobe_v511.native.o",
+          "sha256": "d9f0568977a0d38a18accd2316f221c079ea94ca51c3bea96557f1d2c287d1fd",
+          "executable_bytes": 139221
+        },
+        {
+          "object": "bpf_generic_uprobe_v53.native.o",
+          "sha256": "bad020a8d2689d37fadee183ef466943543e6cedb9ac3bf301fd187f59d9e7a8",
+          "executable_bytes": 122661
+        },
+        {
+          "object": "bpf_generic_uprobe_v61.native.o",
+          "sha256": "fc8dafbf30893d445dc4a82d685e410bdae6cceadd33725ecf3df637a2a415e5",
+          "executable_bytes": 48165
+        },
+        {
+          "object": "bpf_generic_usdt_v511.native.o",
+          "sha256": "746effb773da33424428df59ba210c877cf8c3dcbb3419bfc3328b3d2c5c49dd",
+          "executable_bytes": 136824
+        },
+        {
+          "object": "bpf_generic_usdt_v53.native.o",
+          "sha256": "7b5a3f28532b63be4b45bb8c419430135fc8b0e843019db3684f234063a0d81a",
+          "executable_bytes": 118504
+        },
+        {
+          "object": "bpf_generic_usdt_v61.native.o",
+          "sha256": "50effa7a7fd171b2d5d3177161c198babd24232c4c9f85cb9ff9131eb2ff57ed",
+          "executable_bytes": 49923
+        },
+        {
+          "object": "bpf_loader_v511.native.o",
+          "sha256": "ed5e86812fa112d0a4e59fe1038a8af6b9c835bd209142ab566b11910d2b22de",
+          "executable_bytes": 956
+        },
+        {
+          "object": "bpf_multi_kprobe_v511.native.o",
+          "sha256": "8f0f4e0fd735e1f27620f4b8c572c395751d68769fcb07141309662c66345f68",
+          "executable_bytes": 108069
+        },
+        {
+          "object": "bpf_multi_kprobe_v53.native.o",
+          "sha256": "e3940a1ff8d7737f915f6c8b8205408e92e9298a0f578436aedcb4eafc21eaeb",
+          "executable_bytes": 103093
+        },
+        {
+          "object": "bpf_multi_kprobe_v61.native.o",
+          "sha256": "b5952680d1e5b1134c299686fdf6e535f5e388a822226454c1b40f7ca0b99720",
+          "executable_bytes": 45993
+        },
+        {
+          "object": "bpf_multi_retkprobe_v511.native.o",
+          "sha256": "4687ad9fb1251f5ac07570b3fc5be5664d7813c5c80d386397aff89bf030b5b1",
+          "executable_bytes": 32271
+        },
+        {
+          "object": "bpf_multi_retkprobe_v53.native.o",
+          "sha256": "9320e915404f41d99182588c4e95a4885a3dab2bdbcee7b903a79a669f7c4f3a",
+          "executable_bytes": 29761
+        },
+        {
+          "object": "bpf_multi_retkprobe_v61.native.o",
+          "sha256": "3875946d3f5bb9a8173b9120c8eea2c13c73495326ff4f2b44c901badc53cdf3",
+          "executable_bytes": 27784
+        },
+        {
+          "object": "bpf_multi_retuprobe_v511.native.o",
+          "sha256": "745e480d300eead28b4f01771b48373fe5ecfb25746d7ac9525ee74e06df57bc",
+          "executable_bytes": 32253
+        },
+        {
+          "object": "bpf_multi_retuprobe_v61.native.o",
+          "sha256": "394b39f43f9d38f79fbb1919631322e532727fa3c57da0a5d7a8f27e9adb0fdf",
+          "executable_bytes": 27796
+        },
+        {
+          "object": "bpf_multi_uprobe_v511.native.o",
+          "sha256": "75637bc48a8120105889eaa379624f5873888cbdfb098c7f449321e19d203fa8",
+          "executable_bytes": 139250
+        },
+        {
+          "object": "bpf_multi_uprobe_v61.native.o",
+          "sha256": "26a046ba3d2ab9a08d93e2c414f2319adf6d06b29bc34bcec1ce12fc677bf4a9",
+          "executable_bytes": 48194
+        },
+        {
+          "object": "bpf_multi_usdt_v511.native.o",
+          "sha256": "e13bba96d9eb1c4e9c5872f7ed4602a18d5bda87b44a33efeb72a5c2062ba6d4",
+          "executable_bytes": 136853
+        },
+        {
+          "object": "bpf_multi_usdt_v61.native.o",
+          "sha256": "2f13c5ae248996cdd5ac73d1416a4ab99b4ac4eaa045d128138fb144dd73ecb3",
+          "executable_bytes": 49952
+        }
+      ],
+      "executable_bytes": 2833211,
+      "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+      "manifest_sha256": "a801deb5295ca5d5e099efa4e04b909a6a06eae6e03ee008d8d652fc27f32cfa"
+    },
+    "candidate": {
+      "native_objects": 62,
+      "manifest_entries": 237,
+      "map_lowered_sites": 2605,
+      "percpu_lowered_sites": 1500,
+      "objects": [
+        {
+          "object": "bpf_cgroup_mkdir_v511.native.o",
+          "sha256": "c828eefa444e632533aed3bd83c09429c2259af4cddda226a61abafbb6fa6bd0",
+          "executable_bytes": 1882
+        },
+        {
+          "object": "bpf_cgroup_release_v511.native.o",
+          "sha256": "2f8be0d5171bfa783bd18fac309fbd69986d28043201ccba2580b30e389978ce",
+          "executable_bytes": 1582
+        },
+        {
+          "object": "bpf_cgroup_rmdir_v511.native.o",
+          "sha256": "0568adcf2bca84d04c44d07632899a6046c6d97a1e0c14960c6c5a4855819c6d",
+          "executable_bytes": 1582
+        },
+        {
+          "object": "bpf_execve_event_v310.native.o",
+          "sha256": "67e922c80b977bcb6297c5a7de09a4847ad134adbcbe1620b499ddd8caa424b2",
+          "executable_bytes": 17036
+        },
+        {
+          "object": "bpf_execve_event_v511.native.o",
+          "sha256": "4fb377eea076ab0610dbf5b01360e168def62378a48d4d15bf91a343abed4015",
+          "executable_bytes": 19658
+        },
+        {
+          "object": "bpf_execve_event_v53.native.o",
+          "sha256": "a0ae4473b681962b4cdf8feec1b1f7b93df2a6f12ae516be4f42d4400b111c78",
+          "executable_bytes": 16399
+        },
+        {
+          "object": "bpf_execve_event_v61.native.o",
+          "sha256": "45e012a4f2c234ed856e67b28806b6b108c7c71aa36eda233625702596a9c6b1",
+          "executable_bytes": 18207
+        },
+        {
+          "object": "bpf_execve_map_update_v511.native.o",
+          "sha256": "afebadac786e8707ae210105697eb33eee0dcb13741c9c705d966cabbdcc1853",
+          "executable_bytes": 352
+        },
+        {
+          "object": "bpf_execve_map_update_v53.native.o",
+          "sha256": "5ac3382942dc458a4d01a0eaaba075e5b6aeffd0263b996a45399daaac05fcf8",
+          "executable_bytes": 224
+        },
+        {
+          "object": "bpf_execve_map_update_v61.native.o",
+          "sha256": "afebadac786e8707ae210105697eb33eee0dcb13741c9c705d966cabbdcc1853",
+          "executable_bytes": 352
+        },
+        {
+          "object": "bpf_exit_v310.native.o",
+          "sha256": "9a958457d5f8d933abd0cd05a53ecfbe4b2e5ce922f2bc5eee2387c683cce549",
+          "executable_bytes": 1511
+        },
+        {
+          "object": "bpf_exit_v511.native.o",
+          "sha256": "b8f3ce23afb63bd9034447b6f078b6bfb8e95923e0dc683e2b940c7c295c3d53",
+          "executable_bytes": 2009
+        },
+        {
+          "object": "bpf_fork_v310.native.o",
+          "sha256": "cc6870c0e525a806a69b8ef91dfbbf42c0ef59eb42bf8b34edf0b009c2f31fe0",
+          "executable_bytes": 2686
+        },
+        {
+          "object": "bpf_fork_v511.native.o",
+          "sha256": "9901a903fec125efe66ba159bf37aa6034dd753703ec0d8053f632fed10ee283",
+          "executable_bytes": 4690
+        },
+        {
+          "object": "bpf_generic_fentry_v511.native.o",
+          "sha256": "e304dfd30a5965d0d43f0e1189ef0dc2fec4ff45c708cfc5faf49a3c9281dc4e",
+          "executable_bytes": 108573
+        },
+        {
+          "object": "bpf_generic_fentry_v53.native.o",
+          "sha256": "4039a26a17a22f875affd021415495b3e423dac776f37f20f1b6ca2569e628f4",
+          "executable_bytes": 103069
+        },
+        {
+          "object": "bpf_generic_fentry_v61.native.o",
+          "sha256": "3f808f94ef0b7d916514bfe5b26a23e763bdd75aea37031311bf880adc4f89ec",
+          "executable_bytes": 46141
+        },
+        {
+          "object": "bpf_generic_fexit_v511.native.o",
+          "sha256": "96c3bad90cf7b9dedfbdeff6f910d67ed90b78ea590062ca241ebb31acf84a2b",
+          "executable_bytes": 33677
+        },
+        {
+          "object": "bpf_generic_fexit_v53.native.o",
+          "sha256": "670a65e7f85a2c9511b3bfced74f7c72a6287794e51f6b20cba50b543a0ab8f1",
+          "executable_bytes": 30730
+        },
+        {
+          "object": "bpf_generic_fexit_v61.native.o",
+          "sha256": "006c58ee50a8aaaa05217320a4701ee464d051f797ccb5db41004d7492a66d10",
+          "executable_bytes": 28922
+        },
+        {
+          "object": "bpf_generic_kprobe_v511.native.o",
+          "sha256": "6d9c6472e4a17f406476fc8bd9f3fd43ad13bcf32aec15d0170285e9361a93eb",
+          "executable_bytes": 111109
+        },
+        {
+          "object": "bpf_generic_kprobe_v53.native.o",
+          "sha256": "eb2fe9691a64445fe1bf80521e58740641e8e317ceae70d6a56b62e440dfca64",
+          "executable_bytes": 104821
+        },
+        {
+          "object": "bpf_generic_kprobe_v61.native.o",
+          "sha256": "c09aa861f877e6fa3ee9d3c3bb9a8fd5255c4dd9d5d5338386657b2b29d803e5",
+          "executable_bytes": 47682
+        },
+        {
+          "object": "bpf_generic_lsm_core_v511.native.o",
+          "sha256": "caca396dab1c2b56ff30662ebee716a39c06e89d8ed8bae64107db2096070c3a",
+          "executable_bytes": 106813
+        },
+        {
+          "object": "bpf_generic_lsm_core_v61.native.o",
+          "sha256": "0c12ccf8fbe1d3317fdd775c8cb3736d2f95314b9b093b341f2f32af866aa09e",
+          "executable_bytes": 44270
+        },
+        {
+          "object": "bpf_generic_lsm_ima_bprm_v511.native.o",
+          "sha256": "592453155743d47cc7645db240cfdbb85abd53f30c4ad7dfb96f46be1f68cf3a",
+          "executable_bytes": 151
+        },
+        {
+          "object": "bpf_generic_lsm_ima_bprm_v61.native.o",
+          "sha256": "8f9afe0ca0fc07ff6f77cb5579802dc0a0a4d14d6b4cabc55415c924c379cc55",
+          "executable_bytes": 151
+        },
+        {
+          "object": "bpf_generic_lsm_ima_file_v511.native.o",
+          "sha256": "11ef94a0e408b703450d2f52165b6d1c6a4d7015ab6ca6f2305f495cf8f99587",
+          "executable_bytes": 146
+        },
+        {
+          "object": "bpf_generic_lsm_ima_file_v61.native.o",
+          "sha256": "c65f1b4655b93b99c519cd544e8e027547eabcfea5b20b87744c63b7b54e4dbb",
+          "executable_bytes": 146
+        },
+        {
+          "object": "bpf_generic_lsm_output_v511.native.o",
+          "sha256": "182e538e6dea8ee251334c70c149da55b85592762eab05ee9e933e625c5b8d23",
+          "executable_bytes": 2278
+        },
+        {
+          "object": "bpf_generic_lsm_output_v61.native.o",
+          "sha256": "e4573e185ed8849163c6dd570d12528ab4364a902bcc3d583c8b9fcd35764606",
+          "executable_bytes": 2278
+        },
+        {
+          "object": "bpf_generic_rawtp_v511.native.o",
+          "sha256": "401603f6cacb0ca5ee5e425b141e9cdf9f917fc750d524104dd88179e97cc77e",
+          "executable_bytes": 108029
+        },
+        {
+          "object": "bpf_generic_rawtp_v53.native.o",
+          "sha256": "fde5eaf090e4131a7af58d516661a1028306ce9a2228baaf60ddd7d689945603",
+          "executable_bytes": 102525
+        },
+        {
+          "object": "bpf_generic_rawtp_v61.native.o",
+          "sha256": "26a69d9f26acf79bca42c0556a0e6d9aab0836e6ca348199362faebebce08e53",
+          "executable_bytes": 45597
+        },
+        {
+          "object": "bpf_generic_retkprobe_v511.native.o",
+          "sha256": "f369498a12e7aea130fc2a646bf3a6ce2fae526c9f231c912d3b3f365d9897a3",
+          "executable_bytes": 33584
+        },
+        {
+          "object": "bpf_generic_retkprobe_v53.native.o",
+          "sha256": "f326f52823eee00cf1767a7c8fb11ece53c36050e2a8ab8ab9b26a39f9bda924",
+          "executable_bytes": 30613
+        },
+        {
+          "object": "bpf_generic_retkprobe_v61.native.o",
+          "sha256": "860ab92abace6195f89d1d3394737d6896e564e2f8c0f6c32adf8da23f61a03d",
+          "executable_bytes": 28788
+        },
+        {
+          "object": "bpf_generic_retuprobe_v511.native.o",
+          "sha256": "039a328f1bbab9d341e5817ca2d8892412425daf39b357207a49aaae02ed72be",
+          "executable_bytes": 33183
+        },
+        {
+          "object": "bpf_generic_retuprobe_v53.native.o",
+          "sha256": "8ba4113ab325fc149152f95c8ce69be22fec853c25363f10d55509d23d095f5b",
+          "executable_bytes": 30340
+        },
+        {
+          "object": "bpf_generic_retuprobe_v61.native.o",
+          "sha256": "ea7d49505e3619f6b767594fc236c9f510435a02446a212f87b4669836858793",
+          "executable_bytes": 28774
+        },
+        {
+          "object": "bpf_generic_tracepoint_v511.native.o",
+          "sha256": "b8436c6799d1580e23d4fefa96fe0a044bb7a4c34fe6ca90db47b9625dce1834",
+          "executable_bytes": 62923
+        },
+        {
+          "object": "bpf_generic_tracepoint_v53.native.o",
+          "sha256": "f1c8ab34588fa8c21605fe823b2371d70b519fc7f0304c7b3a8f4d6a02d77090",
+          "executable_bytes": 56912
+        },
+        {
+          "object": "bpf_generic_tracepoint_v61.native.o",
+          "sha256": "2c33b68c4a5fe8eb3a6f3a25bae22dc67b4502156d05d9273a68b3cf6d4a94f0",
+          "executable_bytes": 56391
+        },
+        {
+          "object": "bpf_generic_uprobe_v511.native.o",
+          "sha256": "51748ef4dcfbf346f478acbd926c55737903307a671d7e487b74762955a03230",
+          "executable_bytes": 144082
+        },
+        {
+          "object": "bpf_generic_uprobe_v53.native.o",
+          "sha256": "82a68177d63771865ae7d0a69a99829cfff3a6d818332c25a674e2c483e4795e",
+          "executable_bytes": 124418
+        },
+        {
+          "object": "bpf_generic_uprobe_v61.native.o",
+          "sha256": "435656cf2ba31cca071ebe06bb3c17af9fff67dcc2e8b38258d71c73ad1064b4",
+          "executable_bytes": 50126
+        },
+        {
+          "object": "bpf_generic_usdt_v511.native.o",
+          "sha256": "784091bbe19cfe93fe5cd4410462ab29353fa0308a3605505a024d28226bd588",
+          "executable_bytes": 141237
+        },
+        {
+          "object": "bpf_generic_usdt_v53.native.o",
+          "sha256": "5f396b85e9092e4b0f2db2945e666f9d4b34c20e3602aa76d243cfdd3cd9dfd7",
+          "executable_bytes": 120709
+        },
+        {
+          "object": "bpf_generic_usdt_v61.native.o",
+          "sha256": "ce04c2735db5fa572d9ec176385525eeee5ec40bcc58a036446a32060a390f5f",
+          "executable_bytes": 51942
+        },
+        {
+          "object": "bpf_loader_v511.native.o",
+          "sha256": "e69bc03161127f90b6fbd791239a9df30c50e1f236f184472eebf3efec157942",
+          "executable_bytes": 1105
+        },
+        {
+          "object": "bpf_multi_kprobe_v511.native.o",
+          "sha256": "97ae50b47bb545d0c519400c4a53802943bbbd3ef96220410ab02cda8245f99f",
+          "executable_bytes": 111121
+        },
+        {
+          "object": "bpf_multi_kprobe_v53.native.o",
+          "sha256": "086ae8f05f6e93a5babdded6d2b9a71d107daa9f991c3bd3ac20c86ada646232",
+          "executable_bytes": 104833
+        },
+        {
+          "object": "bpf_multi_kprobe_v61.native.o",
+          "sha256": "8d1233d9678a640965b5b04f19bcea73fbcc9212caefc96a25d1bc1e4285c7eb",
+          "executable_bytes": 47694
+        },
+        {
+          "object": "bpf_multi_retkprobe_v511.native.o",
+          "sha256": "6168d8aae5a364044486ae8b6bb88ed5d58db3c52437078f1aa6791508cc98ad",
+          "executable_bytes": 33721
+        },
+        {
+          "object": "bpf_multi_retkprobe_v53.native.o",
+          "sha256": "2b239194985b86f39bdfec6c1f1ce97cc2fb6eaa0a1094915130278e2765f0f7",
+          "executable_bytes": 30625
+        },
+        {
+          "object": "bpf_multi_retkprobe_v61.native.o",
+          "sha256": "2db8dafad716635642faaae831d4ec0491183e27be0cdcab597d253cb8c775f1",
+          "executable_bytes": 28995
+        },
+        {
+          "object": "bpf_multi_retuprobe_v511.native.o",
+          "sha256": "0880e44569012d6936788de42bcae3d7d3bcbba068e2b5c835934bb2950a8185",
+          "executable_bytes": 33666
+        },
+        {
+          "object": "bpf_multi_retuprobe_v61.native.o",
+          "sha256": "c1711106a86aa69edc566fecfcf10bddcb8b850b39a39384621d9a433c9edba1",
+          "executable_bytes": 28528
+        },
+        {
+          "object": "bpf_multi_uprobe_v511.native.o",
+          "sha256": "46314825b0fce038f4824db70641b768f3d61c52eba3bcfe53aff840adeede22",
+          "executable_bytes": 144110
+        },
+        {
+          "object": "bpf_multi_uprobe_v61.native.o",
+          "sha256": "a195f376fbc6c830b69511d53bea84d2c7fe3b66f841e932669d3e06be429339",
+          "executable_bytes": 50138
+        },
+        {
+          "object": "bpf_multi_usdt_v511.native.o",
+          "sha256": "32286140bddbc9515b0ef6aa3a1df790021c02f375b6815f906306aec8554e92",
+          "executable_bytes": 141265
+        },
+        {
+          "object": "bpf_multi_usdt_v61.native.o",
+          "sha256": "7c86f61c0f1257d027608cc91e41d7bacaa53d86fa8d12457c0e4fd2c0d5553a",
+          "executable_bytes": 51954
+        }
+      ],
+      "executable_bytes": 2917055,
+      "plugin_sha256": "52839626cb6e998f4bf0c509268e4f4c7343d76cf1ceac76a76c076905989d4d",
+      "manifest_sha256": "a801deb5295ca5d5e099efa4e04b909a6a06eae6e03ee008d8d652fc27f32cfa"
+    }
+  },
+  "complete_manifest_rows_equal": true,
+  "native_execution_requests": 0,
+  "observation": "native compilation and manifest generation; application timing follows R",
+  "archives": {
+    "control": {
+      "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/control-payload.tar.gz",
+      "bytes": 27604811,
+      "sha256": "8004ba831b528c15ffb2a6e385a8845eb2edc51a60ef4cb4fd7bb360bbb12b20",
+      "files": [
+        {
+          "name": "control-payload.tar.gz",
+          "bytes": 27604811,
+          "sha256": "8004ba831b528c15ffb2a6e385a8845eb2edc51a60ef4cb4fd7bb360bbb12b20"
+        }
+      ]
+    },
+    "candidate": {
+      "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/candidate-payload.tar.gz",
+      "bytes": 27692944,
+      "sha256": "7f82302dab9b65a998005c5a4262fed088bc76154daacc7ffcb2af16fb7a49ba",
+      "files": [
+        {
+          "name": "candidate-payload.tar.gz",
+          "bytes": 27692944,
+          "sha256": "7f82302dab9b65a998005c5a4262fed088bc76154daacc7ffcb2af16fb7a49ba"
+        }
+      ]
+    },
+    "jit": {
+      "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/paired-jit.tar.gz",
+      "bytes": 31578319,
+      "sha256": "a9f220de161c127cd58f2b7d8f9985e46bba50db451406085bb1f6e90811f001",
+      "files": [
+        {
+          "name": "paired-jit.tar.gz",
+          "bytes": 31578319,
+          "sha256": "a9f220de161c127cd58f2b7d8f9985e46bba50db451406085bb1f6e90811f001"
+        }
+      ]
+    },
+    "raw": {
+      "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/build-raw.tar.gz",
+      "bytes": 2332845,
+      "sha256": "a08ef755842261f0c6f3c0e53348847fc773877271f5dbfc5595814f30311f7f",
+      "files": [
+        {
+          "name": "build-raw.tar.gz",
+          "bytes": 2332845,
+          "sha256": "a08ef755842261f0c6f3c0e53348847fc773877271f5dbfc5595814f30311f7f"
+        }
+      ]
+    },
+    "zero_site_before": {
+      "live_path": "/var/tmp/kprog-tmp/C/map-lookup-native/tetragon/zero-sites-before.tar.gz",
+      "bytes": 56314210,
+      "sha256": "a1b3f27af3afbc92da92e7711fda8fac154c5cc607a88bd8641bb82cef943e6a",
+      "files": [
+        {
+          "name": "zero-sites-before.tar.gz.part00",
+          "bytes": 48000000,
+          "sha256": "6326ea0082146d24817a7b1de65a0de8be784808f682bf47f147b4ccf06cc922"
+        },
+        {
+          "name": "zero-sites-before.tar.gz.part01",
+          "bytes": 8314210,
+          "sha256": "f5c0967fbb5048cd12e3e54555c63576833a574aabc8480e68997b09cab97e4d"
+        }
+      ]
+    }
+  }
+}
