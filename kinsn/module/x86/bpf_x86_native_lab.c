@@ -218,6 +218,15 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 						blob->bytes, snapshot_len, emit_at, blob->maps, blob->map_count);
 					break;
 
+				case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
+				case NATIVE_LAB_RELOC_X86_TAIL_STACK: {
+					u32 depth = prog->aux->priv_stack_ptr ? 0 : round_up(prog->aux->stack_depth, 8);
+					s32 value = r->kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT ? -16 - depth : depth;
+
+					memcpy(emit_at + r->offset, &value, sizeof(value));
+					break;
+				}
+
 				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
 					u64 slot_va;
 					u64 rip_after;

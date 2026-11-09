@@ -18,6 +18,8 @@ const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
 const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
 const NATIVE_LAB_RELOC_HELPER_POINTER: u32 = 7;
+const NATIVE_LAB_RELOC_X86_TAIL_COUNT: u32 = 10;
+const NATIVE_LAB_RELOC_X86_TAIL_STACK: u32 = 11;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
@@ -776,6 +778,7 @@ enum PatchKind {
     HelperCallRel32 { target_addr: u64 },
     HelperPointer { target_addr: u64 },
     HelperDispatch { targets: Vec<(u64, u64)> },
+    TailCallFrame { count_offset: usize, stack_offset: usize },
     CodeAddress { section: usize, address: u64 },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
@@ -1779,13 +1782,15 @@ pub(super) fn rewrite_x86(
                                 map_name
                             );
                         }
-                        for ib in build_x86_tail_call_inline(
+                        let (inline, count_offset, stack_offset) = build_x86_tail_call_inline(
                             helper_addrs,
                             callee_saved_mask,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
-                        )? {
+                        )?;
+                        let first = kinds.len();
+                        for ib in inline {
                             push_x86_synthetic(
                                 &mut local,
                                 &mut kinds,
@@ -1794,6 +1799,7 @@ pub(super) fn rewrite_x86(
                                 ib,
                             )?;
                         }
+                        kinds[first] = Some(PatchKind::TailCallFrame { count_offset, stack_offset });
                         resolved_helper_call_sites.insert(site_key);
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
@@ -2066,6 +2072,13 @@ pub(super) fn rewrite_x86(
     let mut relocs = Vec::new();
     for p in &patches {
         match &p.kind {
+            PatchKind::TailCallFrame { count_offset, stack_offset } => {
+                for (offset, kind) in [(*count_offset, NATIVE_LAB_RELOC_X86_TAIL_COUNT),
+                                       (*stack_offset, NATIVE_LAB_RELOC_X86_TAIL_STACK)] {
+                    relocs.push(RelocRecord { offset: u32::try_from(p.global_offset + offset)?,
+                        kind, target: 0 });
+                }
+            }
             PatchKind::HelperPointer { target_addr } => {
                 relocs.push(RelocRecord {
                     offset: u32::try_from(p.global_offset+2)?,
@@ -4121,7 +4134,7 @@ fn build_x86_tail_call_inline(
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
-) -> Result<Vec<Instruction>> {
+) -> Result<(Vec<Instruction>, usize, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
         helper_addrs,
@@ -4162,6 +4175,7 @@ fn build_x86_tail_call_inline(
     } else {
         bail!("x86 bpf_tail_call lowering missing BPF rbp location");
     }
+    let count_offset = bytes.len();
     bytes.extend_from_slice(&(-16i32).to_le_bytes());
     bytes.extend_from_slice(&[0x48, 0x83, 0x38, MAX_TAIL_CALL_CNT]); // cmp qword [rax], 33
     let jae_out = append_x86_jcc_rel32(&mut bytes, 0x83);
@@ -4175,6 +4189,9 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(native_cleanup);
     append_x86_stub_callee_pop(&mut bytes, callee_saved_mask);
     bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
+    bytes.extend_from_slice(&[0x48, 0x81, 0xC4]); // add rsp, rounded JIT stack depth
+    let stack_offset = bytes.len();
+    bytes.extend_from_slice(&0u32.to_le_bytes());
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
     append_x86_add_rcx_imm(&mut bytes, tail_call_offset);
@@ -4184,7 +4201,7 @@ fn build_x86_tail_call_inline(
     patch_x86_rel32(&mut bytes, jbe_out, out)?;
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
-    declared_byte_chunks(&bytes)
+    Ok((declared_byte_chunks(&bytes)?, count_offset, stack_offset))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
@@ -5175,6 +5192,43 @@ mod tests {
         assert_eq!(preserved.callee_saved_mask, 0);
         assert!(preserved.drop_local_ips.is_empty());
         assert!(preserved.register_renames.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn tail_call_frame_resolves_actual_jit_depth() -> Result<()> {
+        let helpers = HashMap::from([
+            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 0),
+            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 8),
+            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 0),
+            (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0),
+        ]);
+        for saved_rbp in [None, Some(24)] {
+            let (instructions, count, stack) = build_x86_tail_call_inline(
+                &helpers, 15, &[], saved_rbp, saved_rbp.is_none())?;
+            let encoded = encode_x86_local_block("tail", 0, &instructions,
+                &vec![u64::MAX; instructions.len()])?;
+            let bytes = encoded.code_buffer;
+            assert_eq!(&bytes[count-3..count],
+                if saved_rbp.is_some() { &[0x48,0x8b,0x80] } else { &[0x48,0x8b,0x85] });
+            assert_eq!(&bytes[stack-3..stack], &[0x48,0x81,0xc4]);
+            assert_eq!(&bytes[count+4..count+8], &[0x48,0x83,0x38,33]);
+            for depth in 0u32..=512 {
+                let rounded = (depth + 7) & !7;
+                let mut patched = bytes.clone();
+                patched[count..count+4].copy_from_slice(&(-16i32-rounded as i32).to_le_bytes());
+                patched[stack..stack+4].copy_from_slice(&rounded.to_le_bytes());
+                assert_eq!(i32::from_le_bytes(patched[count..count+4].try_into()?), -16-rounded as i32);
+                assert_eq!(u32::from_le_bytes(patched[stack..stack+4].try_into()?), rounded);
+            }
+            if saved_rbp.is_none() {
+                if let Ok(directory) = std::env::var("KPROG_TAIL_TEST_OUTPUT") {
+                    std::fs::write(std::path::Path::new(&directory).join("tail.bin"), &bytes)?;
+                    std::fs::write(std::path::Path::new(&directory).join("tail-offsets.txt"),
+                        format!("{count} {stack}\n"))?;
+                }
+            }
+        }
         Ok(())
     }
 

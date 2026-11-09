@@ -21,13 +21,16 @@
  * chunk; target = (source byte PC << 32) | final chunk's proof instruction.
  */
 #define NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE 9U
+/* x86 JIT frame immediates, resolved from the final physical stack depth. */
+#define NATIVE_LAB_RELOC_X86_TAIL_COUNT 10U
+#define NATIVE_LAB_RELOC_X86_TAIL_STACK 11U
 
 static inline int native_lab_reloc_patch_size(__u32 kind)
 {
 	switch (kind) {
 	case 1: return 5;
 	case 2: return 16;
-	case 3: case 4: return 4;
+	case 3: case 4: case 10: case 11: return 4;
 	case 5: case 6: case 7: return 8;
 	case 8: case 9: return 0;
 	default: return -EINVAL;

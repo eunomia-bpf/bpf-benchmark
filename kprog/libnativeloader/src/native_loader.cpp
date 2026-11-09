@@ -702,13 +702,17 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
            kind == kNativeLabRelocArm64PercpuMrs;
 #else
-    return kind == kNativeLabRelocHelperCallRel32;
+    return kind == kNativeLabRelocHelperCallRel32 ||
+           kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT || kind == NATIVE_LAB_RELOC_X86_TAIL_STACK;
 #endif
 }
 
 size_t native_lab_reloc_slot_bytes(uint32_t kind)
 {
     switch (kind) {
+    case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
+    case NATIVE_LAB_RELOC_X86_TAIL_STACK:
+        return sizeof(int32_t);
     case NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE:
         return 4; // Exact ARM instruction anchor, with no byte patch.
     case NATIVE_LAB_RELOC_READONLY_DATA:
