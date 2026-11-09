@@ -101,6 +101,7 @@
 - [ ] **V** compiled ROR 与前序 RET source 模型合并批次全量检查（本提交；复用共享增量缓存和唯一 full 队列）。
 - [x] **V** compiled ADD_IMM：五个真实 BPF 单元覆盖8位低/高字节及16/32/64位，任意操作数/编码立即数及64位imm32符号扩展，reference scalar写回、完整memory/visit/halt/fault/events；151组合函数保留原146字节（本提交，compiled15/75）。
 - [ ] **V** compiled ADD_IMM 后继全量检查（本提交；在现有RET/ROR批次后复用唯一full槽与增量缓存）。
+- [ ] **V/C** ROR_MEM 绝对地址写回采用现有64位整数地址运算；原有26,547,217-case oracle 的 GCC/Clang UBSan 回放与归档（本提交；C stack-facts 中的原始line892诊断保持）。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
 - [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。

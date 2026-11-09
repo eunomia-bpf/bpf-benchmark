@@ -1731,7 +1731,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		if ((DST) == X86_RSP) \
 			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_ror_base + __x86_ror_disp, __x86_ror_width, __x86_ror_result); \
 		else { \
-			void *__x86_ror_addr = (__u8 *)__x86_ror_base + __x86_ror_disp; \
+			void *__x86_ror_addr = KPROG_PTR_ADD64_BITS(__x86_ror_base, __x86_ror_disp); \
 			X86_SIM_L_STORE_ADDR_TAGGED(__x86_ror_addr, __x86_ror_width, __x86_ror_result, X86_SIM_L_REG_TAG(DST)); \
 		} \
 		X86_SIM_L_SET_ROR_FLAGS(__x86_ror_result, __x86_ror_count, __x86_ror_width); \
