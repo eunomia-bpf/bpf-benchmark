@@ -135,14 +135,35 @@ def namespace(scratch):
 
 
 
+def compiler_failures(row):
+    """Retain failed compiler command records from the service's raw archive."""
+    service = row.get("submission", {}).get("service", {})
+    archive_path = service.get("failure_archive", service.get("artifact_archive"))
+    if row["stage"] != "compilation_failed" or not archive_path:
+        return []
+    if not Path(archive_path).is_file():
+        return []
+    records = []
+    with tarfile.open(archive_path) as archive:
+        for member in archive.getmembers():
+            if member.isfile() and member.name.endswith("/commands.jsonl"):
+                for line in archive.extractfile(member).read().decode().splitlines():
+                    command = json.loads(line)
+                    if command["returncode"]:
+                        records.append(command)
+    return records
+
+
 def failure_class(row):
     stage = row["stage"]
-    text = row.get("diagnostic", "")
+    text = row.get("diagnostic", "") + "\n" + "\n".join(
+        command.get("stderr", "") for command in row.get("compiler_failures", ()))
     if stage == "installed":
         return "installed"
     if stage == "native_selection_failed":
         return "native_manifest_selection_gap"
     for phrase, label in [
+        ("BPF stack limit is exceeded", "compiler_stack_storage"),
         ("bpf_object__open_file", "source_elf_open"),
         ("maps/BTF object prepare", "source_maps_btf_prepare"),
         ("native symbol must be an explicit ELF identifier", "elf_symbol_name_grammar"),
@@ -209,6 +230,8 @@ def publish_results(scratch, output=None, previous=None, returncode=None):
     if provenance.is_file():
         result["input_provenance"] = json.loads(provenance.read_text())
     for row in result["programs"]:
+        if row["stage"] == "compilation_failed":
+            row["compiler_failures"] = compiler_failures(row)
         row["failure_class"] = failure_class(row)
     classes = collections.Counter(row["failure_class"] for row in result["programs"])
     result["ranked_classes"] = [{"failure_class": label, "programs": count}
