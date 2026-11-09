@@ -497,3 +497,16 @@ kprog/perf/measure/
 /tests/results/e084a44b/
 /tests/results/e54648e4/
 /tests/results/e81210f7/
+
+# Closed run output preserved by the 2026-11-09 shared-tree cleanup (replay-input-extras).
+/kprog/results/kprog_fidelity_20261107/differential/arm64-control-branches/
+/kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/
+/kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/
+/kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/
+/kprog/results/kprog_fidelity_20261107/differential/x86-control/
+/kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl/
+/kprog/results/kprog_fidelity_20261107/differential/x86-dshift-cl16/
+/kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/
+/kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/
+/kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/
+/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/
