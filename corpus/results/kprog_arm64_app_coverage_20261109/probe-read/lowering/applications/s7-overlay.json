@@ -1,0 +1,46 @@
+{
+  "utc": "2026-11-09T06:51:13.640317+00:00",
+  "source_commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+  "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+  "prior_overlay": {
+    "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h"
+    ],
+    "utc": "2026-11-09T06:31:36.178532+00:00",
+    "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+    "derived_header": "kprog/arm64/arm64_sim_direct.h",
+    "derivation": "Existing owning Makefile target with existing libbpf host include"
+  },
+  "applications": {
+    "bcc": {
+      "header_sha256": "eac07f2c95d682b0e4485762ad6d50f26ce1c5e9bb3651bbedaa5d674c06814b",
+      "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+      "delta_archive_sha256": "7f1a76f056a97238d2cc4176381878afba7c7c3fa2205c7e19b0550a27b92b62",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/bcc/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    },
+    "tracee": {
+      "header_sha256": "eac07f2c95d682b0e4485762ad6d50f26ce1c5e9bb3651bbedaa5d674c06814b",
+      "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+      "delta_archive_sha256": "bc6b4452f6b63c053b3196d6f7d77e0392a32436288e5b7ddc75328f57c4d6b3",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/tracee/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    }
+  },
+  "runtime_admission_additions": 0
+}
