@@ -14,6 +14,7 @@
 -- kprog/x86/native_lab/native_link/src/x86.rs:x86_local_data_object sha256=079b904b04a75749e2d155dcc71f7a7404125cda2eef82c1aef888394d64cce4
 -- kprog/x86/native_lab/native_link/src/main.rs:record serializer sha256=5b4155b4fb08e698d82728f4cbdb65a20eb32bfa70a8d8c8670f6d9abdce9f68
 -- vendor/linux-framework/kernel/bpf/core.c:native_trusted_put before module_put sha256=b3b299bb3a3b2a844888a2dcff90f2066f561cd3f505dc7a9f3d1e9f3376abdf
+-- vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:word-copy emitter source sha256=0dc45d429f36b2900f01f41c9160c4182c15c79f4694e9d87a207a4e817d25b8
 -- vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:emit_bpf_tail_call_direct sha256=9e4e9357cad8bf05cd9c93e95bd967639df46a0d863aed09abd1d77c54e865be
 -- vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:bpf_tail_call_direct_fixup sha256=fd83235cb4279e354f8e4046dcaa53dacce9a2d9937e27eae210081807f9dc84
 -- vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:emit_patch sha256=1e66b5ed9ed1202676bacf9ecba53daee818dc1bb5fe412f439d0bab64696907
@@ -126,6 +127,18 @@ def chunkRecords (chunk : Chunk) (records : List Record) : List Record :=
 
 def chunkWire (chunk : Chunk) (records : List Record) : List Byte :=
   (chunkRecords chunk records).flatMap serialize
+
+/-- The module reads an unaligned little-endian u32 into scratch; the ARM
+JIT stores that scratch word through cpu_to_le32. Complete aligned chunks
+consist of these four-byte groups. -/
+def armWordBytes (source : Image) (start : Nat) : List Byte :=
+  le32 (littleEndian 32 [source start,source (start+1),source (start+2),source (start+3)])
+
+def armCopiedByte (source : Image) (start i : Nat) : Byte :=
+  fromList (armWordBytes source (start+i/4*4)) (i%4)
+
+def armCopyImage (destination source : Image) (destinationAt sourceAt words : Nat) : Image :=
+  copy destination destinationAt (armCopiedByte source sourceAt) 0 (words*4)
 
 /-- Macro byte widths and descriptor placement extracted from the complete tail
 emitter and finalizer. Dynamic callee-pop/stack-add widths are nonnegative

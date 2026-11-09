@@ -360,6 +360,22 @@ def extract(repo: Path, scratch: Path) -> str:
       module_put(fp->aux->native_trusted_owner);'''):
         raise ValueError('core release grammar changed')
     receipts.append((core_path, 'native_trusted_put before module_put', core_release))
+    arm_path = 'vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c'
+    arm_jit = read(arm_path)
+    arm_copy = body(arm_jit,'emit_kinsn_desc_call_arm64')
+    for operation in [
+      'if (scratch_idx != n_insns || (size_t)n_insns > max_insns) { ret = -EFAULT; goto out; }',
+      'if (ctx->image && ctx->write) { for (i = 0; i < n_insns; i++) ctx->image[ctx->idx + i] = cpu_to_le32(scratch[i]); }',
+      'ctx->idx += n_insns;']:
+        if normalized(operation) not in normalized(arm_copy):
+            raise ValueError('ARM JIT word-copy operation changed')
+    module_arm = read('kinsn/module/arm64/bpf_arm64_native_lab.c')
+    for operation in [
+      'for (i = 0; i < native_len; i += sizeof(u32)) image[start_idx + (i / sizeof(u32))] = get_unaligned_le32(native_bytes + i);',
+      '*idx += native_len / sizeof(u32);']:
+        if normalized(operation) not in normalized(module_arm):
+            raise ValueError('ARM module word-copy operation changed')
+    receipts.append((arm_path,'word-copy emitter source',arm_copy))
     jit_path = 'vendor/linux-framework/arch/x86/net/bpf_jit_comp.c'
     jit = read(jit_path)
     tail = recognize(jit, 'emit_bpf_tail_call_direct', TAIL_DIRECT)
@@ -523,6 +539,18 @@ def chunkRecords (chunk : Chunk) (records : List Record) : List Record :=
 
 def chunkWire (chunk : Chunk) (records : List Record) : List Byte :=
   (chunkRecords chunk records).flatMap serialize
+
+/-- The module reads an unaligned little-endian u32 into scratch; the ARM
+JIT stores that scratch word through cpu_to_le32. Complete aligned chunks
+consist of these four-byte groups. -/
+def armWordBytes (source : Image) (start : Nat) : List Byte :=
+  le32 (littleEndian 32 [source start,source (start+1),source (start+2),source (start+3)])
+
+def armCopiedByte (source : Image) (start i : Nat) : Byte :=
+  fromList (armWordBytes source (start+i/4*4)) (i%4)
+
+def armCopyImage (destination source : Image) (destinationAt sourceAt words : Nat) : Image :=
+  copy destination destinationAt (armCopiedByte source sourceAt) 0 (words*4)
 
 /-- Macro byte widths and descriptor placement extracted from the complete tail
 emitter and finalizer. Dynamic callee-pop/stack-add widths are nonnegative

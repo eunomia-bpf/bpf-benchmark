@@ -299,6 +299,34 @@ theorem source_scoped_loop_refines (length : Nat) (maps : List Map)
       rw [ih next emitted later, source_scoped_record_refines _ _ _ _ _ first]
       rfl
 
+/-- Every four-byte source group survives the actual unaligned little-endian
+word read followed by the JIT little-endian word store. -/
+theorem arm_word_bytes (a b c d : Byte) :
+    le32 (littleEndian 32 [a,b,c,d]) = [a,b,c,d] := by
+  simp +decide [le32, littleEndian]
+  bv_decide
+
+theorem arm_copy_byte (source : Image) (start i : Nat) :
+    armCopiedByte source start i = source (start+i) := by
+  unfold armCopiedByte armWordBytes
+  rw [arm_word_bytes]
+  have small : i % 4 < 4 := Nat.mod_lt _ (by decide)
+  have divided : i/4*4+i%4=i := by omega
+  have lanes : i%4=0 ∨ i%4=1 ∨ i%4=2 ∨ i%4=3 := by omega
+  rcases lanes with h | h | h | h <;> simp [fromList,h] <;> congr 1 <;> omega
+
+theorem arm_copy_image (destination source : Image) (destinationAt sourceAt words : Nat) :
+    armCopyImage destination source destinationAt sourceAt words =
+      copy destination destinationAt source sourceAt (words*4) := by
+  funext i
+  simp only [armCopyImage, copy, arm_copy_byte, Nat.zero_add]
+
+/-- Word-index advancement retains the complete byte cursor under the explicit
+successful signed-index domain; the global allocation extent retains its own
+source-derived range/allocator obligation. -/
+theorem arm_cursor_units (cursor words : Nat) (fits : cursor+words < 2^31) :
+    (cursor+words)*4 = cursor*4+words*4 ∧ cursor+words < 2^31 := by omega
+
 /-- Counts of actual kref/module primitives and their source-level owners.
 The split teardown state retains the module during the capsule callback. -/
 structure Ownership where
