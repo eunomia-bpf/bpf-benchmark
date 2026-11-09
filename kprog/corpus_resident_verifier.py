@@ -165,9 +165,9 @@ def failure_class(row):
 
 
 def host(scratch, output=None, previous=None):
-    previous = int((scratch / "worker.pid").read_text())
+    worker_pid = int((scratch / "worker.pid").read_text())
     try:
-        descriptor = os.pidfd_open(previous)
+        descriptor = os.pidfd_open(worker_pid)
         select.select([descriptor], [], [])
         os.close(descriptor)
     except ProcessLookupError:
@@ -176,10 +176,15 @@ def host(scratch, output=None, previous=None):
         done = subprocess.run([sys.executable, str(Path(__file__).resolve()),
                                "namespace", "--scratch", str(scratch)],
                               stdout=log, stderr=subprocess.STDOUT)
+    publish_results(scratch, output, previous, done.returncode)
+
+
+def publish_results(scratch, output=None, previous=None, returncode=None):
+    """Publish completed load-only records, including a retained prior cohort."""
     result_path = scratch / "stock-results.json"
     if not result_path.exists():
         (scratch / "stock-setup.json").write_text(json.dumps(
-            dict(returncode=done.returncode, result="setup_requires_continuation"),
+            dict(returncode=returncode, result="setup_requires_continuation"),
             indent=2) + "\n")
         return
     result = json.loads(result_path.read_text())
@@ -259,7 +264,7 @@ def host(scratch, output=None, previous=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["guest", "namespace", "compile", "host"])
+    parser.add_argument("mode", choices=["guest", "namespace", "compile", "host", "publish"])
     parser.add_argument("--scratch", type=Path,
                         default=Path("/var/tmp/kprog-tmp/A/resident-census"))
     parser.add_argument("--output", type=Path)
@@ -273,6 +278,8 @@ def main():
                       Path(rest[rest.index("-o") + 1]), "x86")
     if args.mode == "host":
         host(args.scratch, args.output, args.previous_results)
+    elif args.mode == "publish":
+        publish_results(args.scratch, args.output, args.previous_results)
     elif args.mode == "guest":
         guest(args.scratch)
     else:
