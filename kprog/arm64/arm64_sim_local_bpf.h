@@ -1101,6 +1101,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
       } else ARM64_SIM_L_STORE_ADDR((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE)+(OFF),(WIDTH),__a64_sw_value); \
  } while (0)
 
+/* A propagated context displacement can be encoded against the entry base.
+ * Both address forms read the same native width at the same address; dynamic
+ * displacements retain the existing base-register memory dispatch. */
 #define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
 	({                                                                 \
 		__s64 __a64_mrd_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
@@ -1108,10 +1111,17 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__u64 __a64_mrd_value;                                    \
 		__u8 __a64_mrd_src = KPROG_ARM64_MEM_READ_SRC(           \
 			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
+        __s64 __a64_mrd_ctx_off = (__s64)(                                \
+            (__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE) -                  \
+            (__u64)(long)__a64_sim_helper_ctx + (__u64)__a64_mrd_off);     \
 		if (__a64_sim_is_xdp && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
             __a64_mrd_value = ARM64_SIM_L_XDP_READ((BASE), __a64_mrd_off, (WIDTH)); \
         } else if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
             __a64_mrd_value = ARM64_SIM_L_SKB_READ((BASE), __a64_mrd_off, (WIDTH)); \
+        } else if (__a64_mrd_tag == ARM64_SIM_TAG_ABI &&                  \
+                   __builtin_constant_p(__a64_mrd_ctx_off)) {            \
+            __a64_mrd_value = KPROG_ARM64_LOAD_BYTES_OFFSET(             \
+                __a64_sim_helper_ctx, __a64_mrd_ctx_off, (WIDTH));       \
         } else switch (__a64_mrd_src) {                                 \
 		case KPROG_ARM64_MEM_SRC_STACK: {                        \
 		__u8 __a64_mrd_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
