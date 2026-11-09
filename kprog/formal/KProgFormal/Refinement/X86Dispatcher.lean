@@ -596,21 +596,29 @@ def leaRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.
 /-- DIV's raw SRC selector samples a full GPR or the already captured IMM
 operand before RAX/RDX writeback. DST and AUX retain their unused values. -/
 def divideRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (flags : Byte) (src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (flags : Byte) (aux : BitVec 32) (src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   match widthOf flags with
   | none => none
   | some width =>
-      if src = 255 then some (divideWord env frame arena state width value nextPc)
-      else (registerOf src).map (fun source =>
-        divideWord env frame arena state width (registerValue env frame arena state source) nextPc)
+      let body := fun operand => if aux.getLsbD 0 then
+        SignedDivision.wordStep env frame arena state width operand nextPc fresh
+        else divideWord env frame arena state width operand nextPc
+      if src = 255 then some (body value)
+      else (registerOf src).map (fun source => body (registerValue env frame arena state source))
+
+/-- The production signed selector consumes exactly AUX bit0; higher fields
+remain unconstrained, matching the C bit mask. -/
+theorem divide_aux_signed (aux : BitVec 32) :
+    aux.getLsbD 0 = (aux &&& 1 != 0) := by
+  bv_decide
 
 /-- Partial ordered register dispatcher. MOVX follows the existing NOP/MOV
 prefix and precedes the ALU, compare and singleton register gates. Distinct
 opcode identities preserve selection across the covered handler families.
 Option-valued decoding records the scope of the legal-field interface. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   match dispatchThroughMove env frame arena code flags aux dst src value nextPc state with
   | some result => some result
@@ -739,7 +747,7 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         pure ⟨nativeRegisters env frame arena
           (exchangeRegisters env frame arena state width destination source nextPc), [], none⟩
       else if code = GeneratedX86Opcode.code .div then
-        divideRegisters env frame arena flags src value nextPc state
+        divideRegisters env frame arena fresh flags aux src value nextPc state
       else none
 
 /-- Field/operand identities only. CMOV consumes the entire condition AUX;
@@ -757,15 +765,29 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
   | divide (width : ScalarWidth) (source : Register)
-      (widthField : WidthBinding flags width) (sourceField : src = registerByte source) :
+      (widthField : WidthBinding flags width) (sourceField : src = registerByte source)
+      (unsignedField : aux.getLsbD 0 = false) :
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
         (.divide width (.register (.low source)) nextPc)
   | divideCaptured (width : ScalarWidth) (source : RegisterSlice)
       (widthField : WidthBinding flags width) (sourceField : src = 255)
+      (unsignedField : aux.getLsbD 0 = false)
       (legal : match source with | .low _ => True | .high _ => width = .w8)
       (operandField : value = Reference.X86.scalarRegisterValue nativeState width source) :
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
         (.divide width (.register source) nextPc)
+  | divideSigned (width : ScalarWidth) (source : Register)
+      (widthField : WidthBinding flags width) (sourceField : src = registerByte source)
+      (signedField : aux.getLsbD 0 = true) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
+        (.signedDivide width (.register (.low source)) nextPc)
+  | divideSignedCaptured (width : ScalarWidth) (source : RegisterSlice)
+      (widthField : WidthBinding flags width) (sourceField : src = 255)
+      (signedField : aux.getLsbD 0 = true)
+      (legal : match source with | .low _ => True | .high _ => width = .w8)
+      (operandField : value = Reference.X86.scalarRegisterValue nativeState width source) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
+        (.signedDivide width (.register source) nextPc)
   | lea (width : Reference.X86.CmovWidth) (destination : Register) (base index : Option Register)
       (widthField : WidthBinding flags (cmovScalarWidth width))
       (dstField : dst = registerByte destination) (baseField : src = optionalRegisterByte base)
@@ -1038,11 +1060,24 @@ theorem lea_unit_rcx_binding (state : Reference.X86.State) (flags : Byte)
 its SRC_NONE encoding therefore establishes the generic captured-lane binding. -/
 theorem divide_high_byte_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Reference.Word) (state : RegisterState) (flags : Byte) (aux : BitVec 32) (dst : Byte)
-    (source : Fin 4) (nextPc : Reference.Word) (widthField : WidthBinding flags .w8) :
+    (source : Fin 4) (nextPc : Reference.Word) (widthField : WidthBinding flags .w8)
+    (unsignedField : aux.getLsbD 0 = false) :
     RegisterBinding flags aux dst 255 (readRegister env frame arena state .w8 (.high source)) nextPc
       (nativeRegisters env frame arena state) (GeneratedX86Opcode.code .div)
       (.divide .w8 (.register (.high source)) nextPc) :=
-  .divideCaptured .w8 (.high source) widthField rfl rfl
+  .divideCaptured .w8 (.high source) widthField rfl unsignedField rfl
+    (native_register_read env frame arena state .w8 (.high source))
+
+/-- Signed high-byte operands retain the same source capture identity and the
+production AUX signed bit; no result or transition equality is a premise. -/
+theorem signed_divide_high_byte_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (flags : Byte) (aux : BitVec 32) (dst : Byte)
+    (source : Fin 4) (nextPc : Reference.Word) (widthField : WidthBinding flags .w8)
+    (signedField : aux.getLsbD 0 = true) :
+    RegisterBinding flags aux dst 255 (readRegister env frame arena state .w8 (.high source)) nextPc
+      (nativeRegisters env frame arena state) (GeneratedX86Opcode.code .div)
+      (.signedDivide .w8 (.register (.high source)) nextPc) :=
+  .divideSignedCaptured .w8 (.high source) widthField rfl signedField rfl
     (native_register_read env frame arena state .w8 (.high source))
 
 /-- SHLD/SHRD CL reads the byte from the same incoming raw RCX frame.
@@ -1104,16 +1139,16 @@ partial dispatcher theorem, not all77 operations or a compiled-body claim.
 It returns the actual transition and canonical Step relation, retaining real
 ANDN parity writes without constraining architecturally undefined PF/AF. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchRegisters env frame arena code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchRegisters env frame arena fresh code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
-  | divide width source widthField sourceField =>
+  | divide width source widthField sourceField unsignedField =>
       apply exact_dispatch_refines
       subst src
       have decoded := width_binding_decodes flags width widthField
@@ -1123,22 +1158,49 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         change source.val % 256 = 255 at encoded
         have bound := source.isLt
         omega
-      change divideRegisters env frame arena flags (registerByte source) value nextPc state =
+      change divideRegisters env frame arena fresh flags aux (registerByte source) value nextPc state =
         some (Reference.X86.step (.divide width (.register (.low source)) nextPc)
           (nativeRegisters env frame arena state))
-      simp only [divideRegisters, decoded]
+      simp only [divideRegisters, decoded, unsignedField, Bool.false_eq_true, ↓reduceIte]
       rw [if_neg present]
       simpa [register_of_byte] using
         congrArg some (divide_register_frame_refines env frame arena state width source nextPc)
-  | divideCaptured width source widthField sourceField legal operandField =>
+  | divideCaptured width source widthField sourceField unsignedField legal operandField =>
       apply exact_dispatch_refines
       have decoded := width_binding_decodes flags width widthField
       have captured : value = readRegister env frame arena state width source := by
         rw [native_register_read]; exact operandField
+      change divideRegisters env frame arena fresh flags aux src value nextPc state = _
+      simp only [divideRegisters, decoded, sourceField, ↓reduceIte, unsignedField,
+        Bool.false_eq_true, captured]
+      exact congrArg some (divide_captured_frame_refines env frame arena state width source nextPc)
+  | divideSigned width source widthField sourceField signedField =>
+      subst src
+      have decoded := width_binding_decodes flags width widthField
+      have present : registerByte source ≠ (255 : Byte) := by
+        intro equal
+        have encoded := congrArg BitVec.toNat equal
+        change source.val % 256 = 255 at encoded
+        have bound := source.isLt
+        omega
+      refine ⟨SignedDivision.wordStep env frame arena state width
+        (registerValue env frame arena state source) nextPc fresh, ?_,
+        SignedDivision.register_frame_refines env frame arena state width source nextPc fresh⟩
+      change divideRegisters env frame arena fresh flags aux (registerByte source) value nextPc state = _
+      simp only [divideRegisters, decoded]
+      rw [if_neg present]
+      simp only [register_of_byte, Option.map_some, signedField, ↓reduceIte]
+      rfl
+  | divideSignedCaptured width source widthField sourceField signedField legal operandField =>
+      have decoded := width_binding_decodes flags width widthField
+      have captured : value = readRegister env frame arena state width source := by
+        rw [native_register_read]; exact operandField
+      refine ⟨SignedDivision.wordStep env frame arena state width
+        (readRegister env frame arena state width source) nextPc fresh, ?_,
+        SignedDivision.captured_frame_refines env frame arena state width source nextPc fresh⟩
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
         GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
-        divideRegisters, decoded, sourceField, captured] using
-        congrArg some (divide_captured_frame_refines env frame arena state width source nextPc)
+        divideRegisters, decoded, sourceField, captured, signedField]
   | lea width destination base index widthField dstField baseField indexField scaleField ordinary =>
       apply exact_dispatch_refines
       have widthDecoded := cmov_width_binding_decodes flags width widthField
@@ -1510,15 +1572,15 @@ raw token. This is single-step observational matching, including real faults
 and effects. Composing steps still needs the generic flag/register-definedness
 invariant; equality of architecturally undefined bits is not claimed. -/
 theorem register_dispatch_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native)
     (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, dispatchRegisters env frame arena code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchRegisters env frame arena fresh code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
   obtain ⟨actual, dispatched, refines⟩ :=
-    register_dispatch_step_refines env frame arena code flags aux dst src value nextPc state native binding
+    register_dispatch_step_refines env frame arena fresh code flags aux dst src value nextPc state native binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refines⟩
 
 /-- Direct macro tokens whose complete raw register bodies are lifted below.
@@ -1550,7 +1612,7 @@ frame remain parameters. None is an unproved/malformed modeled binding, not
 an added runtime guard. This is C-model O2; compiler/actual-B preservation is
 still a separate trusted or proved transformation law. -/
 def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   match token with
@@ -1632,26 +1694,26 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
       let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
       let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
       pure ⟨nativeRegisters env frame arena (logicRegister env frame arena state width .test destination source nextPc), [], none⟩
-  | .div => dispatchRegisters env frame arena (GeneratedX86Opcode.code .div) flags aux dst src value nextPc state
-  | .nop => dispatchRegisters env frame arena (GeneratedX86Opcode.code .nop) flags aux dst src value nextPc state
-  | .bswap => dispatchRegisters env frame arena (GeneratedX86Opcode.code .bswap) flags aux dst src value nextPc state
-  | .popcnt => dispatchRegisters env frame arena (GeneratedX86Opcode.code .popcnt) flags aux dst src value nextPc state
-  | .xchg => dispatchRegisters env frame arena (GeneratedX86Opcode.code .xchg) flags aux dst src value nextPc state
-  | .shiftx => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shiftx) flags aux dst src value nextPc state
-  | .bzhi => dispatchRegisters env frame arena (GeneratedX86Opcode.code .bzhi) flags aux dst src value nextPc state
-  | .shldImm => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shldImm) flags aux dst src value nextPc state
-  | .shrdImm => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shrdImm) flags aux dst src value nextPc state
+  | .div => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .div) flags aux dst src value nextPc state
+  | .nop => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .nop) flags aux dst src value nextPc state
+  | .bswap => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .bswap) flags aux dst src value nextPc state
+  | .popcnt => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .popcnt) flags aux dst src value nextPc state
+  | .xchg => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .xchg) flags aux dst src value nextPc state
+  | .shiftx => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .shiftx) flags aux dst src value nextPc state
+  | .bzhi => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .bzhi) flags aux dst src value nextPc state
+  | .shldImm => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .shldImm) flags aux dst src value nextPc state
+  | .shrdImm => dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code .shrdImm) flags aux dst src value nextPc state
   | _ => none
 
 /-- O2 once per lifted direct token: specializing opcode dispatch retains the
 entire raw body result for ALL fields, states and invocations. No ISA result,
 condition, chosen state, program bytes or program certificate is a premise. -/
 theorem specialized_register_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : directRegisterOpcode token = some opcode) :
-    specializedRegisters env frame arena token flags aux dst src value nextPc state =
-      dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedRegisters env frame arena fresh token flags aux dst src value nextPc state =
+      dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   cases token <;> simp only [directRegisterOpcode] at selected
   all_goals first | contradiction | cases selected
   all_goals simp [specializedRegisters, dispatchRegisters, aluImmediateRegisters, aluRegisterRegisters, dispatchThroughMove, beforeMove,
@@ -1664,23 +1726,23 @@ theorem specialized_register_body_matches (env : EntryEnvironment.Environment) (
 This supplies a program-independent per-token interface, not compiled-B or
 whole-ISA coverage for tokens whose raw bodies are still being lifted. -/
 theorem specialized_register_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (state : RegisterState) (native : Reference.X86.Instruction)
     (selected : directRegisterOpcode token = some opcode)
     (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRegisters env frame arena fresh token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [specialized_register_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
-  exact register_dispatch_step_refines env frame arena _ flags aux dst src value nextPc state native binding
+  rw [specialized_register_body_matches env frame arena fresh token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_step_refines env frame arena fresh _ flags aux dst src value nextPc state native binding
 
 /-- Combine O1's native-successor observation with O2's per-token body
 identity. All fields and invocations remain arbitrary. This common-input
 single-step interface does not replace the generic definedness/ABI relation
 needed to compose masked architectural states across instructions. -/
 theorem specialized_register_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (state : RegisterState) (native : Reference.X86.Instruction)
     (selected : directRegisterOpcode token = some opcode)
@@ -1688,10 +1750,10 @@ theorem specialized_register_native_matches (env : EntryEnvironment.Environment)
       (GeneratedX86Opcode.code opcode) native)
     (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRegisters env frame arena fresh token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  rw [specialized_register_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
-  exact register_dispatch_native_matches env frame arena _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
+  rw [specialized_register_body_matches env frame arena fresh token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_native_matches env frame arena fresh _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
 
 /-- The uniform token interface includes direct bodies and unchanged generic
 RUN_OP calls. The direct-only API above remains available for its direct-macro subset. -/
@@ -1715,11 +1777,11 @@ theorem register_token_identity (token : GeneratedX86Specialization.Op) (opcode 
 /-- Uniform O2: every lifted token preserves the full raw step, whether the
 renderer emits its shared macro directly or forwards all fields to RUN_OP. -/
 theorem register_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : registerTokenOpcode token = some opcode) :
-    specializedRegisters env frame arena token flags aux dst src value nextPc state =
-      dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedRegisters env frame arena fresh token flags aux dst src value nextPc state =
+      dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   cases token <;> simp only [registerTokenOpcode, directRegisterOpcode] at selected
   all_goals first | contradiction | cases selected
   all_goals simp [specializedRegisters, dispatchRegisters, aluImmediateRegisters, aluRegisterRegisters,
@@ -1729,22 +1791,22 @@ theorem register_token_body_matches (env : EntryEnvironment.Environment) (frame 
   all_goals split <;> symm <;> assumption
 
 theorem register_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (state : RegisterState) (native : Reference.X86.Instruction)
     (selected : registerTokenOpcode token = some opcode)
     (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRegisters env frame arena fresh token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
-  exact register_dispatch_step_refines env frame arena _ flags aux dst src value nextPc state native binding
+  rw [register_token_body_matches env frame arena fresh token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_step_refines env frame arena fresh _ flags aux dst src value nextPc state native binding
 
 /-- Native-to-specialized observation for every covered direct or generic
 token, any common architectural input and any permitted native successor.
 Generic ABI/definedness and actual compiled-B preservation remain separate. -/
 theorem register_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (state : RegisterState) (native : Reference.X86.Instruction)
     (selected : registerTokenOpcode token = some opcode)
@@ -1752,10 +1814,10 @@ theorem register_token_native_matches (env : EntryEnvironment.Environment) (fram
       (GeneratedX86Opcode.code opcode) native)
     (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRegisters env frame arena fresh token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
-  exact register_dispatch_native_matches env frame arena _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
+  rw [register_token_body_matches env frame arena fresh token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_native_matches env frame arena fresh _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
 
 /-- Raw PF-aware JCC condition and the actual forward/backward goto shape.
 Logical label addresses select the architectural PC through the existing
@@ -2283,9 +2345,9 @@ theorem compare_memory_registers_refine (env : EntryEnvironment.Environment) (fr
 separate JCC/JMP branch-handler class share one transition interface. Logical
 label/PC and compiled-code correspondence retain their layout/ABI obligations. -/
 def dispatchStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchRegisters env frame arena code flags aux dst src value nextPc state with
+  match dispatchRegisters env frame arena fresh code flags aux dst src value nextPc state with
   | some result => some result
   | none =>
       if code = GeneratedX86Opcode.code .jcc then branchRegisters env frame arena current aux value nextPc state
@@ -2337,15 +2399,15 @@ inductive StepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value n
       (.branch none value nextPc)
 
 theorem simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | registers code native fields =>
       obtain ⟨actual, dispatched, step⟩ :=
-        register_dispatch_step_refines env frame arena code flags aux dst src value nextPc state native fields
+        register_dispatch_step_refines env frame arena fresh code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchStep, dispatched], step⟩
   | stack code native fields =>
       apply exact_dispatch_refines
@@ -2413,7 +2475,7 @@ theorem simulator_step_refines (env : EntryEnvironment.Environment) (frame : Ent
 /-- The branch renderer emits the same shared macro for every JCC/JMP token.
 Other covered tokens retain their existing direct/generic body interface. -/
 def specializedStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .jcc then branchRegisters env frame arena current aux value nextPc state
@@ -2433,7 +2495,7 @@ def specializedStep (env : EntryEnvironment.Environment) (frame : EntryEnvironme
   else if token = .cmpMemReg then compareMemoryRegisters env frame arena (GeneratedX86Opcode.code .cmpMemReg) flags aux dst src value nextPc state
   else if token = .testMemReg then compareMemoryRegisters env frame arena (GeneratedX86Opcode.code .testMemReg) flags aux dst src value nextPc state
   else if token = .cmpRegMem then compareMemoryRegisters env frame arena (GeneratedX86Opcode.code .cmpRegMem) flags aux dst src value nextPc state
-  else specializedRegisters env frame arena token flags aux dst src value nextPc state
+  else specializedRegisters env frame arena fresh token flags aux dst src value nextPc state
 
 def stepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .jcc then some .jcc else if token = .jmp then some .jmp
@@ -2520,11 +2582,11 @@ theorem step_token_identity (token : GeneratedX86Specialization.Op) (opcode : Ge
   all_goals decide
 
 theorem step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : stepTokenOpcode token = some opcode) :
-    specializedStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases conditional : token = .jcc
   · subst token
     simp only [stepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -2655,35 +2717,35 @@ theorem step_token_body_matches (env : EntryEnvironment.Environment) (frame : En
                                     obtain ⟨_, _, _, _, _, notCmpMemImm, notTestMemImm, notCmpMemReg, notTestMemReg, notCmpRegMem⟩ :=
                                       register_token_excludes_memory_compare token opcode registerSelected
                                     simp only [specializedStep, conditional, jump, push, pop, load, store, set, move, immediateStore, registerStore, memoryUnary, memoryRotate, cmpMemoryImmediate, testMemoryImmediate, cmpMemoryRegister, testMemoryRegister, cmpRegisterMemory, ↓reduceIte]
-                                    rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state registerSelected]
+                                    rw [register_token_body_matches env frame arena fresh token opcode flags aux dst src value nextPc state registerSelected]
                                     unfold dispatchStep
-                                    cases dispatched : dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+                                    cases dispatched : dispatchRegisters env frame arena fresh (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
                                       simp [dispatched, notConditional, notJump, notSet, notMove, notLoad, notStore, notImmediateStore, notRegisterStore, notMemoryUnary, notMemoryRotate, notCmpMemImm, notTestMemImm, notCmpMemReg, notTestMemReg, notCmpRegMem, stackRegisters, notPush, notPop]
 
 
 theorem simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : stepTokenOpcode token = some opcode)
     (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : stepTokenOpcode token = some opcode)
     (binding : StepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native)
     (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
   obtain ⟨actual, dispatched, refines⟩ :=
-    simulator_token_step_refines env frame arena current token opcode flags aux dst src value nextPc state native selected binding
+    simulator_token_step_refines env frame arena fresh current token opcode flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refines⟩
 
 
@@ -2859,24 +2921,24 @@ theorem alu_memory_registers_refine (env : EntryEnvironment.Environment) (frame 
 /-- Extend the existing unified model with the two memory-destination ALU
 opcodes, preserving every previously composed register/control/memory arm. -/
 def dispatchMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => aluMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_alu_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (immediate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (immediate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchStep env frame arena current (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
+    dispatchStep env frame arena fresh current (GeneratedX86Opcode.code (if immediate then .aluMemImm else .aluMemReg))
       flags aux dst src value nextPc state = none := by
   cases immediate <;> rfl
 
 theorem alu_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : AluMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding <;> apply before_alu_memory_none
 
 inductive MemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
@@ -2891,27 +2953,27 @@ inductive MemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
 /-- One composed step for all earlier model arms and the new memory ALU
 fields. It retains native state, ordered effects, faults and defined flags. -/
 theorem memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchMemoryStep, dispatched], refined⟩
   | alu fields =>
       apply exact_dispatch_refines
-      rw [dispatchMemoryStep, alu_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]
+      rw [dispatchMemoryStep, alu_memory_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]
       exact alu_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
 
 def specializedMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .aluMemImm then aluMemoryRegisters env frame arena (GeneratedX86Opcode.code .aluMemImm) flags aux dst src value nextPc state
   else if token = .aluMemReg then aluMemoryRegisters env frame arena (GeneratedX86Opcode.code .aluMemReg) flags aux dst src value nextPc state
-  else specializedStep env frame arena current token flags aux dst src value nextPc state
+  else specializedStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def memoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .aluMemImm then some .aluMemImm else if token = .aluMemReg then some .aluMemReg
@@ -2936,55 +2998,55 @@ private theorem earlier_token_excludes_alu_memory (token : GeneratedX86Specializ
   all_goals decide
 
 theorem memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : memoryStepTokenOpcode token = some opcode) :
-    specializedMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases immediate : token = .aluMemImm
   · subst token
     simp only [memoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
     subst opcode
-    have skipped := before_alu_memory_none env frame arena current true flags aux dst src value nextPc state
+    have skipped := before_alu_memory_none env frame arena fresh current true flags aux dst src value nextPc state
     simp only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] at skipped
     rw [specializedMemoryStep, if_pos rfl, dispatchMemoryStep, skipped]
   · by_cases registers : token = .aluMemReg
     · subst token
       simp only [memoryStepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
       subst opcode
-      have skipped := before_alu_memory_none env frame arena current false flags aux dst src value nextPc state
+      have skipped := before_alu_memory_none env frame arena fresh current false flags aux dst src value nextPc state
       simp only [Bool.true_eq, Bool.false_eq_true, ↓reduceIte] at skipped
       rw [specializedMemoryStep, if_neg (by decide), if_pos rfl, dispatchMemoryStep, skipped]
     · have earlier : stepTokenOpcode token = some opcode := by
         simpa only [memoryStepTokenOpcode, immediate, registers, ↓reduceIte] using selected
       obtain ⟨notImmediate, notRegisters⟩ := earlier_token_excludes_alu_memory token opcode earlier
       simp only [specializedMemoryStep, immediate, registers, ↓reduceIte]
-      rw [step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchMemoryStep
-      cases dispatched : dispatchStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      cases dispatched : dispatchStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
         simp [dispatched, aluMemoryRegisters, notImmediate, notRegisters]
 
 theorem memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : memoryStepTokenOpcode token = some opcode)
     (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : memoryStepTokenOpcode token = some opcode)
     (binding : MemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -3098,16 +3160,16 @@ theorem alu_source_registers_refine (env : EntryEnvironment.Environment) (frame 
       exact congrArg some (multiply_source_frame_refines env frame arena state width destination _ nextPc)
 
 def dispatchSourceStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => aluSourceRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_alu_source_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchMemoryStep env frame arena current (GeneratedX86Opcode.code .aluMem) flags aux dst src value nextPc state = none := by
+    dispatchMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .aluMem) flags aux dst src value nextPc state = none := by
   rfl
 
 inductive SourceStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
@@ -3120,14 +3182,14 @@ inductive SourceStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       SourceStepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .aluMem) native
 
 theorem source_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : SourceStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchSourceStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchSourceStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier code native fields =>
-      obtain ⟨actual, dispatched, refined⟩ := memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchSourceStep, dispatched], refined⟩
   | source native fields =>
       apply exact_dispatch_refines
@@ -3135,11 +3197,11 @@ theorem source_simulator_step_refines (env : EntryEnvironment.Environment) (fram
       exact alu_source_registers_refine env frame arena _ flags aux dst src value nextPc state native fields
 
 def specializedSourceStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .aluMem then aluSourceRegisters env frame arena (GeneratedX86Opcode.code .aluMem) flags aux dst src value nextPc state
-  else specializedMemoryStep env frame arena current token flags aux dst src value nextPc state
+  else specializedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def sourceStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .aluMem then some .aluMem else memoryStepTokenOpcode token
@@ -3162,11 +3224,11 @@ private theorem earlier_token_excludes_alu_source (token : GeneratedX86Specializ
   all_goals decide
 
 theorem source_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : sourceStepTokenOpcode token = some opcode) :
-    specializedSourceStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchSourceStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedSourceStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchSourceStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases source : token = .aluMem
   · subst token
     simp only [sourceStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -3176,32 +3238,32 @@ theorem source_step_token_body_matches (env : EntryEnvironment.Environment) (fra
       simpa only [sourceStepTokenOpcode, source, ↓reduceIte] using selected
     have separate := earlier_token_excludes_alu_source token opcode earlier
     simp only [specializedSourceStep, source, ↓reduceIte]
-    rw [memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    rw [memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
     unfold dispatchSourceStep
-    cases dispatched : dispatchMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+    cases dispatched : dispatchMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
       simp [dispatched, aluSourceRegisters, separate]
 
 theorem source_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : sourceStepTokenOpcode token = some opcode)
     (binding : SourceStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedSourceStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedSourceStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [source_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact source_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [source_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact source_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem source_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : sourceStepTokenOpcode token = some opcode)
     (binding : SourceStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedSourceStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedSourceStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := source_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := source_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -3251,16 +3313,16 @@ theorem imul_memory_registers_refine (env : EntryEnvironment.Environment) (frame
       exact congrArg some (multiply_memory_immediate_frame_refines env frame arena state width destination value _ nextPc)
 
 def dispatchImulStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchSourceStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchSourceStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => imulMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_imul_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchSourceStep env frame arena current (GeneratedX86Opcode.code .imulMemImm) flags aux dst src value nextPc state = none := by
+    dispatchSourceStep env frame arena fresh current (GeneratedX86Opcode.code .imulMemImm) flags aux dst src value nextPc state = none := by
   rfl
 
 inductive ImulStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
@@ -3273,14 +3335,14 @@ inductive ImulStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       ImulStepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .imulMemImm) native
 
 theorem imul_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchImulStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchImulStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier code native fields =>
-      obtain ⟨actual, dispatched, refined⟩ := source_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := source_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchImulStep, dispatched], refined⟩
   | source native fields =>
       apply exact_dispatch_refines
@@ -3288,11 +3350,11 @@ theorem imul_simulator_step_refines (env : EntryEnvironment.Environment) (frame 
       exact imul_memory_registers_refine env frame arena _ flags aux dst src value nextPc state native fields
 
 def specializedImulStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .imulMemImm then imulMemoryRegisters env frame arena (GeneratedX86Opcode.code .imulMemImm) flags aux dst src value nextPc state
-  else specializedSourceStep env frame arena current token flags aux dst src value nextPc state
+  else specializedSourceStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def imulStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .imulMemImm then some .imulMemImm else sourceStepTokenOpcode token
@@ -3315,11 +3377,11 @@ private theorem earlier_token_excludes_imul_memory (token : GeneratedX86Speciali
   all_goals decide
 
 theorem imul_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : imulStepTokenOpcode token = some opcode) :
-    specializedImulStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchImulStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedImulStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchImulStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases source : token = .imulMemImm
   · subst token
     simp only [imulStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -3329,32 +3391,32 @@ theorem imul_step_token_body_matches (env : EntryEnvironment.Environment) (frame
       simpa only [imulStepTokenOpcode, source, ↓reduceIte] using selected
     have separate := earlier_token_excludes_imul_memory token opcode earlier
     simp only [specializedImulStep, source, ↓reduceIte]
-    rw [source_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    rw [source_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
     unfold dispatchImulStep
-    cases dispatched : dispatchSourceStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+    cases dispatched : dispatchSourceStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
       simp [dispatched, imulMemoryRegisters, separate]
 
 theorem imul_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : imulStepTokenOpcode token = some opcode)
     (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedImulStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedImulStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [imul_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact imul_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [imul_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact imul_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem imul_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : imulStepTokenOpcode token = some opcode)
     (binding : ImulStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedImulStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedImulStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := imul_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := imul_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -3459,23 +3521,23 @@ theorem load_registers_refine (env : EntryEnvironment.Environment) (frame : Entr
       exact congrArg some (load_memory_move_refines env frame arena state width destination _ nextPc)
 
 def dispatchLoadStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchImulStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchImulStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => loadRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_load_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (kind : LoadKind) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (kind : LoadKind) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchImulStep env frame arena current (GeneratedX86Opcode.code (loadOpcode kind)) flags aux dst src value nextPc state = none := by
+    dispatchImulStep env frame arena fresh current (GeneratedX86Opcode.code (loadOpcode kind)) flags aux dst src value nextPc state = none := by
   cases kind <;> rfl
 
 theorem load_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : LoadBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchImulStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchImulStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding <;> apply before_load_none
 
 inductive LoadStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
@@ -3488,28 +3550,28 @@ inductive LoadStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       LoadStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem load_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : LoadStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchLoadStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchLoadStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := imul_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := imul_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchLoadStep, dispatched], refined⟩
   | load fields =>
       apply exact_dispatch_refines
-      rw [dispatchLoadStep, load_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]
+      rw [dispatchLoadStep, load_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]
       exact load_registers_refine env frame arena code flags aux dst src value nextPc state native fields
 
 def specializedLoadStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .movLoad then loadBodyRegisters env frame arena false flags aux dst src value nextPc state
   else if token = .movLoadScalar then loadBodyRegisters env frame arena false flags aux dst src value nextPc state
   else if token = .movsxLoad then loadBodyRegisters env frame arena true flags aux dst src value nextPc state
-  else specializedImulStep env frame arena current token flags aux dst src value nextPc state
+  else specializedImulStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def loadStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .movLoad then some .movLoad else if token = .movLoadScalar then some .movLoadScalar
@@ -3537,16 +3599,16 @@ private theorem earlier_token_excludes_load (token : GeneratedX86Specialization.
   all_goals decide
 
 theorem load_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : loadStepTokenOpcode token = some opcode) :
-    specializedLoadStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchLoadStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedLoadStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchLoadStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases ordinary : token = .movLoad
   · subst token
     simp only [loadStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
     subst opcode
-    have skipped := before_load_none env frame arena current .ordinary flags aux dst src value nextPc state
+    have skipped := before_load_none env frame arena fresh current .ordinary flags aux dst src value nextPc state
     simp only [loadOpcode] at skipped
     rw [specializedLoadStep, if_pos rfl, dispatchLoadStep,
       skipped]
@@ -3555,7 +3617,7 @@ theorem load_step_token_body_matches (env : EntryEnvironment.Environment) (frame
     · subst token
       simp only [loadStepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
       subst opcode
-      have skipped := before_load_none env frame arena current .scalar flags aux dst src value nextPc state
+      have skipped := before_load_none env frame arena fresh current .scalar flags aux dst src value nextPc state
       simp only [loadOpcode] at skipped
       rw [specializedLoadStep, if_neg (by decide), if_pos rfl, dispatchLoadStep,
         skipped]
@@ -3564,7 +3626,7 @@ theorem load_step_token_body_matches (env : EntryEnvironment.Environment) (frame
       · subst token
         simp only [loadStepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
         subst opcode
-        have skipped := before_load_none env frame arena current .signed flags aux dst src value nextPc state
+        have skipped := before_load_none env frame arena fresh current .signed flags aux dst src value nextPc state
         simp only [loadOpcode] at skipped
         rw [specializedLoadStep, if_neg (by decide), if_neg (by decide), if_pos rfl, dispatchLoadStep,
           skipped]
@@ -3573,32 +3635,32 @@ theorem load_step_token_body_matches (env : EntryEnvironment.Environment) (frame
           simpa only [loadStepTokenOpcode, ordinary, scalar, signed, ↓reduceIte] using selected
         obtain ⟨notOrdinary, notScalar, notSigned⟩ := earlier_token_excludes_load token opcode earlier
         simp only [specializedLoadStep, ordinary, scalar, signed, ↓reduceIte]
-        rw [imul_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+        rw [imul_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
         unfold dispatchLoadStep
-        cases dispatched : dispatchImulStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+        cases dispatched : dispatchImulStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
           simp [dispatched, loadRegisters, notOrdinary, notScalar, notSigned]
 
 theorem load_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : loadStepTokenOpcode token = some opcode)
     (binding : LoadStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedLoadStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedLoadStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [load_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact load_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [load_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact load_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem load_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : loadStepTokenOpcode token = some opcode)
     (binding : LoadStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedLoadStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedLoadStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := load_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := load_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -3667,27 +3729,27 @@ theorem bmi_memory_registers_refine (env : EntryEnvironment.Environment) (frame 
       exact congrArg some (bmi_memory_frame_refines env frame arena state width .rotate destination (.immediate (value.setWidth 8)) _ nextPc)
 
 def dispatchBmiMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchLoadStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchLoadStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => bmiMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_bmi_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchLoadStep env frame arena current (GeneratedX86Opcode.code (if rotate then .rorxMem else .shiftxMem))
+    dispatchLoadStep env frame arena fresh current (GeneratedX86Opcode.code (if rotate then .rorxMem else .shiftxMem))
       flags aux dst src value nextPc state = none := by
   cases rotate <;> rfl
 
 theorem bmi_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : BmiMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchLoadStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchLoadStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding
-  · exact before_bmi_memory_none env frame arena current false flags aux dst src value nextPc state
-  · exact before_bmi_memory_none env frame arena current true flags aux dst src value nextPc state
+  · exact before_bmi_memory_none env frame arena fresh current false flags aux dst src value nextPc state
+  · exact before_bmi_memory_none env frame arena fresh current true flags aux dst src value nextPc state
 
 inductive BmiMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -3699,29 +3761,29 @@ inductive BmiMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       BmiMemoryStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem bmi_memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : BmiMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchBmiMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchBmiMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := load_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := load_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchBmiMemoryStep, dispatched], refined⟩
   | memory fields =>
       apply exact_dispatch_refines
-      rw [dispatchBmiMemoryStep, bmi_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]
+      rw [dispatchBmiMemoryStep, bmi_memory_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]
       exact bmi_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
 
 /-- These two production tokens invoke RUN_OP with their constant opcode;
 all fields flow through the same modeled generic dispatcher arm. -/
 def specializedBmiMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
-  if token = .shiftxMem then dispatchBmiMemoryStep env frame arena current (GeneratedX86Opcode.code .shiftxMem) flags aux dst src value nextPc state
-  else if token = .rorxMem then dispatchBmiMemoryStep env frame arena current (GeneratedX86Opcode.code .rorxMem) flags aux dst src value nextPc state
-  else specializedLoadStep env frame arena current token flags aux dst src value nextPc state
+  if token = .shiftxMem then dispatchBmiMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .shiftxMem) flags aux dst src value nextPc state
+  else if token = .rorxMem then dispatchBmiMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .rorxMem) flags aux dst src value nextPc state
+  else specializedLoadStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def bmiMemoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .shiftxMem then some .shiftxMem else if token = .rorxMem then some .rorxMem else loadStepTokenOpcode token
@@ -3747,11 +3809,11 @@ private theorem earlier_token_excludes_bmi_memory (token : GeneratedX86Specializ
   all_goals decide
 
 theorem bmi_memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : bmiMemoryStepTokenOpcode token = some opcode) :
-    specializedBmiMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchBmiMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedBmiMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchBmiMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases shift : token = .shiftxMem
   · subst token
     simp only [bmiMemoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -3766,32 +3828,32 @@ theorem bmi_memory_step_token_body_matches (env : EntryEnvironment.Environment) 
         simpa only [bmiMemoryStepTokenOpcode, shift, rotate, ↓reduceIte] using selected
       obtain ⟨notShift, notRotate⟩ := earlier_token_excludes_bmi_memory token opcode earlier
       simp only [specializedBmiMemoryStep, shift, rotate, ↓reduceIte]
-      rw [load_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [load_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchBmiMemoryStep
-      cases dispatched : dispatchLoadStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      cases dispatched : dispatchLoadStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
         simp [dispatched, bmiMemoryRegisters, notShift, notRotate]
 
 theorem bmi_memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : bmiMemoryStepTokenOpcode token = some opcode)
     (binding : BmiMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedBmiMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedBmiMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [bmi_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact bmi_memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [bmi_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact bmi_memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem bmi_memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : bmiMemoryStepTokenOpcode token = some opcode)
     (binding : BmiMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedBmiMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedBmiMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := bmi_memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := bmi_memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -3850,27 +3912,27 @@ theorem bit_memory_registers_refine (env : EntryEnvironment.Environment) (frame 
       exact congrArg some (population_count_memory_frame_refines env frame arena state width destination _ nextPc)
 
 def dispatchBitMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchBmiMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchBmiMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => bitMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_bit_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchBmiMemoryStep env frame arena current (GeneratedX86Opcode.code (if rotate then .popcntMem else .bzhiMem))
+    dispatchBmiMemoryStep env frame arena fresh current (GeneratedX86Opcode.code (if rotate then .popcntMem else .bzhiMem))
       flags aux dst src value nextPc state = none := by
   cases rotate <;> rfl
 
 theorem bit_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : BitMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchBmiMemoryStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchBmiMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding
-  · exact before_bit_memory_none env frame arena current false flags aux dst src value nextPc state
-  · exact before_bit_memory_none env frame arena current true flags aux dst src value nextPc state
+  · exact before_bit_memory_none env frame arena fresh current false flags aux dst src value nextPc state
+  · exact before_bit_memory_none env frame arena fresh current true flags aux dst src value nextPc state
 
 inductive BitMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -3882,29 +3944,29 @@ inductive BitMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       BitMemoryStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem bit_memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : BitMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchBitMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchBitMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := bmi_memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := bmi_memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchBitMemoryStep, dispatched], refined⟩
   | memory fields =>
       apply exact_dispatch_refines
-      rw [dispatchBitMemoryStep, bit_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]
+      rw [dispatchBitMemoryStep, bit_memory_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]
       exact bit_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
 
 /-- These two production tokens invoke RUN_OP with their constant opcode;
 all fields flow through the same modeled generic dispatcher arm. -/
 def specializedBitMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
-  if token = .bzhiMem then dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code .bzhiMem) flags aux dst src value nextPc state
-  else if token = .popcntMem then dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code .popcntMem) flags aux dst src value nextPc state
-  else specializedBmiMemoryStep env frame arena current token flags aux dst src value nextPc state
+  if token = .bzhiMem then dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .bzhiMem) flags aux dst src value nextPc state
+  else if token = .popcntMem then dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .popcntMem) flags aux dst src value nextPc state
+  else specializedBmiMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def bitMemoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .bzhiMem then some .bzhiMem else if token = .popcntMem then some .popcntMem else bmiMemoryStepTokenOpcode token
@@ -3930,11 +3992,11 @@ private theorem earlier_token_excludes_bit_memory (token : GeneratedX86Specializ
   all_goals decide
 
 theorem bit_memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : bitMemoryStepTokenOpcode token = some opcode) :
-    specializedBitMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedBitMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases shift : token = .bzhiMem
   · subst token
     simp only [bitMemoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -3949,32 +4011,32 @@ theorem bit_memory_step_token_body_matches (env : EntryEnvironment.Environment) 
         simpa only [bitMemoryStepTokenOpcode, shift, rotate, ↓reduceIte] using selected
       obtain ⟨notShift, notRotate⟩ := earlier_token_excludes_bit_memory token opcode earlier
       simp only [specializedBitMemoryStep, shift, rotate, ↓reduceIte]
-      rw [bmi_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [bmi_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchBitMemoryStep
-      cases dispatched : dispatchBmiMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      cases dispatched : dispatchBmiMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
         simp [dispatched, bitMemoryRegisters, notShift, notRotate]
 
 theorem bit_memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : bitMemoryStepTokenOpcode token = some opcode)
     (binding : BitMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedBitMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedBitMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [bit_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact bit_memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [bit_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact bit_memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem bit_memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : bitMemoryStepTokenOpcode token = some opcode)
     (binding : BitMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedBitMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedBitMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := bit_memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := bit_memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4044,27 +4106,27 @@ theorem observed_memory_registers_refine (env : EntryEnvironment.Environment) (f
       exact congrArg some (bit_test_memory_frame_refines env frame arena state width value _ nextPc)
 
 def dispatchObservedMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchBitMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchBitMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => observedMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_observed_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (rotate : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code (if rotate then .btMemImm else .andnMem))
+    dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code (if rotate then .btMemImm else .andnMem))
       flags aux dst src value nextPc state = none := by
   cases rotate <;> rfl
 
 theorem observed_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : ObservedMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchBitMemoryStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchBitMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding
-  · exact before_observed_memory_none env frame arena current false flags aux dst src value nextPc state
-  · exact before_observed_memory_none env frame arena current true flags aux dst src value nextPc state
+  · exact before_observed_memory_none env frame arena fresh current false flags aux dst src value nextPc state
+  · exact before_observed_memory_none env frame arena fresh current true flags aux dst src value nextPc state
 
 inductive ObservedMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -4076,29 +4138,29 @@ inductive ObservedMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : 
       ObservedMemoryStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem observed_memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : ObservedMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchObservedMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchObservedMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := bit_memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := bit_memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchObservedMemoryStep, dispatched], refined⟩
   | memory fields =>
       obtain ⟨actual, dispatched, refined⟩ := observed_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
       exact ⟨actual, by rw [dispatchObservedMemoryStep,
-        observed_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]; exact dispatched, refined⟩
+        observed_memory_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]; exact dispatched, refined⟩
 
 /-- These two direct tokens select their actual fixed-opcode memory bodies.
 Earlier tokens retain their established invocation routes. -/
 def specializedObservedMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .andnMem then observedMemoryRegisters env frame arena (GeneratedX86Opcode.code .andnMem) flags aux dst src value nextPc state
   else if token = .btMemImm then observedMemoryRegisters env frame arena (GeneratedX86Opcode.code .btMemImm) flags aux dst src value nextPc state
-  else specializedBitMemoryStep env frame arena current token flags aux dst src value nextPc state
+  else specializedBitMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def observedMemoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .andnMem then some .andnMem else if token = .btMemImm then some .btMemImm else bitMemoryStepTokenOpcode token
@@ -4124,55 +4186,55 @@ private theorem earlier_token_excludes_observed_memory (token : GeneratedX86Spec
   all_goals decide
 
 theorem observed_memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : observedMemoryStepTokenOpcode token = some opcode) :
-    specializedObservedMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchObservedMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedObservedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchObservedMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases shift : token = .andnMem
   · subst token
     simp only [observedMemoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
     subst opcode
-    have skipped := before_observed_memory_none env frame arena current false flags aux dst src value nextPc state
-    change dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code .andnMem) flags aux dst src value nextPc state = none at skipped
+    have skipped := before_observed_memory_none env frame arena fresh current false flags aux dst src value nextPc state
+    change dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .andnMem) flags aux dst src value nextPc state = none at skipped
     rw [specializedObservedMemoryStep, if_pos rfl, dispatchObservedMemoryStep, skipped]
   · by_cases rotate : token = .btMemImm
     · subst token
       simp only [observedMemoryStepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
       subst opcode
-      have skipped := before_observed_memory_none env frame arena current true flags aux dst src value nextPc state
-      change dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code .btMemImm) flags aux dst src value nextPc state = none at skipped
+      have skipped := before_observed_memory_none env frame arena fresh current true flags aux dst src value nextPc state
+      change dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .btMemImm) flags aux dst src value nextPc state = none at skipped
       rw [specializedObservedMemoryStep, if_neg (by decide), if_pos rfl, dispatchObservedMemoryStep, skipped]
     · have earlier : bitMemoryStepTokenOpcode token = some opcode := by
         simpa only [observedMemoryStepTokenOpcode, shift, rotate, ↓reduceIte] using selected
       obtain ⟨notShift, notRotate⟩ := earlier_token_excludes_observed_memory token opcode earlier
       simp only [specializedObservedMemoryStep, shift, rotate, ↓reduceIte]
-      rw [bit_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [bit_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchObservedMemoryStep
-      cases dispatched : dispatchBitMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      cases dispatched : dispatchBitMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
         simp [dispatched, observedMemoryRegisters, notShift, notRotate]
 
 theorem observed_memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : observedMemoryStepTokenOpcode token = some opcode)
     (binding : ObservedMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedObservedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedObservedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [observed_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact observed_memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [observed_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact observed_memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem observed_memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : observedMemoryStepTokenOpcode token = some opcode)
     (binding : ObservedMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedObservedMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedObservedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := observed_memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := observed_memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4268,27 +4330,27 @@ theorem xmm_memory_registers_refine (env : EntryEnvironment.Environment) (frame 
       rfl
 
 def dispatchXmmMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchObservedMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchObservedMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => xmmMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_xmm_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (store : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (store : Bool) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchObservedMemoryStep env frame arena current (GeneratedX86Opcode.code (if store then .storeXmm0 else .loadXmm0))
+    dispatchObservedMemoryStep env frame arena fresh current (GeneratedX86Opcode.code (if store then .storeXmm0 else .loadXmm0))
       flags aux dst src value nextPc state = none := by
   cases store <;> rfl
 
 theorem xmm_memory_binding_before_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : XmmMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchObservedMemoryStep env frame arena current code flags aux dst src value nextPc state = none := by
+    dispatchObservedMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = none := by
   cases binding
-  · exact before_xmm_memory_none env frame arena current false flags aux dst src value nextPc state
-  · exact before_xmm_memory_none env frame arena current true flags aux dst src value nextPc state
+  · exact before_xmm_memory_none env frame arena fresh current false flags aux dst src value nextPc state
+  · exact before_xmm_memory_none env frame arena fresh current true flags aux dst src value nextPc state
 
 inductive XmmMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -4300,29 +4362,29 @@ inductive XmmMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       XmmMemoryStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem xmm_memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : XmmMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchXmmMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchXmmMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := observed_memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := observed_memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchXmmMemoryStep, dispatched], refined⟩
   | memory fields =>
       obtain ⟨actual, dispatched, refined⟩ := xmm_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
       exact ⟨actual, by rw [dispatchXmmMemoryStep,
-        xmm_memory_binding_before_none env frame arena current code flags aux dst src value nextPc state native fields]; exact dispatched, refined⟩
+        xmm_memory_binding_before_none env frame arena fresh current code flags aux dst src value nextPc state native fields]; exact dispatched, refined⟩
 
 /-- Both generic tokens retain the selected constant opcode and the complete
 interpreter dispatch; earlier tokens keep their established body routes. -/
 def specializedXmmMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
-  if token = .loadXmm0 then dispatchXmmMemoryStep env frame arena current (GeneratedX86Opcode.code .loadXmm0) flags aux dst src value nextPc state
-  else if token = .storeXmm0 then dispatchXmmMemoryStep env frame arena current (GeneratedX86Opcode.code .storeXmm0) flags aux dst src value nextPc state
-  else specializedObservedMemoryStep env frame arena current token flags aux dst src value nextPc state
+  if token = .loadXmm0 then dispatchXmmMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .loadXmm0) flags aux dst src value nextPc state
+  else if token = .storeXmm0 then dispatchXmmMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .storeXmm0) flags aux dst src value nextPc state
+  else specializedObservedMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def xmmMemoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .loadXmm0 then some .loadXmm0 else if token = .storeXmm0 then some .storeXmm0 else observedMemoryStepTokenOpcode token
@@ -4348,11 +4410,11 @@ private theorem earlier_token_excludes_xmm_memory (token : GeneratedX86Specializ
   all_goals decide
 
 theorem xmm_memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : xmmMemoryStepTokenOpcode token = some opcode) :
-    specializedXmmMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchXmmMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedXmmMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchXmmMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases load : token = .loadXmm0
   · subst token
     simp only [xmmMemoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -4367,32 +4429,32 @@ theorem xmm_memory_step_token_body_matches (env : EntryEnvironment.Environment) 
         simpa only [xmmMemoryStepTokenOpcode, load, store, ↓reduceIte] using selected
       obtain ⟨notLoad, notStore⟩ := earlier_token_excludes_xmm_memory token opcode earlier
       simp only [specializedXmmMemoryStep, load, store, ↓reduceIte]
-      rw [observed_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [observed_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchXmmMemoryStep
-      cases dispatched : dispatchObservedMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+      cases dispatched : dispatchObservedMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
         simp [dispatched, xmmMemoryRegisters, notLoad, notStore]
 
 theorem xmm_memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : xmmMemoryStepTokenOpcode token = some opcode)
     (binding : XmmMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedXmmMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedXmmMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [xmm_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact xmm_memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [xmm_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact xmm_memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem xmm_memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : xmmMemoryStepTokenOpcode token = some opcode)
     (binding : XmmMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedXmmMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedXmmMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := xmm_memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := xmm_memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4431,16 +4493,16 @@ theorem rep_memory_registers_refine (env : EntryEnvironment.Environment) (frame 
       rfl
 
 def dispatchRepMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchXmmMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchXmmMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => repMemoryRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_rep_memory_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchXmmMemoryStep env frame arena current (GeneratedX86Opcode.code .repMovs) flags aux dst src value nextPc state = none := rfl
+    dispatchXmmMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .repMovs) flags aux dst src value nextPc state = none := rfl
 
 inductive RepMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -4452,14 +4514,14 @@ inductive RepMemoryStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       RepMemoryStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem rep_memory_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : RepMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchRepMemoryStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchRepMemoryStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := xmm_memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := xmm_memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchRepMemoryStep, dispatched], refined⟩
   | memory fields =>
       obtain ⟨actual, dispatched, refined⟩ := rep_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
@@ -4469,11 +4531,11 @@ theorem rep_memory_simulator_step_refines (env : EntryEnvironment.Environment) (
 /-- The generic REP token selects its fixed opcode through the complete
 interpreter dispatcher; earlier tokens retain their established routes. -/
 def specializedRepMemoryStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
-  if token = .repMovs then dispatchRepMemoryStep env frame arena current (GeneratedX86Opcode.code .repMovs) flags aux dst src value nextPc state
-  else specializedXmmMemoryStep env frame arena current token flags aux dst src value nextPc state
+  if token = .repMovs then dispatchRepMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .repMovs) flags aux dst src value nextPc state
+  else specializedXmmMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def repMemoryStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .repMovs then some .repMovs else xmmMemoryStepTokenOpcode token
@@ -4500,11 +4562,11 @@ private theorem earlier_token_excludes_rep_memory (token : GeneratedX86Specializ
   all_goals decide
 
 theorem rep_memory_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : repMemoryStepTokenOpcode token = some opcode) :
-    specializedRepMemoryStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchRepMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedRepMemoryStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchRepMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases copy : token = .repMovs
   · subst token
     simp only [repMemoryStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -4514,32 +4576,32 @@ theorem rep_memory_step_token_body_matches (env : EntryEnvironment.Environment) 
       simpa only [repMemoryStepTokenOpcode, copy, ↓reduceIte] using selected
     have different := earlier_token_excludes_rep_memory token opcode earlier
     simp only [specializedRepMemoryStep, copy, ↓reduceIte]
-    rw [xmm_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    rw [xmm_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
     unfold dispatchRepMemoryStep
-    cases dispatched : dispatchXmmMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+    cases dispatched : dispatchXmmMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
       simp [dispatched, repMemoryRegisters, different]
 
 theorem rep_memory_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : repMemoryStepTokenOpcode token = some opcode)
     (binding : RepMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedRepMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRepMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [rep_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact rep_memory_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [rep_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact rep_memory_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem rep_memory_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : repMemoryStepTokenOpcode token = some opcode)
     (binding : RepMemoryStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedRepMemoryStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedRepMemoryStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := rep_memory_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := rep_memory_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4569,16 +4631,16 @@ theorem call_label_registers_refine (env : EntryEnvironment.Environment) (frame 
         call_label_frame_step_refines env frame arena state value nextPc canonical writable⟩
 
 def dispatchCallLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchRepMemoryStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchRepMemoryStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => callLabelRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_call_label_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchRepMemoryStep env frame arena current (GeneratedX86Opcode.code .call) flags aux dst src value nextPc state = none := rfl
+    dispatchRepMemoryStep env frame arena fresh current (GeneratedX86Opcode.code .call) flags aux dst src value nextPc state = none := rfl
 
 inductive CallLabelStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -4590,14 +4652,14 @@ inductive CallLabelStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       CallLabelStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem call_label_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : CallLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchCallLabelStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchCallLabelStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := rep_memory_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := rep_memory_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchCallLabelStep, dispatched], refined⟩
   | memory fields =>
       obtain ⟨actual, dispatched, refined⟩ := call_label_registers_refine env frame arena code flags aux dst src value nextPc state native fields
@@ -4607,11 +4669,11 @@ theorem call_label_simulator_step_refines (env : EntryEnvironment.Environment) (
 /-- The CALL branch token emits the same saved-word/target-label transfer.
 Earlier tokens retain their established routes. -/
 def specializedCallLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .call then callLabelRegisters env frame arena (GeneratedX86Opcode.code .call) flags aux dst src value nextPc state
-  else specializedRepMemoryStep env frame arena current token flags aux dst src value nextPc state
+  else specializedRepMemoryStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def callLabelStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .call then some .call else repMemoryStepTokenOpcode token
@@ -4638,11 +4700,11 @@ private theorem earlier_token_excludes_call_label (token : GeneratedX86Specializ
   all_goals decide
 
 theorem call_label_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : callLabelStepTokenOpcode token = some opcode) :
-    specializedCallLabelStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchCallLabelStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedCallLabelStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchCallLabelStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases copy : token = .call
   · subst token
     simp only [callLabelStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -4652,32 +4714,32 @@ theorem call_label_step_token_body_matches (env : EntryEnvironment.Environment) 
       simpa only [callLabelStepTokenOpcode, copy, ↓reduceIte] using selected
     have different := earlier_token_excludes_call_label token opcode earlier
     simp only [specializedCallLabelStep, copy, ↓reduceIte]
-    rw [rep_memory_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    rw [rep_memory_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
     unfold dispatchCallLabelStep
-    cases dispatched : dispatchRepMemoryStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+    cases dispatched : dispatchRepMemoryStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
       simp [dispatched, callLabelRegisters, different]
 
 theorem call_label_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : callLabelStepTokenOpcode token = some opcode)
     (binding : CallLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedCallLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedCallLabelStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [call_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact call_label_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [call_label_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact call_label_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem call_label_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : callLabelStepTokenOpcode token = some opcode)
     (binding : CallLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedCallLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedCallLabelStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := call_label_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := call_label_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4709,16 +4771,16 @@ theorem return_label_registers_refine (env : EntryEnvironment.Environment) (fram
         return_label_frame_step_refines env frame arena state nextPc readable canonical⟩
 
 def dispatchReturnLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchCallLabelStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchCallLabelStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => returnLabelRegisters env frame arena code flags aux dst src value nextPc state
 
 theorem before_return_label_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchCallLabelStep env frame arena current (GeneratedX86Opcode.code .ret) flags aux dst src value nextPc state = none := rfl
+    dispatchCallLabelStep env frame arena fresh current (GeneratedX86Opcode.code .ret) flags aux dst src value nextPc state = none := rfl
 
 inductive ReturnLabelStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -4730,14 +4792,14 @@ inductive ReturnLabelStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byt
       ReturnLabelStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem return_label_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchReturnLabelStep env frame arena current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchReturnLabelStep env frame arena fresh current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := call_label_simulator_step_refines env frame arena current code flags aux dst src value nextPc state native fields
+      obtain ⟨actual, dispatched, refined⟩ := call_label_simulator_step_refines env frame arena fresh current code flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchReturnLabelStep, dispatched], refined⟩
   | memory fields =>
       obtain ⟨actual, dispatched, refined⟩ := return_label_registers_refine env frame arena code flags aux dst src value nextPc state native fields
@@ -4747,11 +4809,11 @@ theorem return_label_simulator_step_refines (env : EntryEnvironment.Environment)
 /-- This RET token interpretation covers the emitted SUB_RET branch.
 The source emission relation selects this body for a subroutine return. -/
 def specializedReturnLabelStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .ret then returnLabelRegisters env frame arena (GeneratedX86Opcode.code .ret) flags aux dst src value nextPc state
-  else specializedCallLabelStep env frame arena current token flags aux dst src value nextPc state
+  else specializedCallLabelStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def returnLabelStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .ret then some .ret else callLabelStepTokenOpcode token
@@ -4778,11 +4840,11 @@ private theorem earlier_token_excludes_return_label (token : GeneratedX86Special
   all_goals decide
 
 theorem return_label_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : returnLabelStepTokenOpcode token = some opcode) :
-    specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state =
-      dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedReturnLabelStep env frame arena fresh current token flags aux dst src value nextPc state =
+      dispatchReturnLabelStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases copy : token = .ret
   · subst token
     simp only [returnLabelStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
@@ -4792,32 +4854,32 @@ theorem return_label_step_token_body_matches (env : EntryEnvironment.Environment
       simpa only [returnLabelStepTokenOpcode, copy, ↓reduceIte] using selected
     have different := earlier_token_excludes_return_label token opcode earlier
     simp only [specializedReturnLabelStep, copy, ↓reduceIte]
-    rw [call_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+    rw [call_label_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
     unfold dispatchReturnLabelStep
-    cases dispatched : dispatchCallLabelStep env frame arena current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+    cases dispatched : dispatchCallLabelStep env frame arena fresh current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
       simp [dispatched, returnLabelRegisters, different]
 
 theorem return_label_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : returnLabelStepTokenOpcode token = some opcode)
     (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedReturnLabelStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [return_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state selected]
-  exact return_label_simulator_step_refines env frame arena current _ flags aux dst src value nextPc state native binding
+  rw [return_label_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state selected]
+  exact return_label_simulator_step_refines env frame arena fresh current _ flags aux dst src value nextPc state native binding
 
 theorem return_label_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : returnLabelStepTokenOpcode token = some opcode)
     (binding : ReturnLabelStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedReturnLabelStep env frame arena fresh current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := return_label_simulator_token_step_refines env frame arena current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := return_label_simulator_token_step_refines env frame arena fresh current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -4877,23 +4939,23 @@ theorem return_switch_step_refines (env : EntryEnvironment.Environment) (frame :
 /-- The existing RET token body supplies this source-emitted finite switch.
 All ignored fields and every table entry retain arbitrary values. -/
 theorem return_switch_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
     (if targets.contains (returnStackWord env frame arena state) then
-      specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state else none) =
+      specializedReturnLabelStep env frame arena fresh current .ret flags aux dst src value nextPc state else none) =
       generatedReturnSwitchBody env frame arena state targets := by
   rw [return_switch_body_matches]
   simp only [specializedReturnLabelStep, ↓reduceIte, returnLabelRegisters, ↓reduceIte,
     specializedReturnSwitch]
 
 theorem return_switch_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (member : targets.contains (returnStackWord env frame arena state) = true)
     (readable : permitted state.raw.memory.readable (registerValue env frame arena state 4) 8 = true)
     (canonical : Reference.X86.canonicalTarget state.raw.addressWidth (returnStackWord env frame arena state) = true) :
     ∃ actual, generatedReturnSwitchBody env frame arena state targets = some actual ∧
-      specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state = some actual ∧
+      specializedReturnLabelStep env frame arena fresh current .ret flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step (.returnNear 0 nextPc) (nativeRegisters env frame arena state) actual := by
   refine ⟨returnLabelFrame env frame arena state, (return_switch_selected env frame arena state targets).2 member, ?_,
     return_label_frame_step_refines env frame arena state nextPc readable canonical⟩
@@ -5124,16 +5186,16 @@ theorem pointer_load_registers_refine (env : EntryEnvironment.Environment) (fram
 /-- The shared numeric dispatcher extends all preceding scalar, memory,
 control and internal-return arms with the two pointer-load prefix bodies. -/
 def dispatchPointerStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
-  match dispatchReturnLabelStep env frame arena current code flags aux dst src value nextPc state with
+  match dispatchReturnLabelStep env frame arena fresh current code flags aux dst src value nextPc state with
   | some result => some result
   | none => pointerLoadRegisters env frame arena tags code flags aux dst src value nextPc state
 
 theorem before_pointer_load_none (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (op : GeneratedX86PtrWrite.Op) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (op : GeneratedX86PtrWrite.Op) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
-    dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code (pointerOpcode op))
+    dispatchReturnLabelStep env frame arena fresh current (GeneratedX86Opcode.code (pointerOpcode op))
       flags aux dst src value nextPc state = none := by
   cases op <;> rfl
 
@@ -5147,14 +5209,14 @@ inductive PointerStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
       PointerStepBinding flags aux dst src value nextPc nativeState code native
 
 theorem pointer_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : PointerStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchPointerStep env frame arena tags current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchPointerStep env frame arena fresh tags current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier fields =>
-      obtain ⟨actual, dispatched, refined⟩ := return_label_simulator_step_refines env frame arena current code
+      obtain ⟨actual, dispatched, refined⟩ := return_label_simulator_step_refines env frame arena fresh current code
         flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchPointerStep, dispatched], refined⟩
   | pointer fields =>
@@ -5164,14 +5226,14 @@ theorem pointer_simulator_step_refines (env : EntryEnvironment.Environment) (fra
       exact ⟨actual, by rw [dispatchPointerStep, before_pointer_load_none]; exact dispatched, refined⟩
 
 def specializedPointerStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .movLoadMapPtr then
     pointerLoadRegisters env frame arena tags (GeneratedX86Opcode.code .movLoadMapPtr) flags aux dst src value nextPc state
   else if token = .movLoadHelperId then
     pointerLoadRegisters env frame arena tags (GeneratedX86Opcode.code .movLoadHelperId) flags aux dst src value nextPc state
-  else specializedReturnLabelStep env frame arena current token flags aux dst src value nextPc state
+  else specializedReturnLabelStep env frame arena fresh current token flags aux dst src value nextPc state
 
 def pointerStepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   if token = .movLoadMapPtr then some .movLoadMapPtr
@@ -5202,61 +5264,61 @@ private theorem earlier_token_excludes_pointer (token : GeneratedX86Specializati
   all_goals decide
 
 theorem pointer_step_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat)
     (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (selected : pointerStepTokenOpcode token = some opcode) :
-    specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state =
-      dispatchPointerStep env frame arena tags current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+    specializedPointerStep env frame arena fresh tags current token flags aux dst src value nextPc state =
+      dispatchPointerStep env frame arena fresh tags current (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
   by_cases mapToken : token = .movLoadMapPtr
   · subst token
     simp only [pointerStepTokenOpcode, ↓reduceIte, Option.some.injEq] at selected
     subst opcode
-    have before := before_pointer_load_none env frame arena current .movLoadMapPtr flags aux dst src value nextPc state
-    change dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code .movLoadMapPtr)
+    have before := before_pointer_load_none env frame arena fresh current .movLoadMapPtr flags aux dst src value nextPc state
+    change dispatchReturnLabelStep env frame arena fresh current (GeneratedX86Opcode.code .movLoadMapPtr)
       flags aux dst src value nextPc state = none at before
     rw [specializedPointerStep, if_pos rfl, dispatchPointerStep, before]
   · by_cases helperToken : token = .movLoadHelperId
     · subst token
       simp only [pointerStepTokenOpcode, mapToken, ↓reduceIte, Option.some.injEq] at selected
       subst opcode
-      have before := before_pointer_load_none env frame arena current .movLoadHelperId flags aux dst src value nextPc state
-      change dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code .movLoadHelperId)
+      have before := before_pointer_load_none env frame arena fresh current .movLoadHelperId flags aux dst src value nextPc state
+      change dispatchReturnLabelStep env frame arena fresh current (GeneratedX86Opcode.code .movLoadHelperId)
         flags aux dst src value nextPc state = none at before
       rw [specializedPointerStep, if_neg mapToken, if_pos rfl, dispatchPointerStep, before]
     · have earlier : returnLabelStepTokenOpcode token = some opcode := by
         simpa only [pointerStepTokenOpcode, mapToken, helperToken, ↓reduceIte] using selected
       obtain ⟨mapDifferent, helperDifferent⟩ := earlier_token_excludes_pointer token opcode earlier
       simp only [specializedPointerStep, mapToken, helperToken, ↓reduceIte]
-      rw [return_label_step_token_body_matches env frame arena current token opcode flags aux dst src value nextPc state earlier]
+      rw [return_label_step_token_body_matches env frame arena fresh current token opcode flags aux dst src value nextPc state earlier]
       unfold dispatchPointerStep
-      cases dispatched : dispatchReturnLabelStep env frame arena current (GeneratedX86Opcode.code opcode)
+      cases dispatched : dispatchReturnLabelStep env frame arena fresh current (GeneratedX86Opcode.code opcode)
           flags aux dst src value nextPc state <;>
         simp [dispatched, pointerLoadRegisters, pointerLoadPrefix, mapDifferent, helperDifferent]
 
 theorem pointer_simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat)
     (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : pointerStepTokenOpcode token = some opcode)
     (binding : PointerStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) :
-    ∃ actual, specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedPointerStep env frame arena fresh tags current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
-  rw [pointer_step_token_body_matches env frame arena tags current token opcode flags aux dst src value nextPc state selected]
-  exact pointer_simulator_step_refines env frame arena tags current _ flags aux dst src value nextPc state native binding
+  rw [pointer_step_token_body_matches env frame arena fresh tags current token opcode flags aux dst src value nextPc state selected]
+  exact pointer_simulator_step_refines env frame arena fresh tags current _ flags aux dst src value nextPc state native binding
 
 theorem pointer_simulator_token_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat)
     (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (native : Reference.X86.Instruction) (selected : pointerStepTokenOpcode token = some opcode)
     (binding : PointerStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
       (GeneratedX86Opcode.code opcode) native) (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedPointerStep env frame arena fresh tags current token flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := pointer_simulator_token_step_refines env frame arena tags current token opcode
+  obtain ⟨actual, dispatched, refined⟩ := pointer_simulator_token_step_refines env frame arena fresh tags current token opcode
     flags aux dst src value nextPc state native selected binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
@@ -5350,16 +5412,16 @@ theorem return_dispatch_effect (env : EntryEnvironment.Environment) (frame : Ent
 /-- O2 composes the existing RET token prefix with both switch alternatives.
 Every ignored token field and every finite continuation table is quantified. -/
 def specializedReturnDispatchToken (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
     Option ReturnDispatchResult :=
-  (specializedReturnLabelStep env frame arena current .ret flags aux dst src value nextPc state).map
+  (specializedReturnLabelStep env frame arena fresh current .ret flags aux dst src value nextPc state).map
     (fun effect => if targets.contains (returnStackWord env frame arena state) then .label effect else .unresolved effect)
 
 theorem return_dispatch_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) :
-    specializedReturnDispatchToken env frame arena current state targets flags aux dst src value nextPc =
+    specializedReturnDispatchToken env frame arena fresh current state targets flags aux dst src value nextPc =
       some (generatedReturnDispatch env frame arena state targets) := by
   rw [return_dispatch_body_matches]
   simp only [specializedReturnDispatchToken, specializedReturnLabelStep, ↓reduceIte,
@@ -5367,10 +5429,10 @@ theorem return_dispatch_token_body_matches (env : EntryEnvironment.Environment) 
   split <;> rfl
 
 theorem return_dispatch_token_default (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
+    (arena : Reference.Word) (fresh : Nat → Bool) (current : Nat) (state : RegisterState) (targets : List Reference.Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
     (unmatched : targets.contains (returnStackWord env frame arena state) = false) :
-    specializedReturnDispatchToken env frame arena current state targets flags aux dst src value nextPc =
+    specializedReturnDispatchToken env frame arena fresh current state targets flags aux dst src value nextPc =
       some (.unresolved (returnLabelFrame env frame arena state)) := by
   rw [return_dispatch_token_body_matches, return_dispatch_default env frame arena state targets unmatched]
 
@@ -5437,11 +5499,11 @@ theorem rep_full_count_ignores_legacy_fields (env : EntryEnvironment.Environment
 /-- Preserve all established routes and replace only the old immediate/count
 REP model by the current full-RCX body. This defines the model, not a gate. -/
 def dispatchCurrentStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
   if code = GeneratedX86Opcode.code .repMovs then
     repFullCountRegisters env frame arena flags aux dst src value nextPc state
-  else dispatchPointerStep env frame arena tags current code flags aux dst src value nextPc state
+  else dispatchPointerStep env frame arena fresh tags current code flags aux dst src value nextPc state
 
 inductive CurrentStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
@@ -5456,15 +5518,15 @@ inductive CurrentStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
         (.repMovs width false 0 nextPc)
 
 theorem current_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : CurrentStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    ∃ actual, dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchCurrentStep env frame arena fresh tags current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | earlier =>
       rename_i other fields
-      obtain ⟨actual, dispatched, refined⟩ := pointer_simulator_step_refines env frame arena tags current code
+      obtain ⟨actual, dispatched, refined⟩ := pointer_simulator_step_refines env frame arena fresh tags current code
         flags aux dst src value nextPc state native fields
       exact ⟨actual, by simp only [dispatchCurrentStep, if_neg other]; exact dispatched, refined⟩
   | copy width widthField direction successful =>
@@ -5474,47 +5536,47 @@ theorem current_simulator_step_refines (env : EntryEnvironment.Environment) (fra
       rfl
 
 def specializedCurrentStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
     Option (Transition Reference.X86.State) :=
   if token = .repMovs then do
     let width ← widthOf flags
     pure (repFullCountFrame env frame arena state width nextPc)
-  else specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state
+  else specializedPointerStep env frame arena fresh tags current token flags aux dst src value nextPc state
 
 theorem current_rep_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
-    specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state =
-      dispatchCurrentStep env frame arena tags current (GeneratedX86Opcode.code .repMovs)
+    specializedCurrentStep env frame arena fresh tags current .repMovs flags aux dst src value nextPc state =
+      dispatchCurrentStep env frame arena fresh tags current (GeneratedX86Opcode.code .repMovs)
         flags aux dst src value nextPc state := rfl
 
 theorem current_rep_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
     (widthField : WidthBinding flags width) (direction : state.raw.rflags.getLsbD 10 = false)
     (successful : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
       (nativeRegisters env frame arena state)).fault = none) :
-    ∃ actual, specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedCurrentStep env frame arena fresh tags current .repMovs flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) actual := by
   rw [current_rep_token_body_matches]
-  exact current_simulator_step_refines env frame arena tags current _ flags aux dst src value nextPc state _
+  exact current_simulator_step_refines env frame arena fresh tags current _ flags aux dst src value nextPc state _
     (.copy width widthField direction successful)
 
 theorem current_other_dispatch_preserved (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (other : code ≠ GeneratedX86Opcode.code .repMovs) :
-    dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state =
-      dispatchPointerStep env frame arena tags current code flags aux dst src value nextPc state := by
+    dispatchCurrentStep env frame arena fresh tags current code flags aux dst src value nextPc state =
+      dispatchPointerStep env frame arena fresh tags current code flags aux dst src value nextPc state := by
   simp only [dispatchCurrentStep, if_neg other]
 
 theorem current_other_token_preserved (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
     (other : token ≠ .repMovs) :
-    specializedCurrentStep env frame arena tags current token flags aux dst src value nextPc state =
-      specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state := by
+    specializedCurrentStep env frame arena fresh tags current token flags aux dst src value nextPc state =
+      specializedPointerStep env frame arena fresh tags current token flags aux dst src value nextPc state := by
   simp only [specializedCurrentStep, if_neg other]
 
 end KProgFormal.Refinement.X86Dispatcher
@@ -5524,38 +5586,38 @@ open Reference X86NumericAddress
 open Reference.X86 (Register ScalarWidth)
 
 theorem current_rep_token_source_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
     (widthField : WidthBinding flags width)
     (successful : (X86RepMovs.Indexed.loop width nextPc 0 (registerValue env frame arena state 1).toNat
       (nativeRegisters env frame arena state)).fault = none) :
-    specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state =
+    specializedCurrentStep env frame arena fresh tags current .repMovs flags aux dst src value nextPc state =
       some (X86RepMovs.Indexed.handlerStep width nextPc (nativeRegisters env frame arena state)) := by
   simp only [specializedCurrentStep, ↓reduceIte, width_binding_decodes flags width widthField, Option.bind_some]
   change some (repFullCountFrame env frame arena state width nextPc) = _
   rw [rep_full_count_frame_matches_indexed env frame arena state width nextPc successful]
 
 theorem current_rep_token_source_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
     (widthField : WidthBinding flags width) (direction : state.raw.rflags.getLsbD 10 = false)
     (successful : (X86RepMovs.Indexed.loop width nextPc 0 (registerValue env frame arena state 1).toNat
       (nativeRegisters env frame arena state)).fault = none) :
-    ∃ actual, specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, specializedCurrentStep env frame arena fresh tags current .repMovs flags aux dst src value nextPc state = some actual ∧
       Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) actual := by
-  refine ⟨_, current_rep_token_source_body_matches env frame arena tags current flags aux dst src value nextPc
+  refine ⟨_, current_rep_token_source_body_matches env frame arena fresh tags current flags aux dst src value nextPc
     state width widthField successful, ?_⟩
   exact X86RepMovs.Indexed.handler_step_refines width nextPc _ direction successful
 
 theorem current_simulator_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
-    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (arena : Reference.Word) (fresh : Nat → Bool) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
     (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : CurrentStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native)
     (nativeAfter : Transition Reference.X86.State)
     (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
-    ∃ actual, dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state = some actual ∧
+    ∃ actual, dispatchCurrentStep env frame arena fresh tags current code flags aux dst src value nextPc state = some actual ∧
       Reference.X86.matchesTransition native nativeAfter actual := by
-  obtain ⟨actual, dispatched, refined⟩ := current_simulator_step_refines env frame arena tags current code flags aux
+  obtain ⟨actual, dispatched, refined⟩ := current_simulator_step_refines env frame arena fresh tags current code flags aux
     dst src value nextPc state native binding
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 

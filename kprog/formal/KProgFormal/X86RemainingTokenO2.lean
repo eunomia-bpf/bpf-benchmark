@@ -140,21 +140,21 @@ def returnDispatch (env : Refinement.EntryEnvironment.Environment)
 /-- Specialized RET composes its existing token theorem with both internal
 switch alternatives. Invocation emission uses the native-value RAX projection. -/
 def returnTokenBody (env : Refinement.EntryEnvironment.Environment)
-    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (current : Nat)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
     (state : X86CallMemBody.Frame) (mode : ReturnMode)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) : Option ReturnOutcome :=
   match mode with
   | .invocation => some (.invocation ((nativeRegisters env entry arena state.registers).gpr 0 |>.setWidth 32) state)
   | .subroutine targets =>
-      (specializedReturnDispatchToken env entry arena current state.registers targets
+      (specializedReturnDispatchToken env entry arena fresh current state.registers targets
         flags aux dst src value nextPc).map (ReturnOutcome.subroutine (subroutineFrame env entry arena state))
 
 /-- RET O2 covers every mode, finite table, saved word and encoded field. -/
 theorem ret_body_matches (env : Refinement.EntryEnvironment.Environment)
-    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (current : Nat)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
     (state : X86CallMemBody.Frame) (mode : ReturnMode)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
-    returnTokenBody env entry arena current state mode flags aux dst src value nextPc =
+    returnTokenBody env entry arena fresh current state mode flags aux dst src value nextPc =
       returnDispatch env entry arena state mode (GeneratedX86Opcode.code .ret) := by
   cases mode with
   | invocation => rfl
@@ -165,14 +165,14 @@ theorem ret_body_matches (env : Refinement.EntryEnvironment.Environment)
 
 /-- The internal default carries the same captured effect through O2. -/
 theorem ret_default_body_matches (env : Refinement.EntryEnvironment.Environment)
-    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (current : Nat)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
     (state : X86CallMemBody.Frame) (targets : List Word)
     (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word)
     (selected : targets.contains (returnStackWord env entry arena state.registers) = false) :
-    returnTokenBody env entry arena current state (.subroutine targets) flags aux dst src value nextPc =
+    returnTokenBody env entry arena fresh current state (.subroutine targets) flags aux dst src value nextPc =
       some (.subroutine (subroutineFrame env entry arena state)
         (.unresolved (returnLabelFrame env entry arena state.registers))) := by
-  simp only [returnTokenBody, return_dispatch_token_default env entry arena current
+  simp only [returnTokenBody, return_dispatch_token_default env entry arena fresh current
     state.registers targets flags aux dst src value nextPc selected, Option.map_some]
   rfl
 

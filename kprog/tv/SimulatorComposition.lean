@@ -57,8 +57,8 @@ def interpretedToken (env : Artifact → EntryEnvironment.Environment) (frame : 
     (arena : Artifact → Reference.Word) (select : Artifact → Site → NativeState → Prop)
     (a : Artifact) (site : Site) : BlockStep NativeState := fun before trace after =>
   select a site before ∧ X86Dispatcher.stepTokenOpcode site.token=some site.opcode ∧
-    ∃ raw effect, nativeRegisters (env a) (frame a) (arena a) raw=before ∧
-      X86Dispatcher.dispatchStep (env a) (frame a) (arena a) site.current
+    ∃ raw effect fresh, nativeRegisters (env a) (frame a) (arena a) raw=before ∧
+      X86Dispatcher.dispatchStep (env a) (frame a) (arena a) fresh site.current
         (GeneratedX86Opcode.code site.opcode) site.flags site.aux site.dst site.src site.value site.nextPc raw=some effect ∧
       effect.events=trace ∧ effect.state=after
 
@@ -66,8 +66,8 @@ def specializedToken (env : Artifact → EntryEnvironment.Environment) (frame : 
     (arena : Artifact → Reference.Word) (select : Artifact → Site → NativeState → Prop)
     (a : Artifact) (site : Site) : BlockStep NativeState := fun before trace after =>
   select a site before ∧ X86Dispatcher.stepTokenOpcode site.token=some site.opcode ∧
-    ∃ raw effect, nativeRegisters (env a) (frame a) (arena a) raw=before ∧
-      X86Dispatcher.specializedStep (env a) (frame a) (arena a) site.current
+    ∃ raw effect fresh, nativeRegisters (env a) (frame a) (arena a) raw=before ∧
+      X86Dispatcher.specializedStep (env a) (frame a) (arena a) fresh site.current
         site.token site.flags site.aux site.dst site.src site.value site.nextPc raw=some effect ∧
       effect.events=trace ∧ effect.state=after
 
@@ -125,13 +125,14 @@ theorem native_to_interpreted (image : Artifact → Memory)
       (GeneratedX86Opcode.code site.opcode) site.instruction := by
     rw [encode_native]
     exact binding
+  let fresh : Nat → Bool := fun _ => false
   obtain ⟨actual,dispatched,actualStep⟩ := X86Dispatcher.simulator_step_refines
-    (env a) (frame a) (arena a) site.current _ site.flags site.aux site.dst site.src site.value site.nextPc
+    (env a) (frame a) (arena a) fresh site.current _ site.flags site.aux site.dst site.src site.value site.nextPc
     (encode (env a) (frame a) model) site.instruction rawBinding
   rw [encode_native] at actualStep
   have matching := canonical_successors_match site.instruction model reference actual referenceStep actualStep
   have head : interpretedToken env frame arena select a site model trace actual.state :=
-    ⟨modelSelected,tokenSelected,encode (env a) (frame a) model,actual,encode_native _ _ _ _,dispatched,
+    ⟨modelSelected,tokenSelected,encode (env a) (frame a) model,actual,fresh,encode_native _ _ _ _,dispatched,
       matching.1.symm.trans referenceEvents,rfl⟩
   exact ⟨actual.state,by simpa only [List.append_nil] using Execution.next head (Execution.refl actual.state),
     closure actual matching⟩
@@ -146,11 +147,11 @@ theorem interpreted_to_specialized (env : Artifact → EntryEnvironment.Environm
   constructor
   intro before other trace after relation source
   subst other
-  obtain ⟨selected,tokenSelected,raw,effect,input,dispatched,events,state⟩ := source
-  have body := X86Dispatcher.step_token_body_matches (env a) (frame a) (arena a) site.current
+  obtain ⟨selected,tokenSelected,raw,effect,fresh,input,dispatched,events,state⟩ := source
+  have body := X86Dispatcher.step_token_body_matches (env a) (frame a) (arena a) fresh site.current
     site.token site.opcode site.flags site.aux site.dst site.src site.value site.nextPc raw tokenSelected
   have head : specializedToken env frame arena select a site before trace after :=
-    ⟨selected,tokenSelected,raw,effect,input,body.trans dispatched,events,state⟩
+    ⟨selected,tokenSelected,raw,effect,fresh,input,body.trans dispatched,events,state⟩
   exact ⟨after,by simpa only [List.append_nil] using Execution.next head (Execution.refl after),rfl⟩
 
 theorem specialized_reflects (env : Artifact → EntryEnvironment.Environment)
@@ -159,10 +160,10 @@ theorem specialized_reflects (env : Artifact → EntryEnvironment.Environment)
     (before after : NativeState) (trace : List Event)
     (run : specializedToken env frame arena select a site before trace after) :
     interpretedToken env frame arena select a site before trace after := by
-  obtain ⟨selected,tokenSelected,raw,effect,input,dispatched,events,state⟩ := run
-  have body := X86Dispatcher.step_token_body_matches (env a) (frame a) (arena a) site.current
+  obtain ⟨selected,tokenSelected,raw,effect,fresh,input,dispatched,events,state⟩ := run
+  have body := X86Dispatcher.step_token_body_matches (env a) (frame a) (arena a) fresh site.current
     site.token site.opcode site.flags site.aux site.dst site.src site.value site.nextPc raw tokenSelected
-  exact ⟨selected,tokenSelected,raw,effect,input,body.symm.trans dispatched,events,state⟩
+  exact ⟨selected,tokenSelected,raw,effect,fresh,input,body.symm.trans dispatched,events,state⟩
 
 /-- The generic block instance consumes V's actual unified laws. The final
 stage is the actual accepted B relation, supplied once for every artifact. -/
