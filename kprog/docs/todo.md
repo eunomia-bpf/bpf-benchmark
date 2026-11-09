@@ -67,6 +67,8 @@
 - [x] **A** 按协调者21:50决策恢复ARM原始volatile栈表示（本提交）：撤回729/e2e scalar forwarding及六个host fixture中的cache声明/reset，保留全部原有语义assertions、隐式SP release与异常恢复；Python语法通过，direct dispatcher逐字相同。现有host回放单独收据。 host stage完成：GCC8/8 UBSan通过；Clang5/8 UBSan通过，三个child-fault boundary oracle按原Makefile flags全部通过，完整instrumentation诊断保留。11-08参考目录36覆盖文件/203原始观察/36entry名及native身份齐全。
 - [ ] **A/C** 共享reverts完成后，用统一kinsn-free路径进行一次verified回放，与11-08最佳行逐行比较；A负责ARM，C负责x86。
 
+- [x] **A** 协调者21:50要求的ARM helper检查撤回（本提交）：31个output-wrapper使用恢复原helper参数投影，移除below-SP output fault、libc额外prefetch及memcpy scalar-source fault；原有invocation-stack host在GCC/Clang18+UBSan均通过。实际guest回放沿共享revert项继续。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
