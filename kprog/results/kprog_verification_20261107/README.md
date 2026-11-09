@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 34/74 |
-| Raw register dispatcher arm composition | 32/75 | 34/74 |
+| Raw register handler refinement | 32/75 | 40/74 |
+| Raw register dispatcher arm composition | 32/75 | 40/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6636,3 +6636,32 @@ inherited Lean.ofReduceBool dependencies. The
 canonical ISA, C/generated/producer sources, original first-draft diagnostic,
 final compiled module and all proof logs. Numeric raw ARM coverage advances
 32to34/74, with source branch coverage separately6/6.
+
+### ARM raw logical flags and compare-only frame refinement
+
+ANDS_IMM, ANDS_REG, BICS_REG, TST_IMM, TST_REG and TST_BIC_REG now compose
+incoming materialized operand capture, actual immediate/modifier selection,
+generated AND/BIC result and NZCV, scalar width writeback or compare-only
+state preservation. ANDS/BICS read SRC/SRC2 and write DST; TST reads DST/SRC.
+`body_tag_frame` proves exact destination scalarization for writeback and the
+complete unchanged raw tag map for TST. Whole architectural projection keeps
+all NZCV-external flag bits and advances PC4, with exact empty events/fault.
+
+Native W/X/shift amount and modifier identities remain explicit. Immediate
+TST retains arbitrary SRC/SRC2 bytes; immediate ANDS retains arbitrary SRC2.
+Register TST retains arbitrary SRC2, all register forms keep arbitrary unused
+IMM, and omitted modifiers keep arbitrary amount bytes. Unused SRC3 and the
+applicable AUX bytes retain their full byte domains, including NONE255 fields.
+Three production dispatcher equalities derive these source roles and ignored
+fields. One numeric step composes40 raw operations; its emission theorem keeps
+all six source branch families and their native-label identities.
+
+Fourteen new and122 preceding laws audit with module/root checks0, sorryAx0 and94
+inherited Lean.ofReduceBool dependencies. The
+[raw logical-flags receipt](arm-raw-flaglogic.log.gz) retains exact prior public
+source, canonical ISA, C/generated contracts, compiled module and all proof logs.
+Numeric raw ARM coverage advances34to40/74, alongside source branch6/6. Entry,
+data/code-address, C extraction/union and physical/compiler transport remain
+explicit generic interfaces independent of B forwarding and callee storage.
+C's original-ABI ISA48 load-only findings remain linked in the shared TODO for
+physical/model diagnosis with the matching candidate kernel/header profile.

@@ -1818,3 +1818,234 @@ end KProgFormal.Refinement.Arm64RawRegister.Compare
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.step_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.earlier_emission_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.emission_step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.FlagLogic
+open Reference
+open Reference.AArch64 (Register Gpr Width ShiftKind)
+
+/-- ANDS/BICS write DST from SRC/SRC2; TST reads DST/SRC and retains all GPRs.
+The generated operand row chooses an immediate or the actual source modifier. -/
+def body (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width) (dst src rhs : Register)
+    (value : Word) (origins : Origins) (state : State) : Transition State :=
+  let lhs := readRegister origins state (if writeback then src else dst)
+  let right := if GeneratedArm64FlagOperand.immediate (Arm64Logic.FlagDispatch.operandOp writeback immediate)
+    then value else GeneratedArm64Mod.value
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+      (readRegister origins state (if writeback then rhs else src))
+      ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64LogicFlagHandler.apply (if invert then .bic else .and) lhs right
+    (Arm64Register.handlerWidth width)
+  let next := if writeback then writeRegister state dst result.value width else state
+  ⟨advance (Compare.setFlags next (Arm64Logic.flagsWord state.raw.flags result.flags)), [], none⟩
+
+theorem body_projects (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (body invert writeback immediate aux width dst src rhs value origins state) =
+      Arm64Dispatcher.flagLogicBody invert writeback immediate aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value (image origins state) := by
+  cases writeback <;> simp only [body, observe, Bool.false_eq_true, ↓reduceIte, advance_refines,
+    Compare.flags_projects, write_refines, read_refines, Arm64Dispatcher.flagLogicBody,
+    Arm64Move.Fields.register_read, Arm64Move.Fields.register_write, Arm64Register.read_refines,
+    Arm64Register.write_refines] <;> rfl
+
+theorem body_tag_frame (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs : Register) (value : Word) (origins : Origins) (state : State) (r : Gpr) :
+    (body invert writeback immediate aux width dst src rhs value origins state).state.tags r =
+      if writeback then (if r.val = dst.val then 0 else state.tags r) else state.tags r := by
+  cases writeback <;> simp [body, Compare.setFlags, advance, write_tag_frame]
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match Compare.dispatch code aux width dst src rhs src3 value origins state with
+  | some result => some result
+  | none => (Arm64Logic.FlagDispatch.decodeOpcode code).map
+      (fun choice => body choice.1 choice.2.1 choice.2.2 aux width dst src rhs value origins state)
+
+theorem leading_passes (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    Compare.dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback immediate) aux width
+      dst src rhs src3 value origins state = none := by
+  cases invert <;> cases writeback <;> cases immediate <;> rfl
+
+theorem reached (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs src3 : Register) (value : Word) (origins : Origins) (state : State)
+    (native : invert = true → immediate = false) :
+    dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback immediate) aux width dst src rhs src3 value origins state =
+      some (body invert writeback immediate aux width dst src rhs value origins state) := by
+  simp only [dispatch, leading_passes, Arm64Logic.FlagDispatch.decode_code invert writeback immediate native]
+  rfl
+
+theorem production (invert writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs src3 : Register) (unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) (native : invert = true → immediate = false) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback immediate) aux width
+      dst src rhs src3 value origins state).map (observe origins) =
+      Arm64Dispatcher.dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode invert writeback immediate)
+        aux width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs)
+        unused3 value sourceScalar sourceStack (image origins state) := by
+  rw [reached (native := native), Arm64Dispatcher.flag_logic_reached (native := native)]
+  exact congrArg some (body_projects invert writeback immediate aux width dst src rhs value origins state)
+
+theorem production_immediate_unused (writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs src3 : Register) (unusedSrc unused2 unused3 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width dst src rhs src3 value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width
+      (Arm64Register.registerCode dst) (if writeback then Arm64Register.registerCode src else unusedSrc)
+      unused2 unused3 value sourceScalar sourceStack (image origins state) := by
+  rw [reached (native := by simp), Arm64Dispatcher.flag_logic_reached (native := by simp)]
+  apply congrArg some
+  have fixed : Arm64Dispatcher.flagLogicBody false writeback true aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value (image origins state) =
+      Arm64Dispatcher.flagLogicBody false writeback true aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode 31) value (image origins state) := by cases writeback <;> rfl
+  have unused := Arm64Dispatcher.flag_logic_immediate_body writeback aux width dst src unusedSrc unused2 value (image origins state)
+  exact (body_projects false writeback true aux width dst src rhs value origins state).trans (fixed.trans unused.symm)
+
+theorem production_register_unused (invert writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst src rhs src3 : Register) (unused2 unused3 : Byte) (value otherValue : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback false) aux width dst src rhs src3 value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughFlagLogic (Arm64Logic.FlagDispatch.operationCode invert writeback false) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (if writeback then Arm64Register.registerCode rhs else unused2) unused3 otherValue
+      sourceScalar sourceStack (image origins state) := by
+  rw [reached (native := by simp), Arm64Dispatcher.flag_logic_reached (native := by simp)]
+  apply congrArg some
+  have ignored : Arm64Dispatcher.flagLogicBody invert writeback false aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) value (image origins state) =
+      Arm64Dispatcher.flagLogicBody invert writeback false aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode rhs) otherValue (image origins state) := by cases writeback <;> rfl
+  have unused := Arm64Dispatcher.flag_logic_register_body invert writeback aux width dst src rhs unused2 otherValue (image origins state)
+  exact (body_projects invert writeback false aux width dst src rhs value origins state).trans (ignored.trans unused.symm)
+
+theorem immediate_refines (writeback : Bool) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width dst src rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.logicImmediate width (.conjunction false true) (Arm64Move.scalarDestination (if writeback then dst else 31))
+          (if writeback then src else dst) value) (image origins state)) := by
+  rw [production_immediate_unused writeback aux width dst src rhs src3 255 255 255 value false false origins state]
+  exact Arm64Dispatcher.flag_logic_immediate_refines writeback aux width dst src 255 255 255 value false false _
+
+theorem register_refines (invert writeback : Bool) (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src rhs src3 : Register) (lane0 lane3 : Byte) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width dst src rhs src3 value origins state).map (observe origins) = some (Reference.AArch64.step
+        (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width kind amount dst src rhs)) (image origins state)) := by
+  rw [production_register_unused invert writeback _ width dst src rhs src3 255 255 value value false false origins state]
+  exact Arm64Dispatcher.flag_logic_register_refines invert writeback width kind amount dst src rhs 255 255 lane0 lane3 value false false _
+
+theorem unmodified_refines (invert writeback : Bool) (width : Width) (dst src rhs src3 : Register)
+    (amount lane0 lane3 : Byte) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+      (Arm64Shift.Unary.packedAux .none amount lane0 lane3) width dst src rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step (.logic
+        (Arm64Logic.FlagDispatch.instruction invert writeback width .lsl ⟨0, by cases width <;> decide⟩ dst src rhs))
+        (image origins state)) := by
+  rw [production_register_unused invert writeback _ width dst src rhs src3 255 255 value value false false origins state]
+  exact Arm64Dispatcher.flag_logic_unmodified_refines invert writeback width dst src rhs 255 255 amount lane0 lane3 value false false _
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Compare.Binding code aux width dst src rhs src3 value instruction) :
+    (dispatch code aux width dst src rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have prior := Compare.step_refines origins state code aux width dst src rhs src3 value instruction binding
+  unfold dispatch
+  cases leading : Compare.dispatch code aux width dst src rhs src3 value origins state with
+  | none => simp [leading] at prior
+  | some output => simpa only [leading] using prior
+
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Compare.Binding code aux width dst src rhs src3 value instruction) :
+      Binding code aux width dst src rhs src3 value instruction
+  | immediate (writeback : Bool) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register) (value : Word) :
+      Binding (Arm64Logic.FlagDispatch.operationCode false writeback true) aux width dst src rhs src3 value
+        (.logicImmediate width (.conjunction false true) (Arm64Move.scalarDestination (if writeback then dst else 31))
+          (if writeback then src else dst) value)
+  | register (invert writeback : Bool) (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+      (dst src rhs src3 : Register) (lane0 lane3 : Byte) (value : Word) :
+      Binding (Arm64Logic.FlagDispatch.operationCode invert writeback false)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+        width dst src rhs src3 value (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width kind amount dst src rhs))
+  | unmodified (invert writeback : Bool) (width : Width) (dst src rhs src3 : Register)
+      (amount lane0 lane3 : Byte) (value : Word) :
+      Binding (Arm64Logic.FlagDispatch.operationCode invert writeback false) (Arm64Shift.Unary.packedAux .none amount lane0 lane3)
+        width dst src rhs src3 value (.logic (Arm64Logic.FlagDispatch.instruction invert writeback width .lsl
+          ⟨0, by cases width <;> decide⟩ dst src rhs))
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src rhs src3 value instruction) :
+    (dispatch code aux width dst src rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src rhs src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst src rhs src3 value instruction bound
+  | immediate => apply immediate_refines
+  | register => apply register_refines
+  | unmodified => apply unmodified_refines
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Branch.Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .execute code aux width dst src rhs src3 value => dispatch code aux width dst src rhs src3 value origins state
+  | _ => Compare.dispatchEmission nativeAddress emission origins state
+
+theorem earlier_emission_step (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : Compare.EmissionBinding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have prior := Compare.emission_step_refines nativeAddress emission origins state instruction binding
+  cases emission with
+  | execute code aux width dst src rhs src3 value =>
+      change (Compare.dispatch code aux width dst src rhs src3 value origins state).map (observe origins) = _ at prior
+      change (dispatch code aux width dst src rhs src3 value origins state).map (observe origins) = _
+      unfold dispatch
+      cases leading : Compare.dispatch code aux width dst src rhs src3 value origins state with
+      | none => simp [leading] at prior
+      | some output => simpa only [leading] using prior
+  | jump current target => exact prior
+  | condition code current fallthrough target => exact prior
+  | zero width nonzero src current fallthrough target => exact prior
+  | bit nonzero src bit current fallthrough target => exact prior
+
+inductive EmissionBinding (nativeAddress : Word → Word) (pc : Word) : Branch.Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Branch.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Compare.EmissionBinding nativeAddress pc emission instruction) : EmissionBinding nativeAddress pc emission instruction
+  | execute (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Binding code aux width dst src rhs src3 value instruction) :
+      EmissionBinding nativeAddress pc (.execute code aux width dst src rhs src3 value) instruction
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : EmissionBinding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound => exact earlier_emission_step nativeAddress emission origins state instruction bound
+  | execute code aux width dst src rhs src3 value instruction bound =>
+      exact step_refines origins state code aux width dst src rhs src3 value instruction bound
+
+end KProgFormal.Refinement.Arm64RawRegister.FlagLogic
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.body_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.leading_passes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.production_immediate_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.production_register_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.unmodified_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.step_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.earlier_emission_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.FlagLogic.emission_step_refines

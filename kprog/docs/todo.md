@@ -79,7 +79,7 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 34/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 40/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
@@ -96,6 +96,7 @@
 - [ ] **V** ARM六族source-control的selected硬件/official-model回放与native标签提取/数据和代码地址对应接口；通用label-map定理已在raw源分支批次给出，数值catalogue保持独立。
 - [x] **V** ARM raw ORN_REG：物化SRC/SRC2、实际modifier/amount、四类native shift与omitted modifier任意amount、width/tag写回、全部别名/XZR和unused字节含255；production ORN dispatcher、32操作raw step以及保留六类源分支的统一emission step；新增12条及前91条审计/模块/root通过（本提交，raw32/74）。
 - [x] **V** ARM raw CCMP_IMM/CCMP_REG：DST/SRC物化、输入NZCV、实际条件/比较/fallback low4、完整rawGPR/tag/data frame与NZCV外flag位、native IMM5/WX/NV归一化、unused字段含255和任意IMM；production dispatcher、34数值操作step与六类源分支统一emission step，新增19条及前103条审计/模块/root通过（本提交，raw34/74）。
+- [x] **V** ARM raw ANDS_IMM/ANDS_REG/BICS_REG/TST_IMM/TST_REG/TST_BIC_REG：实际操作数角色/物化、immediate/modifier、AND/BIC result/NZCV、scalar写回或完整TST raw/tag frame、native WX/shift与omitted amount、unused字段含255/任意IMM；production dispatcher、40数值step与六类源分支emission step，新增14条及前122条审计/模块/root通过（本提交，raw40/74）。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
@@ -105,6 +106,7 @@
 - [x] **V** DIV：AUX bit0 的 signed/unsigned 分流、任意 fresh flags、寄存器/捕获操作数、token/dispatcher 与通用块组合（099a096fb）。
 - [x] **V** DIV：signed/unsigned 当前具体 C-model 全分支，word 算术直接执行于 raw/tag handler，并接入字段、dispatcher 和 O2 token 定理（本提交；71/75）。
 - [ ] **V** 全 simulator 的 C 源解释与 Lean C-model 对应关系（包括 DIV、ROR、ANDN/BZHI 等当前 C-model）；编译 B 与物理内存/入口/ABI 对应关系继续按各项收尾。
+- [ ] **C/V** 原始ABI ISA48的三个load-only accepted_finding：uninitialized_stack、immediate_push_branch、stack_base_flags（C完整before收据7cc7c2106，原字节/前S17阶段保留，negative native执行0）；C对齐六保存寄存器kernel/header回放，V跟踪通用模型与入口/stack/flag/物理compiler对应，保留明确版本前提。
 - [x] **V** RET：现有 x86/ARM callee 标签/值/SP 退出判定、正常返回的完整 frame、x86 RET token guard，以及 native-return/JIT-result 的 callee/SP 前提组合（本提交，15 条组件定理）。
 - [x] **V** RET：内部 STACK_RELEASE 的区间 fresh 字节、已声明 below-SP word 的 tag/valid 清除、payload/live cell 保留、saved-word 捕获与 selected/default token 组合（本提交，17 条组件定理）。
 - [x] **V** RET：owned64read 的 scalar forwarding/非对齐字节路径、字节/scalar coherence 推导 saved-read 前提、live-read 保留与重新分配读取当前字节（本提交，9 条定理；前序 17 条 lifetime 重新审计）。

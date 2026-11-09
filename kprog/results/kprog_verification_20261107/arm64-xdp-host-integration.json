@@ -78410,5 +78410,40 @@
       "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
     },
     "scope": "RawCCMP2 +prior32numeric/sixsource branches; actualDSTleft/SRCoptionalright/inputNZCV/generatedcompareorlow4fallback/PC4, completeGPR/tag/data andotherflags retained. NativeIMM5/WX/NVnormalization, arbitraryfallbackhighbits/unusedbytefields including255 andregisterunusedIMM. Productiondispatcher equality andcombined numeric34+source6 step. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
+  },
+  "arm64_raw_logical_flags_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "21bbdbd04797d1b727121a2044f54e5fee1643ce280570aa5d4846a79d291699",
+      "sorryAx": 0,
+      "reduction_bridge": 94,
+      "scope": "Raw six ANDS/BICS/TST operations plus prior34numericraw/sixsource branches; actual incoming operand roles/materialization/modifier selection/generatedAND-BIC value+NZCV, scalarizing writeback or rawGPR/tag preserving compare. NativeWX/shift domains and arbitrary ignored fields/omittedamount, full architecture and combined step. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_ANDS_IMM",
+      "ARM64_OP_ANDS_REG",
+      "ARM64_OP_BICS_REG",
+      "ARM64_OP_TST_IMM",
+      "ARM64_OP_TST_REG",
+      "ARM64_OP_TST_BIC_REG"
+    ],
+    "raw_operation_count": 40,
+    "source_branch_count": 6,
+    "new_audits": 14,
+    "total_audits": 136,
+    "archive": "arm-raw-flaglogic.log.gz",
+    "source_snapshots": {
+      "source-arm64_mod.h.txt": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "106c76908c5401ecb860cef23b384e99cd3f916c08a740637fc4602b69872bfc",
+      "source-arm64_flag_operand.h.txt": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-arm64_logic_flag_handler.h.txt": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-Arm64Logic.lean.txt": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
+    },
+    "scope": "SixANDS/BICS/TST ops andprior34numeric/sixsource branches; actualoperandroles/materialization/immediate-modifier/generatedAND-BIC value+NZCV/widthtagwrite orcompareframe. Allaliases/XZR/nativeWXshift/omittedamount/unusedbytesincl255/unusedIMM; fullarchitecture andotherflagbits/events/fault/PC4. Three productiondispatcher equalities andnumeric40/source6 emissionstep. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
   }
 }
