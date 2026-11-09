@@ -1,27 +1,27 @@
 {
-  "utc": "2026-11-09T08:01:20.214312+00:00",
-  "scope": "Live original catalog/dynptr family and published complete application attempts",
+  "utc": "2026-11-09T08:30:18.986859+00:00",
+  "scope": "Complete original ARM catalog and dynptr terminals; current whole BCC scalar-forwarding replay",
   "catalog": {
     "expected_native_entries": 380,
     "original_annotation_rows": 1917,
     "counts": {
       "catalog_rows": 1917,
-      "attempted": 336,
-      "submitted": 336,
-      "installed": 43,
-      "verifier_rejected": 89,
-      "generation_failed": 204,
+      "attempted": 380,
+      "submitted": 380,
+      "installed": 52,
+      "verifier_rejected": 107,
+      "generation_failed": 221,
       "compilation_failed": 0,
       "resource_failed": 0,
       "transport_failed": 0,
       "load_failed": 0,
       "skipped": 0,
-      "failure": 83,
-      "failure_agrees": 80,
+      "failure": 92,
+      "failure_agrees": 89,
       "failure_installed": 3,
-      "success": 49,
-      "success_agrees": 40,
-      "success_installed": 40
+      "success": 67,
+      "success_agrees": 49,
+      "success_installed": 49
     },
     "load_only_native_executions": 0,
     "launch_publication": "907403f3e9ea7ca8740cc6dcd1229f4c287d0843",
@@ -32,23 +32,34 @@
         "program": "test_dynptr_reg_type",
         "expect": "failure",
         "stage": "installed",
-        "request_id": 110
+        "request_id": 110,
+        "native_sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78"
       },
       {
         "file": "map_kptr_fail.c",
         "program": "misaligned_access_read",
         "expect": "failure",
         "stage": "installed",
-        "request_id": 152
+        "request_id": 152,
+        "native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b"
       },
       {
         "file": "test_global_func14.c",
         "program": "global_func14",
         "expect": "failure",
         "stage": "installed",
-        "request_id": 217
+        "request_id": 217,
+        "native_sha256": "73acd2144dc795197c51829ce5b393fc5114745bdee7c24fdf3c9afab493ed6c"
       }
-    ]
+    ],
+    "phase": "finished",
+    "actual_archive": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/trusted-arm64-service-result/run-20261109T052325774307Z.tar.gz",
+    "observed_request_header_epochs": {
+      "8055449df2b6d2783bda4ab90005c8cda44cdf01a06d15d1070fb4cdeda046eb": 272,
+      "d0626a0eda11f38e92a9da1347a8380df7102471b4be8b9e50ca6001a1569459": 11,
+      "2f98fec109486f186be41e39ed1fc4188f42a319e2f68655b1aa35d663492983": 85,
+      "6cb4d7c08f0685ce9fa08db7a9ec4f758b5279e2bd733612c350e5401a111117": 12
+    }
   },
   "Tracee": {
     "launch_publication": "3f6a6b5e43c9f8d5e6cb4f49d810bc7bd1ef1fd1",
@@ -159,24 +170,26 @@
     "launch": "7f1f43eab",
     "counts": {
       "catalog_rows": 86,
-      "attempted": 58,
-      "submitted": 58,
-      "installed": 0,
-      "verifier_rejected": 36,
-      "generation_failed": 22,
+      "attempted": 81,
+      "submitted": 81,
+      "installed": 1,
+      "verifier_rejected": 38,
+      "generation_failed": 42,
       "compilation_failed": 0,
       "resource_failed": 0,
       "transport_failed": 0,
       "load_failed": 0,
       "skipped": 0,
-      "failure": 34,
-      "failure_agrees": 34,
-      "failure_installed": 0,
+      "failure": 37,
+      "failure_agrees": 36,
+      "failure_installed": 1,
       "success": 2,
       "success_agrees": 0,
       "success_installed": 0
     },
     "raw_snapshot": "dynptr-access/qemu/progress.json.gz",
-    "load_only_native_executions": 0
+    "load_only_native_executions": 0,
+    "phase": "finished",
+    "terminal": "f4cc8d549"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T08:17:21.537171+00:00",
+  "utc": "2026-11-09T08:30:18.885685+00:00",
   "scope": "Complete direct ARM original native catalog; installed is a load-only stage; native execution records retain their own outcomes",
   "epochs": [
     {
@@ -269,6 +269,79 @@
           "stage": "installed"
         }
       ]
+    },
+    {
+      "epoch": "current-kfunc-complete-observed-source-epochs",
+      "publication_pending": "Actual guest raw collection follows the original wrapper255e11210",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/summary.json",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 380,
+        "submitted": 380,
+        "installed": 52,
+        "verifier_rejected": 107,
+        "generation_failed": 221,
+        "compilation_failed": 0,
+        "resource_failed": 0,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 92,
+        "failure_agrees": 89,
+        "failure_installed": 3,
+        "success": 67,
+        "success_agrees": 49,
+        "success_installed": 49
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 92,
+          "installed": 3,
+          "verifier_rejected": 89,
+          "agrees": 89
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 67,
+          "installed": 49,
+          "verifier_rejected": 18,
+          "agrees": 49
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "expect": "failure",
+          "stage": "installed",
+          "request_id": 110,
+          "native_sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_read",
+          "expect": "failure",
+          "stage": "installed",
+          "request_id": 152,
+          "native_sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b"
+        },
+        {
+          "file": "test_global_func14.c",
+          "program": "global_func14",
+          "expect": "failure",
+          "stage": "installed",
+          "request_id": 217,
+          "native_sha256": "73acd2144dc795197c51829ce5b393fc5114745bdee7c24fdf3c9afab493ed6c"
+        }
+      ],
+      "request_source_epochs": {
+        "8055449df2b6d2783bda4ab90005c8cda44cdf01a06d15d1070fb4cdeda046eb": 272,
+        "d0626a0eda11f38e92a9da1347a8380df7102471b4be8b9e50ca6001a1569459": 11,
+        "2f98fec109486f186be41e39ed1fc4188f42a319e2f68655b1aa35d663492983": 85,
+        "6cb4d7c08f0685ce9fa08db7a9ec4f758b5279e2bd733612c350e5401a111117": 12
+      },
+      "native_test_run": 0
     }
   ],
   "family_epochs": [
