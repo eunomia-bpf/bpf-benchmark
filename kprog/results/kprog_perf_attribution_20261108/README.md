@@ -560,6 +560,38 @@ failure worth keeping distinct: it replaced 8 programs and had 3 refused with
 pre-load-site-ABI signature. That run is baseline-only (1 sample) and is not
 in a full-length table.
 
+### The ceiling, measured as a share of the guest's busy CPUs
+
+The operator asks for BPF seconds over duration times the busy CPUs, so the
+share the native code can move is a measured figure rather than an assumed
+one. Both complete current-ABI runs, eight guest CPUs:
+
+| app | arm | BPF seconds | duration | share of 8 CPUs |
+| --- | --- | ---: | ---: | ---: |
+| bcc/set | JIT | 777.5 | 542.1 s | **17.93%** |
+| bcc/set | native-requested | 784.3 | 541.1 s | 18.12% |
+| katran | JIT | 174.1 | 540.2 s | **4.03%** |
+| katran | native-requested | 175.4 | 540.3 s | 4.06% |
+
+These are hard ceilings on each application's achievable native/JIT
+throughput ratio, not estimates: an application whose programs consume 17.9%
+of the guest's CPU time cannot gain more than 17.9% in throughput even if the
+native body becomes free, and one at 4.0% cannot gain more than 4.0%.
+
+That reframes the target. A 1.20x to 1.40x geomean needs the six
+applications' BPF shares to be large enough for the native body to matter,
+and Katran -- the application the archive credited with 1.102x -- spends only
+4.0% of its CPU time inside the program. Its measured ratio has been 0.86x to
+1.02x across six runs, which is consistent with a 4% share: whatever the
+native body does, the packet path dominates.
+
+So for Katran the archive's 1.102x cannot come from making the body faster;
+it has to come from something the body changes about the packet path, or it
+was a 4%-share artefact of the pre-restore workload. For BCC, with a 17.9%
+share, a faster body has real headroom -- 1.20x would need the native body
+about 14% cheaper, which is inside the range the body-level measurements
+report.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
