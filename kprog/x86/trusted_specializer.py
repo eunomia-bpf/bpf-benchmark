@@ -11,7 +11,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "kprog"))
-from trusted_generation import declarations, validate_native
+from trusted_generation import context_kind, declarations, validate_native
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
@@ -25,6 +25,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                output_dir: Path, native_link: Path) -> dict:
     validate_native(native_bytes, entry_symbol, "EM_X86_64")
     declarations(metadata)
+    kind = context_kind(metadata["prog_type"])
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, mode=0o700)
     native = output_dir / "request.native.o"
@@ -43,7 +44,6 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     run([native_link, "--input", native, "--symbol", entry_symbol,
          "--mode", "proof", "--preserve-entry-abi", "--output", proof])
     instructions, functions, exit_addr, rodata = gen.parse_native_linked_program(name, output_dir)
-    kind = {6: "xdp", 3: "tc", 8: "cgroup_skb"}.get(metadata["prog_type"], "raw")
     source = output_dir / (name + ".bpf.c")
     text = gen.render_program(name, instructions, functions, kind=kind,
         exit_addr=exit_addr, rodata16=rodata, program_section=metadata["section"],

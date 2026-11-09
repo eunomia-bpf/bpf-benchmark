@@ -16,7 +16,7 @@ import sysconfig
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "kprog"))
-from trusted_generation import declarations, validate_native
+from trusted_generation import context_kind, declarations, validate_native
 sys.path.insert(0, str(ROOT / "kprog/arm64/micro-prog"))
 _SPEC = importlib.util.spec_from_file_location("kprog_arm64_trusted_generator",
     ROOT / "kprog/arm64/micro-prog/generate_micro_sim_proofs.py")
@@ -30,6 +30,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     """Generate fresh simulator source and objects in the worker job directory."""
     validate_native(native_bytes, entry_symbol, "EM_AARCH64")
     declarations(metadata)
+    kind = context_kind(metadata["prog_type"])
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, mode=0o700)
     native = output_dir / "request.native.o"
@@ -48,7 +49,6 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     run([native_link, "--input", native, "--symbol", entry_symbol,
          "--mode", "proof", "--preserve-entry-abi", "--output", native_proof])
     functions, rodata = gen.parse_native_linked_program(gen.Bench(name, entry_symbol, "raw"), output_dir)
-    kind = {6: "xdp", 3: "tc", 8: "cgroup_skb"}.get(metadata["prog_type"], "raw")
     source = output_dir / (name + ".bpf.c")
     text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,
         linked_exit=True, program_section=metadata["section"],
