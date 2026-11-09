@@ -5939,3 +5939,21 @@ primitive/tag/provenance/lifetime, physical exception/table/site/frame/ABI and
 C/compiler/embedding correspondence remain active interfaces. O2/O4 status
 and complete family counts retain their stated partial scope. Sole full
 `b2fd6f3b3f475f84a99566ce95efd8e4705d0e90` retains its earlier immutable source.
+
+### Current full-check continuation and cache relocation
+
+The full check at `b2fd6f3b3f475f84a99566ce95efd8e4705d0e90` finished exit2
+at legacy `ldrsx_route_host`:9744 expected-state differences. The
+[fixture receipt](ldrsx-lifetime.log.gz), published as `cb44dce14ebe17ceceb99383bb27cfc0dd2e8583`,
+retains the original source/log/CPU and records2315529 route,256 load,256 op
+and98197 op-route cases, all exit0. The independent model now includes the
+existing host fresh value below live SP and released stack bytes/tags for
+pre/post and destination-SP updates; every original scene/assertion remains.
+The sole successor full runs at `cb44dce14ebe17ceceb99383bb27cfc0dd2e8583`.
+
+The retained check/compiler/reference-model caches now reside under
+`/var/tmp/kprog-tmp/V`, with verified byte hashes, modes and symlink targets.
+Existing paths alias those same incremental contents. The MOVK semantic
+cleanup `94bd567a2` retains schema/column/generated C-Lean checks and passes
+the existing20145-case host oracle. Each publication uses path-scoped
+`git commit -F <msg> -- <paths>` and immediate push.

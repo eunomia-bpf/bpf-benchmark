@@ -24054,6 +24054,25 @@
     "trust": "All eight new laws use only propext/Quot.sound or propext. Existing helper/context/platform congruence laws and private-spill/helper projection checks pass. No sorryAx/new axioms.",
     "utc": "2026-11-09T00:40:35.925639+00:00"
   },
+  "ldrsx_live_stack_fixture": {
+    "archive": "kprog/results/kprog_verification_20261107/ldrsx-lifetime.log.gz",
+    "change": "Independent existing host fresh0 below live SP, released stack byte/tag model for pre/post/destinationSP changes; all scenes/assertions retained.",
+    "current_full_source": "cb44dce14ebe17ceceb99383bb27cfc0dd2e8583",
+    "current_full_status": "running; separate eventual immutable receipt",
+    "earlier_fixture_differences": 9744,
+    "earlier_full_exit": 2,
+    "earlier_full_source": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
+    "existing_cases_actual_exit": {
+      "load256": 0,
+      "op256": 0,
+      "op_route98197": 0,
+      "route2315529": 0
+    },
+    "production_changes": 0,
+    "publication": "cb44dce14ebe17ceceb99383bb27cfc0dd2e8583",
+    "publication_method": "git commit -F <msg> -- <paths>, private worktree/index under /var/tmp",
+    "runtime_predicate_additions": 0
+  },
   "live_memory_frame_oracle_alignment": {
     "actual_rmw_exit": 0,
     "actual_six_oracle_battery_exit": 0,
@@ -28037,7 +28056,7 @@
     },
     "fixture_archive": "kprog/results/kprog_verification_20261107/rep-current-fixtures.log.gz",
     "fixture_publication": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
-    "full_check_source": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
+    "full_check_source": "cb44dce14ebe17ceceb99383bb27cfc0dd2e8583",
     "full_check_status": "running; separate eventual immutable receipt",
     "prior_bounded_laws": "Retained unchanged, explicit count<=64 and incomingRCX/count equality domain.",
     "recovery_prefix_archive": "kprog/results/kprog_verification_20261107/rep-recovery-prefix.log.gz",
@@ -30934,6 +30953,14 @@
     "full_exit": 2,
     "generator_check_exit": 0,
     "scope": "Vector declaration and low/high mapping stay checked. Initial words come from the canonical kind6 entry interface."
+  },
+  "verification_cache_relocation": {
+    "existing_path_aliases_retained": true,
+    "incremental_contents_retained": true,
+    "official_reference_model_cache": "/var/tmp/kprog-tmp/V/reference-models",
+    "published_check_cache": "/var/tmp/kprog-tmp/V/published-check-cache",
+    "receipt": "/var/tmp/kprog-tmp/V/cache-migration-1045/results.json",
+    "status": "complete; all bytes/modes/symlink targets compared before retiring old physical data"
   },
   "x86_acl2_87_operational_reference": {
     "all_agreeing_operation_labels": [
