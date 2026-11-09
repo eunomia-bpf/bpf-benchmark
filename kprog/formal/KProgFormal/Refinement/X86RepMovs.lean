@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86RepStos
 import KProgFormal.Refinement.X86Scalar
 import KProgFormal.X86RepMovsHandler
 

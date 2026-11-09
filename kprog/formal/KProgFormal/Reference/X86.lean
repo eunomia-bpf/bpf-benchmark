@@ -789,6 +789,36 @@ def repMovsStep (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Wo
   let start := stringStart address32 s
   repMovsLoop width address32 sourceBase nextPc (start.gpr 1).toNat start
 
+/-- STOS has no source-memory access and never changes RSI. The accumulator
+is truncated by the architectural store; DF selects the signed destination
+stride. This reference covers the native64 address form emitted by P. -/
+def stosAdvance (width : ScalarWidth) (s : State) : State :=
+  let stride := BitVec.ofNat 64 width.bytes
+  let delta := if s.rflags.getLsbD 10 then -stride else stride
+  { s with gpr := fun r => if r = 1 then s.gpr r - 1
+      else if r = 7 then s.gpr r + delta else s.gpr r }
+
+def repStosElement (width : ScalarWidth) (s : State) : Transition State :=
+  match writeMemory s.memory (s.gpr 7) (s.gpr 0) width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (memory, write) =>
+      ⟨{ stosAdvance width s with memory := memory }, [write], none⟩
+
+/-- Each completed store commits its RCX/RDI progress. A store fault retains
+that element's incoming state and instruction PC; completion advances the PC.
+There is no iteration bound besides the full64-bit architectural RCX value. -/
+def repStosLoop (width : ScalarWidth) (nextPc : Word) :
+    Nat → State → Transition State
+  | 0, s => ⟨{ s with pc := nextPc }, [], none⟩
+  | n + 1, s =>
+      let first := repStosElement width s
+      if first.fault.isSome then first else
+        let rest := repStosLoop width nextPc n first.state
+        ⟨rest.state, first.events ++ rest.events, rest.fault⟩
+
+def repStosStep (width : ScalarWidth) (nextPc : Word) (s : State) : Transition State :=
+  repStosLoop width nextPc (s.gpr 1).toNat s
+
 def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
   (target.setWidth width.bits).signExtend 64 == target
 
@@ -847,6 +877,7 @@ inductive Instruction
   | call (source : ScalarSource) (nextPc : Word)
   | returnNear (release : BitVec 16) (nextPc : Word)
   | repMovs (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word)
+  | repStos (width : ScalarWidth) (nextPc : Word)
   | xmm0Move (store aligned : Bool) (address nextPc : Word)
   | doubleShift (width : CmovWidth) (left : Bool) (dst source : Register) (count nextPc : Word)
   | mulx (width : BzhiWidth) (high low : Register) (source : Source) (nextPc : Word)
@@ -890,7 +921,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
+  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .repStos _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -904,6 +935,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
   | .call source nextPc => callStep source nextPc s
   | .returnNear release _ => returnStep release s
   | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
+  | .repStos width nextPc => repStosStep width nextPc s
   | .xmm0Move store aligned address nextPc => xmm0Step store aligned address nextPc s
   | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
   | .mulx width high low source nextPc => mulxStep width high low source nextPc s
@@ -1005,7 +1037,7 @@ checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
   | .ud2 .. => 0xffffffffffffffff
   | .call .. | .returnNear .. | .leave64 .. => 0xffffffffffffffff
-  | .repMovs .. => 0xffffffffffffffff
+  | .repMovs .. | .repStos .. => 0xffffffffffffffff
   | .xmm0Move .. => 0xffffffffffffffff
   | .doubleShift width _ _ _ count _ =>
       let n := (doubleShiftCount count width.bits).toNat
@@ -1210,6 +1242,10 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     if p.mandatoryPrefix ≠ 0xf3 then throw "MOVS reference requires the architectural REP prefix"
     let sourceBase := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
     return .repMovs (scalarWidth p (first == 0xa4)) p.address32 sourceBase (← fallthrough s (count + 1))
+  if first = 0xaa ∨ first = 0xab then
+    if p.mandatoryPrefix ≠ 0xf3 then throw "STOS reference requires the architectural REP prefix"
+    if p.address32 then throw "STOS reference covers the native64 address profile"
+    return .repStos (scalarWidth p (first == 0xaa)) (← fallthrough s (count + 1))
   if first = 0x90 ∧ p.rex % 2 = 0 then
     return .nop (← fallthrough s (count + 1))
   if 0x90 ≤ first ∧ first ≤ 0x97 then
