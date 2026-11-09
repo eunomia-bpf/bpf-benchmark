@@ -25353,6 +25353,18 @@
     "x86_contract_cases": 1342,
     "x86_production_frames": 2097152
   },
+  "mov_live_xdp_context_identity": {
+    "archive": "kprog/results/kprog_verification_20261107/x86-mov-context-origin.log.gz",
+    "domain": "Existing manual live fixture supplies helper_abi_base=&ctx as production ENTRY_XDP does. All original full raw/native registers, tags, flags, private stack, heap and aliases retained.",
+    "exit": 0,
+    "host_cpu_cases": 3657728,
+    "live_xdp_rsp_cases": 2432,
+    "original_full_exit": 2,
+    "original_full_failure": "Makefile213 missing fixture context origin produced RSP mismatch",
+    "original_full_source": "28883a27183e5bbb6520e541b50546b4a59351c4",
+    "production_changes": 0,
+    "publication": "26044fee63d1a87f654d64577a010c42ff1841ce"
+  },
   "native_helper_call_return_frame": {
     "actual_existing_integration_exit": 0,
     "actual_private_proof_exit": 0,
@@ -30161,6 +30173,191 @@
       ],
       "reduction_bridge": 6,
       "scope": "Actual masked64-bit high/low source magnitude words bound, join and project to complete magnitude; source-state handler Step now consumes those words directly. Concrete restoring-loop/source extraction, AUX binding and compiler/physical/ABI remain interfaces.",
+      "sorryAx": 0
+    }
+  },
+  "signed_div_aux_dispatch_composition": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-dispatch.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 70,
+    "composition": {
+      "audit_input": "import SimulatorComposition\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n",
+      "exit": 0,
+      "reduction_bridge": 5,
+      "sorryAx": 0
+    },
+    "domain": "Production AUXbit0=false unsigned and true signed; higher bits unconstrained. Signed direct/captured/high-byte source fields use original raw numeric frame. Arbitrary fresh choice function is explicit through122existing dispatcher/token/current ISA APIs; interpreted and specialized generic block relations retain the same existential choice. All prior theorem names retained; RET consumer and generic native/interpreted/specialized/accepted-B composition compile and audit.",
+    "integration": [
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal/X86RemainingTokenO2.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal/X86RemainingTokenO2.lean",
+        "source_sha256": "d7e093b36025d67e840ff87db9a3b6b47ba1ab9c2197092ee87b7bf3a4494d9f"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal.lean",
+        "source_sha256": "31bd595dd0e05a660cb3380e6a198b225df416894fe8451ddd46a9a8f6c6f107"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/tv-olean/BPF.olean",
+          "/workspaces/repository/kprog/tv/BPF.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPF.lean",
+        "source_sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/tv-olean/Composition.olean",
+          "/workspaces/repository/kprog/tv/Composition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/Composition.lean",
+        "source_sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/tv-olean/BPFPath.olean",
+          "/workspaces/repository/kprog/tv/BPFPath.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPFPath.lean",
+        "source_sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-dispatch/tv-olean/SimulatorComposition.olean",
+          "/workspaces/repository/kprog/tv/SimulatorComposition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/SimulatorComposition.lean",
+        "source_sha256": "60e601baadb4891ce18172adedf3ec8f3f7237c5455299bf6aaf7f9e533681df"
+      }
+    ],
+    "publication": "099a096fb81c9143663db0bf256eae35400be26a",
+    "remaining_interfaces": [
+      "Concrete64-bit restoring-loop/source extraction",
+      "Actual C-to-Lean correspondence for the new signed source branch",
+      "Per-token compiled-B and physical memory/entry/ABI transport"
+    ],
+    "sole_full_source": "099a096fb81c9143663db0bf256eae35400be26a",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Dispatcher\n#print axioms KProgFormal.Refinement.X86Dispatcher.divide_aux_signed\n#print axioms KProgFormal.Refinement.X86Dispatcher.divide_high_byte_binding\n#print axioms KProgFormal.Refinement.X86Dispatcher.signed_divide_high_byte_binding\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_dispatch_step_refines\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_dispatch_native_matches\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_token_body_matches\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_token_step_refines\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_token_native_matches\n#print axioms KProgFormal.Refinement.X86Dispatcher.simulator_step_refines\n#print axioms KProgFormal.Refinement.X86Dispatcher.step_token_body_matches\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "reused": true,
+          "source_sha256": "ad7419b4a39c32774be87f6c7eeb62875d8d4eed012e9fb2687e7e377884ecc8"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "reused": true,
+          "source_sha256": "e38f465469282b4af6094a1e640e0eb35028731ef2093eba0c933184b5b6bf15"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-dispatch/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Dispatcher",
+          "source_sha256": "9a4a1428f4f3da1694e7db8d05676f042043228b9f193d82943949001d12448b"
+        }
+      ],
+      "laws": [
+        "divide_aux_signed",
+        "divide_high_byte_binding",
+        "signed_divide_high_byte_binding",
+        "register_dispatch_step_refines",
+        "register_dispatch_native_matches",
+        "register_token_body_matches",
+        "register_token_step_refines",
+        "register_token_native_matches",
+        "simulator_step_refines",
+        "step_token_body_matches"
+      ],
+      "reduction_bridge": 8,
+      "scope": "Actual unsigned AUXbit0=false and signed AUXbit0=true field binding, arbitrary fresh-choice parameter through register dispatcher, specialization token and composed ISA step. Concrete loop/source extraction and compiler/physical/ABI remain explicit.",
       "sorryAx": 0
     }
   },

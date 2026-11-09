@@ -6145,3 +6145,34 @@ The actual AUXbit0 unsigned/signed field/token/dispatcher relation, concrete
 loop/source extraction and compiler/physical/ABI interfaces remain open.
 Complete C-model/compiled-family totals stay70/75 and13/75. Sole full28883
 retains its earlier fixed source; these later laws have their own receipt.
+
+### Signed/unsigned DIV through the dispatcher and token composition
+
+The [AUX dispatch receipt](signed-div-dispatch.log.gz), published as
+`099a096fb81c9143663db0bf256eae35400be26a`, proves production AUXbit0 selection: false selects unsigned
+DIV, true selects signed IDIV, and higher bits remain unconstrained. The signed
+register, captured-lane and high-byte field bindings now compose the existing
+numeric frame laws through the register dispatcher, O2 token equation and
+unified current ISA Step for every fresh choice function. Existing unsigned
+bindings now state their actual AUX0 domain. All prior theorem names remain;
+122 dispatcher/token/composed definitions and theorems carry the choice
+parameter explicitly.
+
+The RET consumer, formal root and all generic TV composition imports compile
+successfully. Ten dispatcher and seven generic native/interpreted/specialized/
+accepted-B theorem audits finish exit0 with no sorryAx; inherited reduction
+is disclosed in the receipt. Interpreted and specialized block relations keep
+the same existential fresh choice, without a production default or new runtime
+predicate. These are universal simulator/token laws across programs.
+
+Concrete restoring-loop/source extraction, actual C-to-Lean correspondence for
+the signed branch and compiled-B/physical/ABI transport remain explicit. DIV
+rows are partial-signed-and-unsigned-C-model; complete C-model and compiled
+family totals remain70/75 and13/75.
+
+The [MOV context-origin receipt](x86-mov-context-origin.log.gz), published as
+`26044fee63d1a87f654d64577a010c42ff1841ce`, passes all3,657,728 original host/CPU cases and2,432 live
+XDP RSP cases after the manual fixture supplies the existing ENTRY_XDP context
+identity. Full source28883 ended exit2 at Makefile213; its original inputs,
+log and CPU are archived. Next sole full source is `099a096fb81c9143663db0bf256eae35400be26a`, incorporating
+these proofs and that fixture; actual terminal receives a separate receipt.
