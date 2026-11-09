@@ -65,14 +65,15 @@ frame-predicate composition remains the S11 O4 obligation.
 
 | Case | Fixture exit | Client exit | Service status | Armed raw loads | Verifier completed | Native TEST_RUN |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| x86-physical-tail-frame | 0 | 0 | 0 | 1 | 1 | 1 |
+| x86-physical-tail-frame | 0 | 0 | 0 | - | 1 | 1 |
 | x86-multi-once | 0 | 1 | -5 | 1 | 0 | 0 |
 | x86-jit-error | 0 | 1 | -5 | 1 | 1 | 0 |
 | arm64-multi-once | 0 | 1 | -5 | 1 | 0 | 0 |
 | arm64-jit-error | 0 | 1 | -5 | 1 | 1 | 0 |
 
 Physical tail frame (`f360991d1`, x86): the guest records retval 2, R12=1, RSP=1
-and RBP=1 across 34 invocations and 33 transfers. The earlier exit 1 came from
+and RBP=1 across 34 invocations and 33 transfers. Its load-attempt cell stays `-`
+because that run used the ordinary loader, which lacks the load counter. The earlier exit 1 came from
 the probe compiler assigning retval to EBP between the call and the after
 snapshot; the focused fixture keeps RBP as the frame pointer.
 

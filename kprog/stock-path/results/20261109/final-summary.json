@@ -56,7 +56,7 @@
   "verifier_base_blob": "159b25f8269ddfd6f66edabbca06e3822e56a330",
   "kernel_diffstat": " arch/arm64/mm/fault.c         |   6 ++\n arch/arm64/net/bpf_jit_comp.c | 152 ++++++++++++++++++++++++++++++++++-\n arch/x86/mm/fault.c           |   9 +++\n arch/x86/net/bpf_jit_comp.c   | 181 ++++++++++++++++++++++++++++++++++++++++++\n include/linux/bpf_native.h    |  48 +++++++++++\n kernel/bpf/btf.c              |   1 +\n kernel/bpf/core.c             |  65 +++++++++++++++\n kernel/bpf/syscall.c          |   6 ++\n 8 files changed, 467 insertions(+), 1 deletion(-)\n",
   "stock_loader_patch": "d140d92ab",
-  "source_commit": "fc443b4d4c092f9b1b5bab6aa13c46e1b6731806",
+  "source_commit": "d4f72cb981d8ffb4700aa5ca01a25eb58f05c2e8",
   "suites": {
     "x86": {
       "cases": 48,
@@ -487,7 +487,7 @@
   "raw_collection": {
     "exit": 0,
     "archive": "current-raw.tar.gz",
-    "sha256": "73226bc933c35411ec8c70395e071d0374374482ce28d88f254ace0f6d66c56e",
+    "sha256": "c67232c2dfb181c8e9c2dc9a4dd1a1ed771fe930e10dfdce8895fbe17d8a1f4c",
     "members": 2278,
     "independently_reread": 2278
   }
