@@ -48,6 +48,15 @@ not a frozen launcher — change it freely. The accepted protocol is the
 existing two-start load-time comparison; don't add same-process PMU training,
 `apply_app_rejit()`, or a live-swap lifecycle to `corpus/driver.py`.
 
+Benchmark workload freeze point: commit 9f3855f6f, 2026-05-29 02:22:18 UTC, the
+definition that produced the May reference runs. Operator, 2026-11-09: "是不是 5
+月份之后就应该冻结", "明确记录冻结时间, 以后也要想办法防止继续改动". Frozen paths:
+`runner/libs/workload.py`, `runner/libs/app_runners/`, `corpus/driver.py`,
+`corpus/config/`, `micro/driver.py`, `micro/config/`, `micro/programs/`, `Makefile`,
+`micro/Makefile`, `runner/mk/`. Commit and push hooks in the Workspace checkout
+refuse changes to them and their files carry the immutable attribute. A change
+needs the operator's explicit words. Performance numbers come from this tree.
+
 Never filter, skip, or exclude a BPF program from ReJIT — a failure (e.g.
 EINVAL) is recorded and surfaces naturally, never hidden behind
 `live_rejit_programs()` overrides, `LifecycleAbort`, per-prog_type
