@@ -1,0 +1,3 @@
+Generic ARM dynptr initialization from memory
+
+Helper197 uses its actual four-argument kernel ABI: data pointer,64bit size,64bit flags and opaque dynptr destination. Paired helpers.c initializes all16opaque bytes on success and clears them on every error. The model captures destination before AAPCS clobbers and applies the existing shadow-tag transfer to those16bytes. Existing92row identity/C-ABI/Lean controls and the complete original81native-entry dynptr_fail family generation outcomes are captured. Source and all original annotations retain their bytes. Load-only QEMU verifier results follow the captured family queue. Runtime admission additions:0.

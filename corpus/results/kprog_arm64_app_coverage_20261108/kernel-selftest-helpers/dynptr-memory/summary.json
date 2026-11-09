@@ -1,0 +1,978 @@
+{
+  "utc": "2026-11-09T00:52:23.860137+00:00",
+  "source_publication": {
+    "commit": "0558869442396f5e0554116115cbd20673ec9086",
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h",
+      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py",
+      "kprog/formal/contracts/arm64_helper_idents_spec.json",
+      "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+      "kprog/formal/oracles/test_arm64_helper_idents_host.c",
+      "kprog/formal/KProgFormal/Arm64HelperIdents.lean",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean",
+      "kprog/formal/generated/arm64_helper_idents.h"
+    ],
+    "sha256": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "f658e9299669bba9d6ad35e1a5d5f15da00fe94f952a31047fab4f8a13fc46c3",
+      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+      "kprog/formal/contracts/arm64_helper_idents_spec.json": "7f2b36457ff74b73be12e12510ae1b55b2ef707f908b7c8377efaf7be7727b93",
+      "kprog/formal/tools/generate_arm64_helper_idents_spec.py": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+      "kprog/formal/oracles/test_arm64_helper_idents_host.c": "7f4a7018cca96e8facbd666be751be4f2a252e815f8ea24510a2964c991ccd4c",
+      "kprog/formal/KProgFormal/Arm64HelperIdents.lean": "fa32d86e603e98bc40ba547a20679bca0f1d745208e93740cc999eba331177d3",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean": "3997febb0eb1e310f6375f8a004e9812fa9f52473e356f950ced2884e6311307",
+      "kprog/formal/generated/arm64_helper_idents.h": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e"
+    },
+    "remote_ancestor_verified": true
+  },
+  "controls": [
+    {
+      "command": [
+        "python3",
+        "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+        "--check"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cc",
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-Ikprog/formal",
+        "kprog/formal/oracles/test_arm64_helper_idents_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/identity-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/identity-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cc",
+        "-include",
+        "kprog/formal/oracles/arm64_entry_environment_host.h",
+        "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+        "-include",
+        "kprog/formal/oracles/arm64_exclusive_choice_host.h",
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-Ikprog/formal",
+        "-Ikprog/arm64",
+        "-Ikprog",
+        "-Ivendor/libbpf/src",
+        "kprog/formal/oracles/test_arm64_helper_call_host.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/helper-abi-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/helper-abi-host"
+      ],
+      "cwd": "/workspaces/repository",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.Arm64HelperIdents"
+      ],
+      "cwd": "/workspaces/repository/kprog/formal",
+      "returncode": 0
+    }
+  ],
+  "generation": {
+    "programs": [
+      {
+        "file": "dynptr_fail.c",
+        "program": "ringbuf_missing_release1",
+        "expect": "failure",
+        "request_id": 30,
+        "native_sha256": "e7584d908463c332bebdb7e7a616d7a999ad9c3aae7621491a147b17653346fd",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x2c",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ringbuf_missing_release2",
+        "expect": "failure",
+        "request_id": 31,
+        "native_sha256": "a2d1b5ecf2da30f569861d2d2caa6f17127802df3e37418f15f58b151df44302",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x50",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x50\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ringbuf_missing_release_callback",
+        "expect": "failure",
+        "request_id": 32,
+        "native_sha256": "68ab5bc9f2c395e2b976be6073e36fabaface9ad049d62e0dfbdee6b966f0301",
+        "diagnostic": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\ntrusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=6022\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=20,imm=0;1:code=133,dst=0,src=4,off=1,imm=126356;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 2                        ; R0=scalar()\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (b7) r0 = 2                        ; R0=scalar()\n3: (b7) r0 = 2                        ; R0=scalar()\n4: (b7) r0 = 2                        ; R0=scalar()\n5: (b7) r0 = 2                        ; R0=scalar()\n6: (b7) r0 = 2                        ; R0=scalar()\n7: (b7) r0 = 2                        ; R0=scalar()\n8: (b7) r0 = 2                        ; R0=scalar()\n9: (b7) r0 = 2                        ; R0=scalar()\n10: (b7) r0 = 2                       ; R0=scalar()\n11: (b7) r0 = 2                       ; R0=scalar()\n12: (b7) r0 = 2                       ; R0=scalar()\n13: (b7) r0 = 2                       ; R0=scalar()\n14: (b7) r0 = 2                       ; R0=scalar()\n15: (b7) r0 = 2                       ; R0=scalar()\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (b7) r0 = 2                       ; R0=scalar()\n18: (b7) r0 = 2                       ; R0=scalar()\n19: (b7) r0 = 2                       ; R0=scalar()\n20: (b7) r0 = 2                       ; R0=scalar()\n21: (b7) r0 = 2                       ; R0=scalar()\n22: (b7) r0 = 2                       ; R0=scalar()\n23: (b7) r0 = 2                       ; R0=scalar()\n24: (b7) r0 = 2                       ; R0=scalar()\n25: (b7) r0 = 2                       ; R0=scalar()\n26: (b7) r0 = 2                       ; R0=scalar()\n27: (b7) r0 = 2                       ; R0=scalar()\n28: (b7) r0 = 2                       ; R0=scalar()\n29: (b7) r0 = 2                       ; R0=scalar()\n30: (b7) r0 = 2                       ; R0=scalar()\n31: (b7) r0 = 2                       ; R0=scalar()\n32: (b7) r0 = 2                       ; R0=scalar()\n33: (b7) r0 = 2                       ; R0=scalar()\n34: (b7) r0 = 2                       ; R0=scalar()\n35: (b7) r0 = 2                       ; R0=scalar()\n36: (b7) r0 = 2                       ; R0=scalar()\n37: (b7) r0 = 2                       ; R0=scalar()\n38: (b7) r0 = 2                       ; R0=scalar()\n39: (b7) r0 = 2                       ; R0=scalar()\n40: (b7) r0 = 2                       ; R0=scalar()\n41: (b7) r0 = 2                       ; R0=scalar()\n42: (b7) r0 = 2                       ; R0=scalar()\n43: (b7) r0 = 2                       ; R0=scalar()\n44: (b7) r0 = 2                       ; R0=scalar()\n45: (b7) r0 = 2                       ; R0=scalar()\n46: (b7) r0 = 2                       ; R0=scalar()\n47: (b7) r0 = 2                       ; R0=scalar()\n48: (b7) r0 = 2                       ; R0=scalar()\n49: (b7) r0 = 2                       ; R0=scalar()\n50: (b7) r0 = 2                       ; R0=scalar()\n51: (b7) r0 = 2                       ; R0=scalar()\n52: (b7) r0 = 2                       ; R0=scalar()\n53: (b7) r0 = 2                       ; R0=scalar()\n54: (b7) r0 = 2                       ; R0=scalar()\n55: (b7) r0 = 2                       ; R0=scalar()\n56: (b7) r0 = 2                       ; R0=scalar()\n57: (b7) r0 = 2                       ; R0=scalar()\n58: (b7) r0 = 2                       ; R0=scalar()\n59: (b7) r0 = 2                       ; R0=scalar()\n60: (b7) r0 = 2                       ; R0=scalar()\n61: (b7) r0 = 2                       ; R0=scalar()\n62: (b7) r0 = 2                       ; R0=scalar()\n63: (b7) r0 = 2                       ; R0=scalar()\n64: (b7) r0 = 2                       ; R0=scalar()\n65: (b7) r0 = 2                       ; R0=scalar()\n66: (b7) r0 = 2                       ; R0=scalar()\n67: (b7) r0 = 2                       ; R0=scalar()\n68: (b7) r0 = 2                       ; R0=scalar()\n69: (b7) r0 = 2                       ; R0=scalar()\n70: (b7) r0 = 2                       ; R0=scalar()\n71: (b7) r0 = 2                       ; R0=scalar()\n72: (b7) r0 = 2                       ; R0=scalar()\n73: (b7) r0 = 2                       ; R0=scalar()\n74: (b7) r0 = 2                       ; R0=scalar()\n75: (b7) r0 = 2                       ; R0=scalar()\n76: (b7) r0 = 2                       ; R0=scalar()\n77: (b7) r0 = 2                       ; R0=scalar()\n78: (b7) r0 = 2                       ; R0=scalar()\n79: (b7) r0 = 2                       ; R0=scalar()\n80: (b7) r0 = 2                       ; R0=scalar()\n81: (b7) r0 = 2                       ; R0=scalar()\n82: (b7) r0 = 2                       ; R0=scalar()\n83: (b7) r0 = 2                       ; R0=scalar()\n84: (b7) r0 = 2                       ; R0=scalar()\n85: (b7) r0 = 2                       ; R0=scalar()\n86: (b7) r0 = 2                       ; R0=scalar()\n87: (b7) r0 = 2                       ; R0=scalar()\n88: (b7) r0 = 2                       ; R0=scalar()\n89: (b7) r0 = 2                       ; R0=scalar()\n90: (b7) r0 = 2                       ; R0=scalar()\n91: (b7) r0 = 2                       ; R0=scalar()\n92: (b7) r0 = 2                       ; R0=scalar()\n93: (b7) r0 = 2                       ; R0=scalar()\n94: (b7) r0 = 2                       ; R0=scalar()\n95: (b7) r0 = 2                       ; R0=scalar()\n96: (b7) r0 = 2                       ; R0=scalar()\n97: (b7) r0 = 2                       ; R0=scalar()\n98: (7a) *(u64 *)(r10 -24) = 0        ; R10=fp0 fp-24=0\n99: (b7) r0 = 2                       ; R0=scalar()\n100: (7b) *(u64 *)(r10 -8) = r0       ; R0=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n101: (7a) *(u64 *)(r10 -16) = 0       ; R10=fp0 fp-16=0\n102: (79) r1 = *(u64 *)(r10 -24)      ; R1=0 R10=fp0 fp-24=0\n103: (57) r1 &= -256                  ; R1=0\n104: (47) r1 |= 10                    ; R1=10\n105: (7b) *(u64 *)(r10 -24) = r1      ; R1=10 R10=fp0 fp-24=10\n106: (b4) w1 = 10                     ; R1=10\n107: (18) r2 = 0xffff00000449d330     ; R2=map_value(map=.rodata.native.,ks=4,vs=80)\n109: (b7) r3 = 0                      ; R3=0\n110: (b7) r4 = 0                      ; R4=0\n111: (85) call bpf_loop#181\nR2 type=map_value expected=func\nprocessed 111 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,240,1910657,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,241,1910668,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=17 blob_bytes=140 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=4 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126356\nnative_blob_diag: fnv64=521e26232cc94d95 word_count=35 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=140 final_size_matches=1\nchunk_bytes=0:140\nreloc_targets=28:0xffff8000802fd490\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+        "previous_stage": "verifier_rejected",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ringbuf_release_uninit_dynptr",
+        "expect": "failure",
+        "request_id": 33,
+        "native_sha256": "8777efcb1d3bcc412bff6001fb3530635a5632b7c90a7a13772c19004995e944",
+        "diagnostic": "invalid indirect target scalar:0xc7 at 0x14",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "use_after_invalid",
+        "expect": "failure",
+        "request_id": 34,
+        "native_sha256": "4098ebc0a0c418c003dc7f79c519a10d74001e2b9338da0fad6bb9c98a50360c",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x3c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x3c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ringbuf_invalid_api",
+        "expect": "failure",
+        "request_id": 35,
+        "native_sha256": "7a52c2f9dfe078205055fb24221a7301540dbc579ab22fe86c211e0abca48598",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x34",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x34\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "add_dynptr_to_map1",
+        "expect": "failure",
+        "request_id": 36,
+        "native_sha256": "4689700a5ddc04a1e2c47d9158315ad12a92b79740c444f4f08b278573176894",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x2c",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "add_dynptr_to_map2",
+        "expect": "failure",
+        "request_id": 37,
+        "native_sha256": "9c22f5d42fefab845f505736cd615985f223d32c9b8e6a46ddee9658dc8d3494",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x30",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_out_of_bounds_ringbuf",
+        "expect": "failure",
+        "request_id": 38,
+        "native_sha256": "c0fe1b6eccff39624e6dff00d63b6526401a0bbc63d076afa4f4196a323d2837",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x34",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x34\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_out_of_bounds_skb",
+        "expect": "failure",
+        "request_id": 39,
+        "native_sha256": "f437b52fedb25d0521105ffc2d75b625804feecfc0e608d61b897b2f10dc0b3c",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_out_of_bounds_skb_meta",
+        "expect": "failure",
+        "request_id": 40,
+        "native_sha256": "4beed376b1435ed4b910e538a958a5622520a60b8eee8ce5a9843349ed9a4c2b",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_out_of_bounds_map_value",
+        "expect": "failure",
+        "request_id": 41,
+        "native_sha256": "b9406fed1395f2264384164a795f5f1d534317ec10f21fa57308bc40835c9e74",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x70",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x70\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_use_after_release1",
+        "expect": "failure",
+        "request_id": 42,
+        "native_sha256": "ef49c9a5e13dae4c181af7fb0a546e0accd90ad2092134580aac5fb1be508e38",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x34",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x34\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_use_after_release2",
+        "expect": "failure",
+        "request_id": 43,
+        "native_sha256": "3d1b2a6d4c38cd00df273978d742450b48c065225f839864ac9cae94bf32c10d",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x50",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x50\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_missing_null_check1",
+        "expect": "failure",
+        "request_id": 44,
+        "native_sha256": "bda0039ac450550902b5bd4154a6b9bea9cf6c515ef7eeedb36e15a376f9d1ad",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x34",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x34\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "data_slice_missing_null_check2",
+        "expect": "failure",
+        "request_id": 45,
+        "native_sha256": "c9acbdeb469a4c5fe7b3ad6e9a12070e9ca0e1bdd7a93c76dcadc289c3c794bd",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x38",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x38\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_helper1",
+        "expect": "failure",
+        "request_id": 46,
+        "native_sha256": "fd78ca199c8d2be61c87d9a3eaa0153ebdafa27c37ed59c095abe7af71e7c03d",
+        "diagnostic": "invalid indirect target scalar:0xc5 at 0x54",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_helper2",
+        "expect": "failure",
+        "request_id": 47,
+        "native_sha256": "664a3f1cde97c9238150d94705c986e789a4307f80417d9b405b41d0190f644d",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x74",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x74\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_write1",
+        "expect": "failure",
+        "request_id": 48,
+        "native_sha256": "8a9f5e4b967e73d31d5f958fc44136f5907aad68bf486976b3e5375ef419660e",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x6c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x6c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_write2",
+        "expect": "failure",
+        "request_id": 49,
+        "native_sha256": "567c4d60cc50c395df649ccc139fcaeade246f4d429eec77b1a941105f453ef0",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x40",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x40\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_write3",
+        "expect": "failure",
+        "request_id": 50,
+        "native_sha256": "c3a7770036596685e8196b5e91ee13eb0e878f3c841661946e31ad3750d57b32",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x24",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_write4",
+        "expect": "failure",
+        "request_id": 51,
+        "native_sha256": "3fddf726e33ff1e113bfaaa1e9c693bd507e001db0ea0bba26cb7ff0246392d1",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "global",
+        "expect": "failure",
+        "request_id": 52,
+        "native_sha256": "82809917ef702cc66a17571fafa9572785276b835cb9bc0c5ca1b44c82cb5050",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x24",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_read1",
+        "expect": "failure",
+        "request_id": 53,
+        "native_sha256": "55d6fdc171c960cde0e0a042892e03ace6805a2bf51a47a6d3815f8f3b64347a",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_read2",
+        "expect": "failure",
+        "request_id": 54,
+        "native_sha256": "33a6c1085c35fbae11d596db8553223d8d75b893cb6cea667fa879d77a39fec6",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x74",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x74\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_read3",
+        "expect": "failure",
+        "request_id": 55,
+        "native_sha256": "97cade5166cf6b8ade24f7f825a7024579a6422b2b5db22bb8488f5288a94202",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x28",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_read4",
+        "expect": "failure",
+        "request_id": 56,
+        "native_sha256": "35023c838419d7fec04540a01d6c173caad136e3f1dd2c91f38f9d9ac123260e",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_offset",
+        "expect": "failure",
+        "request_id": 57,
+        "native_sha256": "5d97950d7086828ca3918117bfaf3c0f8618584f997a85148d688a7a30bbe44d",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x24",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "release_twice",
+        "expect": "failure",
+        "request_id": 58,
+        "native_sha256": "30caabbaaed65e4ae77c7a194d5de507b0b127946357600127f3493345604bd6",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "release_twice_callback",
+        "expect": "failure",
+        "request_id": 59,
+        "native_sha256": "41d7441bf9c797e687dbd96e69c2def073b16488c9a3a74487834ab3e20489c6",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_from_mem_invalid_api",
+        "expect": "failure",
+        "request_id": 60,
+        "native_sha256": "64d6d359fb0079710d810475a7408264261e55c62df5a35f317a59258901c68e",
+        "diagnostic": "invalid indirect target scalar:0xc5 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_overwrite_unref",
+        "expect": "success",
+        "request_id": 61,
+        "native_sha256": "ef4c44504c886016ee5142d80f54f935a7cf60c6fca476d949c07244b92ad894",
+        "diagnostic": "invalid indirect target scalar:0xc5 at 0x54",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_invalidate_slice_reinit",
+        "expect": "failure",
+        "request_id": 62,
+        "native_sha256": "5fbb10e605d80e8b301d1e66e4091923e57b812e0ac5b9aecf4f5a47df777689",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x6c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x6c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_invalidate_slice_or_null",
+        "expect": "failure",
+        "request_id": 63,
+        "native_sha256": "84908cf17d633b06ceda3c58655a8b57c8ac76936b9143b634bde662e9a1258f",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_invalidate_slice_failure",
+        "expect": "failure",
+        "request_id": 64,
+        "native_sha256": "d39a221d30a38163ca2b6a4baa796a3403f0bf2c90c1f423b83b51f157672c32",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0xb8",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0xb8\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_invalidate_slice_success",
+        "expect": "success",
+        "request_id": 65,
+        "native_sha256": "729252062376acd062c029819a8d536627aef9fa289f0ef1e127938fb59db4ea",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0xbc",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0xbc\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_overwrite_ref",
+        "expect": "failure",
+        "request_id": 66,
+        "native_sha256": "4e1760386cf04f6931ae0d55283ccbec0b30f6a78f31946978e93ba2f3efcacd",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x20",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_read_into_slot",
+        "expect": "failure",
+        "request_id": 67,
+        "native_sha256": "bcc97dc6eb2c230ae16d855e02a12fd531a1c55a05c973f5ec3c65567460752a",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x40",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x40\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_slice_write",
+        "expect": "failure",
+        "request_id": 68,
+        "native_sha256": "096cc6a7bd9f1242d96724a7d0852b89890077f1e1fb338be803a46737bd0432",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_meta_invalid_slice_write",
+        "expect": "failure",
+        "request_id": 69,
+        "native_sha256": "4295835528df50c211fa7b91eeedd62e2336e01305d30c007bf4aa21a1fde63d",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_data_slice1",
+        "expect": "failure",
+        "request_id": 70,
+        "native_sha256": "9b7a870c6b292ca5c46bb2343789c1e1ec08835e89157eafb3efb2d8d266a310",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x20: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x20: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_data_slice2",
+        "expect": "failure",
+        "request_id": 71,
+        "native_sha256": "7625a19b9399ce8d2f939eeee6d4e8d0c8a0780dd0f456118c291d831166bb13",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x20: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x20: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_data_slice3",
+        "expect": "failure",
+        "request_id": 72,
+        "native_sha256": "2a7d63cbe17087002d44a98432e7f1e398cace3c58fee7d93be4cd34eb87ebe2",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x88",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x88\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_data_slice4",
+        "expect": "failure",
+        "request_id": 73,
+        "native_sha256": "e5d2e7958c61af1922e1791e7acea4ca5f8709fb385943c532e231daf605fb06",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x7c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x7c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ro_skb_slice_invalid_after_metadata_write",
+        "expect": "failure",
+        "request_id": 74,
+        "native_sha256": "4ac67192d1a23a5c630b27b9db523cde004ca1f5a0929c1d33ef3095b73c0dcb",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "rw_skb_slice_invalid_after_metadata_write",
+        "expect": "failure",
+        "request_id": 75,
+        "native_sha256": "fa6069661ac7cba9aacd1087c68484ab93f9cb03bc07d69e9144f04734646f75",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ro_skb_meta_slice_invalid_after_payload_write",
+        "expect": "failure",
+        "request_id": 76,
+        "native_sha256": "37dfab6338ab6c66292b6df576291cae883c32a91b46fc3b6b1b18b3c363d666",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "rw_skb_meta_slice_invalid_after_payload_write",
+        "expect": "failure",
+        "request_id": 77,
+        "native_sha256": "218a30a3176573cc9468f41f3731ba9901234961643f180a88c203d0925c279d",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ro_skb_meta_slice_invalid_after_payload_helper",
+        "expect": "failure",
+        "request_id": 78,
+        "native_sha256": "f39a8235190dd304a248453fea5f10c1232a23df0df106bc422ad43d59c90be8",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "rw_skb_meta_slice_invalid_after_payload_helper",
+        "expect": "failure",
+        "request_id": 79,
+        "native_sha256": "9e48be848dc88644d5e85026b0ccfea128fe7274fe18a5af73fe543899fe4993",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "ro_skb_meta_slice_invalid_after_metadata_write",
+        "expect": "failure",
+        "request_id": 80,
+        "native_sha256": "501820ae8cff3d0442051edc58c5a54d3777655c5c56f089950473fc3fec89b8",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x54",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x54\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "rw_skb_meta_slice_invalid_after_metadata_write",
+        "expect": "failure",
+        "request_id": 81,
+        "native_sha256": "366680a16d8d3d884bc0f7d6ad6eb9f1465fa63b5c4a5460b9dd08c4a68e39ae",
+        "diagnostic": "invalid indirect target scalar:0xca at 0x54",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xca at 0x54\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "xdp_invalid_data_slice1",
+        "expect": "failure",
+        "request_id": 82,
+        "native_sha256": "9aac1d20a7067465c4fb32d9c05ed83b597ffba216bcc968ae5aa85dee0fba4d",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_xdp at 0x20: bl 0 <bpf_dynptr_from_xdp>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_xdp at 0x20: bl 0 <bpf_dynptr_from_xdp>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "xdp_invalid_data_slice2",
+        "expect": "failure",
+        "request_id": 83,
+        "native_sha256": "716205de87d3ef2f94ec8957f28a2ed35fda370609df038409ccc38ca930d6e5",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_xdp at 0x20: bl 0 <bpf_dynptr_from_xdp>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_xdp at 0x20: bl 0 <bpf_dynptr_from_xdp>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_ctx",
+        "expect": "failure",
+        "request_id": 84,
+        "native_sha256": "fbd4e5e54c45df9ff5ef0a17519e8071cc9bbf2a667484b7a9807ff01b275b6d",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x10: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x10: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_meta_invalid_ctx",
+        "expect": "failure",
+        "request_id": 85,
+        "native_sha256": "d5bdea1b6e9aebc1e63c44e680092df4c8db65a6c07de4fefca04f6c57f73e21",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x10: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_ctx_fentry",
+        "expect": "failure",
+        "request_id": 86,
+        "native_sha256": "a9c8260891305ee9602b84416a3dac24ca8dd2a067fcb55993b94826df85f137",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x14: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x14: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "skb_invalid_ctx_fexit",
+        "expect": "failure",
+        "request_id": 87,
+        "native_sha256": "4de1d8b3c04fbe68c4440099d9c3903280ea6d1894a1d6ab1f855f20aa0ae58a",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x14: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x14: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "uninit_write_into_slot",
+        "expect": "failure",
+        "request_id": 88,
+        "native_sha256": "ee143a014eb98916e468db3910fada514f4a67cde67c12fabe94b03844d295c8",
+        "diagnostic": "invalid indirect target scalar:0xc6 at 0x24",
+        "previous_stage": "generation_failed",
+        "stage": "generated_compiled"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "xdp_invalid_ctx",
+        "expect": "failure",
+        "request_id": 89,
+        "native_sha256": "ce05923a0e63ab52db277317afba2b6292d33f921395dd866c0aaede8cc6146f",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_xdp at 0x10: bl 0 <bpf_dynptr_from_xdp>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_xdp at 0x10: bl 0 <bpf_dynptr_from_xdp>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_slice_var_len1",
+        "expect": "failure",
+        "request_id": 90,
+        "native_sha256": "bb7b64b36592730012dcbe606a6b57fcc3a11faab4d651d9bb3f051b2c46893a",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_slice_var_len2",
+        "expect": "failure",
+        "request_id": 91,
+        "native_sha256": "a716ae2e45c3a3ab267ad88c8cc81bf9039ab9602a92bc924f6a0c3c74ee2cf5",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_data_slices",
+        "expect": "failure",
+        "request_id": 92,
+        "native_sha256": "15ec4599a902c5f19b6af6714f0ee35654abb4f2e17e0d10a55480efa5199e86",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x68",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x68\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "invalid_slice_rdwr_rdonly",
+        "expect": "failure",
+        "request_id": 93,
+        "native_sha256": "835a2c9771ae28596af1c6affc4979dbd9ff6f55d8a755bff2fc68e6c0c7f435",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x18: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_adjust_invalid",
+        "expect": "failure",
+        "request_id": 94,
+        "native_sha256": "cfcfb0dd400959358e5665f5479d59ddeecb98be1d1bd1f2cf1bfb57a8e78297",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_adjust at 0x18: bl 0 <bpf_dynptr_adjust>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_adjust at 0x18: bl 0 <bpf_dynptr_adjust>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_is_null_invalid",
+        "expect": "failure",
+        "request_id": 95,
+        "native_sha256": "63ccb54d797ff4eeca136eca5002d229eb9f8d9ed390df8247cb4b86e4a4505e",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_is_null at 0x10: bl 0 <bpf_dynptr_is_null>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_is_null at 0x10: bl 0 <bpf_dynptr_is_null>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_is_rdonly_invalid",
+        "expect": "failure",
+        "request_id": 96,
+        "native_sha256": "bef8e7f260f8d053feac3dd45eb9a805ce41a27447838dd5bc97a2f1b7b03537",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_is_rdonly at 0x10: bl 0 <bpf_dynptr_is_rdonly>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_is_rdonly at 0x10: bl 0 <bpf_dynptr_is_rdonly>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "dynptr_size_invalid",
+        "expect": "failure",
+        "request_id": 97,
+        "native_sha256": "42aea0afa11f0992f2e372e98feb3d29fd16c8ebe40877c7bf9b8ec76e8b6e4e",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_size at 0x10: bl 0 <bpf_dynptr_size>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_size at 0x10: bl 0 <bpf_dynptr_size>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalid1",
+        "expect": "failure",
+        "request_id": 98,
+        "native_sha256": "761e199b8fb726503a5065469266d841ecb22e8961b529520d5a19b4633bfdba",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_clone at 0x14: bl 0 <bpf_dynptr_clone>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_clone at 0x14: bl 0 <bpf_dynptr_clone>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalid2",
+        "expect": "failure",
+        "request_id": 99,
+        "native_sha256": "b87a3fb4ef945415afc3799d965441cd27af2f4ef15dce3bfa90e3a957319574",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_xdp at 0x10: bl 0 <bpf_dynptr_from_xdp>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_xdp at 0x10: bl 0 <bpf_dynptr_from_xdp>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate1",
+        "expect": "failure",
+        "request_id": 100,
+        "native_sha256": "8da14ce8a2c7ff4e84e162dcd559d05b3798634113cbc5149d74e47be20666d4",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x60",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x60\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate2",
+        "expect": "failure",
+        "request_id": 101,
+        "native_sha256": "41c0d705b20eff0ce7db5608bad070746ddaf83a43b8447b2b8b9d6dafb8d6d3",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x60",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x60\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate3",
+        "expect": "failure",
+        "request_id": 102,
+        "native_sha256": "6888258dc3b432ea92031f895127d1653c25b22ca5195f5df96871ec05e0d76c",
+        "diagnostic": "invalid indirect target scalar:0xc9 at 0x6c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xc9 at 0x6c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate4",
+        "expect": "failure",
+        "request_id": 103,
+        "native_sha256": "f68865069c40e6e37d571423afaa2f21d9cc2859d5e59b36357d976ebd55313e",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x48",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x48\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate5",
+        "expect": "failure",
+        "request_id": 104,
+        "native_sha256": "9d1e213bfff1e7fb09e08287e1b60b406d0dccf25af11391ac826d0b2192ebb9",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x3c",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x3c\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_invalidate6",
+        "expect": "failure",
+        "request_id": 105,
+        "native_sha256": "eaf8fcf9e73639558d4480bfa25a85eef422e4357035c4b15e31d9c32739acbe",
+        "diagnostic": "invalid indirect target scalar:0xcb at 0x54",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 966, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 794, in indirect_targets\n    raise ValueError(f\"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}\")\nValueError: invalid indirect target scalar:0xcb at 0x54\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_skb_packet_data",
+        "expect": "failure",
+        "request_id": 106,
+        "native_sha256": "dc85850853635f54980a9062556bce81797789d15a8e69437b5a0a45be166612",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x1c: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x1c: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_skb_packet_meta",
+        "expect": "failure",
+        "request_id": 107,
+        "native_sha256": "ae2f1ed4d29d0ba56a29f343812e9ad31abe652c35afd4840d15227087ef2161",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb_meta at 0x18: bl 0 <bpf_dynptr_from_skb_meta>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "clone_xdp_packet_data",
+        "expect": "failure",
+        "request_id": 108,
+        "native_sha256": "3b5911bc9572a2250a9cfccf6cdec1fa12b25c56f3d52aff9923ee465e0f879d",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_xdp at 0x1c: bl 0 <bpf_dynptr_from_xdp>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_xdp at 0x1c: bl 0 <bpf_dynptr_from_xdp>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "test_dynptr_skb_small_buff",
+        "expect": "failure",
+        "request_id": 109,
+        "native_sha256": "8a25cd24d16cd36215160886d4eaf481858a85a6d87acb23fffe06fa86a05081",
+        "diagnostic": "unresolved native ABI external call bpf_dynptr_from_skb at 0x10: bl 0 <bpf_dynptr_from_skb>",
+        "previous_stage": "generation_failed",
+        "stage": "generation_or_compile_failed",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/A/bpf34/dynptr-memory/controller.py\", line 39, in <module>\n    artifact=worker.specialize(native,row['program'],metadata,out,linker);(out/'generation.metadata.json').write_text(json.dumps(metadata,indent=2)+'\\n');record.update(stage='generated_compiled',native_sha256=artifact['native_sha256'])\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 967, in render_program\n    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/arm64_abi.py\", line 353, in collect_layout\n    raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')\nValueError: unresolved native ABI external call bpf_dynptr_from_skb at 0x10: bl 0 <bpf_dynptr_from_skb>\n"
+      },
+      {
+        "file": "dynptr_fail.c",
+        "program": "test_dynptr_reg_type",
+        "expect": "failure",
+        "request_id": 110,
+        "native_sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78",
+        "diagnostic": "",
+        "previous_stage": "installed",
+        "stage": "generated_compiled"
+      }
+    ],
+    "counts": {
+      "generated_compiled": 20,
+      "generation_or_compile_failed": 61
+    }
+  },
+  "scope": "Complete original dynptr_fail native family, archived input P and actual metadata; host generation and compilation",
+  "runtime_admission_additions": 0
+}
