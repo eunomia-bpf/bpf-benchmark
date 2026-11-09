@@ -3277,3 +3277,95 @@ end KProgFormal.Refinement.X86NumericAddress.FreshAux
 #print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.andn_memory_body_realizes
 #print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_refines
 #print axioms KProgFormal.Refinement.X86NumericAddress.FreshAux.bzhi_memory_body_realizes
+
+namespace KProgFormal.Refinement.X86NumericAddress
+open Reference EntryEnvironment
+
+/-- Current REP uses the observed numeric RCX, never the legacy IMM count.
+Only the successful loop image/events and final progress are projected here. -/
+def repFullCountFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (nextPc : NativeWord) :
+    Transition Reference.X86.State :=
+  let count := (registerValue env frame arena state 1).toNat
+  let copied := X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)
+  ⟨nativeRegisters env frame arena (registerPc
+    (registerMemory (repFinish state width count) copied.state.memory) nextPc), copied.events, none⟩
+
+theorem rep_full_count_frame_matches_handler (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (nextPc : NativeWord)
+    (successful : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    repFullCountFrame env frame arena state width nextPc =
+      X86RepMovs.fullCountHandlerStep width nextPc (nativeRegisters env frame arena state) := by
+  let count := (registerValue env frame arena state 1).toNat
+  change (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).fault = none at successful
+  obtain ⟨flags, vector, fs, gs, addressWidth⟩ :=
+    X86RepMovs.loop_fields width nextPc count (nativeRegisters env frame arena state)
+  have pc := X86RepMovs.loop_success_pc width nextPc count (nativeRegisters env frame arena state) successful
+  unfold repFullCountFrame X86RepMovs.fullCountHandlerStep
+  change (⟨nativeRegisters env frame arena (registerPc
+    (registerMemory (repFinish state width count)
+      (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).state.memory) nextPc),
+    (X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)).events, none⟩ : Transition Reference.X86.State) =
+      (let copied := X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state)
+       if copied.fault.isSome then copied else
+         ⟨{ copied.state with gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state) }, copied.events, none⟩)
+  cases result : X86RepMovs.loop width nextPc count (nativeRegisters env frame arena state) with
+  | mk final events fault =>
+      have finished : fault = none := by simpa only [result] using successful
+      have preserved : { final with gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state) } =
+          { nativeRegisters env frame arena state with
+            gpr := X86RepMovs.emittedRegisters width count (nativeRegisters env frame arena state),
+            memory := final.memory, pc := nextPc } := by
+        simp only [result] at flags vector fs gs addressWidth pc
+        cases final
+        simp_all only
+      simp only [finished, Option.isSome_none, Bool.false_eq_true, ↓reduceIte,
+        native_register_pc, native_register_memory, native_rep_finish]
+      rw [preserved]
+
+theorem rep_full_count_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (nextPc : NativeWord)
+    (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    repFullCountFrame env frame arena state width nextPc =
+      Reference.X86.step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) := by
+  rw [rep_full_count_frame_matches_handler env frame arena state width nextPc successful]
+  exact X86RepMovs.full_count_handler_refines width nextPc _ direction successful
+
+theorem rep_full_count_frame_step_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (nextPc : NativeWord)
+    (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state)
+      (repFullCountFrame env frame arena state width nextPc) := by
+  rw [rep_full_count_frame_refines env frame arena state width nextPc direction successful]
+  exact ⟨rfl, rfl, rfl⟩
+
+end KProgFormal.Refinement.X86NumericAddress
+
+namespace KProgFormal.Refinement.X86NumericAddress
+open Reference EntryEnvironment
+
+/-- Relate the once-captured C pointers/index loop and final original-tag
+writeback to the progress projection. Actual access/recovery primitives and
+physical arena representation retain their explicitly stated interface. -/
+theorem rep_full_count_frame_matches_indexed (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (nextPc : NativeWord)
+    (successful : (X86RepMovs.Indexed.loop width nextPc 0 (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    repFullCountFrame env frame arena state width nextPc =
+      X86RepMovs.Indexed.handlerStep width nextPc (nativeRegisters env frame arena state) := by
+  have faults := X86RepMovs.Indexed.loop_fault_matches width nextPc
+    (registerValue env frame arena state 1).toNat 0 (nativeRegisters env frame arena state)
+  rw [X86RepMovs.Indexed.project_zero] at faults
+  have progressOk : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none := by
+    rw [← faults]
+    exact successful
+  rw [rep_full_count_frame_matches_handler env frame arena state width nextPc progressOk]
+  exact (X86RepMovs.Indexed.handler_matches_progress width nextPc _ successful).symm
+
+end KProgFormal.Refinement.X86NumericAddress

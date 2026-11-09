@@ -5414,3 +5414,149 @@ theorem ud2_terminal_native_step (env : EntryEnvironment.Environment)
 end KProgFormal.Refinement.X86Dispatcher
 #print axioms KProgFormal.Refinement.X86Dispatcher.ud2_terminal_body_refines
 #print axioms KProgFormal.Refinement.X86Dispatcher.ud2_terminal_native_step
+
+namespace KProgFormal.Refinement.X86Dispatcher
+open Reference X86NumericAddress
+open Reference.X86 (Register ScalarWidth)
+
+/-- Updated source operand selection. All legacy unused fields remain
+quantified; only FLAGS selects width and the current RCX supplies count. -/
+def repFullCountRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (flags : Byte) (_aux : BitVec 32) (_dst _src : Byte)
+    (_value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) := do
+  let width ← widthOf flags
+  pure (repFullCountFrame env frame arena state width nextPc)
+
+theorem rep_full_count_ignores_legacy_fields (env : EntryEnvironment.Environment)
+    (frame : EntryEnvironment.Frame) (arena : Reference.Word) (flags : Byte)
+    (aux aux' : BitVec 32) (dst dst' src src' : Byte) (value value' nextPc : Reference.Word)
+    (state : RegisterState) :
+    repFullCountRegisters env frame arena flags aux dst src value nextPc state =
+      repFullCountRegisters env frame arena flags aux' dst' src' value' nextPc state := rfl
+
+/-- Preserve all established routes and replace only the old immediate/count
+REP model by the current full-RCX body. This defines the model, not a gate. -/
+def dispatchCurrentStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  if code = GeneratedX86Opcode.code .repMovs then
+    repFullCountRegisters env frame arena flags aux dst src value nextPc state
+  else dispatchPointerStep env frame arena tags current code flags aux dst src value nextPc state
+
+inductive CurrentStepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) : Nat → Reference.X86.Instruction → Prop where
+  | earlier (code : Nat) (native : Reference.X86.Instruction)
+      (other : code ≠ GeneratedX86Opcode.code .repMovs)
+      (fields : PointerStepBinding flags aux dst src value nextPc nativeState code native) :
+      CurrentStepBinding flags aux dst src value nextPc nativeState code native
+  | copy (width : ScalarWidth) (widthField : WidthBinding flags width)
+      (direction : nativeState.rflags.getLsbD 10 = false)
+      (successful : (X86RepMovs.loop width nextPc (nativeState.gpr 1).toNat nativeState).fault = none) :
+      CurrentStepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .repMovs)
+        (.repMovs width false 0 nextPc)
+
+theorem current_simulator_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : CurrentStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    ∃ actual, dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  cases binding with
+  | earlier =>
+      rename_i other fields
+      obtain ⟨actual, dispatched, refined⟩ := pointer_simulator_step_refines env frame arena tags current code
+        flags aux dst src value nextPc state native fields
+      exact ⟨actual, by simp only [dispatchCurrentStep, if_neg other]; exact dispatched, refined⟩
+  | copy width widthField direction successful =>
+      refine ⟨_, ?_, rep_full_count_frame_step_refines env frame arena state width nextPc direction successful⟩
+      simp only [dispatchCurrentStep, if_pos rfl, repFullCountRegisters,
+        width_binding_decodes flags width widthField, Option.bind_some]
+      rfl
+
+def specializedCurrentStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  if token = .repMovs then do
+    let width ← widthOf flags
+    pure (repFullCountFrame env frame arena state width nextPc)
+  else specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state
+
+theorem current_rep_token_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state =
+      dispatchCurrentStep env frame arena tags current (GeneratedX86Opcode.code .repMovs)
+        flags aux dst src value nextPc state := rfl
+
+theorem current_rep_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
+    (widthField : WidthBinding flags width) (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.loop width nextPc (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    ∃ actual, specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) actual := by
+  rw [current_rep_token_body_matches]
+  exact current_simulator_step_refines env frame arena tags current _ flags aux dst src value nextPc state _
+    (.copy width widthField direction successful)
+
+theorem current_other_dispatch_preserved (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (other : code ≠ GeneratedX86Opcode.code .repMovs) :
+    dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state =
+      dispatchPointerStep env frame arena tags current code flags aux dst src value nextPc state := by
+  simp only [dispatchCurrentStep, if_neg other]
+
+theorem current_other_token_preserved (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (token : GeneratedX86Specialization.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (other : token ≠ .repMovs) :
+    specializedCurrentStep env frame arena tags current token flags aux dst src value nextPc state =
+      specializedPointerStep env frame arena tags current token flags aux dst src value nextPc state := by
+  simp only [specializedCurrentStep, if_neg other]
+
+end KProgFormal.Refinement.X86Dispatcher
+
+namespace KProgFormal.Refinement.X86Dispatcher
+open Reference X86NumericAddress
+open Reference.X86 (Register ScalarWidth)
+
+theorem current_rep_token_source_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
+    (widthField : WidthBinding flags width)
+    (successful : (X86RepMovs.Indexed.loop width nextPc 0 (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state =
+      some (X86RepMovs.Indexed.handlerStep width nextPc (nativeRegisters env frame arena state)) := by
+  simp only [specializedCurrentStep, ↓reduceIte, width_binding_decodes flags width widthField, Option.bind_some]
+  change some (repFullCountFrame env frame arena state width nextPc) = _
+  rw [rep_full_count_frame_matches_indexed env frame arena state width nextPc successful]
+
+theorem current_rep_token_source_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (width : ScalarWidth)
+    (widthField : WidthBinding flags width) (direction : state.raw.rflags.getLsbD 10 = false)
+    (successful : (X86RepMovs.Indexed.loop width nextPc 0 (registerValue env frame arena state 1).toNat
+      (nativeRegisters env frame arena state)).fault = none) :
+    ∃ actual, specializedCurrentStep env frame arena tags current .repMovs flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step (.repMovs width false 0 nextPc) (nativeRegisters env frame arena state) actual := by
+  refine ⟨_, current_rep_token_source_body_matches env frame arena tags current flags aux dst src value nextPc
+    state width widthField successful, ?_⟩
+  exact X86RepMovs.Indexed.handler_step_refines width nextPc _ direction successful
+
+theorem current_simulator_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (tags : Register → Byte) (current code : Nat) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : CurrentStepBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native)
+    (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, dispatchCurrentStep env frame arena tags current code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refined⟩ := current_simulator_step_refines env frame arena tags current code flags aux
+    dst src value nextPc state native binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
+
+end KProgFormal.Refinement.X86Dispatcher
