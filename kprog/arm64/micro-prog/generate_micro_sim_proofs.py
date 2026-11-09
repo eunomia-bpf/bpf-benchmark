@@ -403,7 +403,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     insn = normalize_alias(insn)
     op = insn.mnemonic
     ops = insn.operands
-    if op == "nop":
+    if op in {"nop", "bti"}:
         return Encoded("ARM64_OP_NOP")
     if op == "adrp":
         if not insn.reloc_symbol:

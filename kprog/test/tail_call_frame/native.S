@@ -3,6 +3,10 @@
 .global entry
 .type entry,@function
 entry:
+endbr64
+lea r11, [rip+1f]
+jmp __x86_indirect_thunk_r11
+1: endbr64
 sub rsp,24
 mov QWORD PTR [rsp],7
 mov rax,QWORD PTR tail_counter_value@GOTPCREL[rip]
@@ -17,6 +21,6 @@ sete al
 movzx eax,al
 add eax,eax
 add rsp,24
-ret
+jmp __x86_return_thunk
 .size entry,.-entry
 .section .note.GNU-stack,"",@progbits

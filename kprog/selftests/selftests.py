@@ -179,8 +179,9 @@ def compile_native(source, out, includes, clang, arch="x86"):
     # its native objects with `-mno-red-zone` and `-mgeneral-regs-only`
     # for the same reason.
     arch_flags = {
-        "x86": ["-mno-red-zone"],
-        "arm64": ["--target=aarch64-linux-gnu", "-march=armv8.1-a+lse",
+        "x86": ["-mno-red-zone", "-mretpoline-external-thunk",
+                "-mfunction-return=thunk-extern", "-fcf-protection=branch"],
+        "arm64": ["--target=aarch64-linux-gnu", "-march=armv8.1-a+lse", "-mbranch-protection=bti",
                   "-mno-outline-atomics", "-ffixed-x18", "-ffixed-x26",
                   "-ffixed-x27", "-ffixed-x28", "-fno-optimize-sibling-calls",
                   "-mllvm", "-switch-to-lookup=false"],

@@ -20,6 +20,7 @@ const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
 const NATIVE_LAB_RELOC_HELPER_POINTER: u32 = 7;
 const NATIVE_LAB_RELOC_X86_TAIL_COUNT: u32 = 10;
 const NATIVE_LAB_RELOC_X86_TAIL_STACK: u32 = 11;
+const NATIVE_LAB_RELOC_X86_THUNK: u32 = 12;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
@@ -777,8 +778,9 @@ enum PatchKind {
     /// memory.
     HelperCallRel32 { target_addr: u64 },
     HelperPointer { target_addr: u64 },
-    HelperDispatch { targets: Vec<(u64, u64)> },
-    TailCallFrame { count_offset: usize, stack_offset: usize },
+    HelperDispatch { targets: Vec<(u64, u64)>, thunk_reg: u64 },
+    TailCallFrame { count_offset: usize, stack_offset: usize, thunk_offset: usize },
+    Thunk { selector: u64 },
     CodeAddress { section: usize, address: u64 },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
@@ -1062,6 +1064,29 @@ fn scan_helper_calls(
         }
     }
     Ok(out)
+}
+
+// Architectural meaning of compiler external-thunk relocations. The kernel
+// chooses the concrete mitigation target when it resolves the rel32 field.
+fn x86_thunk_selector(name: &str) -> Option<u64> {
+    if name == "__x86_return_thunk" { return Some(16); }
+    let name = name.strip_prefix("__x86_indirect_thunk_")?;
+    ["rax","rcx","rdx","rbx","rsp","rbp","rsi","rdi",
+     "r8","r9","r10","r11","r12","r13","r14","r15"]
+        .iter().position(|reg| *reg == name).map(|n| n as u64)
+}
+
+fn x86_thunk_semantics(mut insn: Instruction, name: Option<&String>) -> Instruction {
+    if let Some(target) = name.and_then(|name| x86_thunk_selector(name)) {
+        if target == 16 { insn.set_code(Code::Retnq); }
+        else {
+            let call = insn.mnemonic() == Mnemonic::Call;
+            insn.set_code(if call { Code::Call_rm64 } else { Code::Jmp_rm64 });
+            insn.set_op0_kind(OpKind::Register);
+            insn.set_op0_register(Register::RAX + target as u32);
+        }
+    }
+    insn
 }
 
 fn x86_mov_imm_to_gpr64(insn: &Instruction) -> Option<(Register, u64)> {
@@ -1348,7 +1373,11 @@ pub(super) fn rewrite_x86(
         .map(|s| (s.address, s.address + s.size))
         .collect();
 
-    let helper_call_sites = scan_helper_calls(elf, included)?;
+    let mut helper_call_sites = scan_helper_calls(elf, included)?;
+    let thunk_sites: HashMap<_,_> = helper_call_sites.iter()
+        .filter(|(_,name)| x86_thunk_selector(name).is_some())
+        .map(|(key,name)| (*key,name.clone())).collect();
+    helper_call_sites.retain(|key,_| !thunk_sites.contains_key(key));
     let got_relocations = scan_x86_got_relocations(elf, included)?;
     let pc_relative_relocations = scan_x86_pc_relative_relocations(elf, included)?;
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
@@ -1373,8 +1402,19 @@ pub(super) fn rewrite_x86(
     } else {
         None
     };
+    // ABI planning consumes the architectural return represented by a thunk.
+    // Submitted bytes and their relocation offsets retain their original form.
+    let mut planning_entry_bytes = entry_bytes.clone();
+    for (key,name) in &thunk_sites {
+        if key.0 == entry.section_index && key.1 == entry.address &&
+            x86_thunk_selector(name) == Some(16) {
+            let offset = key.2 as usize;
+            planning_entry_bytes[offset] = 0xc3;
+            planning_entry_bytes[offset+1..offset+5].fill(0x90);
+        }
+    }
     let mut planned_entry_abi = plan_x86_entry_abi_strip(
-        &entry_bytes, entry.address, entry_has_tail_call, proof_return_jmp_target,
+        &planning_entry_bytes, entry.address, entry_has_tail_call, proof_return_jmp_target,
         (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
     )?;
     let mut required_mask = planned_entry_abi.callee_saved_mask;
@@ -1434,7 +1474,9 @@ pub(super) fn rewrite_x86(
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
-        let decoded: Vec<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE).into_iter().collect();
+        let decoded: Vec<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE)
+            .into_iter().map(|insn| x86_thunk_semantics(insn,
+                thunk_sites.get(&local_site_key(sym, insn.ip()-sym.address)))).collect();
         let code_defs = x86_code_definitions(elf,sym,&decoded,included,&pc_relative_relocations)?;
         let mut definitions = code_defs.clone();
         definitions.extend(decoded.iter().filter_map(|insn| {
@@ -1478,6 +1520,35 @@ pub(super) fn rewrite_x86(
             }
             if is_entry {
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
+            }
+
+            if let Some(name) = thunk_sites.get(&site_key) {
+                let selector = x86_thunk_selector(name).expect("scanned thunk");
+                if proof_mode {
+                    // ELF records keep the target identity for B and step(e).
+                    let opcode = if insn.mnemonic()==Mnemonic::Call { 0xe8 } else { 0xe9 };
+                    push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,
+                        declared_bytes(&[opcode,0,0,0,0])?,None);
+                    continue;
+                }
+                let helper = helper_targets.get(&(sym.address+local_ip)).is_some_and(|values|
+                    values.iter().all(|v| matches!(v,X86Callee::Id(_) | X86Callee::Symbol(_))));
+                if selector == 16 || !helper {
+                    let opcode = if insn.mnemonic()==Mnemonic::Call { 0xe8 } else { 0xe9 };
+                    if selector == 16 && is_entry {
+                        let mut jump = Instruction::with_branch(Code::Jmp_rel32_64,
+                            X86_JMP_END_PLACEHOLDER_TARGET)?;
+                        jump.set_ip(local_ip);
+                        push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,
+                            local_ip,jump,Some(PatchKind::JmpEnd));
+                    } else {
+                        push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,
+                            declared_bytes(&[opcode,0,0,0,0])?,Some(PatchKind::Thunk { selector: selector | if opcode==0xe8 { 0x100 } else { 0 } }));
+                    }
+                    resolved_helper_call_sites.insert(site_key);
+                    continue;
+                }
+                insn = x86_thunk_semantics(insn,Some(name));
             }
 
             // An external tail jump must return through the native fragment's
@@ -1733,10 +1804,19 @@ pub(super) fn rewrite_x86(
                                     }).collect::<Result<Vec<_>>>()?;
                                     let dispatch = build_x86_helper_dispatch(reg)?;
                                     push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,
-                                        declared_bytes(&dispatch)?,Some(PatchKind::HelperDispatch { targets }));
+                                        declared_bytes(&dispatch)?,Some(PatchKind::HelperDispatch { targets, thunk_reg: if reg==Register::R11 { 10 } else { 11 } }));
                                 } else if values.iter().all(|v| matches!(v,X86Callee::Symbol(_))) {
-                                    // GOT loads now hold generation-bound actual helper addresses.
-                                    local.push(insn); kinds.push(None); insn_local_ip.push(local_ip);
+                                    // GOT loads carry actual helper addresses; compiler thunks retain
+                                    // their external transfer when several symbols reach this site.
+                                    if let Some(name) = thunk_sites.get(&site_key) {
+                                        let selector = x86_thunk_selector(name).expect("scanned thunk") | 0x100;
+                                        push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,
+                                            local_ip,declared_bytes(&[0xe8,0,0,0,0])?,
+                                            Some(PatchKind::Thunk { selector }));
+                                        resolved_helper_call_sites.insert(site_key);
+                                    } else {
+                                        local.push(insn); kinds.push(None); insn_local_ip.push(local_ip);
+                                    }
                                 } else { bail!("mixed helper ID/address dispatch in {} at {local_ip:#x}",sym.name); }
                                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                 continue;
@@ -1782,7 +1862,7 @@ pub(super) fn rewrite_x86(
                                 map_name
                             );
                         }
-                        let (inline, count_offset, stack_offset) = build_x86_tail_call_inline(
+                        let (inline, count_offset, stack_offset, thunk_offset) = build_x86_tail_call_inline(
                             helper_addrs,
                             callee_saved_mask,
                             &entry_abi_strip.tail_call_cleanup_bytes,
@@ -1799,7 +1879,7 @@ pub(super) fn rewrite_x86(
                                 ib,
                             )?;
                         }
-                        kinds[first] = Some(PatchKind::TailCallFrame { count_offset, stack_offset });
+                        kinds[first] = Some(PatchKind::TailCallFrame { count_offset, stack_offset, thunk_offset });
                         resolved_helper_call_sites.insert(site_key);
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
@@ -2072,12 +2152,18 @@ pub(super) fn rewrite_x86(
     let mut relocs = Vec::new();
     for p in &patches {
         match &p.kind {
-            PatchKind::TailCallFrame { count_offset, stack_offset } => {
+            PatchKind::TailCallFrame { count_offset, stack_offset, thunk_offset } => {
+                relocs.push(RelocRecord { offset: u32::try_from(p.global_offset + thunk_offset)?,
+                    kind: NATIVE_LAB_RELOC_X86_THUNK, target: 1 });
                 for (offset, kind) in [(*count_offset, NATIVE_LAB_RELOC_X86_TAIL_COUNT),
                                        (*stack_offset, NATIVE_LAB_RELOC_X86_TAIL_STACK)] {
                     relocs.push(RelocRecord { offset: u32::try_from(p.global_offset + offset)?,
                         kind, target: 0 });
                 }
+            }
+            PatchKind::Thunk { selector } => {
+                relocs.push(RelocRecord { offset: u32::try_from(p.global_offset+1)?,
+                    kind: NATIVE_LAB_RELOC_X86_THUNK, target: *selector });
             }
             PatchKind::HelperPointer { target_addr } => {
                 relocs.push(RelocRecord {
@@ -2086,7 +2172,9 @@ pub(super) fn rewrite_x86(
                     target: *target_addr,
                 });
             }
-            PatchKind::HelperDispatch { targets } => {
+            PatchKind::HelperDispatch { targets, thunk_reg } => {
+                relocs.push(RelocRecord { offset: u32::try_from(p.global_offset+12)?,
+                    kind: NATIVE_LAB_RELOC_X86_THUNK, target: *thunk_reg | 0x100 });
                 let max_id = targets.iter().map(|(id,_)| *id).max()
                     .ok_or_else(|| anyhow!("empty native helper dispatch"))?;
                 let size = usize::try_from(max_id.checked_add(1)
@@ -3077,7 +3165,7 @@ fn plan_x86_entry_abi_strip(
                 insn.ip()
             );
         }
-        if !is_alignment_nop(&insn) {
+        if !is_alignment_nop(&insn) && insn.mnemonic() != Mnemonic::Endbr64 {
             insns.push(insn);
         }
     }
@@ -4047,10 +4135,11 @@ fn build_x86_helper_dispatch(reg: Register) -> Result<Vec<u8>> {
     }
     let index = reg.number() as u8;
     // R10/R11 are caller-clobbered SysV scratch registers, never an argument.
-    // LEA and the SIB-indirect CALL preserve flags and the original helper ID.
+    // LEA, table load and the external-thunk CALL preserve flags and the helper ID.
     let scratch = if reg==Register::R11 { 2 } else { 3 };
     Ok(vec![0x4c,0x8d,0x05 | (scratch<<3),0,0,0,0,
-            0x41 | ((index>>3)<<1),0xff,0x14,0xc0 | ((index & 7)<<3) | scratch])
+            0x4d | ((index>>3)<<1),0x8b,0x04 | (scratch<<3),0xc0 | ((index & 7)<<3) | scratch,
+            0xe8,0,0,0,0])
 }
 
 fn push_x86_helper_call_reloc(
@@ -4134,7 +4223,7 @@ fn build_x86_tail_call_inline(
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
-) -> Result<(Vec<Instruction>, usize, usize)> {
+) -> Result<(Vec<Instruction>, usize, usize, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
         helper_addrs,
@@ -4195,13 +4284,15 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
     append_x86_add_rcx_imm(&mut bytes, tail_call_offset);
-    bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx
+    bytes.push(0xe9); // jmp kernel-selected RCX thunk
+    let thunk_offset = bytes.len();
+    bytes.extend_from_slice(&0i32.to_le_bytes());
 
     let out = bytes.len();
     patch_x86_rel32(&mut bytes, jbe_out, out)?;
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
-    Ok((declared_byte_chunks(&bytes)?, count_offset, stack_offset))
+    Ok((declared_byte_chunks(&bytes)?, count_offset, stack_offset, thunk_offset))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
@@ -5146,10 +5237,11 @@ mod tests {
                     Register::RBP,Register::RSI,Register::RDI,Register::R8,Register::R9,
                     Register::R10,Register::R11,Register::R12,Register::R13,Register::R14,Register::R15] {
             let insns = decode_x86(&build_x86_helper_dispatch(reg)?)?;
-            assert_eq!(insns.len(),2);
+            assert_eq!(insns.len(),3);
             assert_eq!(insns[0].mnemonic(),Mnemonic::Lea);
             assert_eq!(insns[0].op0_register(),if reg==Register::R11 {Register::R10} else {Register::R11});
-            assert_eq!(insns[1].flow_control(),FlowControl::IndirectCall);
+            assert_eq!(insns[1].mnemonic(),Mnemonic::Mov);
+            assert_eq!(insns[2].flow_control(),FlowControl::Call);
             assert_eq!(insns[1].memory_base(),insns[0].op0_register());
             assert_eq!(insns[1].memory_index(),reg);
             assert_eq!(insns[1].memory_index_scale(),8);
@@ -5204,7 +5296,7 @@ mod tests {
             (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0),
         ]);
         for saved_rbp in [None, Some(24)] {
-            let (instructions, count, stack) = build_x86_tail_call_inline(
+            let (instructions, count, stack, thunk) = build_x86_tail_call_inline(
                 &helpers, 15, &[], saved_rbp, saved_rbp.is_none())?;
             let encoded = encode_x86_local_block("tail", 0, &instructions,
                 &vec![u64::MAX; instructions.len()])?;
@@ -5212,6 +5304,8 @@ mod tests {
             assert_eq!(&bytes[count-3..count],
                 if saved_rbp.is_some() { &[0x48,0x8b,0x80] } else { &[0x48,0x8b,0x85] });
             assert_eq!(&bytes[stack-3..stack], &[0x48,0x81,0xc4]);
+            assert_eq!(bytes[thunk-1],0xe9);
+            assert_eq!(&bytes[thunk..thunk+4],&[0,0,0,0]);
             assert_eq!(&bytes[count+4..count+8], &[0x48,0x83,0x38,33]);
             for depth in 0u32..=512 {
                 let rounded = (depth + 7) & !7;

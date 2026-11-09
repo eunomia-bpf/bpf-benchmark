@@ -702,7 +702,7 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
            kind == kNativeLabRelocArm64PercpuMrs;
 #else
-    return kind == kNativeLabRelocHelperCallRel32 ||
+    return kind == NATIVE_LAB_RELOC_X86_THUNK || kind == kNativeLabRelocHelperCallRel32 ||
            kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT || kind == NATIVE_LAB_RELOC_X86_TAIL_STACK;
 #endif
 }
@@ -710,6 +710,7 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
 size_t native_lab_reloc_slot_bytes(uint32_t kind)
 {
     switch (kind) {
+    case NATIVE_LAB_RELOC_X86_THUNK:
     case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
     case NATIVE_LAB_RELOC_X86_TAIL_STACK:
         return sizeof(int32_t);

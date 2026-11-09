@@ -276,9 +276,10 @@ def native_compile_args(
     if original_source is None:
         raise RuntimeError("Cilium compile command has no C source")
     arch = _native_arch()
-    arch_flags = (["-march=native", "-mno-red-zone", "-mno-sse", "-mno-mmx",
+    arch_flags = (["-march=native", "-mno-red-zone", "-mretpoline-external-thunk",
+                   "-mfunction-return=thunk-extern", "-fcf-protection=branch", "-mno-sse", "-mno-mmx",
                    "-mno-sse2", "-mno-3dnow", "-mno-avx", "-mno-sse4a", "-msoft-float"] if arch == "x86" else
-                  ["--target=aarch64-linux-gnu", "-mtune=neoverse-n1", "-mno-outline-atomics",
+                  ["--target=aarch64-linux-gnu", "-mtune=neoverse-n1", "-mbranch-protection=bti", "-mno-outline-atomics",
                    "-ffixed-x18", "-ffixed-x26", "-ffixed-x27", "-ffixed-x28"])
     return [
         "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE", f"-D__TARGET_ARCH_{arch}",

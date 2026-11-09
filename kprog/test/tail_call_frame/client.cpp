@@ -8,7 +8,7 @@
 #include <unistd.h>
 int main(int argc,char **argv) {
     try {
-        if(argc!=4) throw std::runtime_error("client source.bpf.o native.o native-link");
+        if(argc!=4&&argc!=5) throw std::runtime_error("client source.bpf.o native.o native-link [image]");
         auto *obj=bpf_object__open_file(argv[1],nullptr);
         if(libbpf_get_error(obj)||bpf_object__load(obj)) throw std::runtime_error("source load");
         auto *program=bpf_object__find_program_by_name(obj,"entry");
@@ -32,6 +32,13 @@ int main(int argc,char **argv) {
         info={};size=sizeof(info);info.jited_prog_len=image.size();
         info.jited_prog_insns=reinterpret_cast<__u64>(image.data());
         if(bpf_obj_get_info_by_fd(native.prog_fd,&info,&size))throw std::runtime_error("native image");
+        if(argc==5) {
+            FILE *output=std::fopen(argv[4],"wb");
+            if(!output)throw std::runtime_error("image output");
+            auto written=std::fwrite(image.data(),1,image.size(),output);
+            auto closed=std::fclose(output);
+            if(written!=image.size()||closed)throw std::runtime_error("image write");
+        }
         int jit_depth=0,jit_pop=-1;
         for(size_t i=0;i+11<=image.size();i++) {
             if(image[i]==0x48&&image[i+1]==0x8b&&(image[i+2]==0x80||image[i+2]==0x85)&&

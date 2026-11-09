@@ -41,8 +41,8 @@ BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 
 # Same flags as kprog/test/Makefile so .native.o has identical
 # constraints (no PLT, no jump tables, no red zone, no unwind tables).
-NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-    $(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-march=native -mno-red-zone -mretpoline-external-thunk -mfunction-return=thunk-extern -fcf-protection=branch -mgeneral-regs-only) \
+    $(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mtune=neoverse-n1 -mbranch-protection=bti -mgeneral-regs-only)
 NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
     -fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
