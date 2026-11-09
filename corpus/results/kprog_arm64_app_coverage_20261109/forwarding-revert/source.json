@@ -1,0 +1,49 @@
+{
+  "time": "2026-11-09T21:45:53.427187+00:00",
+  "base": "d64628d8bf153b2426bfea00b8c3b551fad3aed2",
+  "reversed_commits": [
+    "e2e6dc6c0",
+    "729856581"
+  ],
+  "paths": [
+    "kprog/arm64/arm64_sim_local_bpf.h",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "kprog/arm64/micro-prog/arm64_abi.py",
+    "kprog/arm64/README.md",
+    "kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_arena_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_arm_route_host.c",
+    "kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c"
+  ],
+  "before_sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+    "kprog/arm64/micro-prog/arm64_abi.py": "5d1adfcd493d90a0d66470229cad64780bc27f2d254616d25c199ac8c84b710e",
+    "kprog/arm64/README.md": "10c75e352a9a4051fa817bcbf2a9d292e44e0be22fc2056f2d9875c96b0c6029"
+  },
+  "after_sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "46c2d347a3fea48930dd351810470e8f9ec3e4446311c7dc285e94caefed1e36",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
+    "kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
+    "kprog/arm64/README.md": "0a6425c2730c67684e27461e62c5dd9e482c3646042dda343f234e1fe3791392"
+  },
+  "python_syntax": 0,
+  "generated_dispatch_equal": true,
+  "native_executions": 0,
+  "decision": "coordinator20261109T2150",
+  "source_files": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "46c2d347a3fea48930dd351810470e8f9ec3e4446311c7dc285e94caefed1e36",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
+    "kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
+    "kprog/arm64/README.md": "0a6425c2730c67684e27461e62c5dd9e482c3646042dda343f234e1fe3791392",
+    "kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c": "d2d5c632481a97893bb775df09c90b374dc402042e6c0dca9750fa0b5f0ce192",
+    "kprog/formal/oracles/test_arm64_stack_arena_route_host.c": "f07474261be41ccfbb813f803dd1ed64e895f11f328a3843adbb7d29cc1994dd",
+    "kprog/formal/oracles/test_arm64_stack_arm_route_host.c": "0a3fd4bcf477d1408b164531f00336ca3ab07d85b8378adf97c672afcf562d49",
+    "kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c": "123283b8bf14bbae8fa2d9ca1d515d1b48111077a588c167fc3c98eadce4df33",
+    "kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c": "d46b3b707ed5fe5454266f064ee0f95f14a86c9bdaf0260ebcdfffa65b4d9f6b",
+    "kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c": "a0e2ff784d0be5dadb6ce64b68665ef71f1353708e70869415ff8f0e374aeab4"
+  },
+  "existing_host_stage": "initial fixture compatibility diagnostics retained; matched source rerun follows"
+}

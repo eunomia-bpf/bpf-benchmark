@@ -64,7 +64,6 @@ typedef union {
 static volatile host_stack_arena *host_stack;
 /* The guarded arena supplies the bytes; entry-private metadata is fresh. */
 static __u8 __a64_stack_tag[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
-static __u8 __a64_stack_scalar_valid[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
 #define __a64_stack (*host_stack)
 static void access_boundary(void *argument)
 {

@@ -59,8 +59,6 @@ static volatile host_stack_arena *host_stack;
 static __u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8)));
 /* Private metadata accompanies the manually planted zero-origin arena. */
 static __u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
-static __u64 __a64_stack_scalar_payload[ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS];
-static __u64 __a64_stack_scalar_valid[(ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS + 63U) / 64U];
 static __u64 __a64_numeric_sp, __a64_numeric_return;
 static __u8 __a64_numeric_sp_valid, __a64_numeric_return_valid;
 struct memory_access { long off; __u32 width; int is_write; };

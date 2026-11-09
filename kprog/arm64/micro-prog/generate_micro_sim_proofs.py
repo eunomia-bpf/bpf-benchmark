@@ -959,8 +959,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for index in range(len(insns) - 1)
     }
     targets_by_addr = indirect_targets(all_insns)
-    scalar_reads = set()
-    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__], scalar_reads=scalar_reads)
+    stack_min, stack_max, payload_offsets = collect_layout(all_insns, targets_by_addr, sys.modules[__name__])
     returns_by_addr = return_targets(all_insns, targets_by_addr)
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
                           if insn.mnemonic in {"bl", "blr"})
@@ -988,26 +987,6 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         lines.extend(["#define ARM64_SIM_ENABLE_STACK 1",
                       f"#define ARM64_SIM_STACK_BIAS {stack_bias}LL",
                       f"#define ARM64_SIM_STACK_BYTES {stack_bytes}U"])
-        # Forward only exact whole-word scalar loads; other accesses use raw bytes.
-        scalar_indexes = sorted({(off + stack_bias) // 8 for off in scalar_reads})
-        declarations = [f"__u64 __a64_fwd_valid_{i}=0;" for i in range(max(1,(len(scalar_indexes)+63)//64))]
-        declarations += [f"__u64 __a64_fwd_value_{i}=0;" for i in range(len(scalar_indexes))]
-        valid = "0ULL"
-        load = "0ULL"
-        clears, stores = [], []
-        for cell, physical in reversed(list(enumerate(scalar_indexes))):
-            bank, bit = divmod(cell,64)
-            valid = f"(__a64_fwd_index=={physical}ULL ? ((__a64_fwd_valid_{bank}>>{bit}U)&1U) : {valid})"
-            load = f"(__a64_fwd_index=={physical}ULL ? __a64_fwd_value_{cell} : {load})"
-            clears.append(f"case {physical}ULL: __a64_fwd_valid_{bank}&=~(1ULL<<{bit}U); break;")
-            stores.append(f"case {physical}ULL: __a64_fwd_value_{cell}=(VALUE); __a64_fwd_valid_{bank}|=1ULL<<{bit}U; break;")
-        lines.extend([
-            "#define ARM64_SIM_L_DECLARE_SCALAR_CACHE() "+" ".join(declarations),
-            "#define ARM64_SIM_L_STACK_SCALAR_VALID(INDEX) ({ __u64 __a64_fwd_index=(INDEX); "+valid+"; })",
-            "#define ARM64_SIM_L_STACK_SCALAR_LOAD(INDEX) ({ __u64 __a64_fwd_index=(INDEX); "+load+"; })",
-            "#define ARM64_SIM_L_STACK_SCALAR_CLEAR(INDEX) do { switch ((__u64)(INDEX)) { "+" ".join(clears)+" default: break; } } while (0)",
-            "#define ARM64_SIM_L_STACK_SCALAR_STORE(INDEX, VALUE) do { switch ((__u64)(INDEX)) { "+" ".join(stores)+" default: break; } } while (0)",
-        ])
         if payload_offsets is not None:
             # Keep only private stack/outer-return identity payloads. Unknown
             # alias/copy extents use the complete layout from the C header.
