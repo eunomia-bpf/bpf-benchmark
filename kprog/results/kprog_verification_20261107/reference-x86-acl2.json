@@ -2117,6 +2117,105 @@
     "sha256": "9aa9c5b99998321574ad17dc103f25a7af3e03c71bd7addc50288bf83034bd86"
   },
   "classifier": "Raw equality classifications retained. Each non-equal observation with a nonempty model MS/fault is separately labeled model-stopped; clear-state REP observations retain state-difference. Original raw observations and full model output remain archived.",
+  "current_certified_operational_replay": {
+    "archive": "kprog/results/kprog_verification_20261107/reference-x86-acl2-current.log.gz",
+    "certification": {
+      "actual_exit": 0,
+      "book_load_actual_exit": 0,
+      "scope": "Unmodified official current machine/FTY/basic/Kestrel, retained8.7+ engine and checker-validated library caches. All certification attempts/inputs/source/certificate pins and operational observations retained in archive; no model edit or skipped proof.",
+      "terminal_attempt": 588,
+      "upstream_machine_source": "37292996d867d74c30192bc09472e135d70a3595"
+    },
+    "combined_current_isa_labels": {
+      "agree": 62,
+      "model_stopped": 4,
+      "state_difference": 1,
+      "total": 67
+    },
+    "new_agreeing_operation_labels": [
+      "X86_OP_MULX",
+      "X86_OP_RORX",
+      "X86_OP_RORX_MEM",
+      "X86_OP_SHIFTX_MEM"
+    ],
+    "publication": "fee4c86c967ce44b04a590d40935ba306fd14370",
+    "remaining_boundary": "ANDN/BZHI register/memory retain NIL semantic bindings; REP MOVS48 clear-state one-element versus whole-instruction observations differ. Every original state difference and source epoch retained. Finite replay does not establish compiler, physical event or universal ISA refinement.",
+    "summary": {
+      "acl2_errors": 0,
+      "by_operation": {
+        "X86_OP_ANDN": {
+          "model-stopped": 24
+        },
+        "X86_OP_ANDN_MEM": {
+          "model-stopped": 24
+        },
+        "X86_OP_BSWAP": {
+          "agree": 24
+        },
+        "X86_OP_BZHI": {
+          "model-stopped": 24
+        },
+        "X86_OP_BZHI_MEM": {
+          "model-stopped": 24
+        },
+        "X86_OP_LOAD_XMM0": {
+          "agree": 24
+        },
+        "X86_OP_MOVBE_LOAD": {
+          "agree": 36
+        },
+        "X86_OP_MOVBE_STORE": {
+          "agree": 36
+        },
+        "X86_OP_MULX": {
+          "agree": 24
+        },
+        "X86_OP_POPCNT": {
+          "agree": 36
+        },
+        "X86_OP_POPCNT_MEM": {
+          "agree": 36
+        },
+        "X86_OP_REP_MOVS": {
+          "state-difference": 48
+        },
+        "X86_OP_RORX": {
+          "agree": 24
+        },
+        "X86_OP_RORX_MEM": {
+          "agree": 24
+        },
+        "X86_OP_SHIFTX": {
+          "agree": 72
+        },
+        "X86_OP_SHIFTX_MEM": {
+          "agree": 72
+        },
+        "X86_OP_STORE_XMM0": {
+          "agree": 24
+        }
+      },
+      "canonical_original_drift_cases": 0,
+      "cases": 576,
+      "command": [
+        "/workspaces/.agent-state/kprog-lanes/V/reference-models/acl2-8.7-saved/acl2"
+      ],
+      "loaded_book_sha256": "e73251b5ea07fdb524d3530006ed268be9ebe1756d9e85abb29d34d08c006f85",
+      "model_engine_sha256": "8179986a468d27eb631b646adbf151f4322811b7cc7aa05acff997ad454f8536",
+      "model_runtime_sha256": "2409c8befe0ca3d6309fcce4f820d8257ceff316a437b38115e228d9259f5670",
+      "model_scope": "Certified unmodified official current machine/FTY/basic/Kestrel against retained8.7+ engine and checked standard-library cache. Application view EFER.LMA/CS.L, CR4=512, X86ISA_EXEC0; one operational model element. Complete16GPR/definedflags/PC/XMM0/supplied-memory comparison; no event or compiler/link claim.",
+      "model_source_commit": "37292996d867d74c30192bc09472e135d70a3595",
+      "process_exit": 0,
+      "reference_epoch": "Original canonical3bc4 frozen executable recovered from reference-arm-asl.log.gz, same576 published requests; fresh replay canonical drift0. Workspace HEAD is operational context, not the canonical executable source.",
+      "reference_sha256": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173",
+      "statuses": {
+        "agree": 432,
+        "model-stopped": 96,
+        "state-difference": 48
+      },
+      "workspace_head_at_execution": "5d8c38d3aeee2909b9dee59178f990f675786f30"
+    }
+  },
   "diagnostic_by_operation": {
     "X86_OP_ANDN": {
       "model-stopped": 24

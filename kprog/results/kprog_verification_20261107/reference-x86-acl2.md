@@ -83,3 +83,31 @@ identity. The loader uses official `init.lisp` plus the upstream local
 in the raw logs; these are operational model comparisons and ACL2 certification
 remains a separate trust item. The November source capability audit above
 continues to describe its own source epoch.
+
+## Certified official current machine replay
+
+The unmodified official machine at `37292996d867d74c30192bc09472e135d70a3595`
+certifies with actual exit0 (incremental attempt588), then loads with actual0
+and bound MULX/RORX handlers. The retained8.7+ engine and source/certificate
+cache are distinct from that machine source. Checker-required dependent books
+were recertified; all initial failures and setup/dependency repairs remain in
+the [current archive](reference-x86-acl2-current.log.gz). No official model
+definition or proof was bypassed.
+
+The same576 original requests run with the same frozen canonical executable
+`3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173`, with fresh canonical
+drift0 and ACL2 error occurrences0:
+
+| Actual outcome | Cases |
+| --- | ---: |
+| Complete observed state agreement | 432 |
+| Model stopped (ANDN/BZHI register and memory) | 96 |
+| Clear-state REP MOVS element/whole-instruction difference | 48 |
+
+MULX24, RORX register24/memory24 and memory SHIFTX72 now agree, including PC
+and all previously compared state. Together with the retained Sail and ACL2
+epochs this gives62 agreeing labels,4 model-stopped labels and1 differing label
+among67 canonical forms. The earlier8.5/8.7 state differences remain historical
+observations; source capability, successful certification and instruction-state
+agreement are recorded separately. These sampled results do not establish
+physical events, permissions/concurrency, C/compiler or link/ABI correspondence.

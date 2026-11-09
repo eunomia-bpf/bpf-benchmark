@@ -24,9 +24,9 @@ specialization token also has its own row.
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
-| Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
-| Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
-| Upstream model-differing operation rows | 2/75 | 1/74 explicit monitor profile |
+| Upstream machine-model sampled architectural-state agreement | 62/75 | 74/74 selected profiles |
+| Upstream model-stopped operation rows | 4/75 | 0/74 selected forms |
+| Upstream model-differing operation rows | 1/75 | 1/74 explicit monitor profile |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
 | Additional explicit-monitor-only replay | 0 | 1/74 |
 | Numeric operations awaiting selected replay | 9/75 | 6/74 |
@@ -36,9 +36,18 @@ specialization token also has its own row.
 The numeric catalogue retains historical vector reference/C-model laws. Current
 native producers use the approved scalar policy and reach existing generation
 failure for two x86 and seven ARM SIMD/FP token families. The additional
-source-emitted REP STOS body has separate pending reference/refinement and
-compiled-B rows; it is outside the numeric catalogue and the13 compiled scalar
-families above.
+source-emitted REP STOS body has a native64 canonical step and14 checked
+progress/frame/refinement laws, plus168 full-state/write/fault scenes. Its actual
+C-loop/arena extraction, compiled-B and physical composition remain partial; it
+is outside the numeric catalogue and the13 compiled scalar families above.
+
+The [certified current ACL2 replay](reference-x86-acl2.md) executes the same576
+inputs:432 complete observed states agree,96 ANDN/BZHI cases stop at missing
+model semantics and48 REP MOVS cases retain the operational element/whole-step
+difference. MULX, RORX register/memory and memory SHIFTX newly agree, bringing
+combined selected coverage to62 agreeing/4stopped/1differing labels among67.
+The unchanged official machine source37292996 certifies and loads with actual0;
+certification, finite replay and universal simulator/compiler closure stay distinct.
 
 The [current Arm ASL comparison](reference-arm-asl.md) records5028 comparisons:
 5016 state observations agree across all74 labels, and12 STLXR inputs retain
@@ -5843,3 +5852,18 @@ entry/exit and successful-tail correspondence remain explicit.
 REP STOS now has two pending source-emission rows: four widths, native64
 addresses and full RCX count under the clear-DF ABI profile. Its finite host
 and native observations do not establish canonical ISA or compiled-B refinement.
+
+### Current reference and source-string followup
+
+Official current ACL2 records and REP STOS14 progress laws retain their exact
+source/canonical epochs and explicit trust/profile premises. The REP STOS
+source-token row remains partial until C extraction, compiled B and physical
+store/ABI correspondence are established; numeric operation/token totals do not
+change. Original REP MOVS bounded component laws remain intact.
+
+Exact55504ff90 full checking exits2 in the later legacy ARM route fixture, after
+the13 repaired host groups pass. The [4471-case route repair and failure archive](a64-route-frame.log.gz)
+retain every original lane/tag/address assertion and the failed full source/log.
+The sole successor full includes this fixture and REP STOS; its own actual exit
+and immutable source receipt are recorded separately. Last completed passing
+full source remains98122928d until a successor actually returns0.
