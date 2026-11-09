@@ -1,0 +1,26 @@
+{
+  "utc": "2026-11-09T11:43:44.598423+00:00",
+  "model_source": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+  "driver_source": "cd9bf8e642aed3106b16af8d373df68729f7e33e",
+  "controller_pid": 3847740,
+  "waits_generation_worker": 3817966,
+  "source_objects": 18,
+  "selected_instances": 274,
+  "instances": 549,
+  "source_symbols_present": 274,
+  "kernel": "/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage",
+  "kernel_sha256": "ebf884adc626fdb5d56ea3b32c7db1057a6147d60ee65e766ff9d849c7ef01dd",
+  "runtime_sha256": {
+    "kprog_stock.ko": "6fc61d7578a26d4c86563da47bdb2bdb341f7d00826cebed48657ff798f6a25e",
+    "libnative_loader.so": "580852d479d5e13433d57cc3c5b822e2c119191564ebbd09fddf92111ae196f8",
+    "trusted-native-loader": "fd7820d758e9ba7a21dcdf378e0a691b047184660688c76bca7789ad13446170"
+  },
+  "guest_cpu": "8-11",
+  "compiler_cpu": "16-19",
+  "guest_memory": "2G",
+  "native_execution_requests": 0,
+  "resource_mode": "source ELF maps/BTF, autoload=false",
+  "stock_inputs": "existing kprog/stock-path/bin/clang and stock_native_input.h",
+  "preparation_cutover_collector": 3848369,
+  "sequence": "retain current Katran compiler outcome, close preparatory cohort, then run all549stock rows"
+}
