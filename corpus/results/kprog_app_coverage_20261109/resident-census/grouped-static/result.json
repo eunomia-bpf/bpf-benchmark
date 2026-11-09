@@ -1,21 +1,23 @@
 {
   "instances": 275,
   "native_body_groups": 27,
-  "groups_completed": 16,
-  "represented_instances": 248,
+  "groups_completed": 17,
+  "represented_instances": 257,
   "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
   "body_identity": "SHA256 of complete native-link proof ELF, including executable/data sections and relocation identities",
   "weighted_classes": {
     "verifier_stack_access": 111,
     "verifier_scalar_memory_access": 104,
     "compiler_stack_storage": 33,
-    "pending": 27
+    "pending": 18,
+    "generation_failed": 9
   },
   "unique_body_classes": {
     "verifier_stack_access": 7,
     "verifier_scalar_memory_access": 8,
     "compiler_stack_storage": 1,
-    "pending": 11
+    "pending": 10,
+    "generation_failed": 1
   },
   "instance_scope": "Class distribution weighted by identical-body membership; each outcome is the actual representative submission",
   "native_execution_requests": 0,
@@ -5083,11 +5085,680 @@
         65,
         91
       ],
-      "stage": "pending",
-      "failure_class": "pending",
+      "stage": "generation_failed",
+      "failure_class": "generation_failed",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
-      "observation": "queued representative",
-      "outcome": null
+      "observation": "group representative submission",
+      "outcome": {
+        "application": "tetragon/observer",
+        "source_prog_id": 142,
+        "name": "generic_retkpro",
+        "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+        "submission": {
+          "source_prog_id": 0,
+          "stage": "generation_failed",
+          "native_sha256": "3ed110e21f9431b6420d5f9be657a0b27d06f7a3c80e71482d29c77b202eff4a",
+          "context": {
+            "version": 1,
+            "load_context": {
+              "prog_type": 2,
+              "expected_attach_type": 0,
+              "prog_flags": 0,
+              "prog_ifindex": 0,
+              "attach_btf_id": 0,
+              "attach_btf_obj_id": 0,
+              "attach_prog_id": 0,
+              "gpl_compatible": 1,
+              "source_btf_id": 14,
+              "source_func_type_id": 433,
+              "token_present": 0
+            },
+            "maps": [
+              {
+                "name": "retkprobe_calls",
+                "map_id": 2,
+                "value_offset": null
+              },
+              {
+                "name": "tcpmon_map",
+                "map_id": 3,
+                "value_offset": null
+              },
+              {
+                "name": "tg_rb_events",
+                "map_id": 4,
+                "value_offset": null
+              },
+              {
+                "name": "buffer_heap_map",
+                "map_id": 5,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_0",
+                "map_id": 7,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_1",
+                "map_id": 9,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_2",
+                "map_id": 11,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_3",
+                "map_id": 13,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_4",
+                "map_id": 15,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_5",
+                "map_id": 17,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_6",
+                "map_id": 19,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_7",
+                "map_id": 21,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_8",
+                "map_id": 23,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_9",
+                "map_id": 25,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_10",
+                "map_id": 27,
+                "value_offset": null
+              },
+              {
+                "name": "string_maps_heap",
+                "map_id": 28,
+                "value_offset": null
+              },
+              {
+                "name": "string_prefix_maps",
+                "map_id": 30,
+                "value_offset": null
+              },
+              {
+                "name": "string_prefix_maps_heap",
+                "map_id": 31,
+                "value_offset": null
+              },
+              {
+                "name": "string_postfix_maps",
+                "map_id": 33,
+                "value_offset": null
+              },
+              {
+                "name": "string_postfix_maps_heap",
+                "map_id": 34,
+                "value_offset": null
+              },
+              {
+                "name": "substring_map",
+                "map_id": 35,
+                "value_offset": null
+              },
+              {
+                "name": "policy_conf",
+                "map_id": 36,
+                "value_offset": null
+              },
+              {
+                "name": "policy_stats",
+                "map_id": 37,
+                "value_offset": null
+              },
+              {
+                "name": "tg_errmetrics_map",
+                "map_id": 38,
+                "value_offset": null
+              },
+              {
+                "name": "tg_conf_map",
+                "map_id": 39,
+                "value_offset": null
+              },
+              {
+                "name": "execve_msg_heap_map",
+                "map_id": 40,
+                "value_offset": null
+              },
+              {
+                "name": "tg_binary_heap",
+                "map_id": 41,
+                "value_offset": null
+              },
+              {
+                "name": "tg_parents_bin",
+                "map_id": 42,
+                "value_offset": null
+              },
+              {
+                "name": "execve_map",
+                "map_id": 43,
+                "value_offset": null
+              },
+              {
+                "name": "execve_map_stats",
+                "map_id": 44,
+                "value_offset": null
+              },
+              {
+                "name": "execve_val",
+                "map_id": 45,
+                "value_offset": null
+              },
+              {
+                "name": "execve_heap",
+                "map_id": 46,
+                "value_offset": null
+              },
+              {
+                "name": "tg_execve_joined_info_map",
+                "map_id": 47,
+                "value_offset": null
+              },
+              {
+                "name": "tg_execve_joined_info_map_stats",
+                "map_id": 48,
+                "value_offset": null
+              },
+              {
+                "name": "tg_stats_map",
+                "map_id": 49,
+                "value_offset": null
+              },
+              {
+                "name": "retprobe_map",
+                "map_id": 50,
+                "value_offset": null
+              },
+              {
+                "name": "tg_ipv6_ext_heap",
+                "map_id": 51,
+                "value_offset": null
+              },
+              {
+                "name": "tg_cgrps_tracking_map",
+                "map_id": 52,
+                "value_offset": null
+              },
+              {
+                "name": "tg_cgrps_tracking_heap",
+                "map_id": 53,
+                "value_offset": null
+              },
+              {
+                "name": "tg_cgrps_msg_heap",
+                "map_id": 54,
+                "value_offset": null
+              },
+              {
+                "name": "tg_cgtracker_map",
+                "map_id": 55,
+                "value_offset": null
+              },
+              {
+                "name": "argfilter_maps",
+                "map_id": 57,
+                "value_offset": null
+              },
+              {
+                "name": "addr4lpm_maps",
+                "map_id": 59,
+                "value_offset": null
+              },
+              {
+                "name": "addr6lpm_maps",
+                "map_id": 61,
+                "value_offset": null
+              },
+              {
+                "name": "enforcer_data",
+                "map_id": 62,
+                "value_offset": null
+              },
+              {
+                "name": "enforcer_missed_notifications",
+                "map_id": 63,
+                "value_offset": null
+              },
+              {
+                "name": "ratelimit_map",
+                "map_id": 64,
+                "value_offset": null
+              },
+              {
+                "name": "ratelimit_heap",
+                "map_id": 65,
+                "value_offset": null
+              },
+              {
+                "name": "heap_ro_zero",
+                "map_id": 66,
+                "value_offset": null
+              },
+              {
+                "name": "heap",
+                "map_id": 67,
+                "value_offset": null
+              },
+              {
+                "name": "tg_mbset_map",
+                "map_id": 68,
+                "value_offset": null
+              },
+              {
+                "name": "tg_mbset_gen",
+                "map_id": 69,
+                "value_offset": null
+              },
+              {
+                "name": "process_call_heap",
+                "map_id": 70,
+                "value_offset": null
+              },
+              {
+                "name": "override_tasks",
+                "map_id": 71,
+                "value_offset": null
+              },
+              {
+                "name": "data_heap",
+                "map_id": 72,
+                "value_offset": null
+              },
+              {
+                "name": "filter_map",
+                "map_id": 73,
+                "value_offset": null
+              },
+              {
+                "name": "config_map",
+                "map_id": 74,
+                "value_offset": null
+              },
+              {
+                "name": "tg_mb_sel_opts",
+                "map_id": 75,
+                "value_offset": null
+              },
+              {
+                "name": "tg_mb_paths",
+                "map_id": 77,
+                "value_offset": null
+              },
+              {
+                "name": "fdinstall_map",
+                "map_id": 78,
+                "value_offset": null
+              },
+              {
+                "name": "socktrack_map",
+                "map_id": 79,
+                "value_offset": null
+              },
+              {
+                "name": "stack_trace_map",
+                "map_id": 80,
+                "value_offset": null
+              },
+              {
+                "name": "policy_filter_maps",
+                "map_id": 82,
+                "value_offset": null
+              },
+              {
+                "name": "policy_filter_cgroup_maps",
+                "map_id": 84,
+                "value_offset": null
+              },
+              {
+                "name": "sleepable_preload",
+                "map_id": 85,
+                "value_offset": null
+              },
+              {
+                "name": "bpf_gene.rodata",
+                "map_id": 87,
+                "value_offset": null
+              },
+              {
+                "name": "CONFIG_ITER_NUM",
+                "map_id": 87,
+                "value_offset": 0
+              },
+              {
+                "name": "PARENTS_MAP_ENABLED",
+                "map_id": 87,
+                "value_offset": 1
+              },
+              {
+                "name": ".rodata.str1.1",
+                "map_id": 88,
+                "value_offset": null
+              }
+            ]
+          },
+          "resources": {
+            "section": "kprobe/generic_retkprobe",
+            "maps": [
+              {
+                "name": "retkprobe_calls",
+                "map_id": 2
+              },
+              {
+                "name": "tcpmon_map",
+                "map_id": 3
+              },
+              {
+                "name": "tg_rb_events",
+                "map_id": 4
+              },
+              {
+                "name": "buffer_heap_map",
+                "map_id": 5
+              },
+              {
+                "name": "string_maps_0",
+                "map_id": 7
+              },
+              {
+                "name": "string_maps_1",
+                "map_id": 9
+              },
+              {
+                "name": "string_maps_2",
+                "map_id": 11
+              },
+              {
+                "name": "string_maps_3",
+                "map_id": 13
+              },
+              {
+                "name": "string_maps_4",
+                "map_id": 15
+              },
+              {
+                "name": "string_maps_5",
+                "map_id": 17
+              },
+              {
+                "name": "string_maps_6",
+                "map_id": 19
+              },
+              {
+                "name": "string_maps_7",
+                "map_id": 21
+              },
+              {
+                "name": "string_maps_8",
+                "map_id": 23
+              },
+              {
+                "name": "string_maps_9",
+                "map_id": 25
+              },
+              {
+                "name": "string_maps_10",
+                "map_id": 27
+              },
+              {
+                "name": "string_maps_heap",
+                "map_id": 28
+              },
+              {
+                "name": "string_prefix_maps",
+                "map_id": 30
+              },
+              {
+                "name": "string_prefix_maps_heap",
+                "map_id": 31
+              },
+              {
+                "name": "string_postfix_maps",
+                "map_id": 33
+              },
+              {
+                "name": "string_postfix_maps_heap",
+                "map_id": 34
+              },
+              {
+                "name": "substring_map",
+                "map_id": 35
+              },
+              {
+                "name": "policy_conf",
+                "map_id": 36
+              },
+              {
+                "name": "policy_stats",
+                "map_id": 37
+              },
+              {
+                "name": "tg_errmetrics_map",
+                "map_id": 38
+              },
+              {
+                "name": "tg_conf_map",
+                "map_id": 39
+              },
+              {
+                "name": "execve_msg_heap_map",
+                "map_id": 40
+              },
+              {
+                "name": "tg_binary_heap",
+                "map_id": 41
+              },
+              {
+                "name": "tg_parents_bin",
+                "map_id": 42
+              },
+              {
+                "name": "execve_map",
+                "map_id": 43
+              },
+              {
+                "name": "execve_map_stats",
+                "map_id": 44
+              },
+              {
+                "name": "execve_val",
+                "map_id": 45
+              },
+              {
+                "name": "execve_heap",
+                "map_id": 46
+              },
+              {
+                "name": "tg_execve_joined_info_map",
+                "map_id": 47
+              },
+              {
+                "name": "tg_execve_joined_info_map_stats",
+                "map_id": 48
+              },
+              {
+                "name": "tg_stats_map",
+                "map_id": 49
+              },
+              {
+                "name": "retprobe_map",
+                "map_id": 50
+              },
+              {
+                "name": "tg_ipv6_ext_heap",
+                "map_id": 51
+              },
+              {
+                "name": "tg_cgrps_tracking_map",
+                "map_id": 52
+              },
+              {
+                "name": "tg_cgrps_tracking_heap",
+                "map_id": 53
+              },
+              {
+                "name": "tg_cgrps_msg_heap",
+                "map_id": 54
+              },
+              {
+                "name": "tg_cgtracker_map",
+                "map_id": 55
+              },
+              {
+                "name": "argfilter_maps",
+                "map_id": 57
+              },
+              {
+                "name": "addr4lpm_maps",
+                "map_id": 59
+              },
+              {
+                "name": "addr6lpm_maps",
+                "map_id": 61
+              },
+              {
+                "name": "enforcer_data",
+                "map_id": 62
+              },
+              {
+                "name": "enforcer_missed_notifications",
+                "map_id": 63
+              },
+              {
+                "name": "ratelimit_map",
+                "map_id": 64
+              },
+              {
+                "name": "ratelimit_heap",
+                "map_id": 65
+              },
+              {
+                "name": "heap_ro_zero",
+                "map_id": 66
+              },
+              {
+                "name": "heap",
+                "map_id": 67
+              },
+              {
+                "name": "tg_mbset_map",
+                "map_id": 68
+              },
+              {
+                "name": "tg_mbset_gen",
+                "map_id": 69
+              },
+              {
+                "name": "process_call_heap",
+                "map_id": 70
+              },
+              {
+                "name": "override_tasks",
+                "map_id": 71
+              },
+              {
+                "name": "data_heap",
+                "map_id": 72
+              },
+              {
+                "name": "filter_map",
+                "map_id": 73
+              },
+              {
+                "name": "config_map",
+                "map_id": 74
+              },
+              {
+                "name": "tg_mb_sel_opts",
+                "map_id": 75
+              },
+              {
+                "name": "tg_mb_paths",
+                "map_id": 77
+              },
+              {
+                "name": "fdinstall_map",
+                "map_id": 78
+              },
+              {
+                "name": "socktrack_map",
+                "map_id": 79
+              },
+              {
+                "name": "stack_trace_map",
+                "map_id": 80
+              },
+              {
+                "name": "policy_filter_maps",
+                "map_id": 82
+              },
+              {
+                "name": "policy_filter_cgroup_maps",
+                "map_id": 84
+              },
+              {
+                "name": "sleepable_preload",
+                "map_id": 85
+              },
+              {
+                "name": "bpf_gene.rodata",
+                "map_id": 87
+              },
+              {
+                "name": ".rodata.str1.1",
+                "map_id": 88
+              }
+            ],
+            "pin_root": "/sys/fs/bpf/kprog-selftest-drikf33b",
+            "attach_target_resolution": null
+          },
+          "request_id": 1,
+          "status": -5,
+          "prog_id": 0,
+          "service": {
+            "request_id": 1,
+            "source_prog_id": 0,
+            "native_sha256": "3ed110e21f9431b6420d5f9be657a0b27d06f7a3c80e71482d29c77b202eff4a",
+            "started": "2026-11-09T14:49:04.629942+00:00",
+            "status": -5,
+            "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '0', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/request.native.o', 'generic_retkprobe_event', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/trusted_x86.proof.o', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/native-link', '0', '0', '0', '0', '0', '0', '2', '1', '14', '433', 'retkprobe_calls', '2', 'null', 'tcpmon_map', '3', 'null', 'tg_rb_events', '4', 'null', 'buffer_heap_map', '5', 'null', 'string_maps_0', '7', 'null', 'string_maps_1', '9', 'null', 'string_maps_2', '11', 'null', 'string_maps_3', '13', 'null', 'string_maps_4', '15', 'null', 'string_maps_5', '17', 'null', 'string_maps_6', '19', 'null', 'string_maps_7', '21', 'null', 'string_maps_8', '23', 'null', 'string_maps_9', '25', 'null', 'string_maps_10', '27', 'null', 'string_maps_heap', '28', 'null', 'string_prefix_maps', '30', 'null', 'string_prefix_maps_heap', '31', 'null', 'string_postfix_maps', '33', 'null', 'string_postfix_maps_heap', '34', 'null', 'substring_map', '35', 'null', 'policy_conf', '36', 'null', 'policy_stats', '37', 'null', 'tg_errmetrics_map', '38', 'null', 'tg_conf_map', '39', 'null', 'execve_msg_heap_map', '40', 'null', 'tg_binary_heap', '41', 'null', 'tg_parents_bin', '42', 'null', 'execve_map', '43', 'null', 'execve_map_stats', '44', 'null', 'execve_val', '45', 'null', 'execve_heap', '46', 'null', 'tg_execve_joined_info_map', '47', 'null', 'tg_execve_joined_info_map_stats', '48', 'null', 'tg_stats_map', '49', 'null', 'retprobe_map', '50', 'null', 'tg_ipv6_ext_heap', '51', 'null', 'tg_cgrps_tracking_map', '52', 'null', 'tg_cgrps_tracking_heap', '53', 'null', 'tg_cgrps_msg_heap', '54', 'null', 'tg_cgtracker_map', '55', 'null', 'argfilter_maps', '57', 'null', 'addr4lpm_maps', '59', 'null', 'addr6lpm_maps', '61', 'null', 'enforcer_data', '62', 'null', 'enforcer_missed_notifications', '63', 'null', 'ratelimit_map', '64', 'null', 'ratelimit_heap', '65', 'null', 'heap_ro_zero', '66', 'null', 'heap', '67', 'null', 'tg_mbset_map', '68', 'null', 'tg_mbset_gen', '69', 'null', 'process_call_heap', '70', 'null', 'override_tasks', '71', 'null', 'data_heap', '72', 'null', 'filter_map', '73', 'null', 'config_map', '74', 'null', 'tg_mb_sel_opts', '75', 'null', 'tg_mb_paths', '77', 'null', 'fdinstall_map', '78', 'null', 'socktrack_map', '79', 'null', 'stack_trace_map', '80', 'null', 'policy_filter_maps', '82', 'null', 'policy_filter_cgroup_maps', '84', 'null', 'sleepable_preload', '85', 'null', 'bpf_gene.rodata', '87', 'null', 'CONFIG_ITER_NUM', '87', '0', 'PARENTS_MAP_ENABLED', '87', '1', '.rodata.str1.1', '88', 'null']' returned non-zero exit status 1.",
+            "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '0', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/request.native.o', 'generic_retkprobe_event', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/trusted_x86.proof.o', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/native-link', '0', '0', '0', '0', '0', '0', '2', '1', '14', '433', 'retkprobe_calls', '2', 'null', 'tcpmon_map', '3', 'null', 'tg_rb_events', '4', 'null', 'buffer_heap_map', '5', 'null', 'string_maps_0', '7', 'null', 'string_maps_1', '9', 'null', 'string_maps_2', '11', 'null', 'string_maps_3', '13', 'null', 'string_maps_4', '15', 'null', 'string_maps_5', '17', 'null', 'string_maps_6', '19', 'null', 'string_maps_7', '21', 'null', 'string_maps_8', '23', 'null', 'string_maps_9', '25', 'null', 'string_maps_10', '27', 'null', 'string_maps_heap', '28', 'null', 'string_prefix_maps', '30', 'null', 'string_prefix_maps_heap', '31', 'null', 'string_postfix_maps', '33', 'null', 'string_postfix_maps_heap', '34', 'null', 'substring_map', '35', 'null', 'policy_conf', '36', 'null', 'policy_stats', '37', 'null', 'tg_errmetrics_map', '38', 'null', 'tg_conf_map', '39', 'null', 'execve_msg_heap_map', '40', 'null', 'tg_binary_heap', '41', 'null', 'tg_parents_bin', '42', 'null', 'execve_map', '43', 'null', 'execve_map_stats', '44', 'null', 'execve_val', '45', 'null', 'execve_heap', '46', 'null', 'tg_execve_joined_info_map', '47', 'null', 'tg_execve_joined_info_map_stats', '48', 'null', 'tg_stats_map', '49', 'null', 'retprobe_map', '50', 'null', 'tg_ipv6_ext_heap', '51', 'null', 'tg_cgrps_tracking_map', '52', 'null', 'tg_cgrps_tracking_heap', '53', 'null', 'tg_cgrps_msg_heap', '54', 'null', 'tg_cgtracker_map', '55', 'null', 'argfilter_maps', '57', 'null', 'addr4lpm_maps', '59', 'null', 'addr6lpm_maps', '61', 'null', 'enforcer_data', '62', 'null', 'enforcer_missed_notifications', '63', 'null', 'ratelimit_map', '64', 'null', 'ratelimit_heap', '65', 'null', 'heap_ro_zero', '66', 'null', 'heap', '67', 'null', 'tg_mbset_map', '68', 'null', 'tg_mbset_gen', '69', 'null', 'process_call_heap', '70', 'null', 'override_tasks', '71', 'null', 'data_heap', '72', 'null', 'filter_map', '73', 'null', 'config_map', '74', 'null', 'tg_mb_sel_opts', '75', 'null', 'tg_mb_paths', '77', 'null', 'fdinstall_map', '78', 'null', 'socktrack_map', '79', 'null', 'stack_trace_map', '80', 'null', 'policy_filter_maps', '82', 'null', 'policy_filter_cgroup_maps', '84', 'null', 'sleepable_preload', '85', 'null', 'bpf_gene.rodata', '87', 'null', 'CONFIG_ITER_NUM', '87', '0', 'PARENTS_MAP_ENABLED', '87', '1', '.rodata.str1.1', '88', 'null']' returned non-zero exit status 1.\n",
+            "failure_archive": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/1.failure.tar.gz",
+            "finished": "2026-11-09T15:03:31.781180+00:00"
+          },
+          "diagnostic": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: entry=generic_retkprobe_event (13814 bytes), 2 reachable symbol(s) total\n  - generic_retkprobe_event (vaddr 0x0, 13814 bytes) [entry]\n  - cwd_read_v61 (vaddr 0x35f6, 481 bytes)\nError: PLT32 reloc at 0x20f3 in generic_retkprobe_event did not encode as direct rel32\n\ncommand: /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/native-link --input /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.proof.o --symbol generic_retkprobe_event --mode kernel --output /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.blob.bin --output-relocs /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.relocs.bin --output-map-patches /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.map-patches.tsv --output-abi /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.abi.tsv --output-data-layout /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.data-layout.json --link-plan /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.link-plan.json\n"
+        },
+        "stage": "generation_failed",
+        "diagnostic": "trusted-native-loader: native-link kernel failed (rc=1)\nstderr:\nnative-link: entry=generic_retkprobe_event (13814 bytes), 2 reachable symbol(s) total\n  - generic_retkprobe_event (vaddr 0x0, 13814 bytes) [entry]\n  - cwd_read_v61 (vaddr 0x35f6, 481 bytes)\nError: PLT32 reloc at 0x20f3 in generic_retkprobe_event did not encode as direct rel32\n\ncommand: /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/native-link --input /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.proof.o --symbol generic_retkprobe_event --mode kernel --output /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.blob.bin --output-relocs /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.relocs.bin --output-map-patches /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.map-patches.tsv --output-abi /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.abi.tsv --output-data-layout /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.data-layout.json --link-plan /var/tmp/kprog-tmp/A/resident-census-groups/workers/0b52860af10c09b9/stock-state/request-4p3lr2b2/generated/kernel-link/b713d35017e38181.tmp.1054.1054.link-plan.json\n",
+        "generated": true,
+        "compiled": true,
+        "compiler_failures": [],
+        "failure_class": "generation_failed"
+      }
     },
     {
       "body_sha256": "f75564d83865027caa1dd8c4a9488e795d3f6d20ebee468065a1db5ad9c0bf02",
