@@ -363,3 +363,5 @@ actual archived Os inputs. Intel SDM Volume2 STOS/REP supplies the
 architectural operation reference; V owns its universal O1/O2/compiler
 composition. Actual stock-verifier/application runtime is recorded
 separately from generation and host observations.
+
+REP MOVS in the native64, default-address, DF-clear profile reads its full RCX count and loops over every element with a64-bit index. RSI/RDI advance by the actual completed count; RCX becomes0. Existing read-fault recovery retains the completed prefix and resumes after the instruction with its stock RCX fixup. The IMM token field stays reserved for this handler. Known and runtime counts share this body; B reaches the stock verifier with its actual loop. Historical bound64 contract theorems describe their bounded subset, while the canonical ISA count remains architectural RCX.

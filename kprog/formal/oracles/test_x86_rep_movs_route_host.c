@@ -3,7 +3,7 @@
  * block-copy body through the machine-checked KPROG_X86_REP_MOVS_* contract.
  *
  * The simulator's `X86_SIM_L_EXEC_REP_MOVS` no longer restates the FLAGS
- * width resolution, the literal element bound, or the fixed RCX writeback
+ * width resolution, the actual RCX element count, and the fixed RCX writeback
  * width; it resolves them through the generated contract and then runs the
  * copy loop. This oracle drives the REAL body over every FLAGS code and a
  * spread of counts, with copying and overlapping source/destination buffers
@@ -78,7 +78,7 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 	__u8 *src = route_src + src_off;
 	__u8 *dst = route_dst + dst_off;
 	__u8 *exp = route_dst_expected + dst_off;
-	unsigned width, bound, elements;
+	unsigned width, elements;
 	__u64 rsi_after, rdi_after;
 	unsigned i;
 
@@ -100,9 +100,8 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
         memcpy((void *)__x86_stack_mem.b, route_dst, ROUTE_BUF_BYTES);
         dst = (__u8 *)(void *)__x86_stack_mem.b + dst_off;
     }
-	/* The count is the raw immediate, not RCX; RCX holds a sentinel the
-	 * body must overwrite at the fixed 64-bit width. */
-	X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0xdeadbeefcafef00dULL,
+	/* Actual RCX supplies the native count; IMM is a legacy token field. */
+	X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, count,
 				  X86_WIDTH_64);
 	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSI, src, src_tag);
 	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI, dst, dst_tag);
@@ -114,15 +113,14 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 
 	/* ---- independent model: forward element order, width-byte copies ---- */
 	width = flags ? flags : X86_WIDTH_64;
-	bound = 64U;
-	elements = count < (__u64)bound ? (unsigned)count : bound;
+	elements = (unsigned)count;
 	for (i = 0; i < elements; i++)
 		memcpy(exp + (__u64)i * width, src + (__u64)i * width, width);
 	rsi_after = kprog_x86_host_native_cell((__u64)(unsigned long)src + count * width, src_tag, X86_RSI, (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)]);
 	rdi_after = kprog_x86_host_native_cell((__u64)(unsigned long)dst + count * width, dst_tag, X86_RDI, (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)]);
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_REP_MOVS(flags, count);
+	X86_SIM_L_EXEC_REP_MOVS(flags, 0xdeadbeefcafef00dULL);
 
 	/* ---- compare the whole modeled state ---- */
 	cases++;

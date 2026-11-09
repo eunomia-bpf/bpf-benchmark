@@ -34,7 +34,6 @@ STAGE2_PROGRAMS = REPO_ROOT / "kprog" / "test"
 OUT_DIR = Path(__file__).resolve().parent
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
-MAX_REP_MOVS_COUNT = 64
 
 PTR_WIDTH = {
     "BYTE": 8,
@@ -928,12 +927,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     if op == "rep":
         if len(ops) != 2 or not ops[0].startswith("movs ") or not is_mem(ops[0]) or not is_mem(ops[1]):
             raise ValueError(f"cannot encode {insn.raw}")
-        if insn.sim_imm is None:
-            raise ValueError(f"cannot encode variable-length {insn.raw}")
-        if insn.sim_imm < 0 or insn.sim_imm > MAX_REP_MOVS_COUNT:
-            raise ValueError(f"rep movs count {insn.sim_imm} exceeds simulator bound in {insn.raw}")
-        return enc("X86_OP_REP_MOVS", flags=WIDTH_CONST[operand_width(ops[0])],
-                   imm=c_u64(insn.sim_imm))
+        return enc("X86_OP_REP_MOVS", flags=WIDTH_CONST[operand_width(ops[0][len("movs "):])],
+                   imm="0ULL")
 
     if op == "bzhi":
         if len(ops) != 3:

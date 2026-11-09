@@ -1,0 +1,410 @@
+{
+  "inputs": {
+    "head": "81a3ff467e938b1888b67cd8c4f0da3c204315f2",
+    "paths": [
+      "kprog/x86/x86_sim_local_bpf.h",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "kprog/formal/oracles/test_x86_rep_movs_route_host.c",
+      "kprog/x86/simulator-spec.md"
+    ],
+    "profile": "native64/default-address/DFclear",
+    "recovery": "S9 prefix retained",
+    "admission_additions": 0
+  },
+  "host": [
+    {
+      "compiler": "gcc",
+      "name": "cpu",
+      "command": [
+        "gcc",
+        "-O2",
+        "-mno-red-zone",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/gcc-cpu"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "name": "route",
+      "command": [
+        "gcc",
+        "-O2",
+        "-mno-red-zone",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_rep_movs_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/gcc-route"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "cpu",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-mno-red-zone",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/clang-18-cpu",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "route",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-mno-red-zone",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/kprog/formal",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_rep_movs_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/rep-movs-full-count/clang-18-route",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "decoder": [
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": null,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": 0,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": 64,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": 65,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": 256,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
+      "count_fact": 18446744073709551615,
+      "emitted": [
+        "\t/* 0x0: rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_8, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": null,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": 0,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": 64,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": 65,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": 256,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi]",
+      "count_fact": 18446744073709551615,
+      "emitted": [
+        "\t/* 0x0: rep movs WORD PTR es:[rdi],WORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_16, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": null,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": 0,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": 64,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": 65,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": 256,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi]",
+      "count_fact": 18446744073709551615,
+      "emitted": [
+        "\t/* 0x0: rep movs DWORD PTR es:[rdi],DWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_32, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": null,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": 0,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": 64,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": 65,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": 256,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    },
+    {
+      "raw": "rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi]",
+      "count_fact": 18446744073709551615,
+      "emitted": [
+        "\t/* 0x0: rep movs QWORD PTR es:[rdi],QWORD PTR ds:[rsi] */",
+        "\tX86_SIM_L_EXEC_REP_MOVS(X86_WIDTH_64, 0ULL);"
+      ]
+    }
+  ],
+  "generic_native_compilation": [
+    {
+      "name": "movs8_valid",
+      "positive": true,
+      "width": 1,
+      "count": 65,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs8_valid/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs8_valid/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs8_valid/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "6a89ca434309cd546eb07097253f2016f8e469b2a35884c004f93214dd9e8ae7"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs16_valid",
+      "positive": true,
+      "width": 2,
+      "count": 65,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs16_valid/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs16_valid/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs16_valid/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "d95cd7df48b194c79edf86a0cf515fc4a0fb7a73619e065948f5839b53060599"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs32_valid",
+      "positive": true,
+      "width": 4,
+      "count": 65,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs32_valid/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs32_valid/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs32_valid/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "4abbdb3092a911ec5da6be8570c3cca7cbee180cf99693241d8a86cc9376b125"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs64_valid",
+      "positive": true,
+      "width": 8,
+      "count": 8,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs64_valid/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs64_valid/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs64_valid/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "595885f97882fbb712fd7d73fe9772a4e502545f14ff6cea2659e08126db93d6"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs_zero_null",
+      "positive": true,
+      "count": 0,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_zero_null/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_zero_null/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_zero_null/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "e6a264d9ccabd983d31de8753884ea5163f214d931921a4146f17178cb8646d1"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs_null_read_max_count",
+      "positive": true,
+      "count": 18446744073709551615,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_read_max_count/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_read_max_count/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_read_max_count/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "01ac18d5ab9cdb358f21fa19323390f94ac09c711938eea2b9c0f58cf82abb2b"
+      },
+      "status": "compiled"
+    },
+    {
+      "name": "movs_null_write",
+      "positive": false,
+      "count": 1,
+      "expected_retval": 2,
+      "expected_packet_u64": 0,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_write/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_write/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/rep-movs-full-count/compiled-fixtures/movs_null_write/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "entry",
+        "native_sha256": "30005d6036b75974dfaebfda7573c11d90965c71ad9263459067286dc9070f2d"
+      },
+      "status": "compiled"
+    }
+  ],
+  "guest": "queued after corrected BCC control",
+  "native_executions": 0
+}

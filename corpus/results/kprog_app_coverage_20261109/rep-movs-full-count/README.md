@@ -1,0 +1,7 @@
+# Full native RCX REP MOVS count
+
+The native64/default-address/DF-clear C body reads actual RCX and iterates with a64-bit index for every element. The generator passes known and runtime counts through the same opcode body, and decodes the actual8/16/32/64-bit element width. Count65,127,128,255,256 and runtime RCX share the architectural loop. Pointer advance uses the existing modular64-bit address operation. S9 completed-prefix read recovery and RCXzero remain in the loop. Production admission additions0.
+
+GCC/Clang18 UBSan each pass34816actual CPU/full-buffer/GPR/tag/flag comparisons with separate buffers, forward/backward overlap and counts through256. Each passes all127existing real-body route cases; their RCX input and full-count expected bytes now reflect the actual instruction, retaining every scenario and whole-state comparison. The generated historical bound64 contract component and bounded Lean theorems retain their definitions.
+
+Twenty-four actual assembled form/count-fact combinations generate their proper widths, including unknown count and u64max. Seven generic native ELF fixtures generate/compile B: four widths, zero-countNULL, protected NULL read with u64max count, and load-only NULL store. Actual verifier/native guest outcomes follow their serial queue. Source3files plus existing generic host-route alignment and spec are captured with the exact parent. Canonical address32/reverse/fault/compiler/physical composition remains with the C/V string coverage and universal model work. Native executions0 in these compiler observations.

@@ -2175,10 +2175,10 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_REP_MOVS_ONE(WIDTH, INDEX)                                \
 	do {                                                               \
 		if (__x86_l_i == (INDEX) && __x86_l_i < __x86_l_count) {  \
-			void *__x86_l_src_addr = (__u8 *)__x86_l_src_ptr +\
-				(__x86_l_i * (WIDTH));                    \
-			void *__x86_l_dst_addr = (__u8 *)__x86_l_dst_ptr +\
-				(__x86_l_i * (WIDTH));                    \
+			void *__x86_l_src_addr = KPROG_PTR_ADD64_BITS(__x86_l_src_ptr,\
+				(__x86_l_i * (WIDTH)));                    \
+			void *__x86_l_dst_addr = KPROG_PTR_ADD64_BITS(__x86_l_dst_ptr,\
+				(__x86_l_i * (WIDTH)));                    \
 			__u64 __x86_l_value = X86_SIM_L_LOAD_ADDR_TAGGED(       \
 				__x86_l_src_addr, (WIDTH), __x86_l_src_tag);              \
 			X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_dst_addr, (WIDTH),  \
@@ -2189,25 +2189,24 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_EXEC_REP_MOVS(FLAGS, IMM)                                  \
 	do {                                                               \
 		__u8 __x86_l_width = KPROG_X86_REP_MOVS_WIDTH(FLAGS);    \
-		__u64 __x86_l_count = (IMM);                             \
+		__u64 __x86_l_count = X86_SIM_L_READ_REG(X86_RCX);                             \
 		void *__x86_l_src_ptr = X86_SIM_L_READ_REG_PTR(X86_RSI); \
 		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI); \
 		__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(X86_RSI);       \
 		__u8 __x86_l_dst_tag = X86_SIM_L_REG_TAG(X86_RDI);       \
-		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < KPROG_X86_REP_MOVS_BOUND; \
+		__u64 __x86_l_i;                                         \
+		for (__x86_l_i = 0; __x86_l_i < __x86_l_count; \
 			__x86_l_i++) {                                           \
-            if (__x86_l_i < __x86_l_count && \
-                X86_SIM_L_READ_RECOVERY_AT(X86_RSI, X86_RCX, (__u64)(unsigned long)__x86_l_src_ptr + __x86_l_i * __x86_l_width)) { \
+            if (X86_SIM_L_READ_RECOVERY_AT(X86_RSI, X86_RCX, (__u64)(unsigned long)__x86_l_src_ptr + __x86_l_i * __x86_l_width)) { \
                 __x86_l_count = __x86_l_i; break; \
             } \
 			X86_SIM_L_REP_MOVS_ONE(__x86_l_width, __x86_l_i); \
         } \
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSI,                     \
-			(__u8 *)__x86_l_src_ptr + __x86_l_count * __x86_l_width,\
+			KPROG_PTR_ADD64_BITS(__x86_l_src_ptr, __x86_l_count * __x86_l_width),\
 			__x86_l_src_tag);                                \
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,                     \
-			(__u8 *)__x86_l_dst_ptr + __x86_l_count * __x86_l_width,\
+			KPROG_PTR_ADD64_BITS(__x86_l_dst_ptr, __x86_l_count * __x86_l_width),\
 			__x86_l_dst_tag);                                \
 		X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0,                     \
 			KPROG_X86_REP_MOVS_COUNT_WIDTH);                         \
