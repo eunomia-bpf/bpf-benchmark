@@ -1,0 +1,229 @@
+{
+  "utc": "2026-11-09T07:14:57.955346+00:00",
+  "production_commits": [
+    "d717641ae4a869ace042b59544ed65ddc7c214f1",
+    "73f51958b5dc453b520debdfaa624919f277f2be"
+  ],
+  "source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "fe86146d943510e5e38f48589c01785d62449904d98706cdb467ada0b1c99943",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "7aac3c487eb4bd7e26a7c8c6d73f7a3372b456f17e99f89db2b4d056ec937c1a"
+  },
+  "focused_cases_per_compiler": 845,
+  "focused_compilers": [
+    {
+      "compiler": "gcc",
+      "exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/test/native_load_fault",
+        "host",
+        "CC=gcc",
+        "OUT=/var/tmp/kprog-tmp/S9/ea/focused-gcc"
+      ]
+    },
+    {
+      "compiler": "clang",
+      "exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/test/native_load_fault",
+        "host",
+        "CC=clang",
+        "OUT=/var/tmp/kprog-tmp/S9/ea/focused-clang"
+      ]
+    }
+  ],
+  "micro_positive_compiles": 29,
+  "micro_negative_compiles": 1,
+  "final_host_commands": 135,
+  "final_host_passing": 106,
+  "final_host_diagnostics": 29,
+  "parent_control_passing": 106,
+  "parent_control_diagnostics": 29,
+  "shared_parent_diagnostic_targets": 28,
+  "parent_only_diagnostic_target": "h84",
+  "final_only_diagnostic_target": "h113",
+  "guest_read_forms": 6,
+  "guest_read_forms_passing": 6,
+  "selected_zero_return_controls": [
+    {
+      "name": "immediate_push_branch",
+      "exit": 0,
+      "stdout": "native program id=136 source_prog_id=0\nnative_raw_context result=0 retval=0 expected_result=0 expected_retval=0\n",
+      "stderr": "",
+      "command": [
+        "/var/tmp/safety/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/immediate_push_branch.native.o",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "name": "stack_base_flags",
+      "exit": 0,
+      "stdout": "native program id=140 source_prog_id=0\nnative_raw_context result=0 retval=0 expected_result=0 expected_retval=0\n",
+      "stderr": "",
+      "command": [
+        "/var/tmp/safety/canonical-probe",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/stack_base_flags.native.o",
+        "0",
+        "0"
+      ]
+    }
+  ],
+  "safety_cases": 38,
+  "safety_stages": {
+    "valid_executed": 8,
+    "positive_infrastructure_error": 1,
+    "verifier_rejected": 24,
+    "accepted_finding": 4,
+    "specialization_rejected": 1
+  },
+  "safety_load_only_accepted": [
+    "stack_oob",
+    "uninitialized_stack",
+    "immediate_push_branch",
+    "stack_base_flags"
+  ],
+  "original_safety_negative_test_run_calls": 0,
+  "exception_before_smap_source_order": true,
+  "h2_control": "Only RSP and absent-base recovery routing differs from final source; all other EA/copy/stack semantics are identical.",
+  "stock_verifier_metrics": [
+    {
+      "epoch": "baseline",
+      "name": "word",
+      "exit": 0,
+      "native_prog_id": 1,
+      "attach_btf_id": 71239,
+      "verified_insns": 42,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "baseline",
+      "name": "byte",
+      "exit": 0,
+      "native_prog_id": 2,
+      "attach_btf_id": 71239,
+      "verified_insns": 42,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "baseline",
+      "name": "half",
+      "exit": 0,
+      "native_prog_id": 3,
+      "attach_btf_id": 71239,
+      "verified_insns": 42,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "baseline",
+      "name": "dword",
+      "exit": 0,
+      "native_prog_id": 4,
+      "attach_btf_id": 71239,
+      "verified_insns": 42,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "baseline",
+      "name": "pop",
+      "exit": 1
+    },
+    {
+      "epoch": "baseline",
+      "name": "chain",
+      "exit": 0,
+      "native_prog_id": 5,
+      "attach_btf_id": 71239,
+      "verified_insns": 53,
+      "extable_entries": 3,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "word",
+      "exit": 0,
+      "native_prog_id": 6,
+      "attach_btf_id": 71239,
+      "verified_insns": 39,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "byte",
+      "exit": 0,
+      "native_prog_id": 7,
+      "attach_btf_id": 71239,
+      "verified_insns": 39,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "half",
+      "exit": 0,
+      "native_prog_id": 8,
+      "attach_btf_id": 71239,
+      "verified_insns": 39,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "dword",
+      "exit": 0,
+      "native_prog_id": 9,
+      "attach_btf_id": 71239,
+      "verified_insns": 39,
+      "extable_entries": 2,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "pop",
+      "exit": 0,
+      "native_prog_id": 10,
+      "attach_btf_id": 71239,
+      "verified_insns": 57,
+      "extable_entries": 3,
+      "control": 4294967295,
+      "null_result": 0
+    },
+    {
+      "epoch": "final",
+      "name": "chain",
+      "exit": 0,
+      "native_prog_id": 11,
+      "attach_btf_id": 71239,
+      "verified_insns": 47,
+      "extable_entries": 3,
+      "control": 4294967295,
+      "null_result": 0
+    }
+  ],
+  "production_admission_additions": 0,
+  "universal_proof_owner": "V",
+  "remaining": [
+    "S7 aligned below-SP read preservation through clang and the valid_spill_restore load diagnostic",
+    "V universal current-C/compiled-B/native handler composition"
+  ]
+}
