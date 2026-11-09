@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 71/75 | 73/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12; ROR5) | 14/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12; ROR5; ADD_IMM5) | 15/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 63/75 | 74/74 selected profiles |
@@ -6335,3 +6335,19 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_d39918760`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-d39918760.log.gz](full-make-check-d39918760.log.gz).
+
+### Actual compiled ADD_IMM scalar units
+
+Five production-dispatcher units cover8-bit low/high lanes and16/32/64-bit
+ADD_IMM for every64-bit operand and encoded immediate. The64-bit case implements
+sign extension of imm32; narrow widths retain their canonical truncation and
+writeback. `AddImmediateCertificate.compiled_all_variants` and `compiled_execution`
+prove exact reference arithmetic/writeback, complete memory/exclusive preservation,
+23 fresh inputs, halted result and empty fault/events for every fresh stream.
+The [compiled receipt](compiled-addimm.log.gz) retains actual expanded C,
+objects/decoded arrays, compiler commands and seven audited execution laws.
+All146 preceding function bytes remain equal in the151-function combined object;
+the five standalone functions equal their combined bytes. Every preceding
+certificate declaration remains an exact source prefix. Current scalar compiled
+coverage is15/75; complete flags/tag/frame, all-register/physical ABI and
+whole-program compiler embedding retain their explicit interfaces.
