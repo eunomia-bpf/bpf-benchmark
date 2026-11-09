@@ -1,0 +1,5 @@
+--- a/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
++++ b/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
+@@ -281 +281 @@
+-    u32 offset = buf->offset;
++    u64 offset = buf->offset;

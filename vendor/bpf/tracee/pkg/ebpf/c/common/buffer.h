@@ -278,7 +278,7 @@ statfunc int save_str_to_buf(args_buffer_t *buf, void *ptr, u8 index)
 {
     // Data saved to submit buf: [index][size][ ... string ... ]
 
-    u32 offset = buf->offset;
+    u64 offset = buf->offset;
     asm volatile("" : "+r"(offset));
     if (offset > ARGS_BUF_SIZE - 1)
         return 0;
