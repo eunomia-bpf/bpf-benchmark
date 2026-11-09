@@ -160,15 +160,18 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	for (i = 0; i < 16; i++) {
 		__u64 expected = i == X86_RAX ? (__u64)(unsigned long)dst_ptr : old_raw[i];
 		__u8 tag = i == X86_RAX ? rdi_tag : old_tags[i];
-		for (unsigned j = 0; j < 8; j++) if (i == caller_regs[j]) { expected = fresh_values[j]; tag = X86_SIM_TAG_SCALAR; }
+		for (unsigned j = 0; j < 8; j++) if (i == caller_regs[j]) { expected = fresh_values[(j + 1U) & 15U]; tag = X86_SIM_TAG_SCALAR; }
 		if ((__u64)(unsigned long)X86_SIM_L_READ_REG_PTR(i) != expected || X86_SIM_L_REG_TAG(i) != tag) {
 			printf("MISMATCH %s full caller frame r%u route%u flags%u\n", what, i, generic_route, incoming_flags); failures++; return;
 		}
 	}
-	if (fresh_cursor != 16 || __x86_cf != (fresh_values[8]&1) || __x86_zf != (fresh_values[9]&1) ||
-	    __x86_sf != (fresh_values[10]&1) || __x86_of != (fresh_values[11]&1) ||
-	    __x86_pf != (fresh_values[12]&1) || __x86_af != (fresh_values[13]&1) ||
-	    __x86_xmm0_lo != fresh_values[14] || __x86_xmm0_hi != fresh_values[15]) {
+	/* S7 releases this fixture's one-byte default scratch arena before
+	 * the sixteen caller-register/flag/vector fresh words. Preserve that
+	 * ordered input effect alongside every original frame assertion. */
+	if (fresh_cursor != 17 || __x86_cf != (fresh_values[9]&1) || __x86_zf != (fresh_values[10]&1) ||
+	    __x86_sf != (fresh_values[11]&1) || __x86_of != (fresh_values[12]&1) ||
+	    __x86_pf != (fresh_values[13]&1) || __x86_af != (fresh_values[14]&1) ||
+	    __x86_xmm0_lo != fresh_values[15] || __x86_xmm0_hi != fresh_values[0]) {
 		printf("MISMATCH %s kind6 stream/flag/vector frame route%u flags%u\n", what, generic_route, incoming_flags); failures++;
 	}
 }

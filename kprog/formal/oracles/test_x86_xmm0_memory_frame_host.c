@@ -42,12 +42,12 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=0;
  __x86_native_stack_base=(__u64)(long)&native_stack[512];
  for(unsigned reg=0;reg<16;reg++)X86_SIM_L_WRITE_REG_WIDTH(reg,seed(reg),8);
- __x86_rsp.ptr=(void *)(long)-256;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
+ __x86_rsp.ptr=(void *)(long)-512;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  unsigned base=profile==3?X86_REG_NONE:base_reg,index_reg=base==X86_R8?X86_R9:X86_R8;
  X86_SIM_L_WRITE_REG_WIDTH(index_reg,16,8);
  if(base!=X86_REG_NONE&&base!=X86_RSP){if(profile==1)X86_SIM_L_WRITE_REG_PTR_TAG(base,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);else X86_SIM_L_WRITE_REG_PTR_TAG(base,&heap[256],profile==2?X86_SIM_TAG_ABI:X86_SIM_TAG_SCALAR);}
  unsigned scale=index_mode?index_mode-1:0,index=index_mode?index_reg:X86_REG_NONE;
- unsigned origin=profile==3?128:base==X86_RSP?256:profile==1?160:256;
+ unsigned origin=profile==3?128:base==X86_RSP?0:profile==1?160:256;
  unsigned offset=origin+displacement+misalignment+(index_mode?(16U<<scale):0);
  for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);__x86_stack_mem.b[i]=(__u8)(i*7+0x85);absolute[i]=(__u8)(i*7+0x85);}
  __u8 *memory=profile==3?absolute:base==X86_RSP||profile==1?(__u8 *)(void *)__x86_stack_mem.b:heap;
@@ -66,7 +66,9 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
 int main(void){unsigned long cases=0,aligned_cases=0;
  absolute=mmap((void *)0x10000000,4096,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED_NOREPLACE,-1,0);if(absolute==MAP_FAILED){perror("XMM fixture mmap");return 1;}
  for(unsigned store=0;store<2;store++)for(unsigned base=0;base<16;base++)for(unsigned profile=0;profile<4;profile++)for(unsigned im=0;im<5;im++)for(unsigned fs=0;fs<64;fs++)for(unsigned li=0;li<NVALUES;li++){
-  unsigned scale=im?im-1:0,origin=profile==3?128:base==X86_RSP?256:profile==1?160:256,misalignment=li%16;int displacement=li&1?-32:32;
+  unsigned scale=im?im-1:0,origin=profile==3?128:base==X86_RSP?0:profile==1?160:256,misalignment=li%16;int displacement=li&1?-32:32;
+  /* Keep the RSP profile inside the allocated frame; other profiles retain signed offsets. */
+  if(profile!=3&&base==X86_RSP)displacement+=64;
   unsigned offset=origin+displacement+misalignment+(im?(16U<<scale):0),stack=profile!=3&&(base==X86_RSP||profile==1);
   struct observation a,b;simulate(&a,1,store,base,profile,im,displacement,misalignment,li,fs);simulate(&b,0,store,base,profile,im,displacement,misalignment,li,fs);
   if(memcmp(&a,&b,sizeof(a))){fprintf(stderr,"XMM direct/interpreter store=%u base=%u profile=%u index=%u\n",store,base,profile,im);return 1;}
