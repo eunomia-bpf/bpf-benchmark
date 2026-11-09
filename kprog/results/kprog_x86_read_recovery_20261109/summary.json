@@ -1,0 +1,158 @@
+{
+  "utc": "2026-11-09T06:03:56.089227+00:00",
+  "production_commits": {
+    "production": "0ee16fa8f66cb723f65878ea18a5e8a833e04127",
+    "rep": "a146b630aeeafb83fef036f6cb605cde3b3a8032",
+    "andn": "493df264e461c002ab9aa3986b313c577e6f72e7"
+  },
+  "source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "d25f13deeb0a5e9c6959186da9119dfadc8435ba0bf43f9e52de9f60b5101eaa",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928"
+  },
+  "initial_component_source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "318954e1f81aa4ae5e823df2edaa2c770f4caeb411cc1646762b1b650b3253ac",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928"
+  },
+  "make_exits": {
+    "component": 0,
+    "more-split": 0,
+    "rep": 0,
+    "micro": 0,
+    "safety": 0,
+    "host-published": 0,
+    "host-rest": 0
+  },
+  "host_executables": 135,
+  "host_compile_recipes": 136,
+  "component_cases_per_compiler": {
+    "mov": 2061312,
+    "alu": 2196480,
+    "additional": 2623104,
+    "rep": 549120,
+    "total": 7430016
+  },
+  "compilers": [
+    "gcc13",
+    "clang18"
+  ],
+  "additional_clang_units": [
+    337920,
+    337920,
+    337920,
+    337920,
+    337920,
+    337920,
+    337920,
+    257664
+  ],
+  "micro_compile_cases": 30,
+  "safety_cases": 38,
+  "safety_stages": {
+    "specialization_rejected": 1,
+    "valid_executed": 9,
+    "verifier_rejected": 28
+  },
+  "unsafe_native_executions": 0,
+  "production_admission_additions": 0,
+  "coverage": [
+    {
+      "family": "scalar_moves",
+      "forms": "mov/movabs/movzx/movsx/movsxd/movbe including AH/BH/CH/DH",
+      "table_destination": "explicit destination GPR",
+      "recovery": "whole GPR zero; flags, memory and other registers preserved",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "arithmetic_source",
+      "forms": "add/adc/sub/sbb/and/or/xor/imul register,memory",
+      "table_destination": "explicit destination GPR",
+      "recovery": "whole GPR zero; original complete frame retained",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "arithmetic_destination",
+      "forms": "binary/unary/shift/ROL/ROR memory destinations",
+      "table_destination": "resume-only",
+      "recovery": "original full state",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "comparisons",
+      "forms": "cmp/test/bt memory forms",
+      "table_destination": "resume-only",
+      "recovery": "original full state including flags",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "scalar_misc",
+      "forms": "imul immediate,popcnt,shlx/shrx/sarx,rorx,bzhi,andn",
+      "table_destination": "explicit destination GPR",
+      "recovery": "whole GPR zero; original complete frame retained",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "conditional_move",
+      "forms": "cmovcc memory source for every condition",
+      "table_destination": "explicit destination GPR",
+      "recovery": "whole GPR zero for both condition outcomes",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "divide",
+      "forms": "div memory source8/16/32/64",
+      "table_destination": "implicit RAX",
+      "recovery": "whole RAX zero; RDX/flags/original frame retained",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "push_memory",
+      "forms": "push word/qword memory source",
+      "table_destination": "resume-only",
+      "recovery": "old RSP and complete original frame",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "pop",
+      "forms": "pop word/qword GPR and memory destination",
+      "table_destination": "explicit destination GPR or resume-only",
+      "recovery": "stack-read fault preserves old RSP except explicit POP RSP clear",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "vector",
+      "forms": "movups/movaps XMM0 memory source",
+      "table_destination": "resume-only",
+      "recovery": "both original XMM lanes and complete frame",
+      "success": "existing byte-preserving body"
+    },
+    {
+      "family": "rep",
+      "forms": "forward REP MOVS byte/word/dword/qword",
+      "table_destination": "implicit RCX",
+      "recovery": "completed iterations retained; RSI/RDI advance by completed bytes; RCX zero",
+      "success": "existing byte-preserving body"
+    }
+  ],
+  "remaining": [
+    {
+      "form": "RET entry and subroutine",
+      "reason": "Structured return/entry-ABI macros require an explicit physical next-PC fallthrough relation for a recovered return-stack read."
+    },
+    {
+      "form": "CALL_MEMCPY and CALL_MEMCPY_REG",
+      "reason": "The external-body abstraction requires actual called instruction bytes, per-PC exception sites and completed-prefix/clobber mapping."
+    },
+    {
+      "form": "PUSH memory later stack write; POP memory destination write; REP destination write",
+      "reason": "The source-read recovery component is measured. Later write-side faults require a transactional full-instruction/prefix relation, including saved-SP ordering and completed stores."
+    },
+    {
+      "form": "Typed context/stack/map/packet/immutable reads",
+      "reason": "Existing typed routes retain their universal valid-address/lifetime and permission premise. The fresh read-recovery choice is attached to scalar-address routes."
+    },
+    {
+      "form": "Whole compiled-B/native platform relation",
+      "reason": "V retains universal O1/O2/O3/compiler, exact decoder-site/frame/handler registration and physical event projection obligations."
+    }
+  ]
+}
