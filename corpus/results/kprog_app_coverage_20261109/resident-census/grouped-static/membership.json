@@ -5,7 +5,8 @@
   "candidate_groups": 27,
   "native_body_groups": 27,
   "body_identity": "SHA256 of complete native-link proof ELF, including executable/data sections and relocation identities",
-  "controller_source_head": "227acca9fb14508072984d2235e4467a4cd0bd9d",
+  "controller_source_head": "1760eee8631cf7082356d89910f9b8579ad4c57d",
+  "publication_status": "compressed local collection; GitHub GH001 pending scoped unpublished-history repair",
   "groups": [
     {
       "body_sha256": "93484b8bc5df7736c9b8bb0205970ab63a4344da188585cdeb20439fc383acfa",
@@ -31980,7 +31981,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/589f81a75e9a10d8",
+      "cpu": 15
     },
     {
       "body_sha256": "c5ea75f8763a162c7351e79fe6508ae2aaa2f47ea315e12e24dd73bb923d5200",
@@ -32108,7 +32113,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/c5ea75f8763a162c",
+      "cpu": 16
     },
     {
       "body_sha256": "7fda6047a62cd2beee6562ec8e728e2aec21532d756cb68156b20dcbaf48691b",
@@ -32368,7 +32377,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/a4b0557544fdf874",
+      "cpu": 18
     },
     {
       "body_sha256": "babe7ed903dfe3e6e4dad4a9f38d64f52a0f2ef554f333d224bebd8879eb8cc8",
@@ -32496,7 +32509,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/babe7ed903dfe3e6",
+      "cpu": 19
     },
     {
       "body_sha256": "392f46e3ff1d0571d872fbeedc26b82eebe6078bfd5d735ee7f17be28c439ce2",
@@ -34568,7 +34585,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/32fddb816d77c765",
+      "cpu": 14
     },
     {
       "body_sha256": "63056a9356f03c8bf54f77b65dff66e64a2ecaeba3ad7a19d79a4ccbfd876480",
@@ -34826,7 +34847,11 @@
         "generation": "pending",
         "compile": "pending",
         "verifier": "pending"
-      }
+      },
+      "observation": "group representative submission",
+      "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+      "worker": "/var/tmp/kprog-tmp/A/resident-census-groups/workers/63056a9356f03c8b",
+      "cpu": 14
     }
   ]
 }
