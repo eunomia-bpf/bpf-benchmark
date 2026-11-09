@@ -74953,5 +74953,77 @@
     },
     "scope": "Twelve generic actual source-index/signed-coordinate/native-address/coherence laws. The live source byte/scalar relation supplies saved-read equality and survives release, composing current native RET step and specialized selected/default token. Actual C/union/compiler establishment of relation and producer/physical/control transport remain explicit. RETpartial/Cmodel71/75/compiled13/75 retained.",
     "archive": "ret-source-coherence.log.gz"
+  },
+  "arm64_current_ret_source": {
+    "status": "partial-current-source-target-tag-numeric-exit",
+    "proof": {
+      "laws": [
+        "cases_match",
+        "body_matches",
+        "token_body_matches",
+        "invocation_case",
+        "code_case",
+        "rejected_case",
+        "code_default",
+        "exit_contract",
+        "capture_native",
+        "code_native_read",
+        "code_step",
+        "native_exit"
+      ],
+      "compile": [
+        {
+          "module": "KProgFormal/ControlABI",
+          "exit": 0,
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-ret-source/olean/KProgFormal/ControlABI.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/ControlABI.lean"
+          ],
+          "source_sha256": "9a7a74b50af4bb42c3c6bc4a0f9363264d8801341efeb869dfc732d8e73353ef"
+        }
+      ],
+      "audit_exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 0,
+      "audit_input": "import KProgFormal.ControlABI\n#print axioms KProgFormal.ControlABI.ArmReturn.cases_match\n#print axioms KProgFormal.ControlABI.ArmReturn.body_matches\n#print axioms KProgFormal.ControlABI.ArmReturn.token_body_matches\n#print axioms KProgFormal.ControlABI.ArmReturn.invocation_case\n#print axioms KProgFormal.ControlABI.ArmReturn.code_case\n#print axioms KProgFormal.ControlABI.ArmReturn.rejected_case\n#print axioms KProgFormal.ControlABI.ArmReturn.code_default\n#print axioms KProgFormal.ControlABI.ArmReturn.exit_contract\n#print axioms KProgFormal.ControlABI.ArmReturn.capture_native\n#print axioms KProgFormal.ControlABI.ArmReturn.code_native_read\n#print axioms KProgFormal.ControlABI.ArmReturn.code_step\n#print axioms KProgFormal.ControlABI.ArmReturn.native_exit\n"
+    },
+    "integration": {
+      "audit_input": "import SimulatorComposition\nimport ControlABIComposition\nimport KProgFormal.X86RemainingTokenO2\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n#print axioms KProgFormal.X86RemainingTokenO2.ret_contract_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.ret_invocation_contract\n#print axioms KProgFormal.X86RemainingTokenO2.ret_subroutine_guard_preserves\n",
+      "exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 5
+    },
+    "source": {
+      "head": "b1d4012f171a5172e15dc571784f3830110a90f7",
+      "sources": {
+        "kprog/arm64/arm64_sim_local_bpf.h": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+        "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+        "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+      },
+      "source_bindings": {
+        "Frame": "complete raw AArch64.State, register tag map, __a64_lr scratch capture",
+        "rawRead/tagRead": "legal RET register field0..31; X0..X30 raw cells; XZR zero/scalar, source SP32 outside decoded RET operand domain",
+        "materialize": "actual numeric observation tag4 adds stack origin, tag10 adds return origin, other tags keep payload",
+        "body": "capture READ_REG_RAW; rawtarget!=0 OR tag!=RETURN10 routes CODE9 finite switch or existing reject; RETURN10+zero routes existing invocation exit",
+        "casesBody": "case goto returns selected label and modeled PC; default existing REJECT_PC; complete frame retained",
+        "exit": "existing eleven callee tag/raw-value and SP checks; uint32 numeric X0 result",
+        "token": "independent invocation/finitecase/default source semantic classification equals exact branch body for every finite case list/encoded register",
+        "code_step": "internal CODE9 reference branch-register step in declared numeric image",
+        "native_exit": "source scalar callee contract implies native materialized callee/SP ABI"
+      },
+      "premises": {
+        "producer": "actual emitted register and finite-case table/source extraction remain explicit",
+        "native": "physical LR/code-PC/entry/return/result transport remain explicit; numeric image and captured frames quantified",
+        "compiled": "actual C/B/compiler correspondence remains per-token interface"
+      },
+      "runtime_additions": 0
+    },
+    "scope": "Twelve current ARM RET target/tag/numeric result/scratch frame/reference branch/ABI component laws. Producer operand/case extraction and actual physical LR/code-address/entry/result/C/B/compiler transport remain explicit; ARMRETpartial/Cmodel73/74 and x86 Cmodel71/75/compiled13/75 retained.",
+    "archive": "arm-ret-source.log.gz"
   }
 }

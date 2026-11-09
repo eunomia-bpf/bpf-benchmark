@@ -34,6 +34,14 @@ composes current source RET with the reference step and selected/default token.
 C/compiler establishment of that relation, producer mode and physical control
 transport remain explicit interfaces.
 
+`ControlABI.ArmReturn` adds twelve current ARM RET component laws: raw target
+decides RETURN-tag invocation or CODE-tag finite continuation/default, with
+complete scratch capture and tag-aware X0 numeric materialization. Internal
+branches refine the reference branch step in the stated numeric image, and
+outer source callee/SP guards derive the native ABI contract. Actual producer
+operand/table extraction and physical LR/code-PC/compiler transport remain
+explicit; ARM RET retains its partial category.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

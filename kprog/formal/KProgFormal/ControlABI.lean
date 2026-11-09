@@ -669,3 +669,211 @@ theorem arm64_source_jit_result (snapshot : AArch64.Gpr → Reference.Word)
     (arm64_source_exit snapshot tags origin raw entry entryStack entryRegisters accepted) saved
 
 end KProgFormal.ControlABI.InvocationExit
+
+
+namespace KProgFormal.ControlABI.ArmReturn
+open Reference
+open InvocationExit
+
+/-- RET keeps the source LR scratch capture alongside the complete raw frame
+and register tags. Native return-address and stack origins are explicit inputs. -/
+structure Frame where
+  raw : AArch64.State
+  tags : AArch64.Gpr → Reference.Byte
+  captured : Reference.Word
+
+def rawRead (state : Frame) (reg : AArch64.Register) : Reference.Word :=
+  AArch64.readReg state.raw reg
+
+def tagRead (state : Frame) (reg : AArch64.Register) : Reference.Byte :=
+  if h : reg.val < 31 then state.tags ⟨reg.val, h⟩ else 0#8
+
+def capture (state : Frame) (reg : AArch64.Register) : Frame :=
+  { state with captured := rawRead state reg }
+
+/-- The existing numeric observation adds the source stack or return origin
+for tag4/tag10; scalar and CODE-tag payloads retain their bits. -/
+def materialize (stackOrigin returnOrigin value : Reference.Word) (tag : Reference.Byte) : Reference.Word :=
+  if tag = 4#8 then value + stackOrigin else if tag = 10#8 then value + returnOrigin else value
+
+def nativeState (stackOrigin returnOrigin : Reference.Word) (state : Frame) : AArch64.State :=
+  { state.raw with
+    gpr := fun r => materialize stackOrigin returnOrigin (state.raw.gpr r) (state.tags r)
+    sp := state.raw.sp + stackOrigin }
+
+inductive Outcome where
+  | fault (state : Frame)
+  | returned (value : BitVec 32) (state : Frame)
+  | label (target : Reference.Word) (state : Frame)
+
+def jump (target : Reference.Word) (state : Frame) : Frame :=
+  { state with raw := { state.raw with pc := target } }
+
+def exit (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (state : Frame) : Outcome :=
+  if arm64Reject snapshot state.raw.gpr state.tags state.raw.sp then .fault state
+  else .returned ((materialize stackOrigin returnOrigin (state.raw.gpr 0) (state.tags 0)).setWidth 32) state
+
+/-- Each generated case transfers to its label; the default invokes the
+existing reject macro with the captured frame. -/
+def casesBody (state : Frame) : List Reference.Word → Outcome
+  | [] => .fault state
+  | target :: rest =>
+      if state.captured = target then .label target (jump target state) else casesBody state rest
+
+def casesSpec (state : Frame) (targets : List Reference.Word) : Outcome :=
+  if targets.contains state.captured then .label state.captured (jump state.captured state) else .fault state
+
+theorem cases_match (state : Frame) (targets : List Reference.Word) :
+    casesBody state targets = casesSpec state targets := by
+  induction targets with
+  | nil => rfl
+  | cons target rest ih =>
+      by_cases selected : state.captured = target
+      · simp [casesBody, casesSpec, List.contains_cons, selected]
+      · simp only [casesBody, if_neg selected, ih]
+        simp [casesSpec, List.contains_cons, selected, Ne.symm selected]
+
+/-- Exact source branch order after READ_REG_RAW is captured in __a64_lr. -/
+def body (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame) : Outcome :=
+  let state := capture input src
+  if state.captured != 0#64 || tagRead state src != 10#8 then
+    if tagRead state src != 9#8 then .fault state else casesBody state targets
+  else exit snapshot stackOrigin returnOrigin state
+
+/-- Independent invocation/internal/default classification for every source
+register, raw target, tag and finite continuation table. -/
+def spec (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame) : Outcome :=
+  let state := capture input src
+  if state.captured = 0#64 ∧ tagRead state src = 10#8 then
+    exit snapshot stackOrigin returnOrigin state
+  else if tagRead state src = 9#8 then casesSpec state targets else .fault state
+
+theorem body_matches (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame) :
+    body snapshot stackOrigin returnOrigin targets src input =
+      spec snapshot stackOrigin returnOrigin targets src input := by
+  simp only [body, spec, cases_match]
+  by_cases zero : (capture input src).captured = 0#64 <;>
+    by_cases outer : tagRead (capture input src) src = 10#8 <;>
+    by_cases code : tagRead (capture input src) src = 9#8 <;> simp [zero, outer, code]
+
+/-- The generated RET token chooses the same invocation/finite-case meaning. -/
+def tokenBody (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame) : Outcome :=
+  spec snapshot stackOrigin returnOrigin targets src input
+
+theorem token_body_matches (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame) :
+    tokenBody snapshot stackOrigin returnOrigin targets src input =
+      body snapshot stackOrigin returnOrigin targets src input :=
+  (body_matches snapshot stackOrigin returnOrigin targets src input).symm
+
+theorem invocation_case (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame)
+    (target : rawRead input src = 0#64) (tag : tagRead input src = 10#8) :
+    body snapshot stackOrigin returnOrigin targets src input =
+      exit snapshot stackOrigin returnOrigin (capture input src) := by
+  rw [body_matches]
+  simp [spec, capture, rawRead, tagRead] at *
+  simp_all
+
+theorem code_case (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame)
+    (tag : tagRead input src = 9#8) :
+    body snapshot stackOrigin returnOrigin targets src input = casesSpec (capture input src) targets := by
+  rw [body_matches]
+  have outer : tagRead (capture input src) src ≠ 10#8 := by
+    change tagRead input src ≠ 10#8
+    rw [tag]
+    decide
+  simp [spec, outer, capture, tagRead] at *
+  simp_all
+
+theorem rejected_case (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame)
+    (outer : ¬(rawRead input src = 0#64 ∧ tagRead input src = 10#8))
+    (code : tagRead input src ≠ 9#8) :
+    body snapshot stackOrigin returnOrigin targets src input = .fault (capture input src) := by
+  rw [body_matches]
+  have outerCaptured : ¬((capture input src).captured = 0#64 ∧ tagRead (capture input src) src = 10#8) := outer
+  have codeCaptured : tagRead (capture input src) src ≠ 9#8 := code
+  simp only [spec, if_neg outerCaptured, if_neg codeCaptured]
+
+theorem code_default (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame)
+    (tag : tagRead input src = 9#8) (unmatched : targets.contains (rawRead input src) = false) :
+    body snapshot stackOrigin returnOrigin targets src input = .fault (capture input src) := by
+  rw [code_case snapshot stackOrigin returnOrigin targets src input tag]
+  simp only [casesSpec, capture, unmatched, Bool.false_eq_true, ↓reduceIte]
+
+/-- Outer source guard and numeric X0 return compose the already proved
+callee/tag/SP contract with the complete captured source frame. -/
+theorem exit_contract (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (state : Frame) :
+    exit snapshot stackOrigin returnOrigin state =
+      if arm64Contract snapshot state.raw.gpr state.tags state.raw.sp then
+        .returned (((nativeState stackOrigin returnOrigin state).gpr 0).setWidth 32) state
+      else .fault state := by
+  by_cases accepted : arm64Reject snapshot state.raw.gpr state.tags state.raw.sp = false
+  · have contract := (arm64_accepted_iff _ _ _ _).mp accepted
+    simp only [exit, accepted, Bool.false_eq_true, ↓reduceIte, contract, nativeState]
+  · have rejected : arm64Reject snapshot state.raw.gpr state.tags state.raw.sp = true := by
+      cases h : arm64Reject snapshot state.raw.gpr state.tags state.raw.sp <;> simp_all
+    have contract := mt (arm64_accepted_iff _ _ _ _).mpr accepted
+    simp only [exit, rejected, ↓reduceIte, contract]
+
+/-- Capturing the source scratch word preserves the native register/memory
+image; the numeric observation includes the explicit stack/return origins. -/
+theorem capture_native (stackOrigin returnOrigin : Reference.Word) (state : Frame) (src : AArch64.Register) :
+    nativeState stackOrigin returnOrigin (capture state src) = nativeState stackOrigin returnOrigin state := rfl
+
+theorem code_native_read (stackOrigin returnOrigin : Reference.Word) (state : Frame) (src : AArch64.Register)
+    (tag : tagRead state src = 9#8) :
+    AArch64.readReg (nativeState stackOrigin returnOrigin state) src = rawRead state src := by
+  by_cases valid : src.val < 31
+  · have tagRegister : state.tags ⟨src.val, valid⟩ = 9#8 := by
+      simpa only [tagRead, valid, ↓reduceDIte] using tag
+    simp [rawRead, AArch64.readReg, nativeState, valid, materialize, tagRegister]
+  · simp [tagRead, valid] at tag
+
+/-- Internal CODE-tag branch outcome implements the reference RET branch in
+the declared numeric image; physical code/LR transport remains an interface. -/
+theorem code_step (snapshot : AArch64.Gpr → Reference.Word) (stackOrigin returnOrigin : Reference.Word)
+    (targets : List Reference.Word) (src : AArch64.Register) (input : Frame)
+    (tag : tagRead input src = 9#8) (selected : targets.contains (rawRead input src) = true) :
+    body snapshot stackOrigin returnOrigin targets src input =
+      .label (rawRead input src) (jump (rawRead input src) (capture input src)) ∧
+    AArch64.step (.branchRegister false src) (nativeState stackOrigin returnOrigin input) =
+      ⟨nativeState stackOrigin returnOrigin (jump (rawRead input src) (capture input src)), [], none⟩ := by
+  constructor
+  · rw [code_case snapshot stackOrigin returnOrigin targets src input tag]
+    simp only [casesSpec, capture, selected, ↓reduceIte]
+  · change Reference.Transition.mk
+        { (nativeState stackOrigin returnOrigin input) with
+          pc := AArch64.readReg (nativeState stackOrigin returnOrigin input) src } [] none = _
+    rw [code_native_read stackOrigin returnOrigin input src tag]
+    rfl
+
+/-- Scalar callee tags make the numeric materialization exactly the captured
+entry value; normal outer source exits supply the full native ABI premise. -/
+theorem native_exit (snapshot : AArch64.Gpr → Reference.Word)
+    (stackOrigin returnOrigin : Reference.Word) (state : Frame) (entry : AArch64.State)
+    (entryStack : entry.sp = stackOrigin)
+    (entryRegisters : ∀ r, arm64Callee r → entry.gpr r = snapshot r)
+    (accepted : arm64Reject snapshot state.raw.gpr state.tags state.raw.sp = false) :
+    arm64Exit entry (nativeState stackOrigin returnOrigin state) := by
+  have contract := (arm64_accepted_iff _ _ _ _).mp accepted
+  constructor
+  · change state.raw.sp + stackOrigin = entry.sp
+    rw [contract.1]
+    simpa [Reference.Word] using entryStack.symm
+  · intro r saved
+    change materialize stackOrigin returnOrigin (state.raw.gpr r) (state.tags r) = entry.gpr r
+    have scalar := (contract.2 r saved).1
+    have bits := (contract.2 r saved).2
+    simpa [materialize, scalar] using bits.trans (entryRegisters r saved).symm
+
+end KProgFormal.ControlABI.ArmReturn

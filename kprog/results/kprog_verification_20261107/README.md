@@ -6290,3 +6290,22 @@ return proof. Root/TV compiles and generic composition audits pass with their
 five inherited bridges. Actual C/union/compiler establishment of live coherence,
 producer return-mode, code-label/native-PC and physical transport remain active.
 RET retains partial status; current C-model71/75 and compiled13/75 retain scope.
+
+### Current ARM RET target/tag selection and numeric return
+
+`ControlABI.ArmReturn` adds twelve universal component laws for the existing
+`ARM64_SIM_A64_RET_TO` body. Raw target zero plus RETURN-tag10 selects the
+outer exit; CODE-tag9 selects a finite continuation or the existing default
+reject; other target/tag combinations retain the existing reject behavior.
+Every decoded register0..31, source target/tag and finite table is quantified,
+including XZR's zero/scalar read. The complete raw state, tags and LR scratch
+capture survive each outcome. Numeric X0 materialization adds the explicit
+stack/return origin before low32 return. Internal selected branches compose
+reference branch-register execution; outer accepted callee/SP guards derive
+the native ABI premise in the same numeric image.
+The [source receipt](arm-ret-source.log.gz) records exact header/generator/catalog
+identities, dependency/root/TV compiles and twelve axiom audits, all passing
+with sorryAx0 and executable-reduction bridges0. Generic TV composition retains
+five inherited bridges. Actual producer operand/case extraction, physical
+LR/code-address/entry/result and C/B/compiler transport remain active. ARM RET
+stays partial, ARM C-model73/74 and x86 C-model71/75/compiled13/75 retain scope.
