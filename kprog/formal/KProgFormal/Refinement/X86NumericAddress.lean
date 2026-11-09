@@ -3435,4 +3435,62 @@ theorem word_frame_refines (env : Environment) (frame : Frame) (arena : NativeWo
   rw [word_frame_matches]
   exact handler_refines width (.immediate operand) nextPc fresh _
 
+/-- Masking a captured divisor in advance leaves the exact source handler
+unchanged: arithmetic and sign observations consume precisely its native width. -/
+theorem handler_operand_narrow (width : Reference.X86.ScalarWidth)
+    (native : Reference.X86.State) (operand nextPc : NativeWord) (fresh : Nat → Bool) :
+    handlerStep width (.immediate ((operand.setWidth width.bits).setWidth 64)) nextPc fresh native =
+      handlerStep width (.immediate operand) nextPc fresh native := by
+  have narrowed : ((operand.setWidth width.bits).setWidth 64).setWidth width.bits =
+      operand.setWidth width.bits := by
+    cases width <;> simp [Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes]
+  have result : outcome width native ((operand.setWidth width.bits).setWidth 64) =
+      outcome width native operand := by
+    simp only [outcome_matches, narrowed]
+  have sign : X86Divide.Capture.sourceNegative width ((operand.setWidth width.bits).setWidth 64) =
+      X86Divide.Capture.sourceNegative width operand := by
+    rw [X86Divide.Capture.divisor_negative, X86Divide.Capture.divisor_negative, narrowed]
+  simp only [handlerStep, arithmeticStep, X86Scalar.read_refines,
+    Reference.X86.scalarRead, result, sign]
+
+/-- SRC_NONE/IMM register-lane capture denotes the same original read as the
+canonical register source, including the separately encoded high-byte lanes. -/
+theorem captured_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (nextPc : NativeWord) (fresh : Nat → Bool) :
+    wordStep env frame arena state width (readRegister env frame arena state width source) nextPc fresh =
+      handlerStep width (.register source) nextPc fresh (nativeRegisters env frame arena state) := by
+  rw [word_frame_matches, native_register_read]
+  simp only [handlerStep, arithmeticStep, X86Scalar.read_refines, Reference.X86.scalarRead]
+
+theorem captured_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (nextPc : NativeWord) (fresh : Nat → Bool) :
+    Reference.X86.Step (.signedDivide width (.register source) nextPc)
+      (nativeRegisters env frame arena state)
+      (wordStep env frame arena state width (readRegister env frame arena state width source) nextPc fresh) := by
+  rw [captured_frame_matches]
+  exact handler_refines width (.register source) nextPc fresh _
+
+/-- Production READ_REG observes the entire incoming numeric cell. The C
+width mask yields exactly the canonical low-register lane before either implicit
+result assignment, for every register including RAX/RDX/RSP aliases. -/
+theorem register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.Register) (nextPc : NativeWord) (fresh : Nat → Bool) :
+    Reference.X86.Step (.signedDivide width (.register (.low source)) nextPc)
+      (nativeRegisters env frame arena state)
+      (wordStep env frame arena state width (registerValue env frame arena state source) nextPc fresh) := by
+  have read : readRegister env frame arena state width (.low source) =
+      (((registerValue env frame arena state source).setWidth width.bits).setWidth 64) := by
+    rw [native_register_read]
+    simp [Reference.X86.scalarRegisterValue, Reference.X86.RegisterSlice.shift,
+      Reference.X86.RegisterSlice.reg, nativeRegisters]
+  have body : wordStep env frame arena state width
+      (registerValue env frame arena state source) nextPc fresh =
+      wordStep env frame arena state width (readRegister env frame arena state width (.low source)) nextPc fresh := by
+    rw [word_frame_matches, word_frame_matches, read, handler_operand_narrow]
+  rw [body]
+  exact captured_frame_refines env frame arena state width (.low source) nextPc fresh
+
 end KProgFormal.Refinement.X86NumericAddress.SignedDivision
