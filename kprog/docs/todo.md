@@ -69,6 +69,11 @@
 
 - [x] **A** 协调者21:50要求的ARM helper检查撤回（本提交）：31个output-wrapper使用恢复原helper参数投影，移除below-SP output fault、libc额外prefetch及memcpy scalar-source fault；原有invocation-stack host在GCC/Clang18+UBSan均通过。实际guest回放沿共享revert项继续。
 
+- [x] **A** ARM X19-X29 stock entry frame, SP-only RET, original ARM branch flags and matching tail cleanup published (fdc68ecea); Image/module/release builds0 and existing tail tests19/19 for each feature selection.
+- [x] **A** Requested aee6/4f5 census comparison published (7d1d0d41d):549 identities, installed7->10, resources238, ELF names14, ENDBR11 and service-OOM transport276; exact2GiB/8GiB evidence and per-instance outcomes retained.
+- [x] **A** Exact OOM-input parser attribution published (f3f1e6b9c):210call-to-following thunk edges and7return thunks normalize in4f5; input/module identities retained, parser-only generation/verifier submissions0.
+- [ ] **A** Existing ARM ISA48 on the fixed entry frame: original48case bytes/annotations, source f3f1e6b9c, release cross-linker0 and guest228238 active; final outcomes and comparison follow guest completion. ARM application queue remains deferred.
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
