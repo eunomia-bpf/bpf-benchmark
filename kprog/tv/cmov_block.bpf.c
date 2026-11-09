@@ -330,3 +330,31 @@ MOVIMM_UNIT(tv_movimm8hi, X86_WIDTH_8, 8)
 MOVIMM_UNIT(tv_movimm16, X86_WIDTH_16, 0)
 MOVIMM_UNIT(tv_movimm32, X86_WIDTH_32, 0)
 MOVIMM_UNIT(tv_movimm64, X86_WIDTH_64, 0)
+
+#define LEA_UNIT(NAME, WIDTH, SCALE) \
+__attribute__((section("tv/lea/" #NAME), used)) \
+__u64 NAME(__u64 old, __u64 base, __u64 index, __u64 displacement) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    __x86_rdx.ptr = (void *)(long)base; \
+    __x86_rcx.ptr = (void *)(long)index; \
+    X86_SIM_L_EXEC(X86_OP_LEA, X86_RAX, X86_RDX, WIDTH, \
+        X86_MEM_AUX(X86_RCX, SCALE), displacement); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+LEA_UNIT(tv_lea16s0, X86_WIDTH_16, 0)
+LEA_UNIT(tv_lea16s1, X86_WIDTH_16, 1)
+LEA_UNIT(tv_lea16s2, X86_WIDTH_16, 2)
+LEA_UNIT(tv_lea16s3, X86_WIDTH_16, 3)
+LEA_UNIT(tv_lea32s0, X86_WIDTH_32, 0)
+LEA_UNIT(tv_lea32s1, X86_WIDTH_32, 1)
+LEA_UNIT(tv_lea32s2, X86_WIDTH_32, 2)
+LEA_UNIT(tv_lea32s3, X86_WIDTH_32, 3)
+LEA_UNIT(tv_lea64s0, X86_WIDTH_64, 0)
+LEA_UNIT(tv_lea64s1, X86_WIDTH_64, 1)
+LEA_UNIT(tv_lea64s2, X86_WIDTH_64, 2)
+LEA_UNIT(tv_lea64s3, X86_WIDTH_64, 3)

@@ -202,3 +202,11 @@ Kind4 per-CPU final-byte laws compose the selected entered thread-pointer
 profile with canonical X10 materialization, preserving the full state and
 empty trace through the final copied word. Physical CPU/profile and C/compiler
 entry/copy/lifetime bindings remain explicit.
+
+LEA adds12 scalar width/scale units with canonical writeValue, complete memory
+and exclusive-index preservation and actual decoded execution. Field/address
+mapping, pointer/RSP and physical native frame/compiler embedding remain explicit.
+The current lookup1/ktime5 units include their decoded private byte store at
+R10-8: the full execution has exact scratch memory and ordered store event,
+under explicit successful-store/slot ownership premises. Prefix and suffix
+composition retains the complete helper result and effects.

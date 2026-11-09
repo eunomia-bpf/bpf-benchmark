@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 73/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5) | 12/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
@@ -5772,3 +5772,21 @@ Whole compiler/JIT traces, physical entry/transfer, helper effects and callee-fr
 ownership, concurrent object retention and executable permissions remain explicit
 premises. The archive retains the module hashes, original proposals and axiom
 audits; the next sole full check records these modules together.
+
+### Compiled scalar LEA and helper private store
+
+`LeaCertificate.compiled_all_variants` and `compiled_execution` cover all12
+16/32/64-bit and scale0/1/2/3 scalar LEA units, with arbitrary old destination,
+base, index and displacement. Actual decoded Execution returns canonical
+`writeValue`, preserves whole memory/exclusive index and advances fresh visit23.
+The combined141 object keeps127 old function bytes, adds12 LEA units and
+refreshes two helper bodies. Reproduction from published headers matches all141.
+[Original inputs and proofs](compiled-lea.log.gz) include losslessly compressed
+expanded C, ELF, exact arrays, diagnostics and successful axiom audits.
+
+The lookup1/ktime5 helper proofs now compose prefix, private-byte store at
+R10-8 and suffix. `compiled_all_variants` proves the prefix; `compiled_execution`
+proves the complete result, scratch memory, visit40 and ordered helper/call/store
+events under the stated successful-store premise. These remain partial helper
+units. Private-slot ownership, helper footprints, native register/tag/flag frame,
+physical invocation ABI and compiler embedding remain explicit.
