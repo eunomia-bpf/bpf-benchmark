@@ -191,3 +191,8 @@ physical guard and O3/native fault-prefix correspondence remain explicit.
 - [oracles/](oracles/): retained semantic C oracles.
 - [tools/](tools/): generators and semantic tooling.
   build/ and .lake/ hold incremental outputs.
+
+Canonical ARM LDP recovery also proves first-element, second-element and
+FEAT_LSE2 double-width fault paths, retaining ordered read events and clearing
+both whole X destinations from the input frame before PC4 continuation.
+Physical site/frame, pre/post writeback and compiled-B/O3 bindings remain explicit.

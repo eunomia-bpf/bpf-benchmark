@@ -5695,3 +5695,20 @@ and5 new function bytes match the combined129 object. Memory/exclusive remain
 equal, visit advances23 and fault/events are absent. [Original evidence](compiled-movimm.log.gz)
 retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
 native register/tag frame, physical ABI and compiler embedding remain explicit.
+
+### ARM paired-load recovery and existing high-byte host ABI
+
+Three canonical LDP read-fault laws cover ordered first/second elements and the
+FEAT_LSE2 double-width profile. The second-element failure retains the first
+read event; pair metadata clears both complete X destinations and resumes PC4
+from the input frame. Existing native-link-final-image-check exits0 with
+propext/Quot.sound for each law. S1/S2 finite recovery receipts are merged into
+the shared partial LOAD_FAULT_RECOVERY row with their exact production epochs.
+
+Full source7513605d9 exits2 at BH-direct: the fixture modifies callee-saved RBX
+then returns under the new exit contract. Saving RBX in R8 and restoring it
+before return retains the original24host/BPF programs,5124byte results and
+four exact access-width assertions; the existing targeted tool exits0.
+[Original proof, host and failed-full receipts](arm-pair-read-recovery.log.gz)
+retain source/manifest/log/CPU/exit identities. Physical exception/table/frame,
+pre/post writeback/SIMD, compiled-B and O3 correspondences remain explicit.

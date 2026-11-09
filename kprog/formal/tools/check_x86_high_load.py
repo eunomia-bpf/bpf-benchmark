@@ -31,6 +31,8 @@ def main():
                 prefix=[("sub",("rsp","8")),("mov",("dl","BYTE PTR [rdi+3]")),("mov",("BYTE PTR [rsp+3]","dl"))]
                 address="rsp+3"
             if kind=="readonly": address="rip+0"
+            # BH cases preserve the invocation callee-saved RBX value.
+            if base=="rbx": prefix=[("mov",("r8","rbx"))]+prefix
             body=[g.NativeInsn(i,op+" "+",".join(args),op,args) for i,(op,args) in enumerate(prefix)]
             load=g.NativeInsn(len(body),f"mov {high},BYTE PTR [{address}]","mov",(high,f"BYTE PTR [{address}]"),
                 reloc_symbol="datum" if kind=="readonly" else None,
@@ -38,6 +40,7 @@ def main():
             body.append(load)
             body.append(g.NativeInsn(len(body),f"movzx eax,{high}","movzx",("eax",high)))
             if kind=="stack": body.append(g.NativeInsn(len(body),"add rsp,8","add",("rsp","8")))
+            if base=="rbx": body.append(g.NativeInsn(len(body),"mov rbx,r8","mov",("rbx","r8")))
             body.append(g.NativeInsn(len(body),"ret","ret",()))
             name=f"high_load_{high}_{kind}"
             program=g.render_program(name,body,kind="raw",program_section="xdp",

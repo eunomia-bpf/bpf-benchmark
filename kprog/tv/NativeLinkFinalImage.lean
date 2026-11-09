@@ -729,3 +729,57 @@ end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.x86_recovered_arithmetic_destination
 #print axioms KProgTV.NativeLinkFinalImage.x86_recovered_logical_destination
 #print axioms KProgTV.NativeLinkFinalImage.x86_recovered_unary_destination
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- The first failed LDP element clears both recorded X destinations and
+resumes at PC+4 from the captured input frame. -/
+theorem arm64_recovered_pair_first (state : AArch64.State)
+    (i : AArch64.PairMemoryInstruction) (load : i.load = true)
+    (aligned : AArch64.spAlignmentFault state i.base = none)
+    (elements : state.pairSingleAccess = false)
+    (fault : readMemory state.memory (AArch64.memoryBase state i.base+i.offset) i.width.bytes =
+      .error (.read (AArch64.memoryBase state i.base+i.offset) i.width.bytes)) :
+    recoverRead (arm64PairResume (BitVec.ofNat 5 i.first.val)
+        (some (BitVec.ofNat 5 i.second.val))) (AArch64.pairMemoryStep i state) =
+      ⟨arm64PairResume (BitVec.ofNat 5 i.first.val) (some (BitVec.ofNat 5 i.second.val)) state,
+        [.fault (.read (AArch64.memoryBase state i.base+i.offset) i.width.bytes)],none⟩ := by
+  simp [recoverRead,AArch64.pairMemoryStep,aligned,load,elements,fault]
+
+/-- A successful first element remains in the ordered diagnostic prefix.
+The failed second element recovers both destinations from the input frame. -/
+theorem arm64_recovered_pair_second (state : AArch64.State)
+    (i : AArch64.PairMemoryInstruction) (load : i.load = true)
+    (aligned : AArch64.spAlignmentFault state i.base = none)
+    (elements : state.pairSingleAccess = false) (first : Word) (event : Event)
+    (readFirst : readMemory state.memory (AArch64.memoryBase state i.base+i.offset) i.width.bytes =
+      .ok (first,event))
+    (fault : readMemory state.memory
+      (AArch64.memoryBase state i.base+i.offset+BitVec.ofNat 64 i.width.bytes) i.width.bytes =
+      .error (.read (AArch64.memoryBase state i.base+i.offset+BitVec.ofNat 64 i.width.bytes) i.width.bytes)) :
+    recoverRead (arm64PairResume (BitVec.ofNat 5 i.first.val)
+        (some (BitVec.ofNat 5 i.second.val))) (AArch64.pairMemoryStep i state) =
+      ⟨arm64PairResume (BitVec.ofNat 5 i.first.val) (some (BitVec.ofNat 5 i.second.val)) state,
+        [event,.fault (.read
+          (AArch64.memoryBase state i.base+i.offset+BitVec.ofNat 64 i.width.bytes) i.width.bytes)],none⟩ := by
+  simp [recoverRead,AArch64.pairMemoryStep,aligned,load,elements,readFirst,fault]
+
+/-- The FEAT_LSE2 single-access profile retains its double-width fault event
+and uses the same pair metadata and whole-X recovery. -/
+theorem arm64_recovered_pair_single_access (state : AArch64.State)
+    (i : AArch64.PairMemoryInstruction) (load : i.load = true)
+    (aligned : AArch64.spAlignmentFault state i.base = none)
+    (single : state.pairSingleAccess = true)
+    (denied : permitted state.memory.readable
+      (AArch64.memoryBase state i.base+i.offset) (2*i.width.bytes) = false) :
+    recoverRead (arm64PairResume (BitVec.ofNat 5 i.first.val)
+        (some (BitVec.ofNat 5 i.second.val))) (AArch64.pairMemoryStep i state) =
+      ⟨arm64PairResume (BitVec.ofNat 5 i.first.val) (some (BitVec.ofNat 5 i.second.val)) state,
+        [.fault (.read (AArch64.memoryBase state i.base+i.offset) (2*i.width.bytes))],none⟩ := by
+  simp [recoverRead,AArch64.pairMemoryStep,aligned,load,single,denied]
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_first
+#print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_second
+#print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_single_access

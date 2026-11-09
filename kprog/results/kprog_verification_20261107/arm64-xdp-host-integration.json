@@ -1030,6 +1030,182 @@
     "trust": "Bitfield/encoded-handler laws use the stated BV reduction bridge (propext/Classical.choice/Quot.sound, and Lean.ofReduceBool where reported). Single/frame laws use propext and zeroing laws use propext/Quot.sound. No sorryAx or new axioms.",
     "utc": "2026-11-09T00:12:03.973390+00:00"
   },
+  "arm64_pair_read_recovery": {
+    "actual_existing_final_image_check_exit": 0,
+    "actual_existing_high_load_check_exit": 0,
+    "archive_block_sha256": "254e7622000c2ee04b8eccd3f82c72054a11cc06857ba0190a018c98df00e5bf",
+    "archive_file": "kprog/results/kprog_verification_20261107/arm-pair-read-recovery.log.gz",
+    "archive_marker": "=== ARM PAIR READ RECOVERY V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-check.console.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-check.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-check.log": {
+        "bytes": 23692,
+        "sha256": "76a518f82102fbcd031118b28c8777dfe5c39e5a603544be9a51c30a97534bc6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-check.py": {
+        "bytes": 387,
+        "sha256": "afcb513ebe2b3d8290f7dd406bddb81edabf80394229267c248cf3cff0824749"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-proposals.json": {
+        "bytes": 2016,
+        "sha256": "825bdade218907acfad2bc73a2fb1af36f26e9fabeacfbf634b31d416d248b98"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery-publish.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery.base.lean": {
+        "bytes": 39559,
+        "sha256": "014476c22c82559f1c8e4dca5c1a26ab766acb4b2f2e05aa2b9487a23a5185d5"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/arm-pair-recovery.fragment.lean": {
+        "bytes": 3416,
+        "sha256": "41242ae152a60f32500c9c095425f6bdc3ac15a37349a3d377f01f8b55cd9f44"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.archive-writer.py": {
+        "bytes": 4531,
+        "sha256": "be047e12b317fcea959c36bc16d67fa3b07e32d7605cfa2c40e26828bceca643"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.cpu.jsonl.gz": {
+        "bytes": 43262,
+        "sha256": "b169ee20b624f83f20276cbd85ae5237af8e984ee68c70a970cbd981e592aa4d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.head": {
+        "bytes": 41,
+        "sha256": "ad6b041fad796a8847d4bc7275e7820b3ceb135348f1744b3b0e2c5a04056f47"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.launch.log": {
+        "bytes": 102,
+        "sha256": "c87c1641250f720f0d44437393f13c839cc13f46ef86eab47df38e8a4d1d34ee"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.log": {
+        "bytes": 119593,
+        "sha256": "6bc3ae01aa6f2cfde49d5ec67a34d7757cdde2dc00d004f8146e9bec684626ad"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.py": {
+        "bytes": 4266,
+        "sha256": "6c4ba12fa60974a8ce19eec054f13ddcef9d83a5bf30409d8bf17bd26b02a5e2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.sources": {
+        "bytes": 144308,
+        "sha256": "5f367dbff18af6e095725ef44a14ffe95ae0c7dacfb959f440a09f7cd0158c8a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-movimm-full.state": {
+        "bytes": 52,
+        "sha256": "bb7bef83c29e6897cc569e703cecc59f072315f9ac347c9ee5bd2af18060d6f2"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/high-load-abi-check.console.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/high-load-abi-check.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/high-load-abi-check.log": {
+        "bytes": 2547,
+        "sha256": "bae3b4e79cd038ffb0bcc8c68abbfe86f2a32f8ab6b2f5c409cb12d8b9293d34"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/high-load-abi-check.py": {
+        "bytes": 378,
+        "sha256": "c2a080238d3790a9b164dcc1a29e1d0c51c4f7528e18db6b835fffda215900a9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/high-load-abi.base.py": {
+        "bytes": 4772,
+        "sha256": "e83caccc2059ec86bc34ebe29e7f77dce8b335fa125fdc6634251349731d5158"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/formal/tools/check_x86_high_load.py": {
+        "bytes": 5005,
+        "sha256": "fde27f43ccc2dd000e29fc8fec561ab26a7ddf80dc19c2599f3b6dba54947860"
+      },
+      "/workspaces/repository/kprog/results/kprog_arm64_read_recovery_20261109/README.md": {
+        "bytes": 5427,
+        "sha256": "649b49ba09dd4a1fe3a62fff15ba3153f9d1fcdf9cf89b6565d674d260650e52"
+      },
+      "/workspaces/repository/kprog/results/kprog_arm64_read_recovery_20261109/host-summary.json": {
+        "bytes": 7918,
+        "sha256": "f8d9d3c96be0b0fdfb18c98f2c8aaaf8b0cf1d171a060457f45c8bf487558902"
+      },
+      "/workspaces/repository/kprog/results/kprog_arm64_read_recovery_20261109/safety-summary.json": {
+        "bytes": 732178,
+        "sha256": "391936db6b8bd5668b6905abee1e97e106a063eaed4e0dbf69dc4f2c30d119e5"
+      },
+      "/workspaces/repository/kprog/results/kprog_x86_read_recovery_20261109/README.md": {
+        "bytes": 5707,
+        "sha256": "4e22afaecbd13f40933db2b597f9d66b32826ff61f21170146c69acf557e5ea0"
+      },
+      "/workspaces/repository/kprog/results/kprog_x86_read_recovery_20261109/summary.json": {
+        "bytes": 5758,
+        "sha256": "465adf76f712f54dae36342bd982a69c93b5129d3cf8e2346d60778aa8b01ce5"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 42975,
+        "sha256": "9daff915a10b152d2520edf1dc9515b9e0375db3c0f7f852621de65bb70cefb5"
+      }
+    },
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "domain": "Canonical LDP read faults: ordered first/second element and double-width FEAT_LSE2 single access. Pair metadata clears both complete X destinations from captured input frame and resumes PC+4; first successful read event retained on second failure.",
+    "high_byte_host_repair": "BH native fixtures preserve callee-saved RBX in R8 across the existing load and restore before return. Original24host/BPF programs,5124byte/alias/stack/readonly results and4access-width assertions pass.",
+    "peer_evidence": {
+      "kprog/results/kprog_arm64_read_recovery_20261109/README.md": {
+        "git_blob": "5441cbc7c15792ebe7b81d5067b70c83e37ddf13",
+        "sha256": "649b49ba09dd4a1fe3a62fff15ba3153f9d1fcdf9cf89b6565d674d260650e52"
+      },
+      "kprog/results/kprog_arm64_read_recovery_20261109/host-summary.json": {
+        "git_blob": "b798b99b69ca5a4d8f0fb7cabc86a28264382ded",
+        "sha256": "f8d9d3c96be0b0fdfb18c98f2c8aaaf8b0cf1d171a060457f45c8bf487558902"
+      },
+      "kprog/results/kprog_arm64_read_recovery_20261109/safety-summary.json": {
+        "git_blob": "8d1417ecaaa906f696a6b304977efe26336fcc5f",
+        "sha256": "391936db6b8bd5668b6905abee1e97e106a063eaed4e0dbf69dc4f2c30d119e5"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/README.md": {
+        "git_blob": "2697633d7a63a2a5a14c20ab10cfa8b3af6db232",
+        "sha256": "4e22afaecbd13f40933db2b597f9d66b32826ff61f21170146c69acf557e5ea0"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/summary.json": {
+        "git_blob": "6608dff69b729f9322d6e6556afb1f5aa8ad5479",
+        "sha256": "465adf76f712f54dae36342bd982a69c93b5129d3cf8e2346d60778aa8b01ce5"
+      }
+    },
+    "preceding_full": {
+      "actual_exit": 2,
+      "published_source": "7513605d9614ed013b94b340d02a8d16fcc86a17",
+      "reason": "BH-direct host modified callee-saved RBX then returned after exit-contract48eb036f5. Original manifest/log/CPU/exit retained in this archive."
+    },
+    "remaining_interface": "Actual final instruction/table/destination/frame/fault-class and physical ordered access binding, pre/post writeback input-state correspondence, saved SIMD clear, O2/compiled-B/provenance/ABI/O3 composition.",
+    "theorems": [
+      "KProgTV.NativeLinkFinalImage.arm64_recovered_pair_first",
+      "KProgTV.NativeLinkFinalImage.arm64_recovered_pair_second",
+      "KProgTV.NativeLinkFinalImage.arm64_recovered_pair_single_access"
+    ]
+  },
   "arm64_recovery_published_execution": {
     "actual_guest_exit": 0,
     "actual_make_exit": 0,
