@@ -8,4 +8,4 @@ make -C /workspaces/repository __runtime-vm-corpus PLATFORM=kvm ARCH=x86 RUNTIME
 
 The paired control payload and immutable raw.tar.gz provide the comparison and reproduction inputs. B uses the actual optimized P and source maps; kernel emission retains its existing same-copy path. R compares actual events/syscall work/BPF run counts and workload throughput against JIT. This payload binds the frozen configuration; a corresponding P compile carries another configuration. Original38 and full application/runtime outcomes retain their separate evidence.
 
-Actual sys_enter/sys_exit service inputs from the running canonical cohort supply metadata for compiler replay. Current emitted-B compile exit0, completed entries[]. Exact public model source and all generated/compiler output accompany compiled-b.tar.gz.
+Actual sys_enter/sys_exit service inputs from the running canonical cohort supply metadata for compiler replay. Current emitted-B compile exit0, completed entries['sys_exit', 'sys_enter']. Exact public model source and all generated/compiler output accompany compiled-b.tar.gz.

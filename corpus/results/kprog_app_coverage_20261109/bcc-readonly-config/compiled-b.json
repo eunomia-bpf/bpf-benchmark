@@ -1,7 +1,45 @@
 {
   "make_exit": 0,
-  "actual_service_inputs": [],
-  "compiled_entries": [],
+  "actual_service_inputs": [
+    {
+      "entry": "sys_exit",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/13.success.tar.gz",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "selection": "completed immutable canonical archive and exact syscount entry"
+    },
+    {
+      "entry": "sys_enter",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/6.success.tar.gz",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "selection": "completed immutable canonical archive and exact syscount entry"
+    }
+  ],
+  "compiled_entries": [
+    {
+      "entry": "sys_exit",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_exit/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_exit/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_exit/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_exit",
+        "native_sha256": "d43869064ee2a5fe85f2000a01c8f6c4ac4bbf3c5409cba7a066b90905262977"
+      }
+    },
+    {
+      "entry": "sys_enter",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_enter/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_enter/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-readonly-config/generated/sys_enter/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_enter",
+        "native_sha256": "d43869064ee2a5fe85f2000a01c8f6c4ac4bbf3c5409cba7a066b90905262977"
+      }
+    }
+  ],
   "source": {
     "head": "a7a8bb86bce9dc3c41d941338463ad6a3b3b53d6",
     "files": {
