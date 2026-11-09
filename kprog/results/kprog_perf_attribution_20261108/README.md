@@ -40,9 +40,16 @@ a `bcc__set` result (`verified_native_loader`, `status ok`).
 Read with the workload ratios in `kprog_reproduction_20261106/`:
 
 - **tracee** is the case the native path wins: 55% more invocations in the
-  same wall time, at 14% *less* total BPF time, and cost per invocation
-  falls from 487.5 to 270.0 ns on its heaviest program. That is why its
-  workload ratio is 1.539x where the reference had 0.958x.
+  same wall time (10.649 to 6.883 billion) at 14% *less* total BPF time,
+  so the aggregate cost per invocation falls from 365.6 to 202.7 ns -- the
+  native body does 0.554x the work per call. That is why its workload
+  ratio is 1.539x where the reference had 0.958x, and the two figures
+  agree: 1.539x of throughput against 1.547x more invocations.
+
+  Cite the aggregate here, not the 487.5-to-270.0 median on its heaviest
+  program: the medians are exactly the statistic this section elsewhere
+  rejects, because they weight a program with a handful of invocations
+  equally with one that runs billions of times.
 - **cilium** is the case it wins on BPF time (486 → 362 s) but not on
   workload: its two top programs drop from 687/683 ns to 449/384 ns per
   run, yet the workload ratio is only 1.229x, so the remaining cost is
@@ -235,6 +242,16 @@ source in both runs. Checked by rebuilding rather than assuming:
 **So the native code did not move, and the linker did not change its
 output.** What moved is the recorded native program size (jited 10,192 to
 10,261, +69 bytes) and the cost per invocation (142.4 to 173.1 ns, 1.215x).
+
+That distinction matters and is easy to get backwards. The *object* is
+identical; the *cost* is not. When both arms are re-measured on the same
+restored workload at full length, the native body costs 186.8 ns per
+invocation against the JIT's 172.8 -- 8% slower (`..._071718_076108`,
+stats on). So Katran's 142.4 ns from 2026-05-29 is not reproducible from
+this code, while the JIT's 178 ns reproduces at 172.8. The native arm lost
+its advantage because the number the reference recorded was measured on a
+workload that did not fill the queue, and because a native body 36% smaller
+in bytes than the JIT's is not thereby cheaper to run.
 Both linkers emit the same bytes from the same object, so the +69 bytes come
 from the object the reference actually ran, which its image held and no
 archive kept.
@@ -945,7 +962,12 @@ program.
 `samples_per_second` is `1000` in the current code and `100000` in the
 reference. A hundredth of the samples means a hundredth of the BPF work per
 second, so the collector has almost nothing for the native path to speed up.
-That is why otelcol's ratio fell from 1.824x to 1.013x.
+
+That is a plausible cause but not a measured one, so state it as the
+hypothesis it is: the ratio fell from 1.824x to 1.013x, and the sampling
+rate is a hundredfold lower, but no run yet pairs the two rates on the same
+code. What the runs do establish is the direction -- OTel's speedup lives in
+BPF work that a hundredth of the samples removes.
 
 ### Restored
 
@@ -1096,9 +1118,67 @@ The `pass` counter reads 1 in the JIT arm and 0 in the native arm, which is
 one packet of a different path, not a work difference: `total` and `tx`
 agree to within 0.18% and the receiver matches both.
 
-That is one 20 s sample, so it establishes binding, shape and equal work
-rather than a final ratio: the six-application timing at SAMPLES=3
-WORKLOAD_DURATION=180 is the measurement.
+That was one 20 s sample, so it established binding, shape and equal work.
+The measurement below repeats it at the operator's knobs.
+
+### Katran at SAMPLES=3 WORKLOAD_DURATION=180, both stats modes
+
+Both runs use the recipe lane C posted, on host CPUs 0-7, with the restored
+workload verified in each: four pktgen workers on threads 0-3, each worker's
+`/proc/net/pktgen` output carrying `flows: 65535` and `flowlen: 1`.
+
+| stats | run | JIT pps | native pps | native/JIT |
+| --- | --- | ---: | ---: | ---: |
+| off | `..._20261109_074938_322377` | 2,652,815 | 2,646,911 | **0.998** |
+| on | `..._20261109_071718_076108` | 1,879,418 | 1,806,798 | **0.961** |
+
+Per sample, so the spread is visible rather than a single number:
+
+| stats | arm | sample 0 | sample 1 | sample 2 |
+| --- | --- | ---: | ---: | ---: |
+| off | JIT | 2,653,196 | 2,658,278 | 2,646,970 |
+| off | native | 2,657,290 | 2,607,301 | 2,676,141 |
+| on | JIT | 1,882,668 | 1,878,300 | 1,877,285 |
+| on | native | 1,787,987 | 1,789,415 | 1,843,005 |
+
+**0.998x with stats off, 0.961x with stats on.** Turning BPF stats on costs
+both arms throughput (2.65M to 1.88M pps on the JIT arm) because every
+invocation updates the per-program counters; the native arm loses slightly
+more, so the ratio drops from parity to 0.96.
+
+Equal work, from the balancer's own counters in the same runs:
+
+| counter | stats off, JIT | stats off, native | stats on, JIT | stats on, native |
+| --- | ---: | ---: | ---: | ---: |
+| `tx` packets | 1,433,365,822 | 1,430,124,713 | 1,015,427,177 | 975,943,327 |
+| `drop` / `encap_fail` / `lru_miss` | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 |
+| worker threads | 0,1,2,3 | 0,1,2,3 | 0,1,2,3 | 0,1,2,3 |
+
+Both arms carry `Flags: FLOW_RND` on all four workers, so both ran the
+restored random-flow shape, and neither dropped or failed to encapsulate a
+packet.
+
+### What the restored workload says about the native code
+
+The stats-on run records per-program time, which is the comparison the
+program-level table above could not make at this length:
+
+| arm | invocations | total ns | ns per invocation |
+| --- | ---: | ---: | ---: |
+| JIT | 1,015,427,177 | 175,426,221,480 | **172.8** |
+| native | 975,943,327 | 182,326,966,937 | **186.8** |
+
+So on the restored workload the native code costs 186.8 ns per invocation
+against the JIT's 172.8 -- **8% slower**, not faster. Its recorded size is
+the same as before (`bytes_xlated` 1,112 against the JIT's 23,840;
+`bytes_jited` 8,744 against 13,641), so this is not a recompilation: the
+native code is the same code, measured against a workload that now fills
+the queue. At 20 s the same code measured 0.995x.
+
+The honest reading is that Katran is a program whose JIT output is already
+good, and a native body that is 36% smaller in bytes (8,744 against 13,641)
+does not make it cheaper per invocation. Any optimization for Katran has to
+change what the native body does, not how it is stored.
 
 ### OTel, and what its image needs
 
