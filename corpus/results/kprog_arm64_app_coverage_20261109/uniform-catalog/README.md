@@ -1,0 +1,5 @@
+Complete original ARM catalog on one captured model source
+
+All1917original annotations,380compiled native entries and59whole resource objects retain their original bytes. The complete ARM model/generator/direct dispatcher/generated headers are captured from55504ff906ab268a5cab3ab083d6d448d152ed54. The coordinator08:50 first-attempt loaderd1b4 uses the paired f1/e5/3e3f runtime and original bpf_testmod/NF resource dependencies. The original direct source0 submission opens resource objects autoload=false and retains program context/maps; every native annotation row stays load-only. All stages enter the original annotation agreement table.
+
+The predecessor20f530b99 measured four header epochs272/11/85/12. This successor uses the existing 9p multidevs=remap source visibility option and a complete immutable source copy; every actual request source identity is collected as evidence. Guest2GiB16-19 shares A allocation with the paired BCC guest. Original selftests and frozen framework retain their published bytes. Runtime admission additions:0. Exact original inputs, model/runtime snapshots and recipes accompany launch.json.
