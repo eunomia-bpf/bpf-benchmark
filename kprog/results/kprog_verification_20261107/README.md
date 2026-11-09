@@ -37,9 +37,15 @@ The numeric catalogue retains historical vector reference/C-model laws. Current
 native producers use the approved scalar policy and reach existing generation
 failure for two x86 and seven ARM SIMD/FP token families. The additional
 source-emitted REP STOS body has a native64 canonical step and14 checked
-progress/frame/refinement laws, plus168 full-state/write/fault scenes. Its actual
-C-loop/arena extraction, compiled-B and physical composition remain partial; it
-is outside the numeric catalogue and the13 compiled scalar families above.
+progress/frame/refinement laws, plus168 full-state/write/fault scenes. The
+[17 indexed-loop laws](stos-indexed-success.log.gz), published as
+`d8961b67ba2c8af2086f1c95454ca5a440954af2`, add captured original RDI/RAX, full RCX,
+unsigned index/condition correspondence, ordered write/fault events and final
+RDI/RCX writeback with a canonical Step theorem. The successful native64/DF-clear
+store profile and primitive/tag/provenance/physical/ABI/compiler interfaces are
+explicit. Both source rows are `partial-indexed-success-model`, outside the
+numeric catalogue and the13 compiled scalar families above. The existing sole
+full at `2d8fb3ac005b1c02c8af4d9c132d950aee109696` retains its earlier source.
 
 The [certified current ACL2 replay](reference-x86-acl2.md) executes the same576
 inputs:432 complete observed states agree,96 ANDN/BZHI cases stop at missing
