@@ -1,6 +1,6 @@
 #!/bin/bash
 # Step 2: one native program through submit, kernel copy, service, verifier, JIT.
-OUT=/var/tmp/kprog-tmp/CK/run/small
+OUT=/mnt/run/small
 . /workspaces/repository/kprog/stock-path/guest/common.sh
 start_service
 $CK/loader/build/trusted-service-client $R/kprog/libnativeloader/build/trusted-native.o > "$OUT/client.out" 2> "$OUT/client.err"

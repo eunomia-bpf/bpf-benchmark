@@ -1,6 +1,6 @@
 #!/bin/bash
 # Step 3: LSM file_open native program called with a valid and a NULL file.
-OUT=/var/tmp/kprog-tmp/CK/run/null_btf
+OUT=/mnt/run/null_btf
 . /workspaces/repository/kprog/stock-path/guest/common.sh
 start_service
 F=$CK/fixture

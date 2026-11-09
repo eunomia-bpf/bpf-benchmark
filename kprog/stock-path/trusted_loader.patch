@@ -1,0 +1,37 @@
+--- /workspaces/repository/kprog/trusted_loader.cpp	2026-11-08 09:42:41.937264844 +0000
++++ /var/tmp/kprog-tmp/CK/loader/kprog/trusted_loader.cpp	2026-11-09 07:30:18.835072138 +0000
+@@ -5,6 +5,9 @@
+ #include <charconv>
+ #include <cerrno>
+ #include <cstring>
++#include <cstdlib>
++#include <fstream>
++#include <vector>
+ #include <iostream>
+ #include <limits>
+ #include <memory>
+@@ -69,6 +72,24 @@
+         o.trusted_maps.push_back(map);
+     }
+     auto program = native_loader::load_from_fd(o);
++    // Evidence that the JIT emitted P: dump the jited image of the loaded program.
++    if (const char *dir = std::getenv("KPROG_STOCK_DUMP_DIR"); dir && program.prog_fd >= 0) {
++        bpf_prog_info first{}; __u32 size = sizeof(first);
++        if (bpf_obj_get_info_by_fd(program.prog_fd, &first, &size) || !first.jited_prog_len)
++            throw std::runtime_error("query jited image");
++        std::vector<uint8_t> image(first.jited_prog_len);
++        bpf_prog_info second{}; size = sizeof(second);
++        second.jited_prog_insns = reinterpret_cast<uintptr_t>(image.data());
++        second.jited_prog_len = image.size();
++        if (bpf_obj_get_info_by_fd(program.prog_fd, &second, &size))
++            throw std::runtime_error("read jited image");
++        std::ofstream out(std::string(dir) + "/jited-" + argv[3] + ".bin", std::ios::binary);
++        out.write(reinterpret_cast<const char *>(image.data()), image.size());
++        std::ofstream meta(std::string(dir) + "/jited-" + argv[3] + ".txt");
++        meta << "prog_id=" << program.native_prog_id << " jited_len=" << first.jited_prog_len
++             << " xlated_len=" << first.xlated_prog_len
++             << " native_code_bytes=" << program.native_code_bytes << "\n";
++    }
+     const auto id = program.native_prog_id;
+     // load_from_fd already COMPLETEs success before returning; never do it twice.
+     native_loader::close_loaded_program(&program);
