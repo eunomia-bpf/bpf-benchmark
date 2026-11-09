@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-09T06:13:44.181981+00:00",
+  "controller_pid": 2876280,
+  "physical_storage": "/var/tmp/kprog-tmp/C/cilium-checksum-caller-frame",
+  "virtual_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame",
+  "dependency_pid": 2867244,
+  "dependency_state": "/var/tmp/kprog-tmp/C/bcc-katran-constant-division",
+  "original38": "published native fixtures and expected outcomes",
+  "application": "complete cilium",
+  "functional_recipe": {
+    "samples": 1,
+    "duration": 2,
+    "cpus": "20-23",
+    "vm_memory": "12G"
+  },
+  "native_C_changes": 0,
+  "compiler_component_state": "host608256gcc608256clang passed; generated B compilation active",
+  "header_sha256": "82aee8426e0112f618530d0d50ce1fcb6dee7258d4d4a9501556bebb38469b97",
+  "generator_sha256": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928"
+}
