@@ -247,5 +247,66 @@
     "transport_failed": 276,
     "branch_hardening_frontend": 11
   },
-  "matched_baseline_identities": true
+  "matched_baseline_identities": true,
+  "frontend_attribution": {
+    "scope": "parser-only view of the exact retained OOM input; generation/verifier submissions0",
+    "input_sha256": "b4ca5042842530bec06aa483561507e29830f2db1ae941f92fdb0dd7ea069e3c",
+    "input_path": "/var/tmp/kprog-tmp/A/census-aee6/resume/shard-0/stock-state/request-wf85yjxx/generated/trusted_x86.proof.o",
+    "views": {
+      "aee6": {
+        "module_sha256": "4145981613d8536e0f036726345302ec549667a8390e784f2d33653897ef9a8b",
+        "instructions": 3679,
+        "text_bytes": 16644,
+        "thunk_relocations": {
+          "__x86_indirect_thunk_r11": 210,
+          "__x86_return_thunk": 7
+        },
+        "thunk_call_to_following_instruction": 210
+      },
+      "4f5": {
+        "module_sha256": "7773063cadab38fda0e0d25454767372ee26fbcdacb6a9cb040f3f4ea2fcf77a",
+        "instructions": 3679,
+        "text_bytes": 16644,
+        "thunk_relocations": {}
+      }
+    },
+    "changed_instructions": 217,
+    "examples": [
+      {
+        "pc": 58,
+        "old": {
+          "mnemonic": "call",
+          "operands": [
+            "3f <generic_kprobe_process_event+0x3f>"
+          ],
+          "reloc_symbol": "__x86_indirect_thunk_r11"
+        },
+        "new": {
+          "mnemonic": "call",
+          "operands": [
+            "r11"
+          ],
+          "reloc_symbol": null
+        }
+      },
+      {
+        "pc": 131,
+        "old": {
+          "mnemonic": "call",
+          "operands": [
+            "88 <generic_kprobe_process_event+0x88>"
+          ],
+          "reloc_symbol": "__x86_indirect_thunk_r11"
+        },
+        "new": {
+          "mnemonic": "call",
+          "operands": [
+            "r11"
+          ],
+          "reloc_symbol": null
+        }
+      }
+    ],
+    "interpretation": "The old ABI analysis receives 210 direct call-to-following edges from external thunk relocations. This is a frontend compatibility confound in the full-old experiment, separate from simulator stack storage and RET obligations."
+  }
 }
