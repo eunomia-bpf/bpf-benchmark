@@ -93,7 +93,7 @@ def namespace(epoch):
         if path.is_file():
             bind(path, ROOT / path.relative_to(epoch / 'source'))
     for name in ['libnative_loader.so', 'trusted-native-loader']:
-        bind(Path('/var/tmp/kprog-tmp/S17/loader-once/build') / name,
+        bind((STATE / 'loader') / name,
              ROOT / 'kprog/libnativeloader/build' / name)
     bind(NATIVE_LINK,
          ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
@@ -104,7 +104,9 @@ def safety(epoch, suite):
     work = epoch / suite
     write(work / 'runtime.json', {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in [STATE / 'kernel-build/arch/x86/boot/bzImage',
-                  STATE / 'module/kprog_stock.ko', NATIVE_LINK]})
+                  STATE / 'module/kprog_stock.ko', NATIVE_LINK,
+                  STATE / 'loader/libnative_loader.so',
+                  STATE / 'loader/trusted-native-loader']})
     if suite == 'selftests315':
         bind(work / 'table', ROOT / 'kprog/selftests/build')
     output = work / 'out'
@@ -162,7 +164,7 @@ def census(epoch):
     runtime.mkdir(exist_ok=True)
     link(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
     for name in ['libnative_loader.so', 'trusted-native-loader']:
-        link(Path('/var/tmp/kprog-tmp/S17/loader-once/build') / name, runtime / name)
+        link((STATE / 'loader') / name, runtime / name)
     scratch = epoch / 'census'
     scratch.mkdir(exist_ok=True)
     link(epoch / 'source', scratch / 'controller-source')
