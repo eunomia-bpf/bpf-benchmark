@@ -1,0 +1,5582 @@
+{
+  "utc": "2026-11-09T06:59:45.214838+00:00",
+  "scope": "Complete raw manifest row static entry attribution; ELF entry body sizes and actual disassembly calls",
+  "candidate_publication": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
+  "control_publication": "948835b72a7850f94829b7f21733e504fccd6a87",
+  "manifest_rows": {
+    "bcc": 32,
+    "tracee": 123
+  },
+  "measurement": "Each entry body retains its original manifest symbol; linked reachable subprograms and workload-frequency weighting retain separate measurements",
+  "rows": [
+    {
+      "app": "bcc",
+      "manifest_ordinal": 0,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/source_map.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+      "retained_bytes": 736
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 1,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_0.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 2,
+      "program": "libbpf_nametest",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_1.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 3,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_2.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+      "retained_bytes": 976
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 4,
+      "program": "det_arg_ctx",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_3.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+      "retained_bytes": 1096
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 5,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_4.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 6,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_5.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 7,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_6.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+      "retained_bytes": 984
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 8,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/startup/startup_7.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 9,
+      "program": "tracepoint__sys",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+      "unit": "bcc/opensnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tracepoint__syscalls__sys_enter_openat",
+          "control": {
+            "object_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+            "entry_symbol_bytes": 176,
+            "disassembly": {
+              "instructions": 44,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+            "entry_symbol_bytes": 176,
+            "disassembly": {
+              "instructions": 44,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 10,
+      "program": "tracepoint__sys",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o",
+      "unit": "bcc/opensnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tracepoint__syscalls__sys_exit_openat",
+          "control": {
+            "object_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+            "entry_symbol_bytes": 248,
+            "disassembly": {
+              "instructions": 62,
+              "calls": 10
+            }
+          },
+          "candidate": {
+            "object_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+            "entry_symbol_bytes": 248,
+            "disassembly": {
+              "instructions": 62,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 11,
+      "program": "kprobe__cap_cap",
+      "symbol": "kprobe__cap_capable_entry",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+      "unit": "bcc/capable",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "kprobe__cap_capable_entry",
+          "control": {
+            "object_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+            "entry_symbol_bytes": 168,
+            "disassembly": {
+              "instructions": 42,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+            "entry_symbol_bytes": 168,
+            "disassembly": {
+              "instructions": 42,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 12,
+      "program": "kprobe__cap_cap",
+      "symbol": "kprobe__cap_capable_exit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/capable.native.o",
+      "unit": "bcc/capable",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "kprobe__cap_capable_exit",
+          "control": {
+            "object_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+            "entry_symbol_bytes": 568,
+            "disassembly": {
+              "instructions": 141,
+              "calls": 13
+            }
+          },
+          "candidate": {
+            "object_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+            "entry_symbol_bytes": 568,
+            "disassembly": {
+              "instructions": 141,
+              "calls": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 13,
+      "program": "inet_sock_set_s",
+      "symbol": "inet_sock_set_state",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o",
+      "unit": "bcc/tcplife",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "inet_sock_set_state",
+          "control": {
+            "object_sha256": "c8f6a834fdece420709341f77824bd15506319f9ccad0ac6d0814cd2bdf9b360",
+            "entry_symbol_bytes": 1076,
+            "disassembly": {
+              "instructions": 264,
+              "calls": 32
+            }
+          },
+          "candidate": {
+            "object_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0",
+            "entry_symbol_bytes": 900,
+            "disassembly": {
+              "instructions": 220,
+              "calls": 18
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 14,
+      "program": "blk_account_io_",
+      "symbol": "blk_account_io_merge_bio",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+      "unit": "bcc/biosnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "blk_account_io_merge_bio",
+          "control": {
+            "object_sha256": "cd1722538f626bf1ccfc940892ee140b887c996d04d967389f0e890a62b8d190",
+            "entry_symbol_bytes": 120,
+            "disassembly": {
+              "instructions": 30,
+              "calls": 4
+            }
+          },
+          "candidate": {
+            "object_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+            "entry_symbol_bytes": 120,
+            "disassembly": {
+              "instructions": 30,
+              "calls": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 15,
+      "program": "block_rq_insert",
+      "symbol": "block_rq_insert",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+      "unit": "bcc/biosnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "block_rq_insert",
+          "control": {
+            "object_sha256": "cd1722538f626bf1ccfc940892ee140b887c996d04d967389f0e890a62b8d190",
+            "entry_symbol_bytes": 352,
+            "disassembly": {
+              "instructions": 85,
+              "calls": 7
+            }
+          },
+          "candidate": {
+            "object_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+            "entry_symbol_bytes": 360,
+            "disassembly": {
+              "instructions": 88,
+              "calls": 6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 16,
+      "program": "block_rq_issue",
+      "symbol": "block_rq_issue",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+      "unit": "bcc/biosnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "block_rq_issue",
+          "control": {
+            "object_sha256": "cd1722538f626bf1ccfc940892ee140b887c996d04d967389f0e890a62b8d190",
+            "entry_symbol_bytes": 396,
+            "disassembly": {
+              "instructions": 98,
+              "calls": 10
+            }
+          },
+          "candidate": {
+            "object_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+            "entry_symbol_bytes": 332,
+            "disassembly": {
+              "instructions": 83,
+              "calls": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 17,
+      "program": "block_rq_comple",
+      "symbol": "block_rq_complete",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o",
+      "unit": "bcc/biosnoop",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "block_rq_complete",
+          "control": {
+            "object_sha256": "cd1722538f626bf1ccfc940892ee140b887c996d04d967389f0e890a62b8d190",
+            "entry_symbol_bytes": 400,
+            "disassembly": {
+              "instructions": 98,
+              "calls": 9
+            }
+          },
+          "candidate": {
+            "object_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
+            "entry_symbol_bytes": 376,
+            "disassembly": {
+              "instructions": 92,
+              "calls": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 18,
+      "program": "tcp_v4_connect",
+      "symbol": "tcp_v4_connect",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+      "unit": "bcc/tcpconnect",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tcp_v4_connect",
+          "control": {
+            "object_sha256": "6a227457f4ab4082ae5cf51f0bd78bf3e6816ed9690de6c6768a393bfccf3fb1",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 19,
+      "program": "tcp_v4_connect_",
+      "symbol": "tcp_v4_connect_ret",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+      "unit": "bcc/tcpconnect",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tcp_v4_connect_ret",
+          "control": {
+            "object_sha256": "6a227457f4ab4082ae5cf51f0bd78bf3e6816ed9690de6c6768a393bfccf3fb1",
+            "entry_symbol_bytes": 572,
+            "disassembly": {
+              "instructions": 139,
+              "calls": 16
+            }
+          },
+          "candidate": {
+            "object_sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
+            "entry_symbol_bytes": 564,
+            "disassembly": {
+              "instructions": 136,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 20,
+      "program": "tcp_v6_connect",
+      "symbol": "tcp_v6_connect",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+      "unit": "bcc/tcpconnect",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tcp_v6_connect",
+          "control": {
+            "object_sha256": "6a227457f4ab4082ae5cf51f0bd78bf3e6816ed9690de6c6768a393bfccf3fb1",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 21,
+      "program": "tcp_v6_connect_",
+      "symbol": "tcp_v6_connect_ret",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
+      "unit": "bcc/tcpconnect",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tcp_v6_connect_ret",
+          "control": {
+            "object_sha256": "6a227457f4ab4082ae5cf51f0bd78bf3e6816ed9690de6c6768a393bfccf3fb1",
+            "entry_symbol_bytes": 576,
+            "disassembly": {
+              "instructions": 140,
+              "calls": 16
+            }
+          },
+          "candidate": {
+            "object_sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
+            "entry_symbol_bytes": 596,
+            "disassembly": {
+              "instructions": 144,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 22,
+      "program": "fentry_vfs_read",
+      "symbol": "fentry_vfs_read",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+      "unit": "bcc/vfsstat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "fentry_vfs_read",
+          "control": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 24,
+            "disassembly": {
+              "instructions": 6
+            }
+          },
+          "candidate": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 24,
+            "disassembly": {
+              "instructions": 6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 23,
+      "program": "fentry_vfs_writ",
+      "symbol": "fentry_vfs_write",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+      "unit": "bcc/vfsstat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "fentry_vfs_write",
+          "control": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          },
+          "candidate": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 24,
+      "program": "fentry_vfs_fsyn",
+      "symbol": "fentry_vfs_fsync",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+      "unit": "bcc/vfsstat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "fentry_vfs_fsync",
+          "control": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          },
+          "candidate": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 25,
+      "program": "fentry_vfs_open",
+      "symbol": "fentry_vfs_open",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+      "unit": "bcc/vfsstat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "fentry_vfs_open",
+          "control": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          },
+          "candidate": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 26,
+      "program": "sys_enter",
+      "symbol": "sys_enter",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+      "unit": "bcc/syscount",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_enter",
+          "control": {
+            "object_sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+            "entry_symbol_bytes": 136,
+            "disassembly": {
+              "instructions": 34,
+              "calls": 4
+            }
+          },
+          "candidate": {
+            "object_sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+            "entry_symbol_bytes": 136,
+            "disassembly": {
+              "instructions": 34,
+              "calls": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 27,
+      "program": "fentry_vfs_crea",
+      "symbol": "fentry_vfs_create",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
+      "unit": "bcc/vfsstat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "fentry_vfs_create",
+          "control": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          },
+          "candidate": {
+            "object_sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 28,
+      "program": "sys_exit",
+      "symbol": "sys_exit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
+      "unit": "bcc/syscount",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_exit",
+          "control": {
+            "object_sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+            "entry_symbol_bytes": 500,
+            "disassembly": {
+              "instructions": 123,
+              "calls": 10
+            }
+          },
+          "candidate": {
+            "object_sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+            "entry_symbol_bytes": 500,
+            "disassembly": {
+              "instructions": 123,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 29,
+      "program": "sched_wakeup",
+      "symbol": "sched_wakeup",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+      "unit": "bcc/runqlat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sched_wakeup",
+          "control": {
+            "object_sha256": "990c3f9052aa6a14ea1fc19a70af70dd406fe4c073e4667cf585f861ec87be79",
+            "entry_symbol_bytes": 140,
+            "disassembly": {
+              "instructions": 35,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
+            "entry_symbol_bytes": 140,
+            "disassembly": {
+              "instructions": 35,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 30,
+      "program": "sched_wakeup_ne",
+      "symbol": "sched_wakeup_new",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+      "unit": "bcc/runqlat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sched_wakeup_new",
+          "control": {
+            "object_sha256": "990c3f9052aa6a14ea1fc19a70af70dd406fe4c073e4667cf585f861ec87be79",
+            "entry_symbol_bytes": 140,
+            "disassembly": {
+              "instructions": 35,
+              "calls": 3
+            }
+          },
+          "candidate": {
+            "object_sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
+            "entry_symbol_bytes": 140,
+            "disassembly": {
+              "instructions": 35,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "bcc",
+      "manifest_ordinal": 31,
+      "program": "sched_switch",
+      "symbol": "sched_switch",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
+      "unit": "bcc/runqlat",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sched_switch",
+          "control": {
+            "object_sha256": "990c3f9052aa6a14ea1fc19a70af70dd406fe4c073e4667cf585f861ec87be79",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7,
+              "calls": 1
+            }
+          },
+          "candidate": {
+            "object_sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
+            "entry_symbol_bytes": 28,
+            "disassembly": {
+              "instructions": 7,
+              "calls": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 0,
+      "program": "cgroup_bpf_run_",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "cgroup_bpf_run_filter_skb",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 3460,
+            "disassembly": {
+              "instructions": 855,
+              "calls": 79
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 2288,
+            "disassembly": {
+              "instructions": 562,
+              "calls": 32
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 1,
+      "program": "cgroup_mkdir_si",
+      "symbol": "cgroup_mkdir_signal",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "cgroup_mkdir_signal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 756,
+            "disassembly": {
+              "instructions": 189,
+              "calls": 11
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 636,
+            "disassembly": {
+              "instructions": 159,
+              "calls": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 2,
+      "program": "cgroup_rmdir_si",
+      "symbol": "cgroup_rmdir_signal",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "cgroup_rmdir_signal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 740,
+            "disassembly": {
+              "instructions": 185,
+              "calls": 11
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 620,
+            "disassembly": {
+              "instructions": 155,
+              "calls": 7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 3,
+      "program": "cgroup_skb_egre",
+      "symbol": "cgroup_skb_egress",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "cgroup_skb_egress",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7248,
+            "disassembly": {
+              "instructions": 1758,
+              "calls": 118
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 7248,
+            "disassembly": {
+              "instructions": 1758,
+              "calls": 118
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 4,
+      "program": "cgroup_skb_ingr",
+      "symbol": "cgroup_skb_ingress",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "cgroup_skb_ingress",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7248,
+            "disassembly": {
+              "instructions": 1758,
+              "calls": 118
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 7248,
+            "disassembly": {
+              "instructions": 1758,
+              "calls": 118
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 5,
+      "program": "empty_kprobe",
+      "symbol": "empty_kprobe",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "empty_kprobe",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8,
+            "disassembly": {
+              "instructions": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8,
+            "disassembly": {
+              "instructions": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 6,
+      "program": "hash_task_id",
+      "symbol": "hash_task_id",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "hash_task_id",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 228,
+            "disassembly": {
+              "instructions": 60
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 228,
+            "disassembly": {
+              "instructions": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 7,
+      "program": "hash_u32_and_u6",
+      "symbol": "hash_u32_and_u64",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "hash_u32_and_u64",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 192,
+            "disassembly": {
+              "instructions": 48
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 192,
+            "disassembly": {
+              "instructions": 48
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 8,
+      "program": "heartbeat_captu",
+      "symbol": "heartbeat_capture",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "heartbeat_capture",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 9,
+      "program": "kernel_write_ma",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "kernel_write_magic_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 252,
+            "disassembly": {
+              "instructions": 63,
+              "calls": 5
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 148,
+            "disassembly": {
+              "instructions": 37,
+              "calls": 2
+            }
+          }
+        },
+        {
+          "symbol": "kernel_write_magic_return",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 15160,
+            "disassembly": {
+              "instructions": 3737,
+              "calls": 323
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 10252,
+            "disassembly": {
+              "instructions": 2505,
+              "calls": 125
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 10,
+      "program": "lkm_seeker_kset",
+      "symbol": "lkm_seeker_kset_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_kset_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 35928,
+            "disassembly": {
+              "instructions": 8813,
+              "calls": 1006
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 26524,
+            "disassembly": {
+              "instructions": 6462,
+              "calls": 509
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 11,
+      "program": "lkm_seeker_mod_",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_mod_tree_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 436,
+            "disassembly": {
+              "instructions": 108,
+              "calls": 11
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 384,
+            "disassembly": {
+              "instructions": 95,
+              "calls": 9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 12,
+      "program": "lkm_seeker_modt",
+      "symbol": "lkm_seeker_modtree_loop",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_modtree_loop",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 30172,
+            "disassembly": {
+              "instructions": 7538,
+              "calls": 976
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 23452,
+            "disassembly": {
+              "instructions": 5858,
+              "calls": 616
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 13,
+      "program": "lkm_seeker_new_",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_new_mod_only_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 820,
+            "disassembly": {
+              "instructions": 200,
+              "calls": 18
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 768,
+            "disassembly": {
+              "instructions": 187,
+              "calls": 16
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 14,
+      "program": "lkm_seeker_proc",
+      "symbol": "lkm_seeker_proc_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_proc_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 48208,
+            "disassembly": {
+              "instructions": 12048,
+              "calls": 1334
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 31092,
+            "disassembly": {
+              "instructions": 7767,
+              "calls": 673
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 15,
+      "program": "lkm_seeker_send",
+      "symbol": "lkm_seeker_send_to_userspace",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lkm_seeker_send_to_userspace",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1932,
+            "disassembly": {
+              "instructions": 482,
+              "calls": 45
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 1168,
+            "disassembly": {
+              "instructions": 291,
+              "calls": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 16,
+      "program": "lsm_bpf_check",
+      "symbol": "lsm_bpf_check",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/lsm_check.native.o",
+      "unit": "tracee/lsm_support/lsm_check",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lsm_bpf_check",
+          "control": {
+            "object_sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+            "entry_symbol_bytes": 64,
+            "disassembly": {
+              "instructions": 16,
+              "calls": 1
+            }
+          },
+          "candidate": {
+            "object_sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+            "entry_symbol_bytes": 64,
+            "disassembly": {
+              "instructions": 16,
+              "calls": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 17,
+      "program": "lsm_file_open_t",
+      "symbol": "lsm_file_open_test",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "lsm_file_open_test",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5556,
+            "disassembly": {
+              "instructions": 1371,
+              "calls": 137
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3848,
+            "disassembly": {
+              "instructions": 943,
+              "calls": 58
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 18,
+      "program": "murmur32",
+      "symbol": "murmur32",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "murmur32",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 228,
+            "disassembly": {
+              "instructions": 60
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 228,
+            "disassembly": {
+              "instructions": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 19,
+      "program": "process_execute",
+      "symbol": "process_execute_failed_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "process_execute_failed_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8884,
+            "disassembly": {
+              "instructions": 2191,
+              "calls": 202
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 5452,
+            "disassembly": {
+              "instructions": 1334,
+              "calls": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 20,
+      "program": "sched_process_e",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "sched_process_exec_event_submit_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 16572,
+            "disassembly": {
+              "instructions": 4091,
+              "calls": 367
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 11012,
+            "disassembly": {
+              "instructions": 2696,
+              "calls": 111
+            }
+          }
+        },
+        {
+          "symbol": "sched_process_exec_signal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 18152,
+            "disassembly": {
+              "instructions": 4483,
+              "calls": 370
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 12732,
+            "disassembly": {
+              "instructions": 3120,
+              "calls": 126
+            }
+          }
+        },
+        {
+          "symbol": "sched_process_exit_signal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1084,
+            "disassembly": {
+              "instructions": 271,
+              "calls": 16
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 944,
+            "disassembly": {
+              "instructions": 236,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 21,
+      "program": "sched_process_f",
+      "symbol": "sched_process_fork_signal",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sched_process_fork_signal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 3792,
+            "disassembly": {
+              "instructions": 948,
+              "calls": 67
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 2868,
+            "disassembly": {
+              "instructions": 717,
+              "calls": 24
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 22,
+      "program": "security_bpf_kp",
+      "symbol": "security_bpf_kprobe",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/kprobe_check.native.o",
+      "unit": "tracee/lsm_support/kprobe_check",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "security_bpf_kprobe",
+          "control": {
+            "object_sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+            "entry_symbol_bytes": 64,
+            "disassembly": {
+              "instructions": 16,
+              "calls": 1
+            }
+          },
+          "candidate": {
+            "object_sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+            "entry_symbol_bytes": 64,
+            "disassembly": {
+              "instructions": 16,
+              "calls": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 23,
+      "program": "send_bin",
+      "symbol": "send_bin",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "send_bin",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 924,
+            "disassembly": {
+              "instructions": 229,
+              "calls": 16
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 828,
+            "disassembly": {
+              "instructions": 205,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 24,
+      "program": "send_bin_tp",
+      "symbol": "send_bin_tp",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "send_bin_tp",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 924,
+            "disassembly": {
+              "instructions": 229,
+              "calls": 16
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 828,
+            "disassembly": {
+              "instructions": 205,
+              "calls": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 25,
+      "program": "sys_dup_exit_ta",
+      "symbol": "sys_dup_exit_tail",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_dup_exit_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7996,
+            "disassembly": {
+              "instructions": 1980,
+              "calls": 180
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 5244,
+            "disassembly": {
+              "instructions": 1291,
+              "calls": 61
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 26,
+      "program": "sys_enter_init",
+      "symbol": "sys_enter_init",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_enter_init",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1808,
+            "disassembly": {
+              "instructions": 450,
+              "calls": 53
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 908,
+            "disassembly": {
+              "instructions": 225,
+              "calls": 15
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 27,
+      "program": "sys_enter_submi",
+      "symbol": "sys_enter_submit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_enter_submit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 11968,
+            "disassembly": {
+              "instructions": 2942,
+              "calls": 258
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8224,
+            "disassembly": {
+              "instructions": 2003,
+              "calls": 102
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 28,
+      "program": "sys_exit_init",
+      "symbol": "sys_exit_init",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_exit_init",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1620,
+            "disassembly": {
+              "instructions": 404,
+              "calls": 47
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 840,
+            "disassembly": {
+              "instructions": 209,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 29,
+      "program": "sys_exit_submit",
+      "symbol": "sys_exit_submit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "sys_exit_submit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7660,
+            "disassembly": {
+              "instructions": 1865,
+              "calls": 121
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6652,
+            "disassembly": {
+              "instructions": 1613,
+              "calls": 73
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 30,
+      "program": "syscall__accept",
+      "symbol": "syscall__accept4",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "syscall__accept4",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5760,
+            "disassembly": {
+              "instructions": 1420,
+              "calls": 118
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4348,
+            "disassembly": {
+              "instructions": 1069,
+              "calls": 54
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 31,
+      "program": "syscall__execve",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "syscall__execve_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 20864,
+            "disassembly": {
+              "instructions": 5116,
+              "calls": 310
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 19048,
+            "disassembly": {
+              "instructions": 4667,
+              "calls": 270
+            }
+          }
+        },
+        {
+          "symbol": "syscall__execve_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 22176,
+            "disassembly": {
+              "instructions": 5445,
+              "calls": 311
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 20292,
+            "disassembly": {
+              "instructions": 4973,
+              "calls": 271
+            }
+          }
+        },
+        {
+          "symbol": "syscall__execveat_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 21696,
+            "disassembly": {
+              "instructions": 5323,
+              "calls": 312
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 20924,
+            "disassembly": {
+              "instructions": 5133,
+              "calls": 272
+            }
+          }
+        },
+        {
+          "symbol": "syscall__execveat_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 21116,
+            "disassembly": {
+              "instructions": 5178,
+              "calls": 313
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 19592,
+            "disassembly": {
+              "instructions": 4799,
+              "calls": 273
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 32,
+      "program": "syscall__init_m",
+      "symbol": "syscall__init_module",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "syscall__init_module",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 456,
+            "disassembly": {
+              "instructions": 113,
+              "calls": 10
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 392,
+            "disassembly": {
+              "instructions": 98,
+              "calls": 6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 33,
+      "program": "syscall_checker",
+      "symbol": "syscall_checker",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "syscall_checker",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 16032,
+            "disassembly": {
+              "instructions": 3933,
+              "calls": 357
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 10708,
+            "disassembly": {
+              "instructions": 2602,
+              "calls": 139
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 34,
+      "program": "trace___debugfs",
+      "symbol": "trace___debugfs_create_file",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace___debugfs_create_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6492,
+            "disassembly": {
+              "instructions": 1600,
+              "calls": 149
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4628,
+            "disassembly": {
+              "instructions": 1135,
+              "calls": 68
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 35,
+      "program": "trace___registe",
+      "symbol": "trace___register_chrdev",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace___register_chrdev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 36,
+      "program": "trace_arch_prct",
+      "symbol": "trace_arch_prctl",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_arch_prctl",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1724,
+            "disassembly": {
+              "instructions": 429,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 844,
+            "disassembly": {
+              "instructions": 209,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 37,
+      "program": "trace_bpf_check",
+      "symbol": "trace_bpf_check",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_bpf_check",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4508,
+            "disassembly": {
+              "instructions": 1109,
+              "calls": 102
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3320,
+            "disassembly": {
+              "instructions": 810,
+              "calls": 52
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 38,
+      "program": "trace_call_user",
+      "symbol": "trace_call_usermodehelper",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_call_usermodehelper",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 24144,
+            "disassembly": {
+              "instructions": 5931,
+              "calls": 371
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 20656,
+            "disassembly": {
+              "instructions": 5056,
+              "calls": 292
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 39,
+      "program": "trace_cap_capab",
+      "symbol": "trace_cap_capable",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_cap_capable",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4820,
+            "disassembly": {
+              "instructions": 1185,
+              "calls": 102
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3708,
+            "disassembly": {
+              "instructions": 906,
+              "calls": 54
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 40,
+      "program": "trace_check_hel",
+      "symbol": "trace_check_helper_call",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_check_helper_call",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4620,
+            "disassembly": {
+              "instructions": 1133,
+              "calls": 102
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3416,
+            "disassembly": {
+              "instructions": 832,
+              "calls": 53
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 41,
+      "program": "trace_check_map",
+      "symbol": "trace_check_map_func_compatibility",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_check_map_func_compatibility",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4604,
+            "disassembly": {
+              "instructions": 1129,
+              "calls": 101
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3408,
+            "disassembly": {
+              "instructions": 830,
+              "calls": 53
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 42,
+      "program": "trace_chmod_com",
+      "symbol": "trace_chmod_common",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_chmod_common",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 12428,
+            "disassembly": {
+              "instructions": 3064,
+              "calls": 286
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8088,
+            "disassembly": {
+              "instructions": 1976,
+              "calls": 104
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 43,
+      "program": "trace_commit_cr",
+      "symbol": "trace_commit_creds",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_commit_creds",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6248,
+            "disassembly": {
+              "instructions": 1542,
+              "calls": 136
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4412,
+            "disassembly": {
+              "instructions": 1083,
+              "calls": 55
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 44,
+      "program": "trace_debugfs_c",
+      "symbol": "trace_debugfs_create_dir",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_debugfs_create_dir",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6340,
+            "disassembly": {
+              "instructions": 1561,
+              "calls": 147
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4416,
+            "disassembly": {
+              "instructions": 1082,
+              "calls": 66
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 45,
+      "program": "trace_device_ad",
+      "symbol": "trace_device_add",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_device_add",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6036,
+            "disassembly": {
+              "instructions": 1489,
+              "calls": 142
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4112,
+            "disassembly": {
+              "instructions": 1008,
+              "calls": 62
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 46,
+      "program": "trace_do_exit",
+      "symbol": "trace_do_exit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5728,
+            "disassembly": {
+              "instructions": 1412,
+              "calls": 138
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3896,
+            "disassembly": {
+              "instructions": 954,
+              "calls": 59
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 47,
+      "program": "trace_do_init_m",
+      "symbol": "trace_do_init_module",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_init_module",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 48,
+      "program": "trace_do_mmap",
+      "symbol": "trace_do_mmap",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_mmap",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 49,
+      "program": "trace_do_sigact",
+      "symbol": "trace_do_sigaction",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_sigaction",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7304,
+            "disassembly": {
+              "instructions": 1804,
+              "calls": 155
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 5252,
+            "disassembly": {
+              "instructions": 1290,
+              "calls": 69
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 50,
+      "program": "trace_do_splice",
+      "symbol": "trace_do_splice",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_splice",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 51,
+      "program": "trace_do_trunca",
+      "symbol": "trace_do_truncate",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_do_truncate",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6656,
+            "disassembly": {
+              "instructions": 1641,
+              "calls": 154
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4636,
+            "disassembly": {
+              "instructions": 1136,
+              "calls": 68
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 52,
+      "program": "trace_dup",
+      "symbol": "trace_dup",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_dup",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1728,
+            "disassembly": {
+              "instructions": 430,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 848,
+            "disassembly": {
+              "instructions": 210,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 53,
+      "program": "trace_dup2",
+      "symbol": "trace_dup2",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_dup2",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1724,
+            "disassembly": {
+              "instructions": 429,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 844,
+            "disassembly": {
+              "instructions": 209,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 54,
+      "program": "trace_dup3",
+      "symbol": "trace_dup3",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_dup3",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1728,
+            "disassembly": {
+              "instructions": 430,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 848,
+            "disassembly": {
+              "instructions": 210,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 55,
+      "program": "trace_exec_binp",
+      "symbol": "trace_exec_binprm",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_exec_binprm",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 12644,
+            "disassembly": {
+              "instructions": 3115,
+              "calls": 270
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8584,
+            "disassembly": {
+              "instructions": 2098,
+              "calls": 103
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 56,
+      "program": "trace_execute_f",
+      "symbol": "trace_execute_finished",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_execute_finished",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 23832,
+            "disassembly": {
+              "instructions": 5845,
+              "calls": 383
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 21508,
+            "disassembly": {
+              "instructions": 5273,
+              "calls": 296
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 57,
+      "program": "trace_fd_instal",
+      "symbol": "trace_fd_install",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_fd_install",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 11308,
+            "disassembly": {
+              "instructions": 2784,
+              "calls": 259
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 7320,
+            "disassembly": {
+              "instructions": 1785,
+              "calls": 96
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 58,
+      "program": "trace_file_modi",
+      "symbol": "trace_file_modified",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_file_modified",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 380,
+            "disassembly": {
+              "instructions": 94,
+              "calls": 9
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 196,
+            "disassembly": {
+              "instructions": 48,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 59,
+      "program": "trace_file_upda",
+      "symbol": "trace_file_update_time",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_file_update_time",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 380,
+            "disassembly": {
+              "instructions": 94,
+              "calls": 9
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 196,
+            "disassembly": {
+              "instructions": 48,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 60,
+      "program": "trace_filldir64",
+      "symbol": "trace_filldir64",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_filldir64",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5824,
+            "disassembly": {
+              "instructions": 1436,
+              "calls": 138
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3904,
+            "disassembly": {
+              "instructions": 957,
+              "calls": 59
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 61,
+      "program": "trace_filp_clos",
+      "symbol": "trace_filp_close",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_filp_close",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 11212,
+            "disassembly": {
+              "instructions": 2760,
+              "calls": 257
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 7444,
+            "disassembly": {
+              "instructions": 1816,
+              "calls": 96
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 62,
+      "program": "trace_inotify_f",
+      "symbol": "trace_inotify_find_inode",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_inotify_find_inode",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 63,
+      "program": "trace_kallsyms_",
+      "symbol": "trace_kallsyms_lookup_name",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_kallsyms_lookup_name",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 64,
+      "program": "trace_kernel_wr",
+      "symbol": "trace_kernel_write",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_kernel_write",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 65,
+      "program": "trace_load_elf_",
+      "symbol": "trace_load_elf_phdrs",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_load_elf_phdrs",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13124,
+            "disassembly": {
+              "instructions": 3236,
+              "calls": 300
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8704,
+            "disassembly": {
+              "instructions": 2128,
+              "calls": 106
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 66,
+      "program": "trace_mmap_aler",
+      "symbol": "trace_mmap_alert",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_mmap_alert",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 14260,
+            "disassembly": {
+              "instructions": 3519,
+              "calls": 314
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9484,
+            "disassembly": {
+              "instructions": 2321,
+              "calls": 113
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 67,
+      "program": "trace_proc_crea",
+      "symbol": "trace_proc_create",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_proc_create",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5924,
+            "disassembly": {
+              "instructions": 1461,
+              "calls": 139
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4116,
+            "disassembly": {
+              "instructions": 1008,
+              "calls": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 68,
+      "program": "trace_process_v",
+      "symbol": "trace_process_vm_writev",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_process_vm_writev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1728,
+            "disassembly": {
+              "instructions": 430,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 848,
+            "disassembly": {
+              "instructions": 210,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 69,
+      "program": "trace_ptrace",
+      "symbol": "trace_ptrace",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ptrace",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1728,
+            "disassembly": {
+              "instructions": 430,
+              "calls": 51
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 848,
+            "disassembly": {
+              "instructions": 210,
+              "calls": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 70,
+      "program": "trace_register_",
+      "symbol": "trace_register_kprobe",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_register_kprobe",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 71,
+      "program": "trace_ret__regi",
+      "symbol": "trace_ret__register_chrdev",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret__register_chrdev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6324,
+            "disassembly": {
+              "instructions": 1560,
+              "calls": 145
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4332,
+            "disassembly": {
+              "instructions": 1064,
+              "calls": 66
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 72,
+      "program": "trace_ret_arch_",
+      "symbol": "trace_ret_arch_prctl",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_arch_prctl",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 73,
+      "program": "trace_ret_do_in",
+      "symbol": "trace_ret_do_init_module",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_do_init_module",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8592,
+            "disassembly": {
+              "instructions": 2113,
+              "calls": 183
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6504,
+            "disassembly": {
+              "instructions": 1592,
+              "calls": 93
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 74,
+      "program": "trace_ret_do_mm",
+      "symbol": "trace_ret_do_mmap",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_do_mmap",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13820,
+            "disassembly": {
+              "instructions": 3410,
+              "calls": 306
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9492,
+            "disassembly": {
+              "instructions": 2325,
+              "calls": 113
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 75,
+      "program": "trace_ret_do_sp",
+      "symbol": "trace_ret_do_splice",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_do_splice",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 60,
+            "disassembly": {
+              "instructions": 15,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 60,
+            "disassembly": {
+              "instructions": 15,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 76,
+      "program": "trace_ret_dup",
+      "symbol": "trace_ret_dup",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_dup",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 77,
+      "program": "trace_ret_dup2",
+      "symbol": "trace_ret_dup2",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_dup2",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 78,
+      "program": "trace_ret_dup3",
+      "symbol": "trace_ret_dup3",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_dup3",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 79,
+      "program": "trace_ret_file_",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_ret_file_modified",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13332,
+            "disassembly": {
+              "instructions": 3289,
+              "calls": 306
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8448,
+            "disassembly": {
+              "instructions": 2070,
+              "calls": 113
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_file_update_time",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13332,
+            "disassembly": {
+              "instructions": 3289,
+              "calls": 306
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8448,
+            "disassembly": {
+              "instructions": 2070,
+              "calls": 113
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 80,
+      "program": "trace_ret_inoti",
+      "symbol": "trace_ret_inotify_find_inode",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_inotify_find_inode",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13056,
+            "disassembly": {
+              "instructions": 3219,
+              "calls": 298
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8276,
+            "disassembly": {
+              "instructions": 2023,
+              "calls": 109
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 81,
+      "program": "trace_ret_kalls",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_kallsyms_lookup_name",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6008,
+            "disassembly": {
+              "instructions": 1482,
+              "calls": 143
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4232,
+            "disassembly": {
+              "instructions": 1037,
+              "calls": 64
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 82,
+      "program": "trace_ret_kerne",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_ret_kernel_write",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13160,
+            "disassembly": {
+              "instructions": 3244,
+              "calls": 278
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9196,
+            "disassembly": {
+              "instructions": 2253,
+              "calls": 110
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_kernel_write_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 22136,
+            "disassembly": {
+              "instructions": 5437,
+              "calls": 486
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 15080,
+            "disassembly": {
+              "instructions": 3668,
+              "calls": 176
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 83,
+      "program": "trace_ret_proce",
+      "symbol": "trace_ret_process_vm_writev",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_process_vm_writev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 84,
+      "program": "trace_ret_ptrac",
+      "symbol": "trace_ret_ptrace",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_ptrace",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8784,
+            "disassembly": {
+              "instructions": 2147,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 6924,
+            "disassembly": {
+              "instructions": 1681,
+              "calls": 78
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 85,
+      "program": "trace_ret_regis",
+      "symbol": "trace_ret_register_kprobe",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_register_kprobe",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6300,
+            "disassembly": {
+              "instructions": 1555,
+              "calls": 147
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4316,
+            "disassembly": {
+              "instructions": 1060,
+              "calls": 65
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 86,
+      "program": "trace_ret_sock_",
+      "symbol": "trace_ret_sock_alloc_file",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_ret_sock_alloc_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5604,
+            "disassembly": {
+              "instructions": 1383,
+              "calls": 137
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3760,
+            "disassembly": {
+              "instructions": 920,
+              "calls": 56
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 87,
+      "program": "trace_ret_vfs_r",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_ret_vfs_read",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13160,
+            "disassembly": {
+              "instructions": 3242,
+              "calls": 278
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9196,
+            "disassembly": {
+              "instructions": 2252,
+              "calls": 110
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_read_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13260,
+            "disassembly": {
+              "instructions": 3262,
+              "calls": 294
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8744,
+            "disassembly": {
+              "instructions": 2132,
+              "calls": 107
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_readv",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13116,
+            "disassembly": {
+              "instructions": 3232,
+              "calls": 277
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9188,
+            "disassembly": {
+              "instructions": 2250,
+              "calls": 110
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_readv_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13296,
+            "disassembly": {
+              "instructions": 3270,
+              "calls": 296
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8820,
+            "disassembly": {
+              "instructions": 2151,
+              "calls": 109
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 88,
+      "program": "trace_ret_vfs_w",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_ret_vfs_write",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13160,
+            "disassembly": {
+              "instructions": 3244,
+              "calls": 278
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9196,
+            "disassembly": {
+              "instructions": 2253,
+              "calls": 110
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_write_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 22136,
+            "disassembly": {
+              "instructions": 5437,
+              "calls": 486
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 15080,
+            "disassembly": {
+              "instructions": 3668,
+              "calls": 176
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_writev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13116,
+            "disassembly": {
+              "instructions": 3233,
+              "calls": 277
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9188,
+            "disassembly": {
+              "instructions": 2253,
+              "calls": 110
+            }
+          }
+        },
+        {
+          "symbol": "trace_ret_vfs_writev_tail",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 22228,
+            "disassembly": {
+              "instructions": 5460,
+              "calls": 488
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 15224,
+            "disassembly": {
+              "instructions": 3705,
+              "calls": 177
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 89,
+      "program": "trace_security_",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_security_bpf",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 11960,
+            "disassembly": {
+              "instructions": 2943,
+              "calls": 271
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8368,
+            "disassembly": {
+              "instructions": 2048,
+              "calls": 115
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_bpf_map",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5880,
+            "disassembly": {
+              "instructions": 1450,
+              "calls": 139
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3984,
+            "disassembly": {
+              "instructions": 977,
+              "calls": 60
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_bpf_prog",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6752,
+            "disassembly": {
+              "instructions": 1668,
+              "calls": 153
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4740,
+            "disassembly": {
+              "instructions": 1166,
+              "calls": 71
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_bprm_check",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 30700,
+            "disassembly": {
+              "instructions": 7542,
+              "calls": 525
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 24316,
+            "disassembly": {
+              "instructions": 5952,
+              "calls": 337
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_bprm_creds_for_exec",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 12648,
+            "disassembly": {
+              "instructions": 3116,
+              "calls": 270
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8564,
+            "disassembly": {
+              "instructions": 2093,
+              "calls": 103
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_file_ioctl",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 8048,
+            "disassembly": {
+              "instructions": 1981,
+              "calls": 178
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 5376,
+            "disassembly": {
+              "instructions": 1315,
+              "calls": 73
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_file_mprotect",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 25464,
+            "disassembly": {
+              "instructions": 6276,
+              "calls": 551
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 17356,
+            "disassembly": {
+              "instructions": 4245,
+              "calls": 198
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_file_open",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13692,
+            "disassembly": {
+              "instructions": 3368,
+              "calls": 279
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9832,
+            "disassembly": {
+              "instructions": 2401,
+              "calls": 116
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_file_permission",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6240,
+            "disassembly": {
+              "instructions": 1542,
+              "calls": 148
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4204,
+            "disassembly": {
+              "instructions": 1032,
+              "calls": 63
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_inode_mknod",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6408,
+            "disassembly": {
+              "instructions": 1578,
+              "calls": 148
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4500,
+            "disassembly": {
+              "instructions": 1103,
+              "calls": 67
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_inode_rename",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6872,
+            "disassembly": {
+              "instructions": 1689,
+              "calls": 155
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4768,
+            "disassembly": {
+              "instructions": 1165,
+              "calls": 72
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_inode_symlink",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6312,
+            "disassembly": {
+              "instructions": 1555,
+              "calls": 147
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4440,
+            "disassembly": {
+              "instructions": 1087,
+              "calls": 66
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_inode_unlink",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7008,
+            "disassembly": {
+              "instructions": 1727,
+              "calls": 160
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4824,
+            "disassembly": {
+              "instructions": 1181,
+              "calls": 69
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_kernel_post_read_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13096,
+            "disassembly": {
+              "instructions": 3231,
+              "calls": 298
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8800,
+            "disassembly": {
+              "instructions": 2149,
+              "calls": 106
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_kernel_read_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13100,
+            "disassembly": {
+              "instructions": 3232,
+              "calls": 299
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8792,
+            "disassembly": {
+              "instructions": 2151,
+              "calls": 106
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_mmap_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 25420,
+            "disassembly": {
+              "instructions": 6253,
+              "calls": 537
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 17428,
+            "disassembly": {
+              "instructions": 4260,
+              "calls": 202
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_path_notify",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13136,
+            "disassembly": {
+              "instructions": 3240,
+              "calls": 295
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8640,
+            "disassembly": {
+              "instructions": 2112,
+              "calls": 106
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_sb_mount",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 12884,
+            "disassembly": {
+              "instructions": 3176,
+              "calls": 288
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8780,
+            "disassembly": {
+              "instructions": 2149,
+              "calls": 105
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_sb_umount",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6552,
+            "disassembly": {
+              "instructions": 1615,
+              "calls": 152
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4580,
+            "disassembly": {
+              "instructions": 1122,
+              "calls": 67
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_settime64",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6276,
+            "disassembly": {
+              "instructions": 1549,
+              "calls": 145
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4228,
+            "disassembly": {
+              "instructions": 1037,
+              "calls": 62
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_sk_clone",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 364,
+            "disassembly": {
+              "instructions": 91,
+              "calls": 8
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 188,
+            "disassembly": {
+              "instructions": 47,
+              "calls": 2
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_accept",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7100,
+            "disassembly": {
+              "instructions": 1752,
+              "calls": 164
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4980,
+            "disassembly": {
+              "instructions": 1222,
+              "calls": 71
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_bind",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6584,
+            "disassembly": {
+              "instructions": 1624,
+              "calls": 152
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4492,
+            "disassembly": {
+              "instructions": 1101,
+              "calls": 65
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_connect",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6736,
+            "disassembly": {
+              "instructions": 1658,
+              "calls": 148
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4668,
+            "disassembly": {
+              "instructions": 1143,
+              "calls": 66
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_create",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6052,
+            "disassembly": {
+              "instructions": 1493,
+              "calls": 141
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4180,
+            "disassembly": {
+              "instructions": 1026,
+              "calls": 62
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_listen",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6936,
+            "disassembly": {
+              "instructions": 1712,
+              "calls": 157
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4844,
+            "disassembly": {
+              "instructions": 1188,
+              "calls": 66
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_recvmsg",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5772,
+            "disassembly": {
+              "instructions": 1425,
+              "calls": 140
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3764,
+            "disassembly": {
+              "instructions": 922,
+              "calls": 54
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_sendmsg",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5772,
+            "disassembly": {
+              "instructions": 1425,
+              "calls": 140
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3764,
+            "disassembly": {
+              "instructions": 922,
+              "calls": 54
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_socket_setsockopt",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7148,
+            "disassembly": {
+              "instructions": 1765,
+              "calls": 161
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4944,
+            "disassembly": {
+              "instructions": 1213,
+              "calls": 69
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_task_prctl",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 34428,
+            "disassembly": {
+              "instructions": 8490,
+              "calls": 647
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 23948,
+            "disassembly": {
+              "instructions": 5857,
+              "calls": 239
+            }
+          }
+        },
+        {
+          "symbol": "trace_security_task_setrlimit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 5308,
+            "disassembly": {
+              "instructions": 1306,
+              "calls": 108
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4032,
+            "disassembly": {
+              "instructions": 987,
+              "calls": 57
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 90,
+      "program": "trace_set_fs_pw",
+      "symbol": "trace_set_fs_pwd",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_set_fs_pwd",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 12628,
+            "disassembly": {
+              "instructions": 3112,
+              "calls": 291
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8724,
+            "disassembly": {
+              "instructions": 2132,
+              "calls": 105
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 91,
+      "program": "trace_sock_allo",
+      "symbol": "trace_sock_alloc_file",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_sock_alloc_file",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 320,
+            "disassembly": {
+              "instructions": 80,
+              "calls": 6
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 196,
+            "disassembly": {
+              "instructions": 49,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 92,
+      "program": "trace_switch_ta",
+      "symbol": "trace_switch_task_namespaces",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_switch_task_namespaces",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 7460,
+            "disassembly": {
+              "instructions": 1843,
+              "calls": 172
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 5188,
+            "disassembly": {
+              "instructions": 1277,
+              "calls": 65
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 93,
+      "program": "trace_sys_enter",
+      "symbol": "trace_sys_enter",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_sys_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4720,
+            "disassembly": {
+              "instructions": 1162,
+              "calls": 97
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3572,
+            "disassembly": {
+              "instructions": 876,
+              "calls": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 94,
+      "program": "trace_sys_exit",
+      "symbol": "trace_sys_exit",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_sys_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4752,
+            "disassembly": {
+              "instructions": 1170,
+              "calls": 98
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3580,
+            "disassembly": {
+              "instructions": 878,
+              "calls": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 95,
+      "program": "trace_tracepoin",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6908,
+            "disassembly": {
+              "instructions": 1707,
+              "calls": 153
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4768,
+            "disassembly": {
+              "instructions": 1173,
+              "calls": 69
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 96,
+      "program": "trace_utimes_co",
+      "symbol": "trace_utimes_common",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_utimes_common",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13360,
+            "disassembly": {
+              "instructions": 3294,
+              "calls": 300
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8804,
+            "disassembly": {
+              "instructions": 2153,
+              "calls": 106
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 97,
+      "program": "trace_vfs_read",
+      "symbol": "trace_vfs_read",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_vfs_read",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 98,
+      "program": "trace_vfs_readv",
+      "symbol": "trace_vfs_readv",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_vfs_readv",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 25,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 99,
+      "program": "trace_vfs_utime",
+      "symbol": "trace_vfs_utimes",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "trace_vfs_utimes",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13360,
+            "disassembly": {
+              "instructions": 3294,
+              "calls": 300
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 8804,
+            "disassembly": {
+              "instructions": 2153,
+              "calls": 106
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 100,
+      "program": "trace_vfs_write",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "trace_vfs_write",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          }
+        },
+        {
+          "symbol": "trace_vfs_writev",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 100,
+            "disassembly": {
+              "instructions": 28,
+              "calls": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 101,
+      "program": "tracepoint__cgr",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "tracepoint__cgroup__cgroup_attach_task",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6176,
+            "disassembly": {
+              "instructions": 1525,
+              "calls": 142
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4288,
+            "disassembly": {
+              "instructions": 1052,
+              "calls": 62
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__cgroup__cgroup_mkdir",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6204,
+            "disassembly": {
+              "instructions": 1532,
+              "calls": 144
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4124,
+            "disassembly": {
+              "instructions": 1013,
+              "calls": 61
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__cgroup__cgroup_rmdir",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6204,
+            "disassembly": {
+              "instructions": 1532,
+              "calls": 144
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4124,
+            "disassembly": {
+              "instructions": 1013,
+              "calls": 61
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 102,
+      "program": "tracepoint__exe",
+      "symbol": "tracepoint__exec_test",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tracepoint__exec_test",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 40408,
+            "disassembly": {
+              "instructions": 9929,
+              "calls": 902
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 27428,
+            "disassembly": {
+              "instructions": 6686,
+              "calls": 390
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 103,
+      "program": "tracepoint__mod",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "tracepoint__module__module_free",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6292,
+            "disassembly": {
+              "instructions": 1553,
+              "calls": 147
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4372,
+            "disassembly": {
+              "instructions": 1074,
+              "calls": 66
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__module__module_load",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13704,
+            "disassembly": {
+              "instructions": 3382,
+              "calls": 315
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 9480,
+            "disassembly": {
+              "instructions": 2322,
+              "calls": 116
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 104,
+      "program": "tracepoint__raw",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "tracepoint__raw_syscalls__sys_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 152,
+            "disassembly": {
+              "instructions": 38,
+              "calls": 4
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 116,
+            "disassembly": {
+              "instructions": 29,
+              "calls": 3
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__raw_syscalls__sys_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 184,
+            "disassembly": {
+              "instructions": 46,
+              "calls": 5
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 128,
+            "disassembly": {
+              "instructions": 32,
+              "calls": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 105,
+      "program": "tracepoint__sch",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "tracepoint__sched__sched_process_exec",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 15600,
+            "disassembly": {
+              "instructions": 3836,
+              "calls": 314
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 11144,
+            "disassembly": {
+              "instructions": 2727,
+              "calls": 131
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__sched__sched_process_exit",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6296,
+            "disassembly": {
+              "instructions": 1557,
+              "calls": 145
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4228,
+            "disassembly": {
+              "instructions": 1041,
+              "calls": 62
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__sched__sched_process_fork",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 13828,
+            "disassembly": {
+              "instructions": 3415,
+              "calls": 291
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 10412,
+            "disassembly": {
+              "instructions": 2561,
+              "calls": 143
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__sched__sched_process_free",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 224,
+            "disassembly": {
+              "instructions": 56,
+              "calls": 6
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 164,
+            "disassembly": {
+              "instructions": 41,
+              "calls": 4
+            }
+          }
+        },
+        {
+          "symbol": "tracepoint__sched__sched_switch",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6376,
+            "disassembly": {
+              "instructions": 1574,
+              "calls": 145
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4380,
+            "disassembly": {
+              "instructions": 1075,
+              "calls": 64
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 106,
+      "program": "tracepoint__tas",
+      "symbol": "tracepoint__task__task_rename",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "tracepoint__task__task_rename",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 6008,
+            "disassembly": {
+              "instructions": 1482,
+              "calls": 140
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 4116,
+            "disassembly": {
+              "instructions": 1009,
+              "calls": 61
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 107,
+      "program": "uprobe__feature",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "uprobe__features_fallback_arena",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 2484,
+            "disassembly": {
+              "instructions": 618,
+              "calls": 68
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 1528,
+            "disassembly": {
+              "instructions": 378,
+              "calls": 29
+            }
+          }
+        },
+        {
+          "symbol": "uprobe__features_fallback_arena_tailcall",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1540,
+            "disassembly": {
+              "instructions": 385,
+              "calls": 43
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 804,
+            "disassembly": {
+              "instructions": 201,
+              "calls": 12
+            }
+          }
+        },
+        {
+          "symbol": "uprobe__features_fallback_helper",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 2484,
+            "disassembly": {
+              "instructions": 618,
+              "calls": 68
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 1528,
+            "disassembly": {
+              "instructions": 378,
+              "calls": 29
+            }
+          }
+        },
+        {
+          "symbol": "uprobe__features_fallback_helper_tailcall",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1532,
+            "disassembly": {
+              "instructions": 383,
+              "calls": 43
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 804,
+            "disassembly": {
+              "instructions": 201,
+              "calls": 12
+            }
+          }
+        },
+        {
+          "symbol": "uprobe__features_fallback_minimal",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 2476,
+            "disassembly": {
+              "instructions": 613,
+              "calls": 67
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 1520,
+            "disassembly": {
+              "instructions": 374,
+              "calls": 28
+            }
+          }
+        },
+        {
+          "symbol": "uprobe__features_fallback_minimal_tailcall",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 1532,
+            "disassembly": {
+              "instructions": 383,
+              "calls": 43
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 804,
+            "disassembly": {
+              "instructions": 201,
+              "calls": 12
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 108,
+      "program": "uprobe_lkm_seek",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "uprobe_lkm_seeker",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 3180,
+            "disassembly": {
+              "instructions": 784,
+              "calls": 79
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 2184,
+            "disassembly": {
+              "instructions": 535,
+              "calls": 38
+            }
+          }
+        },
+        {
+          "symbol": "uprobe_lkm_seeker_submitter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 2556,
+            "disassembly": {
+              "instructions": 633,
+              "calls": 68
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 1596,
+            "disassembly": {
+              "instructions": 393,
+              "calls": 29
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 109,
+      "program": "uprobe_mem_dump",
+      "symbol": "uprobe_mem_dump_trigger",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "uprobe_mem_dump_trigger",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4652,
+            "disassembly": {
+              "instructions": 1155,
+              "calls": 115
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 2884,
+            "disassembly": {
+              "instructions": 713,
+              "calls": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 110,
+      "program": "uprobe_seq_ops_",
+      "symbol": "uprobe_seq_ops_trigger",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "uprobe_seq_ops_trigger",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 4848,
+            "disassembly": {
+              "instructions": 1199,
+              "calls": 119
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 3096,
+            "disassembly": {
+              "instructions": 762,
+              "calls": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 111,
+      "program": "uprobe_syscall_",
+      "symbol": "uprobe_syscall_table_check",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Explicit manifest symbol",
+      "entries": [
+        {
+          "symbol": "uprobe_syscall_table_check",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 39484,
+            "disassembly": {
+              "instructions": 9860,
+              "calls": 1118
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 22124,
+            "disassembly": {
+              "instructions": 5522,
+              "calls": 279
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 112,
+      "program": "vfs_write_magic",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "vfs_write_magic_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 252,
+            "disassembly": {
+              "instructions": 63,
+              "calls": 5
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 148,
+            "disassembly": {
+              "instructions": 37,
+              "calls": 2
+            }
+          }
+        },
+        {
+          "symbol": "vfs_write_magic_return",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 15160,
+            "disassembly": {
+              "instructions": 3737,
+              "calls": 323
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 10252,
+            "disassembly": {
+              "instructions": 2505,
+              "calls": 125
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 113,
+      "program": "vfs_writev_magi",
+      "symbol": null,
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/tracee.native.o",
+      "unit": "tracee/tracee",
+      "source": "Paired actual native compiler objects",
+      "entry_name_selection": "Full ELF symbol set sharing captured 15-byte program name; actual loader context selects the entry",
+      "entries": [
+        {
+          "symbol": "vfs_writev_magic_enter",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 252,
+            "disassembly": {
+              "instructions": 63,
+              "calls": 5
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 148,
+            "disassembly": {
+              "instructions": 37,
+              "calls": 2
+            }
+          }
+        },
+        {
+          "symbol": "vfs_writev_magic_return",
+          "control": {
+            "object_sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+            "entry_symbol_bytes": 15200,
+            "disassembly": {
+              "instructions": 3747,
+              "calls": 324
+            }
+          },
+          "candidate": {
+            "object_sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
+            "entry_symbol_bytes": 10288,
+            "disassembly": {
+              "instructions": 2515,
+              "calls": 126
+            }
+          }
+        }
+      ]
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 114,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/source_map.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "1697082677ea710d02110bb43726ae30452c157961f90d167ef02cf23559063f",
+      "retained_bytes": 736
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 115,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_0.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 116,
+      "program": "libbpf_nametest",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_1.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 117,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_2.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "172751254a9ad6b9d59711a2edc70f688b8c936a360ca6af3d36be0aba55790d",
+      "retained_bytes": 976
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 118,
+      "program": "det_arg_ctx",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_3.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "c96c62a15d23d09cff75c83d9edba20f6364dc6448ffccf1239bdab0f33e3511",
+      "retained_bytes": 1096
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 119,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_4.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 120,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_5.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 121,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_6.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "6a46ff1ec9de810b4d4c51135443b61e557b37b618162a7772bb6949837f7fb3",
+      "retained_bytes": 984
+    },
+    {
+      "app": "tracee",
+      "manifest_ordinal": 122,
+      "program": "",
+      "symbol": "bpf_main",
+      "native_object": "/workspaces/repository/kprog/arm64/build/app-verified-stage/tracee/startup/startup_7.native.o",
+      "source": "Retained captured startup P input",
+      "retained_sha256": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
+      "retained_bytes": 552
+    }
+  ],
+  "runtime_admission_additions": 0
+}
