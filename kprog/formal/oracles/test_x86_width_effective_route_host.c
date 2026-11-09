@@ -1008,6 +1008,8 @@ static void check_stack_roundtrip(__u8 w)
 	}
 
 	fill_stack(__x86_stack_mem.b);
+    /* The read phase starts from a new raw image, including fresh ghost facts. */
+    X86_SIM_L_STACK_VALUES_CLEAR();
 	want = le_load(&__x86_stack_mem.b[m], e);
 	if (e == X86_WIDTH_64 && (m & 7U) == 0U)
 		want = le_load(&__x86_stack_mem.b[m], X86_WIDTH_64);
