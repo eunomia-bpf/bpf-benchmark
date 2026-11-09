@@ -161,12 +161,17 @@ run, compared against the archived 2026-05-29 run for the same application
 (`kprog/perf/arm_moved.py`). Restricting to programs active in both arms of
 both runs keeps the work comparable:
 
-| app | archived run (JIT) | current run (JIT) | JIT x | native x | native beyond JIT |
+The archived run for each application is the one `kprog/docs/evaluation.md`
+names as that app's reference (`:358-372`), which is the run whose ratio the
+reproduction was compared against:
+
+| app | reference run (stats on) | current run | JIT x | native x | native beyond JIT |
 | --- | --- | --- | ---: | ---: | ---: |
-| tetragon | `x86_kvm_corpus_20260529_000413_418475` | `..._20261107_002003_274609` | 1.287 | 1.389 | 1.079 |
-| cilium | `x86_kvm_corpus_20260529_033517_489159` | `..._20261107_020659_029387` | 1.116 | 1.292 | 1.158 |
+| bcc | `x86_kvm_corpus_20260529_005704_033715` | `..._20261108_232046_843736` | 1.536 | 1.330 | 0.866 |
 | otelcol | `x86_kvm_corpus_20260529_021623_817446` | `..._20261107_024322_358412` | 1.518 | 1.691 | 1.114 |
-| katran | `x86_kvm_corpus_20260529_001204_890087` | `..._20261106_230835_743350` | 1.012 | 1.196 | 1.182 |
+| cilium | `x86_kvm_corpus_20260529_033517_489159` | `..._20261107_020659_029387` | 1.116 | 1.292 | 1.158 |
+| tetragon | `x86_kvm_corpus_20260529_045551_393389` | `..._20261107_002003_274609` | 1.076 | 1.142 | 1.061 |
+| katran | `x86_kvm_corpus_20260529_061439_040837` | `..._20261106_230835_743350` | 0.989 | 1.215 | 1.228 |
 
 `JIT x` is the median per-program increase in nanoseconds per invocation on
 the JIT arm; `native x` is the same on the native arm. `native beyond JIT`
@@ -174,18 +179,22 @@ is their ratio, which is the part the native path is answerable for.
 
 Two facts follow:
 
-1. **Every arm got slower.** The JIT arm alone is 1.01x to 1.52x heavier per
-   invocation than its 2026-05-29 run. The native arm moves by almost the
-   same factor, so the reference's ratios came from a faster machine state,
-   not from faster native code.
-2. **The native-specific share is 8% to 18%.** After dividing out what the
-   JIT arm also lost, 1.079x to 1.182x remains attributable to the native
-   path.
+1. **The JIT arm, the control, is heavier in four of five applications.**
+   It is 1.08x to 1.54x heavier per invocation than its reference on
+   tetragon, cilium, otelcol and bcc, and 0.99x on katran. The native arm
+   moves by a similar factor, so the reference's ratios came from a faster
+   machine state, not from faster native code.
+2. **The native-specific share is 0.87x to 1.23x.** After dividing out what
+   the JIT arm also lost: bcc **0.866x** (the native arm lost *less* than
+   the JIT arm), tetragon 1.061x, otelcol 1.114x, cilium 1.158x, katran
+   1.228x. Four of five are within 1.06x to 1.23x; bcc is below 1, which
+   means its native path is not the slower one there.
 
 That is why cilium's reference 2.358x is now 1.229x: its native arm lost
 1.292x, but its JIT arm lost 1.116x, so the ratio collapses by most of the
 native factor while the absolute slowdown is common to both arms. The same
-shape explains otelcol (1.824x to 1.013x) where the JIT arm lost 1.518x.
+shape explains otelcol (1.824x to 1.013x), where the JIT arm lost 1.518x,
+and tetragon (1.323x to 1.008x), where both arms lost about the same 1.1x.
 
 ### The JIT arm, program by program
 
@@ -196,18 +205,18 @@ show the shape directly:
 
 | program | 2026-05-29 ns/run | 2026-11-07 ns/run | change |
 | --- | ---: | ---: | ---: |
-| `event_execve` | 4,998.0 | 5,512.0 | 1.103 |
-| `event_exit_acct` | 1,395.3 | 2,315.8 | 1.660 |
-| `event_wake_up_n` | 1,734.2 | 3,312.2 | 1.910 |
-| `generic_kprobe_` | 838.0 | 1,078.2 | 1.287 |
-| `generic_rawtp_e` | 4,173.0 | 6,183.7 | 1.482 |
-| `generic_retkpro` | 53.5 | 52.4 | 0.981 |
-| `generic_tracepo` | 563.3 | 765.4 | 1.359 |
-| `tg_kp_bprm_comm` | 744.0 | 714.3 | 0.960 |
+| `event_execve` | 5,921.3 | 5,512.0 | 0.931 |
+| `event_exit_acct` | 1,396.8 | 2,315.8 | 1.658 |
+| `event_wake_up_n` | 2,207.3 | 3,312.2 | 1.501 |
+| `generic_kprobe_` | 985.9 | 1,078.2 | 1.094 |
+| `generic_rawtp_e` | 4,384.0 | 6,183.7 | 1.411 |
+| `generic_retkpro` | 51.3 | 52.4 | 1.023 |
+| `generic_tracepo` | 722.7 | 765.4 | 1.059 |
+| `tg_kp_bprm_comm` | 878.3 | 714.3 | 0.813 |
 
-Six of eight got slower by 1.10x to 1.91x and two got slightly faster, on
-bytecode the native path does not execute. The spread is per-program, so it
-is the workload's own timing, not a uniform clock or CPU change.
+Six of eight got slower by 1.02x to 1.66x and two got faster (0.93x, 0.81x),
+on bytecode the native path does not execute. The spread is per-program, so
+it is the workload's own timing, not a uniform clock or CPU change.
 
 ### Two differences that were checked and ruled out
 
