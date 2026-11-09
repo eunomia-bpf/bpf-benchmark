@@ -30337,6 +30337,76 @@
       "sorryAx": 0
     }
   },
+  "signed_div_operand_capture": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-operands.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 70,
+    "domain": "Divisor pre-narrowing preserves full source handler; captured low/high-byte register lanes and full numeric READ_REG cells refine canonical signedDivide Step for every input/width/environment/frame/arena and arbitrary fresh flags, including RAX/RDX/RSP aliases before writes.",
+    "publication": "c565562ae0cd53803306ccd7668994304858279d",
+    "remaining_interfaces": [
+      "Actual AUXbit0 unsigned/signed field/token/dispatcher binding",
+      "Concrete restoring-loop/source extraction",
+      "Compiler/physical memory/entry/ABI transport"
+    ],
+    "sole_full_source": "28883a27183e5bbb6520e541b50546b4a59351c4",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86NumericAddress\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.handler_operand_narrow\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.captured_frame_matches\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.captured_frame_refines\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.register_frame_refines\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-operands/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-operands/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "ad7419b4a39c32774be87f6c7eeb62875d8d4eed012e9fb2687e7e377884ecc8"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-operands/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "source_sha256": "e38f465469282b4af6094a1e640e0eb35028731ef2093eba0c933184b5b6bf15"
+        }
+      ],
+      "laws": [
+        "handler_operand_narrow",
+        "captured_frame_matches",
+        "captured_frame_refines",
+        "register_frame_refines"
+      ],
+      "reduction_bridge": 4,
+      "scope": "Universal exact captured low/high-byte register lane and full numeric READ_REG operand normalization, all RAX/RDX/RSP aliases before implicit writes. Actual AUX/dispatcher/token, loop/source extraction and compiler/physical interfaces remain explicit.",
+      "sorryAx": 0
+    }
+  },
   "signed_div_reference": {
     "archive": "kprog/results/kprog_verification_20261107/signed-div-reference.log.gz",
     "canonical_module_compiles": {

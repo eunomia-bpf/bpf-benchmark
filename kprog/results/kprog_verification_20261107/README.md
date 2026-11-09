@@ -6130,3 +6130,18 @@ and compiler/physical/ABI transport remain explicit. Complete current C-model
 and compiled-family totals stay70/75 and13/75. Sole full source
 `28883a27183e5bbb6520e541b50546b4a59351c4` keeps its earlier epoch and excludes these later frame laws;
 its actual terminal receives a separate receipt.
+
+### Signed DIV captured and direct register operands
+
+The [four operand capture laws](signed-div-operands.log.gz), published as
+`c565562ae0cd53803306ccd7668994304858279d`, prove that pre-narrowing preserves the complete source handler,
+and connect captured low/high-byte lanes and full numeric READ_REG cells to
+canonical signedDivide Step. All widths, input states, environment/frame/arena,
+RAX/RDX/RSP aliases and arbitrary fresh flags are quantified before either
+implicit result write. Module compilation and axiom audit finish exit0 with
+no sorryAx; four inherited BV-reduction dependencies are disclosed.
+
+The actual AUXbit0 unsigned/signed field/token/dispatcher relation, concrete
+loop/source extraction and compiler/physical/ABI interfaces remain open.
+Complete C-model/compiled-family totals stay70/75 and13/75. Sole full28883
+retains its earlier fixed source; these later laws have their own receipt.
