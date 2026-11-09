@@ -6062,3 +6062,30 @@ AUX0/AUX1 token/dispatcher binding and C/compiler/physical-memory/ABI transport
 remain explicit interfaces. Current complete x86 C-model families stay70/75,
 with13/75 compiled scalar families. Full source `852e65822` keeps its earlier
 immutable epoch; these eighteen later laws have their separate compile receipts.
+
+### ARM pair lifetime and signed source-state composition
+
+The [pair lifetime receipt](arm-pair-lifetime.log.gz), published as `9cfb291c8ab5372c4207edddd3eda398136b35f0`,
+retains the original165,895 route comparisons and complete register/tag/memory
+assertions. Its independent oracle now represents zero host fresh inputs below
+live SP, forgotten below-frame stores and exact SP-release bytes/tags. The prior
+full source852e65822 stopped at Makefile676 with384 lifetime differences; its
+original source/log/CPU are archived.
+
+The [signed source-state laws](signed-div-source-state.log.gz), published as
+`fbe6cd1f865fee9c4b48208c9e88de933c0d081e`, compose captured magnitude splitting and the two arithmetic fault
+sites with unsigned64word sign restoration, emitted AH:AL mask/shift/OR packing,
+width-aware writes and the complete architectural frame. Eight generic laws
+include canonical signedDivide Step for every choice of the six fresh flags.
+Compilation and axiom audits finish exit0 with no sorryAx; executable-reduction
+dependencies remain disclosed. The concrete C high/low word projection to the
+normalized split, primitive loop/source extraction, signed AUX token/dispatcher
+and compiler/physical/ABI interfaces remain open. Current complete C-model and
+compiled-family scope stays70/75 and13/75.
+
+Full source9cfb291c8 stopped at Makefile150 on duplicate proof-generated
+AddressWidth.enumToBitVec declarations. The original high-sign statement now
+uses a word-only bitvector lemma, avoiding State-wide enum normalization. The
+combined X86Divide/X86Exchange import and actual X86NumericAddress/X86Dispatcher
+compilations finish exit0. The next sole full source is `fbe6cd1f865fee9c4b48208c9e88de933c0d081e`; its
+actual terminal receives a separate receipt.

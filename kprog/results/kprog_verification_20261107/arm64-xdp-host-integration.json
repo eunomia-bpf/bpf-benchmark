@@ -3773,6 +3773,17 @@
     "successor_full_source": "8f62cbf0e2f81de135ab83347b31ef4da2ae564c",
     "successor_full_status": "running; eventual immutable receipt separate"
   },
+  "arm_pair_private_stack_lifetime": {
+    "archive": "kprog/results/kprog_verification_20261107/arm-pair-lifetime.log.gz",
+    "existing_cases": 165895,
+    "exit": 0,
+    "original_full_exit": 2,
+    "original_full_failure": "Makefile676:192LDP register and192STP memory differences",
+    "original_full_source": "852e65822e058cb95beeee04dab475c89a1457ef",
+    "production_changes": 0,
+    "publication": "9cfb291c8ab5372c4207edddd3eda398136b35f0",
+    "scope": "Same original case grid and every state/tag/memory assertion. Independently model zero host fresh reads and bytewise stores below liveSP; SP release clears exact half-open byte interval and overlapping tags."
+  },
   "arm_reserved_default_opcode": {
     "all_three_components_pass": true,
     "archive_compressed_prefix_bytes": 95511705,
@@ -30267,6 +30278,107 @@
       "original_production": "2942313a7"
     },
     "status": "partial-universal-C-arithmetic-capture-components"
+  },
+  "signed_div_source_state_composition": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-source-state.log.gz",
+    "compiled_scalar_families": 13,
+    "current_complete_x86_C_model_families": 70,
+    "full_failed_exit": 2,
+    "full_failed_source": "9cfb291c8ab5372c4207edddd3eda398136b35f0",
+    "full_failure": "Makefile150: duplicated AddressWidth.enumToBitVec proof auxiliary upon X86Divide+X86Exchange import",
+    "full_successor_source": "fbe6cd1f865fee9c4b48208c9e88de933c0d081e",
+    "integration": [
+      {
+        "exit": 0,
+        "input": "import KProgFormal.Refinement.X86Divide\nimport KProgFormal.Refinement.X86Exchange\n#print axioms KProgFormal.Refinement.X86Divide.Capture.high_sign_matches\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_negative\n",
+        "stage": "combined-import"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-source-state/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+        ],
+        "exit": 0,
+        "source_sha256": "9a2e6d87da40923d3460d04b18682c45d3238a5e0d76a55feef5e41a62625f00",
+        "stage": "KProgFormal/Refinement/X86NumericAddress"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-source-state/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+        ],
+        "exit": 0,
+        "source_sha256": "ba981ea00c0bd3404bdc241b94e8ea805a88210fbdc60f22661b79b8acb4b69e",
+        "stage": "KProgFormal/Refinement/X86Dispatcher"
+      }
+    ],
+    "publication": "fbe6cd1f865fee9c4b48208c9e88de933c0d081e",
+    "remaining_interfaces": [
+      "Actual C high/low word projection onto normalized magnitude split",
+      "Concrete64-bit restoring-loop/source extraction",
+      "AUX0/AUX1 numeric/token/dispatcher binding",
+      "Compiler and physical memory/entry/tag/ABI transport"
+    ],
+    "scope": "Normalized captured magnitude split and preliminary/signed bound arithmetic routes compose unsigned word sign restoration, exact byte packing, all generated width writes and complete architectural frame. Six arbitrary fresh CF/ZF/SF/OF/PF/AF choices satisfy canonical signedDivide Step; every fault retains exact input state and ordered events.",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.outcome_matches\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.restored_word\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.byte_pack_words\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.low_int_byte\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.byte_pack_matches\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.arithmetic_step_refines\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.fresh_flags_mask\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.handler_refines\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-source-state/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "58fb229546d228f15c85d7448765db3b5bea9f5291c7dc3b6e5899d8dfb10de7"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-source-state/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "4f831c99eb14cc9bbe922e3ff8eb5115c1d8877a4322b0465139af92a89ca045"
+        }
+      ],
+      "laws": [
+        "outcome_matches",
+        "restored_word",
+        "byte_pack_words",
+        "low_int_byte",
+        "byte_pack_matches",
+        "arithmetic_step_refines",
+        "fresh_flags_mask",
+        "handler_refines"
+      ],
+      "reduction_bridge": 6,
+      "scope": "Universal captured signed source arithmetic, two-site fault, unsigned word sign restoration, byte packing and complete state/fresh flags. Concrete word-limb projection, restoring-loop/source extraction, AUX dispatcher and compiler/physical transport remain explicit.",
+      "sorryAx": 0
+    },
+    "word_only_sign_lemma": "KProgFormal.Refinement.X86Divide.Capture.high_sign_matches"
   },
   "source_emission_composition": {
     "commands": [
