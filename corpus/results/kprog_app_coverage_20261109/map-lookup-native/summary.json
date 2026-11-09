@@ -1,0 +1,44 @@
+{
+  "source_commit": "722be6474aaf47e6797f6d826b77e69beffd9229",
+  "change": "pre-submission array map lookup body in P; same source/inline flags and division semantics as32dad; runtime header bounds/mask/stride with existing map relocations",
+  "objects": [
+    {
+      "object": "balancer.native.o",
+      "sha256": "1097fe78a042d861fd28e463036724110fed09dbb8b4e80407b63ed9f40e4bdf",
+      "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+      "text_symbols": [
+        "0000000000000000 0000000000002359 T balancer_ingress"
+      ],
+      "executable_bytes": 9049
+    },
+    {
+      "object": "healthchecking.native.o",
+      "sha256": "e456a9965d26c22248c26fae992eb426e0d226b91ca672d7a6fdfe9a9c101158",
+      "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+      "text_symbols": [
+        "0000000000000000 0000000000000535 T healthcheck_encap"
+      ],
+      "executable_bytes": 1333
+    },
+    {
+      "object": "healthchecking_ipip.native.o",
+      "sha256": "b1d91584c474bbb3ac659683c25eba7b46c3e663c273bc7e922d0762cd13e64f",
+      "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+      "text_symbols": [
+        "0000000000000000 00000000000001ba T healthcheck_encap"
+      ],
+      "executable_bytes": 442
+    },
+    {
+      "object": "xdp_root.native.o",
+      "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+      "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+      "text_symbols": [
+        "0000000000000000 000000000000005f T xdp_root"
+      ],
+      "executable_bytes": 95
+    }
+  ],
+  "plugin_sha256": "639ebc22dac73ba730164b9f01b707c3256a15b9ec9756f20b1517d5126ed498",
+  "lowered_array_sites": 21
+}

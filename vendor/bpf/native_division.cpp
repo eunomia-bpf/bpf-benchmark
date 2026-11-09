@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Native input follows the eBPF integer quotient/remainder semantics.
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/Analysis/ValueTracking.h>
+#include <llvm/BinaryFormat/Dwarf.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/InlineAsm.h>
 #include <llvm/IR/PassManager.h>
@@ -106,6 +109,119 @@ struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
                                    llvm::PreservedAnalyses::none();
     }
 };
+
+#if defined(K_BPF_ARRAY_VALUE_OFFSET) && defined(K_BPF_ARRAY_ELEM_SIZE_OFFSET) && \
+    defined(K_BPF_ARRAY_INDEX_MASK_OFFSET) && defined(K_BPF_MAP_MAX_ENTRIES_OFFSET)
+/* Kernel layout enters the producer when this plugin is compiled. Native P
+ * keeps ordinary map-symbol relocations; the kernel emits its submitted copy.
+ * BTF C map types select the same array operation as map_gen_lookup. */
+struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
+    static bool isRequired() { return true; }
+
+    static bool isLookup(llvm::CallInst &call) {
+        if (call.arg_size() != 2 || !call.getType()->isPointerTy())
+            return false;
+        auto *target = llvm::dyn_cast<llvm::Operator>(call.getCalledOperand());
+        if (!target || target->getOpcode() != llvm::Instruction::IntToPtr)
+            return false;
+        auto *id = target->getOperand(0);
+        if (auto *barrier = llvm::dyn_cast<llvm::CallInst>(id)) {
+            auto *assembly = llvm::dyn_cast<llvm::InlineAsm>(barrier->getCalledOperand());
+            if (!assembly || !assembly->getAsmString().empty() || barrier->arg_empty())
+                return false;
+            id = barrier->getArgOperand(0);
+        }
+        auto *number = llvm::dyn_cast<llvm::ConstantInt>(id);
+        return number && number->equalsInt(1);
+    }
+
+    static bool isArray(const llvm::GlobalVariable &map) {
+        llvm::SmallVector<llvm::DIGlobalVariableExpression *> debug;
+        map.getDebugInfo(debug);
+        for (auto *expression : debug) {
+            llvm::DIType *type = expression->getVariable()->getType();
+            while (auto *alias = llvm::dyn_cast_or_null<llvm::DIDerivedType>(type))
+                type = alias->getBaseType();
+            auto *record = llvm::dyn_cast_or_null<llvm::DICompositeType>(type);
+            if (!record)
+                continue;
+            for (auto *element : record->getElements()) {
+                auto *member = llvm::dyn_cast<llvm::DIDerivedType>(element);
+                if (!member || member->getName() != "type")
+                    continue;
+                auto *pointer = llvm::dyn_cast_or_null<llvm::DIDerivedType>(member->getBaseType());
+                if (!pointer || pointer->getTag() != llvm::dwarf::DW_TAG_pointer_type)
+                    continue;
+                auto *array = llvm::dyn_cast_or_null<llvm::DICompositeType>(pointer->getBaseType());
+                if (!array || array->getTag() != llvm::dwarf::DW_TAG_array_type)
+                    continue;
+                for (auto *dimension : array->getElements()) {
+                    auto *range = llvm::dyn_cast<llvm::DISubrange>(dimension);
+                    if (range)
+                        if (auto *count = range->getCount().dyn_cast<llvm::ConstantInt *>())
+                            if (count->equalsInt(2))
+                                return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &) {
+        llvm::SmallVector<llvm::CallInst *> lookups;
+        for (auto &function : module)
+            for (auto &block : function)
+                for (auto &instruction : block)
+                    if (auto *call = llvm::dyn_cast<llvm::CallInst>(&instruction)) {
+                        if (!isLookup(*call))
+                            continue;
+                        auto *map = llvm::dyn_cast<llvm::GlobalVariable>(
+                            llvm::getUnderlyingObject(call->getArgOperand(0)));
+                        if (map && map->getSection() == ".maps" && isArray(*map))
+                            lookups.push_back(call);
+                    }
+        for (auto *call : lookups) {
+            llvm::IRBuilder<> before(call);
+            before.SetCurrentDebugLocation(call->getDebugLoc());
+            auto *pointer = before.getPtrTy();
+            auto *opaque = llvm::InlineAsm::get(llvm::FunctionType::get(pointer, {pointer}, false),
+                "", "=r,0,~{memory}", true);
+            // The ELF symbol becomes the kernel map address at binding time;
+            // its original C declaration describes metadata, rather than storage.
+            auto *map = before.CreateCall(opaque, {call->getArgOperand(0)}, "native.map.address");
+            auto field = [&](unsigned offset) {
+                return before.CreateLoad(before.getInt32Ty(),
+                    before.CreateGEP(before.getInt8Ty(), map, before.getInt64(offset)));
+            };
+            auto *index = before.CreateLoad(before.getInt32Ty(), call->getArgOperand(1));
+            auto *maximum = field(K_BPF_MAP_MAX_ENTRIES_OFFSET);
+            auto *entry = call->getParent();
+            auto *join = entry->splitBasicBlock(call, "native.array.join");
+            auto *value = llvm::BasicBlock::Create(module.getContext(), "native.array.value",
+                                                 entry->getParent(), join);
+            entry->getTerminator()->eraseFromParent();
+            before.SetInsertPoint(entry);
+            before.CreateCondBr(before.CreateICmpULT(index, maximum), value, join);
+            before.SetInsertPoint(value);
+            auto *mask = field(K_BPF_ARRAY_INDEX_MASK_OFFSET);
+            auto *stride = field(K_BPF_ARRAY_ELEM_SIZE_OFFSET);
+            auto *offset = before.CreateAdd(before.getInt64(K_BPF_ARRAY_VALUE_OFFSET),
+                before.CreateMul(before.CreateZExt(before.CreateAnd(index, mask), before.getInt64Ty()),
+                                 before.CreateZExt(stride, before.getInt64Ty())));
+            auto *result = before.CreateGEP(before.getInt8Ty(), map, offset);
+            before.CreateBr(join);
+            auto *merged = llvm::PHINode::Create(pointer, 2, "native.array.result", call);
+            merged->addIncoming(llvm::ConstantPointerNull::get(pointer), entry);
+            merged->addIncoming(result, value);
+            call->replaceAllUsesWith(merged);
+            llvm::errs() << "native-map-lowering: array " << module.getModuleIdentifier()
+                         << "::" << entry->getParent()->getName() << "\n";
+            call->eraseFromParent();
+        }
+        return lookups.empty() ? llvm::PreservedAnalyses::all() : llvm::PreservedAnalyses::none();
+    }
+};
+#endif
 }
 
 extern "C" LLVM_ATTRIBUTE_WEAK llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
@@ -115,5 +231,12 @@ extern "C" LLVM_ATTRIBUTE_WEAK llvm::PassPluginLibraryInfo llvmGetPassPluginInfo
                 [](llvm::ModulePassManager &passes, llvm::OptimizationLevel) {
                     passes.addPass(llvm::createModuleToFunctionPassAdaptor(NativeDivision()));
                 });
+#if defined(K_BPF_ARRAY_VALUE_OFFSET) && defined(K_BPF_ARRAY_ELEM_SIZE_OFFSET) && \
+    defined(K_BPF_ARRAY_INDEX_MASK_OFFSET) && defined(K_BPF_MAP_MAX_ENTRIES_OFFSET)
+            builder.registerOptimizerLastEPCallback(
+                [](llvm::ModulePassManager &passes, llvm::OptimizationLevel) {
+                    passes.addPass(NativeArrayLookups());
+                });
+#endif
         }};
 }
