@@ -539,7 +539,7 @@ the program-level figure it rests on is reproduced here.
 
 ### OTel, stats off: both arms complete, 13 programs native
 
-`x86_kvm_corpus_20261109_202713_178772`, status ok, 3 samples per arm, the
+`x86_kvm_corpus_20261109_212927_297911`, status ok, 3 samples per arm, the
 same definition and settings as the stats-on run:
 
 | arm | samples | components | nonzero return codes | programs |
@@ -547,7 +547,8 @@ same definition and settings as the stats-on run:
 | JIT | 3 | 33 | 0 | 13 |
 | native | 3 | 33 | 0 | 12 |
 
-13 programs were replaced natively. With stats off there are no runtime
+13 programs were replaced natively, and the byte counts differ between the
+arms (13 program entries against 12), so the arm really is native. With stats off there are no runtime
 counters by construction, so this arm supplies the equal-work check instead:
 both arms ran 33 components with no failures, which is the same 11-workload
 mix per sample, and the program census differs only because the native arm
@@ -783,6 +784,27 @@ Put beside the stats-on run:
 The archive records 1.102x, and both modes land within 0.2% of it. Stats off
 is faster in both arms, as expected when the counters are not updated, and
 the ratio is essentially unchanged.
+
+**Every table row above passes `tools/audit_native_arm.py`**, which checks the
+three ways a row can look right and not be:
+
+| verdict | meaning |
+| --- | --- |
+| `native` | arms differ in `bytes_jited`, 3 samples each, about 540 s per arm |
+| `same-code` | both arms recorded the same program bytes -- the shim was off |
+| `short-run` | fewer than 3 samples, or an arm far from 540 s |
+| `missing-arm` / `bad-status` | one arm absent, or the runner reported an error |
+
+For example, on the 2026-05-29 definition: the real stats-off run
+`..._210035_874649` reads `native 1 vs 1 programs`, while the shim-off
+attempt reads `same-code 1 programs, identical bytes`, and a 2 s diagnostic
+reads `short-run samples [1, 1]`. Run it before quoting any row:
+
+```sh
+python3 kprog/results/kprog_perf_attribution_20261108/tools/audit_native_arm.py <run-dir>
+```
+
+It exits 1 on any failure, so it can gate a table.
 
 The first attempt at the off mode (`..._195850_891648`) is worth recording
 because it read 1.099x and looked fine: both arms held `jited 13641`, no
