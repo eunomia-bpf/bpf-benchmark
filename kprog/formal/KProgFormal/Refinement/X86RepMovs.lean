@@ -815,3 +815,116 @@ theorem source_body_success_witness (scalarSource : Bool) (width : ScalarWidth)
   exact ⟨choices, source_handler_step_refines width nextPc _ s direction ordinary successful⟩
 
 end KProgFormal.Refinement.X86RepMovs.Indexed
+
+namespace KProgFormal.Refinement.X86RepMovs.Indexed
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+/-- Install one finite family of per-read choices at dynamic input positions.
+The schedule carries the primitive/compiler visit correspondence; injectivity
+keeps the recovery choices independent of each other. Other input words retain
+their original values, including interleaved primitive choices. -/
+def installFresh (original : Nat → Reference.Word) (schedule : Nat → Nat)
+    (values : Nat → Reference.Word) : Nat → Nat → Reference.Word
+  | 0 => original
+  | count + 1 => fun slot =>
+      if slot = schedule count then values count else
+        installFresh original schedule values count slot
+
+theorem install_fresh_selected (original : Nat → Reference.Word) (schedule : Nat → Nat)
+    (values : Nat → Reference.Word) (independent : ∀ ⦃i j : Nat⦄, schedule i = schedule j → i = j)
+    (count index : Nat) (within : index < count) :
+    installFresh original schedule values count (schedule index) = values index := by
+  induction count with
+  | zero => omega
+  | succ count ih =>
+      by_cases last : index = count
+      · subst index; simp [installFresh]
+      · have different : schedule index ≠ schedule count := fun same => last (independent same)
+        simp only [installFresh, if_neg different]
+        exact ih (by omega)
+
+theorem install_fresh_outside (original : Nat → Reference.Word) (schedule : Nat → Nat)
+    (values : Nat → Reference.Word) (count slot : Nat)
+    (outside : ∀ index, index < count → slot ≠ schedule index) :
+    installFresh original schedule values count slot = original slot := by
+  induction count with
+  | zero => rfl
+  | succ count ih =>
+      simp only [installFresh, if_neg (outside count (by omega))]
+      exact ih (by intro index within; exact outside index (by omega))
+
+/-- Whole-count ordinary recovery decisions embed into any independent set of
+fresh-word visits, with the surrounding input stream preserved. -/
+theorem ordinary_stream_exists (scalarSource : Bool) (width : ScalarWidth) (s : State)
+    (original : Nat → Reference.Word) (schedule : Nat → Nat) (independent : ∀ ⦃i j : Nat⦄, schedule i = schedule j → i = j)
+    (count : Nat)
+    (high : scalarSource = true → ∀ j, j < count →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat) :
+    ∃ stream : Nat → Reference.Word,
+      (∀ slot, (∀ j, j < count → slot ≠ schedule j) → stream slot = original slot) ∧
+      (∀ j, j < count → recoveryDecision scalarSource width s (fun i => stream (schedule i)) j = false) := by
+  obtain ⟨values, ordinary⟩ := ordinary_choices_exist scalarSource width s count high
+  refine ⟨installFresh original schedule values count, ?_, ?_⟩
+  · intro slot outside
+    exact install_fresh_outside original schedule values count slot outside
+  · intro j within
+    simpa only [recoveryDecision, install_fresh_selected original schedule values independent count j within]
+      using ordinary j within
+
+/-- The first selected recovery and its successful prefix use a finite set of
+visits. Positions after that recovery and interleaved inputs retain their words. -/
+theorem first_recovery_stream_exists (width : ScalarWidth) (s : State)
+    (original : Nat → Reference.Word) (schedule : Nat → Nat) (independent : ∀ ⦃i j : Nat⦄, schedule i = schedule j → i = j)
+    (completed : Nat)
+    (high : ∀ j, j < completed →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat) :
+    ∃ stream : Nat → Reference.Word,
+      (∀ slot, (∀ j, j < completed + 1 → slot ≠ schedule j) → stream slot = original slot) ∧
+      (∀ j, j < completed → recoveryDecision true width s (fun i => stream (schedule i)) j = false) ∧
+      recoveryDecision true width s (fun i => stream (schedule i)) completed = true := by
+  obtain ⟨values, earlier, selected⟩ := first_recovery_choices_exist width s completed high
+  refine ⟨installFresh original schedule values (completed + 1), ?_, ?_, ?_⟩
+  · intro slot outside
+    exact install_fresh_outside original schedule values (completed + 1) slot outside
+  · intro j within
+    have bound : j < completed + 1 := by omega
+    simpa only [recoveryDecision, install_fresh_selected original schedule values independent (completed + 1) j bound]
+      using earlier j within
+  · simpa only [recoveryDecision, install_fresh_selected original schedule values independent (completed + 1) completed (by omega)]
+      using selected
+
+/-- Generic successful source-body refinement with a shared input-stream
+witness. The schedule, scalar primitive and native entry/profile transport
+remain explicit caller interfaces. -/
+theorem source_body_success_stream_witness (scalarSource : Bool) (width : ScalarWidth)
+    (nextPc : Reference.Word) (s : State) (direction : s.rflags.getLsbD 10 = false)
+    (original : Nat → Reference.Word) (schedule : Nat → Nat) (independent : ∀ ⦃i j : Nat⦄, schedule i = schedule j → i = j)
+    (high : scalarSource = true → ∀ j, j < (s.gpr 1).toNat →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    ∃ stream : Nat → Reference.Word,
+      (∀ slot, (∀ j, j < (s.gpr 1).toNat → slot ≠ schedule j) → stream slot = original slot) ∧
+      Reference.X86.Step (.repMovs width false 0 nextPc) s
+        (sourceHandler width nextPc (recoveryDecision scalarSource width s (fun j => stream (schedule j))) s) := by
+  obtain ⟨stream, outside, ordinary⟩ := ordinary_stream_exists scalarSource width s original schedule independent (s.gpr 1).toNat high
+  exact ⟨stream, outside, source_handler_step_refines width nextPc _ s direction ordinary successful⟩
+
+/-- Shared-stream recovery reaches the exact captured-prefix memory, events,
+pointer writeback and RCX clear. O4 supplies the actual fault and registered
+continuation relation through recoveryFinish. -/
+theorem source_recovery_stream_witness (width : ScalarWidth) (nextPc : Reference.Word) (s : State)
+    (original : Nat → Reference.Word) (schedule : Nat → Nat) (independent : ∀ ⦃i j : Nat⦄, schedule i = schedule j → i = j)
+    (completed : Nat) (remaining : completed < (s.gpr 1).toNat)
+    (high : ∀ j, j < completed →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat)
+    (successful : (loop width s.pc 0 completed s).fault = none) :
+    ∃ stream : Nat → Reference.Word,
+      (∀ slot, (∀ j, j < completed + 1 → slot ≠ schedule j) → stream slot = original slot) ∧
+      sourceHandler width nextPc (recoveryDecision true width s (fun j => stream (schedule j))) s =
+        recoveryFinish width nextPc completed s := by
+  obtain ⟨stream, outside, earlier, selected⟩ := first_recovery_stream_exists width s original schedule independent completed high
+  exact ⟨stream, outside, source_handler_recovery_matches width nextPc _ completed s (by omega)
+    earlier (by intro _; exact selected) successful⟩
+
+end KProgFormal.Refinement.X86RepMovs.Indexed
