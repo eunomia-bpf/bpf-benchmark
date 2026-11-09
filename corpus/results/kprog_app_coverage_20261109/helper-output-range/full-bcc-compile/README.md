@@ -1,0 +1,5 @@
+# Full original BCC entry generation with helper output-range representation
+
+This finite compiler observation includes every25entry of each complete8-object canonicalO3 and existing frozen-config frontend producer. The generation metadata comes from the actual complete BCC runtime archive, preserving original native inputs and entry identities. The private candidate model changes helper-output ghost invalidation/caller-frame representation; native instructions, helper calls and existing lifetime/exit predicates retain their definitions.
+
+Actual complete totals {'control': {'entries': 25, 'compiled': 24, 'diagnostic': 1}, 'frontend': {'entries': 25, 'compiled': 25, 'diagnostic': 0}}. generated.tar.gz retains every generated C/B/native/link/compiler artifact; component.tar.gz retains exact model source, original service inputs, both complete native producers, commands and diagnostics. Canonical production model retains its published parent. This is generation/compilation evidence; current coherent whole-application verifier/startup/work observations retain their own receipts. Native executions0; runtime admission additions0.
