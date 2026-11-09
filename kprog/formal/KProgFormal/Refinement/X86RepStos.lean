@@ -204,3 +204,197 @@ theorem loop_success_pc (width : ScalarWidth) (nextPc : Reference.Word) (count :
         simpa [loop, stopped] using ih _ rest
 
 end KProgFormal.Refinement.X86RepStos
+
+namespace KProgFormal.Refinement.X86RepStos.Indexed
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+def project (width : ScalarWidth) (index : Nat) (s : State) : State :=
+  { s with gpr := progressed width index s }
+
+theorem project_memory (width : ScalarWidth) (index : Nat) (s : State) :
+    (project width index s).memory = s.memory := rfl
+
+theorem project_accumulator (width : ScalarWidth) (index : Nat) (s : State) :
+    (project width index s).gpr 0 = s.gpr 0 := by
+  simp [project, progressed]
+
+theorem project_destination (width : ScalarWidth) (index : Nat) (s : State) :
+    (project width index s).gpr 7 =
+      generatedX86RepMovsAdvance (s.gpr 7) index (X86Scalar.handlerWidth width) := by
+  simp [project, progressed]
+
+theorem project_memory_commute (width : ScalarWidth) (index : Nat) (s : State) (memory : Memory) :
+    project width index { s with memory := memory } = { project width index s with memory := memory } := rfl
+
+theorem project_zero (width : ScalarWidth) (s : State) : project width 0 s = s := by
+  unfold project
+  have registers : progressed width 0 s = s.gpr := by
+    funext r
+    simp [progressed, generatedX86RepMovsAdvance]
+  rw [registers]
+
+theorem advance_project (width : ScalarWidth) (index : Nat) (s : State) :
+    advance width (project width index s) = project width (index + 1) s := by
+  unfold advance project
+  congr 1
+  funext r
+  by_cases counter : r = 1
+  · simp only [progressed, counter, ↓reduceIte, BitVec.ofNat_add]
+    change (s.gpr 1 - BitVec.ofNat 64 index) - 1 = s.gpr 1 - (BitVec.ofNat 64 index + 1)
+    generalize s.gpr 1 = value
+    clear s width
+    bv_decide
+  · by_cases pointer : r = 7
+    · simp only [progressed, if_neg counter, if_pos pointer, generatedX86RepMovsAdvance,
+        Nat.add_mul, Nat.one_mul, BitVec.ofNat_add, BitVec.add_assoc]
+    · simp only [progressed, if_neg counter, if_neg pointer]
+
+/-- The emitted STOS loop captures RDI and RAX once, computes each original
+pointer plus index times width, and changes memory before final register writes.
+The scalar-store primitive carries its tag/provenance and physical interface. -/
+def element (width : ScalarWidth) (index : Nat) (s : State) : Transition State :=
+  let destination := generatedX86RepMovsAdvance (s.gpr 7) index (X86Scalar.handlerWidth width)
+  match X86Scalar.write s width (.memory destination) (s.gpr 0) with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (written, writes) => ⟨written, writes, none⟩
+
+def projectElement (width : ScalarWidth) (index : Nat) (effect : Transition State) : Transition State :=
+  ⟨project width (if effect.fault.isSome then index else index + 1) effect.state, effect.events, effect.fault⟩
+
+theorem element_projects (width : ScalarWidth) (index : Nat) (s : State) :
+    X86RepStos.element width (project width index s) = projectElement width index (element width index s) := by
+  simp only [X86RepStos.element, element, X86Scalar.write_refines, Reference.X86.scalarWrite,
+    project_accumulator, project_destination, project_memory]
+  by_cases hw : permitted s.memory.writable
+    (generatedX86RepMovsAdvance (s.gpr 7) index (X86Scalar.handlerWidth width)) width.bytes = true <;>
+    simp [writeMemory, hw, projectElement, advance_project, project_memory_commute]
+
+theorem element_gpr (width : ScalarWidth) (index : Nat) (s : State) :
+    (element width index s).state.gpr = s.gpr := by
+  simp only [element, X86Scalar.write_refines, Reference.X86.scalarWrite]
+  by_cases hw : permitted s.memory.writable
+    (generatedX86RepMovsAdvance (s.gpr 7) index (X86Scalar.handlerWidth width)) width.bytes = true <;>
+    simp [writeMemory, hw]
+
+/-- Natural recursion presents C's exact unsigned index range. The
+full_count_index_exact law supplies the u64 index correspondence. -/
+def loop (width : ScalarWidth) (nextPc : Reference.Word) (index : Nat) : Nat → State → Transition State
+  | 0, s => ⟨{ s with pc := nextPc }, [], none⟩
+  | n + 1, s =>
+      let first := element width index s
+      if first.fault.isSome then first else
+        let rest := loop width nextPc (index + 1) n first.state
+        ⟨rest.state, first.events ++ rest.events, rest.fault⟩
+
+theorem loop_gpr (width : ScalarWidth) (nextPc : Reference.Word) (count index : Nat) (s : State) :
+    (loop width nextPc index count s).state.gpr = s.gpr := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      simp only [loop]
+      split
+      · exact element_gpr width index s
+      · exact (ih (index + 1) (element width index s).state).trans (element_gpr width index s)
+
+theorem loop_fault_matches (width : ScalarWidth) (nextPc : Reference.Word) (count index : Nat) (s : State) :
+    (loop width nextPc index count s).fault =
+      (X86RepStos.loop width nextPc count (project width index s)).fault := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      simp only [loop, X86RepStos.loop, element_projects, projectElement]
+      by_cases stopped : (element width index s).fault.isSome = true
+      · simp only [stopped, ↓reduceIte]
+      · simp only [stopped, ↓reduceIte]
+        exact ih (index + 1) (element width index s).state
+
+theorem loop_projects (width : ScalarWidth) (nextPc : Reference.Word) (count index : Nat) (s : State)
+    (successful : (loop width nextPc index count s).fault = none) :
+    X86RepStos.loop width nextPc count (project width index s) =
+      ⟨project width (index + count) (loop width nextPc index count s).state,
+        (loop width nextPc index count s).events, none⟩ := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      by_cases stopped : (element width index s).fault.isSome = true
+      · have bad : (element width index s).fault = none := by simpa [loop, stopped] using successful
+        simp [bad] at stopped
+      · have firstOk : (element width index s).fault = none := by
+          cases h : (element width index s).fault <;> simp_all
+        have restOk : (loop width nextPc (index + 1) n (element width index s).state).fault = none := by
+          simpa [loop, stopped] using successful
+        rw [X86RepStos.loop, element_projects]
+        simp only [projectElement, firstOk, Option.isSome_none, Bool.false_eq_true, ↓reduceIte]
+        rw [ih (index + 1) (element width index s).state restOk]
+        have indices : index + 1 + n = index + (n + 1) := by omega
+        simp only [loop, if_neg stopped, indices]
+
+/-- Ordered write/fault events agree at every prefix, including a stopped store. -/
+theorem loop_events_match (width : ScalarWidth) (nextPc : Reference.Word) (count index : Nat) (s : State) :
+    (loop width nextPc index count s).events =
+      (X86RepStos.loop width nextPc count (project width index s)).events := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      simp only [loop, X86RepStos.loop, element_projects, projectElement]
+      by_cases stopped : (element width index s).fault.isSome = true
+      · simp only [stopped, ↓reduceIte]
+      · simp only [stopped, ↓reduceIte]
+        rw [ih (index + 1) (element width index s).state]
+        rfl
+
+def handlerStep (width : ScalarWidth) (nextPc : Reference.Word) (s : State) : Transition State :=
+  let count := (s.gpr 1).toNat
+  let copied := loop width nextPc 0 count s
+  if copied.fault.isSome then copied else
+    ⟨{ copied.state with gpr := emittedRegisters width s }, copied.events, none⟩
+
+theorem handler_matches_progress (width : ScalarWidth) (nextPc : Reference.Word) (s : State)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    handlerStep width nextPc s = X86RepStos.handlerStep width nextPc s := by
+  have projection := loop_projects width nextPc (s.gpr 1).toNat 0 s successful
+  rw [project_zero] at projection
+  unfold handlerStep X86RepStos.handlerStep
+  rw [projection]
+  simp only [successful, Option.isSome_none, Bool.false_eq_true, ↓reduceIte]
+  rfl
+
+theorem handler_refines (width : ScalarWidth) (nextPc : Reference.Word) (s : State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    handlerStep width nextPc s = Reference.X86.step (.repStos width nextPc) s := by
+  have faults := loop_fault_matches width nextPc (s.gpr 1).toNat 0 s
+  rw [project_zero] at faults
+  have progressOk : (X86RepStos.loop width nextPc (s.gpr 1).toNat s).fault = none := by
+    rw [← faults]
+    exact successful
+  rw [handler_matches_progress width nextPc s successful]
+  exact X86RepStos.handler_refines width nextPc s direction progressOk
+
+end KProgFormal.Refinement.X86RepStos.Indexed
+
+namespace KProgFormal.Refinement.X86RepStos.Indexed
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+theorem full_count_index_exact (counter : Reference.Word) (index : Nat)
+    (within : index ≤ counter.toNat) :
+    (BitVec.ofNat 64 index).toNat = index := by
+  have bound := counter.isLt
+  simp only [BitVec.toNat_ofNat]
+  exact Nat.mod_eq_of_lt (by omega)
+
+theorem full_count_condition_exact (counter : Reference.Word) (index : Nat)
+    (within : index ≤ counter.toNat) :
+    (BitVec.ofNat 64 index).ult counter = decide (index < counter.toNat) := by
+  simp only [BitVec.ult, full_count_index_exact counter index within]
+
+theorem handler_step_refines (width : ScalarWidth) (nextPc : Reference.Word) (s : State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    Reference.X86.Step (.repStos width nextPc) s (handlerStep width nextPc s) := by
+  rw [handler_refines width nextPc s direction successful]
+  exact ⟨rfl, rfl, rfl⟩
+
+end KProgFormal.Refinement.X86RepStos.Indexed
