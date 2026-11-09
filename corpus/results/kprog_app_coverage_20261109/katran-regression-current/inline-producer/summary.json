@@ -1,0 +1,45 @@
+{
+  "source_commit": "81999b64cc306f70180fa440163846600e0ccf2e",
+  "change": "native P compiler inline-threshold=1000; all other producer flags and source bytes retain their definitions",
+  "objects": [
+    {
+      "object": "balancer.native.o",
+      "sha256": "68ed0e47d477f6facb4248dddb7e8f70f89a1e1dc63a0ff2e9dd7096505b4089",
+      "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+      "text_symbols": [
+        "0000000000000000 000000000000205c T balancer_ingress",
+        "0000000000000060 00000000000000e3 t jhash",
+        "0000000000000000 000000000000005c t jhash_2words"
+      ],
+      "executable_bytes": 8607
+    },
+    {
+      "object": "healthchecking.native.o",
+      "sha256": "fd2f79a25d305c55a305ddf5469d58d00003fa0bdfdcca57ebc3ca4343012522",
+      "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+      "text_symbols": [
+        "0000000000000000 00000000000004c3 T healthcheck_encap"
+      ],
+      "executable_bytes": 0
+    },
+    {
+      "object": "healthchecking_ipip.native.o",
+      "sha256": "059b4db38a9eab866d0baa3954b7498dc4b9d2fae270a25a18b6f4313651e2da",
+      "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+      "text_symbols": [
+        "0000000000000000 0000000000000198 T healthcheck_encap"
+      ],
+      "executable_bytes": 0
+    },
+    {
+      "object": "xdp_root.native.o",
+      "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+      "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+      "text_symbols": [
+        "0000000000000000 000000000000005f T xdp_root"
+      ],
+      "executable_bytes": 95
+    }
+  ],
+  "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301"
+}
