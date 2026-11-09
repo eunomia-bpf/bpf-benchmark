@@ -14,19 +14,19 @@
       "native_sha256_matches": true,
       "generated": true,
       "compiled": true,
-      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/runtime/trusted-native-loader', 'load', '4', '1', '15', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-azzmjejz/requests/request-rhnm2iej/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-azzmjejz/requests/request-rhnm2iej/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-azzmjejz/requests/request-rhnm2iej/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/runtime/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '27', 'null', 'ctl_array', '23', 'null', 'fallback_cache', '25', 'null', 'lru_mapping', '26', 'null', 'lru_miss_stats', '30', 'null', 'quic_stats_map', '32', 'null', 'reals', '28', 'null', 'reals_stats', '29', 'null', 'server_id_map', '35', 'null', 'server_id_stats', '37', 'null', 'stats', '22', 'null', 'vip_map', '24', 'null', 'vip_miss_stats', '31', 'null', 'vip_to_down_reals_map', '39', 'null']' returned non-zero exit status 1.",
+      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/runtime/trusted-native-loader', 'load', '4', '1', '15', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-ao9xccy7/requests/request-0t4zsic2/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-ao9xccy7/requests/request-0t4zsic2/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-ao9xccy7/requests/request-0t4zsic2/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/runtime/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '27', 'null', 'ctl_array', '23', 'null', 'fallback_cache', '25', 'null', 'lru_mapping', '26', 'null', 'lru_miss_stats', '30', 'null', 'quic_stats_map', '32', 'null', 'reals', '28', 'null', 'reals_stats', '29', 'null', 'server_id_map', '35', 'null', 'server_id_stats', '37', 'null', 'stats', '22', 'null', 'vip_map', '24', 'null', 'vip_miss_stats', '31', 'null', 'vip_to_down_reals_map', '39', 'null']' returned non-zero exit status 1.",
       "verifier_excerpt": [
         "R0 invalid mem access 'scalar'",
-        "processed 1509 insns (limit 1000000) max_states_per_insn 0 total_states 29 peak_states 29 mark_read 0"
+        "processed 1247 insns (limit 1000000) max_states_per_insn 0 total_states 13 peak_states 13 mark_read 0"
       ]
     }
   ],
   "summary": {
-    "started": "2026-11-09T14:47:21.152451+00:00",
+    "started": "2026-11-09T15:21:52.149716+00:00",
     "apps": "katran",
     "samples": 1,
     "duration": 2,
-    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-azzmjejz/requests",
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-ao9xccy7/requests",
     "service_state_mode": "0o700",
     "command": [
       "make",
@@ -41,26 +41,26 @@
       "WORKLOAD_DURATION=2"
     ],
     "returncode": 0,
-    "retained_service_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-state-20261109T144721",
+    "retained_service_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/katran-regression-runtime/trusted-state-20261109T152152",
     "retained_service_files": [
       "requests/1.failure.tar.gz",
       "requests/requests.jsonl"
     ],
-    "finished": "2026-11-09T14:59:35.463673+00:00",
+    "finished": "2026-11-09T15:29:56.665607+00:00",
     "corpus_metadata": [
       {
-        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_145048_798086/metadata.json",
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_152447_325003/metadata.json",
         "status": "completed",
         "error_message": null
       }
     ],
-    "archive": "corpus-20261109T145935519212Z.tar.gz",
-    "archive_sha256": "90fa54bffd7f5b2750580daa18433d3d5b67aac9a30d473771dbb4e8517ba8a5"
+    "archive": "corpus-20261109T152956684132Z.tar.gz",
+    "archive_sha256": "f3e4eaf180f6534ddf8597fbfd2f4da726bed5ffc6c3f02ae022450d41aaa640"
   },
   "results": [
     {
       "metadata": {
-        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_145048_798086/metadata.json",
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_152447_325003/metadata.json",
         "status": "completed",
         "error_message": null
       },
@@ -74,8 +74,8 @@
               "bytes_xlated": 23840,
               "id": 9,
               "name": "balancer_ingres",
-              "run_cnt_delta": 4689618,
-              "run_time_ns_delta": 968122506,
+              "run_cnt_delta": 5240159,
+              "run_time_ns_delta": 1027425976,
               "type": "xdp"
             }
           },
@@ -115,10 +115,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.0603612339999984,
+                  "duration_s": 2.0605520910000052,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1976926  errors: 3372855\n     started: 220100043us  stopped: 222070917us idle: 0us\n     seq_num: 1976927  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 41528\n     cur_queue_map: 0\n     flows: 2691308\nResult: OK: 1970874(c1970874+d0) usec, 1976926 (64byte,-1frags)\n  1003070pps 513Mb/sec (513571840bps) errors: 3372855",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25503  errors: 67558\n     started: 187230408us  stopped: 189251930us idle: 0us\n     seq_num: 25504  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 27528\n     cur_queue_map: 0\n     flows: 61983\nResult: OK: 2021521(c2021521+d0) usec, 25503 (64byte,-1frags)\n  12615pps 6Mb/sec (6458880bps) errors: 67558",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -145,10 +145,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.0603612339999984,
+                  "duration_s": 2.0605520910000052,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 812667  errors: 1760418\n     started: 220100130us  stopped: 222080039us idle: 0us\n     seq_num: 812668  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 17260\n     cur_queue_map: 0\n     flows: 1302829\nResult: OK: 1979909(c1979909+d0) usec, 812667 (64byte,-1frags)\n  410456pps 210Mb/sec (210153472bps) errors: 1760418",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 2194551  errors: 3790861\n     started: 187230408us  stopped: 189252362us idle: 0us\n     seq_num: 2194552  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 21819\n     cur_queue_map: 0\n     flows: 3009178\nResult: OK: 2021953(c2021953+d0) usec, 2194551 (64byte,-1frags)\n  1085361pps 555Mb/sec (555704832bps) errors: 3790861",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -175,10 +175,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.0603612339999984,
+                  "duration_s": 2.0605520910000052,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 853868  errors: 1604166\n     started: 220100045us  stopped: 222070966us idle: 0us\n     seq_num: 853869  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 33277\n     cur_queue_map: 0\n     flows: 1245530\nResult: OK: 1970921(c1970921+d0) usec, 853868 (64byte,-1frags)\n  433232pps 221Mb/sec (221814784bps) errors: 1604166",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 887564  errors: 1781456\n     started: 187250016us  stopped: 189251930us idle: 0us\n     seq_num: 887565  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 47661\n     cur_queue_map: 0\n     flows: 1350819\nResult: OK: 2001914(c2001914+d0) usec, 887564 (64byte,-1frags)\n  443357pps 226Mb/sec (226998784bps) errors: 1781456",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -205,10 +205,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.0603612339999984,
+                  "duration_s": 2.0605520910000052,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1046157  errors: 1815117\n     started: 220100018us  stopped: 222070848us idle: 0us\n     seq_num: 1046158  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 43313\n     cur_queue_map: 0\n     flows: 1447025\nResult: OK: 1970829(c1970829+d0) usec, 1046157 (64byte,-1frags)\n  530820pps 271Mb/sec (271779840bps) errors: 1815117",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 2132541  errors: 3766147\n     started: 187230125us  stopped: 189251930us idle: 0us\n     seq_num: 2132542  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 629\n     cur_queue_map: 0\n     flows: 2965709\nResult: OK: 2021804(c2021804+d0) usec, 2132541 (64byte,-1frags)\n  1054771pps 540Mb/sec (540042752bps) errors: 3766147",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 }
               ],
@@ -231,7 +231,7 @@
                 "tool": "kernel_pktgen",
                 "xmit_mode": "start_xmit"
               },
-              "duration_s": 2.0603612339999984,
+              "duration_s": 2.0605520910000052,
               "returncode": 0,
               "stderr": "",
               "stdout": "",
@@ -247,8 +247,8 @@
               "bytes_xlated": 23840,
               "id": 15,
               "name": "balancer_ingres",
-              "run_cnt_delta": 4809214,
-              "run_time_ns_delta": 1011324995,
+              "run_cnt_delta": 4999342,
+              "run_time_ns_delta": 949242040,
               "type": "xdp"
             }
           },
@@ -288,10 +288,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.07182853900008,
+                  "duration_s": 2.115118295000002,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1854026  errors: 3272650\n     started: 729630059us  stopped: 731660833us idle: 0us\n     seq_num: 1854027  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 15025\n     cur_queue_map: 0\n     flows: 2579716\nResult: OK: 2030773(c2030773+d0) usec, 1854026 (64byte,-1frags)\n  912965pps 467Mb/sec (467438080bps) errors: 3272650",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 903115  errors: 1994598\n     started: 479580026us  stopped: 481540614us idle: 0us\n     seq_num: 903116  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 14218\n     cur_queue_map: 0\n     flows: 1465097\nResult: OK: 1960587(c1960587+d0) usec, 903115 (64byte,-1frags)\n  460634pps 235Mb/sec (235844608bps) errors: 1994598",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -318,10 +318,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.07182853900008,
+                  "duration_s": 2.115118295000002,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1995443  errors: 3669299\n     started: 729630120us  stopped: 731660898us idle: 0us\n     seq_num: 1995444  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 28819\n     cur_queue_map: 0\n     flows: 2848811\nResult: OK: 2030777(c2030777+d0) usec, 1995443 (64byte,-1frags)\n  982600pps 503Mb/sec (503091200bps) errors: 3669299",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 2048996  errors: 3799927\n     started: 479580026us  stopped: 481540661us idle: 0us\n     seq_num: 2048997  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 16398\n     cur_queue_map: 0\n     flows: 2940755\nResult: OK: 1960634(c1960634+d0) usec, 2048996 (64byte,-1frags)\n  1045067pps 535Mb/sec (535074304bps) errors: 3799927",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -348,10 +348,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.07182853900008,
+                  "duration_s": 2.115118295000002,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 107889  errors: 302445\n     started: 729630059us  stopped: 731660941us idle: 0us\n     seq_num: 107890  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 17131\n     cur_queue_map: 0\n     flows: 221550\nResult: OK: 2030881(c2030881+d0) usec, 107889 (64byte,-1frags)\n  53124pps 27Mb/sec (27199488bps) errors: 302445",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 235085  errors: 457493\n     started: 479580014us  stopped: 481540614us idle: 0us\n     seq_num: 235086  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 37239\n     cur_queue_map: 0\n     flows: 362629\nResult: OK: 1960600(c1960600+d0) usec, 235085 (64byte,-1frags)\n  119904pps 61Mb/sec (61390848bps) errors: 457493",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 },
                 {
@@ -378,10 +378,10 @@
                     "tool": "kernel_pktgen",
                     "xmit_mode": "start_xmit"
                   },
-                  "duration_s": 2.07182853900008,
+                  "duration_s": 2.115118295000002,
                   "returncode": 0,
                   "stderr": "",
-                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 851856  errors: 1866538\n     started: 729630443us  stopped: 731670074us idle: 0us\n     seq_num: 851857  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 31501\n     cur_queue_map: 0\n     flows: 1375553\nResult: OK: 2039631(c2039631+d0) usec, 851856 (64byte,-1frags)\n  417651pps 213Mb/sec (213837312bps) errors: 1866538",
+                  "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1812145  errors: 3346661\n     started: 479580121us  stopped: 481540752us idle: 0us\n     seq_num: 1812146  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 47155\n     cur_queue_map: 0\n     flows: 2595874\nResult: OK: 1960631(c1960631+d0) usec, 1812145 (64byte,-1frags)\n  924266pps 473Mb/sec (473224192bps) errors: 3346661",
                   "workload_name": "katran_kernel_pktgen_l2_udp_thread"
                 }
               ],
@@ -404,7 +404,7 @@
                 "tool": "kernel_pktgen",
                 "xmit_mode": "start_xmit"
               },
-              "duration_s": 2.07182853900008,
+              "duration_s": 2.115118295000002,
               "returncode": 0,
               "stderr": "",
               "stdout": "",
