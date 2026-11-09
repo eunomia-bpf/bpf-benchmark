@@ -1,0 +1,253 @@
+{
+  "parent_source": {
+    "source_head": "1415e8d6bb69b83eda710411b324736fef83c632",
+    "source_closure": "full BCC published cc245 plus df6 runtime source",
+    "parent_header_sha256": "2e52507f3f489973b32b32455f6e0d20fd2c6503740f02ea40c293c1791efaaa"
+  },
+  "candidate_header_sha256": "e324ba41260977b4552217152b1f8c948f778d640420d2f92bfe93cf82e57c6a",
+  "readonly_helpers": [
+    "bpf_ktime_get_ns",
+    "bpf_trace_printk",
+    "bpf_get_prandom_u32",
+    "bpf_get_smp_processor_id",
+    "bpf_get_current_pid_tgid",
+    "bpf_get_current_uid_gid",
+    "bpf_perf_event_output",
+    "bpf_get_stackid",
+    "bpf_get_current_task",
+    "bpf_current_task_under_cgroup",
+    "bpf_get_current_cgroup_id",
+    "bpf_jiffies64",
+    "bpf_ktime_get_boot_ns",
+    "bpf_ringbuf_output",
+    "bpf_ktime_get_coarse_ns",
+    "bpf_get_func_ip",
+    "bpf_get_attach_cookie"
+  ],
+  "host": [
+    {
+      "compiler": "gcc",
+      "name": "cache",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/cache-host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-cache"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "name": "exit",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_invocation_exit_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-exit"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "name": "output",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-output"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "cache",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/cache-host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-cache",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "exit",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_invocation_exit_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-exit",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "output",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-output",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": -11
+    },
+    {
+      "compiler": "gcc",
+      "name": "parent-output",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/parent-source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-parent-output"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "parent-output",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/parent-source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-parent-output",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": -11
+    }
+  ],
+  "actual_input_compilation": [
+    {
+      "label": "control",
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a"
+      },
+      "status": "compiled",
+      "ir_exit": 0
+    },
+    {
+      "label": "control",
+      "entry": "kprobe__cap_capable_entry",
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/control/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26"
+      },
+      "status": "compiled",
+      "ir_exit": 0
+    },
+    {
+      "label": "candidate",
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3"
+      },
+      "status": "compiled",
+      "ir_exit": 0
+    },
+    {
+      "label": "candidate",
+      "entry": "kprobe__cap_capable_entry",
+      "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/focused/candidate/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c"
+      },
+      "status": "compiled",
+      "ir_exit": 0
+    }
+  ],
+  "full_pair_state": "detached controller 3407552",
+  "native_executions": 0
+}

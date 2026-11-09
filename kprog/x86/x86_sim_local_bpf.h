@@ -247,27 +247,35 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 #ifdef X86_SIM_STACK_VALUE_WORDS
 #define X86_SIM_L_SV_TAG_NAME_(I) __x86_stack_value_tag_##I
 #define X86_SIM_L_SV_PTR_NAME_(I) __x86_stack_value_ptr_##I
+#define X86_SIM_L_SC_VALUE_NAME_(I) __x86_stack_scalar_value_##I
+#define X86_SIM_L_SC_VALID_NAME_(I) __x86_stack_scalar_valid_##I
+#define X86_SIM_L_SC_VALUE(I) X86_SIM_L_SC_VALUE_NAME_(I)
+#define X86_SIM_L_SC_VALID(I) X86_SIM_L_SC_VALID_NAME_(I)
 #define X86_SIM_L_SV_TAG(I) X86_SIM_L_SV_TAG_NAME_(I)
 #define X86_SIM_L_SV_PTR(I) X86_SIM_L_SV_PTR_NAME_(I)
-#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I)=0;
+#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I)=0; __u64 X86_SIM_L_SC_VALUE(I)=0; __u8 X86_SIM_L_SC_VALID(I)=0;
 #define X86_SIM_L_DECLARE_STACK_VALUES() X86_SIM_STACK_VALUE_WORDS(X86_SIM_L_SV_DECLARE)
 #define X86_SIM_L_SV_EACH(OP) X86_SIM_STACK_VALUE_WORDS(OP)
 #else
 #define X86_SIM_L_SV_TAG(I) __x86_stack_value_tags[(I)]
 #define X86_SIM_L_SV_PTR(I) __x86_stack_value_ptrs[(I)]
+#define X86_SIM_L_SC_VALUE(I) __x86_stack_scalar_values[(I)]
+#define X86_SIM_L_SC_VALID(I) __x86_stack_scalar_valid[(I)]
 #define X86_SIM_L_DECLARE_STACK_VALUES() \
     __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
-    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
+    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
+    __u64 __x86_stack_scalar_values[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
+    __u8 __x86_stack_scalar_valid[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
 #define X86_SIM_L_SV_EACH(OP) \
     _Pragma("unroll") \
     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }
 #endif
-#define X86_SIM_L_SV_CLEAR_ONE(I) X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR;
+#define X86_SIM_L_SV_CLEAR_ONE(I) X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0;
 #define X86_SIM_L_STACK_VALUES_CLEAR() do { X86_SIM_L_SV_EACH(X86_SIM_L_SV_CLEAR_ONE) } while(0)
 #define X86_SIM_L_SV_ERASE_ONE(I) \
     do { __u64 __x86_sv_start=(__u64)(I)*8U; \
          if (__x86_sv_index-__x86_sv_start<8U || __x86_sv_start-__x86_sv_index<__x86_sv_width) \
-             X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; } while(0);
+             { X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0; } } while(0);
 #define X86_SIM_L_STACK_VALUES_ERASE(INDEX, WIDTH) \
     do { __u64 __x86_sv_index=(INDEX),__x86_sv_width=X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_ERASE_ONE) } while(0)
@@ -275,6 +283,24 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
     do { if (__x86_sv_at==(__u64)(I)*8U) { \
         if (__x86_sv_tag==X86_SIM_TAG_STACK) X86_SIM_L_SV_PTR(I)=__x86_sv_pointer; \
         X86_SIM_L_SV_TAG(I)=__x86_sv_tag; } } while(0);
+/* Full-word forwarding retains the raw access and its original scalar identity.
+ * Every existing pointer-ghost invalidation also releases this value fact. */
+#define X86_SIM_L_SC_SAVE_ONE(I) \
+    do { if (__x86_sc_at==(__u64)(I)*8U) { \
+        X86_SIM_L_SC_VALUE(I)=__x86_sc_value; X86_SIM_L_SC_VALID(I)=1; } } while(0);
+#define X86_SIM_L_STACK_SCALAR_SAVE(INDEX, VALUE) \
+    do { __u64 __x86_sc_at=(INDEX), __x86_sc_value=(VALUE); \
+         if ((__s64)__x86_sc_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP()) { \
+             X86_SIM_L_SV_EACH(X86_SIM_L_SC_SAVE_ONE) } } while(0)
+#define X86_SIM_L_SC_READ_ONE(I) \
+    do { if (__x86_sc_at==(__u64)(I)*8U && X86_SIM_L_SC_VALID(I)) \
+        __x86_sc_value=X86_SIM_L_SC_VALUE(I); } while(0);
+#define X86_SIM_L_STACK_SCALAR_READ(INDEX, WIDTH, RAW) \
+    ({ __u64 __x86_sc_at=(INDEX), __x86_sc_value=(RAW); \
+       if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)==X86_WIDTH_64 && \
+           (__s64)__x86_sc_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP()) { \
+           X86_SIM_L_SV_EACH(X86_SIM_L_SC_READ_ONE) } \
+       __x86_sc_value; })
 #define X86_SIM_L_STACK_VALUES_SAVE(INDEX, WIDTH, POINTER, TAG) \
     do { __u64 __x86_sv_at=(INDEX); __u8 __x86_sv_tag=(TAG); \
          if ((__s64)__x86_sv_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP() && X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)==X86_WIDTH_64 && __x86_sv_tag!=X86_SIM_TAG_SCALAR) { \
@@ -291,7 +317,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
  * deallocated slots disappear while their architectural bytes stay raw. */
 #define X86_SIM_L_SV_BELOW_SP_ONE(I) \
     do { if ((__s64)((__u64)(I)*8U)-(__s64)X86_SIM_STACK_BYTES<__x86_sv_sp) \
-             X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; } while(0);
+             { X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0; } } while(0);
 #define X86_SIM_L_STACK_VALUES_CALL_FRAME() \
     do { __s64 __x86_sv_sp=(__s64)(long)__x86_rsp.ptr; \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_BELOW_SP_ONE) } while(0)
@@ -738,8 +764,13 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	} while (0)
 
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE) \
-    do { X86_SIM_L_STACK_VALUES_ERASE(X86_SIM_L_STACK_INDEX(OFF),(WIDTH)); \
-         X86_SIM_L_STACK_WRITE_RAW((OFF),(WIDTH),(VALUE)); } while(0)
+    do { __s64 __x86_sc_write_off=(OFF); __u8 __x86_sc_write_width=(WIDTH); \
+         __u64 __x86_sc_write_value=(VALUE); \
+         X86_SIM_L_STACK_VALUES_ERASE(X86_SIM_L_STACK_INDEX(__x86_sc_write_off),__x86_sc_write_width); \
+         X86_SIM_L_STACK_WRITE_RAW(__x86_sc_write_off,__x86_sc_write_width,__x86_sc_write_value); \
+         if (X86_SIM_L_EFFECTIVE_WIDTH(__x86_sc_write_width)==X86_WIDTH_64) \
+             X86_SIM_L_STACK_SCALAR_SAVE(X86_SIM_L_STACK_INDEX(__x86_sc_write_off),__x86_sc_write_value); \
+    } while(0)
 
 /* Bytes below the current native SP have an independent environment value.
  * Releasing an allocated byte also releases its value and pointer provenance. */
@@ -776,6 +807,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_str_value = __x86_stack_mem.q               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_str_index)];               \
+            __x86_str_value=X86_SIM_L_STACK_SCALAR_READ(__x86_str_index,(WIDTH),__x86_str_value); \
 		} else {                                                  \
 			volatile __u8 *__x86_str_bytes = __x86_stack_mem.b; \
 			__u8 __x86_str_width =                            \
@@ -846,11 +878,13 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
        X86_SIM_L_BARRIER_VAR(__x86_alias_delta); (__s64)__x86_alias_delta; })
 #define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \
     ({ __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
+       if ((TAG)==X86_SIM_TAG_STACK) __x86_alias_observed=X86_SIM_L_STACK_SCALAR_READ((__u64)(long)(ADDR)-(__u64)(long)&__x86_stack_mem.b[0],(WIDTH),__x86_alias_observed); \
        if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(ADDR)<X86_SIM_L_STACK_SP()) \
          __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
        __x86_alias_observed; })
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED(BASE, OFF, WIDTH, TAG) \
     ({ __u64 __x86_alias_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
+       if ((TAG)==X86_SIM_TAG_STACK) __x86_alias_observed=X86_SIM_L_STACK_SCALAR_READ((__u64)(long)KPROG_PTR_ADD64_BITS((BASE),(OFF))-(__u64)(long)&__x86_stack_mem.b[0],(WIDTH),__x86_alias_observed); \
        if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(KPROG_PTR_ADD64_BITS((BASE),(OFF)))<X86_SIM_L_STACK_SP()) \
          __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
        __x86_alias_observed; })
@@ -1454,6 +1488,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				X86_SIM_L_EFFECTIVE_WIDTH(FLAGS),          \
                 __x86_l_value); \
+            if (__x86_l_width==X86_WIDTH_64) X86_SIM_L_STACK_SCALAR_SAVE( \
+                X86_SIM_L_STACK_INDEX((__s64)(long)__x86_l_base_ptr+__x86_l_meta_disp),__x86_l_value); \
             if ((OP)==X86_OP_MOV_STORE_REG && __x86_l_width==X86_WIDTH_64 && \
                 KPROG_X86_STORE_SRC_SHIFT(0U,(AUX))==0U) \
                 X86_SIM_L_STACK_VALUES_SAVE( \
@@ -1474,6 +1510,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			else                                             \
 				X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, \
                     __x86_l_width,__x86_l_value,X86_SIM_L_REG_TAG(DST));     \
+            if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK && __x86_l_width==X86_WIDTH_64) \
+                X86_SIM_L_STACK_SCALAR_SAVE((__u64)(long)__x86_l_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_l_value); \
             if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK && (OP)==X86_OP_MOV_STORE_REG && \
                 __x86_l_width==X86_WIDTH_64 && KPROG_X86_STORE_SRC_SHIFT(0U,(AUX))==0U) \
                 X86_SIM_L_STACK_VALUES_SAVE( \
@@ -3056,16 +3094,16 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_ktime_get_ns() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_ns())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ktime_get_ns())
 
 #define X86_SIM_BPF_CALL_bpf_trace_printk() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_trace_printk((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), X86_SIM_L_READ_REG(X86_RDX), X86_SIM_L_READ_REG(X86_RCX), X86_SIM_L_READ_REG(X86_R8)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_trace_printk((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), X86_SIM_L_READ_REG(X86_RDX), X86_SIM_L_READ_REG(X86_RCX), X86_SIM_L_READ_REG(X86_R8)))
 
 #define X86_SIM_BPF_CALL_bpf_get_prandom_u32() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_prandom_u32())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_prandom_u32())
 
 #define X86_SIM_BPF_CALL_bpf_get_smp_processor_id() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_smp_processor_id())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_smp_processor_id())
 
 #define X86_SIM_BPF_CALL_bpf_skb_store_bytes() \
 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_skb_store_bytes((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
@@ -3080,10 +3118,10 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_tail_call((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_get_current_pid_tgid() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_pid_tgid())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_pid_tgid())
 
 #define X86_SIM_BPF_CALL_bpf_get_current_uid_gid() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_uid_gid())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_uid_gid())
 
 #define X86_SIM_BPF_CALL_bpf_get_current_comm() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
@@ -3098,13 +3136,13 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect((__u32)X86_SIM_L_READ_REG(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_perf_event_output() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_perf_event_output((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_perf_event_output((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
 
 #define X86_SIM_BPF_CALL_bpf_skb_load_bytes() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
 
 #define X86_SIM_BPF_CALL_bpf_get_stackid() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stackid((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_stackid((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_csum_diff() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_csum_diff((__be32 *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__be32 *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX), (__wsum)X86_SIM_L_READ_REG(X86_R8)))
@@ -3113,13 +3151,13 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_type((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_get_current_task() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_task())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_task())
 
 #define X86_SIM_BPF_CALL_bpf_probe_write_user() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_write_user((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_current_task_under_cgroup() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_current_task_under_cgroup((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_current_task_under_cgroup((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_skb_change_tail() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_tail((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
@@ -3161,7 +3199,7 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (struct bpf_fib_lookup *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RSI), (int)X86_SIM_L_READ_REG(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
 
 #define X86_SIM_BPF_CALL_bpf_get_current_cgroup_id() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_cgroup_id())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_cgroup_id())
 
 #define X86_SIM_BPF_CALL_bpf_sk_lookup_udp() \
 	X86_SIM_L_HELPER_POINTER_RESULT(bpf_sk_lookup_udp((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (struct bpf_sock_tuple *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
@@ -3200,7 +3238,7 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_jiffies64() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_jiffies64())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_jiffies64())
 
 #define X86_SIM_BPF_CALL_bpf_get_netns_cookie() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_netns_cookie((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
@@ -3209,10 +3247,10 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_assign((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
 
 #define X86_SIM_BPF_CALL_bpf_ktime_get_boot_ns() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_boot_ns())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ktime_get_boot_ns())
 
 #define X86_SIM_BPF_CALL_bpf_ringbuf_output() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_output((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ringbuf_output((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
 
 #define X86_SIM_BPF_CALL_bpf_copy_from_user() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
@@ -3227,16 +3265,16 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_POINTER_RESULT(bpf_get_current_task_btf())
 
 #define X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
 
 #define X86_SIM_BPF_CALL_bpf_check_mtu() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_check_mtu((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u32 *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDX), (__s32)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
 
 #define X86_SIM_BPF_CALL_bpf_get_func_ip() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_func_ip((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
 
 #define X86_SIM_BPF_CALL_bpf_get_attach_cookie() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_attach_cookie((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
 
 #define X86_SIM_BPF_CALL_bpf_task_pt_regs() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_task_pt_regs((struct task_struct *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
