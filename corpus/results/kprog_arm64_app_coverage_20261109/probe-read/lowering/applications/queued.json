@@ -374,13 +374,17 @@
       "manifest_rows": 32,
       "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned",
       "model_delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-model-delta.tar.gz",
-      "model_delta_sha256": "b02793168bbdc831dfb92231cb8d96c725db05b1e998f416f5ea5b9793bbc574",
+      "model_delta_sha256": "968eb46b6a17137381920508c63c405fd1741ee2501a9530bb4b8c5fec45861a",
       "model_overlay": {
         "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
         "paths": [
           "kprog/arm64/arm64_sim_local_bpf.h"
         ],
         "base_model_commit": "5bbbf128a2c47bf102376fb28c90df6cd14191a2"
+      },
+      "derivation": {
+        "make_exit": 0,
+        "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33"
       }
     },
     "tracee": {
@@ -1187,13 +1191,17 @@
       "manifest_rows": 123,
       "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned",
       "model_delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-model-delta.tar.gz",
-      "model_delta_sha256": "c4d02325116b9c6176cd42af86e87fd1bc4a7a330ac410322a4da1612bff090a",
+      "model_delta_sha256": "a1042b289402f9cb3fabde7a2b0b981182187a4b61b4ca56280e16c2fe5d5334",
       "model_overlay": {
         "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
         "paths": [
           "kprog/arm64/arm64_sim_local_bpf.h"
         ],
         "base_model_commit": "5bbbf128a2c47bf102376fb28c90df6cd14191a2"
+      },
+      "derivation": {
+        "make_exit": 0,
+        "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33"
       }
     }
   },
@@ -1223,6 +1231,8 @@
       "kprog/arm64/arm64_sim_local_bpf.h"
     ],
     "utc": "2026-11-09T06:31:36.178532+00:00",
-    "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model"
+    "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+    "derived_header": "kprog/arm64/arm64_sim_direct.h",
+    "derivation": "Existing owning Makefile target with existing libbpf host include"
   }
 }
