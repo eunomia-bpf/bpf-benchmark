@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-09T05:54:55.777863+00:00",
+  "controller_pid": 2867244,
+  "physical_storage": "/var/tmp/kprog-tmp/C/bcc-katran-constant-division",
+  "virtual_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-constant-division",
+  "dependency_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-native-size",
+  "dependency_pid": 2805722,
+  "compiler_result": "68b47d23849a633b705fbe573ad84bd5516148b7",
+  "producer": "/var/tmp/kprog-tmp/C/native-constant-division/candidate/native",
+  "sequence": [
+    "wait Os application/controller and guest terminal",
+    "original published38 with captured approved runtime",
+    "same-source whole BCC/Katran O3 constant-divisor candidate,3x180",
+    "publish full P/C/B/compiler/verifier/service/work outcomes"
+  ],
+  "timing_owner": "R,restored05-29 workload",
+  "benchmark_workload": "captured canonical compatibility epoch"
+}
