@@ -1,0 +1,70 @@
+{
+  "utc": "2026-11-09T08:17:21.537171+00:00",
+  "publication": "f4cc8d549939a7f37581e072947e85d977554f30",
+  "source": "6737766140096384da964e3044d16bf662365f16",
+  "counts": {
+    "catalog_rows": 86,
+    "attempted": 81,
+    "submitted": 81,
+    "installed": 1,
+    "verifier_rejected": 38,
+    "generation_failed": 42,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 37,
+    "failure_agrees": 36,
+    "failure_installed": 1,
+    "success": 2,
+    "success_agrees": 0,
+    "success_installed": 0
+  },
+  "agreement": [
+    {
+      "annotation": "failure",
+      "reached_verifier": 37,
+      "installed": 1,
+      "verifier_rejected": 36,
+      "agrees": 36
+    },
+    {
+      "annotation": "success",
+      "reached_verifier": 2,
+      "installed": 0,
+      "verifier_rejected": 2,
+      "agrees": 0
+    }
+  ],
+  "installed": [
+    {
+      "file": "dynptr_fail.c",
+      "program": "test_dynptr_reg_type",
+      "expect": "failure",
+      "stage": "installed",
+      "request_id": 81,
+      "native_sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78"
+    }
+  ],
+  "generation_causes": {
+    "unresolved native ABI external call bpf_dynptr_from_skb": 18,
+    "unresolved native ABI external call bpf_dynptr_from_skb_meta": 8,
+    "unresolved native ABI external call bpf_dynptr_from_xdp": 5,
+    "unresolved native ABI external call bpf_dynptr_adjust": 1,
+    "unresolved native ABI external call bpf_dynptr_is_null": 1,
+    "unresolved native ABI external call bpf_dynptr_is_rdonly": 1,
+    "unresolved native ABI external call bpf_dynptr_size": 1,
+    "unresolved native ABI external call bpf_dynptr_clone": 7
+  },
+  "load_only_native_executions": 0,
+  "runtime_admission_additions": 0,
+  "installed_rule": {
+    "program": "test_dynptr_reg_type",
+    "kernel_annotation_rule": "Original BPF global-function verification rejects the dynptr argument register type; whole opaque dynptr stack placement is required at that BPF call boundary.",
+    "native_P": "Native C compilation inlines the test-only global call, retaining the resulting native instructions and its local dynptr memory; the original eBPF global-call register boundary is represented by the original BPF build.",
+    "B": "B simulates that compiled native P through the native helper/stack sequence and installs. Its outcome is counted at installed stage against the original failure annotation.",
+    "prior_triage": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/runner-current/full/installed-annotation-triage.json",
+    "next": "S16/coordinator recovery-aware accepted-case classification retains the original annotation and native compile distinction."
+  }
+}

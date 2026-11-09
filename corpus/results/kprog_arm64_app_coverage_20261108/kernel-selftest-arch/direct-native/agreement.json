@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T05:41:11.130574+00:00",
+  "utc": "2026-11-09T08:17:21.537171+00:00",
   "scope": "Complete direct ARM original native catalog; installed is a load-only stage; native execution records retain their own outcomes",
   "epochs": [
     {
@@ -431,6 +431,58 @@
           "stage": "installed"
         }
       ]
+    },
+    {
+      "epoch": "dynptr-access-original-family",
+      "publication": "f4cc8d549939a7f37581e072947e85d977554f30",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261109/dynptr-access/qemu/summary.json",
+      "counts": {
+        "catalog_rows": 86,
+        "attempted": 81,
+        "submitted": 81,
+        "installed": 1,
+        "verifier_rejected": 38,
+        "generation_failed": 42,
+        "compilation_failed": 0,
+        "resource_failed": 0,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 37,
+        "failure_agrees": 36,
+        "failure_installed": 1,
+        "success": 2,
+        "success_agrees": 0,
+        "success_installed": 0
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 37,
+          "installed": 1,
+          "verifier_rejected": 36,
+          "agrees": 36
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 2,
+          "installed": 0,
+          "verifier_rejected": 2,
+          "agrees": 0
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "expect": "failure",
+          "stage": "installed",
+          "request_id": 81,
+          "native_sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78"
+        }
+      ],
+      "source": "6737766140096384da964e3044d16bf662365f16",
+      "native_test_run": 0
     }
   ],
   "subsets": [
