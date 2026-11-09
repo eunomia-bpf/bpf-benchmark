@@ -1,0 +1,491 @@
+{
+  "application": "bcc/set",
+  "native_requests": 12,
+  "generated": 12,
+  "compiled": 12,
+  "installed": 8,
+  "failed": 4,
+  "programs": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "entry": "fentry_vfs_read",
+      "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 2,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 3,
+      "status": -5,
+      "entry": "blk_account_io_merge_bio",
+      "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/trusted-native-loader', 'load', '4', '3', '118', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-xx8lefxg/generated/request.native.o', 'blk_account_io_merge_bio', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-xx8lefxg/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-xx8lefxg/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/native-link', '0', '0', '0', '0', '0', '0', 'cgroup_map', '72', 'null', 'filter_cg', '92', '0', 'infobyreq', '75', 'null']' returned non-zero exit status 1.",
+      "verifier_excerpt": [
+        "R0 invalid mem access 'scalar'",
+        "processed 241 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0",
+        "native_lab stub context: prog_type=2 blob_bytes=129 reloc_records=7 reloc_bytes=112 chunks=2 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=3 relocated_map_ids=3 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129918",
+        "retained_map_info=8:id=92:type=2:name=biosnoop.rodata,9:id=72:type=8:name=cgroup_map,10:id=75:type=1:name=infobyreq"
+      ]
+    },
+    {
+      "request_id": 4,
+      "status": 0,
+      "entry": "kprobe__cap_capable_entry",
+      "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 5,
+      "status": -5,
+      "entry": "inet_sock_set_state",
+      "native_sha256": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/trusted-native-loader', 'load', '4', '5', '125', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-azjsp_t_/generated/request.native.o', 'inet_sock_set_state', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-azjsp_t_/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-azjsp_t_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/native-link', '0', '0', '0', '0', '0', '0', 'birth', '96', 'null', 'events', '107', 'null', 'filter_dport', '111', '1', 'filter_sport', '111', '0', 'idents', '100', 'null', 'target_dports', '111', '2050', 'target_family', '111', '4104', 'target_pid', '111', '4100', 'target_sports', '111', '2']' returned non-zero exit status 1.",
+      "verifier_excerpt": [
+        "invalid write to stack R10 off=-528 size=4",
+        "processed 456 insns (limit 1000000) max_states_per_insn 0 total_states 25 peak_states 25 mark_read 0",
+        "retained_map_info=9:id=111:type=2:name=tcplife_.rodata,10:id=96:type=1:name=birth,11:id=100:type=1:name=idents,12:id=107:type=4:name=events"
+      ]
+    },
+    {
+      "request_id": 6,
+      "status": 0,
+      "entry": "tcp_v4_connect",
+      "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 7,
+      "status": 0,
+      "entry": "sched_wakeup",
+      "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 8,
+      "status": 0,
+      "entry": "sys_enter",
+      "native_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 9,
+      "status": 0,
+      "entry": "fentry_vfs_write",
+      "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 10,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": null,
+      "verifier_excerpt": []
+    },
+    {
+      "request_id": 11,
+      "status": -5,
+      "entry": "kprobe__cap_capable_exit",
+      "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/trusted-native-loader', 'load', '4', '11', '135', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-newcops4/generated/request.native.o', 'kprobe__cap_capable_exit', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-newcops4/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-newcops4/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/native-link', '0', '0', '0', '0', '0', '0', 'LINUX_KERNEL_VERSION', '81', '0', 'events', '65', 'null', 'info', '67', 'null', 'kernel_stack', '77', '8', 'seen', '68', 'null', 'stackmap', '66', 'null', 'start', '63', 'null', 'unique_type', '77', '4', 'user_stack', '77', '9']' returned non-zero exit status 1.",
+      "verifier_excerpt": [
+        "R0 invalid mem access 'scalar'",
+        "processed 656 insns (limit 1000000) max_states_per_insn 0 total_states 20 peak_states 20 mark_read 0",
+        "retained_map_info=12:id=63:type=1:name=start,13:id=81:type=2:name=capable.kconfig,14:id=77:type=2:name=capable_.rodata,15:id=68:type=1:name=seen,16:id=66:type=7:name=stackmap,17:id=67:type=1:name=info,18:id=65:type=4:name=events"
+      ]
+    },
+    {
+      "request_id": 12,
+      "status": -5,
+      "entry": "tcp_v4_connect_ret",
+      "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "native_sha256_matches": true,
+      "generated": true,
+      "compiled": true,
+      "error": "Command '['/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/trusted-native-loader', 'load', '4', '12', '138', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-2melx3ce/generated/request.native.o', 'tcp_v4_connect_ret', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-2melx3ce/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests/request-2melx3ce/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime/native-link', '0', '0', '0', '0', '0', '0', 'count_v4.zero', '110', '0', 'do_count', '109', '12', 'events', '98', 'null', 'filter_ports', '109', '16', 'filter_ports_len', '109', '0', 'ipv4_count', '85', 'null', 'sockets', '80', 'null', 'source_port', '109', '13']' returned non-zero exit status 1.",
+      "verifier_excerpt": []
+    }
+  ],
+  "summary": {
+    "started": "2026-11-09T10:18:44.995244+00:00",
+    "apps": "bcc/set",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-yox4_ay5/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-helper-output:c-current-shim-20261109",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/runtime.image.tar",
+      "SAMPLES=1",
+      "WORKLOAD_DURATION=2"
+    ],
+    "returncode": 0,
+    "retained_service_state": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application/trusted-state-20261109T101844",
+    "retained_service_files": [
+      "requests/11.failure.tar.gz",
+      "requests/12.failure.tar.gz",
+      "requests/3.failure.tar.gz",
+      "requests/5.failure.tar.gz",
+      "requests/requests.jsonl"
+    ],
+    "finished": "2026-11-09T10:24:56.432496+00:00",
+    "corpus_metadata": [
+      {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_102148_078721/metadata.json",
+        "status": "error",
+        "error_message": "corpus suite reported errors"
+      }
+    ],
+    "archive": "corpus-20261109T102504426988Z.tar.gz",
+    "archive_sha256": "0136ce3cdaf4c81a3a105d454e48e7ed23705b73ecbc444aed4a0f28423ba62d"
+  },
+  "results": [
+    {
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_102148_078721/metadata.json",
+        "status": "error",
+        "error_message": "corpus suite reported errors"
+      },
+      "application": "bcc/set",
+      "app": {
+        "app": "bcc/set",
+        "baseline": {
+          "bpf": {
+            "29": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 29,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 4433,
+              "run_time_ns_delta": 178650,
+              "type": "tracing"
+            },
+            "31": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 31,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "35": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 35,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 191201,
+              "run_time_ns_delta": 21797905,
+              "type": "tracepoint"
+            },
+            "36": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 36,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 4135,
+              "run_time_ns_delta": 171790,
+              "type": "tracing"
+            },
+            "37": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 37,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "38": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 38,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 12,
+              "run_time_ns_delta": 881,
+              "type": "tracing"
+            },
+            "39": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 39,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 191201,
+              "run_time_ns_delta": 283519526,
+              "type": "tracepoint"
+            },
+            "40": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 40,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 191881,
+              "run_time_ns_delta": 7158957,
+              "type": "tracing"
+            },
+            "43": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 43,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 239,
+              "run_time_ns_delta": 10610,
+              "type": "tracing"
+            },
+            "45": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 45,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 324255,
+              "run_time_ns_delta": 33237629,
+              "type": "kprobe"
+            },
+            "47": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 47,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 242750,
+              "run_time_ns_delta": 30716418,
+              "type": "tracing"
+            },
+            "51": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 51,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 324251,
+              "run_time_ns_delta": 122954726,
+              "type": "kprobe"
+            },
+            "52": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 52,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 78,
+              "run_time_ns_delta": 44265,
+              "type": "tracing"
+            },
+            "55": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 55,
+              "name": "sched_switch",
+              "run_cnt_delta": 478089,
+              "run_time_ns_delta": 135316693,
+              "type": "tracing"
+            },
+            "57": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 57,
+              "name": "sys_enter",
+              "run_cnt_delta": 7350623,
+              "run_time_ns_delta": 865875711,
+              "type": "tracepoint"
+            },
+            "60": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 60,
+              "name": "sys_exit",
+              "run_cnt_delta": 7350632,
+              "run_time_ns_delta": 598355541,
+              "type": "tracepoint"
+            },
+            "62": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 62,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "66": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 66,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 39,
+              "run_time_ns_delta": 9592,
+              "type": "kprobe"
+            },
+            "67": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 67,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "69": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 69,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "70": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 70,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "71": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 71,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "72": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 72,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 51,
+              "run_time_ns_delta": 56015,
+              "type": "tracing"
+            },
+            "74": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 74,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 58,
+              "run_time_ns_delta": 265242,
+              "type": "tracing"
+            },
+            "75": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 75,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            }
+          },
+          "workloads": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14528",
+                "--timeout",
+                "2s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/8b2af0f8"
+              ],
+              "config": {
+                "stressors": [
+                  "syscall",
+                  "cap",
+                  "set",
+                  "sockfd"
+                ],
+                "tool": "stress-ng"
+              },
+              "duration_s": 2.0199229860000116,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "stress-ng: info:  [1815] setting to a 2 secs run per stressor\nstress-ng: info:  [1815] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1815] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1816] syscall: using method 'fast75'\nstress-ng: info:  [1816] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1816] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1816] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1816] syscall:                  pkey_get       61.4         33\nstress-ng: info:  [1816] syscall:                      time       69.4         54\nstress-ng: info:  [1816] syscall:                  pkey_set       90.8         71\nstress-ng: info:  [1816] syscall:                    getcpu      106.0         52\nstress-ng: info:  [1816] syscall:              gettimeofday      286.6         63\nstress-ng: info:  [1816] syscall:                 pkey_free      577.9        520\nstress-ng: info:  [1816] syscall:           set_robust_list      600.1        549\nstress-ng: info:  [1816] syscall:                     umask      636.3        573\nstress-ng: info:  [1816] syscall:                   prlimit      647.8        562\nstress-ng: info:  [1816] syscall:                   getppid      661.7        546\nstress-ng: metrc: [1815] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1815]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1815] syscall            8654      2.00      0.01      0.06      4322.10      120795.06\nstress-ng: metrc: [1815] cap              384270      2.00      0.31      1.51    192134.61      211646.59\nstress-ng: metrc: [1815] set               28698      2.00      0.17      1.61     14349.02       16091.49\nstress-ng: metrc: [1815] sockfd           187228      2.00      0.17      1.82     93588.60       94219.64\nstress-ng: info:  [1815] skipped: 0\nstress-ng: info:  [1815] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1815] failed: 0\nstress-ng: info:  [1815] metrics untrustworthy: 0\nstress-ng: info:  [1815] successful run completed in 2.01 secs",
+              "workload_name": "stress_ng_bcc_hook_hot"
+            }
+          ]
+        },
+        "error": "BCC tool capable exited before BPF programs were tracked by shim",
+        "post_rejit": null,
+        "rejit_result": {
+          "enabled_passes": [],
+          "mode": "verified_native_loader",
+          "status": "ok"
+        },
+        "runner": "bcc_set",
+        "runner_details": {
+          "command_used": [],
+          "process_output": {
+            "stderr_tail": "",
+            "stdout_tail": ""
+          }
+        },
+        "selected_workload": "stress_ng_bcc_hook_hot",
+        "status": "error"
+      }
+    }
+  ]
+}

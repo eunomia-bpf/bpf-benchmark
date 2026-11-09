@@ -1,0 +1,43 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T10:02:17.202906+00:00",
+    "parent_model": "c4fe77f34e6d43746b9aa1f266a606fcc8d8b2ea579560774f35fa43eae10255",
+    "candidate_model": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+    "native_p": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/control/bcc",
+    "native_profile": "complete8tool canonicalO3 producer retained",
+    "parent_runtime": "/var/tmp/kprog-tmp/C/coherent-six-app-runtime",
+    "queued_after_pid": 3571776,
+    "native_fixture_set": "original38 unchanged, risky inputs load-only",
+    "framework_freeze": "9f3855f6f",
+    "virtual_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application",
+    "source_change": "8 helper wrappers; exact output-byte ghost invalidation; existing caller-frame operation",
+    "admission_additions": 0,
+    "preceding_trial": "e929a65093b36852e5f139f5a5275a14e48fb345",
+    "original38_receipt": "same candidate/kernel/first-log-loader prior9valid26verifier1generation2protected-read load-only",
+    "runtime_change": "current five-step shim paired with same loader through coherent six-app image"
+  },
+  "original38": {
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  },
+  "make_exit": 0,
+  "native_requests": 12,
+  "generated": 12,
+  "compiled": 12,
+  "installed": 8,
+  "failed": 4,
+  "app_outcomes": [
+    {
+      "application": "bcc/set",
+      "status": "error",
+      "error": "BCC tool capable exited before BPF programs were tracked by shim"
+    }
+  ]
+}
