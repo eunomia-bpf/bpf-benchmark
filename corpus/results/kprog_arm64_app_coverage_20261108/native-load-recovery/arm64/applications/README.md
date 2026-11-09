@@ -1,0 +1,3 @@
+ARM BCC and Katran paired native-load recovery replay
+
+This two-start cohort retains original whole application manifests and workload. BCC uses the8exact archived Armv8.1LSE native tool objects from b9378e020, preserving all23application and startup manifest rows. Katran retains its native inputs. Both use the newly built same-copy native-load recovery Image/module/worker and configured module BTF epoch together, including all11native kinsn modules. BCC retains originalTCP/fsync/libaio/256MiBext4 recipe2GiB16-19; Katran follows8GiB16-19. Full per-program work and actual service/verifier stages are retained. Runtime admission additions:0.
