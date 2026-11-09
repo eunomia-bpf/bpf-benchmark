@@ -1224,7 +1224,8 @@ native-loader source-context flags=0 token_fd=-1
 | generated source | 911,444 bytes, 21,822 lines |
 | compiler resident set | 9.3 GB, flat |
 | compiler CPU | 6,013 ticks per 60 s -- one full core, advancing |
-| wall time with no external timeout | past 5 minutes, not finished |
+| wall time with no external timeout | past 11 minutes and still compiling |
+| compiler peak resident set | 9.3 GB, falling to 2.3 GB in its codegen phase |
 | broker compiles that returned | 3 of 4 (`returncode: 0`) |
 
 So generation and the earlier compiles succeed; this one program's generated
