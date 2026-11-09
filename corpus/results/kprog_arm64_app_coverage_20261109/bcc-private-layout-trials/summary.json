@@ -1,0 +1,194 @@
+{
+  "utc": "2026-11-09T09:24:29.124716+00:00",
+  "base_commit": "562602751e863b58568b63be67534dfc025e68b2",
+  "canonical_model_publication": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "rows": [
+    {
+      "request": 5,
+      "entry": "inet_sock_set_state",
+      "parent": {
+        "sha256": "607fd60b515efa2816984a4ec06aec2183509c0f70e9325f4267c5f9ac383a0a",
+        "frame_extent_bytes": 704,
+        "instruction_lines": 3734
+      },
+      "packed_validity": {
+        "sha256": "0712d33b3944da244b9cf025d63c64deddab303aeea0c1feedfeb10a3efe7644",
+        "frame_extent_bytes": 672,
+        "instruction_lines": 3703
+      },
+      "compact_scalar_slots": {
+        "sha256": "3f5ea718b1fe28401c3e09ce5f6d1e0a8778e286e3ed214740bd8fb5bf38c763",
+        "frame_extent_bytes": 536,
+        "instruction_lines": 3637
+      },
+      "common_native_Os": {
+        "sha256": "2e0829ee2bb107b8cfb61a7aec903df504c78e82ac32ffe98901de11e4e2d99d",
+        "frame_extent_bytes": 704,
+        "instruction_lines": 3818
+      }
+    },
+    {
+      "request": 10,
+      "entry": "sys_exit_openat",
+      "parent": {
+        "sha256": "87189fcaeda703533a7020e917f0c48a98dd1ab7063f2e2ef22bd8c2fd042e38",
+        "frame_extent_bytes": 648,
+        "instruction_lines": 2627
+      },
+      "packed_validity": {
+        "sha256": "2dfffe4c17feb6d8f27630baa8b0b975df5caeddaeabb741b7657f9cb0efcbdd",
+        "frame_extent_bytes": 592,
+        "instruction_lines": 2584
+      },
+      "compact_scalar_slots": {
+        "sha256": "5ea42de7a3f89dc47d1f414e67858d2e6e60da5f3cf807a3ce8096098d10c73b",
+        "frame_extent_bytes": 600,
+        "instruction_lines": 2597
+      },
+      "common_native_Os": {
+        "sha256": "d2c9c8523acf4cae94b6949160532210047d9d61699ae4643d0a0b71e79f1d0b",
+        "frame_extent_bytes": 648,
+        "instruction_lines": 2627
+      }
+    },
+    {
+      "request": 11,
+      "entry": "block_rq_insert",
+      "parent": {
+        "sha256": "2e05dcc2ebb567549a0f743a636644ec19243935709aafc2a972ef25fe138655",
+        "frame_extent_bytes": 120,
+        "instruction_lines": 1681
+      },
+      "packed_validity": {
+        "sha256": "3cb049a4c65530e920501835bc771ce82dc20d678e4aad451867788cd528c967",
+        "frame_extent_bytes": 128,
+        "instruction_lines": 1600
+      },
+      "compact_scalar_slots": {
+        "sha256": "7733f009fcdd37d4a07c2e6eccc3e6f7b07fda99be6f379e421a064827678e95",
+        "frame_extent_bytes": 104,
+        "instruction_lines": 1662
+      },
+      "common_native_Os": {
+        "sha256": "0b09a0ccea9d11cb00b0bd96c7264a62e87cee6a6bb0b60446f2b4e3cb33154e",
+        "frame_extent_bytes": 120,
+        "instruction_lines": 1465
+      }
+    },
+    {
+      "request": 12,
+      "entry": "capable_exit",
+      "parent": {
+        "sha256": "ad839de1b543515b266596fa6d9ce16e1cbf4b386795d32fd2722da9d473d8ac",
+        "frame_extent_bytes": 184,
+        "instruction_lines": 2547
+      },
+      "packed_validity": {
+        "sha256": "702a5994ad782fdc819d2f41af31dc2d1b20708b399813aa8c4a9f31f3b023aa",
+        "frame_extent_bytes": 184,
+        "instruction_lines": 2489
+      },
+      "compact_scalar_slots": {
+        "sha256": "5614c0c685d69aedcb6f9a19e2a35a9f434c972631daae4f3de2ec904fe824ec",
+        "frame_extent_bytes": 152,
+        "instruction_lines": 2315
+      },
+      "common_native_Os": {
+        "sha256": "c0c29f60c3c4c4a71ac0426aa91934ed95b80bf8f007830cb367ec7e21f352b3",
+        "frame_extent_bytes": 184,
+        "instruction_lines": 2071
+      }
+    }
+  ],
+  "native_Os": {
+    "utc": "2026-11-09T09:06:22.230400+00:00",
+    "phase": "finished",
+    "rows": [
+      {
+        "unit": "capable",
+        "exit": 0
+      },
+      {
+        "unit": "biosnoop",
+        "exit": 0
+      },
+      {
+        "unit": "vfsstat",
+        "exit": 0
+      },
+      {
+        "unit": "opensnoop",
+        "exit": 0
+      },
+      {
+        "unit": "syscount",
+        "exit": 0
+      },
+      {
+        "unit": "tcpconnect",
+        "exit": 0
+      },
+      {
+        "unit": "tcplife",
+        "exit": 0
+      },
+      {
+        "unit": "runqlat",
+        "exit": 0
+      }
+    ]
+  },
+  "packed": {
+    "utc": "2026-11-09T08:48:57.174356+00:00",
+    "phase": "finished",
+    "commands": [
+      {
+        "cohort": "candidate",
+        "request": 5,
+        "exit": 0
+      },
+      {
+        "cohort": "candidate",
+        "request": 10,
+        "exit": 0
+      },
+      {
+        "cohort": "candidate",
+        "request": 11,
+        "exit": 0
+      },
+      {
+        "cohort": "candidate",
+        "request": 12,
+        "exit": 0
+      },
+      {
+        "cohort": "parent",
+        "request": 5,
+        "exit": 0
+      },
+      {
+        "cohort": "parent",
+        "request": 10,
+        "exit": 0
+      },
+      {
+        "cohort": "parent",
+        "request": 11,
+        "exit": 0
+      },
+      {
+        "cohort": "parent",
+        "request": 12,
+        "exit": 0
+      }
+    ]
+  },
+  "compact": {
+    "utc": "2026-11-09T08:58:47.728154+00:00",
+    "phase": "finished",
+    "exit": 0
+  },
+  "scope": "Private compilation and code-layout observations; full-app outcomes belong to the separately published replay cohorts.",
+  "runtime_admission_additions": 0
+}
