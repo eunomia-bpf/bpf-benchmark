@@ -1,0 +1,211 @@
+{
+  "make_exit": 0,
+  "source": "bc0b5b1c51b76b2a4afda019e59618f1562be769",
+  "loader": "fb23a234d88f80a397a893d3d9188d680bdd6d13",
+  "generic": {
+    "programs": [
+      {
+        "name": "movs8_valid",
+        "positive": true,
+        "width": 1,
+        "count": 65,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs8_valid.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 1,
+          "source_prog_id": 0,
+          "native_sha256": "6a89ca434309cd546eb07097253f2016f8e469b2a35884c004f93214dd9e8ae7",
+          "started": "2026-11-09T09:13:52.738639+00:00",
+          "prog_id": 4,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/1.success.tar.gz",
+          "finished": "2026-11-09T09:14:04.925137+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs16_valid",
+        "positive": true,
+        "width": 2,
+        "count": 65,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs16_valid.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 2,
+          "source_prog_id": 0,
+          "native_sha256": "d95cd7df48b194c79edf86a0cf515fc4a0fb7a73619e065948f5839b53060599",
+          "started": "2026-11-09T09:14:05.363173+00:00",
+          "prog_id": 8,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/2.success.tar.gz",
+          "finished": "2026-11-09T09:14:08.752340+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs32_valid",
+        "positive": true,
+        "width": 4,
+        "count": 65,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs32_valid.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 3,
+          "source_prog_id": 0,
+          "native_sha256": "4abbdb3092a911ec5da6be8570c3cca7cbee180cf99693241d8a86cc9376b125",
+          "started": "2026-11-09T09:14:09.040828+00:00",
+          "prog_id": 12,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/3.success.tar.gz",
+          "finished": "2026-11-09T09:14:14.582213+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs64_valid",
+        "positive": true,
+        "width": 8,
+        "count": 8,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs64_valid.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 4,
+          "source_prog_id": 0,
+          "native_sha256": "595885f97882fbb712fd7d73fe9772a4e502545f14ff6cea2659e08126db93d6",
+          "started": "2026-11-09T09:14:15.037171+00:00",
+          "prog_id": 16,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/4.success.tar.gz",
+          "finished": "2026-11-09T09:14:19.416398+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs_zero_null",
+        "positive": true,
+        "count": 0,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs_zero_null.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 5,
+          "source_prog_id": 0,
+          "native_sha256": "e6a264d9ccabd983d31de8753884ea5163f214d931921a4146f17178cb8646d1",
+          "started": "2026-11-09T09:14:19.556477+00:00",
+          "prog_id": 20,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/5.success.tar.gz",
+          "finished": "2026-11-09T09:14:22.521017+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs_null_read_max_count",
+        "positive": true,
+        "count": 18446744073709551615,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs_null_read_max_count.native.o",
+          "0",
+          "2"
+        ],
+        "returncode": 0,
+        "service": {
+          "request_id": 6,
+          "source_prog_id": 0,
+          "native_sha256": "01ac18d5ab9cdb358f21fa19323390f94ac09c711938eea2b9c0f58cf82abb2b",
+          "started": "2026-11-09T09:14:22.875936+00:00",
+          "prog_id": 24,
+          "status": 0,
+          "artifact_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/6.success.tar.gz",
+          "finished": "2026-11-09T09:14:27.316328+00:00"
+        },
+        "stage": "valid_executed"
+      },
+      {
+        "name": "movs_null_write",
+        "positive": false,
+        "count": 1,
+        "expected_retval": 2,
+        "expected_packet_u64": 0,
+        "command": [
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/canonical-probe",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/safety/build/context_array.bpf.o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/movs_null_write.native.o"
+        ],
+        "returncode": 1,
+        "service": {
+          "request_id": 7,
+          "source_prog_id": 0,
+          "native_sha256": "30005d6036b75974dfaebfda7573c11d90965c71ad9263459067286dc9070f2d",
+          "started": "2026-11-09T09:14:27.453462+00:00",
+          "status": -5,
+          "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '7', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.",
+          "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 208, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '7', '0', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/request.native.o', 'entry', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/request-9e48r6dv/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '6', '1', '0', '0']' returned non-zero exit status 1.\n",
+          "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/rep-movs-full-count/safety-control/rep-movs/requests/7.failure.tar.gz",
+          "finished": "2026-11-09T09:14:30.648554+00:00"
+        },
+        "stage": "verifier_or_generation_rejected"
+      }
+    ],
+    "negative_test_run_calls": 0,
+    "service_ready": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "status": "observed"
+  },
+  "original38": {
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  }
+}
