@@ -1,0 +1,5 @@
+ARM BCC fixed-register native producer trial
+
+The complete8BCC cohort reserves x20-x25 alongside existing x18/x26-x28 while retaining O3, scalar probe-read lowering, Armv8.1LSE and the paired biosnoop0185source edit. All8native objects compile, and all4actual prior failing entries generate and compile B. Their B stack extents are inet_sock_set_state624, sys_exit_openat968, block_rq_insert120, capable_exit184bytes. The two large entries retain the stock512frame frontier; the application replay keeps the original register profile. This receipt measures generated code layout; functional/full-app counters belong to the separate full replay.
+
+The initial frontend command also requested fixed x19/x29; clang18 emits its original unsupported-option diagnostics for these two flags. The successor uses the supported fixed-register options listed above. Every initial/final command and diagnostic, actual edited/original C/header input, native ELF, generated B and metadata is in raw.tar.gz. Published simulator555 retains its source. Runtime admission additions:0.

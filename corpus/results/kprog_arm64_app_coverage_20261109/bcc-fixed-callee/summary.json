@@ -1,0 +1,108 @@
+{
+  "utc": "2026-11-09T09:38:38.634597+00:00",
+  "native_status": {
+    "utc": "2026-11-09T09:37:05.751468+00:00",
+    "phase": "finished",
+    "rows": [
+      {
+        "label": "capable",
+        "exit": 0
+      },
+      {
+        "label": "biosnoop",
+        "exit": 0
+      },
+      {
+        "label": "vfsstat",
+        "exit": 0
+      },
+      {
+        "label": "opensnoop",
+        "exit": 0
+      },
+      {
+        "label": "syscount",
+        "exit": 0
+      },
+      {
+        "label": "tcpconnect",
+        "exit": 0
+      },
+      {
+        "label": "tcplife",
+        "exit": 0
+      },
+      {
+        "label": "runqlat",
+        "exit": 0
+      },
+      {
+        "label": "generation",
+        "exit": 0
+      }
+    ]
+  },
+  "generation": [
+    {
+      "request": 5,
+      "unit": "tcplife",
+      "phase": "compiled",
+      "frame_extent_bytes": 624,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/5/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/5/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "2bd1bcc507faf433c7dcb22746ce9d56c414493a5d7999b64d2c0c49dcbdc383"
+      }
+    },
+    {
+      "request": 10,
+      "unit": "opensnoop",
+      "phase": "compiled",
+      "frame_extent_bytes": 968,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/10/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/10/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "ddbac3d4688797b658bf8e9834a3585ca42a7fa3c8afa5f674e643ea111ea62c"
+      }
+    },
+    {
+      "request": 11,
+      "unit": "biosnoop",
+      "phase": "compiled",
+      "frame_extent_bytes": 120,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/11/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/11/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "bed0717e8e67f9d683c57dd89f8a7169c74cdaec6380767e8013c96820f216e8"
+      }
+    },
+    {
+      "request": 12,
+      "unit": "capable",
+      "phase": "compiled",
+      "frame_extent_bytes": 184,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/12/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/bcc-fixed-callee/generated/12/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "f0d373b7756dbc3ab7b6ec8593650af02f0aa9c5e8aa55e46a43ee84731979b4"
+      }
+    }
+  ],
+  "flags": "Existing fixed x18,x26,x27,x28 plus fixed x20-x25; original O3/scalar-probe-read/Armv8.1LSE",
+  "source": "Paired biosnoop0185e288b C and original other7BCCtools",
+  "model_publication": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "canonical_profile_retained": "O3/scalar-probe-read/Armv8.1LSE original register allocation",
+  "runtime_admission_additions": 0
+}
