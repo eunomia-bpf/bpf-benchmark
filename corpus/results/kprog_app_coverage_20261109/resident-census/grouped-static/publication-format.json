@@ -1,0 +1,19 @@
+{
+  "kind": "publication_harness_observation",
+  "stage_publication_completed_groups": [
+    3
+  ],
+  "gzip_json_roundtrip_rows": 3,
+  "fixture_phase_counts": {
+    "generated": 3,
+    "compiled": 3,
+    "verifier_accepted": 3,
+    "verifier_rejected": 0
+  },
+  "part_boundary_bytes": [
+    48000000,
+    1
+  ],
+  "part_roundtrip": true,
+  "native_execution_requests": 0
+}

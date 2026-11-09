@@ -29,12 +29,35 @@ def write(path, value):
     Path(path).write_text(json.dumps(value, indent=2) + "\n")
 
 
+def store_compressed(base, name, payload):
+    """Store one gzip stream in files below the requested 50 MB ceiling."""
+    chunk_bytes = 48_000_000
+    if len(payload) <= chunk_bytes:
+        path = base / name
+        path.write_bytes(payload)
+        return path.name, [path]
+    parts = []
+    paths = []
+    for number, start in enumerate(range(0, len(payload), chunk_bytes)):
+        chunk = payload[start:start + chunk_bytes]
+        path = base / (name + ".part" + str(number).zfill(3))
+        path.write_bytes(chunk)
+        paths.append(path)
+        parts.append(dict(file=path.name, bytes=len(chunk),
+                          sha256=hashlib.sha256(chunk).hexdigest()))
+    manifest = base / (name + ".parts.json")
+    write(manifest, dict(format="concatenate parts in order, then decompress gzip",
+          bytes=len(payload), sha256=hashlib.sha256(payload).hexdigest(),
+          parts=parts))
+    return manifest.name, paths + [manifest]
+
+
 def prepare(scratch, original):
     scratch.mkdir(parents=True, exist_ok=True)
     inventory = json.loads((original / "run-inventory.json").read_text())
     resources = json.loads((original / "resource-index.json").read_text())
     completed = json.loads((original / "stock-progress.json").read_text())
-    completed_by_id = {r["source_prog_id"]: r for r in completed["programs"]}
+    completed_by_id = {(r["application"], r["source_prog_id"]): r for r in completed["programs"]}
     candidates = collections.defaultdict(list)
     for row in inventory["programs"]:
         candidate = row["native_candidates"][0]
@@ -54,8 +77,8 @@ def prepare(scratch, original):
         group = groups.setdefault(identity, dict(body_sha256=identity,
             proof_object=str(proof), members=[], representative=members[0]))
         group["members"].extend(members)
-        observed = [completed_by_id[r["source_prog_id"]] for r in members
-                    if r["source_prog_id"] in completed_by_id]
+        observed = [completed_by_id[(r["application"], r["source_prog_id"])] for r in members
+                    if (r["application"], r["source_prog_id"]) in completed_by_id]
         if observed and "outcome" not in group:
             row = dict(observed[0])
             row["compiler_failures"] = census.compiler_failures(row)
@@ -72,14 +95,16 @@ def prepare(scratch, original):
 
 
 def publish(scratch, data, commit=True):
-    base = ROOT / "corpus/results/kprog_app_coverage_20261109/resident-census/grouped-static"
+    base = Path(data.get("output", ROOT / "corpus/results/kprog_app_coverage_20261109/resident-census/grouped-static"))
     base.mkdir(parents=True, exist_ok=True)
     classes = collections.Counter()
     unique = collections.Counter()
     records = []
     for group in data["groups"]:
         outcome = group.get("outcome")
-        label = outcome["failure_class"] if outcome else "pending"
+        label = census.failure_class(outcome) if outcome else "pending"
+        if outcome:
+            outcome["failure_class"] = label
         classes[label] += len(group["members"])
         unique[label] += 1
         records.append(dict(body_sha256=group["body_sha256"],
@@ -99,8 +124,16 @@ def publish(scratch, data, commit=True):
         instance_scope="Class distribution weighted by identical-body membership; each outcome is the actual representative submission",
         native_execution_requests=0, raw_outcomes_file="outcomes.json.gz", groups=records)
     outcomes = {g["body_sha256"]: g["outcome"] for g in data["groups"] if "outcome" in g}
-    (base / "outcomes.json.gz").write_bytes(gzip.compress(
+    raw_name, raw_paths = store_compressed(base, "outcomes.json.gz", gzip.compress(
         (json.dumps(outcomes, indent=2) + "\n").encode(), mtime=0))
+    result["raw_outcomes_file"] = raw_name
+    result["phase_instances"] = {
+        key: sum(len(g["members"]) for g in data["groups"]
+                 if g.get("outcome", {}).get(field) == value)
+        for key, field, value in [
+            ("generated", "generated", True), ("compiled", "compiled", True),
+            ("verifier_accepted", "stage", "installed"),
+            ("verifier_rejected", "stage", "verifier_rejected")]}
     write(base / "result.json", result)
     write(base / "membership.json", {k: v for k, v in data.items() if k != "groups"} |
         {"groups": [{k: v for k, v in g.items() if k != "outcome"} for g in data["groups"]]})
@@ -112,11 +145,11 @@ def publish(scratch, data, commit=True):
     for label, count in classes.most_common():
         lines.append("| " + label + " | " + str(unique[label]) + " | " + str(count) + " |")
     lines += ["", "Each body is the complete linked native proof ELF with its executable bytes, data and relocation identities. Members retain their resident IDs and original resource/context inputs. The table weights a representative observation by body membership; the source program IDs identify the actual submissions.",
-        "", "Complete representative outcome records, including every diagnostic character, are stored losslessly in outcomes.json.gz, keyed by body SHA256. The compact table retains the class, actual stage and resident membership.",
+        "", "Complete representative outcome records, including every diagnostic character, are stored losslessly in the gzip stream named by result.json raw_outcomes_file, keyed by body SHA256. Ordered part manifests specify concatenation before decompression. The compact table retains the class, actual stage and resident membership.",
         "", "Model epoch: " + data["model_head"] + ". Retained completed requests supply their original raw records. Remaining representatives use separate stock-kernel guests and host compilers across CPUs8-19, one representative per body. Each guest uses one vCPU and2GiB. Application execution requests:0. The benchmark framework retains its frozen definition.",
-        "", "The initial549-instance census and this275-instance grouped continuation retain separate epochs and counts. Runtime resources and BTF differences remain visible in membership.json; weighted body classes describe this census sampling rule."]
+        "", "Each cohort retains its explicit resident membership, model epoch and actual representative observations. Runtime resources and BTF differences remain visible in membership.json; weighted body classes describe this census sampling rule. Publication occurs once at stage end; compressed streams use ordered parts below50MB."]
     (base / "README.md").write_text("\n".join(lines) + "\n")
-    paths = [base / n for n in ["result.json", "membership.json", "README.md", "outcomes.json.gz"]]
+    paths = [base / n for n in ["result.json", "membership.json", "README.md"]] + raw_paths
     raw_dir = base / "requests"
     raw_dir.mkdir(exist_ok=True)
     for group in data["groups"]:
@@ -126,19 +159,8 @@ def publish(scratch, data, commit=True):
         archive = service.get("failure_archive", service.get("artifact_archive"))
         if archive and Path(archive).is_file():
             target = raw_dir / (group["body_sha256"] + ".tar.gz")
-            if not target.exists():
-                shutil.copy2(archive, target)
-            paths.append(target)
-    todo = ROOT / "kprog/docs/todo.md"
-    text = todo.read_text()
-    prefix = "- [ ] **A** 这 275 个程序的静态结果"
-    for line in text.splitlines():
-        if line.startswith(prefix):
-            replacement = prefix + "，按 native body 分组并行：27 个候选入口组；实际 linked body " + str(len(records)) + " 组，完成 " + str(result["groups_completed"]) + " 组，覆盖 " + str(result["represented_instances"]) + "/275 加权实例。模型 " + data["model_head"][:9] + "；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。"
-            text = text.replace(line, replacement, 1)
-            break
-    todo.write_text(text)
-    paths.append(todo)
+            _, archive_paths = store_compressed(raw_dir, target.name, Path(archive).read_bytes())
+            paths.extend(archive_paths)
     if not commit:
         write(scratch / "collection.json", result)
         return result
@@ -146,6 +168,16 @@ def publish(scratch, data, commit=True):
         "/var/tmp/kprog-tmp/A/publication/publish.py")
     publisher = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(publisher)
+    unchanged = all(subprocess.run(
+        ["git", "cat-file", "-e", "HEAD:" + str(p.relative_to(ROOT))],
+        cwd=ROOT, capture_output=True).returncode == 0 and
+        subprocess.check_output(["git", "show", "HEAD:" + str(p.relative_to(ROOT))],
+                                cwd=ROOT) == p.read_bytes() for p in paths)
+    if unchanged:
+        write(scratch / "publication.json", dict(
+            status="identical stage artifacts retained in current history",
+            head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()))
+        return result
     receipt = publisher.publish([str(p.relative_to(ROOT)) for p in paths],
         "Publish weighted resident native-body failure classes", "grouped-native-classes")
     write(scratch / "publication.json", receipt)
@@ -154,7 +186,7 @@ def publish(scratch, data, commit=True):
             datetime.datetime.now(datetime.timezone.utc).isoformat() + ": PUSHED " +
             receipt["commit"] + " grouped native census actual representatives " +
             str(result["groups_completed"]) + "/" + str(len(records)) + ", weighted " +
-            str(result["represented_instances"]) + "/275; classes " +
+            str(result["represented_instances"]) + "/" + str(data["instances"]) + "; classes " +
             json.dumps(dict(classes)) + ". Per-group raw and membership published. Model" +
             data["model_head"] + "; native executions0. Coordinator14:35 sampling and CPU8-19 parallelism applied.\n")
     return result
@@ -213,7 +245,7 @@ def shard(scratch, original, group, cpu):
     inventory = json.loads((original / "run-inventory.json").read_text())
     resources = json.loads((original / "resource-index.json").read_text())
     row = json.loads(json.dumps(group["representative"]))
-    resource = next(r for r in resources["programs"] if r["source_prog_id"] == row["source_prog_id"])
+    resource = next(r for r in resources["programs"] if (r["application"], r["source_prog_id"]) == (row["application"], row["source_prog_id"]))
     resource = dict(resource)
     for candidate in row["native_candidates"]:
         source = Path(candidate["native_object"])
@@ -232,7 +264,8 @@ def shard(scratch, original, group, cpu):
     write(work / "resource-index.json", resources)
     write(work / "provenance.json", dict(model_head=inventory["source_head"],
         body_sha256=group["body_sha256"], weighted_instances=len(group["members"]),
-        host_cpu=cpu, guest_cpus=1, coordinator="2026-11-09 14:35 grouped parallel census"))
+        host_cpu=cpu, guest_cpus=1,
+        kernel_image=inventory.get("kernel_image", "/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage"), coordinator="2026-11-09 14:35 grouped parallel census"))
     if not (work / "source").exists():
         (work / "source").symlink_to((original / "source").resolve(), target_is_directory=True)
     (work / "stock-runtime").mkdir(exist_ok=True)
@@ -277,12 +310,12 @@ def run(scratch, commit=True):
             with lock:
                 group.update(completed)
                 write(scratch / "groups.json", data)
-                publish(scratch, data, commit)
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(cpus)) as pool:
         futures = [pool.submit(drive_publish, cpu, groups) for cpu, groups in zip(cpus, assignments) if groups]
         for future in concurrent.futures.as_completed(futures):
             future.result()
     write(scratch / "complete.json", dict(groups=len(data["groups"]), instances=data["instances"]))
+    publish(scratch, data, commit)
 
 
 def main():

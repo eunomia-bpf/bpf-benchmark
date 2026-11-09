@@ -120,7 +120,7 @@ def namespace(scratch):
     try:
         provenance = json.loads((scratch / "provenance.json").read_text()) if (scratch / "provenance.json").exists() else {}
         command = ["taskset", "-c", str(provenance.get("host_cpu", "8-11")), "vng", "--run",
-                   "/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage",
+                   str(provenance.get("kernel_image", "/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage")),
                    "--cpus", str(provenance.get("guest_cpus", 2)), "--memory", "2G",
                    "--rwdir=/mnt=" + str(scratch),
                    "--exec", "mkdir -p " + str(scratch) + " && mount --bind /mnt " +
