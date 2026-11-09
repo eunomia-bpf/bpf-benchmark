@@ -1,0 +1,145 @@
+{
+  "utc": "2026-11-09T06:47:38.974851+00:00",
+  "scope": "Live partial original catalog and paired-source Tracee, followed by the existing complete probe-read queue",
+  "catalog": {
+    "expected_native_entries": 380,
+    "original_annotation_rows": 1917,
+    "counts": {
+      "catalog_rows": 1917,
+      "attempted": 188,
+      "submitted": 188,
+      "installed": 8,
+      "verifier_rejected": 42,
+      "generation_failed": 138,
+      "compilation_failed": 0,
+      "resource_failed": 0,
+      "transport_failed": 0,
+      "load_failed": 0,
+      "skipped": 0,
+      "failure": 44,
+      "failure_agrees": 42,
+      "failure_installed": 2,
+      "success": 6,
+      "success_agrees": 6,
+      "success_installed": 6
+    },
+    "load_only_native_executions": 0,
+    "launch_publication": "907403f3e9ea7ca8740cc6dcd1229f4c287d0843",
+    "raw_snapshot": "catalog-progress.json.gz",
+    "installed_failure_rows": [
+      {
+        "file": "dynptr_fail.c",
+        "program": "test_dynptr_reg_type",
+        "expect": "failure",
+        "stage": "installed",
+        "request_id": 110
+      },
+      {
+        "file": "map_kptr_fail.c",
+        "program": "misaligned_access_read",
+        "expect": "failure",
+        "stage": "installed",
+        "request_id": 152
+      }
+    ]
+  },
+  "Tracee": {
+    "launch_publication": "3f6a6b5e43c9f8d5e6cb4f49d810bc7bd1ef1fd1",
+    "phase": "baseline_start completed; existing BPF evidence collection active",
+    "evidence": {
+      "files": 413,
+      "bytes": 26066801,
+      "latest_file": "140-trace_security_path_notify.jited.bin.stderr",
+      "latest_mtime_utc": "2026-11-09T06:47:22.951421+00:00"
+    },
+    "monitor_followup_symbols": {
+      "addresses": [
+        "0xe87cf0",
+        "0xea0fa0"
+      ],
+      "tool": "llvm-addr2line-18",
+      "exit": 0,
+      "stdout": "sync.runtime_procUnpin\n??:0\nsync.(*Pool).Get\n??:0\n"
+    },
+    "native_requests_at_observation": 0
+  },
+  "jobs": {
+    "full": {
+      "publication": {
+        "commit": "907403f3e9ea7ca8740cc6dcd1229f4c287d0843",
+        "paths": [
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/README.md",
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/compile.json",
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/launch-inputs.tar.gz"
+        ],
+        "sha256": {
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/README.md": "7b59d881c18a122d5a4d046148eef09669f889b99e99d51a1b3311d5c6b5e5da",
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/compile.json": "877fe0c15e6cd70010b6c5dc7357e8015b2d6f3d8c23d183d014fc749c6330b7",
+          "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/launch-inputs.tar.gz": "63faaed8887c2af25e4cfd24c02b961051924f407a5739e03ac94a627f8b6aa3"
+        },
+        "remote_ancestor_verified": true
+      },
+      "utc": "2026-11-09T05:23:25.508918+00:00",
+      "phase": "actual_complete_paired_resource_catalog"
+    },
+    "Tracee": {
+      "utc": "2026-11-09T05:28:47.738101+00:00",
+      "phase": "actual_application",
+      "publication": {
+        "commit": "3f6a6b5e43c9f8d5e6cb4f49d810bc7bd1ef1fd1",
+        "paths": [
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch.json",
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/README.md",
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch-inputs.tar.gz"
+        ],
+        "sha256": {
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch.json": "aec56f33ebcdb47f7bdf40e53b61b5e592ade0c028552c3fb0bc29fdcfae14d9",
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/README.md": "7d09a76e30339f1c18995c518446932bd6049d9d957e97c54a75550c8d0d3a73",
+          "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch-inputs.tar.gz": "31d763972a55e21207fbc3d02fb3352b2ca37ee2eac63d37f0b8c4c3ad2ec2b9"
+        },
+        "remote_ancestor_verified": true
+      },
+      "application": "tracee"
+    },
+    "probe_read_apps": {
+      "utc": "2026-11-09T06:26:38.316267+00:00",
+      "phase": "waiting_existing_full_and_Tracee",
+      "publication": {
+        "commit": "129220421df883cac2eefc942ead0a36ef653ed4",
+        "paths": [
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/README.md",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-input-delta.tar.gz",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/prior-queue-retirement.json",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/queue-inputs.tar.gz",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/queued.json",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-input-delta.tar.gz"
+        ],
+        "sha256": {
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/README.md": "eb7f2b8617b0d9f69cc5a3d56a832c20999dd4ec9cf913275969c03d2817db39",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-input-delta.tar.gz": "36382b5f2e2868a30d33659c5e0e5d22446f24ade966c2ed1981270d0534c365",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/prior-queue-retirement.json": "7b7190ca3178886186d1c11e67ed9540e36c99c96a7719df84b1df952ecc2316",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/queue-inputs.tar.gz": "e8d917152a6ec5baaa72f394f864619eb5e48e6aa191101ec4799616bf2a92c0",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/queued.json": "ca3346218a02d045e24b748a0ab07d07b5cbe190c0907b3f279ecca5c0fd67da",
+          "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-input-delta.tar.gz": "9be2ce48117350943ad9ec01485f78769988710f95bd1d7d59324967feb48694"
+        },
+        "remote_ancestor_verified": true
+      },
+      "predecessors": [
+        {
+          "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/controller.pid",
+          "pid": 2792901
+        },
+        {
+          "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-unix-length/application/controller.pid",
+          "pid": 2801443
+        }
+      ]
+    }
+  },
+  "storage_publications": [
+    "d46a650e792d79bfe8a0b2784b029823e9051c02",
+    "b09aa12d5a4259408ed02f890cfae5f8f150113f"
+  ],
+  "workspace_released_bytes": 3840856214,
+  "runtime_admission_additions": 0
+}

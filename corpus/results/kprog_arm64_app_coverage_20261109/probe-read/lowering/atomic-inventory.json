@@ -1,0 +1,57 @@
+{
+  "utc": "2026-11-09T06:46:47.534870+00:00",
+  "objects": {
+    "native/bcc/biosnoop.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/bcc/capable.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/bcc/opensnoop.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/bcc/runqlat.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {
+        "ldaddal": 1
+      }
+    },
+    "native/bcc/syscount.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {
+        "ldaddal": 2
+      }
+    },
+    "native/bcc/tcpconnect.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {
+        "ldadd": 2
+      }
+    },
+    "native/bcc/tcplife.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/bcc/vfsstat.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {
+        "ldadd": 10
+      }
+    },
+    "native/tracee/lsm_support/kprobe_check.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/tracee/lsm_support/lsm_check.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    },
+    "native/tracee/tracee.native.o": {
+      "disassembly_exit": 0,
+      "atomic_mnemonics": {}
+    }
+  }
+}
