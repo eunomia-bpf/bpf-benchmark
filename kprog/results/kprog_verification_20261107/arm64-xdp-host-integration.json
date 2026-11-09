@@ -28118,6 +28118,32 @@
     },
     "status": "partial-universal-component"
   },
+  "rep_movs_shared_stream": {
+    "actual_C_visit_schedule": "Explicit primitive/compiler interface",
+    "actual_module_compile": 0,
+    "archive": "kprog/results/kprog_verification_20261107/rep-stream.log.gz",
+    "audit_exit": 0,
+    "audit_input": "import KProgFormal.Refinement.X86RepMovs\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.install_fresh_selected\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.install_fresh_outside\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.ordinary_stream_exists\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.first_recovery_stream_exists\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.source_body_success_stream_witness\n#print axioms KProgFormal.Refinement.X86RepMovs.Indexed.source_recovery_stream_witness\n",
+    "existing_module_prefix_preserved": true,
+    "finite_independent_positions": true,
+    "law_count": 6,
+    "laws": [
+      "install_fresh_selected",
+      "install_fresh_outside",
+      "ordinary_stream_exists",
+      "first_recovery_stream_exists",
+      "source_body_success_stream_witness",
+      "source_recovery_stream_witness"
+    ],
+    "other_input_words_preserved": true,
+    "publication": "3b1187719c91f32c1ddea01fbd6a67aa75ed7a99",
+    "reduction_bridge": 1,
+    "runtime_predicate_additions": 0,
+    "scope": "Finite independent dynamic-position fresh-word embedding, surrounding stream preservation and successful/recovery source handler witnesses for every state/count. Actual C visit schedule, primitive/tag/provenance, physical exceptions and compiler correspondence remain explicit interfaces; partial coverage retained.",
+    "sorryAx": 0,
+    "source_sha256": "58ad9c5098bd5b65e8a27c08f24d0ff4348e9077cb69069040830c2a469b163c",
+    "status": "partial-shared-stream-source-model"
+  },
   "rep_movs_source_choices": {
     "actual_module_compiles": {
       "NativeLinkFinalImage": 0,

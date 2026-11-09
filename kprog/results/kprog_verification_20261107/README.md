@@ -5940,6 +5940,22 @@ C/compiler/embedding correspondence remain active interfaces. O2/O4 status
 and complete family counts retain their stated partial scope. Sole full
 `b2fd6f3b3f475f84a99566ce95efd8e4705d0e90` retains its earlier immutable source.
 
+### REP MOVS shared input stream
+
+The [six shared-stream laws](rep-stream.log.gz), published as
+`3b1187719c91f32c1ddea01fbd6a67aa75ed7a99`, install per-read recovery choices at arbitrary
+independent dynamic input positions and preserve every other input word,
+including interleaved primitive choices. The resulting whole-count successful
+body satisfies the canonical Step; a first selected recovery reaches the exact
+captured-prefix memory, ordered events, pointer writeback and RCX clear.
+
+The actual C visit schedule, scalar primitives, tag/provenance/lifetime,
+physical exception/table/site/frame/ABI and compiler correspondence remain
+explicit interfaces. The axiom report records the inherited executable-reduction
+bridge on the successful Step theorem. O2/O4 entries retain their partial scope;
+complete family totals remain71/75 C-model and13/75 compiled. The sole full at
+`cb44dce14ebe17ceceb99383bb27cfc0dd2e8583` uses its earlier committed source.
+
 ### Current full-check continuation and cache relocation
 
 The full check at `b2fd6f3b3f475f84a99566ce95efd8e4705d0e90` finished exit2
