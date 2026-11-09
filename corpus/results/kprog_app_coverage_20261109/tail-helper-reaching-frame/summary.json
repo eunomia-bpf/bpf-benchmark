@@ -25,7 +25,7 @@
     "returncode": 1,
     "stderr": "native-link: entry=tracepoint__raw_syscalls__sys_enter (142 bytes), 1 reachable symbol(s) total\n  - tracepoint__raw_syscalls__sys_enter (vaddr 0x0, 142 bytes) [entry]\nError: x86 bpf_tail_call lowering missing BPF rbp location\n",
     "outputs": {
-      "result.json": "e3e8e9d061d80412aba7fe77e75650f235e9425c0cf59f72bc001758493f9899"
+      "result.json": "0b46050d9e969f05a240b3e6a831b1413cd1dab7fb4db10053fcc67c57c94c74"
     }
   },
   "candidate": {
@@ -53,6 +53,7 @@
     "returncode": 0,
     "stderr": "native-link: entry=tracepoint__raw_syscalls__sys_enter (142 bytes), 1 reachable symbol(s) total\n  - tracepoint__raw_syscalls__sys_enter (vaddr 0x0, 142 bytes) [entry]\nnative-link: wrote 240 bytes -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.blob (6 relocs)\nnative-link: wrote 6 relocs -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.relocs\nnative-link: wrote 2 map patch site(s) -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/maps.tsv\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/abi.tsv\n",
     "outputs": {
+      "result.json": "3073accd87610b4f5a3a54625aaeed23e4049f5881b8dc802f491d858ca47bd7",
       "native.blob": "d232f895344dbdb7c598da304accc96ca928606900ae509cde5c443120647323",
       "native.relocs": "4865d747f4098b58392a0ea12f81c1a59e13aaecefa96cc0b8b467264bdb0e58",
       "maps.tsv": "51a91f17689725a0b1bf39e22f6e4ce2ded60008d3f044195be615153e626461",
@@ -62,7 +63,7 @@
   },
   "rust_test_exit": 0,
   "build_exit": 0,
-  "source_sha256": "5b3cb610e4113860789c8617ca523031c0f1b65f881534035ce27c4d9abd6211",
-  "native_link_sha256": "e5d034af6e2802b0e11cd25a39afc77ab4dd3dec4df788808754d8a637b07ccf",
+  "source_sha256": "070be7b519d1901cf498327a66f94bf304827d6237f1ea5c97260f5f1222420a",
+  "native_link_sha256": "74f3d620e02f8fce764fc3406e91af9488d0247d6e045a598c7d2d99cf6e5f81",
   "runtime_predicates_added": 0
 }

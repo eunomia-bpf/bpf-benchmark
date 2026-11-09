@@ -1,8 +1,71 @@
 --- a/kprog/x86/native_lab/native_link/src/x86.rs
 +++ b/kprog/x86/native_lab/native_link/src/x86.rs
-@@ -1197,28 +1197,15 @@
+@@ -1134,91 +1134,16 @@
+     }
  }
  
+-fn x86_lookahead_indirect_call_uses_register(
+-    bytes: &[u8],
+-    next_ip: u64,
+-    sym_addr: u64,
+-    reg: Register,
+-) -> Option<Register> {
+-    let start = usize::try_from(next_ip.checked_sub(sym_addr)?).ok()?;
+-    if start >= bytes.len() {
+-        return None;
+-    }
+-    let mut decoder = Decoder::with_ip(64, &bytes[start..], next_ip, DecoderOptions::NONE);
+-    while decoder.can_decode() {
+-        let next = decoder.decode();
+-        if next.is_invalid() {
+-            return None;
+-        }
+-        if is_alignment_nop(&next) {
+-            continue;
+-        }
+-        if x86_indirect_call_register(&next) == Some(reg) {
+-            return Some(reg);
+-        }
+-        if matches!(
+-            next.flow_control(),
+-            FlowControl::Call
+-                | FlowControl::IndirectCall
+-                | FlowControl::Return
+-                | FlowControl::UnconditionalBranch
+-                | FlowControl::ConditionalBranch
+-                | FlowControl::IndirectBranch
+-                | FlowControl::Interrupt
+-                | FlowControl::XbeginXabortXend
+-                | FlowControl::Exception
+-        ) {
+-            return None;
+-        }
+-        if x86_written_gpr_family(&next) == Some(reg) {
+-            return None;
+-        }
+-    }
+-    None
+-}
+-
+-fn x86_immediate_helper_load_before_call(
+-    bytes: &[u8],
+-    sym_addr: u64,
+-    local_ip: u64,
+-    insn: &Instruction,
+-) -> Option<(Register, u64)> {
+-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
+-    if helper_id > 255 {
+-        return None;
+-    }
+-    let insn_len = u64::try_from(insn.len()).ok()?;
+-    let next_ip = sym_addr.checked_add(local_ip)?.checked_add(insn_len)?;
+-    if x86_lookahead_indirect_call_uses_register(bytes, next_ip, sym_addr, reg) == Some(reg) {
+-        Some((reg, helper_id))
+-    } else {
+-        None
+-    }
+-}
+-
  fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
 -    let mut decoder = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE);
 -    while decoder.can_decode() {
@@ -37,7 +100,7 @@
  }
  
  fn scan_x86_got_relocations(
-@@ -5281,6 +5268,28 @@
+@@ -5281,6 +5206,28 @@
      }
  
      #[test]
