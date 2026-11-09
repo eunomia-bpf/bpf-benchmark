@@ -1,0 +1,12 @@
+{
+  "source_commit": "044d32e09e21e8fd885517fffaa5c12125fe8a30",
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "installed": 0,
+  "verifier_rejected": 1,
+  "error": "invalid write to stack R10 off=-520 size=8",
+  "application_stage": "native startup observer waits for successful replacement despite retained eBPF source fd",
+  "baseline": "one functional sample complete",
+  "next": "Replay rebuilt completion-counter shim; retain original framework bytes"
+}
