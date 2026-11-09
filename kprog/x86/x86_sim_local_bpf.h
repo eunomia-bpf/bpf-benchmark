@@ -2056,10 +2056,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		for (__x86_l_i = 0; __x86_l_i < KPROG_X86_REP_MOVS_BOUND; \
 			__x86_l_i++) {                                           \
             if (__x86_l_i < __x86_l_count && \
-                X86_SIM_L_READ_RECOVERY(X86_RSI, X86_RCX)) break; \
+                X86_SIM_L_READ_RECOVERY(X86_RSI, X86_RCX)) { \
+                __x86_l_count = __x86_l_i; break; \
+            } \
 			X86_SIM_L_REP_MOVS_ONE(__x86_l_width, __x86_l_i); \
         } \
-        if (__x86_l_i < __x86_l_count) __x86_l_count = __x86_l_i; \
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSI,                     \
 			(__u8 *)__x86_l_src_ptr + __x86_l_count * __x86_l_width,\
 			__x86_l_src_tag);                                \
