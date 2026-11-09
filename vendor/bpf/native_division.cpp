@@ -138,7 +138,7 @@ struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
         return number && number->equalsInt(1);
     }
 
-    static bool isArray(const llvm::GlobalVariable &map) {
+    static unsigned mapType(const llvm::GlobalVariable &map) {
         llvm::SmallVector<llvm::DIGlobalVariableExpression *> debug;
         map.getDebugInfo(debug);
         for (auto *expression : debug) {
@@ -162,12 +162,12 @@ struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
                     auto *range = llvm::dyn_cast<llvm::DISubrange>(dimension);
                     if (range)
                         if (auto *count = range->getCount().dyn_cast<llvm::ConstantInt *>())
-                            if (count->equalsInt(2))
-                                return true;
+                            if (count->equalsInt(2) || count->equalsInt(6))
+                                return count->getZExtValue();
                 }
             }
         }
-        return false;
+        return 0;
     }
 
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &) {
@@ -180,10 +180,13 @@ struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
                             continue;
                         auto *map = llvm::dyn_cast<llvm::GlobalVariable>(
                             llvm::getUnderlyingObject(call->getArgOperand(0)));
-                        if (map && map->getSection() == ".maps" && isArray(*map))
+                        if (map && map->getSection() == ".maps" && mapType(*map))
                             lookups.push_back(call);
                     }
         for (auto *call : lookups) {
+            auto *global = llvm::cast<llvm::GlobalVariable>(
+                llvm::getUnderlyingObject(call->getArgOperand(0)));
+            const bool per_cpu = mapType(*global) == 6;
             llvm::IRBuilder<> before(call);
             before.SetCurrentDebugLocation(call->getDebugLoc());
             auto *pointer = before.getPtrTy();
@@ -207,17 +210,24 @@ struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
             before.CreateCondBr(before.CreateICmpULT(index, maximum), value, join);
             before.SetInsertPoint(value);
             auto *mask = field(K_BPF_ARRAY_INDEX_MASK_OFFSET);
-            auto *stride = field(K_BPF_ARRAY_ELEM_SIZE_OFFSET);
+            auto *stride = per_cpu ? static_cast<llvm::Value *>(before.getInt32(8)) : field(K_BPF_ARRAY_ELEM_SIZE_OFFSET);
             auto *offset = before.CreateAdd(before.getInt64(K_BPF_ARRAY_VALUE_OFFSET),
                 before.CreateMul(before.CreateZExt(before.CreateAnd(index, mask), before.getInt64Ty()),
                                  before.CreateZExt(stride, before.getInt64Ty())));
             auto *result = before.CreateGEP(before.getInt8Ty(), map, offset);
+            if (per_cpu) {
+                auto *slot = before.CreateLoad(pointer, result);
+                auto *signature = llvm::FunctionType::get(pointer, {pointer}, false);
+                auto *this_cpu = llvm::ConstantExpr::getIntToPtr(before.getInt64(154), pointer);
+                result = before.CreateCall(signature, this_cpu, {slot});
+            }
             before.CreateBr(join);
             auto *merged = llvm::PHINode::Create(pointer, 2, "native.array.result", call);
             merged->addIncoming(llvm::ConstantPointerNull::get(pointer), entry);
             merged->addIncoming(result, value);
             call->replaceAllUsesWith(merged);
-            llvm::errs() << "native-map-lowering: array " << module.getModuleIdentifier()
+            llvm::errs() << "native-map-lowering: " << (per_cpu ? "percpu-array " : "array ")
+                         << module.getModuleIdentifier()
                          << "::" << entry->getParent()->getName() << "\n";
             call->eraseFromParent();
         }
