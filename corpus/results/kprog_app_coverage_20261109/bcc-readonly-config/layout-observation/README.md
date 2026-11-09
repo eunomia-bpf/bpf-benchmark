@@ -1,0 +1,5 @@
+# Historical native layout and paired O3 control identity
+
+The archived canonical syscount ELFf6d0 differs from paired compiler controlf75d in its sys_exit task-field immediates: group_leader0xb30→0xbb8 and comm0xd10→0xd90. The disassembly diff retains the complete observation. Both loads belong to save_proc_name, selected only by count_by_process=true in the original syscount.bpf.c. The frozen May29 CLI -L -i1 supplies count_by_process0; the readonly candidate consumes that stable value at native compilation and removes this branch. Its sys_enter/compiler evidence retains the separate object identities.
+
+The paired complete-BCC replay uses its own O3 control and candidate, with exact recorded ELF/source hashes and original runtime image. These receipts describe the fixed CLI configuration; task-field layout correspondence for other configurations remains a native producer input requirement. R receives the explicit cold-branch and compiler-layout distinction alongside the pending matching-work timing request.

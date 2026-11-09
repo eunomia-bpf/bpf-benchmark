@@ -1,13 +1,13 @@
 {
   "source_commit": "c3d6523f80887e49e79c786fecc3a166cc4325d4",
-  "build_commit": "88c358f8549400564f15831de3c58af57cb614a1",
-  "module_sha256": "e3cd301da44d2f740ff3d15f1c8aecf0466261c6897d196350634da15390fe85",
+  "build_commit": "fb19625713630768192bdb0ee4a0d6eb48e25be4",
+  "module_sha256": "fad7da641ecf65ddf38cd1bf2dea5bfc7cdf6f611f51d2516b06146d051c4385",
   "state": "/var/tmp/kprog-tmp/C/bcc-katran-constant-division/safety-control",
   "result": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-constant-division/safety-control/approved-copy-boundary.json",
   "controller_pid": 2867244,
   "dependency_pid": 2805722,
   "memory": "existing serial2GiB guest",
-  "case_count": 16,
+  "case_count": 24,
   "source_ids": "u32max intentionally absent; smaller sizes reach existing source lookup before native allocation",
   "sizes": [
     0,
@@ -21,7 +21,9 @@
   ],
   "case_routes": [
     "SUBMIT",
-    "SUBMIT_RESOURCES"
+    "SUBMIT_RESOURCES",
+    "CHUNK"
   ],
-  "followup": "Guest removes private boundary module, then runs original canonical38 through its captured module"
+  "followup": "Guest removes private boundary module, then runs original canonical38 through its captured module",
+  "chunk_source_commit": "15f14ae2e0629dfc5aa7c2b24874a928150d13de"
 }

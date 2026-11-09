@@ -1,0 +1,25 @@
+--- canonical-service-native
++++ paired-O3-control-native
+@@ -1,5 +1,5 @@
+ 
+-/var/tmp/kprog-tmp/C/bcc-readonly-config/actual-inputs/sys_exit/kernel.native.o:	file format elf64-x86-64
++/var/tmp/kprog-tmp/C/bcc-readonly-config/control/bcc/syscount.native.o:	file format elf64-x86-64
+ 
+ Disassembly of section tracepoint/raw_syscalls/sys_exit:
+ 
+@@ -94,13 +94,13 @@
+      118:      	je	0x14d <sys_exit+0x14d>
+      11a:      	callq	0x11f <sys_exit+0x11f>
+ 		000000000000011b:  R_X86_64_PLT32	bpf_get_current_task-0x4
+-     11f:      	leaq	0xb30(%rax), %rdx
++     11f:      	leaq	0xbb8(%rax), %rdx
+      126:      	leaq	0x8(%rsp), %rdi
+      12b:      	movl	$0x8, %esi
+      130:      	callq	0x135 <sys_exit+0x135>
+ 		0000000000000131:  R_X86_64_PLT32	bpf_probe_read_kernel_str-0x4
+      135:      	leaq	0x10(%r14), %rdi
+-     139:      	movl	$0xd10, %edx            # imm = 0xD10
++     139:      	movl	$0xd90, %edx            # imm = 0xD90
+      13e:      	addq	0x8(%rsp), %rdx
+      143:      	movl	$0x10, %esi
+      148:      	callq	0x14d <sys_exit+0x14d>

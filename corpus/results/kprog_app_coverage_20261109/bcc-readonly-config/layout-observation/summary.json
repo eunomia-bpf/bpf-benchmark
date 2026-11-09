@@ -1,0 +1,13 @@
+{
+  "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+  "paired_control_sha256": "f75d9ddc53bdd5484d1760f9b16b058ae133aa2f8831b07a058be649ae01465d",
+  "canonical_group_leader_offset": 2864,
+  "control_group_leader_offset": 3000,
+  "canonical_comm_offset": 3344,
+  "control_comm_offset": 3472,
+  "origin": "save_proc_name: BPF_CORE_READ_STR_INTO(&val->comm,current,group_leader,comm)",
+  "reachability": "sys_exit calls save_proc_name only with count_by_process=true",
+  "frozen_syscount_count_by_process": false,
+  "current_candidate": "d43869064ee2a5fe85f2000a01c8f6c4ac4bbf3c5409cba7a066b90905262977",
+  "binding": "Frozen CLI -L -i1 supplies count_by_process0; paired actual application trial remains queued3126829"
+}
