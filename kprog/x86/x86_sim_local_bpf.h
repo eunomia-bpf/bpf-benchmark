@@ -688,7 +688,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	((__s64)KPROG_X86_MEM_OFFSET((AUX), (DISP), (INDEX_VALUE),         \
 				     (HAS_INDEX)))
 
-#define X86_SIM_L_BARRIER_VAR(VAR) do { if (!__builtin_constant_p(VAR)) asm volatile("" : "+r"(VAR)); } while (0)
+#define X86_SIM_L_BARRIER_VAR(VAR) asm volatile("" : "+r"(VAR))
 
 #define X86_SIM_L_STACK_INDEX(OFF)                                         \
 	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
