@@ -401,6 +401,48 @@ between the trees and their ratios reproduce; the applications' native
 objects came out of their images, and on the two apps where the baseline
 held, those objects are where the loss is.
 
+### The whole 2026-05-29 definition, rebuilt and run
+
+The section above reasons from sources. This one builds the reference and
+runs it, which is what the operator asked for ("性能是不是恢复之前的版本先?
+otel 和 katran?"). Every component comes from `9f3855f6f`:
+
+| component | source |
+| --- | --- |
+| kernel | `vendor/linux-framework` at the tree's recorded `8e116c79d`, built into `/var/tmp/kprog-tmp/R/linux-9f3855f6f` |
+| config | the tree's own `vendor/bpfrejit_x86_defconfig` |
+| vmlinux.h, kernel_offsets.h | generated from that kernel's own BTF and `vmlinux` |
+| kinsn modules | `module/x86` built against that kernel, 15 modules |
+| native objects | `vendor/bpf/native-katran` in the tree, from its own `vmlinux.h` |
+| loader | the tree's `native-sim/libnativeloader` against its `vendor/libbpf`, 1,808,320 bytes |
+| runner, corpus config, Makefile | the tree's own copies, at `/paper-tree` in the image |
+| native arm | `BPFREJIT_SHIM_NATIVE_LOADER=post` with the app manifest, **unbound**, `SKIP_REJIT=all` so the shim's own loader is what loads |
+
+Two of the tree's submodules had been emptied when `/tmp` was cleared, so
+they were repopulated from the commits the tree records (`vendor/libbpf`
+`6ddc03d4f`, `vendor/llvmbpf` `96fb87aef`, kernel `8e116c79d`), which are
+present in this repo's clones.
+
+The run is `x86_kvm_corpus_20261109_121841_595452`: `status completed`, both
+arms, SAMPLES=3 WORKLOAD_DURATION=180, host CPUs 0-7. The workload shape
+is the reference's, verified from each worker's pktgen output: four workers
+on threads 0-3, `flows: 65535 flowlen: 1`, `Flags: FLOW_RND`.
+
+| arm | sample 0 | sample 1 | sample 2 | total pps |
+| --- | ---: | ---: | ---: | ---: |
+| JIT | 820,795 | 851,837 | 858,632 | **843,755** |
+| native | 873,363 | 680,350 | 621,587 | **725,112** |
+
+**The JIT arm returns.** 843,755 pps against the reference's 820,622 median
+is 1.028x, and every worker carries the reference's random-flow shape, so
+the baseline is the 2026-05-29 workload again.
+
+**The native arm does not return: 725,112 pps, 0.859x of JIT.** The
+archived figure was 1.102x by per-invocation cost. The native arm's three
+samples fall monotonically -- 873,363 then 680,350 then 621,587 -- while the
+JIT arm's rise slightly, which is the signature of the native arm's own
+cost growing across the run rather than a steady per-packet difference.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
