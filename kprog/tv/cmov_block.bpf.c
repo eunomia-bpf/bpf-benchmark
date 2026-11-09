@@ -379,3 +379,23 @@ ROR_UNIT(tv_ror8hi, X86_WIDTH_8, 8)
 ROR_UNIT(tv_ror16, X86_WIDTH_16, 0)
 ROR_UNIT(tv_ror32, X86_WIDTH_32, 0)
 ROR_UNIT(tv_ror64, X86_WIDTH_64, 0)
+
+/* ADD_IMM: actual dispatcher, both byte lanes and every scalar width. */
+#define ADDIMM_UNIT(NAME, WIDTH, SHIFT) \
+__attribute__((section("tv/addimm/" #NAME), used)) \
+__u64 NAME(__u64 value, __u64 count) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)value; \
+    X86_SIM_L_EXEC(X86_OP_ADD_IMM, X86_RAX, X86_REG_NONE, WIDTH, \
+        KPROG_X86_REG_LANE_AUX(X86_ALU_ADD, SHIFT, 0), count); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+ADDIMM_UNIT(tv_addimm8lo, X86_WIDTH_8, 0)
+ADDIMM_UNIT(tv_addimm8hi, X86_WIDTH_8, 8)
+ADDIMM_UNIT(tv_addimm16, X86_WIDTH_16, 0)
+ADDIMM_UNIT(tv_addimm32, X86_WIDTH_32, 0)
+ADDIMM_UNIT(tv_addimm64, X86_WIDTH_64, 0)
