@@ -1478,22 +1478,23 @@ static void model_rep_movs(unsigned flags, __u64 imm,
 			   const struct snap *seed, struct snap *b)
 {
 	unsigned w = flags ? flags : X86_WIDTH_64;
-	unsigned long count = S64_TO_OFF(x86_simm(imm));
+	unsigned long count = (unsigned long)snap_numeric(seed, X86_RCX);
+    (void)imm;
 	unsigned long so = (unsigned long)((__u64)seed->x[X86_RSI] -
 		(__u64)(unsigned long)(void *)heap);
 	unsigned long doff = (unsigned long)((__u64)seed->x[X86_RDI] -
 		(__u64)(unsigned long)(void *)heap);
 	unsigned long i;
 
-	for (i = 0; i < 64U && i < count; i++) {
-		unsigned j;
-
-		for (j = 0; j < w; j++) {
-			b->heap[doff + (__u64)i * (__u64)w + (__u64)j] =
-				seed->heap[so + (__u64)i * (__u64)w +
-					   (__u64)j];
-		}
-	}
+	for (i = 0; i < count; i++) {
+        __u8 sample[8];
+        unsigned j;
+        /* Each element samples before writing; later elements see prior writes. */
+        for (j = 0; j < w; j++)
+            sample[j] = b->heap[so + i * w + j];
+        for (j = 0; j < w; j++)
+            b->heap[doff + i * w + j] = sample[j];
+    }
 	b->x[X86_RSI] = seed->x[X86_RSI] + (__u64)count * (__u64)w;
 	b->t[X86_RSI] = seed->t[X86_RSI];
 	b->x[X86_RDI] = seed->x[X86_RDI] + (__u64)count * (unsigned long)w;
@@ -1796,13 +1797,16 @@ static void check_arm(const char *what, unsigned op, unsigned dst,
 		if (op == X86_OP_LEA)
 			X86_SIM_L_WRITE_REG_WIDTH(
 				KPROG_X86_MEM_AUX_INDEX(aux), 0, X86_WIDTH_64);
+        if (op == X86_OP_REP_MOVS)
+            X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, imm, X86_WIDTH_64);
 		stack_arena_base =
 			(unsigned long)(void *)&__x86_stack_mem.b[0];
 		CAPTURE_ALL(&seed);
         observed_divide_fault = 0;
         observing_divide = 1;
         if (setjmp(divide_fault) == 0) {
-            X86_SIM_L_EXEC(op, dst, src, flags, aux, imm);
+            X86_SIM_L_EXEC(op, dst, src, flags, aux,
+                op == X86_OP_REP_MOVS ? imm ^ 0xdeadbeefcafef00dULL : imm);
             CAPTURE_ALL(&a);
         } else {
             a = divide_fault_snapshot;
@@ -2169,7 +2173,7 @@ int main(void)
 				  a ? X86_REG_NONE : X86_RCX, movreg_flags[f],
 				  a ? X86_R9 : X86_REG_NONE, 0ULL);
 
-	/* REP_MOVS: counts 0, 1, 4 and the 64-bound saturating count. */
+	/* REP_MOVS: actual RCX counts0/1/4; unrelated legacy IMM must be ignored. */
 	check_arm("repMovs/0", X86_OP_REP_MOVS, X86_REG_NONE, X86_REG_NONE,
 		  0U, 0U, 0ULL);
 	check_arm("repMovs/1", X86_OP_REP_MOVS, X86_REG_NONE, X86_REG_NONE,
