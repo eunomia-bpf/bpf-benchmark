@@ -74801,5 +74801,88 @@
     },
     "scope": "Source stack-byte image and declared word representatives accompany the historical canonical native-frame projection. Signed newSP-8 range and owned-read/forwarding/live-memory relations remain source interfaces. Producer mode and actual C/B/compiler/physical transport remain active; current RET partial, Cmodel71/75 and compiled13/75 unchanged.",
     "archive": "ret-stack-release.log.gz"
+  },
+  "x86_ret_owned_read_component": {
+    "status": "partial-source-owned-read",
+    "proof": {
+      "laws": [
+        "forward_matches",
+        "owned_read_matches",
+        "owned_read_unaligned",
+        "owned_read_forwarded",
+        "owned_read_native",
+        "read_at_sp",
+        "sub_return_owned_projection",
+        "owned_read_live_preserved",
+        "reallocated_word_reads_bytes"
+      ],
+      "compile": [
+        {
+          "module": "KProgFormal/X86RemainingTokenO2",
+          "exit": 0,
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/ret-owned-read/olean/KProgFormal/X86RemainingTokenO2.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+          ],
+          "source_sha256": "cf5d29e750e3d1dc084c2015a8eb8274c3b1e1bf8a99e8e6bfde04a93fd3f192"
+        }
+      ],
+      "audit_exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 0,
+      "audit_input": "import KProgFormal.X86RemainingTokenO2\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.forward_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.owned_read_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.owned_read_unaligned\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.owned_read_forwarded\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.owned_read_native\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.read_at_sp\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_owned_projection\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.owned_read_live_preserved\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.reallocated_word_reads_bytes\n"
+    },
+    "preceding_lifetime_audit": {
+      "laws": [
+        "clear_idempotent",
+        "visit_cell",
+        "body_matches",
+        "released_byte",
+        "retained_byte",
+        "released_cell",
+        "payload_preserved",
+        "fresh_locality",
+        "sub_return_matches",
+        "saved_word_captured",
+        "sub_return_frame_projection",
+        "sub_return_live_bytes",
+        "token_body_matches",
+        "token_default",
+        "released_word_invalid",
+        "live_cell_preserved",
+        "sub_return_frame_retained"
+      ],
+      "input": "import KProgFormal.X86RemainingTokenO2\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.clear_idempotent\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.visit_cell\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_byte\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.retained_byte\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_cell\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.payload_preserved\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.fresh_locality\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.saved_word_captured\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_frame_projection\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_live_bytes\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.token_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.token_default\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.released_word_invalid\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.live_cell_preserved\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.sub_return_frame_retained\n",
+      "exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 0
+    },
+    "integration": {
+      "audit_input": "import SimulatorComposition\nimport ControlABIComposition\nimport KProgFormal.X86RemainingTokenO2\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n#print axioms KProgFormal.X86RemainingTokenO2.ret_contract_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.ret_invocation_contract\n#print axioms KProgFormal.X86RemainingTokenO2.ret_subroutine_guard_preserves\n",
+      "exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 5
+    },
+    "source": {
+      "head": "ae02e009aff06ccbcf8ef2ac9484a577750a6f14",
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891",
+      "correspondence": {
+        "forward": "SC_READ declared-word iteration, nonzero scalar valid byte, full64bit scalar payload",
+        "ownedRead": "aligned union little-endian word primitive + conditional forwarding; unaligned ordered eight bytes",
+        "read_at_sp": "OFF=current SP, below-SP alternative comparison false",
+        "source_profile": "computed wrapping64bit stack index, representable loop/index/word arithmetic, signed coordinate and union/memory interpretation remain explicit",
+        "owned_read_native": "source byte-value and active scalar-identity relations give canonical saved native word",
+        "lifetime": "source byte image and private scalar cells carried separately from historical native memory projection; surviving live reads preserved; valid0 prevents stale scalar forwarding upon later reallocation"
+      },
+      "runtime_additions": 0
+    },
+    "scope": "Nine new generic source read/forwarding/lifetime laws. Declared byte/scalar coherence supplies canonical saved-word premise. Computed source index/union/signed profile, code-label/native-address and actual compiler/physical relations remain interfaces; Cmodel71/75 and compiled13/75 unchanged.",
+    "archive": "ret-owned-read.log.gz"
   }
 }

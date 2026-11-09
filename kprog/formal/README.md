@@ -20,6 +20,12 @@ bytes are quantified. Source owned-read/forwarding, signed-coordinate validity,
 live-stack/native-memory representation and compiler/physical transport remain
 explicit interfaces; RET retains its partial category.
 
+Nine additional owned-read laws cover full64 scalar forwarding, unaligned byte
+assembly, saved-word projection, live-read preservation and byte reads after
+reallocation. Source byte/scalar coherence supplies the saved-read premise;
+computed index, union memory and physical/compiler transport retain their
+explicit source profile.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

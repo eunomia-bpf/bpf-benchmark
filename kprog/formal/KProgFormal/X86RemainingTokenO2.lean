@@ -274,9 +274,9 @@ namespace StackRelease
 validity and provenance tags are released. -/
 structure Cell where
   pointer : Word
-  tag : Byte
+  tag : Reference.Byte
   scalar : Word
-  valid : Byte
+  valid : Reference.Byte
 
 def clear (cell : Cell) : Cell := { cell with tag := 0, valid := 0 }
 
@@ -305,20 +305,20 @@ theorem visit_cell {Cell : Type} (selected : Nat → Bool) (change : Nat → Cel
       · by_cases choose : selected i = true <;>
           by_cases member : i ∈ rest <;> simp [eq, choose, member]
 
-/-- Byte coordinates are signed offsets from the top of the source stack. -/
+/-- Reference.Byte coordinates are signed offsets from the top of the source stack. -/
 def offset (size index : Nat) : Int := (index : Int) - (size : Int)
 
 def inReleased (size : Nat) (oldSp newSp : Int) (i : Nat) : Bool :=
   decide (oldSp ≤ offset size i ∧ offset size i < newSp)
 
 structure Image where
-  bytes : Nat → Byte
+  bytes : Nat → Reference.Byte
   cells : Nat → Cell
 
 /-- STACK_RELEASE first replaces bytes in [oldSP,newSP), then invalidates
 all declared source word representatives whose first byte is below newSP. -/
 def body (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) : Image :=
+    (fresh : Nat → Reference.Byte) (image : Image) : Image :=
   if newSp > oldSp then
     { bytes := visit (inReleased size oldSp newSp) (fun i _ => fresh i)
         (List.range size) image.bytes
@@ -329,7 +329,7 @@ def body (size : Nat) (words : List Nat) (oldSp newSp : Int)
 /-- Independent pointwise statement of the existing byte lifetime and
 scalar/pointer validity effects, including arbitrary sparse declarations. -/
 def spec (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) : Image :=
+    (fresh : Nat → Reference.Byte) (image : Image) : Image :=
   { bytes := fun i =>
       if newSp > oldSp ∧ i < size ∧ oldSp ≤ offset size i ∧ offset size i < newSp
       then fresh i else image.bytes i
@@ -338,7 +338,7 @@ def spec (size : Nat) (words : List Nat) (oldSp newSp : Int)
       then clear (image.cells i) else image.cells i }
 
 theorem body_matches (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) :
+    (fresh : Nat → Reference.Byte) (image : Image) :
     body size words oldSp newSp fresh image = spec size words oldSp newSp fresh image := by
   unfold body spec
   split <;> rename_i growing
@@ -353,7 +353,7 @@ theorem body_matches (size : Nat) (words : List Nat) (oldSp newSp : Int)
     congr 1 <;> funext i <;> simp [growing]
 
 theorem released_byte (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
     (growing : oldSp < newSp) (inside : i < size)
     (lower : oldSp ≤ offset size i) (upper : offset size i < newSp) :
     (body size words oldSp newSp fresh image).bytes i = fresh i := by
@@ -361,14 +361,14 @@ theorem released_byte (size : Nat) (words : List Nat) (oldSp newSp : Int)
   simp [spec, growing, inside, lower, upper]
 
 theorem retained_byte (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
     (retained : ¬ (oldSp < newSp ∧ i < size ∧ oldSp ≤ offset size i ∧ offset size i < newSp)) :
     (body size words oldSp newSp fresh image).bytes i = image.bytes i := by
   rw [body_matches]
   simp [spec, retained]
 
 theorem released_cell (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
     (growing : oldSp < newSp) (declared : i ∈ words)
     (below : offset size (i * 8) < newSp) :
     (body size words oldSp newSp fresh image).cells i = clear (image.cells i) := by
@@ -376,7 +376,7 @@ theorem released_cell (size : Nat) (words : List Nat) (oldSp newSp : Int)
   simp [spec, growing, declared, below]
 
 theorem payload_preserved (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat) :
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat) :
     ((body size words oldSp newSp fresh image).cells i).pointer = (image.cells i).pointer ∧
       ((body size words oldSp newSp fresh image).cells i).scalar = (image.cells i).scalar := by
   rw [body_matches]
@@ -385,7 +385,7 @@ theorem payload_preserved (size : Nat) (words : List Nat) (oldSp newSp : Int)
 
 
 theorem released_word_invalid (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
     (growing : oldSp < newSp) (declared : i ∈ words)
     (below : offset size (i * 8) < newSp) :
     ((body size words oldSp newSp fresh image).cells i).tag = 0 ∧
@@ -394,7 +394,7 @@ theorem released_word_invalid (size : Nat) (words : List Nat) (oldSp newSp : Int
   exact ⟨rfl, rfl⟩
 
 theorem live_cell_preserved (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh : Nat → Byte) (image : Image) (i : Nat)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
     (live : newSp ≤ offset size (i * 8)) :
     (body size words oldSp newSp fresh image).cells i = image.cells i := by
   rw [body_matches]
@@ -403,7 +403,7 @@ theorem live_cell_preserved (size : Nat) (words : List Nat) (oldSp newSp : Int)
 /-- A fresh stream affects exactly the released byte interval; its complement
 and every pointer/scalar representative have identical results. -/
 theorem fresh_locality (size : Nat) (words : List Nat) (oldSp newSp : Int)
-    (fresh other : Nat → Byte) (image : Image)
+    (fresh other : Nat → Reference.Byte) (image : Image)
     (agree : ∀ i, i < size → oldSp ≤ offset size i → offset size i < newSp → fresh i = other i) :
     body size words oldSp newSp fresh image = body size words oldSp newSp other image := by
   rw [body_matches, body_matches]
@@ -426,7 +426,7 @@ structure CapturedReturn where
   state : ReturnImage
 
 def subReturn (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) : CapturedReturn :=
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) : CapturedReturn :=
   let target := read state
   let oldSp := state.frame.registers.raw.gpr 4
   let newSp := oldSp + 8
@@ -436,7 +436,7 @@ def subReturn (size : Nat) (words : List Nat) (read : ReturnImage → Word)
         stack := body size words (newSp.toInt - 8) newSp.toInt fresh state.stack } }
 
 def subReturnSpec (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) : CapturedReturn :=
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) : CapturedReturn :=
   { target := read state
     state :=
       { frame := { state.frame with registers := registerPc (advanceStack state.frame.registers 8) (read state) }
@@ -444,19 +444,19 @@ def subReturnSpec (size : Nat) (words : List Nat) (read : ReturnImage → Word)
           (state.frame.registers.raw.gpr 4 + 8).toInt fresh state.stack } }
 
 theorem sub_return_matches (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) :
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) :
     subReturn size words read fresh state = subReturnSpec size words read fresh state := by
   simp only [subReturn, subReturnSpec, body_matches]
 
 theorem saved_word_captured (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) :
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) :
     (subReturn size words read fresh state).target = read state ∧
       (subReturn size words read fresh state).state.frame.registers.raw.pc = read state := by
   exact ⟨rfl, rfl⟩
 
 theorem sub_return_frame_projection (size : Nat) (words : List Nat)
     (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
-    (arena : Word) (read : ReturnImage → Word) (fresh : Nat → Byte) (state : ReturnImage)
+    (arena : Word) (read : ReturnImage → Word) (fresh : Nat → Reference.Byte) (state : ReturnImage)
     (readProjection : read state = returnStackWord env entry arena state.frame.registers) :
     (subReturn size words read fresh state).state.frame = subroutineFrame env entry arena state.frame := by
   simp only [subReturn, subroutineFrame, readProjection]
@@ -466,7 +466,7 @@ theorem sub_return_frame_projection (size : Nat) (words : List Nat)
 /-- The source release changes its stack image and word ghosts while the
 historical native-memory projection retains its bytes and register tags. -/
 theorem sub_return_frame_retained (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) :
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) :
     let result := (subReturn size words read fresh state).state.frame
     result.registers.raw.gpr 4 = state.frame.registers.raw.gpr 4 + 8 ∧
       result.tags = state.frame.tags ∧
@@ -478,7 +478,7 @@ theorem sub_return_frame_retained (size : Nat) (words : List Nat) (read : Return
 
 /-- Every byte at or above the new signed SP retains its original image. -/
 theorem sub_return_live_bytes (size : Nat) (words : List Nat) (read : ReturnImage → Word)
-    (fresh : Nat → Byte) (state : ReturnImage) (i : Nat)
+    (fresh : Nat → Reference.Byte) (state : ReturnImage) (i : Nat)
     (live : (state.frame.registers.raw.gpr 4 + 8).toInt ≤ offset size i) :
     (subReturn size words read fresh state).state.stack.bytes i = state.stack.bytes i := by
   apply retained_byte
@@ -491,10 +491,10 @@ def attach (stack : Image) : Option ReturnOutcome → Option (ReturnOutcome × I
   | none => none
   | some outcome => some (outcome, stack)
 
-def tokenBody (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
+def tokenBody (size : Nat) (words : List Nat) (releaseFresh : Nat → Reference.Byte)
     (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
     (arena : Word) (fresh : Nat → Bool) (current : Nat) (state : ReturnImage)
-    (mode : ReturnMode) (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+    (mode : ReturnMode) (flags : Reference.Byte) (aux : BitVec 32) (dst src : Reference.Byte) (value nextPc : Word) :
     Option (ReturnOutcome × Image) :=
   let stack := match mode with
     | .invocation => state.stack
@@ -502,7 +502,7 @@ def tokenBody (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
         (fun s => returnStackWord env entry arena s.frame.registers) releaseFresh state).state.stack
   attach stack (returnTokenBody env entry arena fresh current state.frame mode flags aux dst src value nextPc)
 
-def dispatch (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
+def dispatch (size : Nat) (words : List Nat) (releaseFresh : Nat → Reference.Byte)
     (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
     (arena : Word) (state : ReturnImage) (mode : ReturnMode) : Option (ReturnOutcome × Image) :=
   let stack := match mode with
@@ -511,10 +511,10 @@ def dispatch (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
         (state.frame.registers.raw.gpr 4 + 8).toInt releaseFresh state.stack
   attach stack (returnDispatch env entry arena state.frame mode (GeneratedX86Opcode.code .ret))
 
-theorem token_body_matches (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
+theorem token_body_matches (size : Nat) (words : List Nat) (releaseFresh : Nat → Reference.Byte)
     (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
     (arena : Word) (fresh : Nat → Bool) (current : Nat) (state : ReturnImage)
-    (mode : ReturnMode) (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+    (mode : ReturnMode) (flags : Reference.Byte) (aux : BitVec 32) (dst src : Reference.Byte) (value nextPc : Word) :
     tokenBody size words releaseFresh env entry arena fresh current state mode flags aux dst src value nextPc =
       dispatch size words releaseFresh env entry arena state mode := by
   simp only [tokenBody, dispatch, ret_body_matches]
@@ -524,10 +524,10 @@ theorem token_body_matches (size : Nat) (words : List Nat) (releaseFresh : Nat �
 
 /-- Every continuation, including the unresolved-target edge, carries the
 same released byte image and word validity/provenance result. -/
-theorem token_default (size : Nat) (words : List Nat) (releaseFresh : Nat → Byte)
+theorem token_default (size : Nat) (words : List Nat) (releaseFresh : Nat → Reference.Byte)
     (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
     (arena : Word) (fresh : Nat → Bool) (current : Nat) (state : ReturnImage)
-    (targets : List Word) (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word)
+    (targets : List Word) (flags : Reference.Byte) (aux : BitVec 32) (dst src : Reference.Byte) (value nextPc : Word)
     (unmatched : targets.contains (returnStackWord env entry arena state.frame.registers) = false) :
     tokenBody size words releaseFresh env entry arena fresh current state (.subroutine targets)
         flags aux dst src value nextPc =
@@ -539,7 +539,152 @@ theorem token_default (size : Nat) (words : List Nat) (releaseFresh : Nat → By
   simp only [dispatch, returnDispatch, ↓reduceIte, attach,
     return_dispatch_default env entry arena state.frame.registers targets unmatched]
 
+
+/-- The scalarized SC_READ loop visits each declared word and forwards the
+saved scalar payload exactly when its valid byte is nonzero. -/
+def forward (index : Nat) (cells : Nat → Cell) : List Nat → Word → Word
+  | [], raw => raw
+  | i :: rest, raw => forward index cells rest
+      (if index = i * 8 ∧ (cells i).valid ≠ 0#8 then (cells i).scalar else raw)
+
+theorem forward_matches (index : Nat) (cells : Nat → Cell) (words : List Nat)
+    (raw : Word) (aligned : index % 8 = 0) :
+    forward index cells words raw =
+      if index / 8 ∈ words ∧ (cells (index / 8)).valid ≠ 0#8
+      then (cells (index / 8)).scalar else raw := by
+  induction words generalizing raw with
+  | nil => simp [forward]
+  | cons head rest ih =>
+      rw [forward, ih]
+      have same : index = head * 8 ↔ index / 8 = head := by omega
+      by_cases selected : index / 8 = head
+      · subst head
+        by_cases valid : (cells (index / 8)).valid = 0#8 <;>
+          by_cases member : index / 8 ∈ rest <;> simp [same, valid, member]
+      · by_cases valid : (cells (index / 8)).valid = 0#8 <;>
+          by_cases member : index / 8 ∈ rest <;> simp [same, selected, valid, member]
+
+/-- The owned 64-bit path distinguishes aligned union-word reads with
+optional scalar forwarding from the ordered eight-byte unaligned path.
+The aligned union primitive is interpreted by its little-endian byte image. -/
+def ownedRead (size : Nat) (words : List Nat) (sp : Int) (index : Nat) (image : Image) : Word :=
+  let raw := GeneratedX86MemAccess.load (fun i => image.bytes (index + i)) .w64
+  if index % 8 = 0 then
+    if sp ≤ offset size index then forward index image.cells words raw else raw
+  else raw
+
+def ownedReadSpec (size : Nat) (words : List Nat) (sp : Int) (index : Nat) (image : Image) : Word :=
+  if index % 8 = 0 ∧ sp ≤ offset size index ∧ index / 8 ∈ words ∧
+      (image.cells (index / 8)).valid ≠ 0#8 then
+    (image.cells (index / 8)).scalar
+  else x86MemLoadSpec (fun i => image.bytes (index + i)) .w64
+
+theorem owned_read_matches (size : Nat) (words : List Nat) (sp : Int) (index : Nat) (image : Image) :
+    ownedRead size words sp index image = ownedReadSpec size words sp index image := by
+  unfold ownedRead ownedReadSpec
+  rw [x86_mem_load_refines]
+  by_cases aligned : index % 8 = 0
+  · simp only [aligned, ↓reduceIte, true_and]
+    by_cases live : sp ≤ offset size index
+    · simp only [live, ↓reduceIte, true_and, forward_matches index image.cells words _ aligned]
+    · simp [live]
+  · simp [aligned]
+
+theorem owned_read_unaligned (size : Nat) (words : List Nat) (sp : Int) (index : Nat) (image : Image)
+    (unaligned : index % 8 ≠ 0) :
+    ownedRead size words sp index image = x86MemLoadSpec (fun i => image.bytes (index + i)) .w64 := by
+  rw [owned_read_matches]
+  simp [ownedReadSpec, unaligned]
+
+theorem owned_read_forwarded (size : Nat) (words : List Nat) (sp : Int) (index : Nat) (image : Image)
+    (aligned : index % 8 = 0) (live : sp ≤ offset size index)
+    (declared : index / 8 ∈ words) (valid : (image.cells (index / 8)).valid ≠ 0#8) :
+    ownedRead size words sp index image = (image.cells (index / 8)).scalar := by
+  rw [owned_read_matches]
+  simp [ownedReadSpec, aligned, live, declared, valid]
+
+/-- Every branch of the source read agrees with the canonical native word
+when active forwarded scalars and the source byte image represent that word. -/
+theorem owned_read_native (size : Nat) (words : List Nat) (sp : Int) (index : Nat)
+    (image : Image) (target : Word)
+    (bytes : x86MemLoadSpec (fun i => image.bytes (index + i)) .w64 = target)
+    (scalar : index % 8 = 0 → sp ≤ offset size index → index / 8 ∈ words →
+      (image.cells (index / 8)).valid ≠ 0#8 → (image.cells (index / 8)).scalar = target) :
+    ownedRead size words sp index image = target := by
+  rw [owned_read_matches]
+  unfold ownedReadSpec
+  split <;> rename_i selected
+  · exact scalar selected.1 selected.2.1 selected.2.2.1 selected.2.2.2
+  · exact bytes
+
+/-- SUB_RET reads at its current SP. The below-SP fresh-read alternative
+therefore retains the owned result before the release changes the image. -/
+def read (size : Nat) (words : List Nat) (sp off : Int) (index : Nat)
+    (fresh : Word) (image : Image) : Word :=
+  let raw := ownedRead size words sp index image
+  if off < sp then fresh else raw
+
+theorem read_at_sp (size : Nat) (words : List Nat) (sp : Int) (index : Nat)
+    (fresh : Word) (image : Image) :
+    read size words sp sp index fresh image = ownedRead size words sp index image := by
+  simp [read]
+
+/-- The read/forwarding relation supplies the earlier abstract saved-read
+premise once for every entered source image and stack coordinate. -/
+theorem sub_return_owned_projection (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena : Word) (index : Nat) (fresh : Nat → Reference.Byte) (state : ReturnImage)
+    (bytes : x86MemLoadSpec (fun i => state.stack.bytes (index + i)) .w64 =
+      returnStackWord env entry arena state.frame.registers)
+    (scalar : index % 8 = 0 → (state.frame.registers.raw.gpr 4).toInt ≤ offset size index →
+      index / 8 ∈ words → (state.stack.cells (index / 8)).valid ≠ 0#8 →
+      (state.stack.cells (index / 8)).scalar = returnStackWord env entry arena state.frame.registers) :
+    (subReturn size words
+      (fun s => ownedRead size words (s.frame.registers.raw.gpr 4).toInt index s.stack)
+      fresh state).state.frame = subroutineFrame env entry arena state.frame := by
+  apply sub_return_frame_projection
+  exact owned_read_native size words _ index state.stack _ bytes scalar
+
+
+/-- Every later owned read inside the surviving live interval sees the
+same bytes and scalar identity after the current release. -/
+theorem owned_read_live_preserved (size : Nat) (words : List Nat) (oldSp newSp : Int)
+    (fresh : Nat → Reference.Byte) (image : Image) (index : Nat)
+    (live : newSp ≤ offset size index) :
+    ownedRead size words newSp index (body size words oldSp newSp fresh image) =
+      ownedRead size words newSp index image := by
+  have bytes : (fun i => (body size words oldSp newSp fresh image).bytes (index + i)) =
+      (fun i => image.bytes (index + i)) := by
+    funext i
+    apply retained_byte
+    unfold offset at *
+    omega
+  rw [owned_read_matches, owned_read_matches]
+  unfold ownedReadSpec
+  rw [bytes]
+  by_cases aligned : index % 8 = 0
+  · have wordLive : newSp ≤ offset size (index / 8 * 8) := by
+      have start : index / 8 * 8 = index := by omega
+      simpa only [start] using live
+    rw [live_cell_preserved size words oldSp newSp fresh image (index / 8) wordLive]
+  · simp [aligned]
+
+/-- Reallocating a previously released word reads its current byte image:
+the cleared valid bit prevents stale scalar forwarding at every later SP. -/
+theorem reallocated_word_reads_bytes (size : Nat) (words : List Nat) (oldSp newSp laterSp : Int)
+    (fresh : Nat → Reference.Byte) (image : Image) (i : Nat)
+    (growing : oldSp < newSp) (declared : i ∈ words)
+    (below : offset size (i * 8) < newSp) :
+    ownedRead size words laterSp (i * 8) (body size words oldSp newSp fresh image) =
+      x86MemLoadSpec (fun j => (body size words oldSp newSp fresh image).bytes (i * 8 + j)) .w64 := by
+  have invalid := (released_word_invalid size words oldSp newSp fresh image i growing declared below).2
+  have zero : ((body size words oldSp newSp fresh image).cells i).valid = 0#8 := invalid
+  rw [owned_read_matches]
+  simp [ownedReadSpec, zero]
+
 end StackRelease
+
+
 
 
 end KProgFormal.X86RemainingTokenO2

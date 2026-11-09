@@ -6256,3 +6256,19 @@ bridges. Source read/forwarding and live-stack/native-memory representation,
 signed subtraction domain, producer mode and C/B/compiler/physical interfaces
 remain active. RET stays partial; current C-model71/75 and compiled13/75 totals
 retain their scope.
+
+### Internal RET owned read and surviving live image
+
+Nine additional `StackRelease` laws interpret the existing full64 read and
+scalar-forwarding loops. Ordered declared-word selection equals the independent
+slot lookup, using the exact nonzero valid-byte condition. Aligned and unaligned
+paths compose their byte/scalar coherence with the native saved-word projection.
+Reads in the surviving live interval preserve their values; later reallocation
+uses the released image's bytes after valid0 clears scalar forwarding.
+The [owned-read receipt](ret-owned-read.log.gz) retains exact source macros,
+root/TV compiles, nine new audits and seventeen preceding lifetime audits.
+All26 component audits pass with sorryAx0 and executable-reduction bridges0;
+TV composition retains five inherited bridges. Source computed-index, union
+memory and signed-coordinate interpretation, producer mode, code-address mapping
+and C/B/compiler/physical transport remain the active universal interfaces.
+RET retains partial status and C-model71/75, compiled13/75 totals retain scope.
