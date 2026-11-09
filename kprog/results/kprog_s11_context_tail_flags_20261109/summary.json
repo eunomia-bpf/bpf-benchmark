@@ -1,0 +1,172 @@
+{
+  "context": {
+    "typed_types": [
+      3,
+      6,
+      8
+    ],
+    "raw_identity_types": [
+      2,
+      5,
+      15,
+      17,
+      20,
+      24,
+      26,
+      27,
+      28,
+      29,
+      31,
+      32
+    ],
+    "typed_handler_required": [
+      1,
+      4,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      16,
+      18,
+      19,
+      21,
+      22,
+      23,
+      25,
+      30
+    ]
+  },
+  "tail": {
+    "host_executions": 195,
+    "depths_tested": 13,
+    "relocation_depths": 513,
+    "saved_rbp_forms": 2,
+    "tc": [
+      {
+        "jit_stack_depth": 24,
+        "jit_stack_pop": 24
+      },
+      {
+        "route": "stock",
+        "retval": 2,
+        "invocations": 34,
+        "tail_transfers": 33
+      },
+      {
+        "route": "native",
+        "retval": 2,
+        "invocations": 34,
+        "tail_transfers": 33
+      }
+    ]
+  },
+  "flags": {
+    "host_regression": "PASS",
+    "kernel_patch_reapply": "PASS",
+    "private_kernel_build": 0,
+    "paired_module_build": 0
+  },
+  "micro": {
+    "x86": {
+      "positive_compiles": 29,
+      "unchecked_read_compile": 1,
+      "total_compiles": 30
+    },
+    "arm64": {
+      "positive_compiles": 29,
+      "unchecked_read_compile": 1,
+      "total_compiles": 30
+    }
+  },
+  "safety": {
+    "x86": {
+      "cases": 42,
+      "outcomes": {
+        "valid_executed": 8,
+        "positive_infrastructure_error": 1,
+        "verifier_rejected": 30,
+        "specialization_rejected": 1,
+        "accepted_finding": 2
+      },
+      "findings": [
+        {
+          "name": "valid_cmov_to_sp",
+          "stage": "positive_infrastructure_error"
+        },
+        {
+          "name": "immediate_push_branch",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "stack_base_flags",
+          "stage": "accepted_finding"
+        }
+      ],
+      "unsafe_executions": 0
+    },
+    "arm64": {
+      "cases": 38,
+      "outcomes": {
+        "valid_executed": 4,
+        "verifier_rejected": 25,
+        "specialization_rejected": 2,
+        "accepted_finding": 7
+      },
+      "findings": [
+        {
+          "name": "scalar_vector_load_clear_high",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "unpaired_stxr_failure",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "unpaired_stlxr_failure",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "paired_stxr_failure",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "paired_stlxr_failure",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "entry_return_address_flags",
+          "stage": "accepted_finding"
+        },
+        {
+          "name": "stack_base_flags",
+          "stage": "accepted_finding"
+        }
+      ],
+      "unsafe_executions": 0
+    }
+  },
+  "rust_tests": 91,
+  "service_tests": 9,
+  "production_commits": [
+    "901194c0c",
+    "b1be661ee",
+    "64ca0ff0a"
+  ],
+  "proposal_commit": "b62382b24",
+  "remaining": [
+    "S7, S10 and C own the named safety-suite model findings and saved-register/context-spill precision diagnostics.",
+    "V and S13 compose universal producer/JIT/entry and successful tail-transfer obligations.",
+    "The coordinator selects SIMD ownership and indirect-branch integration from the published cost proposal."
+  ],
+  "raw_archive": {
+    "file": "raw.tar.gz",
+    "size": 2397005,
+    "sha256": "625e97bf5cd4bc08001c51a18bacf8d12c84b812aee1d7311ac2c258ccf82e24",
+    "entries": 634
+  },
+  "tc_fixture_commit": "496c507b5",
+  "review": "Focused source and diff-size review: production uses one shared layout selector, one pre-restore flag scan and two JIT-frame relocations; added fixtures exercise the requested frame and flag behavior."
+}

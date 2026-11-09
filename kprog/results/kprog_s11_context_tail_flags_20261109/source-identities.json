@@ -1,0 +1,22 @@
+{
+  "kprog/trusted_generation.py": "0dd183ae1950f17012fc48a1da0f0aa627b86e4f19457e668dd17a07498d1af5",
+  "kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+  "kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
+  "kprog/tv/native-proof-regions.patch": "e0b8761defdc357e293894f98e1b74a93e4b96cee817bad870e81e9d6e3534c0",
+  "kprog/x86/native_lab/native_link/src/x86.rs": "e8719bb67dc3fc53a20fa34504c7c342ee2b1099ed4ee3c1364db4c51d92afa3",
+  "kprog/libnativeloader/src/native_loader.cpp": "1dc7485554127dad34cb0dcf33397349f412a98456d64d1c37a3c8eb9f2a7997",
+  "kinsn/module/include/native_lab_binding.h": "f048b909f68aa4f5b93241f075cd4f96162830766c0c9f3333e3a3a662f9959f",
+  "kinsn/module/x86/bpf_x86_native_lab.c": "f9aca6f0248b8afe3cb2331bb4ed61782079c12dacff7294c52b5b8b920faebb",
+  "kernel-src/kernel/bpf/verifier.c": "e9fef4249589e352c96074cb7bd8160d8cbad8355c2ae3dd6c6cc4cd52c52b12",
+  "kernel-build/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+  "kernel-build/arch/x86/boot/bzImage": "69b98b9ab21cd5fae48d44b9118820704a77b015e37dd28b7a402da827ac6367",
+  "module/bpf_x86_native_lab.ko": "3d6e921a02027d071e9b161fb88e5cd2c8b30a10205c95622afd1848cb00b926",
+  "cargo/release/native-link": "544c47d0c3117aa197cf0b2f23029771399ef2491bb787b1812181e2f10d0a66",
+  "loader/trusted-native-loader": "ebaac9fc77f7c9303ceadf8c5dd1e5f3fe71802b20f4d190bf42af59fe24853c",
+  "kprog/test/tail_call_frame/native.S": "8f2d6669aa24a99621fa034d39406edc86ca8c3064e9becb5be5b0977c2810aa",
+  "kprog/test/tail_call_frame/program.c": "75df3573e966e9f829faf31513b7eefcff37cb6862e573b8437dfadeb31bf958",
+  "kprog/test/tail_call_frame/client.cpp": "ba0418c9e9efaaa8326c517cea7530ccbd4c3851fa70a66d7daef5c767caa4ae",
+  "kprog/test/test_x86_tail_frame.py": "a8240d8d7a7247b78e3aad1f2e15b66c6ed1fe07407d7d5168ff09520f6e56e2",
+  "kprog/test/test_context_kind.py": "fe52d3ee157c4a0ca011fe159160fe2d71e24528f8021c3b7814d4310db0fe28",
+  "kprog/tv/test_native_rewrite_flags.py": "1c80f0ceb5c147508c8389a13e8df3550e188ea7263763daca52b93cf7449cec"
+}
