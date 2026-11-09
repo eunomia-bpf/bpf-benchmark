@@ -25,5 +25,8 @@
   "frame": "X19-X28 through existing full-callee pushes/pops; X29 through existing FP/LR frame record",
   "stack_delta_bytes": 80,
   "model_exit": "SP at entry coordinate0",
-  "native_execution_requests": 0
+  "native_execution_requests": 0,
+  "module": "/var/tmp/kprog-tmp/A/entry-frame/module/kprog_stock.ko",
+  "module_sha256": "ebc2661f8e048e28704c5371317001d5355959fa226609dcd0155666cee39c65",
+  "module_build_exit": 0
 }
