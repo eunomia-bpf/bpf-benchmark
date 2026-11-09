@@ -295,3 +295,101 @@ theorem signed_magnitude_handler_refines (width : ScalarWidth) (source : Referen
   exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86Divide
+
+namespace KProgFormal.Refinement.X86Divide.SignedArithmetic
+open Reference.X86 (ScalarWidth)
+
+/-- The emitted sign-bit magnitude permits the negative signed minimum and
+ends one earlier for a positive quotient. -/
+def limit (width : ScalarWidth) (negative : Bool) : Nat :=
+  2 ^ (width.bits - 1) - (if negative then 0 else 1)
+
+theorem limit_lt_base (width : ScalarWidth) (negative : Bool) :
+    limit width negative < base width := by
+  cases width <;> cases negative <;> decide
+
+/-- Production chooses direct narrow division, the zero-high qword fast path,
+and the verified radix-two qword loop. The incoming high-limb condition supplies
+that loop's restoring remainder invariant. -/
+def quotRem (width : ScalarWidth) (high low divisor : Nat) : Nat × Nat :=
+  if width = .w64 then
+    if high = 0 then (low / divisor, low % divisor)
+    else longDivide 64 high low divisor
+  else ((high * base width + low) / divisor, (high * base width + low) % divisor)
+
+theorem quot_rem_matches (width : ScalarWidth) (high low divisor : Nat)
+    (lowBound : low < base width) (highBound : high < divisor) :
+    quotRem width high low divisor =
+      ((high * base width + low) / divisor, (high * base width + low) % divisor) := by
+  unfold quotRem
+  by_cases wide : width = .w64
+  · subst width
+    rw [if_pos rfl]
+    by_cases zero : high = 0
+    · simp [zero]
+    · rw [if_neg zero]
+      have result := longDivide_quot_rem 64 high low divisor highBound lowBound
+      exact Prod.ext result.1 result.2
+  · rw [if_neg wide]
+
+/-- The earlier high-magnitude condition already implies failure of the signed
+quotient bound, for either quotient sign. It preserves the canonical #DE result. -/
+theorem preliminary_overflow (width : ScalarWidth) (negative : Bool)
+    (high low divisor : Nat) (lowBound : low < base width)
+    (nonzero : divisor ≠ 0) (highFault : divisor ≤ high) :
+    limit width negative < (high * base width + low) / divisor := by
+  have wide := (fault_refines width high low divisor lowBound).mp (Or.inr highFault)
+  have smaller := limit_lt_base width negative
+  omega
+
+/-- Two production arithmetic fault sites: the preliminary high-limb test and
+then the sign-sensitive quotient limit. Architectural writes follow this result. -/
+def guarded (width : ScalarWidth) (negative : Bool) (high low divisor : Nat) : Option (Nat × Nat) :=
+  if divisor = 0 ∨ divisor ≤ high then none else
+    let result := quotRem width high low divisor
+    if limit width negative < result.1 then none else some result
+
+/-- Flat magnitude result used by signedMagnitudeStep; this normal form keeps
+the integer signed-range correspondence separate from the C arithmetic route. -/
+def flatResult (width : ScalarWidth) (negative : Bool) (high low divisor : Nat) : Option (Nat × Nat) :=
+  let result := ((high * base width + low) / divisor, (high * base width + low) % divisor)
+  if divisor = 0 ∨ limit width negative < result.1 then none else some result
+
+theorem guarded_matches (width : ScalarWidth) (negative : Bool) (high low divisor : Nat)
+    (lowBound : low < base width) :
+    guarded width negative high low divisor = flatResult width negative high low divisor := by
+  by_cases early : divisor = 0 ∨ divisor ≤ high
+  · rcases early with zero | highFault
+    · simp [guarded, flatResult, zero]
+    · by_cases zero : divisor = 0
+      · simp [guarded, flatResult, zero]
+      · have overflow := preliminary_overflow width negative high low divisor lowBound zero highFault
+        simp [guarded, flatResult, highFault, overflow]
+  · have nonzero : divisor ≠ 0 := by omega
+    have highBound : high < divisor := by omega
+    have result := quot_rem_matches width high low divisor lowBound highBound
+    simp [guarded, flatResult, early, nonzero, result, Nat.not_le.mpr highBound]
+
+/-- Accepted quotient and remainder fit the emitted width. This permits their
+unsigned word representation before the source restores signed results. -/
+theorem accepted_result_bounds (width : ScalarWidth) (negative : Bool)
+    (high low divisor quotient remainder : Nat)
+    (lowBound : low < base width) (divisorBound : divisor < base width)
+    (accepted : guarded width negative high low divisor = some (quotient, remainder)) :
+    quotient < base width ∧ remainder < base width := by
+  rw [guarded_matches width negative high low divisor lowBound] at accepted
+  unfold flatResult at accepted
+  dsimp only at accepted
+  split at accepted
+  · contradiction
+  · rename_i successful
+    have result := Option.some.inj accepted
+    have q := congrArg Prod.fst result
+    have r := congrArg Prod.snd result
+    have smaller := limit_lt_base width negative
+    have nonzero : divisor ≠ 0 := by omega
+    have remBound := Nat.mod_lt (high * base width + low) (by omega : 0 < divisor)
+    simp only [Prod.fst, Prod.snd] at q r
+    omega
+
+end KProgFormal.Refinement.X86Divide.SignedArithmetic
