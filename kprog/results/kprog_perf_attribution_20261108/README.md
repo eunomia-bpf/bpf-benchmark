@@ -1159,3 +1159,36 @@ compile broker.** For C: restart the `frozen-python` broker (its `STOP` file
 is present and no process runs), and OTel's native objects then need
 regenerating with the load-site fields. The six-application timing at
 `SAMPLES=3 WORKLOAD_DURATION=180` waits on those.
+
+### What it takes to run OTel's native arm
+
+Chasing the OTel compile to the end established the full set of things the
+recipe needs, each verified in isolation:
+
+1. **The compile broker must be running.** `frozen-python/trusted_compile.py
+   serve` writes `ready.json`, serves `*.request.json` pairs and stops when
+   a `STOP` file appears. Lane C's `broker/` has `STOP` present, no process,
+   and a `ready.json` from 2026-11-08 06:20, so every compile submitted to
+   it fails. A broker started in a private state directory with
+   `--clang /usr/lib/llvm-18/bin/clang` serves the same requests correctly:
+   a compile through it returns `returncode: 0`.
+2. **The `CLANG` environment variable chooses the compiler.** The
+   specializer resolves `CLANG`, then `PATH`, then `/usr/lib/llvm-*/bin`;
+   the recipe's `clang` on `PATH` is the wrapper that submits to the broker,
+   so `CLANG` must name it explicitly for the requests to go through the
+   working broker.
+3. **The wrapper needs two links beside it.** It rewrites the generated
+   source's absolute `#include` to `<its own dir>/source/...` and invokes
+   `<its own dir>/frozen-python/trusted_compile.py`, so `source -> repo` and
+   `frozen-python -> the frozen copy` have to exist next to it.
+4. **The image needs four source trees the generated BPF includes by
+   absolute path**: `kprog/x86`, `kprog/formal/generated`,
+   `kinsn/module/include` and `vendor/libbpf`. With all four, the generated
+   source compiles to a 41,608-byte object with no errors.
+
+With all four in place the request reaches my broker and the broker's own
+compile returns 0, but the corpus request still reports `exit status 1` and
+one request is left unserved in the broker's queue, so the wrapper and the
+recipe disagree on something the broker's log does not show. That agreement
+is lane C's to settle, since the broker, the wrapper and the frozen service
+are all theirs.
