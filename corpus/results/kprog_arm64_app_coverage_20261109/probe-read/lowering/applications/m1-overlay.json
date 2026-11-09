@@ -1,0 +1,66 @@
+{
+  "utc": "2026-11-09T06:59:44.226102+00:00",
+  "source_commit": "5363b5ff6",
+  "scope": "Published S10 complete-effective-address zero-page recovery with retained S7 stack access and coordinate semantics",
+  "prior_overlay": {
+    "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h"
+    ],
+    "utc": "2026-11-09T06:57:07.787110+00:00",
+    "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
+    "prior_overlay": {
+      "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+      "paths": [
+        "kprog/arm64/arm64_sim_local_bpf.h"
+      ],
+      "utc": "2026-11-09T06:51:13.923107+00:00",
+      "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+      "prior_overlay": {
+        "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+        "paths": [
+          "kprog/arm64/arm64_sim_local_bpf.h"
+        ],
+        "utc": "2026-11-09T06:31:36.178532+00:00",
+        "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+        "derived_header": "kprog/arm64/arm64_sim_direct.h",
+        "derivation": "Existing owning Makefile target with existing libbpf host include"
+      },
+      "derived_header": "kprog/arm64/arm64_sim_direct.h",
+      "derivation": "Existing owning Makefile target with existing libbpf host include"
+    },
+    "derived_header": "kprog/arm64/arm64_sim_direct.h",
+    "derivation": "Existing owning Makefile target with existing libbpf host include"
+  },
+  "applications": {
+    "bcc": {
+      "header_sha256": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+      "derived_header_sha256": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
+      "delta_archive_sha256": "74f281a643ca7356bee9c4939a4fffdef008f9a4d6971673d941f08f95ab9f0d",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/bcc/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    },
+    "tracee": {
+      "header_sha256": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+      "derived_header_sha256": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
+      "delta_archive_sha256": "0b6f86450b9e24b1685f3f33c38f01cd62f7bc4b7146eebfefbfb3d025f10a76",
+      "make_exit": 0,
+      "command": [
+        "make",
+        "-C",
+        "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/tracee/source/kprog/arm64",
+        "-f",
+        "/workspaces/repository/kprog/arm64/Makefile",
+        "arm64_sim_direct.h"
+      ]
+    }
+  },
+  "runtime_admission_additions": 0
+}

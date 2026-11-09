@@ -37,11 +37,11 @@
         "source/kprog/fidelity/negative.py": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
         "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
         "source/kprog/x86/x86_sim_local_bpf.h": "f893baef3f342251992b385f489ca6c2edb4aaf27c670fd260ee5783fe2b3beb",
-        "source/kprog/arm64/arm64_sim_local_bpf.h": "7d100984405db1c4f49fb87abc067593e018f692163a61147cdb835ef50c5438",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
         "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
         "source/kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
         "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
-        "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+        "source/kprog/arm64/arm64_sim_direct.h": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
         "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
         "source/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py": "ba427648704edb8ee2ce8412616cd29ec12e2e91f3cf46f6a07334edf7555fd5",
         "source/kprog/selftests/__pycache__/selftests.cpython-312.pyc": "84a2d2c915f06b497f7e17727d6dd9a5a8c4973af49b129f73506ba186ff3b61",
@@ -374,27 +374,37 @@
       "manifest_rows": 32,
       "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned",
       "model_delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-model-delta.tar.gz",
-      "model_delta_sha256": "28ca5980d8770a13a84e057c268b0fe1d21e058721f0076c52c3e6d1928ec465",
+      "model_delta_sha256": "74f281a643ca7356bee9c4939a4fffdef008f9a4d6971673d941f08f95ab9f0d",
       "model_overlay": {
-        "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
+        "commit": "5363b5ff6",
         "paths": [
           "kprog/arm64/arm64_sim_local_bpf.h"
         ],
         "base_model_commit": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
         "prior_overlay": {
-          "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+          "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
           "paths": [
             "kprog/arm64/arm64_sim_local_bpf.h"
           ],
-          "utc": "2026-11-09T06:51:13.923107+00:00",
-          "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+          "utc": "2026-11-09T06:57:07.787110+00:00",
+          "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
           "prior_overlay": {
-            "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+            "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
             "paths": [
               "kprog/arm64/arm64_sim_local_bpf.h"
             ],
-            "utc": "2026-11-09T06:31:36.178532+00:00",
-            "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+            "utc": "2026-11-09T06:51:13.923107+00:00",
+            "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+            "prior_overlay": {
+              "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+              "paths": [
+                "kprog/arm64/arm64_sim_local_bpf.h"
+              ],
+              "utc": "2026-11-09T06:31:36.178532+00:00",
+              "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+              "derived_header": "kprog/arm64/arm64_sim_direct.h",
+              "derivation": "Existing owning Makefile target with existing libbpf host include"
+            },
             "derived_header": "kprog/arm64/arm64_sim_direct.h",
             "derivation": "Existing owning Makefile target with existing libbpf host include"
           },
@@ -413,7 +423,7 @@
           "arm64_sim_direct.h"
         ],
         "host_include": "/workspaces/repository/vendor/libbpf/src",
-        "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33"
+        "derived_header_sha256": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831"
       }
     },
     "tracee": {
@@ -444,11 +454,11 @@
         "source/kprog/fidelity/negative.py": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
         "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
         "source/kprog/x86/x86_sim_local_bpf.h": "f893baef3f342251992b385f489ca6c2edb4aaf27c670fd260ee5783fe2b3beb",
-        "source/kprog/arm64/arm64_sim_local_bpf.h": "7d100984405db1c4f49fb87abc067593e018f692163a61147cdb835ef50c5438",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
         "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
         "source/kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
         "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
-        "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
+        "source/kprog/arm64/arm64_sim_direct.h": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
         "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
         "source/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py": "ba427648704edb8ee2ce8412616cd29ec12e2e91f3cf46f6a07334edf7555fd5",
         "source/kprog/selftests/__pycache__/selftests.cpython-312.pyc": "84a2d2c915f06b497f7e17727d6dd9a5a8c4973af49b129f73506ba186ff3b61",
@@ -1220,27 +1230,37 @@
       "manifest_rows": 123,
       "functional_recipe": "Captured complete prior application recipe, paired workload/JIT/manifest; restored05-29 hardware timing remains R-owned",
       "model_delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-model-delta.tar.gz",
-      "model_delta_sha256": "738930fe5d584c5b8cc4d1fa8497503dd55fbb212a2532b3d2943d3b87ab6680",
+      "model_delta_sha256": "0b6f86450b9e24b1685f3f33c38f01cd62f7bc4b7146eebfefbfb3d025f10a76",
       "model_overlay": {
-        "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
+        "commit": "5363b5ff6",
         "paths": [
           "kprog/arm64/arm64_sim_local_bpf.h"
         ],
         "base_model_commit": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
         "prior_overlay": {
-          "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+          "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
           "paths": [
             "kprog/arm64/arm64_sim_local_bpf.h"
           ],
-          "utc": "2026-11-09T06:51:13.923107+00:00",
-          "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+          "utc": "2026-11-09T06:57:07.787110+00:00",
+          "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
           "prior_overlay": {
-            "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+            "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
             "paths": [
               "kprog/arm64/arm64_sim_local_bpf.h"
             ],
-            "utc": "2026-11-09T06:31:36.178532+00:00",
-            "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+            "utc": "2026-11-09T06:51:13.923107+00:00",
+            "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+            "prior_overlay": {
+              "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+              "paths": [
+                "kprog/arm64/arm64_sim_local_bpf.h"
+              ],
+              "utc": "2026-11-09T06:31:36.178532+00:00",
+              "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+              "derived_header": "kprog/arm64/arm64_sim_direct.h",
+              "derivation": "Existing owning Makefile target with existing libbpf host include"
+            },
             "derived_header": "kprog/arm64/arm64_sim_direct.h",
             "derivation": "Existing owning Makefile target with existing libbpf host include"
           },
@@ -1259,7 +1279,7 @@
           "arm64_sim_direct.h"
         ],
         "host_include": "/workspaces/repository/vendor/libbpf/src",
-        "derived_header_sha256": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33"
+        "derived_header_sha256": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831"
       }
     }
   },
@@ -1284,26 +1304,36 @@
   ],
   "runtime_admission_additions": 0,
   "model_overlay": {
-    "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
+    "commit": "5363b5ff6",
     "paths": [
       "kprog/arm64/arm64_sim_local_bpf.h"
     ],
-    "utc": "2026-11-09T06:57:07.787110+00:00",
-    "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
+    "utc": "2026-11-09T06:59:44.528554+00:00",
+    "scope": "Published S10 complete-effective-address zero-page recovery with retained S7 stack access and coordinate semantics",
     "prior_overlay": {
-      "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
+      "commit": "088a292b0374b728d86a6172b96ff7e4c7622c65",
       "paths": [
         "kprog/arm64/arm64_sim_local_bpf.h"
       ],
-      "utc": "2026-11-09T06:51:13.923107+00:00",
-      "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+      "utc": "2026-11-09T06:57:07.787110+00:00",
+      "scope": "Published S7 full-width SP ADD/SUB relative coordinates over retained volatile-access/lifetime and S10 recovery model",
       "prior_overlay": {
-        "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+        "commit": "da42f496cce7aba11b90196aa01c23b0a76e9584",
         "paths": [
           "kprog/arm64/arm64_sim_local_bpf.h"
         ],
-        "utc": "2026-11-09T06:31:36.178532+00:00",
-        "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+        "utc": "2026-11-09T06:51:13.923107+00:00",
+        "scope": "Published S7 volatile access then fresh below-SP lifetime model over captured S10 recovery",
+        "prior_overlay": {
+          "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+          "paths": [
+            "kprog/arm64/arm64_sim_local_bpf.h"
+          ],
+          "utc": "2026-11-09T06:31:36.178532+00:00",
+          "scope": "Published S10 scalar memcpy fault, vector recovery and narrow LSE source overlay over captured model",
+          "derived_header": "kprog/arm64/arm64_sim_direct.h",
+          "derivation": "Existing owning Makefile target with existing libbpf host include"
+        },
         "derived_header": "kprog/arm64/arm64_sim_direct.h",
         "derivation": "Existing owning Makefile target with existing libbpf host include"
       },
