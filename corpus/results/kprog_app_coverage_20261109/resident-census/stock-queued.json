@@ -1,8 +1,8 @@
 {
   "utc": "2026-11-09T11:43:44.598423+00:00",
   "model_source": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
-  "driver_source": "cd9bf8e642aed3106b16af8d373df68729f7e33e",
-  "controller_pid": 3847740,
+  "driver_source": "d3a92cd519055e9a90d179c55ce6e627ab7b2568",
+  "controller_pid": 3857937,
   "waits_generation_worker": 3817966,
   "source_objects": 18,
   "selected_instances": 274,
@@ -22,5 +22,8 @@
   "resource_mode": "source ELF maps/BTF, autoload=false",
   "stock_inputs": "existing kprog/stock-path/bin/clang and stock_native_input.h",
   "preparation_cutover_collector": 3848369,
-  "sequence": "retain current Katran compiler outcome, close preparatory cohort, then run all549stock rows"
+  "sequence": "complete stock load-only census; publish ranked table; generic largest-class fix",
+  "initial_controller_pid": 3847740,
+  "stock_attempt": "v2 absolute scratch alias through /mnt",
+  "preparatory_state": "closed29rows"
 }
