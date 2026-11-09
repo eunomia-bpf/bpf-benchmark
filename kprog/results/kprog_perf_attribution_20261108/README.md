@@ -745,3 +745,47 @@ setup, the result write and the runner's loop. That is the split the
 three-span measurement could not give.
 
 `--spans body` selects this mode; `--spans three` keeps the original.
+
+## The entry and return bridge, measured
+
+The candidates list the entry and return bridge as "fixed per invocation"
+but gave no cost. It is measurable: `simple` writes one constant, so its
+per-invocation cost is the bridge plus the runner's loop and nothing else.
+At one million inner repeats, that floor is **6.04 cycles and 26
+instructions per invocation** (it converges as the repeat count grows:
+6.68 at 10,000, 6.08 at 100,000, 6.04 at 1,000,000, so the one-shot call
+setup is amortized).
+
+Measured the same way, with each program's own generated input:
+
+| program | cycles/inv | instructions/inv | body cycles | body instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `simple` (floor, median of five) | 6.01 | 32 | -- | -- |
+| `katran_lb_consistent_hash_select` | 53.02 | 253 | 47.02 | 221 |
+| `packet_vlan_tcpopt_parser` | 30.59 | 165 | 24.58 | 133 |
+| `flow_5tuple_rss_hash` | 33.77 | 152 | 27.76 | 120 |
+
+Each program runs with its own generated input, at one million inner
+repeats; `kprog/perf/bridge.py` reproduces the table. Katran's figure is
+its input-taking path: without `--memory` it returns early and costs 6.7
+cycles and 40 instructions, which is the floor plus its own first checks.
+
+Two consequences, and they matter for how the ratios above should be read:
+
+1. **The bridge is about 6 cycles, and where a program is small it is most
+   of the measurement.** A program that costs 6.7 cycles per invocation is
+   90% bridge; one that costs 53 is 11%. Any per-program ratio between two
+   runtimes for a small program therefore measures the call path as much as
+   the code.
+2. **For the programs that carry an application's BPF time the bridge is
+   11% to 20% of the cycles.** `packet_vlan_tcpopt_parser` spends 30.6
+   cycles per invocation of which 24.6 is its own body (20% bridge),
+   `flow_5tuple_rss_hash` 33.8 of which 27.8 (18%), katran 53.0 of which
+   47.0 (11%). The bridge is a real candidate there, and a minor one.
+
+**The bridge's share by instruction**, which is what a compiler-flags or
+inlining change would move: 32 of 253 for katran (13%), 32 of 165 for
+`packet_vlan_tcpopt_parser` (19%), 32 of 152 for `flow_5tuple_rss_hash`
+(21%). Removing it entirely would take katran from 53.0 to 47.0 cycles per
+invocation (1.13x), `packet_vlan_tcpopt_parser` from 30.6 to 24.6 (1.24x)
+and `flow_5tuple_rss_hash` from 33.8 to 27.8 (1.22x).
