@@ -22,7 +22,7 @@ int main(int argc,char **argv)
 {
     native_loader::LoadedProgram loaded;
     try {
-        if (argc != 3) return 2;
+        if (argc != 3 && argc != 4) return 2;
         btf *vmlinux = btf__load_vmlinux_btf();
         if (!vmlinux) throw std::runtime_error("load guest BTF");
         int target = btf__find_by_name_kind(vmlinux,"bpf_lsm_file_open",BTF_KIND_FUNC);
@@ -34,8 +34,12 @@ int main(int argc,char **argv)
         context.attach_btf_id=target;
         options.native_context=context;
         options.expected_attach_type=BPF_LSM_MAC;options.attach_btf_id=target;
-        options.native_object_path=argv[1];options.symbol_name="entry";
+        options.native_object_path=argv[1];options.symbol_name=argc==4?argv[3]:"entry";
+#if defined(__aarch64__)
+        options.native_link_path="/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link";
+#else
         options.native_link_path="/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link";
+#endif
         loaded=native_loader::load_from_fd(options);
         int module=open(argv[2],O_RDONLY);
         if (module<0) throw std::runtime_error("open guest fixture module");
