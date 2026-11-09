@@ -1,0 +1,13 @@
+{
+  "trial": {
+    "entry": "balancer_ingress",
+    "native_sha256": "36f3daf9b98a3907d9a87307ab21133acf1225da88421035c4bb65f3dc95f751",
+    "model_sha256": "05c2d199d81f584c5223ef407125a7c4a2498d7ac32279b4188522f50a3ea2bb",
+    "status": "diagnostic",
+    "error": "Command '['/usr/lib/llvm-18/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/var/tmp/kprog-tmp/C/katran-regression-current/generated/trusted_x86.bpf.c', '-o', '/var/tmp/kprog-tmp/C/katran-regression-current/generated/trusted_x86.bpf.o']' returned non-zero exit status 1.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/corpus/results/kprog_app_coverage_20261109/katran-regression-current/compile.py\", line 6, in <module>\n    try:row['result']=specialize((I/'kernel.native.o').read_bytes(),row['entry'],json.loads((I/'generation.metadata.json').read_text()),G/'generated',Path('/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/native-link'));row['status']='compiled'\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 64, in specialize\n    run([clang, \"-g\", \"-O3\", \"-mcpu=v4\", \"-target\", \"bpf\",\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 42, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/lib/llvm-18/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/var/tmp/kprog-tmp/C/katran-regression-current/generated/trusted_x86.bpf.c', '-o', '/var/tmp/kprog-tmp/C/katran-regression-current/generated/trusted_x86.bpf.o']' returned non-zero exit status 1.\n"
+  },
+  "reversed_commit": "5d8c38d3aeee2909b9dee59178f990f675786f30",
+  "parent_model_sha256": "fbd419b9fcb7a3ef8ac98e08d7c0fc2fd2f53c2854f28e590d52491494a42843",
+  "model_restored": true
+}

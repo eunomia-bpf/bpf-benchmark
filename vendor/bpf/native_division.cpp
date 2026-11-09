@@ -46,6 +46,10 @@ struct NativeDivision : llvm::PassInfoMixin<NativeDivision> {
                         op->getOpcode() == llvm::Instruction::SRem;
             bool remainder = op->getOpcode() == llvm::Instruction::URem ||
                              op->getOpcode() == llvm::Instruction::SRem;
+            // Defined constant divisors retain LLVM's strength reduction.
+            if (auto *constant = llvm::dyn_cast<llvm::ConstantInt>(divisor))
+                if (!constant->isZero() && (!sign || !constant->isMinusOne()))
+                    continue;
             llvm::IRBuilder<> before(op);
             auto *zero = llvm::Constant::getNullValue(type);
             auto *is_zero = before.CreateICmpEQ(divisor, zero);

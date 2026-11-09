@@ -1,0 +1,58 @@
+{
+  "objects": [
+    {
+      "object": "balancer.native.o",
+      "sha256": "212aabfff8c539c64f3ad5ec41f9fa08918a65d44483abc3903ae44e32a9e3f7",
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 323,
+          "sha256": "03ab01c0d482d2332bd4d5cdd0faf9e3ddb6e5bfbb05ffad2368b347932329d1"
+        },
+        {
+          "name": "xdp",
+          "bytes": 8284,
+          "sha256": "248ae86291975da7564c5a6d3dbfca92435fad96097cfd188cf506d5e1835541"
+        }
+      ]
+    },
+    {
+      "object": "healthchecking.native.o",
+      "sha256": "f87fd19a00a35312e199c9edb60389c8649c804c427f78b63c8b2ddc24462061",
+      "sections": [
+        {
+          "name": "tc",
+          "bytes": 1219,
+          "sha256": "d37d60835f33324fa302cde71b98d055bab8f8b2aa4114ceceaac702d5e10322"
+        }
+      ]
+    },
+    {
+      "object": "healthchecking_ipip.native.o",
+      "sha256": "b5d2065bc08ff1b989eaf0bb82db546e95b5a4b2bf78a05f5b8b09d103690772",
+      "sections": [
+        {
+          "name": "tc",
+          "bytes": 408,
+          "sha256": "b19976df1407615d2693de48048d618ffb4a8756fffcb23bbbe523fcd1a42f54"
+        }
+      ]
+    },
+    {
+      "object": "xdp_root.native.o",
+      "sha256": "78423542521bebf180b3061a831ff5af6219f8b6b0a1a02ecc2976e1882d1456",
+      "sections": [
+        {
+          "name": "xdp",
+          "bytes": 95,
+          "sha256": "4a9e6918899b2d6fccd52c4afb2f214bc0667e253f02d26a2b55a332bda19af5"
+        }
+      ]
+    }
+  ],
+  "plugin_source_sha256": "424d41d2ff0dcc911218aa9fe832d7751990ba505c58ebbf0e776bcadb1607d1",
+  "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+  "scalar_oracle": "native division/remainder: 804232 operand pairs, 1608464 results OK",
+  "known_accepted_P": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+  "unselected_control_P": "36f3daf9b98a3907d9a87307ab21133acf1225da88421035c4bb65f3dc95f751"
+}
