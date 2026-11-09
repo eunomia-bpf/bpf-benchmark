@@ -1,0 +1,80 @@
+{
+  "original38": {
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  },
+  "inputs": {
+    "utc": "2026-11-09T10:39:43.485991+00:00",
+    "source_head": "c84a4ccd4d1afbb8a36d93bf0acc443366f0f05a",
+    "base_restored_image": "sha256:03cc5c15b546394dece4934c7ae601d44bf19c04aad5495b55b2bfacc163977f",
+    "image_tag": "bpf-benchmark/kprog-bcc-profile:c-20261109",
+    "kernel_build": "46125883be418abdeecf2f4c2e5641693ece9397",
+    "payloads": [
+      "b120d49fe209706f07843943af1e2595929796b7",
+      "29e8c1bf01a88a49a41b2235a1e1d4d5db0b9eeb",
+      "174e4a6be1fecb32e7bbc409d48709207e593e19",
+      "b316f05479f2048ab98adb2a7505ada52135f3bb"
+    ],
+    "frozen_workload": "9f3855f6f",
+    "virtual_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-native-profile-runtime",
+    "profile": "original complete four-app startup; one sample2s functional replay on20-23; R retains performance ownership",
+    "preceding_result": "fc50455dc034711bb21f79b0dca8403857984864",
+    "correction": "package actual kernel release7.0.0-rc2, matching842 ordinary and15 custom modules",
+    "prior_result": "53b44c83b6eaac4a15b1991ef4da88874517fd13",
+    "shim": "2312b25f55c403d22c300b3c2be20e216b56bacb",
+    "tracee_current_source": "626eae6152bd3aa71639b8f05c6acc24c7a44cd7",
+    "tetragon_baseline_destination": "/artifacts/user/repo-artifacts/x86_64/tetragon/",
+    "applications": [
+      "bcc/set",
+      "katran",
+      "tracee/monitor"
+    ],
+    "scope": "complete8object frozen-config native producer; same helper-output candidate; corrected reaching-frame linker; original38 then whole applications",
+    "native_profile_commit": "37fea6858ee85b77da1331b171ed22c287414df8",
+    "linker_source_commit": "7f906c4298c0b7ef92206d5d6ecbf45942987313",
+    "helper_candidate_commit": "cbae86808",
+    "model_sha256": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+    "native_payload": {
+      "manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+      "opensnoop.native.o": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "tcplife.native.o": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920",
+      "syscount.native.o": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+      "vfsstat.native.o": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "runqlat.native.o": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "capable.native.o": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "tcpconnect.native.o": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "biosnoop.native.o": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+    }
+  },
+  "make_exit": 0,
+  "application": "bcc/set,katran,tracee/monitor",
+  "native_requests": 16,
+  "generated": 16,
+  "compiled": 15,
+  "installed": 9,
+  "failed": 7,
+  "app_outcomes": [
+    {
+      "application": "bcc/set",
+      "status": "error",
+      "error": "BCC tool capable exited before BPF programs were tracked by shim"
+    },
+    {
+      "application": "katran",
+      "status": "error",
+      "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI20261109 10:47:48.850409  3213 KatranGrpcService.cpp:69] Starting Katran\nE20261109 10:47:48.850677  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261109 10:47:48.850688  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261109 10:47:48.850881  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261109 10:47:48.850889  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261109 10:47:48.852818  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261109 10:47:48.852837  3213 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame"
+    },
+    {
+      "application": "tracee/monitor",
+      "status": "error",
+      "error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/461de98c/tracee/signatures --capabilities bypass=true: command exited with code 97: {\"level\":\"warn\",\"ts\":1794221811.646628,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"warn\",\"ts\":1794221811.652375,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"error\",\"ts\":1794221811.658327,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1794221811.6588256,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}"
+    }
+  ]
+}
