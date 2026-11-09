@@ -62,6 +62,13 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
+x86 raw handler/dispatcher refinement covers34/75 operations. JCC/JMP now
+retain the full raw GPR/tag/flags/memory frame and select PC through generated
+source shapes and a native label map. Source ordering and native address
+ordering can differ. Ten control laws compile with module/root0 and sorryAx0;
+the existing entry image and native/source/physical/compiler interfaces retain
+their domains.
+
 ARM raw handler/dispatcher refinement covers58/74 operations: immediate moves,
 multiply/divide, shift/unary, ORN, extract/reverse/extension, conditional select,
 bitfields, conditional compare, logical flags, arithmetic flags, MOV_REG, resolved GOT/RODATA addresses, CNT/UADDLV vector reductions, ADD/SUB immediate aliases, shared ALU tokens and FMOV.

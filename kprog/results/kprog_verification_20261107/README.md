@@ -11,15 +11,15 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 58/74 |
-| Raw register dispatcher arm composition | 32/75 | 58/74 |
+| Raw register handler refinement | 34/75 | 58/74 |
+| Raw register dispatcher arm composition | 34/75 | 58/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 74/74 |
 | Immediate-alias source-emission binding composed | 0 | 2/74 |
-| Control handler model / composed step | 3/75 | 0/74 |
+| Control handler model / composed step | 1/75 | 0/74 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 71/75 | 73/74 |
@@ -6824,3 +6824,18 @@ source manifest, CPU trace and exit receipt are archived under
 The same exported source bytes are reachable at `124747e7bc2109f244e6a83496184dc1d3defbb6` after the coordinator history repair. The recorded run retains its original frozen source identity.
 
 Full raw archive: [full-make-check-37f561242.log.gz](full-make-check-37f561242.log.gz).
+
+### x86 raw source-control refinement
+
+JCC/JMP now preserve complete raw register words, all byte tags, flags,
+XMM/memory and the remaining architecture frame while changing PC. JCC reads
+the PF-aware generated condition and actual forward/backward shape; JMP chooses
+its label directly. An arbitrary native label map commutes with either source
+shape, including differing source/native address orders. The current specialized
+dispatcher retains arbitrary ignored flags/register fields and fresh inputs.
+
+Ten new laws and six preceding audits compile with module/root exit0 and
+sorryAx0. The [raw-control receipt](x86-raw-control.log.gz) records source and
+module identities. Numeric raw coverage advances32→34/75; the separate control
+model count retains CALL. Native label extraction/placement, entry image and
+C flag packing/physical/compiler transport remain explicit interfaces.

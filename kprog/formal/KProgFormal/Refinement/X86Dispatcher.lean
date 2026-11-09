@@ -5622,3 +5622,167 @@ theorem current_simulator_native_matches (env : EntryEnvironment.Environment) (f
   exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refined⟩
 
 end KProgFormal.Refinement.X86Dispatcher
+
+
+namespace KProgFormal.Refinement.X86Dispatcher.RawControl
+open X86NumericAddress
+open Reference
+open Reference.X86 (Register)
+open EntryEnvironment
+
+/-- Complete raw register words and byte tags. The established entry image
+interprets RSP as an offset and other STACK4 words as private-arena pointers.
+Label extraction, native-code placement and C flag packing retain their
+existing entry/source/physical interfaces. -/
+structure State where
+  raw : Reference.X86.State
+  tags : Register → Reference.Byte
+
+def registers (state : State) : RegisterState :=
+  ⟨state.raw, fun reg => state.tags reg == (4#8)⟩
+
+def image (env : Environment) (frame : Frame) (arena : Reference.Word) (state : State) : Reference.X86.State :=
+  nativeRegisters env frame arena (registers state)
+
+def setPc (state : State) (pc : Reference.Word) : State :=
+  { state with raw := { state.raw with pc := pc } }
+
+def observe (env : Environment) (frame : Frame) (arena : Reference.Word) (result : Transition State) :
+    Transition Reference.X86.State := ⟨image env frame arena result.state, result.events, result.fault⟩
+
+theorem pc_projects (env : Environment) (frame : Frame) (arena : Reference.Word) (state : State) (pc : Reference.Word) :
+    image env frame arena (setPc state pc) = { image env frame arena state with pc := pc } := rfl
+
+/-- Source index ordering and native address ordering choose the same
+destination for either generated shape. The label map stays arbitrary. -/
+theorem selected_labels (label : Nat → Reference.Word) (current next target : Nat) (taken : Bool) :
+    label (GeneratedX86BranchEmit.nextPc (GeneratedX86BranchEmit.shape current target) taken next target) =
+      BitVec.ofNat 64 (GeneratedX86BranchEmit.nextPc
+        (GeneratedX86BranchEmit.shape current (label target).toNat) taken (label next).toNat (label target).toNat) := by
+  rw [x86_branch_emit_refines, x86_branch_emit_refines]
+  cases taken <;> simp [branchPc]
+
+def conditional (label : Nat → Reference.Word) (current next target : Nat) (aux : BitVec 32) (state : State) :
+    Option (Transition State) :=
+  (GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2)).map (fun taken =>
+      ⟨setPc state (label (GeneratedX86BranchEmit.nextPc
+        (GeneratedX86BranchEmit.shape current target) taken next target)), [], none⟩)
+
+def jump (label : Nat → Reference.Word) (target : Nat) (state : State) : Transition State :=
+  ⟨setPc state (label target), [], none⟩
+
+theorem conditional_projects (env : Environment) (frame : Frame) (arena : Reference.Word)
+    (label : Nat → Reference.Word) (current next target : Nat) (aux : BitVec 32) (state : State) :
+    (conditional label current next target aux state).map (observe env frame arena) =
+      branchRegisters env frame arena current aux (label target) (label next) (registers state) := by
+  unfold conditional branchRegisters
+  simp only [registers]
+  change ((GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2)).map _).map _ = _
+  cases decoded : GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2) with
+  | none => rfl
+  | some taken =>
+      dsimp only [Option.map, observe]
+      rw [selected_labels label current next target taken]
+      rfl
+
+theorem jump_projects (env : Environment) (frame : Frame) (arena : Reference.Word)
+    (label : Nat → Reference.Word) (target : Nat) (state : State) :
+    some (observe env frame arena (jump label target state)) =
+      jumpRegisters env frame arena (label target) (registers state) := rfl
+
+theorem conditional_refines (env : Environment) (frame : Frame) (arena : Reference.Word)
+    (label : Nat → Reference.Word) (current next target : Nat) (cc : Fin 16) (state : State) :
+    (conditional label current next target (BitVec.ofNat 32 cc.val) state).map (observe env frame arena) =
+      some (Reference.X86.step (.branch (some cc) (label target) (label next)) (image env frame arena state)) := by
+  rw [conditional_projects]
+  exact branch_register_frame_refines env frame arena current cc (label target) (label next) (registers state)
+
+theorem jump_refines (env : Environment) (frame : Frame) (arena : Reference.Word)
+    (label : Nat → Reference.Word) (next target : Nat) (state : State) :
+    observe env frame arena (jump label target state) =
+      Reference.X86.step (.branch none (label target) (label next)) (image env frame arena state) := rfl
+
+theorem conditional_frame (label : Nat → Reference.Word) (current next target : Nat) (aux : BitVec 32)
+    (state : State) (result : Transition State) (selected : conditional label current next target aux state = some result) :
+    result.events = [] ∧ result.fault = none ∧ result.state.tags = state.tags ∧
+      result.state.raw = { state.raw with pc := result.state.raw.pc } := by
+  unfold conditional at selected
+  cases decoded : GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2) with
+  | none =>
+      rw [decoded] at selected
+      change none = some result at selected
+      contradiction
+  | some taken =>
+      rw [decoded] at selected
+      change some ⟨setPc state (label (GeneratedX86BranchEmit.nextPc
+        (GeneratedX86BranchEmit.shape current target) taken next target)), [], none⟩ = some result at selected
+      cases Option.some.inj selected
+      exact ⟨rfl, rfl, rfl, rfl⟩
+
+theorem jump_frame (label : Nat → Reference.Word) (target : Nat) (state : State) :
+    (jump label target state).state.tags = state.tags ∧
+      (jump label target state).state.raw = { state.raw with pc := label target } := ⟨rfl, rfl⟩
+
+def dispatch (code : Nat) (label : Nat → Reference.Word) (current next target : Nat) (aux : BitVec 32) (state : State) :
+    Option (Transition State) :=
+  if code = GeneratedX86Opcode.code .jcc then conditional label current next target aux state
+  else if code = GeneratedX86Opcode.code .jmp then some (jump label target state)
+  else none
+
+/-- Both current specialized branch tokens reach the original source macros;
+FLAGS/register bytes and the fresh stream retain arbitrary inputs. -/
+theorem production (isConditional : Bool) (env : Environment) (frame : Frame) (arena : Reference.Word)
+    (fresh : Nat → Bool) (label : Nat → Reference.Word) (current next target : Nat)
+    (flags dst src : Reference.Byte) (aux : BitVec 32) (state : State) :
+    (dispatch (GeneratedX86Opcode.code (if isConditional then .jcc else .jmp))
+      label current next target aux state).map (observe env frame arena) =
+      specializedCurrentStep env frame arena fresh state.tags current (if isConditional then .jcc else .jmp)
+        flags aux dst src (label target) (label next) (registers state) := by
+  cases isConditional <;>
+    simp [dispatch, specializedCurrentStep, specializedPointerStep, specializedReturnLabelStep,
+      specializedCallLabelStep, specializedRepMemoryStep, specializedXmmMemoryStep,
+      specializedObservedMemoryStep, specializedBitMemoryStep, specializedBmiMemoryStep,
+      specializedLoadStep, specializedImulStep, specializedSourceStep, specializedMemoryStep,
+      specializedStep, GeneratedX86Opcode.code, conditional_projects, jump_projects]
+
+inductive Binding (label : Nat → Reference.Word) (next target : Nat) :
+    Nat → BitVec 32 → Reference.X86.Instruction → Prop where
+  | conditional (cc : Fin 16) :
+      Binding label next target (GeneratedX86Opcode.code .jcc) (BitVec.ofNat 32 cc.val)
+        (.branch (some cc) (label target) (label next))
+  | jump (aux : BitVec 32) :
+      Binding label next target (GeneratedX86Opcode.code .jmp) aux (.branch none (label target) (label next))
+
+theorem step_refines (env : Environment) (frame : Frame) (arena : Reference.Word) (label : Nat → Reference.Word)
+    (current next target code : Nat) (aux : BitVec 32) (state : State) (native : Reference.X86.Instruction)
+    (binding : Binding label next target code aux native) :
+    (dispatch code label current next target aux state).map (observe env frame arena) =
+      some (Reference.X86.step native (image env frame arena state)) := by
+  cases binding with
+  | conditional cc =>
+      change (conditional label current next target (BitVec.ofNat 32 cc.val) state).map _ = _
+      exact conditional_refines env frame arena label current next target cc state
+  | jump aux =>
+      change some (observe env frame arena (jump label target state)) = _
+      exact congrArg some (jump_refines env frame arena label next target state)
+
+end KProgFormal.Refinement.X86Dispatcher.RawControl
+
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.pc_projects
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.selected_labels
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.conditional_projects
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.jump_projects
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.conditional_refines
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.jump_refines
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.conditional_frame
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.jump_frame
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.production
+#print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.step_refines

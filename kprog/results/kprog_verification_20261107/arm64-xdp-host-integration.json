@@ -78741,5 +78741,24 @@
       "vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865"
     },
     "source_stable": true
+  },
+  "x86_raw_source_control_refinement": {
+    "operations": [
+      "X86_OP_JCC",
+      "X86_OP_JMP"
+    ],
+    "x86_raw_operation_count": 34,
+    "arm64_raw_operation_count": 58,
+    "new_audits": 10,
+    "total_module_audits": 16,
+    "module_exit": 0,
+    "root_exit": 0,
+    "sorryAx": 0,
+    "theorem": "KProgFormal.Refinement.X86Dispatcher.RawControl.step_refines",
+    "production": "KProgFormal.Refinement.X86Dispatcher.RawControl.production",
+    "archive": "x86-raw-control.log.gz",
+    "archive_sha256": "5f42f3d6fbadd7cbb6fd25b48b300a2e82bdbac9f1bf6a7d90212863169e9ba4",
+    "source_sha256": "8e4b16c4df71229bcc97bd60228b3f51a1575ad0c5d5effb3c4ad9ae45bfafbe",
+    "scope": "JCC/JMP retain all raw64 words/byte tags/flags/XMM/memory and architecture frame while changing PC. Generated PF-aware condition and actual source forward/backward shape compose through an arbitrary native label map with independent ordering. Current specialized branch tokens retain arbitrary ignored FLAGS/DST/SRC/fresh inputs and JMP AUX. Native label extraction/current-next-target placement, RSP-offset/STACK4-arena entry image, C flag packing and physical/compiler interfaces explicit."
   }
 }
