@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2) | 11/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5) | 12/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
@@ -5684,3 +5684,14 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_98122928d`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-98122928d.log.gz](full-make-check-98122928d.log.gz).
+
+### Compiled scalar MOV_IMM units
+
+`MovImmediateCertificate.compiled_all_variants` and `compiled_execution` cover MOV_IMM8-low/high and16/32/64
+with arbitrary old destination and immediate for each legal destination slice, whole memory and fresh
+stream/ghost indices. Actual decoded Execution returns canonical
+`scalarWriteValue`, zero extending width32. All124 published predecessor
+and5 new function bytes match the combined129 object. Memory/exclusive remain
+equal, visit advances23 and fault/events are absent. [Original evidence](compiled-movimm.log.gz)
+retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
+native register/tag frame, physical ABI and compiler embedding remain explicit.

@@ -310,3 +310,23 @@ __u64 NAME(__u64 value, __u64 count) \
 }
 RORX_UNIT(tv_rorx32, X86_WIDTH_32)
 RORX_UNIT(tv_rorx64, X86_WIDTH_64)
+
+/* Actual production MOV_IMM dispatcher, projected scalar unit inputs. */
+#define MOVIMM_UNIT(NAME, WIDTH, DS) \
+__attribute__((section("tv/movimm/" #NAME), used)) \
+__u64 NAME(__u64 old, __u64 immediate) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    X86_SIM_L_EXEC(X86_OP_MOV_IMM, X86_RAX, 0, WIDTH, \
+        KPROG_X86_REG_LANE_AUX(0, DS, 0), immediate); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+MOVIMM_UNIT(tv_movimm8lo, X86_WIDTH_8, 0)
+MOVIMM_UNIT(tv_movimm8hi, X86_WIDTH_8, 8)
+MOVIMM_UNIT(tv_movimm16, X86_WIDTH_16, 0)
+MOVIMM_UNIT(tv_movimm32, X86_WIDTH_32, 0)
+MOVIMM_UNIT(tv_movimm64, X86_WIDTH_64, 0)
