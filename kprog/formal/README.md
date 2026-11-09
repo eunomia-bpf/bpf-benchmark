@@ -138,6 +138,8 @@ Its12 ACL2 observations retain the explicit model RIP+2 profile difference.
 Compiler/link/entered-state and stock-soundness premises remain explicit.
 ANDN adds2 scalar width/writeback units with width32 zero extension;
 flags/native-frame/physical ABI embedding remain explicit.
+BZHI adds2 scalar width/writeback units with width32 zero extension;
+flags/native-frame/physical ABI embedding remain explicit.
 POPCNT adds3 scalar width/writeback units, with high48 preservation at16
 bits and zero extension at32 bits; full flags/register/tag frame and ABI
 embedding remain explicit.

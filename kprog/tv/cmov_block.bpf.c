@@ -261,3 +261,19 @@ __u64 NAME(__u64 first, __u64 second) \
 }
 ANDN_UNIT(tv_andn32, X86_WIDTH_32)
 ANDN_UNIT(tv_andn64, X86_WIDTH_64)
+
+#define BZHI_UNIT(NAME, WIDTH) \
+__attribute__((section("tv/bzhi/" #NAME), used)) \
+__u64 NAME(__u64 first, __u64 second) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)first; \
+    __x86_rdx.ptr = (void *)(long)second; \
+    X86_SIM_L_EXEC(X86_OP_BZHI, X86_RAX, X86_RAX, WIDTH, X86_RDX, 0ULL); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+BZHI_UNIT(tv_bzhi32, X86_WIDTH_32)
+BZHI_UNIT(tv_bzhi64, X86_WIDTH_64)

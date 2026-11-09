@@ -21,7 +21,7 @@ specialization token also has its own row.
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
-| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2) | 9/75 | 0/74 |
+| Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2) | 10/75 | 0/74 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
@@ -5588,3 +5588,14 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_7bbb5c79f`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-7bbb5c79f.log.gz](full-make-check-7bbb5c79f.log.gz).
+
+### Compiled scalar BZHI units
+
+`BzhiCertificate.compiled_all_variants` and `compiled_execution` cover BZHI32/64
+with arbitrary value/destination and count across both low-byte count branches, whole memory and fresh
+stream/ghost indices. Actual decoded Execution returns canonical
+`zeroHighBits`, zero extending width32. All118 published predecessor
+and2 new function bytes match the combined120 object. Memory/exclusive remain
+equal, visit advances25 and fault/events are absent. [Original evidence](compiled-bzhi.log.gz)
+retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
+native register/tag frame, physical ABI and compiler embedding remain explicit.
