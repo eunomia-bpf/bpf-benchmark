@@ -1,0 +1,6 @@
+--- a/libbpf-tools/opensnoop.bpf.c
++++ b/libbpf-tools/opensnoop.bpf.c
+@@ -101,0 +102 @@
++	event.ret = ret;
+@@ -107 +107,0 @@
+-	event.ret = ret;

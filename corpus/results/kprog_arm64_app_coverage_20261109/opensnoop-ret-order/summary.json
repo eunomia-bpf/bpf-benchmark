@@ -1,0 +1,123 @@
+{
+  "utc": "2026-11-09T10:09:43.718903+00:00",
+  "source_change": {
+    "before_sha256": "8c322242892208993e5df9cf221049d481447e8d7436c7cdba202c3c25c6b3f3",
+    "after_sha256": "42b2a91cf3d27bd12c630e888c82a3335aae965d22d9c868ff863624afc09d8b",
+    "change": "Move event.ret=ret to the first event-data assignment before helper calls, shortening native scalar liveness.",
+    "preserved": "Fields, sizes, helper calls, branches, bounds, context reads and final return values retain their original definitions.",
+    "scope": "Private native producer trial; paired original-source JIT/native application remains the active baseline cohort."
+  },
+  "native": {
+    "utc": "2026-11-09T10:09:42.476633+00:00",
+    "phase": "finished",
+    "native": [
+      {
+        "label": "original",
+        "exit": 0
+      },
+      {
+        "label": "reordered",
+        "exit": 0
+      },
+      {
+        "label": "original-fixed",
+        "exit": 0
+      },
+      {
+        "label": "reordered-fixed",
+        "exit": 0
+      }
+    ],
+    "generation_exit": 0,
+    "change": {
+      "before_sha256": "8c322242892208993e5df9cf221049d481447e8d7436c7cdba202c3c25c6b3f3",
+      "after_sha256": "42b2a91cf3d27bd12c630e888c82a3335aae965d22d9c868ff863624afc09d8b",
+      "change": "Move event.ret=ret to the first event-data assignment before helper calls, shortening native scalar liveness.",
+      "preserved": "Fields, sizes, helper calls, branches, bounds, context reads and final return values retain their original definitions.",
+      "scope": "Private native producer trial; paired original-source JIT/native application remains the active baseline cohort."
+    }
+  },
+  "generation": [
+    {
+      "profile": "original",
+      "phase": "compiled",
+      "frame_extent_bytes": 576,
+      "instructions": 2394,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "ae0f01e7ff0c84551c7d59a44cbd94af0991b280f943873234371703e93a3763"
+      }
+    },
+    {
+      "profile": "reordered",
+      "phase": "compiled",
+      "frame_extent_bytes": 520,
+      "instructions": 2315,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "16d282f6ae9deb77b9dfffa4d528a70756115d7066fe7274e962dd22f85d9782"
+      }
+    },
+    {
+      "profile": "original-fixed",
+      "phase": "compiled",
+      "frame_extent_bytes": 544,
+      "instructions": 2334,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original-fixed/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original-fixed/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/original-fixed/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "a5ae5219d991eb0b19efdb772e4d6af0ce30ba75f87da13bd480fbf51f55c7b1"
+      }
+    },
+    {
+      "profile": "reordered-fixed",
+      "phase": "compiled",
+      "frame_extent_bytes": 520,
+      "instructions": 2315,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered-fixed/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered-fixed/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-ret-order/generated/reordered-fixed/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "16d282f6ae9deb77b9dfffa4d528a70756115d7066fe7274e962dd22f85d9782"
+      }
+    }
+  ],
+  "paired_JIT_build_exit": 0,
+  "paired_JIT_command": [
+    "make",
+    "--no-print-directory",
+    "-f",
+    "/var/tmp/kprog-tmp/A/opensnoop-ret-order/upstream.Makefile",
+    "opensnoop",
+    "V=1",
+    "APPS=opensnoop",
+    "ARCH=arm64",
+    "USE_BLAZESYM=0",
+    "CC=aarch64-linux-gnu-gcc",
+    "CLANG=clang-18",
+    "LLVM_STRIP=llvm-strip-18",
+    "OUTPUT=/var/tmp/kprog-tmp/A/opensnoop-ret-order/jit",
+    "BPFTOOL=/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+    "LIBBPF_OBJ=/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+    "INCLUDES=-I/var/tmp/kprog-tmp/A/opensnoop-ret-order/jit -I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/repos/bcc/src/cc/libbpf/include/uapi -I/workspaces/repository/.cache/aarch64-sysroot/usr/include -I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+    "CFLAGS=-g -O2 -Wall",
+    "BPFCFLAGS=-g -O2 -Wall",
+    "LDFLAGS=-static -L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,--start-group -lelf -lz -lzstd -Wl,--end-group"
+  ],
+  "scope": "Private same-source JIT/native opensnoop liveness/compiler trial; full application retains its own captured paired source epoch.",
+  "runtime_admission_additions": 0,
+  "paired_JIT_binary_sha256": "ffafd363f96590692d27c67d86201fd9893ea0098ef461d30b2d24fabbe40db1"
+}
