@@ -1,0 +1,6 @@
+case	fixture_exit	client_exit	service_status	raw_load_attempts	verifier_completed	native_test_run
+x86-physical-tail-frame	0	0	0	1	1	1
+x86-multi-once	0	1	-5	1	0	0
+x86-jit-error	0	1	-5	1	1	0
+arm64-multi-once	0	1	-5	1	0	0
+arm64-jit-error	0	1	-5	1	1	0
