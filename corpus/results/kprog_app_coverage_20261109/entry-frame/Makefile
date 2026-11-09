@@ -26,10 +26,12 @@ linker:
 	CARGO_TARGET_DIR=$(STATE)/native-link-target cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --features stock-entry-frame
 
 REVISION ?= HEAD
+LOADER ?= $(STATE)/loader
+SELFTESTS ?= $(ROOT)/kprog/selftests/build
 NATIVE_LINK ?= $(STATE)/native-link-target/release/native-link
 .PHONY: prepare isa48 selftests315 tail census
 prepare isa48 selftests315 tail census:
-	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/replay.py $@ --revision $(REVISION) --native-link $(NATIVE_LINK)
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/replay.py $@ --revision $(REVISION) --native-link $(NATIVE_LINK) --loader $(LOADER) --selftests $(SELFTESTS)
 
 .PHONY: frame-probe
 frame-probe:

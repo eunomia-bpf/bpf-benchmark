@@ -15,6 +15,10 @@ import threading
 ROOT = Path('/workspaces/repository')
 STATE = Path('/var/tmp/kprog-tmp/C/stock-entry')
 NATIVE_LINK = STATE / 'native-link-target/release/native-link'
+LOADER = STATE / 'loader'
+SELFTESTS = ROOT / 'kprog/selftests/build'
+KERNEL = STATE / 'kernel-build/arch/x86/boot/bzImage'
+MODULE = STATE / 'module/kprog_stock.ko'
 
 
 def write(path, value):
@@ -62,7 +66,7 @@ def prepare(epoch):
         if path.is_file():
             path.chmod(path.stat().st_mode & ~0o222)
     for suite, original in [('isa48', Path('/var/tmp/kprog-tmp/S17/x86-input')),
-                            ('selftests315', ROOT / 'kprog/selftests/build')]:
+                            ('selftests315', SELFTESTS)]:
         work = epoch / suite
         inputs = work / ('x86-input' if suite == 'isa48' else 'table')
         inputs.mkdir(parents=True, exist_ok=True)
@@ -71,6 +75,12 @@ def prepare(epoch):
             if path.is_file() and path.suffix in {'.json', '.o'}:
                 target = inputs / path.name
                 shutil.copy2(path, target)
+                if suite == 'selftests315' and target.name == 'programs.json':
+                    table = json.loads(target.read_text())
+                    for row in table['programs']:
+                        if row.get('bpf_object'):
+                            row['bpf_object'] = str(inputs / Path(row['bpf_object']).name)
+                    write(target, table)
                 rows.append(dict(name=target.name, bytes=target.stat().st_size,
                                  sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
         write(work / 'inputs.json', rows)
@@ -90,11 +100,20 @@ def prepare(epoch):
                  str(work) + ' "$@"', '']
         (work / 'stock-compile-proxy').write_text(chr(10).join(lines))
         (work / 'stock-compile-proxy').chmod(0o755)
+    runtime = epoch / 'runtime'
+    runtime.mkdir(exist_ok=True)
+    for source, name in [(KERNEL, 'bzImage'), (MODULE, 'kprog_stock.ko'),
+                         (NATIVE_LINK, 'native-link'),
+                         (LOADER / 'libnative_loader.so', 'libnative_loader.so'),
+                         (LOADER / 'trusted-native-loader', 'trusted-native-loader')]:
+        shutil.copy2(source, runtime / name)
     write(epoch / 'provenance.json', dict(model_head=revision,
-          kernel_base='35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8',
+          kernel_base='c23719abc330',
+          kernel_head=subprocess.check_output(['git', '-C', '/var/tmp/kprog-tmp/CK/linux',
+                                               'rev-parse', 'HEAD'], text=True).strip(),
           kernel_patch='kprog/stock-path/x86-entry-frame.patch',
-          kernel_image=str(STATE / 'kernel-build/arch/x86/boot/bzImage'),
-          native_link=str(NATIVE_LINK),
+          kernel_image=str(runtime / 'bzImage'),
+          native_link=str(runtime / 'native-link'),
           isa_cases=48, upstream_programs=315, census_bodies=27, census_instances=275))
 
 
@@ -105,7 +124,7 @@ def namespace(epoch):
         if path.is_file():
             bind(path, ROOT / path.relative_to(epoch / 'source'))
     for name in ['libnative_loader.so', 'trusted-native-loader']:
-        bind((STATE / 'loader') / name,
+        bind((epoch / 'runtime') / name,
              ROOT / 'kprog/libnativeloader/build' / name)
     bind(NATIVE_LINK,
          ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
@@ -115,13 +134,12 @@ def safety(epoch, suite):
     namespace(epoch)
     work = epoch / suite
     write(work / 'runtime.json', {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in [STATE / 'kernel-build/arch/x86/boot/bzImage',
-                  STATE / 'module/kprog_stock.ko', NATIVE_LINK,
-                  STATE / 'loader/libnative_loader.so',
-                  STATE / 'loader/trusted-native-loader']})
+        for p in [epoch / 'runtime/bzImage', epoch / 'runtime/kprog_stock.ko', NATIVE_LINK,
+                  epoch / 'runtime/libnative_loader.so',
+                  epoch / 'runtime/trusted-native-loader']})
     if suite == 'selftests315':
         bind(work / 'table', ROOT / 'kprog/selftests/build')
-    for source, name in [(STATE / 'module/kprog_stock.ko', 'kprog_stock.ko'),
+    for source, name in [(epoch / 'runtime/kprog_stock.ko', 'kprog_stock.ko'),
                          (NATIVE_LINK, 'native-link'),
                          (Path('/var/tmp/kprog-tmp/S17/bp/bound-probe'), 'bound-probe')]:
         shutil.copy2(source, work / name)
@@ -163,7 +181,7 @@ def safety(epoch, suite):
             stdout=log, stderr=subprocess.STDOUT)
         try:
             invocation = ['taskset', '-c', '20-23', 'vng', '--run',
-                str(STATE / 'kernel-build/arch/x86/boot/bzImage'), '--cpus', '2',
+                str(epoch / 'runtime/bzImage'), '--cpus', '2',
                 '--memory', '4G', '--rwdir=/mnt=' + str(work),
                 '--exec', 'bash /mnt/guest.sh', '--qemu-opts=-cpu host,+smap']
             write(work / 'command.json', invocation)
@@ -185,15 +203,15 @@ def census(epoch):
         data = json.loads((original / name).read_text())
         if name == 'run-inventory.json':
             data['source_head'] = epoch.name
-            data['kernel_image'] = str(STATE / 'kernel-build/arch/x86/boot/bzImage')
+            data['kernel_image'] = str(epoch / 'runtime/bzImage')
         write(inputs / name, data)
     link(epoch / 'source', inputs / 'source')
     shutil.copy2(NATIVE_LINK, inputs / 'native-link')
     runtime = inputs / 'stock-runtime'
     runtime.mkdir(exist_ok=True)
-    shutil.copy2(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
+    shutil.copy2(epoch / 'runtime/kprog_stock.ko', runtime / 'kprog_stock.ko')
     for name in ['libnative_loader.so', 'trusted-native-loader']:
-        shutil.copy2(STATE / 'loader' / name, runtime / name)
+        shutil.copy2(epoch / 'runtime' / name, runtime / name)
     scratch = epoch / 'census'
     scratch.mkdir(exist_ok=True)
     link(epoch / 'source', scratch / 'controller-source')
@@ -219,19 +237,24 @@ def census(epoch):
 
 
 def main():
-    global NATIVE_LINK
+    global NATIVE_LINK, LOADER, SELFTESTS
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['prepare', 'isa48', 'selftests315', 'tail', 'census'])
     parser.add_argument('--revision', default='HEAD')
     parser.add_argument('--native-link', type=Path, default=NATIVE_LINK)
+    parser.add_argument('--loader', type=Path, default=LOADER)
+    parser.add_argument('--selftests', type=Path, default=SELFTESTS)
     args = parser.parse_args()
     NATIVE_LINK = args.native_link
+    LOADER = args.loader
+    SELFTESTS = args.selftests
     revision = subprocess.check_output(['git', 'rev-parse', args.revision],
                                        cwd=ROOT, text=True).strip()
     epoch = STATE / 'replays' / revision
     if args.mode == 'prepare':
         prepare(epoch)
         return 0
+    NATIVE_LINK = epoch / 'runtime/native-link'
     return census(epoch) if args.mode == 'census' else safety(epoch, args.mode)
 
 
