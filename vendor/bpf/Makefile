@@ -429,6 +429,7 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 		local extra="$${3:-}"; \
 		"$(CLANG)" "$${common_flags[@]}" $${extra} -o "$${native_out}/$${name}.native.o" "$${src}"; \
 	}; \
+	compile_native bpf_execve_bprm_commit_creds "$(CURDIR)/tetragon/bpf/process/bpf_execve_bprm_commit_creds.c" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG"; \
 	for name in bpf_execve_event bpf_exit bpf_fork; do \
 		compile_native "$${name}_v310" "$(CURDIR)/tetragon/bpf/process/$${name}.c" "-D__RHEL7_BPF_PROG"; \
 	done; \
