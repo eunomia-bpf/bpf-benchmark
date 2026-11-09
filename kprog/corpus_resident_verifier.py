@@ -60,7 +60,7 @@ def guest(scratch):
                 map_info = list(row.get("map_info", ()))
                 selected_names = {item["name"] for item in map_info}
                 map_info.extend(item for item in application_maps[row["application"]]
-                                if item["name"] not in selected_names)
+                                if item.get("name") not in selected_names)
                 record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"],
                               map_info=map_info)
                 with contextlib.redirect_stdout(io.StringIO()) as captured:

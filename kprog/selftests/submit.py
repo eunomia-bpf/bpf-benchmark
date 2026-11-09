@@ -279,7 +279,7 @@ class ObjectResources:
             self.ok(self.lib.bpf_map__set_pin_path(
                 item, os.fsencode(self.pins / str(len(self.maps)))), "set_pin_path")
             name = self.lib.bpf_map__name(item).decode()
-            profiles = [info for info in map_info if info["name"] in (name, name[:15])]
+            profiles = [info for info in map_info if info.get("name") in (name, name[:15])]
             if len(profiles) == 1:
                 profile = profiles[0]
                 for field, inventory_field in (("key_size", "bytes_key"),
