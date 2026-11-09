@@ -1,0 +1,3 @@
+# Katran native register allocation profile
+
+This complete4object P producer keeps original source and32dad normal/cold inlining and division flags, reserving RBX/RBP/R12-R15 through the existing LLVM reserve-regs-for-regalloc option. The compiler flag changes native register allocation before submission; source inputs and runtime admission retain their definitions. The actual emitted use of callee-preserved register families is recorded in summary.json. This follows the actual inlined P return/callee-state identity verifier frontier13c38586e. The complete payload, manifest, plugin and build logs are retained. Actual full application replay follows from the committed producer, with each failed native program retained as eBPF.
