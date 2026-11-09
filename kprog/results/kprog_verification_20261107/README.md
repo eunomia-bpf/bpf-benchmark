@@ -220,7 +220,7 @@ row retains its recorded source status.
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
-O4 coverage adds **21 universal transformation/composition rows** to
+O4 coverage adds **22 universal transformation/composition rows** to
 [coverage.tsv](coverage.tsv), alongside V's operation/token inventory.
 The five appended `o4_*` columns record preservation status, theorem,
 evidence, completion obligations and publication. `source-snapshot:` pins the
@@ -231,10 +231,10 @@ continue to count their own `row_kind` values.
 | O4 status | Rows | Scope |
 | --- | ---: | --- |
 | `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
-| `partial-universal-component` | 7 | ARM kind2 near/far body, kind4 per-CPU MRS and kind9 exclusive/marker binding, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
-| `pending-universal-law` | 6 | Readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `partial-universal-component` | 14 | ARM kinds2/4/9, shared kinds5/6/7/8, chunk layout, spill insertion/reload/control, helper ABI, tail calls, entry ABI, load-fault recovery and x86 thunk kind12; current production/compiler/physical composition premises remain explicit |
+| `pending-universal-law` | 1 | Actual compiled B as a complete universal transformation |
 
-All nine production relocation kinds have explicit rows. The seven proved
+The original relocation kinds1 through9 and the new thunk kind12 have explicit rows. The seven proved
 components carry their production correspondence premises in `o4_completion`.
 Their published Lean checks and axiom audits have exit 0 and `sorryAx_count=0`;
 the table points to the original source-pinned receipts. The rel32 table/layout
@@ -481,6 +481,24 @@ Single-kernel-copy composition corollaries use one Artifact; verifier
 acceptance and faithful simulation are the two safety facts. Mathematical
 chunk spans and partitions are supplied by producer construction. Original
 source-pinned historical receipts retain their own outcomes.
+S16's [published verdicts](../kprog_recovery_safety_20261109/README.md) retain
+all source epochs and distinguish benign protected reads from violating
+acceptance. Current scalar suites record x8647 (9positive/35verifier/1generation/
+2benign accepted) and ARM48 (4positive/34verifier/4generation/6benign accepted).
+Nine historical labels have request-level benign verdicts; store companions
+retain their verifier or scalar-generation outcomes. Negative native executions
+and observed violating acceptances are zero in these finite captures.
+
+S15's [thunk and landing-pad handoff](../kprog_branch_hardening_20261109/README.md)
+adds kind12's four-byte rel32 patch row. Existing destination/locality laws are
+partial components; physical thunk effects and current compiled-B composition
+remain open. Neither handoff promotes a universal completion status.
+
+The exact827757435 full check exits2 at the old ARM ALU lifetime fixture;
+[its source/log archive](arm-entry-lifetime.log.gz) also records the five repaired
+host groups published in d680faa9b. Implicit pre/post SP release remains under
+A/S7 investigation. The last passing full source stays98122928d.
+
 <!-- O4 COVERAGE END -->
 
 
