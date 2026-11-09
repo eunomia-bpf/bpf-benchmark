@@ -26,6 +26,8 @@ def guest(scratch):
     source = json.loads((scratch / "run-inventory.json").read_text())
     resources = {(r["application"], r["source_prog_id"]): r for r in
                  json.loads((scratch / "resource-index.json").read_text())["programs"]}
+    application_maps = {app["application"]: app.get("map_inventory", ())
+                        for app in source["applications"]}
     state = scratch / "stock-state"
     state.mkdir(exist_ok=True)
     log = (scratch / "stock-service.log").open("w")
@@ -54,8 +56,12 @@ def guest(scratch):
             elif resource["resource_stage"] != "source_object_captured":
                 result.update(stage="resource_failed", diagnostic=resource["resource_stage"])
             else:
+                map_info = list(row.get("map_info", ()))
+                selected_names = {item["name"] for item in map_info}
+                map_info.extend(item for item in application_maps[row["application"]]
+                                if item["name"] not in selected_names)
                 record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"],
-                              map_info=row.get("map_info", ()))
+                              map_info=map_info)
                 with contextlib.redirect_stdout(io.StringIO()) as captured:
                     submit.direct("x86", state, Path(selected[0]["native_object"]), record)
                 output = captured.getvalue()
