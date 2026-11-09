@@ -45,6 +45,7 @@ BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
 TRACEE_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tracee
 TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
+TETRAGON_CEL_SOURCE_LIBRARY := $(TETRAGON_NATIVE_STAGE_OUT)/cel-defaults.bpf.o
 CILIUM_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/cilium
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
@@ -406,7 +407,11 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
-native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
+$(TETRAGON_CEL_SOURCE_LIBRARY): tetragon_cel_defaults.c
+	install -d "$(@D)"
+	"$(CLANG)" -target bpf -O2 -g -c "$<" -o "$@"
+
+native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK) $(TETRAGON_CEL_SOURCE_LIBRARY)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
@@ -509,9 +514,11 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
 			--source-object-root "$(VENDOR)/build/$(ARCH)/tetragon" --helper-disambiguate 174 \
+			--source-library "$(TETRAGON_CEL_SOURCE_LIBRARY)" --bpftool "$(BPFTOOL)" \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
 			--source-object-root "$(VENDOR)/build/$(ARCH)/tetragon" --helper-disambiguate 174 \
+			--source-library "$(TETRAGON_CEL_SOURCE_LIBRARY)" --bpftool "$(BPFTOOL)" \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 native-artifacts: native-katran native-bcc native-otel native-tracee native-tetragon native-cilium

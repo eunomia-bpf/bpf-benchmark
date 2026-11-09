@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Iterable, NamedTuple
@@ -399,11 +400,15 @@ def main() -> None:
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
     parser.add_argument("--source-object-root", type=Path)
+    parser.add_argument("--source-library", action="append", type=Path, default=[],
+                        help="BPF subprogram library linked into source metadata")
+    parser.add_argument("--bpftool", default="bpftool")
     parser.add_argument("--include-local-source-programs", action="store_true")
     parser.add_argument("--helper-disambiguate", action="append", type=lambda v: int(v, 0), default=[])
     args = parser.parse_args()
 
     output: Path = args.output
+    output.parent.mkdir(parents=True, exist_ok=True)
     entries_by_key: dict[tuple[object, ...], set[str]] = defaultdict(set)
     native_object_by_key: dict[tuple[object, ...], str] = {}
     helper_require_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
@@ -419,13 +424,25 @@ def main() -> None:
             source_obj = source_object_for_native(args.source_object_root, obj)
             if not source_obj.is_file():
                 raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
-            source_meta = source_meta_cache.setdefault(
-                source_obj,
-                scan_bpf_source_programs(
-                    source_obj,
-                    include_local=args.include_local_source_programs,
-                ),
-            )
+            if source_obj not in source_meta_cache:
+                if args.source_library:
+                    # Use the application linker's BPF relocation semantics for
+                    # generated subprograms before computing reachable code.
+                    with tempfile.TemporaryDirectory(
+                            prefix="manifest-source-", dir=output.parent) as temp:
+                        linked = Path(temp) / source_obj.name
+                        subprocess.run(
+                            [args.bpftool, "gen", "object", str(linked),
+                             str(source_obj), *map(str, args.source_library)],
+                            check=True,
+                        )
+                        metadata = scan_bpf_source_programs(
+                            linked, include_local=args.include_local_source_programs)
+                else:
+                    metadata = scan_bpf_source_programs(
+                        source_obj, include_local=args.include_local_source_programs)
+                source_meta_cache[source_obj] = metadata
+            source_meta = source_meta_cache[source_obj]
         prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
             if attrs.get("symbol") and symbol != attrs["symbol"]:
