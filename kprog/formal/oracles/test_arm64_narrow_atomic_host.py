@@ -1,8 +1,11 @@
 """Compare actual narrow kfunc effects with integer updates and adjacent bytes."""
 from pathlib import Path
-import subprocess,sys
+import re,subprocess,sys
 R=Path(__file__).resolve().parents[3];O=Path(sys.argv[1]);O.mkdir(parents=True,exist_ok=True)
 s=(R/'kinsn/module/arm64/bpf_arm64_native_lab.c').read_text()
+ids=s[s.index('BTF_KFUNCS_START(bpf_arm64_native_lab_kfunc_ids)'):s.index('BTF_KFUNCS_END(bpf_arm64_native_lab_kfunc_ids)')]
+slots=int(re.search(r'bpf_arm64_native_lab_kinsn_descs\[(\d+)\]',s)[1])
+assert slots==len(re.findall(r'BTF_ID_FLAGS\(',ids)), 'typed kfunc descriptor table covers every registered function'
 a=s.index('#define ARM64_NATIVE_NARROW_RMW');b=s.index('#undef ARM64_NATIVE_NARROW_RMW',a)
 code='''#include <stdint.h>
 #include <stdio.h>

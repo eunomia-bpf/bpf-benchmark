@@ -592,7 +592,7 @@ const struct bpf_kinsn bpf_arm64_native_lab_desc = {
     .num_exentries = native_lab_num_exentries,
     .emit_exentries = native_lab_emit_exentries,
 };
-static const struct bpf_kinsn *bpf_arm64_native_lab_kinsn_descs[2];
+static const struct bpf_kinsn *bpf_arm64_native_lab_kinsn_descs[3];
 struct map_ptr_file_priv {
 	char response[32];
 	size_t len;
