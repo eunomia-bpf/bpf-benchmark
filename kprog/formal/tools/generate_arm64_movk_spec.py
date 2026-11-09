@@ -13,21 +13,20 @@ The emitted micro kernels use columns 16, 32 and 48, and the contract covers all
 four columns so a column outside {0,16,32,48} is the only unsupported case.
 
 The shift is a finite architectural column rather than an arbitrary shift: the
-16-bit mask/insert pair only forms a valid architectural MOVK at a 16-aligned
-column below 64, which the four-element enum makes explicit and which the
-`--check` drift test pins against the AUX encoding.
+16-bit mask/insert pair forms an architectural MOVK at a 16-aligned
+column below 64. The four-element enum makes the domain explicit; `--check`
+compares the generated C and Lean artifacts with this semantic specification.
+The shared AUX contract separately proves the column field encoding.
 
 The C macro evaluates each operand exactly once and writes no NZCV; the result is
 the raw 64-bit value and the caller applies the destination width.
 """
 import argparse
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "contracts/arm64_movk_spec.json"
-SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64Movk.lean"
 CHEADER = ROOT / "generated/arm64_movk.h"
 
@@ -42,11 +41,6 @@ EXPECTED = {
     ],
 }
 
-AUX_MOVK = re.compile(
-    r"^#define\s+ARM64_AUX_MOVK\(S\)\s+KPROG_ARM64_AUX\(0U, 0U, \(S\), 0U\)\s*$",
-    re.M)
-
-
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
     if data != EXPECTED:
@@ -57,17 +51,6 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 movk columns: {cols!r}")
     if [row["column"] for row in cols] != [0, 16, 32, 48]:
         raise SystemExit(f"invalid arm64 movk column values: {cols!r}")
-    # The AUX encoding must place the MOVK column in lane 2 (bits 16-23) so the
-    # shim shift field is the architectural column itself. After STEP 0093 the
-    # packer is a thin alias of the machine-checked `KPROG_ARM64_AUX` packer, so
-    # the alias must select the third lane; the generating contract
-    # (`generate_arm64_aux_spec.py`, `KProgFormal/Arm64Aux.lean`) fixes that
-    # lane's bit offset.
-    if not AUX_MOVK.search(SIM_HEADER.read_text()):
-        raise SystemExit(
-            "ARM64_AUX_MOVK is not the expected "
-            "`KPROG_ARM64_AUX(0U, 0U, (S), 0U)` lane-2 alias form in "
-            f"{SIM_HEADER}")
     return cols
 
 
