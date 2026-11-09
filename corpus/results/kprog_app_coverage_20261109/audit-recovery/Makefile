@@ -33,3 +33,9 @@ selftests315:
 	$(MAKE) -f $(ENTRY) selftests315 REVISION=$(REVISION)
 census:
 	$(MAKE) -f $(ENTRY) census REVISION=$(REVISION)
+
+.PHONY: app-image applications
+app-image:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/application.py image --revision $(REVISION)
+applications:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/application.py run --revision $(REVISION)
