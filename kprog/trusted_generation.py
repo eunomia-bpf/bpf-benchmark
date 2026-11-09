@@ -9,17 +9,8 @@ import json
 from elftools.elf.elffile import ELFFile
 
 def context_kind(prog_type):
-    """Select the implemented entry layout from Linux bpf_types.h.
-
-    RAW covers identity contexts (including the pt_regs prefix on arm64).
-    The other convert_ctx_access handlers require a typed simulator mapping.
-    """
-    typed = {6: "xdp", 3: "tc", 8: "cgroup_skb"}
-    if prog_type in typed:
-        return typed[prog_type]
-    if prog_type in {2, 5, 15, 17, 20, 24, 26, 27, 28, 29, 31, 32}:
-        return "raw"
-    raise ValueError(f"context layout handler required for program type {prog_type}")
+    """Select typed packet contexts and the original raw context layout."""
+    return {6: "xdp", 3: "tc", 8: "cgroup_skb"}.get(prog_type, "raw")
 
 
 def elf_symbol(name):
