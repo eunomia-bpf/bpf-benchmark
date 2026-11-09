@@ -153,7 +153,7 @@ def failure_class(row):
     return stage
 
 
-def host(scratch):
+def host(scratch, output=None, previous=None):
     previous = int((scratch / "worker.pid").read_text())
     try:
         descriptor = os.pidfd_open(previous)
@@ -172,13 +172,26 @@ def host(scratch):
             indent=2) + "\n")
         return
     result = json.loads(result_path.read_text())
+    if previous:
+        retained = json.loads(previous.read_text())
+        replacements = {(row["application"], row["source_prog_id"]): row
+                        for row in result["programs"]}
+        rows = [replacements.get((row["application"], row["source_prog_id"]), row)
+                for row in retained["programs"]]
+        result.update(new_submissions=len(result["programs"]),
+                      retained_rows=len(rows) - len(result["programs"]),
+                      previous_result=str(previous), programs=rows, attempted=len(rows),
+                      stages=dict(collections.Counter(row["stage"] for row in rows)))
+    provenance = scratch / "provenance.json"
+    if provenance.is_file():
+        result["input_provenance"] = json.loads(provenance.read_text())
     for row in result["programs"]:
         row["failure_class"] = failure_class(row)
     classes = collections.Counter(row["failure_class"] for row in result["programs"])
     result["ranked_classes"] = [{"failure_class": label, "programs": count}
                                for label, count in classes.most_common()]
-    base = ROOT / "corpus/results/kprog_app_coverage_20261109/resident-census"
-    base.mkdir(exist_ok=True)
+    base = output or ROOT / "corpus/results/kprog_app_coverage_20261109/resident-census"
+    base.mkdir(parents=True, exist_ok=True)
     (base / "stock-results.json").write_text(json.dumps(result, indent=2) + "\n")
     apps = sorted({r["application"] for r in result["programs"]})
     table = ["Resident static census: actual stock-verifier outcomes", "",
@@ -212,7 +225,7 @@ def host(scratch):
         for name in ["stock-state/requests.jsonl", "stock-results.json", "stock-console.log",
                      "stock-service.log", "stock-host.log", "stock-guest.exit",
                      "stock-command.json", "stock-guest.sh", "resource-index.json",
-                     "stock-runtime", "stock-compiler"]:
+                     "stock-runtime", "stock-compiler", "provenance.json", "run-inventory.json"]:
             path = scratch / name
             if path.exists():
                 archive.add(path, arcname=name)
@@ -238,6 +251,8 @@ def main():
     parser.add_argument("mode", choices=["guest", "namespace", "compile", "host"])
     parser.add_argument("--scratch", type=Path,
                         default=Path("/var/tmp/kprog-tmp/A/resident-census"))
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--previous-results", type=Path)
     args, rest = parser.parse_known_args()
     if args.mode == "compile":
         sys.path.insert(0, str(ROOT / "kprog"))
@@ -246,7 +261,7 @@ def main():
                       Path(rest[rest.index("-c") + 1]),
                       Path(rest[rest.index("-o") + 1]), "x86")
     if args.mode == "host":
-        host(args.scratch)
+        host(args.scratch, args.output, args.previous_results)
     elif args.mode == "guest":
         guest(args.scratch)
     else:

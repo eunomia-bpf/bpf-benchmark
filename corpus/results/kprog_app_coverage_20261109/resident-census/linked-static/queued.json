@@ -1,0 +1,94 @@
+{
+  "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+  "baseline_result_commit": "a45526c7d858b53cdad269ff92719516c1325eaf",
+  "new_submissions": 275,
+  "retained_original_rows": 274,
+  "native_execution_requests": 0,
+  "resources": "original reference ELF linked with observed default CEL library",
+  "native_objects": {
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_multi_kprobe_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/075c5a5afff42254bb9dad9dc7caaab826dbe11ca92b7dbd085f0e3aabbca8c9.native.o",
+      "sha256": "075c5a5afff42254bb9dad9dc7caaab826dbe11ca92b7dbd085f0e3aabbca8c9"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_generic_kprobe_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/39ca4d335c8be400fbb0b0929e5d5cf7fd4d4b2e4b491bc1be7626af4fb9d8f9.native.o",
+      "sha256": "39ca4d335c8be400fbb0b0929e5d5cf7fd4d4b2e4b491bc1be7626af4fb9d8f9"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_multi_retkprobe_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/1eff32ef1ef5f891dca32d335462602519ce9bb0a5cf1ae7adea354ec65a7f90.native.o",
+      "sha256": "1eff32ef1ef5f891dca32d335462602519ce9bb0a5cf1ae7adea354ec65a7f90"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_generic_retkprobe_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/3ed110e21f9431b6420d5f9be657a0b27d06f7a3c80e71482d29c77b202eff4a.native.o",
+      "sha256": "3ed110e21f9431b6420d5f9be657a0b27d06f7a3c80e71482d29c77b202eff4a"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_generic_tracepoint_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/df2b5ebab58a283a018ce7fdaa4fe6f55d5c12e9ae11881f030d28e8bde8685d.native.o",
+      "sha256": "df2b5ebab58a283a018ce7fdaa4fe6f55d5c12e9ae11881f030d28e8bde8685d"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_generic_rawtp_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/ae30a3e2ed20436d7213bc019513d3fd75accab4c0c7bd97bbc49d37f58995d3.native.o",
+      "sha256": "ae30a3e2ed20436d7213bc019513d3fd75accab4c0c7bd97bbc49d37f58995d3"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_fork_v511.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/9fcba323913de5f79372f0d86c9b8dab9824ed3ed333c104ab19c3a6779b42e5.native.o",
+      "sha256": "9fcba323913de5f79372f0d86c9b8dab9824ed3ed333c104ab19c3a6779b42e5"
+    },
+    "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon/bpf_execve_event_v61.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/1c697aab1c4581f1b0f23e8d9614f829b331b2eadf26b90334584a85d96fe4c4.native.o",
+      "sha256": "1c697aab1c4581f1b0f23e8d9614f829b331b2eadf26b90334584a85d96fe4c4"
+    },
+    "/var/tmp/kprog-tmp/A/resident-census/largest-class/bpf_execve_bprm_commit_creds.native.o": {
+      "snapshot": "/var/tmp/kprog-tmp/A/resident-census-linked/native/b9b8c64c38859eca176e3fbfbc3edad58c624b050cb5a65433f867d11bdac1a3.native.o",
+      "sha256": "b9b8c64c38859eca176e3fbfbc3edad58c624b050cb5a65433f867d11bdac1a3"
+    }
+  },
+  "reference_objects": {
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o": {
+      "sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_multi_kprobe_v61.o",
+      "linked_sha256": "e12eceec78e9848b0ba63f82ecb7fcc791403a200a99c3e082084a940b4bcb25"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v61.o": {
+      "sha256": "7f938c1f10bf8c23b98bf804db70c47e20838d4201b94b04dc7d6437caf8821d",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_generic_kprobe_v61.o",
+      "linked_sha256": "5e9223e49a47109000c1518c8bebf492947bd3f1a3c807049e17f18604976111"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v61.o": {
+      "sha256": "a05781d19f579115904a0cdaa51011c685335a9688048cc139e4aee4fd339eb4",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_multi_retkprobe_v61.o",
+      "linked_sha256": "b80ea53dd2b3ebd495dd3fea672e8af75a4aa9b2a13e1218ba030c7578832ebc"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v61.o": {
+      "sha256": "42e1e59cae7763bc2a977861865bc573247a3226829cd80e7fd6cf13460ab403",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_generic_retkprobe_v61.o",
+      "linked_sha256": "6c2a896b5b18a6505da9219ab07975e34bea537e0ce1fdb4cecf74937fa023ce"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v61.o": {
+      "sha256": "6ec1cbe5915c15f16c65d591207b394961257c5f74b80bc55a1efffbb9f0de28",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_generic_tracepoint_v61.o",
+      "linked_sha256": "35fcc8a2a7bb5bd340f6c6dfd6176b073bb22dd10956c6e9b5c20b80e3c84496"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v61.o": {
+      "sha256": "005182c5d19ae1dd43bf2228016e0cf390a400152883668dee648314d38c7f1d",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_generic_rawtp_v61.o",
+      "linked_sha256": "c30ba4d0491066f90a924625e3710f5416f960656e84dd70444d3ca3317ce506"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v511.o": {
+      "sha256": "6a3b96f21b0bb9b962b1373aa7975ce5e831504cfb53e6a0710d139043419db4",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_fork_v511.o",
+      "linked_sha256": "3c899435b334c4990627281a0175183396edff0d4173bef1de0196ccf854ff6d"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v61.o": {
+      "sha256": "5f02b063c93db8e8c737a5778a3860b6cd58b17503a36be3b2671186e7e88b08",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_execve_event_v61.o",
+      "linked_sha256": "3d6cdf7f8ffc19735d2ae412b645db461797fd7ae1a836ad37d0bf3cf021da06"
+    },
+    "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_bprm_commit_creds.o": {
+      "sha256": "d476e2f8ff675c7267b14e08de6a1fd28a7c371807b015e8e8986924ee4d26f7",
+      "linked": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_execve_bprm_commit_creds.o",
+      "linked_sha256": "bb500e72c85a7ff1b1fc6ddcc7ebe01801779ddc0db1401fbf447d31076b52bc"
+    }
+  },
+  "manifest_fix_commit": "8922e4bdedb45729d7599ce8e1d55c3fe6356377"
+}
