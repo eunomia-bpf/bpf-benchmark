@@ -1,0 +1,384 @@
+{
+  "utc": "2026-11-09T06:44:35.744424+00:00",
+  "scope": "A closed Tracee paired-clamp copies and retained cold CPU trajectories",
+  "source_publication": "7a09825ade11656c713c2f7b159db456ee05b099",
+  "retired": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/lsm_support/kprobe_check.bpf.o",
+      "bytes": 8120,
+      "sha256": "a3fa0243502e07704295677268070a36ff1498e18e6ee03d59db3589dd002f57",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "lsm_support/kprobe_check.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/lsm_support/lsm_check.bpf.o",
+      "bytes": 6616,
+      "sha256": "c0c67e8e0fe79dad8614259e13f66b031a71c6c9c039223983e4df1b8b1adffd",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "lsm_support/lsm_check.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/native/kprobe_check.native.o",
+      "bytes": 7808,
+      "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "native/kprobe_check.native.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/native/lsm_check.native.o",
+      "bytes": 6704,
+      "sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "native/lsm_check.native.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/native/manifest.json",
+      "bytes": 28614,
+      "sha256": "60670d793e5aa98907c6e47bdb639681467af3287f239f01cdf9e09fe23030b3",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "native/manifest.json"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/native/tracee.native.o",
+      "bytes": 10084920,
+      "sha256": "37d7285ecf7a41c94806c757d579a72d7fd8d2bfad9e18cd23928f0824037cf9",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "native/tracee.native.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/tracee",
+      "bytes": 79712936,
+      "sha256": "3bf4d941330f2ebd3ca64d126483c265416a1bed46f877bd207191950f0747f6",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "tracee"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/image/tracee.bpf.o",
+      "bytes": 14369072,
+      "sha256": "75caf1fe2b24d956f92137f4c9bc1c7ba98c18ae0ddaffd4275eab6921f2ab37",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "tracee.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/embedded-dist/lsm_support/kprobe_check.bpf.o",
+      "bytes": 8120,
+      "sha256": "a3fa0243502e07704295677268070a36ff1498e18e6ee03d59db3589dd002f57",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "lsm_support/kprobe_check.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/embedded-dist/lsm_support/lsm_check.bpf.o",
+      "bytes": 6616,
+      "sha256": "c0c67e8e0fe79dad8614259e13f66b031a71c6c9c039223983e4df1b8b1adffd",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "lsm_support/lsm_check.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/embedded-dist/tracee.bpf.o",
+      "bytes": 14369072,
+      "sha256": "75caf1fe2b24d956f92137f4c9bc1c7ba98c18ae0ddaffd4275eab6921f2ab37",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "tracee.bpf.o"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/capture_filtering.h",
+      "bytes": 6332,
+      "sha256": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/capture_filtering.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/arch.h",
+      "bytes": 17082,
+      "sha256": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/arch.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/arguments.h",
+      "bytes": 1183,
+      "sha256": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/arguments.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/binprm.h",
+      "bytes": 998,
+      "sha256": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/binprm.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/bpf_prog.h",
+      "bytes": 534,
+      "sha256": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/bpf_prog.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/buffer.h",
+      "bytes": 25462,
+      "sha256": "bbe455a8d6e3cc0b389694d8aa3f98bc3db6e30b7f7ec58e5c945574cf1028ac",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/buffer.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/capabilities.h",
+      "bytes": 1087,
+      "sha256": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/capabilities.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/cgroups.h",
+      "bytes": 2238,
+      "sha256": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/cgroups.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/common.h",
+      "bytes": 3079,
+      "sha256": "3ef7ef9ba2e3384439cf5b9e1fa06d3fd509441420f7c9b2b50bba9640187686",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/common.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/consts.h",
+      "bytes": 2335,
+      "sha256": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/consts.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/context.h",
+      "bytes": 10922,
+      "sha256": "3f75fae98f3af498bccb4df5ddc9bb5bd37199f6ebce31bcb2b14c0ac3b432db",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/context.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/filesystem.h",
+      "bytes": 17139,
+      "sha256": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/filesystem.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/filtering.h",
+      "bytes": 18662,
+      "sha256": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/filtering.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/hash.h",
+      "bytes": 3034,
+      "sha256": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/hash.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/kconfig.h",
+      "bytes": 426,
+      "sha256": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/kconfig.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/ksymbols.h",
+      "bytes": 1269,
+      "sha256": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/ksymbols.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/logging.h",
+      "bytes": 1832,
+      "sha256": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/logging.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/memory.h",
+      "bytes": 8896,
+      "sha256": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/memory.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/namespaces.h",
+      "bytes": 1070,
+      "sha256": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/namespaces.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/network.h",
+      "bytes": 19222,
+      "sha256": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/network.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/probes.h",
+      "bytes": 13397,
+      "sha256": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/probes.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/signal.h",
+      "bytes": 472,
+      "sha256": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/signal.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/common/task.h",
+      "bytes": 6744,
+      "sha256": "f97496645f4c146da9078e9bf72ee96a9b8bed542e2a20f4cac40ec173e97a2a",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/common/task.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/lsmsupport/kprobe_check.bpf.c",
+      "bytes": 581,
+      "sha256": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/lsmsupport/kprobe_check.bpf.c"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/lsmsupport/lsm_check.bpf.c",
+      "bytes": 598,
+      "sha256": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/lsmsupport/lsm_check.bpf.c"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/lsmsupport/lsm_check_common.h",
+      "bytes": 469,
+      "sha256": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/lsmsupport/lsm_check_common.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/maps.h",
+      "bytes": 20995,
+      "sha256": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/maps.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/tracee.bpf.c",
+      "bytes": 276106,
+      "sha256": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/tracee.bpf.c"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/tracee.h",
+      "bytes": 3044,
+      "sha256": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/tracee.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/types.h",
+      "bytes": 28386,
+      "sha256": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/types.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/vmlinux.h",
+      "bytes": 29097,
+      "sha256": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/vmlinux.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/vmlinux_flavors.h",
+      "bytes": 2923,
+      "sha256": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/vmlinux_flavors.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/tree/vmlinux_missing.h",
+      "bytes": 9530,
+      "sha256": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "tree/vmlinux_missing.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/build-source/vendor/bpf/Makefile",
+      "bytes": 26872,
+      "sha256": "3d2529d3ccd41b39a81b0bb509050d83db31b5aad5ff999399f4aaf695085a50",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "build-source/vendor/bpf/Makefile"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/build-source/vendor/bpf/native_compat.h",
+      "bytes": 39516,
+      "sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "build-source/vendor/bpf/native_compat.h"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/build-source/vendor/bpf/write_native_manifest.py",
+      "bytes": 25732,
+      "sha256": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "build-source/vendor/bpf/write_native_manifest.py"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/build-source/vendor/repos/tracee/Makefile",
+      "bytes": 37931,
+      "sha256": "28acf2729271ccd60617f9bf767a6feb45aaae6516061b92af603581caac4506",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/compile-inputs.tar.gz",
+      "member": "build-source/vendor/repos/tracee/Makefile"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/app-source/tracee-paired/stage/tracee/manifest.json",
+      "bytes": 28614,
+      "sha256": "60670d793e5aa98907c6e47bdb639681467af3287f239f01cdf9e09fe23030b3",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-paired-clamp/paired-artifacts.tar.gz",
+      "member": "native/manifest.json"
+    }
+  ],
+  "relocated": [
+    {
+      "original": "/workspaces/.agent-state/kprog-lanes/A/skb-live-projection/fidelity/cpu-states.bin.zst",
+      "retained": "/var/tmp/kprog-tmp/A/cold-evidence-20261109/skb-live-projection/fidelity/cpu-states.bin.zst",
+      "bytes": 487280465,
+      "sha256": "07c382c77629b8cdd7feeb05d70f8c272bbff4804be08bb6d87851e6b68fb52c",
+      "access": "original path symbolic link"
+    },
+    {
+      "original": "/workspaces/.agent-state/kprog-lanes/A/design-only/architectural-fault/qemu-output/operations/control/cpu-states.bin",
+      "retained": "/var/tmp/kprog-tmp/A/cold-evidence-20261109/design-only/architectural-fault/qemu-output/operations/control/cpu-states.bin",
+      "bytes": 23477272,
+      "sha256": "9b861967c13dc9f98398636130fb4ce478fd80b0d8cbec84352d8889a70a1104",
+      "access": "original path symbolic link"
+    },
+    {
+      "original": "/workspaces/.agent-state/kprog-lanes/A/design-only/architectural-fault/qemu-output/operations/exclusive/cpu-states.bin",
+      "retained": "/var/tmp/kprog-tmp/A/cold-evidence-20261109/design-only/architectural-fault/qemu-output/operations/exclusive/cpu-states.bin",
+      "bytes": 3383320,
+      "sha256": "088b2f0a82337babcbc7733c43772256dd14ee3729b74a4b0a0dc2dc94066fbd",
+      "access": "original path symbolic link"
+    },
+    {
+      "original": "/workspaces/.agent-state/kprog-lanes/A/design-only/architectural-fault/qemu-output/operations/memory/cpu-states.bin",
+      "retained": "/var/tmp/kprog-tmp/A/cold-evidence-20261109/design-only/architectural-fault/qemu-output/operations/memory/cpu-states.bin",
+      "bytes": 107842584,
+      "sha256": "57c18dbc5632394a4b88fc5fa5c8db656fdc23e28a126bac8128d6cf0d360b8c",
+      "access": "original path symbolic link"
+    }
+  ],
+  "runtime_admission_additions": 0,
+  "retired_bytes": 119302407,
+  "relocated_bytes": 621983641,
+  "workspace_released_bytes": 741286048
+}
