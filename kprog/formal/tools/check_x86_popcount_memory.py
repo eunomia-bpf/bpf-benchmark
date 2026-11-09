@@ -24,10 +24,11 @@ def main():
         '/* Entry mode is immutable; snapshot it before opaque compiler barriers. */',
         '#undef __x86_sim_is_xdp', '#define __x86_sim_is_xdp host_entry_is_xdp',
         'static __u8 datum[64];']
+    # The RSP fixture reads allocated bytes in the live [-32,0) frame.
     variants = [
         ("rdi+17", "rax", 0, False), ("rdi-3", "rax", 20, False),
         ("rdi+rcx*4-3", "rax", 12, False), ("rdi+17", "rdi", 0, False),
-        ("rdi+rcx*4-3", "rcx", 12, False), ("rsp-15", "rax", 0, True),
+        ("rdi+rcx*4-3", "rcx", 12, False), ("rsp+17", "rax", 0, True),
         ("rip+0", "rax", 0, False)]
     for width, qualifier in ((2, "WORD"), (4, "DWORD"), (8, "QWORD")):
         for n, (address, destination, _, _) in enumerate(variants):
@@ -57,7 +58,7 @@ def main():
                 'state.cf=flags&1;state.pf=(flags>>1)&1;state.af=(flags>>2)&1;',
                 'state.zf=(flags>>3)&1;state.sf=(flags>>4)&1;state.of=(flags>>5)&1;']
             if stack:
-                source += [f'for(unsigned i=0;i<{width};i++) state.stack_mem.b[KPROG_X86_STACK_INDEX(-47,X86_SIM_STACK_BYTES)+i]=datum[17+i];']
+                source += [f'for(unsigned i=0;i<{width};i++) state.stack_mem.b[KPROG_X86_STACK_INDEX(-15,X86_SIM_STACK_BYTES)+i]=datum[17+i];']
             source += ['struct x86_sim_state expected=state;',
                 f'__u64 narrowed=value & (~0ULL>>(64-{width*8})), count=0;',
                 f'for(unsigned bit=0;bit<{width*8};bit++) count+=(narrowed>>bit)&1;',

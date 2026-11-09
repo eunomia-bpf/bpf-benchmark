@@ -5712,3 +5712,13 @@ four exact access-width assertions; the existing targeted tool exits0.
 [Original proof, host and failed-full receipts](arm-pair-read-recovery.log.gz)
 retain source/manifest/log/CPU/exit identities. Physical exception/table/frame,
 pre/post writeback/SIMD, compiled-B and O3 correspondences remain explicit.
+
+### POPCNT live-stack fixture after exit/lifetime modeling
+
+Full sourcea274d8978 exits2 at the POPCNT stack case: RSP-15 reads byte-47
+with live SP-32. The valid-memory fixture now reads RSP+17 at byte-15 within
+the allocated32B frame. GCC and Clang each pass88704full-state comparisons;
+the existing malformed/context/readonly/exact-width BPF assertions pass.
+Negative displacement remains in rdi-3; S7 lifetime suites exercise below-SP
+loss. [Original failed-full and targeted receipts](popcount-live-stack-fixture.log.gz)
+retain the exact full source manifest, log, CPU and exit.
