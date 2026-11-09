@@ -76,7 +76,7 @@
 | O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 0/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
-| 编译字节级证明 | 15/75 个操作，151 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
+| 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
 | O4 链接步骤（22 行，两个 ISA 合计） | 7 条件式、14 部分、1 待证 | 同左 | V |
 
 - [ ] **V** 上表每一行做到满额。
@@ -102,6 +102,8 @@
 - [x] **V** compiled ADD_IMM：五个真实 BPF 单元覆盖8位低/高字节及16/32/64位，任意操作数/编码立即数及64位imm32符号扩展，reference scalar写回、完整memory/visit/halt/fault/events；151组合函数保留原146字节（本提交，compiled15/75）。
 - [ ] **V** compiled ADD_IMM 后继全量检查（本提交；在现有RET/ROR批次后复用唯一full槽与增量缓存）。
 - [ ] **V/C** ROR_MEM 绝对地址写回采用现有64位整数地址运算；原有26,547,217-case oracle 的 GCC/Clang UBSan 回放与归档（本提交；C stack-facts 中的原始line892诊断保持）。
+- [x] **V** compiled ADD_REG：七个真实BPF单元覆盖四种8位源/目的低高字节组合及16/32/64位，任意操作数/fresh/visit、canonical arithmetic与scalar写回、完整memory/exclusive/23输入/halt/fault/events；158组合函数保留原151字节（本提交，compiled16/75）。
+- [ ] **V** compiled ADD_REG 后继全量检查（本提交；在现有151单元/RET批次后复用唯一full槽及增量缓存）。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
 - [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。

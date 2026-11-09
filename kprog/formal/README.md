@@ -42,7 +42,7 @@ outer source callee/SP guards derive the native ABI contract. Actual producer
 operand/table extraction and physical LR/code-PC/compiler transport remain
 explicit; ARM RET retains its partial category.
 
-Actual compiled scalar coverage is15 of75 x86 operations across151 combined
+Actual compiled scalar coverage is16 of75 x86 operations across158 combined
 units, including two partial returning-helper units. Classic ROR adds five
 width/lane units with arbitrary values, counts and fresh inputs; actual BPF
 execution preserves memory/exclusive state and consumes the23 captured input
@@ -54,6 +54,12 @@ writeback, with the encoded imm32 sign extension at64-bit width. Seven execution
 laws quantify every operand, immediate, fresh stream and initial visit, preserving
 memory/exclusive state, consuming23 inputs and reaching the stated result.
 The complete flags/tag/register frame and physical/compiler embedding remain
+explicit interfaces.
+
+ADD_REG adds seven actual scalar units: all four low/high byte-lane pairs and
+16/32/64-bit writeback. Nine execution laws quantify every operand and fresh
+stream and preserve memory/exclusive state with23 consumed inputs. Complete
+flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
 ## Specification and proof scope

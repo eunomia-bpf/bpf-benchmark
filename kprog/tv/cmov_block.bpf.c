@@ -399,3 +399,26 @@ ADDIMM_UNIT(tv_addimm8hi, X86_WIDTH_8, 8)
 ADDIMM_UNIT(tv_addimm16, X86_WIDTH_16, 0)
 ADDIMM_UNIT(tv_addimm32, X86_WIDTH_32, 0)
 ADDIMM_UNIT(tv_addimm64, X86_WIDTH_64, 0)
+
+/* ADD_REG: production dispatcher, every byte-lane pair and scalar width. */
+#define ADDREG_UNIT(NAME, WIDTH, DS, SS) \
+__attribute__((section("tv/addreg/" #NAME), used)) \
+__u64 NAME(__u64 old, __u64 source) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rax.ptr = (void *)(long)old; \
+    __x86_rdx.ptr = (void *)(long)source; \
+    X86_SIM_L_EXEC(X86_OP_ADD_REG, X86_RAX, X86_RDX, WIDTH, \
+        KPROG_X86_REG_LANE_AUX(X86_ALU_ADD, DS, SS), 0); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+ADDREG_UNIT(tv_addreg8ll, X86_WIDTH_8, 0, 0)
+ADDREG_UNIT(tv_addreg8lh, X86_WIDTH_8, 0, 8)
+ADDREG_UNIT(tv_addreg8hl, X86_WIDTH_8, 8, 0)
+ADDREG_UNIT(tv_addreg8hh, X86_WIDTH_8, 8, 8)
+ADDREG_UNIT(tv_addreg16, X86_WIDTH_16, 0, 0)
+ADDREG_UNIT(tv_addreg32, X86_WIDTH_32, 0, 0)
+ADDREG_UNIT(tv_addreg64, X86_WIDTH_64, 0, 0)
