@@ -1,6 +1,6 @@
 {
-  "utc": "2026-11-09T07:30:45.538957+00:00",
-  "head": "4dabac7c5c68dd3f067c8326d06bd926c3d65755",
+  "utc": "2026-11-09T08:39:31.183284+00:00",
+  "head": "75c01d29afb1e183ab260a6a3d5fb2c1f0cd4447",
   "closed_cohorts": {
     "BCC and Katran": {
       "path": "corpus/results/kprog_app_coverage_20261109/smap-recovery/bcc-katran",
@@ -3271,5 +3271,123 @@
     "Cilium checksum-frame",
     "paired syscount fixed config",
     "paired complete BCC fixed config"
-  ]
+  ],
+  "compiler_trials": {
+    "constant_division": {
+      "path": "corpus/results/kprog_app_coverage_20261109/native-constant-division/application",
+      "commit": "5d106c5c3090d35b7a790552c549afa1e1f2ca58",
+      "original38": {
+        "make_exit": 0,
+        "cases": 38,
+        "stages": {
+          "specialization_rejected": 1,
+          "valid_executed": 9,
+          "verifier_rejected": 28
+        },
+        "native_risk_executions": 0
+      },
+      "arms": [],
+      "counts": {
+        "native_requests": 24,
+        "generated": 24,
+        "compiled": 24,
+        "installed": 23,
+        "failed": 1
+      }
+    },
+    "syscount_config": {
+      "path": "corpus/results/kprog_app_coverage_20261109/bcc-readonly-config/application",
+      "commit": "23e4a7e269f80874836376d01debbc0da1fe67ff",
+      "original38": {
+        "make_exit": 0,
+        "cases": 38,
+        "stages": {
+          "accepted_finding": 2,
+          "specialization_rejected": 1,
+          "valid_executed": 9,
+          "verifier_rejected": 26
+        },
+        "accepted_findings": [
+          "immediate_push_branch",
+          "stack_base_flags"
+        ],
+        "native_risk_executions": 0
+      },
+      "arms": [
+        {
+          "label": "control",
+          "native_requests": 3,
+          "generated": 3,
+          "compiled": 3,
+          "installed": 1,
+          "failed": 2
+        },
+        {
+          "label": "candidate",
+          "native_requests": 5,
+          "generated": 5,
+          "compiled": 5,
+          "installed": 1,
+          "failed": 4
+        }
+      ],
+      "counts": {}
+    },
+    "complete_bcc_frontend": {
+      "path": "corpus/results/kprog_app_coverage_20261109/bcc-frozen-config-set/application",
+      "commit": "c718a203046fb7b0d9a14e86e54381ac5e3e4fb0",
+      "original38": {
+        "make_exit": 0,
+        "cases": 38,
+        "stages": {
+          "accepted_finding": 2,
+          "specialization_rejected": 1,
+          "valid_executed": 9,
+          "verifier_rejected": 26
+        },
+        "accepted_findings": [
+          "immediate_push_branch",
+          "stack_base_flags"
+        ],
+        "native_risk_executions": 0
+      },
+      "arms": [
+        {
+          "label": "control",
+          "native_requests": 3,
+          "generated": 3,
+          "compiled": 3,
+          "installed": 1,
+          "failed": 2
+        },
+        {
+          "label": "candidate",
+          "native_requests": 6,
+          "generated": 6,
+          "compiled": 6,
+          "installed": 2,
+          "failed": 4
+        }
+      ],
+      "counts": {}
+    }
+  },
+  "application_preparation": {
+    "cilium_checksum_frame": {
+      "path": "corpus/results/kprog_app_coverage_20261109/cilium-checksum-caller-frame/application",
+      "native_requests": 0,
+      "make_exit": 2,
+      "cause": "APPS=cilium selects unknown configured application; actual configured selector is cilium/agent",
+      "continuation": "private argument correction and matched current tail/thunk runtime handoff"
+    }
+  },
+  "generic_opcode_guest": {
+    "rep_stos": {
+      "path": "corpus/results/kprog_app_coverage_20261109/rep-stos/guest",
+      "commit": "ae6f9d9400e70688c10e36a0cdce96bd16ab6ea0",
+      "positive_executed": 5,
+      "verifier_rejected": 1,
+      "negative_native_executions": 0
+    }
+  }
 }
