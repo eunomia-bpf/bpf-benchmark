@@ -1,0 +1,3 @@
+# Complete six-app current master x86 runtime replay
+
+This cohort pairs current-master46125883be kernel/module/linker, the first-attempt-log loader, current published simulator source and complete Cilium/OTel/Tracee/Tetragon native producers. The baseline image is R restored03cc5c15b546 with its frozen May29 workload/launcher. Tracee/Tetragon retain their paired application-source artifacts. Actual make0, requests15, generated15, compiled14, installed7, failures8. Every actual startup outcome and work stream is retained in coverage.json and the raw archives. One sample2s is functional coverage; R owns full restored-May29 timing.
