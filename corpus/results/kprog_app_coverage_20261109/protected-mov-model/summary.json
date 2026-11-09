@@ -1,0 +1,5 @@
+{
+  "make_exit": 2,
+  "log": "PYTHONDONTWRITEBYTECODE=1 python3 /workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model/generate-fixture.py\nvariants 244\ngcc -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -include /workspaces/repository/kprog/formal/oracles/arm64_entry_environment_host.h -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/vendor/libbpf/src /workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model/host.c -o /workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model/gcc-host\n/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model/gcc-host\nmake: *** [/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model/Makefile:8: component] Segmentation fault (core dumped)\n",
+  "candidate_sha256": "82003db55e21cc7c3fd48aaf17f1c7bf5712f1a4edaa31608d1b13a7d19254c5"
+}
