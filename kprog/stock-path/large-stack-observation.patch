@@ -1,3 +1,106 @@
+--- /dev/null
++++ b/include/linux/kprog_observation_stack_mask.h
+@@ -0,0 +1,100 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/* Slot-set storage for the coordinator's larger-stack observation kernel. */
++#ifndef KPROG_OBSERVATION_STACK_MASK_H
++#define KPROG_OBSERVATION_STACK_MASK_H
++
++#define KPROG_OBS_STACK_SLOTS (MAX_BPF_STACK / 8)
++#define KPROG_OBS_MASK_WORD_BITS (sizeof(unsigned long) * 8)
++#define KPROG_OBS_MASK_WORDS \
++	((KPROG_OBS_STACK_SLOTS + KPROG_OBS_MASK_WORD_BITS - 1) / KPROG_OBS_MASK_WORD_BITS)
++
++typedef struct {
++	unsigned long bits[KPROG_OBS_MASK_WORDS];
++} kprog_obs_stack_mask;
++
++#define KPROG_OBS_INLINE static inline __attribute__((always_inline))
++
++KPROG_OBS_INLINE kprog_obs_stack_mask kprog_obs_mask_zero(void)
++{
++	kprog_obs_stack_mask result = {};
++	return result;
++}
++
++KPROG_OBS_INLINE kprog_obs_stack_mask kprog_obs_mask_all(void)
++{
++	kprog_obs_stack_mask result;
++	unsigned int i;
++
++	for (i = 0; i < KPROG_OBS_MASK_WORDS; i++)
++		result.bits[i] = ~0UL;
++	return result;
++}
++
++#define KPROG_OBS_MASK_BINARY(NAME, EXPR) \
++KPROG_OBS_INLINE kprog_obs_stack_mask NAME(kprog_obs_stack_mask a, \
++					  kprog_obs_stack_mask b) \
++{ \
++	kprog_obs_stack_mask result; \
++	unsigned int i; \
++	for (i = 0; i < KPROG_OBS_MASK_WORDS; i++) \
++		result.bits[i] = (EXPR); \
++	return result; \
++}
++
++KPROG_OBS_MASK_BINARY(kprog_obs_mask_or, a.bits[i] | b.bits[i])
++KPROG_OBS_MASK_BINARY(kprog_obs_mask_and, a.bits[i] & b.bits[i])
++KPROG_OBS_MASK_BINARY(kprog_obs_mask_andnot, a.bits[i] & ~b.bits[i])
++KPROG_OBS_MASK_BINARY(kprog_obs_mask_xor, a.bits[i] ^ b.bits[i])
++#undef KPROG_OBS_MASK_BINARY
++
++KPROG_OBS_INLINE int kprog_obs_mask_empty(kprog_obs_stack_mask mask)
++{
++	unsigned int i;
++
++	for (i = 0; i < KPROG_OBS_MASK_WORDS; i++)
++		if (mask.bits[i])
++			return 0;
++	return 1;
++}
++
++KPROG_OBS_INLINE int kprog_obs_mask_equal(kprog_obs_stack_mask a,
++					 kprog_obs_stack_mask b)
++{
++	unsigned int i;
++
++	for (i = 0; i < KPROG_OBS_MASK_WORDS; i++)
++		if (a.bits[i] != b.bits[i])
++			return 0;
++	return 1;
++}
++
++KPROG_OBS_INLINE void kprog_obs_mask_set(kprog_obs_stack_mask *mask,
++					unsigned int slot)
++{
++	mask->bits[slot / KPROG_OBS_MASK_WORD_BITS] |=
++		1UL << (slot % KPROG_OBS_MASK_WORD_BITS);
++}
++
++KPROG_OBS_INLINE void kprog_obs_mask_clear(kprog_obs_stack_mask *mask,
++					  unsigned int slot)
++{
++	mask->bits[slot / KPROG_OBS_MASK_WORD_BITS] &=
++		~(1UL << (slot % KPROG_OBS_MASK_WORD_BITS));
++}
++
++KPROG_OBS_INLINE int kprog_obs_mask_test(const kprog_obs_stack_mask *mask,
++					unsigned int slot)
++{
++	return !!(mask->bits[slot / KPROG_OBS_MASK_WORD_BITS] &
++		  (1UL << (slot % KPROG_OBS_MASK_WORD_BITS)));
++}
++
++KPROG_OBS_INLINE kprog_obs_stack_mask kprog_obs_mask_bit(unsigned int slot)
++{
++	kprog_obs_stack_mask result = {};
++	kprog_obs_mask_set(&result, slot);
++	return result;
++}
++
++#undef KPROG_OBS_INLINE
++#endif
 --- a/include/linux/filter.h
 +++ b/include/linux/filter.h
 @@ -95,8 +95,8 @@
@@ -6,14 +109,22 @@
  
 -/* BPF program can access up to 512 bytes of stack space. */
 -#define MAX_BPF_STACK	512
-+/* Observation kernel: inspect B beyond the production 512-byte stack wall. */
++/* Observation kernel: BPF stack capacity is 8192 bytes. */
 +#define MAX_BPF_STACK	8192
  
  /* Helper macros for filter block array initializers. */
  
 --- a/include/linux/bpf_verifier.h
 +++ b/include/linux/bpf_verifier.h
-@@ -327,19 +327,19 @@
+@@ -7,6 +7,7 @@
+ #include <linux/bpf.h> /* for enum bpf_reg_type */
+ #include <linux/btf.h> /* for struct btf and btf_id() */
+ #include <linux/filter.h> /* for MAX_BPF_STACK */
++#include <linux/kprog_observation_stack_mask.h>
+ #include <linux/tnum.h>
+ 
+ /* Maximum variable offset umax_value permitted when resolving memory accesses.
+@@ -327,19 +328,19 @@
  enum {
  	/* instruction references stack slot through PTR_TO_STACK register;
  	 * we also store stack's frame number in lower 3 bits (MAX_CALL_FRAMES is 8)
@@ -41,12 +152,642 @@
  };
  
  static_assert(INSN_F_FRAMENO_MASK + 1 >= MAX_CALL_FRAMES);
-@@ -350,7 +350,7 @@
+@@ -350,11 +351,11 @@
  	/* insn idx can't be bigger than 1 million */
  	u32 prev_idx : 20;
  	/* special INSN_F_xxx flags */
 -	u32 flags : 12;
 +	u32 flags : 16;
  	/* additional registers that need precision tracking when this
- 	 * jump is backtracked, vector of six 10-bit records
+-	 * jump is backtracked, vector of six 10-bit records
+-	 */
+-	u64 linked_regs;
++	 * jump is backtracked, vector of six 14-bit records
++	 */
++	unsigned __int128 linked_regs;
+ };
+ 
+ /* Maximum number of register states that can exist at once */
+@@ -686,7 +687,7 @@
+ 	struct bpf_verifier_env *env;
+ 	u32 frame;
+ 	u32 reg_masks[MAX_CALL_FRAMES];
+-	u64 stack_masks[MAX_CALL_FRAMES];
++	kprog_obs_stack_mask stack_masks[MAX_CALL_FRAMES];
+ };
+ 
+ struct bpf_id_pair {
+@@ -834,7 +835,7 @@
  	 */
+ 	u32 scratched_regs;
+ 	/* Same as scratched_regs but for stack slots */
+-	u64 scratched_stack_slots;
++	kprog_obs_stack_mask scratched_stack_slots;
+ 	u64 prev_log_pos, prev_insn_print_pos;
+ 	/* buffer used to temporary hold constants as scalar registers */
+ 	struct bpf_reg_state fake_reg[2];
+@@ -1021,7 +1022,7 @@
+ 
+ static inline void mark_stack_slot_scratched(struct bpf_verifier_env *env, u32 spi)
+ {
+-	env->scratched_stack_slots |= 1ULL << spi;
++	kprog_obs_mask_set(&env->scratched_stack_slots, spi);
+ }
+ 
+ static inline bool reg_scratched(const struct bpf_verifier_env *env, u32 regno)
+@@ -1031,25 +1032,25 @@
+ 
+ static inline bool stack_slot_scratched(const struct bpf_verifier_env *env, u64 regno)
+ {
+-	return (env->scratched_stack_slots >> regno) & 1;
++	return kprog_obs_mask_test(&env->scratched_stack_slots, regno);
+ }
+ 
+ static inline bool verifier_state_scratched(const struct bpf_verifier_env *env)
+ {
+-	return env->scratched_regs || env->scratched_stack_slots;
++	return env->scratched_regs || !kprog_obs_mask_empty(env->scratched_stack_slots);
+ }
+ 
+ static inline void mark_verifier_state_clean(struct bpf_verifier_env *env)
+ {
+ 	env->scratched_regs = 0U;
+-	env->scratched_stack_slots = 0ULL;
++	env->scratched_stack_slots = kprog_obs_mask_zero();
+ }
+ 
+ /* Used for printing the entire verifier state. */
+ static inline void mark_verifier_state_scratched(struct bpf_verifier_env *env)
+ {
+ 	env->scratched_regs = ~0U;
+-	env->scratched_stack_slots = ~0ULL;
++	env->scratched_stack_slots = kprog_obs_mask_all();
+ }
+ 
+ static inline bool bpf_stack_narrow_access_ok(int off, int fill_size, int spill_size)
+@@ -1081,14 +1082,14 @@
+ struct bpf_subprog_info *bpf_find_containing_subprog(struct bpf_verifier_env *env, int off);
+ int bpf_jmp_offset(struct bpf_insn *insn);
+ struct bpf_iarray *bpf_insn_successors(struct bpf_verifier_env *env, u32 idx);
+-void bpf_fmt_stack_mask(char *buf, ssize_t buf_sz, u64 stack_mask);
++void bpf_fmt_stack_mask(char *buf, ssize_t buf_sz, kprog_obs_stack_mask stack_mask);
+ bool bpf_calls_callback(struct bpf_verifier_env *env, int insn_idx);
+ 
+ int bpf_stack_liveness_init(struct bpf_verifier_env *env);
+ void bpf_stack_liveness_free(struct bpf_verifier_env *env);
+ int bpf_update_live_stack(struct bpf_verifier_env *env);
+-int bpf_mark_stack_read(struct bpf_verifier_env *env, u32 frameno, u32 insn_idx, u64 mask);
+-void bpf_mark_stack_write(struct bpf_verifier_env *env, u32 frameno, u64 mask);
++int bpf_mark_stack_read(struct bpf_verifier_env *env, u32 frameno, u32 insn_idx, kprog_obs_stack_mask mask);
++void bpf_mark_stack_write(struct bpf_verifier_env *env, u32 frameno, kprog_obs_stack_mask mask);
+ int bpf_reset_stack_write_marks(struct bpf_verifier_env *env, u32 insn_idx);
+ int bpf_commit_stack_write_marks(struct bpf_verifier_env *env);
+ int bpf_live_stack_query_init(struct bpf_verifier_env *env, struct bpf_verifier_state *st);
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -352,7 +352,7 @@
+ 		u32 ref_obj_id;
+ 	} initialized_dynptr;
+ 	struct {
+-		u8 spi;
++		u16 spi;
+ 		u8 frameno;
+ 	} iter;
+ 	struct bpf_map_desc map;
+@@ -814,7 +814,7 @@
+ 		state->stack[spi - 1].spilled_ptr.ref_obj_id = id;
+ 	}
+ 
+-	bpf_mark_stack_write(env, state->frameno, BIT(spi - 1) | BIT(spi));
++	bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_or(kprog_obs_mask_bit(spi - 1), kprog_obs_mask_bit(spi)));
+ 
+ 	return 0;
+ }
+@@ -831,7 +831,7 @@
+ 	__mark_reg_not_init(env, &state->stack[spi].spilled_ptr);
+ 	__mark_reg_not_init(env, &state->stack[spi - 1].spilled_ptr);
+ 
+-	bpf_mark_stack_write(env, state->frameno, BIT(spi - 1) | BIT(spi));
++	bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_or(kprog_obs_mask_bit(spi - 1), kprog_obs_mask_bit(spi)));
+ }
+ 
+ static int unmark_stack_slots_dynptr(struct bpf_verifier_env *env, struct bpf_reg_state *reg)
+@@ -949,7 +949,7 @@
+ 	__mark_reg_not_init(env, &state->stack[spi].spilled_ptr);
+ 	__mark_reg_not_init(env, &state->stack[spi - 1].spilled_ptr);
+ 
+-	bpf_mark_stack_write(env, state->frameno, BIT(spi - 1) | BIT(spi));
++	bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_or(kprog_obs_mask_bit(spi - 1), kprog_obs_mask_bit(spi)));
+ 
+ 	return 0;
+ }
+@@ -1076,7 +1076,7 @@
+ 		for (j = 0; j < BPF_REG_SIZE; j++)
+ 			slot->slot_type[j] = STACK_ITER;
+ 
+-		bpf_mark_stack_write(env, state->frameno, BIT(spi - i));
++		bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_bit(spi - i));
+ 		mark_stack_slot_scratched(env, spi - i);
+ 	}
+ 
+@@ -1105,7 +1105,7 @@
+ 		for (j = 0; j < BPF_REG_SIZE; j++)
+ 			slot->slot_type[j] = STACK_INVALID;
+ 
+-		bpf_mark_stack_write(env, state->frameno, BIT(spi - i));
++		bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_bit(spi - i));
+ 		mark_stack_slot_scratched(env, spi - i);
+ 	}
+ 
+@@ -1195,7 +1195,7 @@
+ 	slot = &state->stack[spi];
+ 	st = &slot->spilled_ptr;
+ 
+-	bpf_mark_stack_write(env, reg->frameno, BIT(spi));
++	bpf_mark_stack_write(env, reg->frameno, kprog_obs_mask_bit(spi));
+ 	__mark_reg_known_zero(st);
+ 	st->type = PTR_TO_STACK; /* we don't have dedicated reg type */
+ 	st->ref_obj_id = id;
+@@ -1251,7 +1251,7 @@
+ 
+ 	__mark_reg_not_init(env, st);
+ 
+-	bpf_mark_stack_write(env, reg->frameno, BIT(spi));
++	bpf_mark_stack_write(env, reg->frameno, kprog_obs_mask_bit(spi));
+ 
+ 	for (i = 0; i < BPF_REG_SIZE; i++)
+ 		slot->slot_type[i] = STACK_INVALID;
+@@ -3738,7 +3738,7 @@
+ 	int err, i;
+ 
+ 	for (i = 0; i < nr_slots; i++) {
+-		err = bpf_mark_stack_read(env, reg->frameno, env->insn_idx, BIT(spi - i));
++		err = bpf_mark_stack_read(env, reg->frameno, env->insn_idx, kprog_obs_mask_bit(spi - i));
+ 		if (err)
+ 			return err;
+ 		mark_stack_slot_scratched(env, spi - i);
+@@ -3998,7 +3998,7 @@
+ }
+ 
+ #define LR_FRAMENO_BITS	3
+-#define LR_SPI_BITS	6
++#define LR_SPI_BITS	10
+ #define LR_ENTRY_BITS	(LR_SPI_BITS + LR_FRAMENO_BITS + 1)
+ #define LR_SIZE_BITS	4
+ #define LR_FRAMENO_MASK	((1ull << LR_FRAMENO_BITS) - 1)
+@@ -4011,7 +4011,7 @@
+ struct linked_reg {
+ 	u8 frameno;
+ 	union {
+-		u8 spi;
++		u16 spi;
+ 		u8 regno;
+ 	};
+ 	bool is_reg;
+@@ -4030,21 +4030,21 @@
+ 	return NULL;
+ }
+ 
+-/* Use u64 as a vector of 6 10-bit values, use first 4-bits to track
++/* Use u128 as a vector of 6 14-bit values, use first 4-bits to track
+  * number of elements currently in stack.
+- * Pack one history entry for linked registers as 10 bits in the following format:
++ * Pack one history entry for linked registers as 14 bits in the following format:
+  * - 3-bits frameno
+- * - 6-bits spi_or_reg
++ * - 10-bits spi_or_reg
+  * - 1-bit  is_reg
+  */
+-static u64 linked_regs_pack(struct linked_regs *s)
+-{
+-	u64 val = 0;
++static unsigned __int128 linked_regs_pack(struct linked_regs *s)
++{
++	unsigned __int128 val = 0;
+ 	int i;
+ 
+ 	for (i = 0; i < s->cnt; ++i) {
+ 		struct linked_reg *e = &s->entries[i];
+-		u64 tmp = 0;
++		unsigned __int128 tmp = 0;
+ 
+ 		tmp |= e->frameno;
+ 		tmp |= e->spi << LR_SPI_OFF;
+@@ -4058,7 +4058,7 @@
+ 	return val;
+ }
+ 
+-static void linked_regs_unpack(u64 val, struct linked_regs *s)
++static void linked_regs_unpack(unsigned __int128 val, struct linked_regs *s)
+ {
+ 	int i;
+ 
+@@ -4077,7 +4077,7 @@
+ 
+ /* for any branch, call, exit record the history of jmps in the given state */
+ static int push_jmp_history(struct bpf_verifier_env *env, struct bpf_verifier_state *cur,
+-			    int insn_flags, u64 linked_regs)
++			    int insn_flags, unsigned __int128 linked_regs)
+ {
+ 	u32 cnt = cur->jmp_history_cnt;
+ 	struct bpf_jmp_history_entry *p;
+@@ -4094,8 +4094,10 @@
+ 				env->insn_idx, env->cur_hist_ent->flags, insn_flags);
+ 		env->cur_hist_ent->flags |= insn_flags;
+ 		verifier_bug_if(env->cur_hist_ent->linked_regs != 0, env,
+-				"insn history: insn_idx %d linked_regs: %#llx",
+-				env->insn_idx, env->cur_hist_ent->linked_regs);
++				"insn history: insn_idx %d linked_regs: %#llx%016llx",
++				env->insn_idx,
++				(u64)(env->cur_hist_ent->linked_regs >> 64),
++				(u64)env->cur_hist_ent->linked_regs);
+ 		env->cur_hist_ent->linked_regs = linked_regs;
+ 		return 0;
+ 	}
+@@ -4202,13 +4204,12 @@
+ 
+ static inline u32 bt_empty(struct backtrack_state *bt)
+ {
+-	u64 mask = 0;
+ 	int i;
+ 
+ 	for (i = 0; i <= bt->frame; i++)
+-		mask |= bt->reg_masks[i] | bt->stack_masks[i];
+-
+-	return mask == 0;
++		if (bt->reg_masks[i] || !kprog_obs_mask_empty(bt->stack_masks[i]))
++			return 0;
++	return 1;
+ }
+ 
+ static inline int bt_subprog_enter(struct backtrack_state *bt)
+@@ -4253,12 +4254,12 @@
+ 
+ static inline void bt_set_frame_slot(struct backtrack_state *bt, u32 frame, u32 slot)
+ {
+-	bt->stack_masks[frame] |= 1ull << slot;
++	kprog_obs_mask_set(&bt->stack_masks[frame], slot);
+ }
+ 
+ static inline void bt_clear_frame_slot(struct backtrack_state *bt, u32 frame, u32 slot)
+ {
+-	bt->stack_masks[frame] &= ~(1ull << slot);
++	kprog_obs_mask_clear(&bt->stack_masks[frame], slot);
+ }
+ 
+ static inline u32 bt_frame_reg_mask(struct backtrack_state *bt, u32 frame)
+@@ -4271,12 +4272,12 @@
+ 	return bt->reg_masks[bt->frame];
+ }
+ 
+-static inline u64 bt_frame_stack_mask(struct backtrack_state *bt, u32 frame)
++static inline kprog_obs_stack_mask bt_frame_stack_mask(struct backtrack_state *bt, u32 frame)
+ {
+ 	return bt->stack_masks[frame];
+ }
+ 
+-static inline u64 bt_stack_mask(struct backtrack_state *bt)
++static inline kprog_obs_stack_mask bt_stack_mask(struct backtrack_state *bt)
+ {
+ 	return bt->stack_masks[bt->frame];
+ }
+@@ -4293,7 +4294,7 @@
+ 
+ static inline bool bt_is_frame_slot_set(struct backtrack_state *bt, u32 frame, u32 slot)
+ {
+-	return bt->stack_masks[frame] & (1ull << slot);
++	return kprog_obs_mask_test(&bt->stack_masks[frame], slot);
+ }
+ 
+ /* format registers bitmask, e.g., "r0,r2,r4" for 0x15 mask */
+@@ -4316,16 +4317,14 @@
+ 	}
+ }
+ /* format stack slots bitmask, e.g., "-8,-24,-40" for 0x15 mask */
+-void bpf_fmt_stack_mask(char *buf, ssize_t buf_sz, u64 stack_mask)
+-{
+-	DECLARE_BITMAP(mask, 64);
++void bpf_fmt_stack_mask(char *buf, ssize_t buf_sz, kprog_obs_stack_mask stack_mask)
++{
+ 	bool first = true;
+ 	int i, n;
+ 
+ 	buf[0] = '\0';
+ 
+-	bitmap_from_u64(mask, stack_mask);
+-	for_each_set_bit(i, mask, 64) {
++	for_each_set_bit(i, stack_mask.bits, KPROG_OBS_STACK_SLOTS) {
+ 		n = snprintf(buf, buf_sz, "%s%d", first ? "" : ",", -(i + 1) * 8);
+ 		first = false;
+ 		buf += n;
+@@ -4529,10 +4528,10 @@
+ 				/* we are now tracking register spills correctly,
+ 				 * so any instance of leftover slots is a bug
+ 				 */
+-				if (bt_stack_mask(bt) != 0) {
++				if (!kprog_obs_mask_empty(bt_stack_mask(bt))) {
+ 					verifier_bug(env,
+-						     "static subprog leftover stack slots %llx",
+-						     bt_stack_mask(bt));
++						     "static subprog leftover stack slots %*pb",
++						     KPROG_OBS_STACK_SLOTS, bt_stack_mask(bt).bits);
+ 					return -EFAULT;
+ 				}
+ 				/* propagate r1-r5 to the caller */
+@@ -4559,9 +4558,9 @@
+ 					     bt_reg_mask(bt));
+ 				return -EFAULT;
+ 			}
+-			if (bt_stack_mask(bt) != 0) {
+-				verifier_bug(env, "callback leftover stack slots %llx",
+-					     bt_stack_mask(bt));
++			if (!kprog_obs_mask_empty(bt_stack_mask(bt))) {
++				verifier_bug(env, "callback leftover stack slots %*pb",
++					     KPROG_OBS_STACK_SLOTS, bt_stack_mask(bt).bits);
+ 				return -EFAULT;
+ 			}
+ 			/* clear r1-r5 in callback subprog's mask */
+@@ -4924,7 +4923,7 @@
+ 		return 0;
+ 
+ 	for (;;) {
+-		DECLARE_BITMAP(mask, 64);
++		DECLARE_BITMAP(mask, KPROG_OBS_STACK_SLOTS);
+ 		u32 history = st->jmp_history_cnt;
+ 		struct bpf_jmp_history_entry *hist;
+ 
+@@ -4942,7 +4941,7 @@
+ 			if (st->curframe == 0 &&
+ 			    st->frame[0]->subprogno > 0 &&
+ 			    st->frame[0]->callsite == BPF_MAIN_FUNC &&
+-			    bt_stack_mask(bt) == 0 &&
++			    kprog_obs_mask_empty(bt_stack_mask(bt)) &&
+ 			    (bt_reg_mask(bt) & ~BPF_REGMASK_ARGS) == 0) {
+ 				bitmap_from_u64(mask, bt_reg_mask(bt));
+ 				for_each_set_bit(i, mask, 32) {
+@@ -4956,8 +4955,9 @@
+ 				return 0;
+ 			}
+ 
+-			verifier_bug(env, "backtracking func entry subprog %d reg_mask %x stack_mask %llx",
+-				     st->frame[0]->subprogno, bt_reg_mask(bt), bt_stack_mask(bt));
++			verifier_bug(env, "backtracking func entry subprog %d reg_mask %x stack_mask %*pb",
++				     st->frame[0]->subprogno, bt_reg_mask(bt),
++				     KPROG_OBS_STACK_SLOTS, bt_stack_mask(bt).bits);
+ 			return -EFAULT;
+ 		}
+ 
+@@ -5018,8 +5018,8 @@
+ 				}
+ 			}
+ 
+-			bitmap_from_u64(mask, bt_frame_stack_mask(bt, fr));
+-			for_each_set_bit(i, mask, 64) {
++			bitmap_copy(mask, bt_frame_stack_mask(bt, fr).bits, KPROG_OBS_STACK_SLOTS);
++			for_each_set_bit(i, mask, KPROG_OBS_STACK_SLOTS) {
+ 				if (verifier_bug_if(i >= func->allocated_stack / BPF_REG_SIZE,
+ 						    env, "stack slot %d, total slots %d",
+ 						    i, func->allocated_stack / BPF_REG_SIZE))
+@@ -5278,7 +5278,7 @@
+ 		 * to stack slots all the way to first state when programs
+ 		 * writes+reads less than 8 bytes
+ 		 */
+-		bpf_mark_stack_write(env, state->frameno, BIT(spi));
++		bpf_mark_stack_write(env, state->frameno, kprog_obs_mask_bit(spi));
+ 	}
+ 
+ 	check_fastcall_stack_contract(env, state, insn_idx, off);
+@@ -5545,7 +5545,7 @@
+ 
+ 	mark_stack_slot_scratched(env, spi);
+ 	check_fastcall_stack_contract(env, state, env->insn_idx, off);
+-	err = bpf_mark_stack_read(env, reg_state->frameno, env->insn_idx, BIT(spi));
++	err = bpf_mark_stack_read(env, reg_state->frameno, env->insn_idx, kprog_obs_mask_bit(spi));
+ 	if (err)
+ 		return err;
+ 
+@@ -8315,7 +8315,7 @@
+ 		/* reading any byte out of 8-byte 'spill_slot' will cause
+ 		 * the whole slot to be marked as 'read'
+ 		 */
+-		err = bpf_mark_stack_read(env, reg->frameno, env->insn_idx, BIT(spi));
++		err = bpf_mark_stack_read(env, reg->frameno, env->insn_idx, kprog_obs_mask_bit(spi));
+ 		if (err)
+ 			return err;
+ 		/* We do not call bpf_mark_stack_write(), as we can not
+--- a/kernel/bpf/liveness.c
++++ b/kernel/bpf/liveness.c
+@@ -93,10 +93,10 @@
+ };
+ 
+ struct per_frame_masks {
+-	u64 may_read;		/* stack slots that may be read by this instruction */
+-	u64 must_write;		/* stack slots written by this instruction */
+-	u64 must_write_acc;	/* stack slots written by this instruction and its successors */
+-	u64 live_before;	/* stack slots that may be read by this insn and its successors */
++	kprog_obs_stack_mask may_read;		/* stack slots that may be read by this instruction */
++	kprog_obs_stack_mask must_write;		/* stack slots written by this instruction */
++	kprog_obs_stack_mask must_write_acc;	/* stack slots written by this instruction and its successors */
++	kprog_obs_stack_mask live_before;	/* stack slots that may be read by this insn and its successors */
+ };
+ 
+ /*
+@@ -131,7 +131,7 @@
+ 	 * Below fields are used to accumulate stack write marks for instruction at
+ 	 * @write_insn_idx before submitting the marks to @cur_instance.
+ 	 */
+-	u64 write_masks_acc[MAX_CALL_FRAMES];
++	kprog_obs_stack_mask write_masks_acc[MAX_CALL_FRAMES];
+ 	u32 write_insn_idx;
+ };
+ 
+@@ -299,23 +299,23 @@
+ 
+ /* Accumulate may_read masks for @frame at @insn_idx */
+ static int mark_stack_read(struct bpf_verifier_env *env,
+-			   struct func_instance *instance, u32 frame, u32 insn_idx, u64 mask)
++			   struct func_instance *instance, u32 frame, u32 insn_idx, kprog_obs_stack_mask mask)
+ {
+ 	struct per_frame_masks *masks;
+-	u64 new_may_read;
++	kprog_obs_stack_mask new_may_read;
+ 
+ 	masks = alloc_frame_masks(env, instance, frame, insn_idx);
+ 	if (IS_ERR(masks))
+ 		return PTR_ERR(masks);
+-	new_may_read = masks->may_read | mask;
+-	if (new_may_read != masks->may_read &&
+-	    ((new_may_read | masks->live_before) != masks->live_before))
++	new_may_read = kprog_obs_mask_or(masks->may_read, mask);
++	if (!kprog_obs_mask_equal(new_may_read, masks->may_read) &&
++	    !kprog_obs_mask_equal(kprog_obs_mask_or(new_may_read, masks->live_before), masks->live_before))
+ 		instance->updated = true;
+-	masks->may_read |= mask;
+-	return 0;
+-}
+-
+-int bpf_mark_stack_read(struct bpf_verifier_env *env, u32 frame, u32 insn_idx, u64 mask)
++	masks->may_read = kprog_obs_mask_or(masks->may_read, mask);
++	return 0;
++}
++
++int bpf_mark_stack_read(struct bpf_verifier_env *env, u32 frame, u32 insn_idx, kprog_obs_stack_mask mask)
+ {
+ 	int err;
+ 
+@@ -332,7 +332,7 @@
+ 
+ 	liveness->write_insn_idx = insn_idx;
+ 	for (i = 0; i <= instance->callchain.curframe; i++)
+-		liveness->write_masks_acc[i] = 0;
++		liveness->write_masks_acc[i] = kprog_obs_mask_zero();
+ }
+ 
+ int bpf_reset_stack_write_marks(struct bpf_verifier_env *env, u32 insn_idx)
+@@ -348,18 +348,19 @@
+ 	return 0;
+ }
+ 
+-void bpf_mark_stack_write(struct bpf_verifier_env *env, u32 frame, u64 mask)
+-{
+-	env->liveness->write_masks_acc[frame] |= mask;
++void bpf_mark_stack_write(struct bpf_verifier_env *env, u32 frame, kprog_obs_stack_mask mask)
++{
++	env->liveness->write_masks_acc[frame] = kprog_obs_mask_or(env->liveness->write_masks_acc[frame], mask);
+ }
+ 
+ static int commit_stack_write_marks(struct bpf_verifier_env *env,
+ 				    struct func_instance *instance)
+ {
+ 	struct bpf_liveness *liveness = env->liveness;
+-	u32 idx, frame, curframe, old_must_write;
++	u32 idx, frame, curframe;
++	kprog_obs_stack_mask old_must_write;
+ 	struct per_frame_masks *masks;
+-	u64 mask;
++	kprog_obs_stack_mask mask;
+ 
+ 	if (!instance)
+ 		return 0;
+@@ -369,7 +370,7 @@
+ 	for (frame = 0; frame <= curframe; frame++) {
+ 		mask = liveness->write_masks_acc[frame];
+ 		/* avoid allocating frames for zero masks */
+-		if (mask == 0 && !instance->must_write_set[idx])
++		if (kprog_obs_mask_empty(mask) && !instance->must_write_set[idx])
+ 			continue;
+ 		masks = alloc_frame_masks(env, instance, frame, liveness->write_insn_idx);
+ 		if (IS_ERR(masks))
+@@ -380,12 +381,12 @@
+ 		 * to @mask. Otherwise take intersection with the previous value.
+ 		 */
+ 		if (instance->must_write_set[idx])
+-			mask &= old_must_write;
+-		if (old_must_write != mask) {
++			mask = kprog_obs_mask_and(mask, old_must_write);
++		if (!kprog_obs_mask_equal(old_must_write, mask)) {
+ 			masks->must_write = mask;
+ 			instance->updated = true;
+ 		}
+-		if (old_must_write & ~mask)
++		if (!kprog_obs_mask_empty(kprog_obs_mask_andnot(old_must_write, mask)))
+ 			instance->must_write_dropped = true;
+ 	}
+ 	instance->must_write_set[idx] = true;
+@@ -416,20 +417,20 @@
+ }
+ 
+ static void log_mask_change(struct bpf_verifier_env *env, struct callchain *callchain,
+-			    char *pfx, u32 frame, u32 insn_idx, u64 old, u64 new)
+-{
+-	u64 changed_bits = old ^ new;
+-	u64 new_ones = new & changed_bits;
+-	u64 new_zeros = ~new & changed_bits;
+-
+-	if (!changed_bits)
++			    char *pfx, u32 frame, u32 insn_idx, kprog_obs_stack_mask old, kprog_obs_stack_mask new)
++{
++	kprog_obs_stack_mask changed_bits = kprog_obs_mask_xor(old, new);
++	kprog_obs_stack_mask new_ones = kprog_obs_mask_and(new, changed_bits);
++	kprog_obs_stack_mask new_zeros = kprog_obs_mask_andnot(changed_bits, new);
++
++	if (kprog_obs_mask_empty(changed_bits))
+ 		return;
+ 	bpf_log(&env->log, "%s frame %d insn %d ", fmt_callchain(env, callchain), frame, insn_idx);
+-	if (new_ones) {
++	if (!kprog_obs_mask_empty(new_ones)) {
+ 		bpf_fmt_stack_mask(env->tmp_str_buf, sizeof(env->tmp_str_buf), new_ones);
+ 		bpf_log(&env->log, "+%s %s ", pfx, env->tmp_str_buf);
+ 	}
+-	if (new_zeros) {
++	if (!kprog_obs_mask_empty(new_zeros)) {
+ 		bpf_fmt_stack_mask(env->tmp_str_buf, sizeof(env->tmp_str_buf), new_zeros);
+ 		bpf_log(&env->log, "-%s %s", pfx, env->tmp_str_buf);
+ 	}
+@@ -562,7 +563,7 @@
+ 			       struct func_instance *instance, u32 frame, u32 insn_idx)
+ {
+ 	struct bpf_insn_aux_data *aux = env->insn_aux_data;
+-	u64 new_before, new_after, must_write_acc;
++	kprog_obs_stack_mask new_before, new_after, must_write_acc;
+ 	struct per_frame_masks *insn, *succ_insn;
+ 	struct bpf_iarray *succ;
+ 	u32 s;
+@@ -574,28 +575,28 @@
+ 
+ 	changed = false;
+ 	insn = get_frame_masks(instance, frame, insn_idx);
+-	new_before = 0;
+-	new_after = 0;
++	new_before = kprog_obs_mask_zero();
++	new_after = kprog_obs_mask_zero();
+ 	/*
+ 	 * New "must_write_acc" is an intersection of all "must_write_acc"
+ 	 * of successors plus all "must_write" slots of instruction itself.
+ 	 */
+-	must_write_acc = U64_MAX;
++	must_write_acc = kprog_obs_mask_all();
+ 	for (s = 0; s < succ->cnt; ++s) {
+ 		succ_insn = get_frame_masks(instance, frame, succ->items[s]);
+-		new_after |= succ_insn->live_before;
+-		must_write_acc &= succ_insn->must_write_acc;
+-	}
+-	must_write_acc |= insn->must_write;
++		new_after = kprog_obs_mask_or(new_after, succ_insn->live_before);
++		must_write_acc = kprog_obs_mask_and(must_write_acc, succ_insn->must_write_acc);
++	}
++	must_write_acc = kprog_obs_mask_or(must_write_acc, insn->must_write);
+ 	/*
+ 	 * New "live_before" is a union of all "live_before" of successors
+ 	 * minus slots written by instruction plus slots read by instruction.
+ 	 */
+-	new_before = (new_after & ~insn->must_write) | insn->may_read;
+-	changed |= new_before != insn->live_before;
+-	changed |= must_write_acc != insn->must_write_acc;
++	new_before = kprog_obs_mask_or(kprog_obs_mask_andnot(new_after, insn->must_write), insn->may_read);
++	changed |= !kprog_obs_mask_equal(new_before, insn->live_before);
++	changed |= !kprog_obs_mask_equal(must_write_acc, insn->must_write_acc);
+ 	if (unlikely(env->log.level & BPF_LOG_LEVEL2) &&
+-	    (insn->may_read || insn->must_write ||
++	    (!kprog_obs_mask_empty(insn->may_read) || !kprog_obs_mask_empty(insn->must_write) ||
+ 	     insn_idx == callchain_subprog_start(&instance->callchain) ||
+ 	     aux[insn_idx].prune_point)) {
+ 		log_mask_change(env, &instance->callchain, "live",
+@@ -631,7 +632,7 @@
+ 
+ 			for (i = 0; i < instance->insn_cnt; i++) {
+ 				insn = get_frame_masks(instance, frame, this_subprog_start + i);
+-				insn->must_write_acc = 0;
++				insn->must_write_acc = kprog_obs_mask_zero();
+ 			}
+ 		}
+ 	}
+@@ -702,7 +703,7 @@
+ 	struct per_frame_masks *masks;
+ 
+ 	masks = get_frame_masks(instance, frameno, insn_idx);
+-	return masks && (masks->live_before & BIT(spi));
++	return masks && kprog_obs_mask_test(&masks->live_before, spi);
+ }
+ 
+ int bpf_live_stack_query_init(struct bpf_verifier_env *env, struct bpf_verifier_state *st)

@@ -1,0 +1,11 @@
+Observation kernel: full slot representation
+
+The8192B observation patch carries1024stack slots through precision/backtracking, liveness, scratched-slot tracking and history. Slot sets use128B bitmaps; six14-bit linked-register records use a128-bit container; narrow slot fields grow to16bits and history flags to16bits. The kernel patch packages the exact master-owned helper header, retaining the two existing capacity assertions.
+
+GCC and Clang18 each compile and run1,218,560 extracted slot/history/liveness/record observations with UBSan. The fixture uses the changed function bodies directly: every slot and call frame, distinct63/64/1023 slots, full six-entry linked records, actual liveness equations, stack-write intersections, scratch clearing and high-slot log formatting. Final compile/run return codes are0/0 for each compiler. Earlier strict-warning and compiler-rt link diagnostics remain in the archive. The final Clang command links the installed UBSan runtime explicitly.
+
+The actual modified verifier.c/liveness.c and existing log.c also pass GCC syntax compilation using the retained S17 kernel arguments, with a generated forced header supplied through an anonymous descriptor. Original kernel source edits:0. Full kernel object generation, linked image and guest census retain their separate stages.
+
+The capacity adaptation gives old_must_write the complete slot-set type used by must_write; the original temporary is u32. The observation retains every selected slot during its set intersection. Production512B results retain their original source and counts; this experiment reports its capacity-adapted bookkeeping and source epoch explicitly.
+
+Every diagnostic, extracted fixture, compiler command, binary and exact patch/helper input is retained in raw.tar.gz. Native execution requests:0.
