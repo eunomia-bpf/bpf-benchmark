@@ -1,0 +1,22 @@
+{
+  "kernel_build_exit": 0,
+  "module_build_exit": 0,
+  "kernel_base": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "source_before": {
+    "arch/x86/net/bpf_jit_comp.c": "e9f7725a1fba9fca93c9a631948580e8ca3fea4fcabdf3d3a78aae4b644115b4",
+    "kernel/bpf/verifier.c": "2bbb780a06e76719c97b8458f3560e3ab0bc37cfc2a773a3e0267ccf3cd7dd50"
+  },
+  "source_after": {
+    "arch/x86/net/bpf_jit_comp.c": "e9f7725a1fba9fca93c9a631948580e8ca3fea4fcabdf3d3a78aae4b644115b4",
+    "kernel/bpf/verifier.c": "2bbb780a06e76719c97b8458f3560e3ab0bc37cfc2a773a3e0267ccf3cd7dd50"
+  },
+  "source_equal": true,
+  "verifier_object_sha256": "007ab7885c45fcd6585913097ae036e023409c918d00f2154e3dd8490a70279e",
+  "verifier_object_equal": true,
+  "kernel_sha256": "f408b40e9b5fb6743d8ca1a49e27af5c33fc3dddc4c08b914c79af36bf6c0000",
+  "module_sha256": "4ebb2d5edc1c5cf602cf7605920a01f321843d4a75c729635c2ee1b9061a2297",
+  "linker_sha256": "97226f64e37319a85e2defc63dfc2f6a52288db61436a12f7def0fbee0f6a5c5",
+  "stock_input_header_sha256": "f3d87e3aeefcce8a939d7bb871d51efe1b9199ecd1482d3fef3db073243487cd",
+  "build_strategy": "master-owned patch to GCC frontend stdin; original CK input and per-object Kbuild dependencies",
+  "entry_contract": "RBX RBP R12 R13 R14 R15 physically preserved; SP and return-target B checks retained"
+}

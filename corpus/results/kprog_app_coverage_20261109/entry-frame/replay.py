@@ -74,9 +74,21 @@ def prepare(epoch):
                 rows.append(dict(name=target.name, bytes=target.stat().st_size,
                                  sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
         write(work / 'inputs.json', rows)
-        (work / 'stock-compile-proxy').write_text('#!/bin/sh\nexec python3 ' +
-            str(ROOT / 'kprog/corpus_resident_verifier.py') + ' compile --scratch ' +
-            str(work) + ' "$@"\n')
+    tail = epoch / 'tail'
+    tail.mkdir(exist_ok=True)
+    rows = []
+    for source in [Path('/var/tmp/kprog-tmp/S17/frameprobe/client'),
+                   Path('/var/tmp/kprog-tmp/S17/tail/tail.bpf.o'),
+                   Path('/var/tmp/kprog-tmp/S17/tail/tail.native.o')]:
+        target = tail / source.name
+        shutil.copy2(source, target)
+        rows.append(dict(name=target.name, sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
+    write(tail / 'inputs.json', rows)
+    for work in [epoch / name for name in ['isa48', 'selftests315', 'tail']]:
+        lines = ['#!/bin/sh', 'exec python3 ' +
+                 str(ROOT / 'kprog/corpus_resident_verifier.py') + ' compile --scratch ' +
+                 str(work) + ' "$@"', '']
+        (work / 'stock-compile-proxy').write_text(chr(10).join(lines))
         (work / 'stock-compile-proxy').chmod(0o755)
     write(epoch / 'provenance.json', dict(model_head=revision,
           kernel_base='35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8',
@@ -116,20 +128,34 @@ def safety(epoch, suite):
     output = work / 'out'
     output.mkdir(exist_ok=True)
     guest = work / 'guest.sh'
-    command = ('python3 ' + str(ROOT / 'kprog/stock-path/run_safety.py') +
-        ' check --out ' + str(output) + ' --inputs /mnt/x86-input --cases /mnt/x86-input/cases.json'
-        if suite == 'isa48' else 'python3 ' + str(ROOT / 'kprog/selftests/submit.py') +
-        ' --arch x86 --table ' + str(work / 'table') + ' --out ' + str(output))
-    guest.write_text('#!/bin/bash\nset -e\ninstall -d ' + str(work) + '\nmount --bind /mnt ' + str(work) + '\n' +
-        'mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf\n' +
-        'export KPROG_STOCK_MODULE=/mnt/kprog_stock.ko\n' +
-        'export KPROG_STOCK_LOADER=' + str(ROOT / 'kprog/libnativeloader/build') + '\n' +
-        'export KPROG_STOCK_BOUND_PROBE=/mnt/bound-probe\n' +
-        'export KPROG_STOCK_NATIVE_LINK=/mnt/native-link\n' +
-        'OUT=' + str(output) + '\n. ' + str(ROOT / 'kprog/stock-path/guest/common.sh') + '\n' +
-        'export TMPDIR=' + str(work) + ' CLANG=' + str(work / 'stock-compile-proxy') + '\n' +
-        'set +e\n' + command + ' > "$OUT/suite.log" 2>&1\nresult=$?\n' +
-        'printf "%s\n" "$result" > "$OUT/suite.exit"\ndmesg > "$OUT/dmesg"\nexit "$result"\n')
+    if suite == 'isa48':
+        command = ('python3 ' + str(ROOT / 'kprog/stock-path/run_safety.py') +
+            ' check --out ' + str(output) + ' --inputs /mnt/x86-input --cases /mnt/x86-input/cases.json')
+    elif suite == 'selftests315':
+        command = ('python3 ' + str(ROOT / 'kprog/selftests/submit.py') +
+            ' --arch x86 --table ' + str(work / 'table') + ' --out ' + str(output))
+    else:
+        shutil.copy2(STATE / 'frame-probe/tail_frame_probe.ko', work / 'tail_frame_probe.ko')
+        command = ('/mnt/client /mnt/tail.bpf.o /mnt/tail.native.o /mnt/native-link ' +
+                   str(output / 'native.bin') + ' /mnt/tail_frame_probe.ko')
+    lines = ['#!/bin/bash', 'set -e', 'install -d ' + str(work),
+        'mount --bind /mnt ' + str(work),
+        'mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf',
+        'export KPROG_STOCK_MODULE=/mnt/kprog_stock.ko',
+        'export KPROG_STOCK_LOADER=' + str(ROOT / 'kprog/libnativeloader/build'),
+        'export KPROG_STOCK_BOUND_PROBE=/mnt/bound-probe',
+        'export KPROG_STOCK_NATIVE_LINK=/mnt/native-link',
+        'OUT=' + str(output),
+        '. ' + str(ROOT / 'kprog/stock-path/guest/common.sh'),
+        'export TMPDIR=' + str(work) + ' CLANG=' + str(work / 'stock-compile-proxy')]
+    if suite == 'tail':
+        lines.append('start_service')
+    lines += ['set +e', command + ' > "$OUT/suite.log" 2>&1', 'result=$?']
+    if suite == 'tail':
+        lines.append('stop_service')
+    lines += ['printf "%s' + chr(92) + 'n" "$result" > "$OUT/suite.exit"',
+              'dmesg > "$OUT/dmesg"', 'exit "$result"', '']
+    guest.write_text(chr(10).join(lines))
     with (work / 'stock-compiler.log').open('w') as log:
         compiler = subprocess.Popen([sys.executable, str(ROOT / 'kprog/trusted_compile.py'),
             'serve', '--scope', str(work), '--state', str(work / 'stock-compiler'),
@@ -196,7 +222,7 @@ def census(epoch):
 def main():
     global NATIVE_LINK
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['prepare', 'isa48', 'selftests315', 'census'])
+    parser.add_argument('mode', choices=['prepare', 'isa48', 'selftests315', 'tail', 'census'])
     parser.add_argument('--revision', default='HEAD')
     parser.add_argument('--native-link', type=Path, default=NATIVE_LINK)
     args = parser.parse_args()

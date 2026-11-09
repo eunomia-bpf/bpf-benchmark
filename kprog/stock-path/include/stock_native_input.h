@@ -4,6 +4,9 @@
  * instruction produced, so B needs no verifier extension. */
 #ifndef NATIVE_LAB_INPUT_H
 #define NATIVE_LAB_INPUT_H
+#if defined(__TARGET_ARCH_x86)
+#define KPROG_X86_ENTRY_SAVES_CALLEE 1
+#endif
 #define NATIVE_LAB_INPUT_ABI 2
 #define NATIVE_LAB_INPUT_SRC 9
 #define NATIVE_LAB_INPUT_SP 1
