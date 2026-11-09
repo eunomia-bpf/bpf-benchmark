@@ -19,7 +19,7 @@ with tarfile.open(A/s['archive'])as t:
    appfile=root/'details/apps'/(appname.replace('/','__')+'.json')
    if appfile.exists():outputs.append(dict(metadata=m,application=appname,app=json.loads(appfile.read_text())))
  result['results']=outputs
-O=D/'collected'/key;O.mkdir(parents=True,exist_ok=True)
+O=D/'collected'/key/s['archive'].removesuffix('.tar.gz');O.mkdir(parents=True,exist_ok=True)
 (O/'coverage.json').write_text(json.dumps(result,indent=2)+'\n')
 with tarfile.open(O/'service.tar.gz','x:gz')as t:t.add(A/s['archive'],arcname=s['archive'])
 with tarfile.open(O/'result.tar.gz','x:gz')as t:

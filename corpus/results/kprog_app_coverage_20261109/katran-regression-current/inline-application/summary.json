@@ -1,0 +1,13 @@
+{
+  "source_commit": "20a06f5f87cae003d10263a37ba57cf0d5ca63b2",
+  "payload_commit": "32dadc6b67094203f2ccaa41091700625f22e95d",
+  "make_exit": 0,
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "installed": 0,
+  "failed": 1,
+  "application_status": "ok",
+  "verifier_error": "R0 invalid mem access 'scalar'",
+  "preceding_frontier": "stack -520 after non-inlined P; inlined P reaches native return/callee-state equality arm"
+}
