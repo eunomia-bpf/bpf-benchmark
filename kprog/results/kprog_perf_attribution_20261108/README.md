@@ -1180,6 +1180,31 @@ good, and a native body that is 36% smaller in bytes (8,744 against 13,641)
 does not make it cheaper per invocation. Any optimization for Katran has to
 change what the native body does, not how it is stored.
 
+### BCC: baseline complete, native arm refused on stale objects
+
+BCC ran on the restored workload at SAMPLES=3 WORKLOAD_DURATION=180 with
+stats off. Its baseline arm completed and produced real per-program
+counters -- 26 programs, the heaviest being `sys_enter` at 6,779,793 runs
+and 1,026,337,247 ns, and `kprobe__cap_cap` at 324,384 runs and 38,814,715
+ns.
+
+Its native arm failed, with the same signature Katran had before its loader
+was rebuilt:
+
+| observation | value |
+| --- | --- |
+| programs replaced before the failure | 2 (`fentry_vfs_read`, `tcp_v4_connect`) |
+| programs refused | 3 |
+| error | `trusted specializer refused native program: Input/output error` |
+| the app's native objects in the image | `/opt/bpf-benchmark/native-bpf/x86_64/bcc/`, **2026-11-07 15:01** |
+| its manifest | 2026-11-07 19:08 |
+| `load_sites_user` / `load_site_count` added to the trusted request | `5598b9321`, 2026-11-08 23:49 |
+
+So the objects predate the ABI that carries load sites, and the specializer
+rejects the short request with `EIO`. That is generation, not workload, and
+it belongs to lane C: the objects have to be regenerated from the current
+generator, not just re-linked.
+
 ### OTel, and what its image needs
 
 OTel ran its baseline arm on the restored workload (13 programs loaded, the
