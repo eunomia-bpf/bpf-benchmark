@@ -1,0 +1,5 @@
+Resource ELF local entry compatibility
+
+The common direct-submission resource opener presents local executable-section entry symbols as global symbols in a temporary ELF view. The original source ELF, native P, instruction/data sections and BTF retain their byte streams. Programs keep autoload=false, and native requests keep source_prog_id 0. Temporary resource views follow the direct request state directory and close with the object.
+
+The retained 18 distinct source objects cover the 274 originally selected resident instances. This offline open-only census recovers all 13 OTel instances from the static-entry diagnostic. Cilium 72 advances to its next resource diagnostic, custom map pinning value 16. The other source objects retain their existing successful open outcomes. All allocatable and BTF section hashes match the originals in every adapted object; program autoload is disabled for every successful open. BPF program-load calls: 0; native execution requests: 0. Stock generation/compile/verifier results follow their actual separate stages.

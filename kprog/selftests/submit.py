@@ -11,6 +11,7 @@ rejection for __failure. Generation, resource and transport outcomes retain
 their coverage stages. Installed __failure rows count as findings.
 """
 import argparse
+import contextlib
 import ctypes as c
 import errno
 import fcntl
@@ -93,14 +94,41 @@ def start_service(arch=1):
     return proc, state
 
 
+@contextlib.contextmanager
+def libbpf_resource_object(path, directory):
+    """Present Go-loader local entry symbols to libbpf for maps/BTF setup."""
+    from elftools.elf.elffile import ELFFile
+    path = pathlib.Path(path)
+    with path.open("rb") as source:
+        elf = ELFFile(source)
+        local_entries = [
+            symbol.name for symbol in elf.get_section_by_name(".symtab").iter_symbols()
+            if symbol["st_info"]["type"] == "STT_FUNC"
+            and symbol["st_info"]["bind"] == "STB_LOCAL"
+            and isinstance(symbol["st_shndx"], int)
+            and elf.get_section(symbol["st_shndx"])["sh_flags"] & 4
+            and elf.get_section(symbol["st_shndx"]).name != ".text"
+        ]
+    if local_entries:
+        with tempfile.TemporaryDirectory(prefix="resource-elf-", dir=directory) as temp:
+            resource = pathlib.Path(temp) / path.name
+            subprocess.run(["llvm-objcopy-18",
+                            *("--globalize-symbol=" + name for name in local_entries),
+                            str(path), str(resource)], check=True)
+            yield resource, local_entries
+    else:
+        yield path, []
+
+
 class ObjectResources:
     """A libbpf object containing maps/BTF and autoload=false programs."""
-    def __init__(self, arch, path, program):
-        directory, _ = tools_for_arch(arch)
+    def __init__(self, arch, path, program, directory=None):
+        loader_directory, _ = tools_for_arch(arch)
         self.obj = None
         self.pins = None
+        self.source_stack = contextlib.ExitStack()
         self.entry_name = program.encode()
-        self.lib = c.CDLL(str(directory / "libnative_loader.so"), use_errno=True)
+        self.lib = c.CDLL(str(loader_directory / "libnative_loader.so"), use_errno=True)
         self.pins = pathlib.Path(tempfile.mkdtemp(prefix="kprog-selftest-",
                                                 dir="/sys/fs/bpf"))
         self.bind("libbpf_get_error", c.c_long, c.c_void_p)
@@ -129,7 +157,9 @@ class ObjectResources:
         self.bind("btf__name_by_offset", c.c_char_p, c.c_void_p, c.c_uint32)
         self.bind("btf__find_by_name_kind", c.c_int, c.c_void_p, c.c_char_p, c.c_uint32)
         self.bind("libbpf_find_vmlinux_btf_id", c.c_int, c.c_char_p, c.c_uint32)
-        self.obj = self.lib.bpf_object__open_file(os.fsencode(path), None)
+        resource, self.globalized_entries = self.source_stack.enter_context(
+            libbpf_resource_object(path, directory))
+        self.obj = self.lib.bpf_object__open_file(os.fsencode(resource), None)
         error = self.lib.libbpf_get_error(self.obj)
         if error or not self.obj:
             self.obj = None
@@ -249,12 +279,14 @@ class ObjectResources:
                                             b"GPL" in license.data().split(b"\0", 1)[0])
         return dict(version=1, load_context=context, maps=bindings), fds, dict(
             section=section, maps=pins, pin_root=str(self.pins),
-            attach_target_resolution=target_error)
+            attach_target_resolution=target_error,
+            resource_globalized_entries=self.globalized_entries)
 
     def close(self):
         if self.obj:
             self.lib.bpf_object__close(self.obj)
             self.obj = None
+        self.source_stack.close()
         if self.pins is not None:
             for pin in self.pins.iterdir():
                 pin.unlink()
@@ -298,7 +330,7 @@ def direct(arch, state, native, row):
         result["native_sha256"] = hashlib.sha256(native_bytes).hexdigest()
         # Allocation before __init__ keeps cleanup available for libbpf errors.
         resources = ObjectResources.__new__(ObjectResources)
-        resources.__init__(arch, row["bpf_object"], row["program"])
+        resources.__init__(arch, row["bpf_object"], row["program"], state)
         metadata, fds, details = resources.load(row["bpf_object"])
         entry_bytes = row["program"].encode()
         meta_bytes = json.dumps(metadata, separators=(",", ":")).encode()
