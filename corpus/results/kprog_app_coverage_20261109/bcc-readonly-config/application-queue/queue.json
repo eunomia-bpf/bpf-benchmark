@@ -2,7 +2,7 @@
   "utc": "2026-11-09T06:50:47.795797+00:00",
   "source_head": "4636128014f700fc072cfd00e3157a3017caa7a7",
   "source_epoch": "published HEAD model with retained canonical SMAP runtime binaries",
-  "canonical_base_image": "sha256:714f4261db8f36c35a3aa5f4dfe3fdfc1327967d79e22da47f7006ec33d7b8a7",
+  "canonical_base_image": "sha256:05ceed1e263ad3f29b928065f88a5437aacb81b17063c438d6975a56c0819f2d",
   "source_changed_from_canonical": [
     {
       "path": "kprog/trusted_generation.py",
@@ -549,5 +549,7 @@
       "biosnoop.native.o": "145e6db7f2b4c970ea3053405eb0fa11b42963969652706c0758acd54918798b"
     }
   },
-  "controller_pid": 3126829
+  "controller_pid": 3126829,
+  "canonical_original_index": "sha256:714f4261db8f36c35a3aa5f4dfe3fdfc1327967d79e22da47f7006ec33d7b8a7",
+  "image_recovery": "image-recovery.json selected canonical amd64 manifest/config/rootfs"
 }
