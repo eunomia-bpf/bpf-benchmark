@@ -293,3 +293,20 @@ __u64 NAME(__u64 first, __u64 second) \
 }
 HELPER_UNIT(tv_helpercall_lookup, 1ULL)
 HELPER_UNIT(tv_helpercall_ktime, 5ULL)
+
+#include <linux/bpf.h>
+#include <bpf_helpers.h>
+#define RORX_UNIT(NAME, WIDTH) \
+__attribute__((section("tv/rorx/" #NAME), used)) \
+__u64 NAME(__u64 value, __u64 count) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rdx.ptr = (void *)(long)value; \
+    X86_SIM_L_EXEC(X86_OP_RORX, X86_RAX, X86_RDX, WIDTH, 0U, count); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+RORX_UNIT(tv_rorx32, X86_WIDTH_32)
+RORX_UNIT(tv_rorx64, X86_WIDTH_64)
