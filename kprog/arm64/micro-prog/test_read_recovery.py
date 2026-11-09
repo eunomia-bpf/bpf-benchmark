@@ -39,7 +39,7 @@ def main():
         assert lines[-1] == f"\tgoto {gen.label(0x104)};", lines
         assert sum("ARM64_SIM_RUN_KNOWN_OP3" in line for line in lines) == 1
         rows.append(dict(assembly=insn.raw, operation=enc.op,
-                         recovery="SIMD runtime interface" if enc.op in {"ARM64_OP_LOAD_D0", "ARM64_OP_LOAD_Q0"}
+                         recovery="SIMD/base preserved before effects; PC+4" if enc.op in {"ARM64_OP_LOAD_D0", "ARM64_OP_LOAD_Q0"}
                          else "whole-GPR clear before effects; PC+4"))
     print(json.dumps(dict(forms=len(rows), rows=rows), indent=2))
 
