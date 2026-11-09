@@ -9,5 +9,8 @@
   "dependency": "exact host collector pidfd",
   "transport_scratch": "/var/tmp/kprog-tmp/A/context-offset/application/transport-state",
   "publication": "git commit -F <msg> -- <paths>",
-  "runtime_admission_additions": 0
+  "runtime_admission_additions": 0,
+  "application_state": "deferred_by_coordinator",
+  "application_guest_started": false,
+  "coordinator_priority": "549resident x86 census and performance"
 }

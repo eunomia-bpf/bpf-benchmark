@@ -1,0 +1,59 @@
+{
+  "source_head": "73fecc65d0cbc63a68dfc326990acc85076f1c4b",
+  "applications": [
+    {
+      "application": "bcc/set",
+      "expected": 25,
+      "evidence": "bcc_set",
+      "shim": "bcc__set",
+      "producer": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/constant-profile/candidate/bcc",
+      "coverage": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/result.tar.gz"
+    },
+    {
+      "application": "katran",
+      "expected": 1,
+      "evidence": "katran",
+      "shim": "katran",
+      "producer": "/var/tmp/kprog-tmp/C/bcc-native-profile-runtime/image/native-bpf/katran",
+      "coverage": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/result.tar.gz"
+    },
+    {
+      "application": "cilium/agent",
+      "expected": 72,
+      "evidence": "cilium_agent",
+      "shim": "cilium__agent",
+      "producer": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium",
+      "coverage": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/result.tar.gz"
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "expected": 13,
+      "evidence": "otelcol-ebpf-profiler_profiling",
+      "shim": "otelcol-ebpf-profiler__profiling",
+      "producer": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/otelcol-ebpf-profiler",
+      "coverage": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/result.tar.gz"
+    },
+    {
+      "application": "tracee/monitor",
+      "expected": 151,
+      "evidence": "tracee_monitor",
+      "shim": "tracee__monitor",
+      "producer": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tracee",
+      "coverage": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime/result.tar.gz"
+    },
+    {
+      "application": "tetragon/observer",
+      "expected": 287,
+      "evidence": "tetragon_observer",
+      "shim": "tetragon__observer",
+      "producer": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon",
+      "coverage": "corpus/results/kprog_app_coverage_20261108/stack-spill-values/tetragon-stack-values/coverage.json",
+      "archive": "corpus/results/kprog_app_coverage_20261108/stack-spill-values/tetragon-stack-values/result.tar.gz"
+    }
+  ]
+}
