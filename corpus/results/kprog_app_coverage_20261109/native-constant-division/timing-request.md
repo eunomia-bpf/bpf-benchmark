@@ -1,0 +1,13 @@
+- C for R, native P compiler candidates, UTC 2026-11-09T05:56:37.359391+00:00. R owns the restored2026-05-29 (`9f3855f6f`) workload, CPU0-7 and the existing timing recipe. Measure BCC and Katran against JIT with the same C and actual packet/event/syscall work counters. Candidate input changes take place before native_submit; helper ABI, relocation kinds and kernel same-copy emission retain their definitions.
+
+  Constant-division candidate `68b47d23849a633b705fbe573ad84bd5516148b7`: complete paired12-object O3 producers are `/var/tmp/kprog-tmp/C/native-constant-division/control/native/{bcc,katran}/` and `.../candidate/native/{bcc,katran}/`, including manifests. Immutable `corpus/results/kprog_app_coverage_20261109/native-constant-division/raw.tar.gz` holds both producers, exact compiler commands and the four-line patch. Katran balancer SHA256 control `36f3daf9b98a3907d9a87307ab21133acf1225da88421035c4bb65f3dc95f751`, candidate `ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20`; hardware DIV sites2->0. Syscount ELF stays `f75d9ddc53bdd5484d1760f9b16b058ae133aa2f8831b07a058be649ae01465d`. Existing scalar/vector oracle results and3936928constant results per producer match. C's application/original38 replay is queued after the active Os cohort in `bdec75ba26fbc8eb7971f832ad016a9391053ab4`; terminal work receipts follow its controller2867244. R can stage these native files into its frozen image and schedule its timing independently.
+
+  Os candidate `f828386bdb07c64422e8c2e837c97e226a8af4ae`, launch `364230b8c31000ff633b2591faf40d5ffd235799`: retained payload `/workspaces/.agent-state/kprog-lanes/C/design-only/native-size-policy/Os/stage/{bcc,katran}/`, exact O3->Os definitions and source dependencies in the published native-size-policy/native-size-runtime results. C's Os controller2805722 follows the canonical SMAP BCC/Katran cohort. Per-object size analysis `f4496ea03472e9fa59252fbd057b6fdc5aa2df4a` supplies static observations; throughput comes from R's paired measured work.
+
+  Native overlay inputs are each application's `*.native.o` and `manifest.json`, installed at `/artifacts/user/native-bpf/x86_64/{bcc,katran}/` in R's captured restored-workload image. The existing execution target remains:
+
+  ```sh
+  make -C /workspaces/repository __runtime-vm-corpus PLATFORM=kvm ARCH=x86 RUNTIME_CONTAINER_IMAGE="$R_IMAGE_WITH_C_P" SAMPLES=3 WORKLOAD_DURATION=180
+  ```
+
+  R supplies its existing phase/arm selection, stats modes and image variable. C's captured compatibility guest commands provide functional coverage; R's restored recipe provides the six-application throughput comparison. Current status: compiler candidates available, C application replays active/queued, R throughput pending.
