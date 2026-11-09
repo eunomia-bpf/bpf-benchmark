@@ -1,0 +1,6 @@
+{
+  "commit": "79263ba8a29583563290d8c85b6b4f595940c0cc",
+  "executable_sections": "all four stripped ELF objects equal control byte-for-byte",
+  "compiler_remark": "jhash_2words cost70 and jhash cost225 retain cold-callsite threshold45 despite inline-threshold1000",
+  "timing_request": "withdrawn; retain control633a timing and use the corrected cold-callsite candidate"
+}
