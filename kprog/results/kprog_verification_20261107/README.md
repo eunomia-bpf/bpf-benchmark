@@ -6813,3 +6813,14 @@ The [FMOV receipt](arm-raw-fmov.log.gz) records source identities and diagnostic
 The unified emission theorem covers58 numeric rows and six source families.
 The current scalar producer policy and native/C/entry/physical/compiler
 interfaces retain their domains.
+
+### Committed source full check 37f561242
+
+`make check` on immutable committed37f561242 exits0. All1289 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_37f561242`. Every check retains its exact committed source identity.
+
+The same exported source bytes are reachable at `124747e7bc2109f244e6a83496184dc1d3defbb6` after the coordinator history repair. The recorded run retains its original frozen source identity.
+
+Full raw archive: [full-make-check-37f561242.log.gz](full-make-check-37f561242.log.gz).

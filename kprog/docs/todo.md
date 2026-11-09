@@ -105,7 +105,7 @@
 - [x] **V** ARM raw CCMP_IMM/CCMP_REG：DST/SRC物化、输入NZCV、实际条件/比较/fallback low4、完整rawGPR/tag/data frame与NZCV外flag位、native IMM5/WX/NV归一化、unused字段含255和任意IMM；production dispatcher、34数值操作step与六类源分支统一emission step，新增19条及前103条审计/模块/root通过（本提交，raw34/74）。
 - [x] **V** ARM raw ANDS_IMM/ANDS_REG/BICS_REG/TST_IMM/TST_REG/TST_BIC_REG：实际操作数角色/物化、immediate/modifier、AND/BIC result/NZCV、scalar写回或完整TST raw/tag frame、native WX/shift与omitted amount、unused字段含255/任意IMM；production dispatcher、40数值step与六类源分支emission step，新增14条及前122条审计/模块/root通过（本提交，raw40/74）。
 - [x] **V** 完整检查99b的ROR字节码观察器修复：实际r3=3;r3+=r1交换加数顺序，增加既有ADD64仿射传播的常数DST/指针SRC形式；全部原有断言保留，504 handler/17640结果/40 BPF artifact及内存宽度/MOVX/坏偏移原套件通过；原full exit2与1289 Git源SHA和CPU/log归档（本提交）。
-- [ ] **V** raw CCMP/logical flags（40数值操作+6源分支）与交换ADD64观察器合并后的完整make check；保留既有增量cache与精确源/实际exit。
+- [x] **V** raw CCMP/logical flags（40数值操作+6源分支）与交换ADD64观察器合并完整make check（源 37f561242，本提交归档实际exit0；136条raw公理审计及全部既有语义套件）。
 - [x] **V** ARM raw ADDS/SUBS/CMP/CMN八操作：SP32/ZR31与全部tag物化、实际SRC/SRC2或DST/SRC角色、immediate/shift/extend、arithmetic result/NZCV、width/tag写回或完整compare raw/tag frame；production dispatcher与48数值+六源分支normalized emission step，新增12条及前136条审计/模块/root通过（本提交，raw48/74）。
 - [ ] **V** raw arithmetic flags（48数值操作+6源分支）批次的完整make check，接续当前固定40操作源的sole full，复用增量cache并保留各自源/actual exit。
 - [x] **V** ARM raw MOV_REG/ADRP_GOT/ADRP_RODATA：捕获raw/tag、W64复制/W32 scalar化、SP32/ZR31和SP相对坐标往返、MOV_IMM bitmask SP alias、GOT7/RODATA8及resolved IMM/native PC绑定；完整architecture/tag frame、production prefix和51数值+六源分支emission step，新增16条及前148条审计/模块/root通过（本提交，raw51/74）。
@@ -147,7 +147,7 @@
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。 协调者16:00暂停编译单元，等待B表示调整。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
 - [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。
-- [x] **V** 全量检查通过（本提交归档的源版本 2adbd4abd，实际 make check exit0）；后续模型批次按第5节继续全量检查。
+- [x] **V** 全量检查通过（本提交归档的源版本 37f561242，实际 make check exit0）；后续模型批次按第5节继续全量检查。
 - [ ] **V** TCB 统计，在提交论文的版本上重新计数。
 - [ ] **协调者** 全量检查通过后重核论文的 O1、O2、O4 数字。
 
