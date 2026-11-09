@@ -72,7 +72,7 @@
 - [x] **A** ARM X19-X29 stock entry frame, SP-only RET, original ARM branch flags and matching tail cleanup published (fdc68ecea); Image/module/release builds0 and existing tail tests19/19 for each feature selection.
 - [x] **A** Requested aee6/4f5 census comparison published (7d1d0d41d):549 identities, installed7->10, resources238, ELF names14, ENDBR11 and service-OOM transport276; exact2GiB/8GiB evidence and per-instance outcomes retained.
 - [x] **A** Exact OOM-input parser attribution published (f3f1e6b9c):210call-to-following thunk edges and7return thunks normalize in4f5; input/module identities retained, parser-only generation/verifier submissions0.
-- [ ] **A** Existing ARM ISA48 on the fixed entry frame: original48case bytes/annotations, source f3f1e6b9c, release cross-linker0 and guest228238 active; final outcomes and comparison follow guest completion. ARM application queue remains deferred.
+- [x] **A** Existing ARM ISA48 fixed-frame replay collected: 48/48 cases, {"accepted_finding": 11, "specialization_rejected": 4, "valid_executed": 4, "verifier_rejected": 29}; original case bytes/annotations and suite exit 1 retained. Receipt entry-frame/isa48/replay; ARM applications remain deferred.
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
