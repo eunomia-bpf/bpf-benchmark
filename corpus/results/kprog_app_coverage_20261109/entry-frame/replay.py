@@ -1,0 +1,202 @@
+"""Reuse the published safety/census drivers with a paired stock entry ABI."""
+from pathlib import Path
+import argparse
+import concurrent.futures
+import hashlib
+import importlib.util
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
+import threading
+
+ROOT = Path('/workspaces/repository')
+STATE = Path('/var/tmp/kprog-tmp/C/stock-entry')
+HERE = ROOT / 'corpus/results/kprog_app_coverage_20261109/entry-frame'
+
+
+def write(path, value):
+    path.write_text(json.dumps(value, indent=2) + '\n')
+
+
+def module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+def bind(source, target):
+    subprocess.run(['mount', '--bind', str(source), str(target)], check=True)
+
+
+def link(source, target):
+    if not os.path.lexists(target):
+        target.symlink_to(source)
+
+
+def prepare(epoch):
+    source = epoch / 'source'
+    source.mkdir(parents=True, exist_ok=True)
+    revision = epoch.name
+    tracked = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', revision,
+                                      '--', 'kprog'], cwd=ROOT, text=True).splitlines()
+    selected = [p for p in tracked if (
+        (Path(p).parent == Path('kprog') and p.endswith('.py')) or
+        p.startswith(('kprog/x86/micro-prog/', 'kprog/formal/generated/',
+                      'kprog/stock-path/')) and p.endswith(('.py', '.sh', '.h')) or
+        Path(p).parent == Path('kprog/x86') and p.endswith(('.py', '.h')) or
+        p in ['kprog/stock-path/bin/clang', 'kprog/selftests/submit.py',
+              'kprog/fidelity/negative.py',
+              'kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py'])]
+    archive = subprocess.Popen(['git', 'archive', revision, '--', *selected],
+                               cwd=ROOT, stdout=subprocess.PIPE)
+    with tarfile.open(fileobj=archive.stdout, mode='r|') as stream:
+        stream.extractall(source, filter='data')
+    archive.stdout.close()
+    if archive.wait():
+        raise RuntimeError('committed source export failed')
+    for path in source.rglob('*'):
+        if path.is_file():
+            path.chmod(path.stat().st_mode & ~0o222)
+    for suite, original in [('isa48', Path('/var/tmp/kprog-tmp/S17/x86-input')),
+                            ('selftests315', ROOT / 'kprog/selftests/build')]:
+        work = epoch / suite
+        inputs = work / ('x86-input' if suite == 'isa48' else 'table')
+        inputs.mkdir(parents=True, exist_ok=True)
+        rows = []
+        for path in sorted(original.iterdir()):
+            if path.is_file() and path.suffix in {'.json', '.o'}:
+                target = inputs / path.name
+                shutil.copy2(path, target)
+                rows.append(dict(name=target.name, bytes=target.stat().st_size,
+                                 sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
+        write(work / 'inputs.json', rows)
+        (work / 'stock-compile-proxy').write_text('#!/bin/sh\nexec python3 ' +
+            str(ROOT / 'kprog/corpus_resident_verifier.py') + ' compile --scratch ' +
+            str(work) + ' "$@"\n')
+        (work / 'stock-compile-proxy').chmod(0o755)
+    write(epoch / 'provenance.json', dict(model_head=revision,
+          kernel_base='35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8',
+          kernel_patch='kprog/stock-path/x86-entry-frame.patch',
+          kernel_image=str(STATE / 'kernel-build/arch/x86/boot/bzImage'),
+          native_link=str(STATE / 'native-link-target/release/native-link'),
+          isa_cases=48, upstream_programs=315, census_bodies=27, census_instances=275))
+
+
+def namespace(epoch):
+    os.unshare(os.CLONE_NEWNS)
+    subprocess.run(['mount', '--make-rprivate', '/'], check=True)
+    for path in (epoch / 'source').rglob('*'):
+        if path.is_file():
+            bind(path, ROOT / path.relative_to(epoch / 'source'))
+    for name in ['libnative_loader.so', 'trusted-native-loader']:
+        bind(Path('/var/tmp/kprog-tmp/S17/loader-once/build') / name,
+             ROOT / 'kprog/libnativeloader/build' / name)
+    bind(STATE / 'native-link-target/release/native-link',
+         ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
+
+
+def safety(epoch, suite):
+    namespace(epoch)
+    work = epoch / suite
+    if suite == 'selftests315':
+        bind(work / 'table', ROOT / 'kprog/selftests/build')
+    output = work / 'out'
+    output.mkdir(exist_ok=True)
+    guest = work / 'guest.sh'
+    command = ('python3 ' + str(ROOT / 'kprog/stock-path/run_safety.py') +
+        ' check --out ' + str(output) + ' --inputs /mnt/x86-input --cases /mnt/x86-input/cases.json'
+        if suite == 'isa48' else 'python3 ' + str(ROOT / 'kprog/selftests/submit.py') +
+        ' --arch x86 --table ' + str(work / 'table') + ' --out ' + str(output))
+    guest.write_text('#!/bin/bash\nset -e\nmount --bind /mnt ' + str(work) + '\n' +
+        'mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf\n' +
+        'export KPROG_STOCK_MODULE=' + str(STATE / 'module/kprog_stock.ko') + '\n' +
+        'export KPROG_STOCK_LOADER=' + str(ROOT / 'kprog/libnativeloader/build') + '\n' +
+        'export KPROG_STOCK_BOUND_PROBE=/var/tmp/kprog-tmp/S17/bp/bound-probe\n' +
+        'export KPROG_STOCK_NATIVE_LINK=' + str(STATE / 'native-link-target/release/native-link') + '\n' +
+        'OUT=' + str(output) + '\n. ' + str(ROOT / 'kprog/stock-path/guest/common.sh') + '\n' +
+        'export TMPDIR=' + str(work) + ' CLANG=' + str(work / 'stock-compile-proxy') + '\n' +
+        'set +e\n' + command + ' > "$OUT/suite.log" 2>&1\nresult=$?\n' +
+        'printf "%s\n" "$result" > "$OUT/suite.exit"\ndmesg > "$OUT/dmesg"\nexit "$result"\n')
+    with (work / 'stock-compiler.log').open('w') as log:
+        compiler = subprocess.Popen([sys.executable, str(ROOT / 'kprog/trusted_compile.py'),
+            'serve', '--scope', str(work), '--state', str(work / 'stock-compiler'),
+            '--clang', str(epoch / 'source/kprog/stock-path/bin/clang')],
+            stdout=log, stderr=subprocess.STDOUT)
+        try:
+            invocation = ['taskset', '-c', '20-23', 'vng', '--run',
+                str(STATE / 'kernel-build/arch/x86/boot/bzImage'), '--cpus', '2',
+                '--memory', '4G', '--rwdir=/mnt=' + str(work),
+                '--exec', 'bash /mnt/guest.sh', '--qemu-opts=-cpu host,+smap']
+            write(work / 'command.json', invocation)
+            with (work / 'console.log').open('w') as console:
+                result = subprocess.run(invocation, stdout=console, stderr=subprocess.STDOUT)
+            (work / 'guest.exit').write_text(str(result.returncode) + '\n')
+            return result.returncode
+        finally:
+            (work / 'stock-compiler/STOP').touch()
+            compiler.wait()
+
+
+def census(epoch):
+    namespace(epoch)
+    bind(STATE / 'kernel-build/arch/x86/boot/bzImage',
+         Path('/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage'))
+    original = Path('/var/tmp/kprog-tmp/A/resident-census-linked')
+    inputs = epoch / 'census-inputs'
+    inputs.mkdir(exist_ok=True)
+    for name in ['run-inventory.json', 'resource-index.json']:
+        data = json.loads((original / name).read_text())
+        if name == 'run-inventory.json':
+            data['source_head'] = epoch.name
+        write(inputs / name, data)
+    link(epoch / 'source', inputs / 'source')
+    link(STATE / 'native-link-target/release/native-link', inputs / 'native-link')
+    runtime = inputs / 'stock-runtime'
+    runtime.mkdir(exist_ok=True)
+    link(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
+    for name in ['libnative_loader.so', 'trusted-native-loader']:
+        link(Path('/var/tmp/kprog-tmp/S17/loader-once/build') / name, runtime / name)
+    scratch = epoch / 'census'
+    scratch.mkdir(exist_ok=True)
+    link(epoch / 'source', scratch / 'controller-source')
+    grouped = module('entry_groups', ROOT / 'kprog/corpus_resident_groups.py')
+    baseline = json.loads(Path('/var/tmp/kprog-tmp/A/resident-census-groups/groups.json').read_text())
+    groups = [dict(body_sha256=g['body_sha256'], representative=g['representative'],
+                   members=[dict(source_prog_id=m['source_prog_id']) for m in g['members']])
+              for g in baseline['groups']]
+    lock = threading.Lock()
+    def run(cpu, assigned):
+        for group in assigned:
+            result = grouped.shard(scratch, inputs, group, cpu)
+            with lock:
+                group.update(result)
+                write(scratch / 'groups.json', dict(model_head=epoch.name, groups=groups))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        jobs = [pool.submit(run, cpu, groups[i::4]) for i, cpu in enumerate(range(20, 24))]
+        for job in concurrent.futures.as_completed(jobs):
+            job.result()
+    write(scratch / 'complete.json', dict(bodies=len(groups), instances=275,
+                                         native_execution_requests=0))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=['prepare', 'isa48', 'selftests315', 'census'])
+    parser.add_argument('--revision', default='HEAD')
+    args = parser.parse_args()
+    revision = subprocess.check_output(['git', 'rev-parse', args.revision],
+                                       cwd=ROOT, text=True).strip()
+    epoch = STATE / 'replays' / revision
+    if args.mode == 'prepare':
+        prepare(epoch)
+        return 0
+    return census(epoch) if args.mode == 'census' else safety(epoch, args.mode)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

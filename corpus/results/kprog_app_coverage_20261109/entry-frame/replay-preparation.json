@@ -1,0 +1,28 @@
+{
+  "kernel_cache": {
+    "source_head": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+    "entry_contract": "original CK entry ABI; warm cache for later six-register patch",
+    "build_returncode": 0,
+    "bzImage_sha256": "fda0dd6ce634fa287d92e449ba81fc3ae5bd430a0c1ee896b8f281d13ccda31b"
+  },
+  "module": {
+    "build_returncode": 0,
+    "sha256": "4ebb2d5edc1c5cf602cf7605920a01f321843d4a75c729635c2ee1b9061a2297"
+  },
+  "prepared_model": "413fd75959eae5511f057910dcbbcc00069fd780",
+  "source_export_files": 174,
+  "suites": {
+    "isa48": {
+      "programs": 48,
+      "snapshotted_files": 99,
+      "input_fingerprints_sha256": "74a718eb19e77309ef85db97090a5dd765c622d7886e1d849f61faa684efda08",
+      "execution": "matching six-register kernel and stock-input ABI replay follows"
+    },
+    "selftests315": {
+      "programs": 315,
+      "snapshotted_files": 639,
+      "input_fingerprints_sha256": "b728f554a7461ebd45669bb6bd7ce93974c83e8cde5213d314626e74cec660ee",
+      "execution": "matching six-register kernel and stock-input ABI replay follows"
+    }
+  }
+}
