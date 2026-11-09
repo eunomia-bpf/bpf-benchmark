@@ -986,6 +986,7 @@
     ],
     "prior_reference_component": "registered_load_recovery_reference",
     "production_and_guest_scope": "No full kernel-build, installed native table, actual NULL guest execution or complete native/B fault-refinement claim is added by V here.",
+    "published_execution_followup": "arm64_recovery_published_execution",
     "result": "The native marker is always set, pair marker exactly matches optional second destination, both5-bit register fields decode exactly and low16 stock arena offset bits remain zero. Marker dispatch before stock BPF implements complete paired full-GPR zero-and-PC4 recovery. Register31 discards; single destination composes with prior scalar/nativeX5/XZR model, and each physical first/second register is0 afterwards. Raw memory/SP/flags and every other fault-state field retain their actual value apart from selected GPRs/PC.",
     "runtime_admission_additions": 0,
     "scope": "Ten universal conditional ARM native-marker/pair fixup decoding and whole-GPR recovery components. No edits to A production files; physical/B correspondence remains explicit.",
@@ -1028,6 +1029,79 @@
     ],
     "trust": "Bitfield/encoded-handler laws use the stated BV reduction bridge (propext/Classical.choice/Quot.sound, and Lean.ofReduceBool where reported). Single/frame laws use propext and zeroing laws use propext/Quot.sound. No sorryAx or new axioms.",
     "utc": "2026-11-09T00:12:03.973390+00:00"
+  },
+  "arm64_recovery_published_execution": {
+    "actual_guest_exit": 0,
+    "actual_make_exit": 0,
+    "actual_probe_exit": 0,
+    "captured_source_hashes_unchanged": true,
+    "guest_result_commit": "99b2f95617881440a990173aff8876d6985e798d",
+    "kernel_module_and_tools": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "79d8e79645aaaf01dc75f401018d5e192b54fd6e7e7bed39be0228188e294a95",
+      "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+      "kprog/arm64/build/native-load-recovery/recovery/Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
+      "kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
+      "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+      "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "8847668a99d646a06f30f4dda5466e9500ae1046dc78ba445a7579ccf41a9464"
+    },
+    "live_file_result_u32": 4294967295,
+    "native_program_id": 1,
+    "null_file_result_u32": 0,
+    "observed_cases": [
+      "live-file full-word volatile f_pos load, then -(value&1)",
+      "NULL file full-word volatile f_pos load, then -(value&1)"
+    ],
+    "production_commit": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795",
+    "proof_commit": "260dcdb06aabec7e9f7b19b57cfb3728863ff663",
+    "proof_record": "arm64_native_exception_table_recovery",
+    "registered_exception_entries": 2,
+    "remaining_interfaces": [
+      "All17 scalar/table x86 and10 ARM field/pair proof components retain their exact stated domains; this observation does not prove all operations.",
+      "Actual decoder/final-site coverage, saved-frame and exception-class behavior for every supported form, lookup/order/registration/lifetime and physical memory/entry relation remain premises.",
+      "B protected-read semantics, fault outcome arms, raw-to-platform event projection/O3 checked events, partial-register/writeback/pair/vector/exclusive/atomic ordered prefixes and compiled-B correspondence remain open.",
+      "ARM QEMU full-word recovery does not establish x86 recovery or real ARM hardware observations."
+    ],
+    "result": "Both full-word controls executed through the same native program and registered2-entry exception table: live control0xffffffff, NULL0, guest/probe/compiler0. Prior working module/patch bytes exactly equal productionf1caa1cd9. Initial module CRC and earlier LSM range failures remain separate original attempts.",
+    "runtime_admission_additions": 0,
+    "scope": "Exact published ARM production source matches prior conditional proof snapshots, plus actual authorized live-file/NULL native full-word recovery under QEMU. This is evidence, not universal native/B fault closure.",
+    "source_records": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/inputs.tar.gz": {
+        "bytes": 36085729,
+        "commit": "99b2f95617881440a990173aff8876d6985e798d",
+        "sha256": "aceba144684c59c6e14d4cd652e346ec9ee3c595c54b79334a97252b07c31450"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/summary.json": {
+        "bytes": 671,
+        "commit": "99b2f95617881440a990173aff8876d6985e798d",
+        "sha256": "ae7c7d94fe6f971722e08892da727005563237c5b00b1a7f09c8b19efa771e87"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/trusted-arm64-service-result/run-20261109T001856322957Z.tar.gz": {
+        "bytes": 741241,
+        "commit": "99b2f95617881440a990173aff8876d6985e798d",
+        "sha256": "6039be4d6554a05e093fda9e8b03daff830dc1e8bccf8c586044ab3efdb8fbab"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/trusted-arm64-service-result/summary.json": {
+        "bytes": 733055,
+        "commit": "99b2f95617881440a990173aff8876d6985e798d",
+        "sha256": "e424d8fc6e9ab3921cc6414f3a185e56ca0df44c4c6edef0faa375176a41840b"
+      }
+    },
+    "source_snapshot_matches": {
+      "kinsn/module/arm64/bpf_arm64_native_lab.c": {
+        "bytes": 24350,
+        "commit": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795",
+        "matches_prior_working_snapshot": true,
+        "sha256": "3a0a35afea343ee625b3eac8b6c31105235ac8f8c565fe13c95baf20cfa5ebcb"
+      },
+      "kprog/tv/native-proof-regions.patch": {
+        "bytes": 16801,
+        "commit": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795",
+        "matches_prior_working_snapshot": true,
+        "sha256": "5e8cd1628a9085a38fee75bf9e373316c5aac41fc6419ebcbce4e374828c7379"
+      }
+    },
+    "target_btf_id": 69911,
+    "utc": "2026-11-09T00:24:31.502030+00:00"
   },
   "arm64_return_token_body": {
     "c_domain": "All32 native Rn fields, all256 tag bytes,12 raw target boundaries, empty/one/four literal target tables, skb and ordinary exit profiles and all16 NZCV patterns. GCC scope cleanup observes actual production macros at return; the unsupported handler records the frame before the explicit refusal exit. Whole GPR/tag/vector/NZCV state, private LR scratch, whole context canaries, exactly two CB cells, materialized low32 X0 and entry-input call counts are checked. The emitter check covers32 explicit native operands and defaultX30 at four source PCs.",
@@ -16979,6 +17053,7 @@
     "ubsan_mov_load_and_arm_memory_tokens": true
   },
   "load_fault_recovery_obligation": {
+    "arm64_execution_followup": "arm64_recovery_published_execution",
     "authorized_decision": "- COORDINATOR DECISION FOR C/A/V 2026-11-08, top safety item (operator: \"\u8fd9\u79cd\u4e4b\u540e\u4f60\u81ea\u5df1\u51b3\u5b9a, \u4e0d\u8981\u95ee\u6211\"). V 2a891f9ba and A f55cf2f09 establish that the stock JIT gives a BTF-pointer load an exception-table entry whose handler clears the destination and resumes at the next instruction, B is verified under that behavior, and native P runs the same load as a plain instruction, so a fault there takes the kernel fault path. Native P gets the same recovery as the stock JIT. At step (e) the JIT registers an exception-table entry for every memory load in P, with the stock handler behavior, and P's bytes stay exactly as submitted. The service supplies the load sites (PC, length, destination register) from the decode it already performs. Owners: C for x86-64 and the shared code, A for AArch64, V for a new O4 row covering load-fault recovery and the reference-semantics premise for an invalid read through a BTF pointer. Test with a native program that loads through a NULL BTF pointer in a guest, on both ISAs: the guest stays up and the destination reads 0. Also for A: build the ARM kernel with the same upstream file__nullable hook argument name the x86 tree has, as an incremental build.",
     "counts_and_existing_results": "Operation/token/replay totals and prior raw-fault/captured LSM observations retained. New row is pending, not a completed theorem or observed execution.",
     "decision_sha256": "38e1e6ece749a3ebf65b81facf95f1e17525a2746f5e865fd6795c6e8f780248",

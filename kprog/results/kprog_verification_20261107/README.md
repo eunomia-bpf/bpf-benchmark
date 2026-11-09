@@ -5539,3 +5539,22 @@ remain explicit. This handles the existing raw fault state; it does not discard
 earlier successful accesses or assume all pair/writeback/exclusive prefixes are
 identical to a scalar failure. The O4 row remains partial, with operation/token
 and replay totals unchanged. No runtime check or new build target is added.
+
+### Published ARM recovery source and actual NULL execution
+
+ARM productionf1caa1cd9 matches both module and kernel-patch hashes captured
+by the ten native-marker/paired-recovery laws at260dcdb06. The later
+[authorized QEMU result](../../../corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/summary.json)
+at99b2f9561 executes the same native program with a live file and NULL file:
+full-word volatile load followed by `-(value&1)` returns0xffffffff and0.
+The probe reports2 registered exception entries; probe and guest exit0.
+Exact Image/module/loader/linker/service/model identities, unchanged input
+hashes and original archive/source record hashes are retained under
+`arm64_recovery_published_execution`. Earlier CRC/LSM-range attempts remain.
+
+This upgrades the prior working-source qualification to an exact published
+match and records actual scalar execution. It does not close every decoded
+fault site, B protected-read/fault arms, physical entry/memory/exception profile,
+ordered-prefix/event projection/O3 predicates or compiled-B interfaces. The
+O4 status and operation/token/replay totals remain partial and unchanged;
+x86 and real ARM hardware recovery are separate evidence.
