@@ -1,0 +1,127 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T10:42:02.144063+00:00",
+    "parent_commit": "f360991d1306fe500dc9f954f608665a86167ea0",
+    "approval": "COORDINATOR DECISION 2026-11-09 signed IDIV zero-divisor and quotient-overflow architectural faults for all widths",
+    "paths": [
+      "kprog/x86/x86_sim.h",
+      "kprog/x86/x86_sim_local_bpf.h",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py"
+    ]
+  },
+  "host": [
+    {
+      "compiler": "gcc",
+      "label": "idiv",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/var/tmp/kprog-tmp/C/signed-idiv/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/gcc-idiv"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "label": "original-div",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_div_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/gcc-original-div"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "label": "idiv",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/var/tmp/kprog-tmp/C/signed-idiv/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/clang-18-idiv",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "label": "original-div",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_div_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/clang-18-original-div",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "host_banners": {
+    "gcc-idiv": "signed IDIV hardware/model full-register-state PASS 18048 cases, 9380 architectural faults",
+    "clang-18-idiv": "signed IDIV hardware/model full-register-state PASS 18048 cases, 9380 architectural faults",
+    "gcc-original-div": "x86 div route host cross-check: OK (110885 cases)",
+    "clang-18-original-div": "x86 div route host cross-check: OK (110885 cases)"
+  },
+  "compiler": {
+    "entries": 25,
+    "compiled": 25,
+    "diagnostics": []
+  },
+  "original38": {
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  },
+  "source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "fbd419b9fcb7a3ef8ac98e08d7c0fc2fd2f53c2854f28e590d52491494a42843",
+    "kprog/x86/x86_sim.h": "003ce637260f97b720fcf22bd1d64e3a04f254b1d6dc8dcdd4002da609b5c4ca",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "7773063cadab38fda0e0d25454767372ee26fbcdacb6a9cb040f3f4ea2fcf77a"
+  },
+  "production_source_commit": "2942313a7508bed95aaa79926a6881c3d1df9632",
+  "guest_committed_export": {
+    "utc": "2026-11-09T10:54:15.989367+00:00",
+    "commit": "2942313a7508bed95aaa79926a6881c3d1df9632",
+    "read_only_export": "/var/tmp/kprog-tmp/C/signed-idiv/committed-2942313a7508",
+    "files": 157,
+    "queued_state": "queued_after_application_and_compiler",
+    "active_input": "/var/tmp/kprog-tmp/C/signed-idiv/safety-source",
+    "source_model_sha256": "fbd419b9fcb7a3ef8ac98e08d7c0fc2fd2f53c2854f28e590d52491494a42843"
+  }
+}

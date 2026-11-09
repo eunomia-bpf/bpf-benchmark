@@ -1,0 +1,128 @@
+--- a/kprog/x86/micro-prog/generate_micro_sim_proofs.py
++++ b/kprog/x86/micro-prog/generate_micro_sim_proofs.py
+@@ -511,7 +511,7 @@
+                    aux="X86_MAP_PTR_AUX_VALUE" if is_value else "0",
+                    imm=c_ptr_u64(expression))
+     if insn.reloc_type=="R_X86_64_PC32" and op not in {
+-        "mov","movabs","movzx","movsx","movsxd","lea","popcnt","div"
++        "mov","movabs","movzx","movsx","movsxd","lea","popcnt","div","idiv"
+     }:
+         raise ValueError(f"unresolved PC-relative data instruction: {insn.raw}")
+     if insn.reloc_type and "GOTPCREL" in insn.reloc_type and insn.symbol_offset:
+@@ -532,7 +532,7 @@
+          reg_info(ops[0]) is not None and
+          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+         (op in {"rol", "ror"} and len(ops) == 2 and reg_info(ops[0]) is not None) or
+-        (op == "div" and len(ops) == 1 and reg_info(ops[0]) is not None) or
++        (op in {"div", "idiv"} and len(ops) == 1 and reg_info(ops[0]) is not None) or
+         (op in {"movzx", "movsx"} and len(ops) == 2 and
+          reg_info(ops[0]) is not None and reg_info(ops[1]) is not None) or
+         (op in {"dec", "inc", "neg", "not"} and len(ops) == 1 and
+@@ -1043,15 +1043,16 @@
+                        src=mem_base_reg(ops[1]), flags=WIDTH_CONST[dst[1]],
+                        aux=mem_aux(ops[1], dst[1]), imm=c_u64(packed))
+         raise ValueError(f"cannot encode {insn.raw}")
+-    if op == "div":
++    if op in {"div", "idiv"}:
++        mode = "X86_DIV_AUX_SIGNED" if op == "idiv" else "0"
+         if len(ops) != 1:
+             raise ValueError(f"cannot encode {insn.raw}")
+         src = reg_info(ops[0])
+         if src is not None:
+             if src[2]:
+-                return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[src[1]],
++                return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[src[1]], aux=mode,
+                     imm=f"X86_SIM_L_READ_REG_WIDTH_SHIFT({src[0]}, X86_WIDTH_8, 8)")
+-            return enc("X86_OP_DIV", src=src[0], flags=WIDTH_CONST[src[1]])
++            return enc("X86_OP_DIV", src=src[0], flags=WIDTH_CONST[src[1]], aux=mode)
+         if is_mem(ops[0]):
+             width = operand_width(ops[0], 0)
+             if width not in WIDTH_CONST:
+@@ -1061,7 +1062,7 @@
+                 raise ValueError(f"unresolved DIV data relocation: {insn.raw}")
+             address = relocated_data_address(insn,rodata_idents) if insn.reloc_symbol else c_u64(mem_disp(ops[0]))
+             value = f"X86_SIM_L_READ_MEM_VALUE({mem_base_reg(ops[0])}, {mem_aux(ops[0])}, {address}, {WIDTH_CONST[width]}, 0)"
+-            return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[width], imm=value)
++            return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[width], aux=mode, imm=value)
+         raise ValueError(f"cannot encode {insn.raw}")
+     if op == "shld":
+         if len(ops) != 3:
+@@ -1378,7 +1379,7 @@
+     if (insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2 and
+             dst is not None and dst[2] and is_mem(insn.operands[1])):
+         memory, recovery_dst = insn.operands[1], dst[0]
+-    elif insn.mnemonic == "div" and is_mem(insn.operands[0]):
++    elif insn.mnemonic in {"div", "idiv"} and is_mem(insn.operands[0]):
+         memory, recovery_dst = insn.operands[0], "X86_RAX"
+     if memory is not None:
+         lines.append(f"{indent}if (!X86_SIM_L_READ_RECOVERY_MEM({mem_base_reg(memory)}, {recovery_dst}, {mem_aux(memory)}, x86_simm({c_u64(mem_disp(memory))}))) {{")
+--- a/kprog/x86/x86_sim.h
++++ b/kprog/x86/x86_sim.h
+@@ -28,6 +28,7 @@
+ #define X86_OP_POPCNT 0x18U
+ #define X86_OP_XCHG 0x19U
+ #define X86_OP_DIV 0x1aU
++#define X86_DIV_AUX_SIGNED 1U
+ #define X86_OP_SHLD_IMM 0x1bU
+ #define X86_OP_SHRD_IMM 0x1cU
+ #define X86_OP_CMP_MEM_IMM 0x1dU
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -2949,7 +2949,56 @@
+             __u64 __x86_l_divisor = (SRC) == X86_REG_NONE ? (IMM) : X86_SIM_L_READ_REG(SRC); \
+             __u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX); \
+             __u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX); \
+-            if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B8) { \
++            if ((AUX) & X86_DIV_AUX_SIGNED) { \
++                __u32 __x86_id_bits = (__u32)__x86_l_width * 8; \
++                __u64 __x86_id_mask = ~0ULL >> (64 - __x86_id_bits); \
++                __u64 __x86_id_sign = 1ULL << (__x86_id_bits - 1); \
++                __u64 __x86_id_hi = (__x86_l_width == X86_WIDTH_8 ? __x86_l_rax >> 8 : __x86_l_rdx) & __x86_id_mask; \
++                __u64 __x86_id_lo = __x86_l_rax & __x86_id_mask; \
++                __u64 __x86_id_div = __x86_l_divisor & __x86_id_mask; \
++                __u8 __x86_id_negative = (__x86_id_hi & __x86_id_sign) != 0; \
++                __u8 __x86_id_qnegative = __x86_id_negative ^ ((__x86_id_div & __x86_id_sign) != 0); \
++                if (__x86_id_negative) { \
++                    __x86_id_lo = (0ULL - __x86_id_lo) & __x86_id_mask; \
++                    __x86_id_hi = (~__x86_id_hi + (__x86_id_lo == 0)) & __x86_id_mask; \
++                } \
++                if (__x86_id_div & __x86_id_sign) \
++                    __x86_id_div = (0ULL - __x86_id_div) & __x86_id_mask; \
++                if (__x86_id_div == 0 || __x86_id_hi >= __x86_id_div) \
++                    X86_SIM_L_DIVIDE_FAULT(); \
++                struct x86_sim_divmod64 __x86_id_result; \
++                if (__x86_l_width == X86_WIDTH_64) { \
++                    if (__x86_id_hi == 0) { \
++                        __x86_id_result.quotient = __x86_id_lo / __x86_id_div; \
++                        __x86_id_result.remainder = __x86_id_lo % __x86_id_div; \
++                    } else { \
++                        __x86_id_result = x86_sim_divmod128(__x86_id_hi, __x86_id_lo, __x86_id_div); \
++                    } \
++                } else { \
++                    __u64 __x86_id_dividend = (__x86_id_hi << __x86_id_bits) | __x86_id_lo; \
++                    __x86_id_result.quotient = __x86_id_dividend / __x86_id_div; \
++                    __x86_id_result.remainder = __x86_id_dividend % __x86_id_div; \
++                } \
++                if (__x86_id_result.quotient > __x86_id_sign - (__x86_id_qnegative == 0)) \
++                    X86_SIM_L_DIVIDE_FAULT(); \
++                if (__x86_id_qnegative) \
++                    __x86_id_result.quotient = 0ULL - __x86_id_result.quotient; \
++                if (__x86_id_negative) \
++                    __x86_id_result.remainder = 0ULL - __x86_id_result.remainder; \
++                if (__x86_l_width == X86_WIDTH_8) { \
++                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, \
++                        ((__x86_id_result.remainder & 0xff) << 8) | (__x86_id_result.quotient & 0xff), X86_WIDTH_16); \
++                } else { \
++                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_id_result.quotient, __x86_l_width); \
++                    X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_id_result.remainder, __x86_l_width); \
++                } \
++                __x86_cf = X86_SIM_L_UNSPECIFIED() & 1; \
++                __x86_zf = X86_SIM_L_UNSPECIFIED() & 1; \
++                __x86_sf = X86_SIM_L_UNSPECIFIED() & 1; \
++                __x86_of = X86_SIM_L_UNSPECIFIED() & 1; \
++                __x86_pf = X86_SIM_L_UNSPECIFIED() & 1; \
++                __x86_af = X86_SIM_L_UNSPECIFIED() & 1; \
++            } else if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B8) { \
+                 __u32 __x86_l_dividend = (__u16)__x86_l_rax; \
+                 __u8 __x86_l_div = (__u8)__x86_l_divisor; \
+                 if (__x86_l_div == 0 || (__x86_l_dividend >> 8) >= __x86_l_div) \
