@@ -17,3 +17,5 @@ The actual eleven-object compiler control uses the candidate command lines, Armv
 | tracee/lsm_support/lsm_check | 0 | 64 | 64 | 1 | 1 | 0 |
 
 Plugin Make exit:0. Compile successes:11/11. Runtime admission additions:0.
+
+Combined actual11-object executable bytes1483900→1058124 (28.69% reduction), native instructions365782→259273 (29.12%), and static calls32532→14580 (55.18%). Tracee supplies the largest translation unit:1476028→1050608 executable bytes and32337→14423 static calls. BCC tcpconnect retains its measured1404→1416 bytes alongside38→30 calls; each table row preserves the actual code-size outcome. These combined code counts weight translation units by code volume. Six-application throughput geometric mean remains the R-owned workload measurement.

@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-09T06:54:22.699694+00:00",
+  "scope": "Static all11-object ARM native compiler comparison; whole-application workload and hardware throughput measured by their existing owners",
+  "control_publication": "948835b72a7850f94829b7f21733e504fccd6a87",
+  "candidate_publication": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
+  "compile_successes": 11,
+  "attempted": 11,
+  "totals": {
+    "control_executable_bytes": 1483900,
+    "candidate_executable_bytes": 1058124,
+    "control_instructions": 365782,
+    "candidate_instructions": 259273,
+    "control_static_call_sites": 32532,
+    "candidate_static_call_sites": 14580
+  },
+  "reductions_percent": {
+    "executable_bytes": 28.693038614461884,
+    "instructions": 29.118163277580635,
+    "static_call_sites": 55.18258945038731
+  },
+  "runtime_admission_additions": 0
+}
