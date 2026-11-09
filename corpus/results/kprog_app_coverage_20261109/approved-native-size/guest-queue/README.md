@@ -1,0 +1,5 @@
+# Approved-copy boundary ioctls in the next serial guest
+
+The next existing2GiB original38 guest, after active Os2805722, first loads the private compiled module from sourcec3d6523f8 and observes16 ioctl outcomes across both SUBMIT routes. The input native pointer stays0 and the source program ID is u32max: sizes below1GiB reach existing source lookup/ENOENT, while the approved inclusive boundary returns E2BIG before that lookup. Each request retains its own file owner and closes the descriptor. The guest records every errno and setup result, unloads the private module, then performs its existing original38 replay with the captured canonical module. Application source/native fixtures/model/runtime epochs retain their bytes. These observations retain their own result alongside original38; the application queue retains its existing completion semantics.
+
+This reuses the current serial guest slot and12GiB lane envelope. Full original38 plus BCC/Katran source/worker/work receipts continue through existing controller2867244. Runtime production predicates added: the explicit approved native_size boundary.
