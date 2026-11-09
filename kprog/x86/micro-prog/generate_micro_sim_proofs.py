@@ -1366,6 +1366,21 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
                 rodata_idents: dict[str, str] | None = None) -> None:
     encoded = encode(insn, rodata_idents or {})
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    # These encodings embed the memory expression in IMM, so recovery
+    # surrounds expression evaluation as well as the operation body.
+    dst = reg_info(insn.operands[0]) if insn.operands else None
+    memory = None
+    recovery_dst = "X86_REG_NONE"
+    if (insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2 and
+            dst is not None and dst[2] and is_mem(insn.operands[1])):
+        memory, recovery_dst = insn.operands[1], dst[0]
+    elif insn.mnemonic == "div" and is_mem(insn.operands[0]):
+        memory, recovery_dst = insn.operands[0], "X86_RAX"
+    if memory is not None:
+        lines.append(f"{indent}if (!X86_SIM_L_READ_RECOVERY({mem_base_reg(memory)}, {recovery_dst})) {{")
+        append_encoded_step(lines, encoded, indent + "\t", step_macro)
+        lines.append(f"{indent}}}")
+        return
     append_encoded_step(lines, encoded, indent, step_macro)
 
 
