@@ -443,6 +443,29 @@ samples fall monotonically -- 873,363 then 680,350 then 621,587 -- while the
 JIT arm's rise slightly, which is the signature of the native arm's own
 cost growing across the run rather than a steady per-packet difference.
 
+Repeated to check that spread, since a single run with a monotone trend is
+not a measurement of a steady state:
+
+| run | JIT pps | native pps | native/JIT |
+| --- | ---: | ---: | ---: |
+| `..._121841_595452` | 843,755 | 725,112 | 0.859 |
+| `..._132145_835225` | 834,765 | 853,270 | **1.022** |
+| `..._135025_542160` | 839,838 | 823,201 | 0.980 |
+
+So the JIT arm is stable across three runs to 1.1% (834,765 to 843,755),
+which is what "the JIT arm returns" means here, and the native arm is not:
+it ranges 0.859x to 1.022x of JIT. **Katran's native arm is at parity with
+±12% spread and no reliable advantage**, where the archive recorded 1.102x.
+
+One thing this rerun could not reproduce is the archive's per-invocation
+counters. `BPFREJIT_CORPUS_BPF_STATS=1` records `bpf_stats: true` in the
+run metadata, `kernel.bpf_stats_enabled` reads 1 on the shared root, and
+both arms still report zero programs and zero invocations -- while the
+archived 2026-05-29 run of the same app has 13 programs and `native_tracer_e`
+at 3,210.4 then 216.7 ns. So the archived counts came from a collection step
+this rebuilt definition does not perform, and the comparison above is
+throughput only.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
