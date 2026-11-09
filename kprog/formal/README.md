@@ -138,6 +138,10 @@ Its12 ACL2 observations retain the explicit model RIP+2 profile difference.
 Compiler/link/entered-state and stock-soundness premises remain explicit.
 ANDN adds2 scalar width/writeback units with width32 zero extension;
 flags/native-frame/physical ABI embedding remain explicit.
+Two returning helper scalar units (lookup1/ktime5) retain argument/result,
+complete helper memory/effects and independent clobbers under a matched platform
+contract; full helper registry/tag/frame/native ABI/compiler transport remains
+explicit. These are partial helper-body units, not a completed token family.
 BZHI adds2 scalar width/writeback units with width32 zero extension;
 flags/native-frame/physical ABI embedding remain explicit.
 POPCNT adds3 scalar width/writeback units, with high48 preservation at16

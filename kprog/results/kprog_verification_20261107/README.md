@@ -22,6 +22,7 @@ specialization token also has its own row.
 | Memory-call full-frame C body model | 4/75 | 0/74 |
 | O2 C-model token-body equality | 72/75 | 74/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2) | 10/75 | 0/74 |
+| Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
 | Upstream machine-model sampled architectural-state agreement | 58/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 7/75 | 0/74 selected forms |
@@ -5620,3 +5621,18 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_e69f060e4`. Every check retains its exact published source identity.
 
 Full raw archive: [full-make-check-e69f060e4.log.gz](full-make-check-e69f060e4.log.gz).
+
+### Compiled returning helper scalar bodies
+
+`HelpercallCertificate.compiled_all_variants` and `compiled_execution` cover
+the actual sparse-ID lookup1 and ktime5 C macro bodies. Lookup captures full64
+RDI/RSI arguments; ktime captures none. Given the matched helper resolver and
+successful platform return, arbitrary helper result bits, complete memory,
+ordered effects and independent caller clobbers are preserved by actual
+decoded BPF Execution. Fresh visit advances39 and exclusive state is retained.
+All120 published predecessor and2 standalone function bytes match combined122.
+[Original evidence](compiled-helpercall.log.gz) retains source/preprocessing,
+ELF, arrays and proofs. These are partial returning-helper compiler units,
+without increasing completed operation-family totals. Other helper identities,
+typed pointer/tag/register frame, native/physical ABI, real helper semantics,
+compiler embedding and successful tail transfer remain explicit interfaces.

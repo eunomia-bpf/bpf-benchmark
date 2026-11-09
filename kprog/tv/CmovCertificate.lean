@@ -1,3 +1,4 @@
+import KProgFormal.Reference.X86
 import KProgFormal.Refinement.X86Bzhi
 import KProgFormal.Refinement.X86Andn
 import KProgFormal.Refinement.X86Popcount
@@ -8166,3 +8167,199 @@ theorem compiled_execution (variant : Variant) (choices : Nat → Word)
 end KProgTV.BzhiCertificate
 #print axioms KProgTV.BzhiCertificate.compiled_all_variants
 #print axioms KProgTV.BzhiCertificate.compiled_execution
+
+namespace KProgTV.HelpercallCertificate
+open KProgFormal.Reference KProgTV.BPF KProgTV.BPFPath.InputBurst
+set_option maxRecDepth 100000
+set_option maxHeartbeats 1600000
+inductive Variant | lookup | ktime
+abbrev Helper := BPF.HelperCall → List Word → Memory → Except String BPF.HelperResult
+
+def call : Variant → HelperCall
+  | .lookup => ⟨1,2⟩ | .ktime => ⟨5,0⟩
+
+def arguments (variant : Variant) (s : X86.State) : List Word :=
+  match variant with
+  | .lookup => [s.gpr 7, s.gpr 6]
+  | .ktime => []
+
+def environment (variant : Variant) (choices : Nat → Word) (helper : Helper) : Environment where
+  unspecifiedInput := fun n => .ok (choices n)
+  immediate := fun _ _ _ => .error "external immediate"
+  helperCall := fun _ _ => .ok (call variant)
+  helper := helper
+
+def entry (s : X86.State) (visit exclusive : Nat) : State where
+  regs := fun r => match r.val with
+    | 1 => s.gpr 7 | 2 => s.gpr 6 | 10 => 0x10000 | _ => 0
+  memory := s.memory
+  pc := 0
+  unspecifiedVisit := visit
+  exclusiveVisit := exclusive
+
+def summary (variant : Variant) (program : Array Byte) (positions : List Nat)
+    (choices : Nat → Word) (helper : Helper) (visit exclusive : Nat) (s : X86.State) :
+    Except String (Word × Memory × Nat × Nat × Bool × Option Fault × List Event) := do
+  let result ← BPFPath.evaluate (environment variant choices helper) program positions (entry s visit exclusive)
+  pure (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+    result.state.exclusiveVisit, result.state.halted, result.fault, result.events)
+
+@[simp] private theorem setReg_memory (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).memory = s.memory := rfl
+
+@[simp] private theorem setReg_pc (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).pc = s.pc := rfl
+
+@[simp] private theorem setReg_halted (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).halted = s.halted := rfl
+
+@[simp] private theorem setReg_exclusiveVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).exclusiveVisit = s.exclusiveVisit := rfl
+
+@[simp] private theorem setReg_unspecifiedVisit (s : State) (r : BPF.Register) (v : Word) :
+    (setReg s r v).unspecifiedVisit = s.unspecifiedVisit := rfl
+
+@[simp] private theorem environment_call (variant : Variant) (choices : Nat → Word)
+    (helper : Helper) (i : BPF.Instruction) (state : State) :
+    (environment variant choices helper).helperCall i state = .ok (call variant) := rfl
+
+@[simp] private theorem environment_effect (variant : Variant) (choices : Nat → Word)
+    (helper : Helper) (c : BPF.HelperCall) (args : List Word) (memory : Memory) :
+    (environment variant choices helper).helper c args memory = helper c args memory := rfl
+
+@[simp] private theorem setReg_value (s : State) (r q : BPF.Register) (v : Word) :
+    (setReg s r v).regs q = (if q = r then v else s.regs q) := rfl
+
+@[simp 1100] private theorem burst_lookup_0 (choices : Nat → Word) (helper : Helper)
+    (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment .lookup choices helper) Compiled.tv_helpercall_lookup (inputPositions 0 23 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment .lookup choices helper) Compiled.tv_helpercall_lookup rest
+        (afterInputs choices s 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 0
+    · simpa [active, position] using
+        (evaluate_burst (environment .lookup choices helper) choices Compiled.tv_helpercall_lookup 0 23 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp 1100] private theorem burst_lookup_25 (choices : Nat → Word) (helper : Helper)
+    (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment .lookup choices helper) Compiled.tv_helpercall_lookup (inputPositions 25 16 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 25 then BPFPath.evaluate (environment .lookup choices helper) Compiled.tv_helpercall_lookup rest
+        (afterInputs choices s 16)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 25
+    · simpa [active, position] using
+        (evaluate_burst (environment .lookup choices helper) choices Compiled.tv_helpercall_lookup 25 16 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_lookup (choices : Nat → Word) (helper : Helper)
+    (visit exclusive : Nat) (s : X86.State) (effect : BPF.HelperResult)
+    (returned : helper (call .lookup) (arguments .lookup s) s.memory = .ok effect) :
+    summary .lookup Compiled.tv_helpercall_lookup (inputPositions 0 23 (23 :: 24 :: inputPositions 25 16 [41,42])) choices helper visit exclusive s =
+      .ok (effect.result, effect.memory, visit + 39, exclusive, true, none,
+        effect.events ++ [.helper (call .lookup).identity (arguments .lookup s) effect.result]) := by
+  simp [call, arguments, BitVec.ofNat_eq_ofNat] at returned
+  simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+    BPF.execute, BPF.source, BPF.alu, BPF.helperArguments, List.finRange_succ,
+    entry, call, arguments, returned,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+    Nat.add_assoc] <;> (rw [returned]; simp [Nat.add_assoc])
+#print axioms compiled_lookup
+
+@[simp 1100] private theorem burst_ktime_0 (choices : Nat → Word) (helper : Helper)
+    (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment .ktime choices helper) Compiled.tv_helpercall_ktime (inputPositions 0 23 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 0 then BPFPath.evaluate (environment .ktime choices helper) Compiled.tv_helpercall_ktime rest
+        (afterInputs choices s 23)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 0
+    · simpa [active, position] using
+        (evaluate_burst (environment .ktime choices helper) choices Compiled.tv_helpercall_ktime 0 23 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+@[simp 1100] private theorem burst_ktime_25 (choices : Nat → Word) (helper : Helper)
+    (s : State) (rest : List Nat) :
+    BPFPath.evaluate (environment .ktime choices helper) Compiled.tv_helpercall_ktime (inputPositions 25 16 rest) s =
+      if s.halted then .error "certificate continues after BPF return"
+      else if s.pc = 25 then BPFPath.evaluate (environment .ktime choices helper) Compiled.tv_helpercall_ktime rest
+        (afterInputs choices s 16)
+      else .error "certificate BPF successor mismatch" := by
+  cases active : s.halted with
+  | true => simp [inputPositions, BPFPath.evaluate, active, List.range'_succ]
+  | false =>
+    by_cases position : s.pc = 25
+    · simpa [active, position] using
+        (evaluate_burst (environment .ktime choices helper) choices Compiled.tv_helpercall_ktime 25 16 rest s
+          (fun _ => rfl) active position (by simp [Fin.forall_fin_succ, marker]))
+    · simp [inputPositions, BPFPath.evaluate, active, position, List.range'_succ]
+
+theorem compiled_ktime (choices : Nat → Word) (helper : Helper)
+    (visit exclusive : Nat) (s : X86.State) (effect : BPF.HelperResult)
+    (returned : helper (call .ktime) (arguments .ktime s) s.memory = .ok effect) :
+    summary .ktime Compiled.tv_helpercall_ktime (inputPositions 0 23 (23 :: 24 :: inputPositions 25 16 [41,42])) choices helper visit exclusive s =
+      .ok (effect.result, effect.memory, visit + 39, exclusive, true, none,
+        effect.events ++ [.helper (call .ktime).identity (arguments .ktime s) effect.result]) := by
+  simp [call, arguments, BitVec.ofNat_eq_ofNat] at returned
+  simp [summary, afterInputs, BPFPath.evaluate.eq_1, BPFPath.evaluate.eq_2,
+    BPF.execute, BPF.source, BPF.alu, BPF.helperArguments, List.finRange_succ,
+    entry, call, arguments, returned,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad,
+    Nat.add_assoc] <;> (rw [returned]; simp [Nat.add_assoc])
+#print axioms compiled_ktime
+
+def compiled : Variant → Array Byte
+  | .lookup => Compiled.tv_helpercall_lookup
+  | .ktime => Compiled.tv_helpercall_ktime
+
+def positions : List Nat := (inputPositions 0 23 (23 :: 24 :: inputPositions 25 16 [41,42]))
+
+/-- Returning helper scalar projections for two actual sparse-ID bodies.
+Helper identity/effect resolution and physical ABI remain platform premises. -/
+theorem compiled_all_variants (variant : Variant) (choices : Nat → Word) (helper : Helper)
+    (visit exclusive : Nat) (s : X86.State) (effect : BPF.HelperResult)
+    (returned : helper (call variant) (arguments variant s) s.memory = .ok effect) :
+    summary variant (compiled variant) positions choices helper visit exclusive s =
+      .ok (effect.result, effect.memory, visit + 39, exclusive, true, none,
+        effect.events ++ [.helper (call variant).identity (arguments variant s) effect.result]) := by
+  cases variant with
+  | lookup => exact compiled_lookup choices helper visit exclusive s effect returned
+  | ktime => exact compiled_ktime choices helper visit exclusive s effect returned
+
+theorem compiled_execution (variant : Variant) (choices : Nat → Word) (helper : Helper)
+    (visit exclusive : Nat) (s : X86.State) (effect : BPF.HelperResult)
+    (returned : helper (call variant) (arguments variant s) s.memory = .ok effect) :
+    ∃ result : Transition State,
+      Execution (BPFPath.instructionStep (environment variant choices helper) (compiled variant))
+        (entry s visit exclusive) result.events result.state ∧
+      (result.state.regs 0, result.state.memory, result.state.unspecifiedVisit,
+        result.state.exclusiveVisit, result.state.halted, result.fault, result.events) =
+      (effect.result, effect.memory, visit + 39, exclusive, true, none,
+        effect.events ++ [.helper (call variant).identity (arguments variant s) effect.result]) := by
+  have resultValue := compiled_all_variants variant choices helper visit exclusive s effect returned
+  cases evaluated : BPFPath.evaluate (environment variant choices helper) (compiled variant)
+      positions (entry s visit exclusive) with
+  | error error =>
+    simp [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] at resultValue
+  | ok result =>
+    refine ⟨result, BPFPath.evaluate_sound _ _ _ _ _ evaluated, ?_⟩
+    simpa [summary, evaluated, Except.bind, Except.pure, Except.map, Bind.bind,
+      Pure.pure, Except.instMonad] using resultValue
+end KProgTV.HelpercallCertificate
+#print axioms KProgTV.HelpercallCertificate.compiled_all_variants
+#print axioms KProgTV.HelpercallCertificate.compiled_execution

@@ -277,3 +277,19 @@ __u64 NAME(__u64 first, __u64 second) \
 }
 BZHI_UNIT(tv_bzhi32, X86_WIDTH_32)
 BZHI_UNIT(tv_bzhi64, X86_WIDTH_64)
+
+#define HELPER_UNIT(NAME, ID) \
+__attribute__((section("tv/helpercall/" #NAME), used)) \
+__u64 NAME(__u64 first, __u64 second) \
+{ \
+    X86_SIM_L_DECLARE_STATE(); \
+    X86_SIM_L_DECLARE_STACK(); \
+    struct __sk_buff *__x86_sim_skb_ctx = 0; \
+    __u8 __x86_sim_abi_kind = 0; \
+    __x86_rdi.ptr = (void *)(long)first; \
+    __x86_rsi.ptr = (void *)(long)second; \
+    X86_SIM_BPF_CALL_ID(ID); \
+    return X86_SIM_L_READ_REG(X86_RAX); \
+}
+HELPER_UNIT(tv_helpercall_lookup, 1ULL)
+HELPER_UNIT(tv_helpercall_ktime, 5ULL)
