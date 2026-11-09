@@ -1,0 +1,3 @@
+ARM warm kernel cache relocation
+
+The closed A incremental kernel object cache now lives at /var/tmp/kprog-tmp/A/kernel-cache. Its original path /workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache resolves through a symlink. The complete file inventory preserves byte sizes, nanosecond modification times, modes and symlink targets. Existing warm build outputs remain available for incremental compilation. The workspace copy released 8538818689file bytes. Current BCC QEMU source/runtime snapshots retain their captured paths and bytes. Exact storage receipt accompanies this note.

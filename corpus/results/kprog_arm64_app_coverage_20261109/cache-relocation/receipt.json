@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-09T09:28:55.350439+00:00",
+  "source": "/workspaces/.agent-state/kprog-lanes/A/design-only/stack-frame/kernel-link/cache",
+  "target": "/var/tmp/kprog-tmp/A/kernel-cache",
+  "before": {
+    "entries": 23699,
+    "file_bytes": 8538818689,
+    "sha256": "2e216e12c5d6d7768da1d7f4bc05358db4e49633aface1ee35664fe0dbbbd0b0"
+  },
+  "copied": {
+    "entries": 23699,
+    "file_bytes": 8538818689,
+    "sha256": "2e216e12c5d6d7768da1d7f4bc05358db4e49633aface1ee35664fe0dbbbd0b0"
+  },
+  "old_path_symlink": "/var/tmp/kprog-tmp/A/kernel-cache",
+  "freed_workspace_file_bytes": 8538818689,
+  "scope": "Closed A incremental kernel object cache relocated to host temporary filesystem; original path remains a symlink and active application snapshots retain captured bytes."
+}
