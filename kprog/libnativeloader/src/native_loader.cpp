@@ -968,7 +968,7 @@ std::vector<uint32_t> upload_native_chunks(
     int service_fd, uint64_t request_id, const std::vector<bpf_insn> &proof_program,
     const std::vector<NativeBlobChunk> &chunks, const std::vector<uint8_t> &blob,
     const std::vector<NativeLabReloc> &relocs,
-    const std::vector<native_lab_load_site> &load_sites)
+    const std::vector<native_lab_load_site> &load_sites, uint32_t callee_saved_mask)
 {
     const auto proof = bound_proof_sequence(proof_program);
     const std::vector<bpf_insn> continuation{{
@@ -991,6 +991,7 @@ std::vector<uint32_t> upload_native_chunks(
         native_lab_trusted_chunk input{};
         input.load_sites_user = ptr_to_u64(chunk_loads.data());
         input.load_site_count = chunk_loads.size();
+        input.reserved = callee_saved_mask;
         input.request_id = request_id;
         input.native_user = ptr_to_u64(blob.data() + chunks[i].offset);
         input.native_size = chunks[i].len;
@@ -1314,7 +1315,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    const StubLoadAttrs &attrs,
                    bool tail_call_reachable,
                    const std::string &prog_name,
-                   const std::vector<int> &map_ref_fds)
+                   const std::vector<int> &map_ref_fds,
+                   const std::vector<bpf_insn> &b_program)
 {
     ScopedFd source_btf_fd;
     if (attrs.source_btf_id) {
@@ -1322,111 +1324,9 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         if (source_btf_fd.fd < 0)
             fail("open original entry BTF: " + std::string(std::strerror(errno)));
     }
-    const bool tail_call_probe = tail_call_reachable && handles.empty();
-    ScopedFd tail_call_map_fd;
-    if (tail_call_probe) {
-        LIBBPF_OPTS(bpf_map_create_opts, map_opts);
-        int fd = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY,
-                                "native_tail_call_probe",
-                                sizeof(uint32_t),
-                                sizeof(uint32_t),
-                                1,
-                                &map_opts);
-        if (fd < 0) {
-            fail("bpf_map_create native tail-call probe map: "
-                 + std::string(std::strerror(errno)));
-        }
-        tail_call_map_fd.fd = fd;
-    }
-
-    std::vector<bpf_insn> insns;
-    insns.reserve(static_cast<size_t>(2) * chunks +
-                  (tail_call_probe ? 8 : 1));
-    if (tail_call_probe) {
-        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks;
-        if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
-            fail("native_kernel tail-call probe jump offset exceeds int16");
-        }
-        insns.push_back(bpf_insn{
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = BPF_REG_0,
-            .src_reg = 0,
-            .off = 0,
-            .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_JNE | BPF_K,
-            .dst_reg = BPF_REG_0,
-            .src_reg = 0,
-            .off = static_cast<int16_t>(probe_off),
-            .imm = 0,
-        });
-    }
-    for (uint32_t i = 0; i < chunks; i++) {
-        const uint64_t payload = (uint64_t(handles[i]) << 8) | (uint64_t(callee_saved_mask) << 4);
-        bpf_insn sidecar = {
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = static_cast<uint8_t>(payload & 15),
-            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
-            .off = static_cast<int16_t>((payload >> 4) & 0xffff),
-            .imm = static_cast<int32_t>(payload >> 20),
-        };
-        insns.push_back(sidecar);
-        bpf_insn call = {
-            .code = BPF_JMP | BPF_CALL,
-            .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_CALL,
-            .off = 1, // fd_array slot for module BTF
-            .imm = kfunc_btf_id,
-        };
-        insns.push_back(call);
-    }
-    insns.push_back(bpf_insn{
-        .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-    });
-    if (tail_call_probe) {
-        insns.push_back(bpf_insn{
-            .code = BPF_LD | BPF_DW | BPF_IMM,
-            .dst_reg = BPF_REG_2,
-            .src_reg = BPF_PSEUDO_MAP_FD,
-            .off = 0,
-            .imm = tail_call_map_fd.get(),
-        });
-        insns.push_back(bpf_insn{
-            .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = BPF_REG_3,
-            .src_reg = 0,
-            .off = 0,
-            .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_CALL,
-            .dst_reg = 0,
-            .src_reg = 0,
-            .off = 0,
-            .imm = BPF_FUNC_tail_call,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-        });
-    }
-
-    // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
-    // in the kinsn call resolves to. Retained map fds follow and are bound via
-    // fd_array_cnt, so map retention has no runtime BPF instruction cost.
-    std::vector<int> fd_array;
-    fd_array.reserve(2 + map_ref_fds.size());
-    fd_array.push_back(mod_btf_fd);
-    fd_array.push_back(mod_btf_fd);
-    for (int fd : map_ref_fds) {
-        if (fd < 0) {
-            fail("native_kernel retained map ref has invalid fd");
-        }
-        fd_array.push_back(fd);
-    }
+    // B is the whole program; map references P needs stay pinned in used_maps.
+    std::vector<bpf_insn> insns = b_program;
+    std::vector<int> fd_array = map_ref_fds;
     if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
         fail("native_kernel fd_array too large");
     }
@@ -4351,7 +4251,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
     {
         ensure_debugfs_mounted();
         relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
-        chunks = plan_blob_chunks(linked.blob.size(), relocs);
+        chunks = {NativeBlobChunk{0, linked.blob.size()}};
         out.native_blob_fnv64 = native_blob_fnv64(linked.blob);
         out.native_reloc_count = static_cast<uint32_t>(relocs.size());
         out.native_chunk_count = static_cast<uint32_t>(chunks.size());
@@ -4401,7 +4301,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
             native_loader_kmsg_line(msg.str());
         }
         handles = upload_native_chunks(service_fd, request_id, proof_insns,
-            chunks, linked.blob, relocs, linked.load_sites);
+            chunks, linked.blob, relocs, linked.load_sites, linked.callee_saved_mask);
         upload_end = std::chrono::steady_clock::now();
         {
             std::ostringstream msg;
@@ -4417,8 +4317,8 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
 
         const auto prog_load_start = std::chrono::steady_clock::now();
         native_loader_kmsg_line("stub-btf-lookup-begin name=" + prog_name);
-        NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
-        ScopedFd mod_btf_fd(open_module_btf_fd_by_id(stub_btf.module_btf_id));
+        NativeStubBtfIds stub_btf{};
+        ScopedFd mod_btf_fd;
         {
             std::ostringstream msg;
             msg << "stub-btf-lookup-done"
@@ -4439,7 +4339,8 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                 attrs,
                 tail_call_reachable,
                 prog_name,
-                map_ref_fds);
+                map_ref_fds,
+                proof_insns);
         } catch (const std::exception &e) {
             const std::string load_error = e.what();
             const size_t first_line_end = load_error.find('\n');
@@ -5322,7 +5223,22 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     companion.prog_type = prog_info.type;
     companion.expected_attach_type = options.expected_attach_type;
     bind_source_map_symbols(companion, source_map_bindings, source_insns);
-    for (const auto &binding : options.trusted_maps) {
+    std::vector<native_loader::TrustedMapBinding> trusted_maps = options.trusted_maps;
+    ScopedFd unspecified_map_fd;
+    if (trusted_worker) {
+        // Ordinary mutable array: each read is an unknown scalar for the verifier.
+        LIBBPF_OPTS(bpf_map_create_opts, unspecified_opts);
+        unspecified_map_fd.fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, "kprog_unspec",
+                                               sizeof(uint32_t), sizeof(uint64_t), 1, &unspecified_opts);
+        if (unspecified_map_fd.get() < 0)
+            fail("create unspecified input map: " + std::string(std::strerror(errno)));
+        native_loader::TrustedMapBinding binding;
+        binding.native_symbol = "kprog_unspecified_input";
+        binding.map_id = load_map_info(unspecified_map_fd.get()).id;
+        binding.value_offset = 0;
+        trusted_maps.push_back(binding);
+    }
+    for (const auto &binding : trusted_maps) {
         const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
             [&](const auto &map) { return map.kernel_id == binding.map_id; });
         MapMeta map{};
@@ -5376,7 +5292,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             simulator_program, prog_info, companion, proof_insns);
         if (trusted_externs)
             relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
-                {}, {}, {}, companion, proof_insns, proof_map_fds, &options.trusted_maps);
+                {}, {}, {}, companion, proof_insns, proof_map_fds, &trusted_maps);
         else if (source_proof_metadata)
             relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
                 parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
