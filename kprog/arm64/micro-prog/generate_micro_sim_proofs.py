@@ -43,7 +43,7 @@ GPR_WRITE_OPS = {
     "mvn", "neg", "cneg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
     "rev", "rev16", "sxtb", "sxth", "sxtw", "ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh",
     "ldrsb", "ldrsh", "ldrsw",
-    "ldp", "stlxr", "stxr", 'ldclr', 'ldclra', 'ldclrab', 'ldclrah', 'ldclral', 'ldclralb', 'ldclralh', 'ldclrb', 'ldclrh', 'ldclrl', 'ldclrlb', 'ldclrlh', 'ldset', 'ldseta', 'ldsetab', 'ldsetah', 'ldsetal', 'ldsetalb', 'ldsetalh', 'ldsetb', 'ldseth', 'ldsetl', 'ldsetlb', 'ldsetlh', 'stclr', 'stclrb', 'stclrh', 'stclrl', 'stclrlb', 'stclrlh', 'stset', 'stsetb', 'stseth', 'stsetl', 'stsetlb', 'stsetlh', 'ldadd', 'ldadda', 'ldaddab', 'ldaddah', 'ldaddal', 'ldaddalb', 'ldaddalh', 'ldaddb', 'ldaddh', 'ldaddl', 'ldaddlb', 'ldaddlh', 'stadd', 'staddb', 'staddh', 'staddl', 'staddlb', 'staddlh', "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "csetm", "fmov",
+    "ldp", "stlxr", "stxr", 'ldclr', 'ldclra', 'ldclrab', 'ldclrah', 'ldclral', 'ldclralb', 'ldclralh', 'ldclrb', 'ldclrh', 'ldclrl', 'ldclrlb', 'ldclrlh', 'ldset', 'ldseta', 'ldsetab', 'ldsetah', 'ldsetal', 'ldsetalb', 'ldsetalh', 'ldsetb', 'ldseth', 'ldsetl', 'ldsetlb', 'ldsetlh', 'stclr', 'stclrb', 'stclrh', 'stclrl', 'stclrlb', 'stclrlh', 'stset', 'stsetb', 'stseth', 'stsetl', 'stsetlb', 'stsetlh', 'ldadd', 'ldadda', 'ldaddab', 'ldaddah', 'ldaddal', 'ldaddalb', 'ldaddalh', 'ldaddb', 'ldaddh', 'ldaddl', 'ldaddlb', 'ldaddlh', 'stadd', 'staddb', 'staddh', 'staddl', 'staddlb', 'staddlh', "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "csetm",
 }
 
 
@@ -489,14 +489,6 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op in {"rev", "rev16", "sxtb", "sxth", "sxtw"}:
         op_const = {"rev": "ARM64_OP_REV", "rev16": "ARM64_OP_REV16", "sxtb": "ARM64_OP_SXTB", "sxth": "ARM64_OP_SXTH", "sxtw": "ARM64_OP_SXTW"}[op]
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
-    if op in {"ldr", "ldur"} and ops[0].lower() == "q0":
-        mem = parse_mem(ops, 1)
-        return Encoded("ARM64_OP_LOAD_Q0", src=mem.base, src2=mem.index,
-                       aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"ldr", "ldur"} and ops[0].lower() == "d0":
-        mem = parse_mem(ops, 1)
-        return Encoded("ARM64_OP_LOAD_D0", src=mem.base, src2=mem.index,
-                       aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op in {"ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh"}:
         width = 1 if op in {"ldrb", "ldurb"} else 2 if op in {"ldrh", "ldurh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
@@ -519,14 +511,6 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         width = reg_width(ops[0])
         return Encoded("ARM64_OP_LDP", reg_const(ops[0]), reg_const(ops[1]), mem.base, mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"str", "stur"} and ops[0].lower() == "q0":
-        mem = parse_mem(ops, 1)
-        return Encoded("ARM64_OP_STORE_Q0", dst=mem.base, src2=mem.index,
-                       aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"str", "stur"} and ops[0].lower() == "d0":
-        mem = parse_mem(ops, 1)
-        return Encoded("ARM64_OP_STORE_D0", dst=mem.base, src2=mem.index,
-                       aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op in {"str", "stur", "strb", "sturb", "strh", "sturh"}:
         width = 1 if op in {"strb", "sturb"} else 2 if op in {"strh", "sturh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
@@ -634,26 +618,6 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op == "csneg":
         return Encoded("ARM64_OP_CSNEG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
-    if op == "fmov":
-        dst, src = ops
-        vector = re.fullmatch(r"([ds])([0-9]|[12][0-9]|3[01])", dst)
-        if vector and src.startswith("x" if vector[1] == "d" else "w"):
-            return Encoded("ARM64_OP_FMOV", src=reg_const(src), src2=vector[2],
-                           width="ARM64_WIDTH_64" if vector[1] == "d" else "ARM64_WIDTH_32",
-                           aux="ARM64_FMOV_D_FROM_X" if vector[1] == "d" else "ARM64_FMOV_S_FROM_W")
-        vector = re.fullmatch(r"([ds])([0-9]|[12][0-9]|3[01])", src)
-        if vector and dst.startswith("x" if vector[1] == "d" else "w"):
-            return Encoded("ARM64_OP_FMOV", reg_const(dst), src2=vector[2],
-                           width="ARM64_WIDTH_64" if vector[1] == "d" else "ARM64_WIDTH_32",
-                           aux="ARM64_FMOV_X_FROM_D" if vector[1] == "d" else "ARM64_FMOV_W_FROM_S")
-    if op == "cnt":
-        if ops not in [("v0.8b", "v0.8b"), ("v0.16b", "v0.16b")]:
-            raise ValueError(f"unsupported CNT operands: {insn.raw}")
-        return Encoded("ARM64_OP_CNT", aux="16" if ops[0] == "v0.16b" else "8")
-    if op == "uaddlv":
-        if ops not in [("h0", "v0.8b"), ("h0", "v0.16b")]:
-            raise ValueError(f"unsupported UADDLV operands: {insn.raw}")
-        return Encoded("ARM64_OP_UADDLV", aux="16" if ops[1] == "v0.16b" else "8")
     raise ValueError(f"unsupported arm64 instruction: {insn.raw}")
 
 

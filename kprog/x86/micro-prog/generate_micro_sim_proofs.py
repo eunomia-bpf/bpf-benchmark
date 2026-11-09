@@ -673,23 +673,6 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        imm=c_u64(mem_disp(dst)))
         raise ValueError(f"cannot encode {insn.raw}")
 
-    if op in {"movaps", "movups"}:
-        if len(ops) != 2:
-            raise ValueError(f"cannot encode {insn.raw}")
-        dst, src = ops
-        if dst.lower() == "xmm0" and is_mem(src):
-            if insn.reloc_symbol:
-                if insn.reloc_symbol not in rodata_idents:
-                    raise ValueError(f"unsupported xmm reloc load: {insn.raw}")
-                return enc("X86_OP_LOAD_XMM0", src="X86_REG_NONE",
-                           imm=c_ptr_u64(rodata_idents[insn.reloc_symbol]))
-            return enc("X86_OP_LOAD_XMM0", src=mem_base_reg(src),
-                       aux=mem_aux(src), imm=c_u64(mem_disp(src)))
-        if is_mem(dst) and src.lower() == "xmm0":
-            return enc("X86_OP_STORE_XMM0", dst=mem_base_reg(dst),
-                       aux=mem_aux(dst), imm=c_u64(mem_disp(dst)))
-        raise ValueError(f"cannot encode {insn.raw}")
-
     if op in {"movzx", "movsx", "movsxd"}:
         if len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
