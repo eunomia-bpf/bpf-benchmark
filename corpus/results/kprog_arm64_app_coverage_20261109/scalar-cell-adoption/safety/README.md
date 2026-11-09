@@ -1,0 +1,3 @@
+Original ARM safety suite on scalar-cell storage
+
+The existing48scalar AArch64 fixtures and native-negative load-only protocol run with sourcee2e6dc6c034375365d6f359f5faca766e360a271 and the captured f1/e5/3e3f runtime/first-attempt loaderd1b4. Every original fixture remains exact. The new representation keeps volatile native data access and existing SP/helper/return/fault operations. Complete26original host groups/compiler observations pass through7c463/8b26, and existing29micro plus original negative compile passfa403. Native annotations/unsafe fixtures remain load-only. Source/runtime/input identities, every actual stage and original recovery-label findings are collected. Guest2GiB16-19 shares own allocation with uniform catalog. Runtime admission additions:0.
