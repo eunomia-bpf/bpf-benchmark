@@ -8,7 +8,7 @@
     "elf_symbol_name_grammar": 23,
     "source_maps_btf_prepare": 153,
     "installed": 7,
-    "verifier_scalar_memory_access": 110,
+    "callee_saved_equality_arm": 110,
     "compilation_failed": 1,
     "source_elf_open": 85,
     "bpf_stack_storage": 157,
@@ -194,11 +194,11 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "initial individual submission",
       "raw_reference": "../stock-results.json#bcc/set/62",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "bcc/set",
@@ -285,11 +285,11 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "initial individual submission",
       "raw_reference": "../stock-results.json#bcc/set/70",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "bcc/set",
@@ -3446,13 +3446,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3476,13 +3476,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3506,13 +3506,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3566,13 +3566,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3581,13 +3581,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3611,13 +3611,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3686,13 +3686,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3701,13 +3701,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3716,13 +3716,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3731,13 +3731,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3746,13 +3746,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3761,13 +3761,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3881,13 +3881,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3896,13 +3896,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3911,13 +3911,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -3941,13 +3941,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4001,13 +4001,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4031,13 +4031,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4104,13 +4104,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4164,13 +4164,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4179,13 +4179,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4267,13 +4267,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4297,13 +4297,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4357,13 +4357,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4430,13 +4430,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4460,13 +4460,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4520,13 +4520,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4593,13 +4593,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4638,13 +4638,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4683,13 +4683,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4801,13 +4801,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4816,13 +4816,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4831,13 +4831,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4876,13 +4876,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4906,13 +4906,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4921,13 +4921,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4966,13 +4966,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -4981,13 +4981,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5026,13 +5026,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5086,13 +5086,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "59ced005bad851a99e4f769bc499ad7f99137b199c99d3673d8f1fe5b8f30f01",
       "representative_id": 211,
       "raw_reference": "outcomes.json.gz#59ced005bad851a99e4f769bc499ad7f99137b199c99d3673d8f1fe5b8f30f01",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5116,13 +5116,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "9f12536428bce9fa4e52a74825db5154302512db65c85d6b4c16c6723de4e220",
       "representative_id": 213,
       "raw_reference": "outcomes.json.gz#9f12536428bce9fa4e52a74825db5154302512db65c85d6b4c16c6723de4e220",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5161,13 +5161,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "7fda6047a62cd2beee6562ec8e728e2aec21532d756cb68156b20dcbaf48691b",
       "representative_id": 216,
       "raw_reference": "outcomes.json.gz#7fda6047a62cd2beee6562ec8e728e2aec21532d756cb68156b20dcbaf48691b",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5221,13 +5221,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "bf74e76fc01d63e87d6cb3223dc02abfef58b28ef4f3d803270a9d06d24aaec7",
       "representative_id": 220,
       "raw_reference": "outcomes.json.gz#bf74e76fc01d63e87d6cb3223dc02abfef58b28ef4f3d803270a9d06d24aaec7",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5236,13 +5236,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "16f426ec590fbdb7d8b5255cd520dd943bb861c11a4c2e78e1d676f2c09b5995",
       "representative_id": 221,
       "raw_reference": "outcomes.json.gz#16f426ec590fbdb7d8b5255cd520dd943bb861c11a4c2e78e1d676f2c09b5995",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5266,13 +5266,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5311,13 +5311,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5341,13 +5341,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5386,13 +5386,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5446,13 +5446,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5461,13 +5461,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5506,13 +5506,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5551,13 +5551,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5566,13 +5566,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5596,13 +5596,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5611,13 +5611,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5626,13 +5626,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5671,11 +5671,11 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "initial individual submission",
       "raw_reference": "../stock-results.json#tetragon/observer/25",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5772,13 +5772,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5817,13 +5817,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5832,13 +5832,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5862,13 +5862,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5907,13 +5907,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5937,13 +5937,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5967,13 +5967,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -5982,13 +5982,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "f97fe4f54aeaa793b0b2e7821457f034ecf8ea3ec987da3f27943e955999c8a8",
       "representative_id": 27,
       "raw_reference": "outcomes.json.gz#f97fe4f54aeaa793b0b2e7821457f034ecf8ea3ec987da3f27943e955999c8a8",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6027,13 +6027,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6042,13 +6042,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6147,11 +6147,11 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "initial individual submission",
       "raw_reference": "../stock-results.json#tetragon/observer/28",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6160,13 +6160,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6175,13 +6175,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6190,13 +6190,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6338,13 +6338,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6353,13 +6353,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6368,13 +6368,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6398,13 +6398,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6413,13 +6413,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6458,13 +6458,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6503,13 +6503,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6518,13 +6518,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6593,13 +6593,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6638,13 +6638,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "63056a9356f03c8bf54f77b65dff66e64a2ecaeba3ad7a19d79a4ccbfd876480",
       "representative_id": 31,
       "raw_reference": "outcomes.json.gz#63056a9356f03c8bf54f77b65dff66e64a2ecaeba3ad7a19d79a4ccbfd876480",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6668,13 +6668,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6698,13 +6698,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6713,13 +6713,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6756,13 +6756,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6816,13 +6816,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6831,13 +6831,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6861,13 +6861,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6876,13 +6876,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6936,13 +6936,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6951,13 +6951,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -6981,13 +6981,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7026,13 +7026,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7071,13 +7071,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7086,13 +7086,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7146,13 +7146,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7249,13 +7249,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7279,13 +7279,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7309,13 +7309,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7324,13 +7324,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7369,13 +7369,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7414,13 +7414,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7429,13 +7429,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7459,13 +7459,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7474,13 +7474,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7592,13 +7592,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
       "representative_id": 103,
       "raw_reference": "outcomes.json.gz#3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7622,13 +7622,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
       "representative_id": 101,
       "raw_reference": "outcomes.json.gz#c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",
@@ -7667,13 +7667,13 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "native-body representative weighted instance",
       "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
       "representative_id": 105,
       "raw_reference": "outcomes.json.gz#364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
-      "failure_family": "verifier_scalar_memory_access"
+      "failure_family": "callee_saved_equality_arm"
     },
     {
       "application": "tetragon/observer",

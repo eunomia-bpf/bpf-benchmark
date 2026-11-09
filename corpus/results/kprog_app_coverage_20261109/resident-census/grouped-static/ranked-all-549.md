@@ -4,7 +4,7 @@ All549 resident instances: ranked observed failure families
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | bpf_stack_storage | 157 | 157 | 124 | 0 | 124 | 0 | 0 | 0 | 0 | 157 | 0 |
 | source_maps_btf_prepare | 153 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 151 |
-| verifier_scalar_memory_access | 110 | 110 | 110 | 0 | 110 | 2 | 0 | 0 | 0 | 108 | 0 |
+| callee_saved_equality_arm | 110 | 110 | 110 | 0 | 110 | 2 | 0 | 0 | 0 | 108 | 0 |
 | source_elf_open | 85 | 0 | 0 | 0 | 0 | 0 | 72 | 0 | 13 | 0 | 0 |
 | elf_symbol_name_grammar | 23 | 0 | 0 | 0 | 0 | 14 | 0 | 0 | 0 | 9 | 0 |
 | native_kernel_link_relocation | 11 | 11 | 11 | 0 | 0 | 0 | 0 | 0 | 0 | 11 | 0 |

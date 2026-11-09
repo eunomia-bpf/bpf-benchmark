@@ -7,14 +7,14 @@
   "body_identity": "SHA256 of complete native-link proof ELF, including executable/data sections and relocation identities",
   "weighted_classes": {
     "verifier_stack_access": 124,
-    "verifier_scalar_memory_access": 106,
+    "callee_saved_equality_arm": 106,
     "compiler_stack_storage": 33,
     "native_kernel_link_relocation": 11,
     "verifier_callback_argument": 1
   },
   "unique_body_classes": {
     "verifier_stack_access": 12,
-    "verifier_scalar_memory_access": 10,
+    "callee_saved_equality_arm": 10,
     "compiler_stack_storage": 1,
     "native_kernel_link_relocation": 3,
     "verifier_callback_argument": 1
@@ -110,7 +110,7 @@
         94
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "retained serial representative",
       "outcome_key": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e"
@@ -202,7 +202,7 @@
         92
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "retained serial representative",
       "outcome_key": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620"
@@ -294,7 +294,7 @@
         97
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "retained serial representative",
       "outcome_key": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585"
@@ -434,7 +434,7 @@
         211
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "59ced005bad851a99e4f769bc499ad7f99137b199c99d3673d8f1fe5b8f30f01"
@@ -462,7 +462,7 @@
         213
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "9f12536428bce9fa4e52a74825db5154302512db65c85d6b4c16c6723de4e220"
@@ -504,7 +504,7 @@
         216
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "7fda6047a62cd2beee6562ec8e728e2aec21532d756cb68156b20dcbaf48691b"
@@ -560,7 +560,7 @@
         220
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "bf74e76fc01d63e87d6cb3223dc02abfef58b28ef4f3d803270a9d06d24aaec7"
@@ -574,7 +574,7 @@
         221
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "16f426ec590fbdb7d8b5255cd520dd943bb861c11a4c2e78e1d676f2c09b5995"
@@ -602,7 +602,7 @@
         27
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "f97fe4f54aeaa793b0b2e7821457f034ecf8ea3ec987da3f27943e955999c8a8"
@@ -644,7 +644,7 @@
         31
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_scalar_memory_access",
+      "failure_class": "callee_saved_equality_arm",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "63056a9356f03c8bf54f77b65dff66e64a2ecaeba3ad7a19d79a4ccbfd876480"
