@@ -1,0 +1,74 @@
+--- a/vendor/bpf/native_division.cpp
++++ b/vendor/bpf/native_division.cpp
+@@ -104,0 +105,66 @@
++
++// Discarded-return scalar kernel reads have a single-load destination effect.
++// Native exception-table recovery clears the complete destination register.
++struct NativeProbeRead : llvm::PassInfoMixin<NativeProbeRead> {
++    llvm::PreservedAnalyses run(llvm::Function &function,
++                               llvm::FunctionAnalysisManager &) {
++        if (!llvm::Triple(function.getParent()->getTargetTriple()).isAArch64())
++            return llvm::PreservedAnalyses::all();
++        llvm::SmallVector<llvm::CallInst *> reads;
++        for (auto &block : function)
++            for (auto &instruction : block)
++                if (auto *call = llvm::dyn_cast<llvm::CallInst>(&instruction))
++                    if (call->arg_size() == 3 && call->use_empty())
++                        reads.push_back(call);
++        bool changed = false;
++        for (auto *call : reads) {
++            auto *callee = call->getCalledFunction();
++            auto *cast = llvm::dyn_cast<llvm::IntToPtrInst>(call->getCalledOperand());
++            llvm::CallInst *marker = nullptr;
++            bool kernel_read = callee && callee->getName() == "bpf_probe_read_kernel";
++            if (cast) {
++                marker = llvm::dyn_cast<llvm::CallInst>(cast->getOperand(0));
++                auto *identity = marker && marker->arg_size() == 4 ?
++                    llvm::dyn_cast<llvm::ConstantInt>(marker->getArgOperand(3)) : nullptr;
++                auto *code = marker ?
++                    llvm::dyn_cast<llvm::InlineAsm>(marker->getCalledOperand()) : nullptr;
++                kernel_read = code && code->getAsmString().empty() &&
++                    code->getConstraintString() == "=r,r,r,r,0,~{memory}" &&
++                    identity && identity->equalsInt(113);
++            }
++            if (!kernel_read)
++                continue;
++            auto *size = llvm::dyn_cast<llvm::ConstantInt>(call->getArgOperand(1));
++            if (!size)
++                continue;
++            const char *assembly;
++            switch (size->getZExtValue()) {
++            case 1: assembly = "ldrb ${0:w}, [$1]"; break;
++            case 2: assembly = "ldrh ${0:w}, [$1]"; break;
++            case 4: assembly = "ldr ${0:w}, [$1]"; break;
++            case 8: assembly = "ldr $0, [$1]"; break;
++            default: continue;
++            }
++            llvm::IRBuilder<> builder(call);
++            builder.SetCurrentDebugLocation(call->getDebugLoc());
++            auto *source = call->getArgOperand(2);
++            auto *signature = llvm::FunctionType::get(builder.getInt64Ty(),
++                                                      {source->getType()}, false);
++            auto *load = llvm::InlineAsm::get(signature, assembly,
++                                               "=r,r,~{memory}", true);
++            auto *value = builder.CreateCall(load, {source}, "native.probe.scalar");
++            auto *word = builder.getIntNTy(size->getZExtValue() * 8);
++            builder.CreateStore(builder.CreateTruncOrBitCast(value, word),
++                                call->getArgOperand(0))->setAlignment(llvm::Align(1));
++            call->eraseFromParent();
++            if (cast && cast->use_empty()) {
++                cast->eraseFromParent();
++                if (marker && marker->use_empty())
++                    marker->eraseFromParent();
++            }
++            changed = true;
++        }
++        return changed ? llvm::PreservedAnalyses::none() :
++                         llvm::PreservedAnalyses::all();
++    }
++};
+@@ -113,0 +180,4 @@
++            builder.registerScalarOptimizerLateEPCallback(
++                [](llvm::FunctionPassManager &passes, llvm::OptimizationLevel) {
++                    passes.addPass(NativeProbeRead());
++                });
