@@ -1,8 +1,8 @@
 {
-  "ok": false,
+  "ok": true,
   "case": "control",
-  "started": "2026-11-09T00:13:40.427658+00:00",
-  "archive": "run-20261109T001340427631Z.tar.gz",
+  "started": "2026-11-09T00:18:56.322985+00:00",
+  "archive": "run-20261109T001856322957Z.tar.gz",
   "command": [
     "taskset",
     "-c",
@@ -35,7 +35,7 @@
   ],
   "hashes_before": {
     "kprog/arm64/build/native-load-recovery/recovery/Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
-    "kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko": "f6b505632f9917dda372159744515eaacbd4744127d74b97f1f4e69efd105396",
+    "kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
     "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "8847668a99d646a06f30f4dda5466e9500ae1046dc78ba445a7579ccf41a9464",
     "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
     "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
@@ -2463,10 +2463,17 @@
   },
   "qemu_returncode": 0,
   "booted": true,
-  "guest_exit": 1,
+  "guest_exit": 0,
+  "guest": {
+    "ok": true,
+    "scope": "Authorized ARM full-word NULL BTF load recovery",
+    "probe_exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
+  },
   "hashes_after": {
     "kprog/arm64/build/native-load-recovery/recovery/Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
-    "kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko": "f6b505632f9917dda372159744515eaacbd4744127d74b97f1f4e69efd105396",
+    "kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
     "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": "8847668a99d646a06f30f4dda5466e9500ae1046dc78ba445a7579ccf41a9464",
     "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
     "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
@@ -4894,6 +4901,6 @@
   },
   "hashes_unchanged": true,
   "compiler_exit": 0,
-  "finished": "2026-11-09T00:13:50.805800+00:00",
-  "archive_sha256": "531a87d0d8c1691a05b4fdb0653a1242ab58e6c5c7de21c28b6dec956e8ddc4f"
+  "finished": "2026-11-09T00:19:48.147334+00:00",
+  "archive_sha256": "6039be4d6554a05e093fda9e8b03daff830dc1e8bccf8c586044ab3efdb8fbab"
 }

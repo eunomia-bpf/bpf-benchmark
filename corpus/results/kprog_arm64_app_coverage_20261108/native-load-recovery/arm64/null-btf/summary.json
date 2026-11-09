@@ -1,16 +1,23 @@
 {
-  "utc": "2026-11-09T00:13:40.161658+00:00",
+  "utc": "2026-11-09T00:18:56.071483+00:00",
   "fixture_make_exit": 0,
   "build": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795",
   "shared": "5598b9321",
   "return_policy": "Existing LSM [-4095,0]: negate the loaded low bit",
   "expected_control": 4294967295,
   "expected_null": 0,
-  "make_exit": 1,
+  "make_exit": 0,
   "runtime": {
-    "ok": false,
-    "guest_exit": 1,
+    "ok": true,
+    "guest_exit": 0,
     "qemu_returncode": 0,
     "compiler_exit": 0
+  },
+  "guest": {
+    "ok": true,
+    "scope": "Authorized ARM full-word NULL BTF load recovery",
+    "probe_exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
   }
 }
