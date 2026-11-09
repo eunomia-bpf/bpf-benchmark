@@ -1,5 +1,6 @@
 #define X86_SIM_ENABLE_STACK 1
 #define X86_SIM_STACK_BYTES 16U
+#define X86_SIM_STACK_VALUE_WORDS(M) M(0) M(1)
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -350,7 +351,7 @@ x86_l_1ab:
 	X86_SIM_L_EXEC_ALU_REG(X86_RDI, X86_R9, X86_WIDTH_64, X86_ALU_ADD);
 x86_l_1ae:
 	/* 0x1ae: rorx   rax,rdi,0x3d */
-	X86_SIM_RUN_OP(X86_OP_RORX, X86_RAX, X86_RDI, X86_WIDTH_64, 0, 61ULL);
+	X86_SIM_L_EXEC_RORX(X86_RAX, X86_RDI, X86_WIDTH_64, 61ULL);
 x86_l_1b4:
 	/* 0x1b4: xor    r8,rax */
 	X86_SIM_L_EXEC_ALU_REG(X86_R8, X86_RAX, X86_WIDTH_64, X86_ALU_XOR);

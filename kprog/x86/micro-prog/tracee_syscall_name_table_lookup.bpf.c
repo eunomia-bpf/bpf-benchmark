@@ -1,5 +1,6 @@
 #define X86_SIM_ENABLE_STACK 1
 #define X86_SIM_STACK_BYTES 48U
+#define X86_SIM_STACK_VALUE_WORDS(M) M(0) M(1) M(2) M(3) M(4) M(5)
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")

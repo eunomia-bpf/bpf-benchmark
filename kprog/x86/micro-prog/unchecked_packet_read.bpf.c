@@ -1,3 +1,4 @@
+#define X86_SIM_STACK_VALUE_WORDS(M) M(0)
 #include "../x86_sim_local_bpf.h"
 
 /*
