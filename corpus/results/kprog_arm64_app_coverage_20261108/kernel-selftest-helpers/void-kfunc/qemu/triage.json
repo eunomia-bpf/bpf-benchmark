@@ -1,0 +1,195 @@
+{
+  "utc": "2026-11-09T05:41:11.130574+00:00",
+  "publication": "23eb97460753056d9b512cbb6405e9351d3c8a60",
+  "counts": {
+    "catalog_rows": 46,
+    "attempted": 46,
+    "submitted": 46,
+    "installed": 3,
+    "verifier_rejected": 12,
+    "generation_failed": 31,
+    "compilation_failed": 0,
+    "resource_failed": 0,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 12,
+    "failure_agrees": 12,
+    "failure_installed": 0,
+    "success": 3,
+    "success_agrees": 3,
+    "success_installed": 3
+  },
+  "generation_causes": {
+    "bpf_cgroup_acquire": 9,
+    "bpf_cgroup_release": 4,
+    "bpf_copy_from_user_str": 2,
+    "bpf_task_acquire": 10,
+    "bpf_task_release": 4,
+    "bpf_task_from_pid": 1,
+    "bpf_task_from_vpid": 1
+  },
+  "installed": [
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_balance",
+      "expect": "success",
+      "stage": "installed"
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_balance_subprog_test",
+      "expect": "success",
+      "stage": "installed"
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_global_subprog_test",
+      "expect": "success",
+      "stage": "installed"
+    }
+  ],
+  "verifier_rejected": [
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_1",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "107: (85) call bpf_preempt_disable#70385      ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_2",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "107: (85) call bpf_preempt_disable#70385      ;",
+        "195: (85) call bpf_preempt_disable#70385      ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_3",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "107: (85) call bpf_preempt_disable#70385      ;",
+        "195: (85) call bpf_preempt_disable#70385      ;",
+        "283: (85) call bpf_preempt_disable#70385      ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_3_minus_2",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "107: (85) call bpf_preempt_disable#70385      ;",
+        "195: (85) call bpf_preempt_disable#70385      ;",
+        "283: (85) call bpf_preempt_disable#70385      ;",
+        "371: (85) call bpf_preempt_enable#70386       ;",
+        "459: (85) call bpf_preempt_enable#70386       ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_1_subprog",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "112: (85) call bpf_preempt_disable#70385      ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_2_subprog",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "126: (85) call bpf_preempt_disable#70385      ;",
+        "126: (85) call bpf_preempt_disable#70385      ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_lock_missing_2_minus_1_subprog",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "126: (85) call bpf_preempt_disable#70385      ;",
+        "126: (85) call bpf_preempt_disable#70385      ;",
+        "228: (85) call bpf_preempt_enable#70386       ;",
+        "BPF_EXIT instruction in main prog cannot be used inside bpf_preempt_disable-ed region",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "preempt_lock.c",
+      "program": "preempt_global_sleepable_helper_subprog",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": [
+        "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument",
+        "diagnostic BPF_PROG_LOAD: Invalid argument",
+        "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument"
+      ]
+    },
+    {
+      "file": "task_kfunc_failure.c",
+      "program": "task_access_comm1",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": []
+    },
+    {
+      "file": "task_kfunc_failure.c",
+      "program": "task_access_comm2",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": []
+    },
+    {
+      "file": "task_kfunc_failure.c",
+      "program": "task_access_comm3",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": []
+    },
+    {
+      "file": "task_kfunc_failure.c",
+      "program": "task_access_comm4",
+      "expect": "failure",
+      "stage": "verifier_rejected",
+      "diagnostic_excerpt": []
+    }
+  ],
+  "native_execution_mode": "LOADONLY",
+  "runtime_admission_additions": 0
+}

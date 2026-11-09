@@ -1,0 +1,5 @@
+# AArch64 application and native producer progress
+
+The [native producer comparison](producer-os/README.md) captures18successful ARM native compiles over the same8BCC objects and Katran balancer at O3 and Os. Existing native ABI, division lowering, application C and workload definitions remain captured. Total BCC executable bytes move7892->7352 (0.932), runqlat1516->1240 (0.818), Katran balancer7812->7576 (0.970). Static code size and call-site counts describe these producer artifacts; generation-bound guest replay and restored-workload hardware timing provide the following evidence.
+
+The original [preempt/RCU families](../kprog_arm64_app_coverage_20261108/kernel-selftest-helpers/void-kfunc/qemu/README.md) finish46load-only native submissions:3installed,12verifier rejected,31generation failures. All15annotations reaching the verifier agree. Complete380-entry ARM catalog and paired-source Tracee application retain their currently running private epochs. S2 owns universal ARM load recovery; A collects those replays and advances native P production performance with C.

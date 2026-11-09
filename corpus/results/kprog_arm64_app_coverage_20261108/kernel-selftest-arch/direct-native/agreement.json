@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T05:17:32.338611+00:00",
+  "utc": "2026-11-09T05:41:11.130574+00:00",
   "scope": "Complete direct ARM original native catalog; installed is a load-only stage; native execution records retain their own outcomes",
   "epochs": [
     {
@@ -431,6 +431,58 @@
           "stage": "installed"
         }
       ]
+    }
+  ],
+  "subsets": [
+    {
+      "epoch": "original-void-kfunc-families",
+      "publication": "23eb97460753056d9b512cbb6405e9351d3c8a60",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-helpers/void-kfunc/qemu/summary.json",
+      "counts": {
+        "catalog_rows": 46,
+        "attempted": 46,
+        "submitted": 46,
+        "installed": 3,
+        "verifier_rejected": 12,
+        "generation_failed": 31,
+        "compilation_failed": 0,
+        "resource_failed": 0,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 12,
+        "failure_agrees": 12,
+        "failure_installed": 0,
+        "success": 3,
+        "success_agrees": 3,
+        "success_installed": 3
+      },
+      "generation_causes": {
+        "bpf_cgroup_acquire": 9,
+        "bpf_cgroup_release": 4,
+        "bpf_copy_from_user_str": 2,
+        "bpf_task_acquire": 10,
+        "bpf_task_release": 4,
+        "bpf_task_from_pid": 1,
+        "bpf_task_from_vpid": 1
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 12,
+          "installed": 0,
+          "verifier_rejected": 12,
+          "agrees": 12
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 3,
+          "installed": 3,
+          "verifier_rejected": 0,
+          "agrees": 3
+        }
+      ],
+      "installed_failure": []
     }
   ]
 }
