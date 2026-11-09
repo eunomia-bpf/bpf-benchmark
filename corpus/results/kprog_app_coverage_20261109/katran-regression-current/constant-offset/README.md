@@ -1,0 +1,7 @@
+# Constant native offset identity
+
+The existing empty-assembly barrier now selects dynamic operands at compile time. Constant operands preserve their C value identity, including fixed native stack offsets; dynamic operands retain the original empty assembly constraint. Every instruction body, address, width, stack lifetime, helper effect and return predicate retains its definition. This is a compiler representation change with runtime predicate additions0.
+
+The existing real-header LEA, stack-arm and stack-write-lane host oracles pass under GCC and Clang18 with UBSan. Each compiler reports48553,117782 and1401654 cases respectively. The original captured whole Katran B source compiles against the parent header with the original flags, exit0,398.49seconds. Its complete-input hash, header snapshot and compiler command are retained in summary.json and host-raw.tar.gz. The candidate full B compile runs under the same recipe and flags; stock verifier and original38 outcomes follow separately.
+
+Commands: `make -f corpus/results/kprog_app_coverage_20261109/katran-regression-current/Makefile constant-offset-host` and `make -f corpus/results/kprog_app_coverage_20261109/katran-regression-current/Makefile constant-offset-compile PHASE=candidate`. All generated outputs and caches stay under `/var/tmp/kprog-tmp/C/katran-constant-offset`.

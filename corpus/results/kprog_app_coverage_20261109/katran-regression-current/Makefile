@@ -49,3 +49,8 @@ helper-stack-application:
 .PHONY: constant-offset-compile
 constant-offset-compile:
 	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/constant-offset-compile.py $(PHASE)
+
+.PHONY: constant-offset-host
+constant-offset-host:
+	install -d /var/tmp/kprog-tmp/C/katran-constant-offset/host
+	@for compiler in gcc clang-18; do for case in lea_route stack_arm_route stack_write_lanes_route; do 	  output=/var/tmp/kprog-tmp/C/katran-constant-offset/host/$$compiler-$$case; 	  $$compiler -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=all -I$(ROOT)/kprog/formal -I$(ROOT)/kprog/x86 -I$(ROOT)/kprog -I$(ROOT)/vendor/libbpf/src -c $(ROOT)/kprog/formal/oracles/test_x86_$${case}_host.c -o $$output.o; 	  gcc -fsanitize=undefined $$output.o -o $$output; $$output; 	done; done

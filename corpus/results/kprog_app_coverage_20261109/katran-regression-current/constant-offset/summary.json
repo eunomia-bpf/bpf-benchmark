@@ -1,0 +1,52 @@
+{
+  "change": "Compile-time constant operands retain their C identity; dynamic operands keep the existing empty inline assembly constraint",
+  "header_sha256": "9d2b5a29b7bcf25ade0b3dc84701f0bcc9ebc1e91398924447d973e0aee709a5",
+  "host_exit": 0,
+  "host_compilers": [
+    "gcc",
+    "clang-18"
+  ],
+  "existing_host_outcomes": [
+    "x86 lea route host cross-check: OK (48553 cases)",
+    "x86 stack arm route host cross-check: OK (117782 cases)",
+    "x86 stack write lanes route host cross-check: OK (1401654 cases)",
+    "x86 lea route host cross-check: OK (48553 cases)",
+    "x86 stack arm route host cross-check: OK (117782 cases)",
+    "x86 stack write lanes route host cross-check: OK (1401654 cases)"
+  ],
+  "baseline": {
+    "phase": "baseline",
+    "source_archive_sha256": "20bef4582c7e40221fddc3f17a264ef2dd23fbda81be94ab76a1d9dfe242b822",
+    "input_sha256": "f07af2fd602f2b578cd1bceb593cf3275c261bc11e99ee87d52fdb54670be2c3",
+    "header_sha256": "11e43f2fa3eb127e6ff1e1ba6b96ab05045cba0e2256c099751f5b7f99bc0ffb",
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/C/katran-constant-offset/captured.bpf.c",
+      "-o",
+      "/var/tmp/kprog-tmp/C/katran-constant-offset/baseline/compiled.bpf.o"
+    ],
+    "source_commit": "fc63fdba1371ba6327928c3980f12f3d810a512d",
+    "returncode": 0,
+    "wall_seconds": 398.48972541326657,
+    "object_sha256": "2fe52ebc5997f7f4195be45d72f76da06a28739271f8aa0604b467ba926026be",
+    "object_bytes": 1609272
+  },
+  "whole_application_candidate": "active",
+  "candidate_controller": 4179139,
+  "runtime_predicates_added": 0
+}
