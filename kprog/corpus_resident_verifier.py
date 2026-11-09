@@ -113,8 +113,9 @@ def namespace(scratch):
         command = ["taskset", "-c", "8-11", "vng", "--run",
                    "/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage",
                    "--cpus", "2", "--memory", "2G",
-                   "--rwdir=" + str(scratch) + "=" + str(scratch),
-                   "--exec", "bash " + str(scratch / "stock-guest.sh"),
+                   "--rwdir=/mnt=" + str(scratch),
+                   "--exec", "mkdir -p " + str(scratch) + " && mount --bind /mnt " +
+                   str(scratch) + " && bash /mnt/stock-guest.sh",
                    "--qemu-opts=-cpu host,+smap"]
         (scratch / "stock-command.json").write_text(json.dumps(command, indent=2) + "\n")
         with (scratch / "stock-console.log").open("w") as output:
