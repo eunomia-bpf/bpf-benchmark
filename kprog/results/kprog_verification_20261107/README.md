@@ -6105,3 +6105,28 @@ compile exit0; all six audited statements have no sorryAx and disclose inherited
 BV reduction. Concrete loop/source extraction, AUX0/AUX1 token/dispatcher and
 compiler/physical/ABI transport remain explicit. Complete C-model/compiled-family
 totals stay70/75 and13/75. Sole fullfbe6 keeps its earlier immutable source.
+
+### Current context fixtures and signed numeric frame
+
+The [context oracle receipt](x86-context-oracles.log.gz), published as
+`28883a27183e5bbb6520e541b50546b4a59351c4`, retains all original POPCNT, CL/parity and widening fixtures.
+GCC and Clang each pass88,704 POPCNT full-state cases;3,072 CL-shift cases and
+19 actual rendered host/BPF widening programs pass. Five existing partial
+context programs now compile under current context lowering. Packet/readonly,
+malformed-encoding and exact raw-read kind/width/count comparisons remain active.
+The prior fullfbe6 stopped at Makefile170 on the obsolete diagnostic assertion;
+its original source/log/CPU are archived and independently verified.
+
+The [two numeric frame laws](signed-div-frame.log.gz), published as
+`9fa48d300bd331492ad0cc48a5cf8f926b8e1736`, connect the actual generated raw/tag writes to the signed
+source-state Step. Byte RAX16 packing and ordered wider RAX/RDX writes retain
+all unrelated pointer tags, native-stack origin projections and the complete
+architectural frame. The theorem covers every input/environment/arena and all
+six fresh flags; divide faults retain the input. Compilation and axiom audit
+finish exit0, with no sorryAx and two inherited BV-reduction dependencies.
+
+Concrete loop/source extraction, unsigned AUX0/signed AUX1 field/token/dispatcher
+and compiler/physical/ABI transport remain explicit. Complete current C-model
+and compiled-family totals stay70/75 and13/75. Sole full source
+`28883a27183e5bbb6520e541b50546b4a59351c4` keeps its earlier epoch and excludes these later frame laws;
+its actual terminal receives a separate receipt.

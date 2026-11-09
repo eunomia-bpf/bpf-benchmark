@@ -20194,6 +20194,24 @@
       "73f51958b5dc453b520debdfaa624919f277f2be"
     ]
   },
+  "current_x86_context_oracles": {
+    "archive": "kprog/results/kprog_verification_20261107/x86-context-oracles.log.gz",
+    "cl_shift_cases": 3072,
+    "compilers": [
+      "cc",
+      "clang-18"
+    ],
+    "domain": "Retain all original encoded fixtures; require supported current context programs to compile while existing host state, raw memory access kind/width/count, packet/readonly and malformed encoding assertions stay active.",
+    "focus_exit": 0,
+    "original_full_exit": 2,
+    "original_full_failure": "Makefile170 obsolete narrow XDP context diagnostic assertion after POPCNT full-state cases passed",
+    "original_full_source": "fbe6cd1f865fee9c4b48208c9e88de933c0d081e",
+    "popcount_full_state_per_compiler": 88704,
+    "production_changes": 0,
+    "publication": "28883a27183e5bbb6520e541b50546b4a59351c4",
+    "retained_partial_context_programs": 5,
+    "widening_host_bpf_programs": 19
+  },
   "d_focused": {
     "commands": [
       {
@@ -30248,6 +30266,76 @@
     },
     "runtime_predicate_additions": 0,
     "status": "partial-universal-magnitude-state-model"
+  },
+  "signed_div_numeric_frame": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-frame.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 70,
+    "publication": "9fa48d300bd331492ad0cc48a5cf8f926b8e1736",
+    "remaining_interfaces": [
+      "Concrete restoring-loop/source extraction",
+      "UnsignedAUX0/signedAUX1 source/field/token/dispatcher binding",
+      "Compiler/physical memory/entry/ABI transport"
+    ],
+    "scope": "Generated raw/tag byte RAX16 or ordered wider RAX/RDX writes and arbitrary fresh flags compose actual signed source arithmetic to canonical signedDivide Step for every environment/frame/arena/input state; unrelated pointer tags and native-stack origin projections retained.",
+    "sole_full_source": "28883a27183e5bbb6520e541b50546b4a59351c4",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86NumericAddress\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.word_frame_matches\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.word_frame_refines\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-frame/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-frame/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "reused": true,
+          "source_sha256": "ad7419b4a39c32774be87f6c7eeb62875d8d4eed012e9fb2687e7e377884ecc8"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-frame/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "source_sha256": "e29d831710c7c386cb781f394099939442c0a1354abf82a8d7ca92d422337b81"
+        }
+      ],
+      "laws": [
+        "word_frame_matches",
+        "word_frame_refines"
+      ],
+      "reduction_bridge": 2,
+      "scope": "Universal signed numeric raw/tag frame with generated RAX/RDX writes, arbitrary environment/arena/stack aliases/fresh flags. Concrete loop/source extraction, AUX dispatcher/token and physical/compiler transport remain explicit.",
+      "sorryAx": 0
+    }
   },
   "signed_div_reference": {
     "archive": "kprog/results/kprog_verification_20261107/signed-div-reference.log.gz",
