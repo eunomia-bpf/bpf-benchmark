@@ -25,3 +25,5 @@ corpus-runs: 405 raw paths (3978314 bytes) preserved in 103 closed groups; statu
 micro-test-core: 88 raw paths (26811853 bytes) preserved in 38 closed groups; status 1234 ? 1148. Per-file content hashes and destinations: `micro-test-core-moves.json.gz`. Deferred units: 0.
 
 replay-input-extras: 368 raw paths (1223979923 bytes) preserved in 11 closed groups; status 1162 ? 796. Per-file content hashes and destinations: `replay-input-extras-moves.json.gz`. Deferred units: 0.
+
+historical-corpus-runs: 631 raw paths (9420167 bytes) preserved in 154 closed groups; status 797 ? 168. Per-file content hashes and destinations: `historical-corpus-runs-moves.json.gz`. Deferred units: 0.
