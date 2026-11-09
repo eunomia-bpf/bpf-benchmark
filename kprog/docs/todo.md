@@ -109,20 +109,20 @@
 - [x] **V** RET：实际 wrapping source index/有符号坐标/native byte 地址，已分配 8 字节域的 signed SP 推进、Coherent 推导 saved-read 并在 release 后保持，接入 native Step 与 selected/default token（本提交，12 条定理）。
 - [x] **V** ARM RET：当前 raw target/RETURN10/CODE9 的 invocation/有限 case/default 分流、完整 scratch frame、X0 物化与外层 callee/SP 契约、内部 reference branch 与 native ABI 前提（本提交，12 条组件定理）。
 - [ ] **V** RET：实际 C/union/编译器建立 live-stack/native-memory Coherent 关系，x86 producer return-mode、ARM producer operand/case 表及两 ISA saved-return/LR/code-PC 映射、实际 C/B/编译/物理入口出口对应关系。
-- [ ] **V** RET source-coordinate/coherence 与 ARM RET source 批次全量检查（已合入排队源 35e73c955；当前唯一 d399 full 完成后复用增量缓存）。
-- [ ] **V** RET 栈生命周期/owned-read 组件批次全量检查（与后续源坐标和 ARM RET 合为排队源 35e73c955；当前唯一 full 源 d39918760，沿用共享增量缓存）。
+- [x] **V** RET source-coordinate/coherence 与 ARM RET source 批次全量检查（源 2adbd4abd，本提交归档实际 make check exit0；含源坐标/live-memory12条及ARMtarget/tag/numeric-exit12条定理）。
+- [x] **V** RET 栈生命周期/owned-read 组件批次全量检查（源 2adbd4abd，本提交归档实际 make check exit0；包含 85d7ff891 的17条 lifetime、5e9636767 的9条 owned-read，以及后续源坐标与ARM RET模型）。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
 - [x] **V** compiled ROR：五个真实 BPF 单元覆盖 8 位低/高字节及 16/32/64 位，任意 value/count/fresh 输入、reference scalar 写回和完整 memory/visit/halt/fault/events 观察；组合对象 146 个函数，原 141 字节保持（本提交，compiled14/75）。
-- [ ] **V** compiled ROR 与前序 RET source 模型合并批次全量检查（本提交；复用共享增量缓存和唯一 full 队列）。
+- [x] **V** compiled ROR 与前序 RET source 模型合并批次全量检查（源 2adbd4abd，本提交归档实际 make check exit0；包含151组合单元及50条RET组件定理）。
 - [x] **V** compiled ADD_IMM：五个真实 BPF 单元覆盖8位低/高字节及16/32/64位，任意操作数/编码立即数及64位imm32符号扩展，reference scalar写回、完整memory/visit/halt/fault/events；151组合函数保留原146字节（本提交，compiled15/75）。
-- [ ] **V** compiled ADD_IMM 后继全量检查（本提交；在现有RET/ROR批次后复用唯一full槽与增量缓存）。
+- [x] **V** compiled ADD_IMM 后继全量检查（源 2adbd4abd，本提交归档实际 make check exit0；包含151组合单元及50条RET组件定理）。
 - [x] **V/C** ROR_MEM 绝对地址写回采用现有64位整数地址运算（源9208b579d）；原有26,547,217-case oracle 在 Clang18/GCC UBSan 各通过，原始line892诊断和精确源码/编译输入归档于本提交。
 - [x] **V** compiled ADD_REG：七个真实BPF单元覆盖四种8位源/目的低高字节组合及16/32/64位，任意操作数/fresh/visit、canonical arithmetic与scalar写回、完整memory/exclusive/23输入/halt/fault/events；158组合函数保留原151字节（本提交，compiled16/75）。
 - [ ] **V** compiled ADD_REG 后继全量检查（协调者16:00暂停；已提交源码/归档保留，等待B表示调整）。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。 协调者16:00暂停编译单元，等待B表示调整。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
 - [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。
-- [x] **V** 全量检查通过（本提交归档的源版本 d39918760，实际 make check exit0）；后续模型批次按第5节继续全量检查。
+- [x] **V** 全量检查通过（本提交归档的源版本 2adbd4abd，实际 make check exit0）；后续模型批次按第5节继续全量检查。
 - [ ] **V** TCB 统计，在提交论文的版本上重新计数。
 - [ ] **协调者** 全量检查通过后重核论文的 O1、O2、O4 数字。
 

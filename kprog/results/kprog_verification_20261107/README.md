@@ -6577,3 +6577,12 @@ source correspondence and physical/compiler transport remain explicit generic
 interfaces. Selected source-control hardware/official-model replay stays on the
 shared TODO. These are once-per-simulator theorems for every program; B forwarding
 and callee comparison storage stay independent.
+
+### Committed source full check 2adbd4abd
+
+`make check` on immutable committed2adbd4abd exits0. All1287 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_2adbd4abd`. Every check retains its exact committed source identity.
+
+Full raw archive: [full-make-check-2adbd4abd.log.gz](full-make-check-2adbd4abd.log.gz).
