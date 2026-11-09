@@ -1,0 +1,29 @@
+{
+  "kernel_source": "/var/tmp/kprog-tmp/CK/linux",
+  "kernel_build": "/var/tmp/kprog-tmp/S17/arm64-build",
+  "image": "/var/tmp/kprog-tmp/A/entry-frame/Image",
+  "image_sha256": "d6b8430007e07bc7b53eeb5723cd7124e6b8a8ba84b9e7d544cce6dbc4eacae5",
+  "patch": "kprog/stock-path/arm64-entry-frame.patch",
+  "patch_sha256": "a701d0b86263b8222e4f77b1e4e5ce4ff14a8de945ccfed84682372e6a2ffcf0",
+  "kernel_build_exit": 0,
+  "tail_default_tests_passed": 19,
+  "tail_stock_entry_tests_passed": 19,
+  "release_build_exit": 0,
+  "saved_registers": [
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "frame": "X19-X28 through existing full-callee pushes/pops; X29 through existing FP/LR frame record",
+  "stack_delta_bytes": 80,
+  "model_exit": "SP at entry coordinate0",
+  "native_execution_requests": 0
+}

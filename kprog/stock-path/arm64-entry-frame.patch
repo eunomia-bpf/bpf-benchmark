@@ -1,0 +1,8 @@
+--- a/arch/arm64/net/bpf_jit_comp.c
++++ b/arch/arm64/net/bpf_jit_comp.c
+@@ -443 +443 @@
+-	if (ctx->prog->aux->exception_boundary) {
++	if (ctx->native || ctx->prog->aux->exception_boundary) {
+@@ -477 +477 @@
+-	if (aux->exception_boundary || aux->exception_cb) {
++	if (ctx->native || aux->exception_boundary || aux->exception_cb) {

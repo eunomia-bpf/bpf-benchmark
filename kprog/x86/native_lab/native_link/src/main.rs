@@ -2178,6 +2178,12 @@ fn append_arm64_stub_callee_pop(words: &mut Vec<u32>, callee_saved_mask: u8) -> 
     if callee_saved_mask > 0xf {
         bail!("arm64 tail_call callee-saved mask exceeds 4 bits");
     }
+    if cfg!(feature = "stock-entry-frame") {
+        for reg in [27, 25, 23, 21, 19] {
+            words.push(a64_ldp_post64(reg, reg + 1, 16)?);
+        }
+        return Ok(());
+    }
     let mut regs: Vec<u32> = [19u32, 20, 21, 22]
         .iter()
         .enumerate()
@@ -2280,7 +2286,9 @@ fn build_arm64_tail_call_inline(
     words.push(a64_add_imm64(X12, X12, 1)?);
     words.push(a64_str_u64(X12, X9, 0)?);
     words.extend_from_slice(native_cleanup_words);
-    words.push(a64_add_imm64(31, 31, ARM64_NATIVE_LAB_STACK_RESERVE_BYTES)?);
+    if !cfg!(feature = "stock-entry-frame") {
+        words.push(a64_add_imm64(31, 31, ARM64_NATIVE_LAB_STACK_RESERVE_BYTES)?);
+    }
     append_arm64_stub_callee_pop(&mut words, callee_saved_mask)?;
     words.push(a64_br(X10)?);
 
@@ -5991,6 +5999,14 @@ mod tests {
             a64_branch_target(0, load_idx + 2, words[load_idx + 2]),
             Some((words.len() * 4) as u64)
         );
+        if cfg!(feature = "stock-entry-frame") {
+            let cleanup = words.iter().position(|word| *word == a64_add_imm64(31, 31, 0x80).unwrap()).unwrap();
+            let expected: Vec<_> = [27, 25, 23, 21, 19].iter()
+                .map(|reg| a64_ldp_post64(*reg, *reg + 1, 16).unwrap()).collect();
+            assert_eq!(&words[cleanup + 1..cleanup + 6], expected.as_slice());
+            assert_eq!(words[cleanup + 6], a64_br(10).unwrap());
+            return;
+        }
         let restore_bpf_stack =
             a64_add_imm64(31, 31, ARM64_NATIVE_LAB_STACK_RESERVE_BYTES).unwrap();
 
