@@ -135,9 +135,16 @@ theorem packed_kind (kind : ShiftKind) (lane1 lane2 lane3 : Byte) :
   simp only [packedAux, arm64_aux_b0_roundtrip]
   cases kind <;> rfl
 
+/-- The C shift switch receives the complete AUX word; native SHIFT encodings
+place the kind in byte0 and fill the remaining bytes with0. -/
+def nativeAux (kind : ShiftKind) : BitVec 32 := packedAux kind 0 0 0
+
+theorem native_kind (kind : ShiftKind) :
+    decodeKind (nativeAux kind).toNat = some kind := by cases kind <;> rfl
+
 /-- Actual body order: the generated immediate/register selector chooses the
-count, the generated kind primitive consumes the low AUX byte, then a width
-write commits the result. All sources are read from the incoming state. -/
+count, the generated kind primitive consumes the complete AUX word, then a
+width write commits the result. All sources are read from the incoming state. -/
 def rawStep (op : GeneratedArm64ImmOperand.ImmOp) (kind : ShiftKind) (width : Width)
     (dst src count : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
     Transition Reference.AArch64.State :=
@@ -149,36 +156,36 @@ def dispatch (opcode : Nat) (aux : BitVec 32) (width : Width)
     (dst src count : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
     Option (Transition Reference.AArch64.State) :=
   (decodeOpcode opcode).bind (fun op =>
-    (decodeKind (GeneratedArm64Aux.b0 aux).toNat).map (fun kind => rawStep op kind width dst src count immediate s))
+    (decodeKind aux.toNat).map (fun kind => rawStep op kind width dst src count immediate s))
 
 theorem dispatch_immediate_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
-    (dst src count : Reference.AArch64.Register) (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
-    dispatch (GeneratedArm64DispatchFamily.code .shiftImm) (packedAux kind lane1 lane2 lane3)
+    (dst src count : Reference.AArch64.Register) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .shiftImm) (nativeAux kind)
       width dst src count (BitVec.ofNat 64 amount.val) s =
       some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) s) := by
-  simp only [dispatch, decode_immediate, packed_kind]
+  simp only [dispatch, decode_immediate, native_kind]
   change some (handlerStep (.immediate width kind amount dst src) s) = _
   rw [step_refines]
 
 theorem dispatch_register_refines (width : Width) (kind : ShiftKind)
     (dst src count : Reference.AArch64.Register) (immediate : Word)
-    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
-    dispatch (GeneratedArm64DispatchFamily.code .shiftReg) (packedAux kind lane1 lane2 lane3)
+    (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .shiftReg) (nativeAux kind)
       width dst src count immediate s =
       some (Reference.AArch64.step (.shift (.register width kind dst src count)) s) := by
-  simp only [dispatch, decode_register, packed_kind]
+  simp only [dispatch, decode_register, native_kind]
   change some (handlerStep (.register width kind dst src count) s) = _
   rw [step_refines]
 
 theorem dispatch_bad_kind (opcode : Nat) (aux : BitVec 32) (width : Width)
     (dst src count : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State)
-    (outside : 3 < (GeneratedArm64Aux.b0 aux).toNat) :
+    (outside : 3 < aux.toNat) :
     dispatch opcode aux width dst src count immediate s = none := by
-  have invalid : decodeKind (GeneratedArm64Aux.b0 aux).toNat = none := by
-    simp [decodeKind, GeneratedArm64ShiftDecode.code, show (GeneratedArm64Aux.b0 aux).toNat ≠ 0 by omega,
-      show (GeneratedArm64Aux.b0 aux).toNat ≠ 1 by omega,
-      show (GeneratedArm64Aux.b0 aux).toNat ≠ 2 by omega,
-      show (GeneratedArm64Aux.b0 aux).toNat ≠ 3 by omega]
+  have invalid : decodeKind aux.toNat = none := by
+    simp [decodeKind, GeneratedArm64ShiftDecode.code, show aux.toNat ≠ 0 by omega,
+      show aux.toNat ≠ 1 by omega,
+      show aux.toNat ≠ 2 by omega,
+      show aux.toNat ≠ 3 by omega]
   simp only [dispatch, invalid]
   cases decodeOpcode opcode <;> rfl
 

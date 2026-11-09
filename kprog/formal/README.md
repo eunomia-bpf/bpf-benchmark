@@ -80,8 +80,8 @@ C extraction/union and physical/compiler transport remain interfaces.
 
 ARM raw SHIFT_IMM/SHIFT_REG/MVN/NEG extends the unified step to15/74.
 Seventeen new laws plus23 prior laws audit and compile with module/root0.
-SHIFT binds the whole AUX kind0..3 used by its C switch and producer; the older
-numerical low-byte lift carries an upper-byte0 source premise. Unary consumes
+SHIFT binds the whole AUX kind0..3 used by its C switch and producer; the
+numerical handler, dispatcher and scalar token also decode the complete AUX. Unary consumes
 AUX byte1/byte2, retains arbitrary unused bytes and omitted-modifier amounts,
 and preserves the native NEG/MVN modifier domains. Complete raw words/tags,
 register aliases/XZR and architectural image compose independently of B layout.

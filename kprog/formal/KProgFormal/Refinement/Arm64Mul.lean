@@ -255,18 +255,18 @@ def dispatch (opcode : Nat) (aux : BitVec 32) (width : Width)
 
 theorem shift_immediate_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
     (amount : Fin width.bits) (dst src src2 src3 : Reference.AArch64.Register)
-    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    (s : Reference.AArch64.State) :
     dispatch (GeneratedArm64DispatchFamily.code .shiftImm)
-      (Arm64Shift.packedAux kind lane1 lane2 lane3) width dst src src2 src3 (BitVec.ofNat 64 amount.val) s =
+      (Arm64Shift.nativeAux kind) width dst src src2 src3 (BitVec.ofNat 64 amount.val) s =
       some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) s) := by
   unfold dispatch
   rw [Arm64Shift.dispatch_immediate_refines]
 
 theorem shift_register_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
     (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word)
-    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    (s : Reference.AArch64.State) :
     dispatch (GeneratedArm64DispatchFamily.code .shiftReg)
-      (Arm64Shift.packedAux kind lane1 lane2 lane3) width dst src src2 src3 immediate s =
+      (Arm64Shift.nativeAux kind) width dst src src2 src3 immediate s =
       some (Reference.AArch64.step (.shift (.register width kind dst src src2)) s) := by
   unfold dispatch
   rw [Arm64Shift.dispatch_register_refines]

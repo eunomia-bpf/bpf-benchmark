@@ -355,7 +355,7 @@ theorem whole_kind (kind : ShiftKind) :
     Arm64Shift.decodeKind (kindAux kind).toNat = some kind := by cases kind <;> rfl
 
 theorem numeric_kind (kind : ShiftKind) :
-    kindAux kind = Arm64Shift.packedAux kind 0 0 0 := by cases kind <;> rfl
+    kindAux kind = Arm64Shift.nativeAux kind := by cases kind <;> rfl
 
 def shiftBody (op : GeneratedArm64ImmOperand.ImmOp) (kind : ShiftKind) (width : Width)
     (dst src count : Register) (value : Word) (origins : Origins) (state : State) : Transition State :=
@@ -442,7 +442,7 @@ theorem production_shift (immediate : Bool) (kind : ShiftKind) (width : Width)
   have reached := Arm64Dispatcher.shift_reached immediate (kindAux kind) width
     (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count)
     value sourceScalar sourceStack (image origins state)
-  rw [numeric_kind, Arm64Shift.packed_kind] at reached
+  rw [numeric_kind, Arm64Shift.native_kind] at reached
   simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply,
     numeric_kind, reached, Arm64Dispatcher.shift_body_typed]
   rw [← numeric_kind, shift_reached]
@@ -459,7 +459,7 @@ theorem production_immediate_count (kind : ShiftKind) (width : Width)
       sourceScalar sourceStack (image origins state) := by
   have reached := Arm64Dispatcher.shift_reached true (kindAux kind) width
     (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 value sourceScalar sourceStack (image origins state)
-  rw [numeric_kind, Arm64Shift.packed_kind] at reached
+  rw [numeric_kind, Arm64Shift.native_kind] at reached
   simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply, numeric_kind, reached, Option.map, ↓reduceIte]
   rw [Arm64Dispatcher.shift_immediate_ignores_count kind width _ _ src2 (Arm64Register.registerCode count),
     Arm64Dispatcher.shift_body_typed, ← numeric_kind, shift_reached]

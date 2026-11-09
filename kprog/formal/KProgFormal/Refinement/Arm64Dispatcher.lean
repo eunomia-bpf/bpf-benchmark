@@ -529,7 +529,7 @@ def dispatchThroughShift (code : Nat) (aux : BitVec 32) (width : Width) (dst src
   match dispatch code aux width dst src src2 value sourceScalar sourceStack s with
   | some result => some result
   | none => (Arm64Shift.decodeOpcode code).bind (fun op =>
-      (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+      (Arm64Shift.decodeKind aux.toNat).map
         (fun kind => shiftBody op kind width dst src src2 value s))
 
 theorem before_shift (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
@@ -545,7 +545,7 @@ theorem before_shift (immediate : Bool) (aux : BitVec 32) (width : Width) (dst s
 theorem shift_reached (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
     (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
     dispatchThroughShift (shiftOpcode immediate) aux width dst src src2 value sourceScalar sourceStack s =
-      (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+      (Arm64Shift.decodeKind aux.toNat).map
         (fun kind => shiftBody (if immediate then .shiftImm else .shiftReg) kind width dst src src2 value s) := by
   have known : Arm64Shift.decodeOpcode (shiftOpcode immediate) =
       some (if immediate then .shiftImm else .shiftReg) := by cases immediate <;> rfl
@@ -561,12 +561,12 @@ theorem shift_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (
   simp only [dispatchThroughShift, dispatch_step_refines code aux width dst src src2 value sourceScalar sourceStack native s binding]
 
 theorem shift_immediate_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
-    (dst src : Register) (count : Byte) (lane1 lane2 lane3 : Byte) (sourceScalar sourceStack : Bool)
+    (dst src : Register) (count : Byte) (sourceScalar sourceStack : Bool)
     (s : Reference.AArch64.State) :
-    dispatchThroughShift (shiftOpcode true) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+    dispatchThroughShift (shiftOpcode true) (Arm64Shift.nativeAux kind) width
       (Arm64Register.registerCode dst) (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val)
       sourceScalar sourceStack s = some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) s) := by
-  rw [shift_reached, Arm64Shift.packed_kind]
+  rw [shift_reached, Arm64Shift.native_kind]
   change some (shiftBody .shiftImm kind width (Arm64Register.registerCode dst)
     (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val) s) = _
   rw [shift_immediate_ignores_count kind width _ _ count (Arm64Register.registerCode 31), shift_body_typed]
@@ -574,12 +574,12 @@ theorem shift_immediate_refines (width : Width) (kind : Reference.AArch64.ShiftK
   rw [Arm64Shift.step_refines]
 
 theorem shift_register_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
-    (dst src count : Register) (value : Word) (lane1 lane2 lane3 : Byte) (sourceScalar sourceStack : Bool)
+    (dst src count : Register) (value : Word) (sourceScalar sourceStack : Bool)
     (s : Reference.AArch64.State) :
-    dispatchThroughShift (shiftOpcode false) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+    dispatchThroughShift (shiftOpcode false) (Arm64Shift.nativeAux kind) width
       (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count) value
       sourceScalar sourceStack s = some (Reference.AArch64.step (.shift (.register width kind dst src count)) s) := by
-  rw [shift_reached, Arm64Shift.packed_kind]
+  rw [shift_reached, Arm64Shift.native_kind]
   change some (shiftBody .shiftReg kind width (Arm64Register.registerCode dst)
     (Arm64Register.registerCode src) (Arm64Register.registerCode count) value s) = _
   rw [shift_body_typed]
@@ -593,13 +593,13 @@ inductive ShiftBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → By
       (native : Reference.AArch64.Instruction) (binding : DispatchBinding pc code aux width dst src src2 value native) :
       ShiftBinding pc code aux width dst src src2 value native
   | immediate (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
-      (dst src : Register) (count : Byte) (lane1 lane2 lane3 : Byte) :
-      ShiftBinding pc (shiftOpcode true) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+      (dst src : Register) (count : Byte) :
+      ShiftBinding pc (shiftOpcode true) (Arm64Shift.nativeAux kind) width
         (Arm64Register.registerCode dst) (Arm64Register.registerCode src) count (BitVec.ofNat 64 amount.val)
         (.shift (.immediate width kind amount dst src))
   | register (width : Width) (kind : Reference.AArch64.ShiftKind) (dst src count : Register)
-      (value : Word) (lane1 lane2 lane3 : Byte) :
-      ShiftBinding pc (shiftOpcode false) (Arm64Shift.packedAux kind lane1 lane2 lane3) width
+      (value : Word) :
+      ShiftBinding pc (shiftOpcode false) (Arm64Shift.nativeAux kind) width
         (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count) value
         (.shift (.register width kind dst src count))
 
@@ -4339,7 +4339,7 @@ def specializedScalar (token : ScalarToken) (flags : Byte) (aux : BitVec 32)
         (fun column => keepBody column width dst value s)
     | .aluRegister => (decodeAlu (GeneratedArm64Aux.b0 aux).toNat).map
         (fun op => aluBody op false sourceScalar sourceStack aux width dst src src2 value s)
-    | .shift imm => (Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+    | .shift imm => (Arm64Shift.decodeKind aux.toNat).map
         (fun kind => shiftBody (if imm then .shiftImm else .shiftReg) kind width dst src src2 value s)
     | .multiply op => some (multiplyBody op width dst src src2 src3 s)
     | .unary op => some (unaryBody op aux width dst src s)
@@ -4379,7 +4379,7 @@ theorem scalar_token_body_matches (token : ScalarToken) (flags : Byte) (aux : Bi
   | aluRegister => cases w : (decodeDataWidth flags) <;>
       cases op : decodeAlu (GeneratedArm64Aux.b0 aux).toNat <;> rfl
   | shift imm => cases imm <;> cases w : (decodeDataWidth flags) <;>
-      cases kind : Arm64Shift.decodeKind (GeneratedArm64Aux.b0 aux).toNat <;> rfl
+      cases kind : Arm64Shift.decodeKind aux.toNat <;> rfl
   | multiply op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
   | unary op => cases op <;> cases w : (decodeDataWidth flags) <;> rfl
   | conditionalNegate => cases w : (decodeDataWidth flags) <;>

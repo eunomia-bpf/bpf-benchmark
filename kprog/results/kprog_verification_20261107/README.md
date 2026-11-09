@@ -6440,8 +6440,7 @@ to the generated switch. Its producer ARM64_AUX_SHIFT fills upper bytes with0.
 The new raw dispatcher binds the complete AUX to0..3. Its numerical production
 comparison uses exactly those whole-word encodings. The existing numerical
 low-byte decoder retains a wider abstract domain; source correspondence for that
-older domain requires the explicit upper-byte0 identity. Updating that older
-interface stays on the shared TODO. Unary consumes actual AUX byte1/byte2 and
+older domain requires the explicit upper-byte0 identity. The whole-AUX follow-up below aligns that older interface. Unary consumes actual AUX byte1/byte2 and
 retains arbitrary AUX0/AUX3. Native NEG uses LSL/LSR/ASR, and MVN also uses ROR.
 
 `ShiftUnary.production_shift`, `production_immediate_count` and
@@ -6454,3 +6453,23 @@ snapshots, the exact prior source prefix, original first-attempt diagnostics,
 final module and all proof outcomes. Raw ARM totals advance11to15/74. Entry
 origin identity, C extraction/union access and physical/compiler transport stay
 explicit, independently of B forwarding and callee comparison storage.
+
+### Whole-AUX SHIFT source alignment
+
+The canonical numerical handler, dispatcher, specialized scalar token and
+native-field binding now decode the complete32-bit SHIFT AUX word, matching
+ARM64_SIM_L_EXEC and KPROG_ARM64_SHIFT_VALUE. Native SHIFT_IMM/SHIFT_REG bindings
+use the producer's exact kind0..3 encoding; the low-byte pack utility retains
+its independent field theorem. The existing bad-kind theorem covers every AUX
+word above3. Earlier opcode gates, multiply/unary continuation and the15-operation
+raw step keep their public laws and native coverage.
+
+All11 affected modules, including the root, compile incrementally against the
+retained warm cache. Fifty axiom audits pass with sorryAx0 and33 inherited
+Lean.ofReduceBool dependencies. All prior public definition/theorem names in
+the four changed files remain. The
+[whole-AUX receipt](arm-shift-whole-aux.log.gz) retains before/after canonical
+sources, C/producer snapshots, exact module hashes/logs, the initial audit-name
+diagnostic and final corrected audits. The source C and single reference ISA
+retain their definitions. Runtime predicates added0. Raw ARM coverage stays15/74;
+entry/C extraction/union and physical/compiler transport remain interfaces.

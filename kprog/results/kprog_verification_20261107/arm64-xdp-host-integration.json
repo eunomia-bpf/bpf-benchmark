@@ -78044,5 +78044,141 @@
       "source-arm64_unary.h.txt": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0"
     },
     "scope": "Whole SHIFT AUX0..3 native producer domain and actual unary byte1/byte2; allrawGPR/tag/origin/width writes/complete architecture image and production dispatcher equality. Fullunused bytefields retained. Entry/C extraction/union/physical/compiler interfaces explicit; Bforwarding and calleecomparisons independent."
+  },
+  "arm64_shift_whole_aux_alignment": {
+    "proof": {
+      "exit": 0,
+      "modules": [
+        {
+          "module": "KProgFormal.Refinement.Arm64Shift",
+          "exit": 0,
+          "source_sha256": "25475d8a363447a5a6a72a3182b91c404e6f21a1c6eb90f9fba99164a4a8f615"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Logic",
+          "exit": 0,
+          "source_sha256": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Arithmetic",
+          "exit": 0,
+          "source_sha256": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Exclusive",
+          "exit": 0,
+          "source_sha256": "f2ba9fd7deffaeb5cd989ab35a49e0346bb570b29f4f0dbd13be2e30190245c4"
+        },
+        {
+          "module": "KProgFormal.Arm64Stlxr",
+          "exit": 0,
+          "source_sha256": "2ca61779bb24a96e6b2eb5432eb51d5229d632af8ebdcce9a74f125508fc0a83"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Mul",
+          "exit": 0,
+          "source_sha256": "d0b83f2e536a02e93ebd263b9f593bab365131ea3753353520e15d0c0e675cae"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Extrev",
+          "exit": 0,
+          "source_sha256": "1c7d14dfeb0d107e97fed285021c9b91e142b04c85b4ff24b9fd2b0a331e78be"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Select",
+          "exit": 0,
+          "source_sha256": "876850c5f8b86dd4f99f28bb9e2d6e1f9de87280736cf1e514f5990ce4c91500"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64Dispatcher",
+          "exit": 0,
+          "source_sha256": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20"
+        },
+        {
+          "module": "KProgFormal.Refinement.Arm64RawRegister",
+          "exit": 0,
+          "source_sha256": "404adbf2088192068a97ede2cac4c3811097e846fe3ba95fdacd58b8472f1b22"
+        },
+        {
+          "module": "KProgFormal",
+          "exit": 0,
+          "source_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057"
+        }
+      ],
+      "audits": [
+        "KProgFormal.Refinement.Arm64Shift.native_kind",
+        "KProgFormal.Refinement.Arm64Shift.dispatch_immediate_refines",
+        "KProgFormal.Refinement.Arm64Shift.dispatch_register_refines",
+        "KProgFormal.Refinement.Arm64Shift.dispatch_bad_kind",
+        "KProgFormal.Refinement.Arm64Dispatcher.shift_reached",
+        "KProgFormal.Refinement.Arm64Dispatcher.shift_immediate_refines",
+        "KProgFormal.Refinement.Arm64Dispatcher.shift_register_refines",
+        "KProgFormal.Refinement.Arm64Dispatcher.step_through_shift_refines",
+        "KProgFormal.Refinement.Arm64Dispatcher.scalar_token_body_matches",
+        "KProgFormal.Refinement.Arm64Dispatcher.scalar_token_step_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.read_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.write_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.write_zero_register",
+        "KProgFormal.Refinement.Arm64RawRegister.write_tag_frame",
+        "KProgFormal.Refinement.Arm64RawRegister.advance_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.nop_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.immediate_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.keep_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.dispatch_nop",
+        "KProgFormal.Refinement.Arm64RawRegister.dispatch_immediate",
+        "KProgFormal.Refinement.Arm64RawRegister.dispatch_keep",
+        "KProgFormal.Refinement.Arm64RawRegister.destination_separate_sp",
+        "KProgFormal.Refinement.Arm64RawRegister.step_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.body_projects",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.body_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.prefix_passes",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.reached",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.production_dispatch",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.dispatch_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.earlier_step",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.step_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.unused_accumulator",
+        "KProgFormal.Refinement.Arm64RawRegister.Multiply.production_unused_addend",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.whole_kind",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.numeric_kind",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.shift_projects",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unary_projects",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.before_shift",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.shift_reached",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unary_reached",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_shift",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_immediate_count",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_unary",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.immediate_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.register_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.invert_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.negate_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unmodified_refines",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.earlier_step",
+        "KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.step_refines"
+      ],
+      "sorryAx": 0,
+      "reduction_bridge": 33,
+      "source_sha256": {
+        "kprog/formal/KProgFormal/Refinement/Arm64Shift.lean": "25475d8a363447a5a6a72a3182b91c404e6f21a1c6eb90f9fba99164a4a8f615",
+        "kprog/formal/KProgFormal/Refinement/Arm64Mul.lean": "d0b83f2e536a02e93ebd263b9f593bab365131ea3753353520e15d0c0e675cae",
+        "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+        "kprog/formal/KProgFormal/Refinement/Arm64RawRegister.lean": "404adbf2088192068a97ede2cac4c3811097e846fe3ba95fdacd58b8472f1b22"
+      },
+      "scope": "Whole32bit SHIFT AUX decode in handler/dispatcher/token; native0..3 bindings; outoftable AUX generic decline. Prior40raw laws and all15operation step retained. Canonical ISA/runtime C unchanged; C/physical/compiler interfaces explicit."
+    },
+    "operations": [
+      "ARM64_OP_SHIFT_IMM",
+      "ARM64_OP_SHIFT_REG"
+    ],
+    "raw_operation_count": 15,
+    "archive": "arm-shift-whole-aux.log.gz",
+    "source_snapshots": {
+      "source-arm64_shift.h.txt": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-generate_micro_sim_proofs.py.txt": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+      "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+    },
+    "scope": "Complete32bit AUX decoded by numericalhandler/dispatcher/specializedtoken; nativeproducer kind0..3; existinginvalidkind law covers allabove3. All11affectedmodules/root/50audits0/sorryAx0; priorpublicnames and raw15 step retained. RuntimeC and canonicalISA retain definitions; C/physical/compiler interfaces explicit."
   }
 }
