@@ -1,0 +1,3445 @@
+{
+  "utc": "2026-11-09T08:24:41.205908+00:00",
+  "terminal_publication": {
+    "commit": "255e11210be7f174603b8e9ba7ee79ae6051c8dc",
+    "paths": [
+      "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/driver.log.gz",
+      "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/summary.json"
+    ],
+    "sha256": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/driver.log.gz": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/current-kfunc-catalog/module-path-replay/summary.json": "683826a3298437d5e2a4f05899c4e8e45b7680f4607a986a926cf1366c1fede3"
+    },
+    "remote_ancestor_verified": true
+  },
+  "summary": {
+    "utc": "2026-11-09T08:24:37.358165+00:00",
+    "make_exit": 0
+  },
+  "launch_inputs_sha256": "63faaed8887c2af25e4cfd24c02b961051924f407a5739e03ac94a627f8b6aa3",
+  "scopes": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/source",
+      "bytes": 8680348,
+      "files": [
+        {
+          "path": "source/kprog/trusted_compile.py",
+          "sha256": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
+          "bytes": 6874
+        },
+        {
+          "path": "source/kprog/trusted_loader.cpp",
+          "sha256": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
+          "bytes": 4899
+        },
+        {
+          "path": "source/kprog/trusted_generation.py",
+          "sha256": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+          "bytes": 4316
+        },
+        {
+          "path": "source/kprog/trusted_service.py",
+          "sha256": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+          "bytes": 16518
+        },
+        {
+          "path": "source/kprog/helper_abi.py",
+          "sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+          "bytes": 1879
+        },
+        {
+          "path": "source/kinsn/module/x86/bpf_x86_native_lab.c",
+          "sha256": "8194af40f4decfabdf3cec14a569b9ed4ec39506935af0b29be4bec29afd6bc7",
+          "bytes": 13957
+        },
+        {
+          "path": "source/kinsn/module/arm64/Makefile",
+          "sha256": "cb04c24ff4b7f21df2c42223422251c63f81829ca5dd877ff68a91c0f925ff52",
+          "bytes": 617
+        },
+        {
+          "path": "source/kinsn/module/arm64/bpf_arm64_native_lab.c",
+          "sha256": "6b005380555eebb2cca4eb08c92d6174917101e876c5e4b6443e317662d7a05f",
+          "bytes": 21827
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_exclusive.h",
+          "sha256": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+          "bytes": 1472
+        },
+        {
+          "path": "source/kinsn/module/include/kinsn_x86_emit.h",
+          "sha256": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+          "bytes": 4660
+        },
+        {
+          "path": "source/kinsn/module/include/kinsn_common.h",
+          "sha256": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+          "bytes": 4093
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_group.h",
+          "sha256": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+          "bytes": 1304
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_input.h",
+          "sha256": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+          "bytes": 2320
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_trusted.h",
+          "sha256": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+          "bytes": 17327
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_binding.h",
+          "sha256": "9a4261d76737e038ec82b6efcfaf5684e800d5097738a64e9867cd094d0ec9d6",
+          "bytes": 1058
+        },
+        {
+          "path": "source/kinsn/module/include/native_lab_trusted_wire.h",
+          "sha256": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+          "bytes": 4819
+        },
+        {
+          "path": "source/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+          "sha256": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d",
+          "bytes": 813264
+        },
+        {
+          "path": "source/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so",
+          "sha256": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+          "bytes": 881704
+        },
+        {
+          "path": "source/vendor/libbpf/src/bpf_helper_defs.h",
+          "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+          "bytes": 176025
+        },
+        {
+          "path": "source/kprog/x86/x86_sim_local_bpf.h",
+          "sha256": "eba653298481574afb053754cd0f4405324a59797da361ac4bfcfe11f6fe7c80",
+          "bytes": 183472
+        },
+        {
+          "path": "source/kprog/test/check_trusted_service.py",
+          "sha256": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289",
+          "bytes": 9860
+        },
+        {
+          "path": "source/kprog/arm64/arm64_sim.h",
+          "sha256": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+          "bytes": 5173
+        },
+        {
+          "path": "source/kprog/arm64/arm64_sim_direct.h",
+          "sha256": "4d736e6ccd4e4269c0461f7b7654940e8167cc32bb670cd2f619918ef6a498bf",
+          "bytes": 30490
+        },
+        {
+          "path": "source/kprog/arm64/arm64_sim_local_bpf.h",
+          "sha256": "8055449df2b6d2783bda4ab90005c8cda44cdf01a06d15d1070fb4cdeda046eb",
+          "bytes": 142721
+        },
+        {
+          "path": "source/kprog/arm64/trusted_specializer.py",
+          "sha256": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+          "bytes": 3587
+        },
+        {
+          "path": "source/kprog/arm64/generate_sim_dispatch.py",
+          "sha256": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
+          "bytes": 4508
+        },
+        {
+          "path": "source/kprog/tv/Makefile",
+          "sha256": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
+          "bytes": 45077
+        },
+        {
+          "path": "source/kprog/tv/native-proof-regions.patch",
+          "sha256": "f08d38c07b9608e2f3d62c8e5b85426a3beb1c583a3fb3ab8be184560146b2e6",
+          "bytes": 11987
+        },
+        {
+          "path": "source/kprog/tv/test_kernel_patch.py",
+          "sha256": "b1a659b726f8bf4389dff905e8fe5267bb3de03280910c42359ca678e132b99e",
+          "bytes": 3326
+        },
+        {
+          "path": "source/kprog/selftests/submit.py",
+          "sha256": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186",
+          "bytes": 20222
+        },
+        {
+          "path": "source/kprog/selftests/selftests.py",
+          "sha256": "e1750072a7d77b57100d17089a630d7ff17a029471a16d3e5d6fcc8c4a211e09",
+          "bytes": 13550
+        },
+        {
+          "path": "source/kprog/fidelity/bound_probe.cpp",
+          "sha256": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+          "bytes": 4220
+        },
+        {
+          "path": "source/kprog/fidelity/tcb.py",
+          "sha256": "f3420c7a27cbf5417f7f71b9fa23da503b88a6faad0f6f7fefce10dd1f3452bb",
+          "bytes": 10526
+        },
+        {
+          "path": "source/kprog/fidelity/negative.py",
+          "sha256": "bd18a9b4e406ae8f4e1267c850e3968cccea8e29922bb2c9d60a9d30a22018bb",
+          "bytes": 19269
+        },
+        {
+          "path": "source/kprog/x86/micro-prog/x86_abi.py",
+          "sha256": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
+          "bytes": 30876
+        },
+        {
+          "path": "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+          "sha256": "d91e50ae9204b6d56e905e6a80df951593b352aec5dcdb4099e4e05b7494bc44",
+          "bytes": 87048
+        },
+        {
+          "path": "source/kprog/x86/native_lab/native_link/Cargo.toml",
+          "sha256": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+          "bytes": 524
+        },
+        {
+          "path": "source/kprog/x86/native_lab/native_link/Cargo.lock",
+          "sha256": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+          "bytes": 8877
+        },
+        {
+          "path": "source/kprog/x86/native_lab/native_link/src/main.rs",
+          "sha256": "fc059a7cb799fe8569bbc00e845ff5ca3ce4dc6f22a51b524bee0f292ae89607",
+          "bytes": 240809
+        },
+        {
+          "path": "source/kprog/x86/native_lab/native_link/src/x86.rs",
+          "sha256": "bf235f60cd37da7326d988c60c6eb333074956adbe9c7127fdeda5ad52b7d074",
+          "bytes": 225454
+        },
+        {
+          "path": "source/kprog/arm64/micro-prog/generated_arm64_cc_decode.py",
+          "sha256": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
+          "bytes": 577
+        },
+        {
+          "path": "source/kprog/arm64/micro-prog/generated_arm64_helper_idents.py",
+          "sha256": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+          "bytes": 2946
+        },
+        {
+          "path": "source/kprog/arm64/micro-prog/arm64_abi.py",
+          "sha256": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
+          "bytes": 26723
+        },
+        {
+          "path": "source/kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+          "sha256": "432525f65f70232520bfce246884b1860cf9ca18e664e5282a81ef1c86a6ed8d",
+          "bytes": 57232
+        },
+        {
+          "path": "source/kprog/arm64/micro-prog/generated_arm64_decode.py",
+          "sha256": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
+          "bytes": 904
+        },
+        {
+          "path": "source/kprog/arm64/build/kernel-selftests-current/programs.json",
+          "sha256": "202dbe738a99200e7b1fac3fabead660e85d9c22f080082979960ab69dafb62e",
+          "bytes": 975278
+        },
+        {
+          "path": "source/kprog/arm64/build/native-extent/kinsn/bpf_testmod.ko",
+          "sha256": "87b7d1651fdff71cee43a0f133f6866e79e68cf7866402d9a7becf3a5ce95be1",
+          "bytes": 1009664
+        },
+        {
+          "path": "source/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+          "sha256": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+          "bytes": 2759336
+        },
+        {
+          "path": "source/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py",
+          "sha256": "ba427648704edb8ee2ce8412616cd29ec12e2e91f3cf46f6a07334edf7555fd5",
+          "bytes": 9532
+        },
+        {
+          "path": "source/kprog/formal/KProgFormal/Arm64HelperIdents.lean",
+          "sha256": "fa32d86e603e98bc40ba547a20679bca0f1d745208e93740cc999eba331177d3",
+          "bytes": 6932
+        },
+        {
+          "path": "source/kprog/formal/oracles/test_arm64_helper_idents_host.c",
+          "sha256": "7f4a7018cca96e8facbd666be751be4f2a252e815f8ea24510a2964c991ccd4c",
+          "bytes": 4972
+        },
+        {
+          "path": "source/kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+          "sha256": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+          "bytes": 9031
+        },
+        {
+          "path": "source/kprog/formal/contracts/arm64_helper_idents_spec.json",
+          "sha256": "7f2b36457ff74b73be12e12510ae1b55b2ef707f908b7c8377efaf7be7727b93",
+          "bytes": 4388
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_index.h",
+          "sha256": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b",
+          "bytes": 1445
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mem_aux.h",
+          "sha256": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f",
+          "bytes": 1203
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_dispatch_family.h",
+          "sha256": "b6e1d9ccb0aa7c430136b7e86c21f99fb3b8c5812a957d06f2b8a27d22304d02",
+          "bytes": 5385
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_sbb_flags.h",
+          "sha256": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2",
+          "bytes": 463
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_cond.h",
+          "sha256": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+          "bytes": 1946
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_arm.h",
+          "sha256": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce",
+          "bytes": 2879
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_reg_presence.h",
+          "sha256": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
+          "bytes": 1776
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_fmov.h",
+          "sha256": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30",
+          "bytes": 2443
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_load_bytes.h",
+          "sha256": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571",
+          "bytes": 3546
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_setcc.h",
+          "sha256": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
+          "bytes": 2968
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_store_bytes.h",
+          "sha256": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc",
+          "bytes": 2433
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_ptr_write.h",
+          "sha256": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f",
+          "bytes": 3863
+        },
+        {
+          "path": "source/kprog/formal/generated/control_flow_trace.h",
+          "sha256": "9700892f1ef5e5323e9d4599e59015ade53908f39ca29346b0bd0f9638a67c5a",
+          "bytes": 1023
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_pair_mem.h",
+          "sha256": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6",
+          "bytes": 2651
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_popcount.h",
+          "sha256": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2",
+          "bytes": 710
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_pair_load_tag.h",
+          "sha256": "e2f1240bbfb737e06784063ba783f71c8bd19043aa43db4322793ea0b7463399",
+          "bytes": 2356
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_not.h",
+          "sha256": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a",
+          "bytes": 265
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_dq_mem.h",
+          "sha256": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09",
+          "bytes": 3513
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_fmov_dest.h",
+          "sha256": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a",
+          "bytes": 1602
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_helper_arg_ptr.h",
+          "sha256": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199",
+          "bytes": 2674
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_width.h",
+          "sha256": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe",
+          "bytes": 1768
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mem_dispatch.h",
+          "sha256": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635",
+          "bytes": 1838
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_dispatch_family.h",
+          "sha256": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c",
+          "bytes": 6945
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_adrp.h",
+          "sha256": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
+          "bytes": 1972
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_write_lanes.h",
+          "sha256": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf",
+          "bytes": 8355
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_pushpop.h",
+          "sha256": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499",
+          "bytes": 2228
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_arena.h",
+          "sha256": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+          "bytes": 1847
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_stack_index.h",
+          "sha256": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+          "bytes": 302
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_stack_write_lanes.h",
+          "sha256": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5",
+          "bytes": 8160
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_dispatch.h",
+          "sha256": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d",
+          "bytes": 2947
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_andn.h",
+          "sha256": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295",
+          "bytes": 3232
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stlxr.h",
+          "sha256": "23e346ca5b8c4d0e11397b9cf8ce925d30250de28746ff8ad6ea92c2db9f1991",
+          "bytes": 1641
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_alu_decode.h",
+          "sha256": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c",
+          "bytes": 693
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_store.h",
+          "sha256": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2",
+          "bytes": 4735
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_reg_read.h",
+          "sha256": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+          "bytes": 400
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_bitops.h",
+          "sha256": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+          "bytes": 1083
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_dq_mem_extra.h",
+          "sha256": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b",
+          "bytes": 4585
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_csel.h",
+          "sha256": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+          "bytes": 4510
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_flag_operand.h",
+          "sha256": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+          "bytes": 2495
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_orn.h",
+          "sha256": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
+          "bytes": 1964
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_read_tag_source.h",
+          "sha256": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987",
+          "bytes": 3284
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_signed.h",
+          "sha256": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+          "bytes": 1172
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_cneg.h",
+          "sha256": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df",
+          "bytes": 1971
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_bzhi.h",
+          "sha256": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c",
+          "bytes": 2863
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_tag.h",
+          "sha256": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783",
+          "bytes": 775
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_logic_flag_handler.h",
+          "sha256": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+          "bytes": 843
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_write_arm.h",
+          "sha256": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8",
+          "bytes": 2970
+        },
+        {
+          "path": "source/kprog/formal/generated/abi_load.h",
+          "sha256": "c4dae571789dc6d938ec993cf391428d3cd8ceb8ba55f27fa9443dbc4daa9546",
+          "bytes": 1505
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_full_condition.h",
+          "sha256": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0",
+          "bytes": 663
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_extrev.h",
+          "sha256": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+          "bytes": 5115
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_div.h",
+          "sha256": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2",
+          "bytes": 3197
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mov_load.h",
+          "sha256": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d",
+          "bytes": 3727
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_rep_movs.h",
+          "sha256": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f",
+          "bytes": 1694
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_immediate.h",
+          "sha256": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013",
+          "bytes": 504
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_cmpop.h",
+          "sha256": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725",
+          "bytes": 6335
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_popcnt_flags.h",
+          "sha256": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02",
+          "bytes": 755
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_opcode.h",
+          "sha256": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031",
+          "bytes": 6378
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_shift_result.h",
+          "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+          "bytes": 2080
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mem_index.h",
+          "sha256": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e",
+          "bytes": 1398
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mod.h",
+          "sha256": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+          "bytes": 5482
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_bt.h",
+          "sha256": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575",
+          "bytes": 2893
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_width.h",
+          "sha256": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1",
+          "bytes": 1824
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_ldrsx.h",
+          "sha256": "20e2d1ed13f2780872631360ce0deb911a1140601e9f29c6d8ff5436847e6a90",
+          "bytes": 2148
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mem_offset.h",
+          "sha256": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99",
+          "bytes": 1685
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_vreg_field.h",
+          "sha256": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141",
+          "bytes": 3155
+        },
+        {
+          "path": "source/kprog/formal/generated/ptr_add.h",
+          "sha256": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d",
+          "bytes": 493
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_base_src.h",
+          "sha256": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f",
+          "bytes": 2622
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mov_reg_arm.h",
+          "sha256": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+          "bytes": 3602
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mulx_arm.h",
+          "sha256": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966",
+          "bytes": 2871
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_movbe.h",
+          "sha256": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440",
+          "bytes": 3258
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_shift_count.h",
+          "sha256": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35",
+          "bytes": 314
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_helper_dispatch.h",
+          "sha256": "a8e04dc636c756c2aa5a152f67eedb95b7abdfb87d257a6540c53e48b7021e7b",
+          "bytes": 19808
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_flag_handler.h",
+          "sha256": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564",
+          "bytes": 1369
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_adc.h",
+          "sha256": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c",
+          "bytes": 509
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_alu_handler.h",
+          "sha256": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843",
+          "bytes": 549
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_write_width_arm.h",
+          "sha256": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735",
+          "bytes": 3242
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_logic_flags.h",
+          "sha256": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7",
+          "bytes": 358
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_helper_idents.h",
+          "sha256": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e",
+          "bytes": 12720
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_dispatch_singleton.h",
+          "sha256": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac",
+          "bytes": 5594
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_xmm0.h",
+          "sha256": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848",
+          "bytes": 4688
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_movk.h",
+          "sha256": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063",
+          "bytes": 2271
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_alu_result.h",
+          "sha256": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac",
+          "bytes": 2447
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_alu_flag_arm.h",
+          "sha256": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed",
+          "bytes": 9962
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_index.h",
+          "sha256": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+          "bytes": 426
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_callmem.h",
+          "sha256": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988",
+          "bytes": 982
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_branch_emit.h",
+          "sha256": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d",
+          "bytes": 692
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_aux.h",
+          "sha256": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592",
+          "bytes": 1170
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_bitfield.h",
+          "sha256": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210",
+          "bytes": 3962
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_flags.h",
+          "sha256": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9",
+          "bytes": 2838
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_movx_shape.h",
+          "sha256": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3",
+          "bytes": 6135
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_setcc_mem.h",
+          "sha256": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c",
+          "bytes": 3659
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_doubleshift_arm.h",
+          "sha256": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de",
+          "bytes": 3924
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_ccmp_handler.h",
+          "sha256": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+          "bytes": 764
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_index_value.h",
+          "sha256": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e",
+          "bytes": 2694
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_branch.h",
+          "sha256": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+          "bytes": 2644
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_add_flags.h",
+          "sha256": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd",
+          "bytes": 430
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_write_arm.h",
+          "sha256": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665",
+          "bytes": 3260
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_reg_lane_aux.h",
+          "sha256": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc",
+          "bytes": 668
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_xchg.h",
+          "sha256": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+          "bytes": 3084
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_branch_emit.h",
+          "sha256": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+          "bytes": 703
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_shift_flags.h",
+          "sha256": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770",
+          "bytes": 1768
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_stack_arena.h",
+          "sha256": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16",
+          "bytes": 1590
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_ccmp_decode.h",
+          "sha256": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+          "bytes": 1482
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_byte_lane.h",
+          "sha256": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
+          "bytes": 1735
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_reg_dispatch.h",
+          "sha256": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb",
+          "bytes": 3684
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_mem_access.h",
+          "sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+          "bytes": 5603
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_decode.h",
+          "sha256": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
+          "bytes": 877
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_alu_result.h",
+          "sha256": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7",
+          "bytes": 1242
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_bzhi_flags.h",
+          "sha256": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef",
+          "bytes": 674
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_cc_decode.h",
+          "sha256": "338b989d7d3c62adb6c6c43b269f69abc6582ada7d7bb981dcf4e862fe73bf68",
+          "bytes": 7407
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_stack_write_tag_action.h",
+          "sha256": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
+          "bytes": 4332
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_bswap.h",
+          "sha256": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604",
+          "bytes": 1054
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_offset.h",
+          "sha256": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5",
+          "bytes": 1432
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_reg_presence.h",
+          "sha256": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb",
+          "bytes": 1588
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_aux_flags.h",
+          "sha256": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283",
+          "bytes": 374
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_load_tag.h",
+          "sha256": "92ac76aabe42dc0d9d701b07b06bd82f65da613864ff6ca59a91f70a9764c9c4",
+          "bytes": 1648
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mul.h",
+          "sha256": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b",
+          "bytes": 5119
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_cond.h",
+          "sha256": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef",
+          "bytes": 1626
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_reduction.h",
+          "sha256": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab",
+          "bytes": 3294
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_shift.h",
+          "sha256": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+          "bytes": 3836
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_reg_dispatch.h",
+          "sha256": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c",
+          "bytes": 2599
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_vreg.h",
+          "sha256": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0",
+          "bytes": 4958
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_imm_operand.h",
+          "sha256": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643",
+          "bytes": 1687
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mem_prepost.h",
+          "sha256": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765",
+          "bytes": 2098
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_stack_arm.h",
+          "sha256": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb",
+          "bytes": 2828
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_ldrsx_op.h",
+          "sha256": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d",
+          "bytes": 1861
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_reg_write.h",
+          "sha256": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994",
+          "bytes": 1708
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_alu_operand_select.h",
+          "sha256": "6604e16f46f5a59bb8a2946821e341bf01842d2b919273af7b9648c722d35f54",
+          "bytes": 1260
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_mov.h",
+          "sha256": "80ead9db28172eb01f442b54d4db4264a00482b349f23368a1a28a6938441395",
+          "bytes": 1912
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_unary.h",
+          "sha256": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0",
+          "bytes": 2118
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_csel_ptr.h",
+          "sha256": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5",
+          "bytes": 2321
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_dispatch_singleton.h",
+          "sha256": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972",
+          "bytes": 14235
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_doubleshift.h",
+          "sha256": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5",
+          "bytes": 1619
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_specialization.h",
+          "sha256": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690",
+          "bytes": 5227
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_imul_flags.h",
+          "sha256": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2",
+          "bytes": 585
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_sbb_result.h",
+          "sha256": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7",
+          "bytes": 255
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_alu_operand.h",
+          "sha256": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427",
+          "bytes": 407
+        },
+        {
+          "path": "source/kprog/formal/generated/arm64_cc_decode.h",
+          "sha256": "a22666da330cad56f9fcbe1b142d9b4083b0dc47820cb82e84dcb5240fadd74c",
+          "bytes": 8554
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_sub_flags.h",
+          "sha256": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9",
+          "bytes": 429
+        },
+        {
+          "path": "source/kprog/formal/generated/x86_cmov.h",
+          "sha256": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+          "bytes": 4030
+        },
+        {
+          "path": "source/kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean",
+          "sha256": "3997febb0eb1e310f6375f8a004e9812fa9f52473e356f950ced2884e6311307",
+          "bytes": 9791
+        },
+        {
+          "path": "source/kprog/libnativeloader/src/native_loader_manifest.hpp",
+          "sha256": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+          "bytes": 37788
+        },
+        {
+          "path": "source/kprog/libnativeloader/src/native_loader.cpp",
+          "sha256": "1f48ebc162bb8a8ae8452682d42e8acaf617f4202aba59bf517ab57b901abf68",
+          "bytes": 228459
+        },
+        {
+          "path": "source/kprog/libnativeloader/src/native_loader_link_schema.hpp",
+          "sha256": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8",
+          "bytes": 9591
+        },
+        {
+          "path": "source/kprog/libnativeloader/include/native_loader.hpp",
+          "sha256": "89f4f112bde0f9332b4dc9a8c997dfc7235c4d17b041151648180ffdf3437573",
+          "bytes": 6216
+        },
+        {
+          "path": "source/kprog/selftests/__pycache__/selftests.cpython-312.pyc",
+          "sha256": "84a2d2c915f06b497f7e17727d6dd9a5a8c4973af49b129f73506ba186ff3b61",
+          "bytes": 16564
+        },
+        {
+          "path": "source/bpfopt/shim/shim_native_loader.h",
+          "sha256": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+          "bytes": 26887
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/catalog",
+      "bytes": 125012512,
+      "files": [
+        {
+          "path": "catalog/test_global_func6__global_func6.native.o",
+          "sha256": "408011ec3adf2b0f2548bbb8e338e0ca791925782bc1d524976f25e49b8624bd",
+          "bytes": 9808
+        },
+        {
+          "path": "catalog/crypto_basic.bpf.o",
+          "sha256": "b93a182d6e3f5d58f018a973cc5972cd9ec7b9b897422bd2bd9076898bf56b5b",
+          "bytes": 786384
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_ctx.native.o",
+          "sha256": "fbd4e5e54c45df9ff5ef0a17519e8071cc9bbf2a667484b7a9807ff01b275b6d",
+          "bytes": 11784
+        },
+        {
+          "path": "catalog/verifier_const__tcx6.native.o",
+          "sha256": "81401780393cff5dc41f44dac94648128e9c432a37b39271d13075dca72a3bae",
+          "bytes": 9376
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind4_good_return_code_0.native.o",
+          "sha256": "e367982182ed8bc6a2015134a196a362f54de8f7d924d7cc65cf6d46496feb44",
+          "bytes": 7488
+        },
+        {
+          "path": "catalog/cpumask_failure__test_cpumask_null.native.o",
+          "sha256": "27165637f0bd59374905acbeecebf5215e106abbdc29a7269d181f45c1347154",
+          "bytes": 899872
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_out_of_bounds_skb.native.o",
+          "sha256": "f437b52fedb25d0521105ffc2d75b625804feecfc0e608d61b897b2f10dc0b3c",
+          "bytes": 12664
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_3_minus_2_subprog.native.o",
+          "sha256": "6e082e9a0943fc9068921077529eb8a0395a05066b84083fb6a428f5fddd9cbd",
+          "bytes": 16032
+        },
+        {
+          "path": "catalog/uptr_failure.bpf.o",
+          "sha256": "c778d5d980a1d40d6a46d51e0209d7f13188cabbb637555121f73ab0796b276f",
+          "bytes": 792928
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname6_bad_return_code.native.o",
+          "sha256": "857dca5306f64f257427f4d9d56d170773418c87b48150e917ad5843eeff750e",
+          "bytes": 7656
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sockops_delete.native.o",
+          "sha256": "82c78b2c502d5001f74570b6f64ab11159f9e5b90d63e8903e9e0a749ea9aa8d",
+          "bytes": 9456
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_access_comm1.native.o",
+          "sha256": "027a32b7a0c23b4b4fbc99c4fad0e3caa462ee713aac0893c759986f1644b756",
+          "bytes": 898944
+        },
+        {
+          "path": "catalog/irq__irq_save_iter.native.o",
+          "sha256": "70f6d540c6792fcb0249d237011c2f304664cf108e446994c24b777905fe2b7d",
+          "bytes": 16120
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind4_good_return_code_1.native.o",
+          "sha256": "3500203d381822c1165c7af9de64ce0a61d2537b1cd891abf775407c8071c17b",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_1.native.o",
+          "sha256": "a0ae61a654a8ab98a55f850cb1944dbb238b455f5f8b7e970b8f8e45af9d8a07",
+          "bytes": 14320
+        },
+        {
+          "path": "catalog/verifier_vfs_accept.bpf.o",
+          "sha256": "c4b030e8f087e16ce88c2508fef42507d578789df935568dd237c61e55e43229",
+          "bytes": 832096
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_release_null.native.o",
+          "sha256": "c80a411a3924ee9190defdbe5dcfe7b21da40f95beb57e76e157bc2d4519d639",
+          "bytes": 900624
+        },
+        {
+          "path": "catalog/verifier_sdiv.bpf.o",
+          "sha256": "2d24ea4c7c618d878b264cbb51d5fdd9ff47d6b5ce3313990dd7aebe4cb448ee",
+          "bytes": 64928
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_balance.native.o",
+          "sha256": "af5eef53e339a8c4f9ec000ad96f219bf43b54d93b047d9eb59e8332cc133ba0",
+          "bytes": 14728
+        },
+        {
+          "path": "catalog/dynptr_fail__global.native.o",
+          "sha256": "82809917ef702cc66a17571fafa9572785276b835cb9bc0c5ca1b44c82cb5050",
+          "bytes": 8272
+        },
+        {
+          "path": "catalog/verifier_const__tcx2.native.o",
+          "sha256": "c6cbabe7b9119382749302dfb314af3ce153598f8ec59c2a73c94336944a9318",
+          "bytes": 9416
+        },
+        {
+          "path": "catalog/test_global_func10__global_func10.native.o",
+          "sha256": "09cb46aa219244f780564950e96074ba40f61df53130c88843f19bca84021b9c",
+          "bytes": 9424
+        },
+        {
+          "path": "catalog/dynptr_fail__uninit_write_into_slot.native.o",
+          "sha256": "ee143a014eb98916e468db3910fada514f4a67cde67c12fabe94b03844d295c8",
+          "bytes": 8472
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_null.native.o",
+          "sha256": "e023066a19b33c079ce1be5e8261c80d15d229529acd7e16e4843d1b3419c95c",
+          "bytes": 898856
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__path_d_path_from_path_argument.native.o",
+          "sha256": "c0912081dea7a0963da3a52dabf5410085f662daff9c69a1169e49100c70e0d5",
+          "bytes": 899816
+        },
+        {
+          "path": "catalog/verifier_netfilter_ctx__with_invalid_ctx_access_test5.native.o",
+          "sha256": "a8a208a903818da9443f3546c91cf63e0c78ff05dd9c769c8d5aa3dada6855d0",
+          "bytes": 898968
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg_unix_good_return_code_1.native.o",
+          "sha256": "e447a220c410735b98267c7334b9f36b788185b83eea250be82df733d72da19e",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/verifier_array_access__an_array_with_a_constant_no_nullness.native.o",
+          "sha256": "16a476b437e420d5d017c32fa3bde96c56742aac7c6f716049185041267188bf",
+          "bytes": 7384
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__inode_rename.native.o",
+          "sha256": "5ce8a1cc78f07717a6c20a92d7a359c459801c97a299d114649bfe0bfe6e162a",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind6_good_return_code_1.native.o",
+          "sha256": "9b53a8ba260785510c80d10d4aaa7ee85f5c653f1d1fa3c29cac2efa638d1624",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_global_sleepable_kfunc_subprog.native.o",
+          "sha256": "b7ad916da14c43e1c4681d28985185bf5550ddd3facf029a53834f3c67716e8d",
+          "bytes": 14600
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_read_into_slot.native.o",
+          "sha256": "bcc97dc6eb2c230ae16d855e02a12fd531a1c55a05c973f5ec3c65567460752a",
+          "bytes": 8616
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_2_minus_1_subprog.native.o",
+          "sha256": "a3c0de9f8b4bdd1bc8d4ae2ae4ada8b4df5952ad637415771a014bb67227f5d4",
+          "bytes": 14592
+        },
+        {
+          "path": "catalog/async_stack_depth.bpf.o",
+          "sha256": "c20f281f52d82620ee409cffc8d4d77e91a829dddfe750d8de509408e790fe8b",
+          "bytes": 15056
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_var_off_store.native.o",
+          "sha256": "1ce1aa6f06eddfb1a8c324c0808d83f0217b26fc88ead678163d7866af9210a1",
+          "bytes": 11000
+        },
+        {
+          "path": "catalog/dynptr_fail__ringbuf_invalid_api.native.o",
+          "sha256": "7a52c2f9dfe078205055fb24221a7301540dbc579ab22fe86c211e0abca48598",
+          "bytes": 8920
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_rcu_get_release.native.o",
+          "sha256": "43e1da2fef08ad1b55a816f2fb3fc4a313d0200541a11c9f9493660b4a82c55a",
+          "bytes": 902176
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_xdp.native.o",
+          "sha256": "b3d2711c3e707b4e6d9ba791ad6650bb074c45e35524fa65d95b620abac30b2e",
+          "bytes": 9384
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_read1.native.o",
+          "sha256": "55d6fdc171c960cde0e0a042892e03ace6805a2bf51a47a6d3815f8f3b64347a",
+          "bytes": 8360
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_getter_after_bad.native.o",
+          "sha256": "3a9bd7f6860173a5359da1af57a98420dbcc65d0564b18575febe841b6a4b501",
+          "bytes": 6912
+        },
+        {
+          "path": "catalog/verifier_bits_iter__no_destroy.native.o",
+          "sha256": "d1314135477abe206d281cb79673e041a370d3b15ea58f10292e62ce3a5d3c88",
+          "bytes": 899136
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_read2.native.o",
+          "sha256": "33a6c1085c35fbae11d596db8553223d8d75b893cb6cea667fa879d77a39fec6",
+          "bytes": 9096
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_invalid_return.native.o",
+          "sha256": "bbdc8cd7dd45f527a931f7752034b5e37a5b64b2e3a05f1d066b72f756dd1719",
+          "bytes": 7216
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_missing_null_check2.native.o",
+          "sha256": "c9acbdeb469a4c5fe7b3ad6e9a12070e9ca0e1bdd7a93c76dcadc289c3c794bd",
+          "bytes": 8800
+        },
+        {
+          "path": "catalog/test_global_func3.bpf.o",
+          "sha256": "d8124edee8c047cd744ddd4a88766e9ad8b09749999e5a8d6038d2697f073c1b",
+          "bytes": 12984
+        },
+        {
+          "path": "catalog/verifier_bits_iter__fewer_words.native.o",
+          "sha256": "04825c52a93e4c144d0109100cd7c89c0faf2f51c39b8b7e292963bb9eff8afc",
+          "bytes": 899536
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__get_task_exe_file_kfunc_unreleased.native.o",
+          "sha256": "d967976b189278a5ebd16287b37b364fc1cd0d8f385f0a52c88514419d28de0b",
+          "bytes": 898248
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_is_null_invalid.native.o",
+          "sha256": "63ccb54d797ff4eeca136eca5002d229eb9f8d9ed390df8247cb4b86e4a4505e",
+          "bytes": 8192
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind4_good_return_code_3.native.o",
+          "sha256": "c4cda25512af57a632dac18f8a01e3dd50b6ec30294528384bbffb6af026b71f",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/verifier_may_goto_2__may_goto_c_code.native.o",
+          "sha256": "4d1a4f01c9ee467114ed15b37c0e152284808f05a2ad11ab43884f639252f8d5",
+          "bytes": 6360
+        },
+        {
+          "path": "catalog/verifier_bits_iter__bad_words.native.o",
+          "sha256": "0b093a14972012843b42e28011f84c509b65a3d6dfb772a983655e4380e61257",
+          "bytes": 900640
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_indirect_helper_access.native.o",
+          "sha256": "64af489a73c7fac2b4b2b15feb0a72d4e92f5a102e2243597cf80e520026aeaa",
+          "bytes": 11072
+        },
+        {
+          "path": "catalog/irq__irq_restore_ooo_3.native.o",
+          "sha256": "4a6940023944b0291ef9cfc258fb5723f27c0a2002a8be996f9a59359b4cf656",
+          "bytes": 16064
+        },
+        {
+          "path": "catalog/test_global_func4.bpf.o",
+          "sha256": "54cd1a2bc77cd90c56d83967822250fb6222cf15b14a187e7dc941f233b4c85d",
+          "bytes": 12464
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_fp.native.o",
+          "sha256": "7eb485bf03cce69c903dcbb3f9da4abab9b99c9dfae720a660f3efed9b1f99bc",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/kfunc_implicit_args.bpf.o",
+          "sha256": "1263430e669918d130918c744d7a936be9c59418983824d043aa9147422be8e4",
+          "bytes": 795584
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_2.native.o",
+          "sha256": "914b87af93bb99e58bbc89bf92ce89461f620ca8e7128785c5da8d8b6eb2d3ac",
+          "bytes": 14384
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_3_subprog.native.o",
+          "sha256": "fb64ab23e9dbf37d9ab3adf062f8d043e515fa2f5e69f9819f96e829e2ca87df",
+          "bytes": 15920
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind6_good_return_code_0.native.o",
+          "sha256": "3b9221915479404003c9b41b942f37f609611d748f638a42402d633eb65146fd",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect_unix_good_return_code_1.native.o",
+          "sha256": "fb16e670adf2178103ed472e8f1ba1cdd9fe016b9edb0926d7753bd826a2bc5a",
+          "bytes": 7552
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg4_good_return_code_0.native.o",
+          "sha256": "9ff76d4a5a436df8a9fc277c011bb764d872d79717cb382ad9392132520b7fbb",
+          "bytes": 7504
+        },
+        {
+          "path": "catalog/map_kptr_fail__non_const_var_off.native.o",
+          "sha256": "ce5ac298faa8e67b5fb427ab5e7b42a533841de729a6054e77d5a4dcd82c6b1d",
+          "bytes": 10968
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_release_unacquired.native.o",
+          "sha256": "525ad1501f08ecd869bbec31022e704be90e7c759bee9db198588c97a92e9281",
+          "bytes": 898680
+        },
+        {
+          "path": "catalog/verifier_store_release__dummy_test.native.o",
+          "sha256": "2d98e5144bbe5d38681cd9d50161d016ad55152fba68ed2f9e426003819d888c",
+          "bytes": 4032
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__get_task_exe_file_and_put_kfunc_from_argument.native.o",
+          "sha256": "cf693e9d07821c640338ca13aa65b150307b597006e983e2337bc32a5377ee70",
+          "bytes": 898880
+        },
+        {
+          "path": "catalog/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_write.native.o",
+          "sha256": "37dfab6338ab6c66292b6df576291cae883c32a91b46fc3b6b1b18b3c363d666",
+          "bytes": 13448
+        },
+        {
+          "path": "catalog/verifier_default_trusted_ptr__test_default_trusted_ptr.native.o",
+          "sha256": "1d01a9184a9276f26a310030123e54bfc6122cc33e4a942ee78fb6f26d6585df",
+          "bytes": 5464
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_raw_tp_delete.native.o",
+          "sha256": "fb820de3337ca498c686bd6e127910ef56d0f35b1715253068d91aeae62d1f8f",
+          "bytes": 5776
+        },
+        {
+          "path": "catalog/dynptr_fail__rw_skb_meta_slice_invalid_after_metadata_write.native.o",
+          "sha256": "366680a16d8d3d884bc0f7d6ad6eb9f1465fa63b5c4a5460b9dd08c4a68e39ae",
+          "bytes": 13144
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__put_file_kfunc_unacquired.native.o",
+          "sha256": "9c506cd52246be6b851a5cc995c9f839a643eba0d120e95631894cedb0f51c02",
+          "bytes": 898576
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sockops_update.native.o",
+          "sha256": "05e401b48e1b36d592681a3c34662bdd53e2c742bba88dcc2e59ff1d7aa52ddf",
+          "bytes": 10144
+        },
+        {
+          "path": "catalog/verifier_const__tcx7.native.o",
+          "sha256": "92d2ea3cf5c4869f66700ee400514ab19e69e2b4068f9401fe62b2ee280c65cb",
+          "bytes": 9568
+        },
+        {
+          "path": "catalog/test_global_func3__global_func3.native.o",
+          "sha256": "985a561d7d0b9a22ab28b48410a64800a678187b3eb24e567c5f9d9c7e5bd72c",
+          "bytes": 11232
+        },
+        {
+          "path": "catalog/verifier_array_access__doesnt_reject_irrelevant_maps.native.o",
+          "sha256": "a77efe1c6f1913a961b1400080f3ba059f06464843e386f7e410c4b02cfebc02",
+          "bytes": 7160
+        },
+        {
+          "path": "catalog/irq__irq_restore_4_subprog.native.o",
+          "sha256": "e1e4476a2716486fec24b76e649639e1696adabaf80791bc1c8b6f2843decf08",
+          "bytes": 16632
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg6_good_return_code.native.o",
+          "sha256": "70760ee1c3ce572feffcbe87a72bed38dd573c0991f26ec15bfaaca4ed1e2515",
+          "bytes": 7488
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_out_of_bounds_skb_meta.native.o",
+          "sha256": "4beed376b1435ed4b910e538a958a5622520a60b8eee8ce5a9843349ed9a4c2b",
+          "bytes": 12408
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect6_bad_return_code.native.o",
+          "sha256": "819443f9b9637adbf07387163b990430d4a6307f05cdb4411e7f4800e1b32ad7",
+          "bytes": 7648
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__inode_rename.native.o",
+          "sha256": "4597614782fec26835c867c6b8da819775d609ade814234f067504e29f611c0c",
+          "bytes": 898912
+        },
+        {
+          "path": "catalog/test_kfunc_param_nullable.bpf.o",
+          "sha256": "76db39f6fe445c5ec2c61c2b76d45cb9d285f4bbceeeb6713db1de97741140a3",
+          "bytes": 11960
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_read4.native.o",
+          "sha256": "35023c838419d7fec04540a01d6c173caad136e3f1dd2c91f38f9d9ac123260e",
+          "bytes": 8992
+        },
+        {
+          "path": "catalog/test_bpf_nf_fail.bpf.o",
+          "sha256": "85fd7a6a72d34dbd22b260a7571df7bfd00d7addd4611f9a80b5feb94b5c96d3",
+          "bytes": 802272
+        },
+        {
+          "path": "catalog/test_global_func8__global_func8.native.o",
+          "sha256": "e0c58f427e6fa82161a8f35c2ddf7293ecebba87ca7acc9ba2e22b77e2a7a0d7",
+          "bytes": 8720
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sk_reuseport.native.o",
+          "sha256": "c0f052a249e2e99e36925e85b7a2ae94a3b3e09ac7359f093e05b40d4d1bf228",
+          "bytes": 8904
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_xdp_packet_data.native.o",
+          "sha256": "3b5911bc9572a2250a9cfccf6cdec1fa12b25c56f3d52aff9923ee465e0f879d",
+          "bytes": 10440
+        },
+        {
+          "path": "catalog/uptr_failure__uptr_no_null_check.native.o",
+          "sha256": "49f3c5dc96c9f198dc70aebe4e75c5ccbf350da36370bf8d27ec984078348596",
+          "bytes": 898944
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg4_good_return_code.native.o",
+          "sha256": "ea51081ef7d2295946b64ee3226d051f8f3345c2ee7c7e2d4493d6fa388d5fc4",
+          "bytes": 7488
+        },
+        {
+          "path": "catalog/nested_trust_success__test_nested_offset.native.o",
+          "sha256": "50816a9326211c00d1415c86453e961bf397c6a7c3e46aa5fd4b72278d0a84f4",
+          "bytes": 898856
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_untrusted.native.o",
+          "sha256": "591c7a5f7959ba7330e91cf2d81833105acf32c8c57b5589e6b98f1648ca02ca",
+          "bytes": 901784
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg6_bad_return_code.native.o",
+          "sha256": "11a10a0b4f7059c29dc8b34469d57dfff9d4ae7972dea0461e51e6163f0b5471",
+          "bytes": 7616
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_bad_access2.native.o",
+          "sha256": "f43aee25525e716d8c1afdb5f6c33eabef721c885f75fe90b3f67e09919f44d7",
+          "bytes": 8144
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_3.native.o",
+          "sha256": "be3f77c7f672e5cc6bece9e07c5c21efdd467a55f407429f760dc732a0b794c9",
+          "bytes": 15824
+        },
+        {
+          "path": "catalog/test_global_func2.bpf.o",
+          "sha256": "932bdcee238b0d36b22ad12c15e6af395577d5de57eadebd791bbe42a0b1ec3a",
+          "bytes": 13368
+        },
+        {
+          "path": "catalog/verifier_may_goto_2.bpf.o",
+          "sha256": "71fb57b441220da77929f7bb58f65c315ab33a889c5e9f95792776cd535f6105",
+          "bytes": 6904
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect_unix_bad_return_code.native.o",
+          "sha256": "c55162ddc7c605a8ae9ad7ee0e0c604ebab9474844fddabb12ff6715aa2cf5bc",
+          "bytes": 7680
+        },
+        {
+          "path": "catalog/sock_destroy_prog_fail__trace_tcp_destroy_sock.native.o",
+          "sha256": "2975a962f7e7c8908a3e09236a917f4762489bf0723dd1a3872736532125f6b7",
+          "bytes": 899232
+        },
+        {
+          "path": "catalog/verifier_bits_iter__bit_index.native.o",
+          "sha256": "287042e21fa8db90624fdf9527908581193e2d870d6d871da999353795950860",
+          "bytes": 899520
+        },
+        {
+          "path": "catalog/verifier_vfs_reject.bpf.o",
+          "sha256": "79ba26ddb8de08e7ce3265359db74c734bba3ce0b4e59d28cab051be0ffbf968",
+          "bytes": 839272
+        },
+        {
+          "path": "catalog/verifier_bits_iter__destroy_uninit.native.o",
+          "sha256": "694c1904d6ab43d605f0728c227bd2a93c2c84d7ba4a0794f54802dfc74220f8",
+          "bytes": 898960
+        },
+        {
+          "path": "catalog/task_kfunc_failure.bpf.o",
+          "sha256": "890f27e7aa685fbbda00fb5e8abfb393eccb127ae7cae958fcbc0e3d10d88a51",
+          "bytes": 841328
+        },
+        {
+          "path": "catalog/irq__irq_sleepable_global_subprog_indirect.native.o",
+          "sha256": "bc285e702b3ae97d2d240eef7e25a061ba200d49a3a1df28529b02bf568e8177",
+          "bytes": 12536
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname_unix_unix_bad_return_code.native.o",
+          "sha256": "5350d5c5ee1a6a3d026f31b1b2c73612236d91689136b9584579b62d2c9b2c30",
+          "bytes": 7704
+        },
+        {
+          "path": "catalog/map_kptr_fail.bpf.o",
+          "sha256": "72df799f540318430233467c739fab5875299016b9b3ccb622eaeb3acd278633",
+          "bytes": 34768
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg4_bad_return_code.native.o",
+          "sha256": "9d1bad49c4035db5b65fea830e3e39c112d018963e72ea9ae456ceb644c29e50",
+          "bytes": 7624
+        },
+        {
+          "path": "catalog/dummy_st_ops_fail.bpf.o",
+          "sha256": "e4dc6a8df24f67655a73eb63f0ff4cfeaa4148c2fa99d46dff6b99e97712a488",
+          "bytes": 5976
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_write1.native.o",
+          "sha256": "8a9f5e4b967e73d31d5f958fc44136f5907aad68bf486976b3e5375ef419660e",
+          "bytes": 9192
+        },
+        {
+          "path": "catalog/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_write.native.o",
+          "sha256": "218a30a3176573cc9468f41f3731ba9901234961643f180a88c203d0925c279d",
+          "bytes": 13384
+        },
+        {
+          "path": "catalog/test_global_func11.bpf.o",
+          "sha256": "03e100964d1349c20328ca7f51e1e034edf83a6bfe09e3e504cf1a2ed4e79f6d",
+          "bytes": 10496
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_meta_invalid_ctx.native.o",
+          "sha256": "d5bdea1b6e9aebc1e63c44e680092df4c8db65a6c07de4fefca04f6c57f73e21",
+          "bytes": 11872
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_member_of_ref_xchg.native.o",
+          "sha256": "2bfa7b56f6f68e3a97b68b75982be258119b8f9bc113d1dea201a4a1b0310e4f",
+          "bytes": 11544
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_unsafe_kretprobe.native.o",
+          "sha256": "bf9e65a81526c49fce4ff1859670379b53ba3a35c290b78bc480ac70f3a63d93",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_xchg_unreleased.native.o",
+          "sha256": "3d0595cc3c7ebd7b22916213b5c8595822f5ca17b51b7c3c614bfebc524951fc",
+          "bytes": 901784
+        },
+        {
+          "path": "catalog/test_global_func16__global_func16.native.o",
+          "sha256": "8997f4474606dd180d28bf5bba505ce9960d34445b79c9838d081abe8f432c0c",
+          "bytes": 8896
+        },
+        {
+          "path": "catalog/verifier_const__tcx3.native.o",
+          "sha256": "47fea5b2035d82fa2802f92e7d2aa279829d28b64c513b2da0e8a78456c58bb0",
+          "bytes": 9408
+        },
+        {
+          "path": "catalog/test_global_func14.bpf.o",
+          "sha256": "c7a94ba8701ab27b7dda9cb99cd2c63638e671f42b416f29229b7580c95b53a8",
+          "bytes": 10464
+        },
+        {
+          "path": "catalog/crypto_basic__crypto_acquire.native.o",
+          "sha256": "57968dc165ba308930acc1334c2a609be5f117823332e95451e4744c9606510e",
+          "bytes": 900992
+        },
+        {
+          "path": "catalog/dynptr_fail__ro_skb_meta_slice_invalid_after_metadata_write.native.o",
+          "sha256": "501820ae8cff3d0442051edc58c5a54d3777655c5c56f089950473fc3fec89b8",
+          "bytes": 13184
+        },
+        {
+          "path": "catalog/verifier_mtu__tc_uninit_mtu.native.o",
+          "sha256": "4d7a1538c1a545f8717f14ba9470df4a7f6a2fc79063589a0464e344d555c0f0",
+          "bytes": 8920
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_3_minus_2.native.o",
+          "sha256": "132838d597fb0cf9dafddef849d7eff57040e00523ff7ec874f864cd646e928f",
+          "bytes": 14632
+        },
+        {
+          "path": "catalog/cpumask_failure__test_alloc_no_release.native.o",
+          "sha256": "37d6d7f1b7e244ea3c53a969e347c119d801cc81e40156d859d951e9617b1b84",
+          "bytes": 901000
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind6_good_return_code_3.native.o",
+          "sha256": "218e93f7c592e673cb15a683f20d1696a5c12620e83d6f50d38d1d85d48d6eab",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/verifier_async_cb_context__timer_non_sleepable_prog.native.o",
+          "sha256": "7d2b282b3b574bd0e5920392ffd2ecfdf6614e5793aa28cf4e4825de80ae9271",
+          "bytes": 7928
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername4_bad_return_code.native.o",
+          "sha256": "ce77726e44bacd829172eac4527a02b0f1b6f36076ba5651e47c13234622853a",
+          "bytes": 7656
+        },
+        {
+          "path": "catalog/dynptr_fail__test_dynptr_reg_type.native.o",
+          "sha256": "acb2fa34c9f87e3723f29aefed67bc8e081dd6b2278471d34135ad6a27b76f78",
+          "bytes": 7752
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_from_lsm_task_free.native.o",
+          "sha256": "1225cd38b581b3f7c3bf07a475497975e34c777ede031f7f019a82cb8039816c",
+          "bytes": 898872
+        },
+        {
+          "path": "catalog/map_kptr_fail__inherit_untrusted_on_walk.native.o",
+          "sha256": "866ed1cce7d0aaf966cba2c00c792f5d913cebc22def24ca6e6960038313cb45",
+          "bytes": 11064
+        },
+        {
+          "path": "catalog/nested_trust_success.bpf.o",
+          "sha256": "228b5bd9fc42b3a3d5d03d4ce66bb81cb22df16caf1cc3cb0b1a73d7ae645fb3",
+          "bytes": 816216
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_adjust_invalid.native.o",
+          "sha256": "cfcfb0dd400959358e5665f5479d59ddeecb98be1d1bd1f2cf1bfb57a8e78297",
+          "bytes": 8176
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate1.native.o",
+          "sha256": "8da14ce8a2c7ff4e84e162dcd559d05b3798634113cbc5149d74e47be20666d4",
+          "bytes": 9048
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_skb_packet_meta.native.o",
+          "sha256": "ae2f1ed4d29d0ba56a29f343812e9ad31abe652c35afd4840d15227087ef2161",
+          "bytes": 12936
+        },
+        {
+          "path": "catalog/verifier_bits_iter__max_words.native.o",
+          "sha256": "3e45dbab73ccdfce1b5380fa241e82cdc9c95e5a6a7635ed5c1f1fdc9e652412",
+          "bytes": 899600
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind4_good_return_code_2.native.o",
+          "sha256": "a9b4c0e605a7e890c56aa92c1a97ce0f607bab7b23d8ed2a1311c5cb73689e86",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__task_kfunc_syscall.native.o",
+          "sha256": "bcd0edae205393668e8c9af1a42202b2ee69c4d86d1041f0031ed66be79065d6",
+          "bytes": 900728
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__get_task_exe_file_kfunc_fp.native.o",
+          "sha256": "92c49c163ad059919013552da1620ed981a3cf647f615bc46b34e9a777f9c794",
+          "bytes": 898880
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_from_mem_invalid_api.native.o",
+          "sha256": "64d6d359fb0079710d810475a7408264261e55c62df5a35f317a59258901c68e",
+          "bytes": 8120
+        },
+        {
+          "path": "catalog/test_global_func14__global_func14.native.o",
+          "sha256": "73acd2144dc795197c51829ce5b393fc5114745bdee7c24fdf3c9afab493ed6c",
+          "bytes": 9192
+        },
+        {
+          "path": "catalog/test_bpf_nf_fail__lookup_null_bpf_opts.native.o",
+          "sha256": "db537edb006d9991db3e1030b1943e29b0a4c49435e0a85508ce69557ff015e8",
+          "bytes": 901784
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_write2.native.o",
+          "sha256": "567c4d60cc50c395df649ccc139fcaeade246f4d429eec77b1a941105f453ef0",
+          "bytes": 8672
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_global_subprog_test.native.o",
+          "sha256": "093386c07e3d03dddd104a73bc94e98551a69b158c144c1dd1b4bb57fb583954",
+          "bytes": 14440
+        },
+        {
+          "path": "catalog/verifier_mtu.bpf.o",
+          "sha256": "419a255b3ac267b17ea454af6b02e7a94b2156bea48bbc1e1936886a5c58aed0",
+          "bytes": 10040
+        },
+        {
+          "path": "catalog/verifier_gotol.bpf.o",
+          "sha256": "c7df40d8575b7179f65f62fb87b8f1d97eb5945dc7a977ba01ba91f2d6a1e0aa",
+          "bytes": 325776
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_write4.native.o",
+          "sha256": "3fddf726e33ff1e113bfaaa1e9c693bd507e001db0ea0bba26cb7ff0246392d1",
+          "bytes": 8880
+        },
+        {
+          "path": "catalog/nested_trust_success__test_read_cpumask.native.o",
+          "sha256": "f9f7b936bfac26c7a1b1820de3cfe4f208dd9776b299090b0bdd563115cb7633",
+          "bytes": 898880
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__task_kfunc_perf_event.native.o",
+          "sha256": "bf2fdf68b42239500ef827f7d90b348feb745e5aedd2d97db8fa5a57f175cf2d",
+          "bytes": 900752
+        },
+        {
+          "path": "catalog/irq__irq_restore_3_subprog.native.o",
+          "sha256": "4f9db32af9138b32e683e06cafe47defae6e8528fa23039bd23518df05e52c00",
+          "bytes": 16464
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_getter_good.native.o",
+          "sha256": "e760cae5933bd16e86481d44cb8f2da78b419f55b9e5bb67067ddfeef31ab36e",
+          "bytes": 6848
+        },
+        {
+          "path": "catalog/programs.json",
+          "sha256": "3403a3b4e9fe9cacce525631f03aa64cc732f2acbb4bf74a131d18c27292a964",
+          "bytes": 1034030
+        },
+        {
+          "path": "catalog/test_kfunc_param_nullable__kfunc_dynptr_nullable_test3.native.o",
+          "sha256": "e7cb6abf497d97b96e3c237bd88c086918389298e847c39cc9a0c52293258413",
+          "bytes": 9136
+        },
+        {
+          "path": "catalog/uprobe_multi_verifier__uprobe_sesison_return_2.native.o",
+          "sha256": "04bda77dfc87c5ca23020f2780815aa3ad9f9489760c43af9ac91ed848f6018d",
+          "bytes": 12720
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_discard_dynptr.native.o",
+          "sha256": "5d25addbc433add767f9379959e0d48a98d6725aad0a67d4b6923a961f48263e",
+          "bytes": 7384
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_global_sleepable_helper_subprog.native.o",
+          "sha256": "d973262e715f4df4b72e2a4ca62dca9115b75d75e13315adbdb5b92296d5f58e",
+          "bytes": 14608
+        },
+        {
+          "path": "catalog/verifier_array_access__an_array_with_a_constant_too_big.native.o",
+          "sha256": "89f6a5b9b0c9bc3662ba6fcfcf9158bdc5b6fea44ce3d485b64f8403d231f0cb",
+          "bytes": 7280
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_skb_packet_data.native.o",
+          "sha256": "dc85850853635f54980a9062556bce81797789d15a8e69437b5a0a45be166612",
+          "bytes": 13232
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_global_sleepable_subprog_indirect.native.o",
+          "sha256": "ab0246f24ffeed814a031a69f9bc80604c36304047914a048146940ab25fb67d",
+          "bytes": 14648
+        },
+        {
+          "path": "catalog/irq__irq_sleepable_helper_global_subprog.native.o",
+          "sha256": "807cceefb7de23b4bd9e8bed2edea86045c00057de201d7472503064980e720d",
+          "bytes": 12512
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sockops_update_dedicated.native.o",
+          "sha256": "2c6d0ca4308f0e2b40cf49d42597dd034ab8c1c975f99a803e7172cb066e3b6e",
+          "bytes": 9976
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername_unix_bad_return_code.native.o",
+          "sha256": "9940705a2e6eea123e8730e38d850d638a8fced0cf5f78f6cbd53cb5613212f0",
+          "bytes": 7680
+        },
+        {
+          "path": "catalog/nested_trust_failure.bpf.o",
+          "sha256": "1431062f96f3ff58ab07f9bd37f27155e95f23e48bfe707ea096777521d9849c",
+          "bytes": 815608
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_release_no_null_check.native.o",
+          "sha256": "66510f93ad54c6984ec4c8488820363150ccd828f3e78e5480fcddb9866b2d7f",
+          "bytes": 899000
+        },
+        {
+          "path": "catalog/verifier_store_release.bpf.o",
+          "sha256": "aa3d699be2a0f97c43d48599383c8a84fc8ba9fc5bc5d9143658ae916dd70d55",
+          "bytes": 4640
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg6_good_return_code_0.native.o",
+          "sha256": "d07640bc939d3e93191e4583848124a515b9ed1ccfcdbf5eefed6d2b3fd74388",
+          "bytes": 7504
+        },
+        {
+          "path": "catalog/irq__irq_balance_n.native.o",
+          "sha256": "c4779bc8097f82206cf02b0751d8a6717b4d0de22468f105fdfaf62f1df5fa2c",
+          "bytes": 15872
+        },
+        {
+          "path": "catalog/nested_trust_failure__test_invalid_skb_field.native.o",
+          "sha256": "b6232060175c83d5706846adfb9bccf6f3a4c887050c7fe38f27c57ceb1c296a",
+          "bytes": 899696
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_access_comm3.native.o",
+          "sha256": "a18fc002d2b56e17542d29c7f2c12dec25ddc3cd25477e7bdd6206a4a45e1066",
+          "bytes": 898632
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_raw_tp_update.native.o",
+          "sha256": "cb48f8725cbe362f546b688d4660b4b1f9f9933a84620b273597ba7446161442",
+          "bytes": 8456
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_trace_iter.native.o",
+          "sha256": "9b1836bc82d0e97f82610453f0e2696d6827e208cadb976a37c0f9aa8c02f01e",
+          "bytes": 7432
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_out_of_bounds_ringbuf.native.o",
+          "sha256": "c0fe1b6eccff39624e6dff00d63b6526401a0bbc63d076afa4f4196a323d2837",
+          "bytes": 8840
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_data_slice1.native.o",
+          "sha256": "9b7a870c6b292ca5c46bb2343789c1e1ec08835e89157eafb3efb2d8d266a310",
+          "bytes": 13064
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_data_slice2.native.o",
+          "sha256": "7625a19b9399ce8d2f939eeee6d4e8d0c8a0780dd0f456118c291d831166bb13",
+          "bytes": 13000
+        },
+        {
+          "path": "catalog/test_global_func16.bpf.o",
+          "sha256": "02a3701fd222aae5beff304264e9e4bcd5498076bf68240cf06e3ff6918ed0df",
+          "bytes": 10192
+        },
+        {
+          "path": "catalog/kprobe_multi_verifier__kprobe_session_return_0.native.o",
+          "sha256": "d3632a9eaf5183d4d3b8a46cde2bcad4d9ac659e3fd4f959a4d9ae0abd4a51f3",
+          "bytes": 12584
+        },
+        {
+          "path": "catalog/test_bpf_nf_fail__lookup_null_bpf_tuple.native.o",
+          "sha256": "ff4b288677a91d42c8588ca53a8c6c5f4e63ae3a2c8e36707ac6159ac7749e8c",
+          "bytes": 901760
+        },
+        {
+          "path": "catalog/irq__irq_save_invalid.native.o",
+          "sha256": "984ac6ba48da56fa4536168f9d24d2d13dfa91e3d372f66055e1316725ac0f94",
+          "bytes": 15704
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_socket_filter.native.o",
+          "sha256": "772e1507f78b18206f3bac0fe8b6d5a98fa1f76be8deff2a0ef5867907addf2e",
+          "bytes": 10928
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_kptr_xchg_on_unref.native.o",
+          "sha256": "3e0ab21a871e2e2ef0c6a6a90cf0032d90375a72352d914df562c7122f60b614",
+          "bytes": 11008
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_null.native.o",
+          "sha256": "a7e1d084c42a3e3336f51d4286868a13e5c8bc108e1eebdf8b49b2902dd07a6f",
+          "bytes": 899408
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_trusted_walked.native.o",
+          "sha256": "6b40fce0e1537ccad40ed510ed8d2bf399b229d4cc3bc9bf0c30b5e18f3b436e",
+          "bytes": 898960
+        },
+        {
+          "path": "catalog/test_global_func7.bpf.o",
+          "sha256": "c6a2796b72f69b86b9c2fe7559a8bb960432607bd0b0e8dd98538ef610db3b98",
+          "bytes": 9744
+        },
+        {
+          "path": "catalog/irq__irq_restore_ooo_3_subprog.native.o",
+          "sha256": "ef9ac5d63d40bfc273b6c754d2b2ae05dcaa4e2d4757d87ed3a2d00440114b6a",
+          "bytes": 16608
+        },
+        {
+          "path": "catalog/verifier_jit_inline__inline_bpf_get_current_task.native.o",
+          "sha256": "925b16eb70dc8c3d42331dbd53d5c8014206d454ffa0e4d403827a706e7a1f20",
+          "bytes": 4792
+        },
+        {
+          "path": "catalog/nested_trust_success__test_skb_field.native.o",
+          "sha256": "667f57a47f890dd7deacb14ec7a47049fd8f31c6fc6924909397e64837bfa316",
+          "bytes": 899520
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_reinit_dynptr_ringbuf.native.o",
+          "sha256": "f384180b576857afe24b52e8f2a48916ed7dab3a68dee7a6d6da39c8338098e7",
+          "bytes": 7592
+        },
+        {
+          "path": "catalog/test_global_func17.bpf.o",
+          "sha256": "85f7f36067ac1b3dd965a5ce6dd2453ae1faa483f2789cce38dce8fd7f93c501",
+          "bytes": 9896
+        },
+        {
+          "path": "catalog/verifier_lsm__no_null_check.native.o",
+          "sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+          "bytes": 898248
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_untrusted_from_current.native.o",
+          "sha256": "952f9c09be69f8961ee814848674aa679119c7ee9580ee30e9fd0f9dc41286e3",
+          "bytes": 898856
+        },
+        {
+          "path": "catalog/test_bpf_nf_fail__xdp_lookup_null_bpf_opts.native.o",
+          "sha256": "41fac10d5e0d5a5400a91a7aac23e95729e70efa61522b0d5bc146556258d15c",
+          "bytes": 899768
+        },
+        {
+          "path": "catalog/dynptr_fail__add_dynptr_to_map2.native.o",
+          "sha256": "9c22f5d42fefab845f505736cd615985f223d32c9b8e6a46ddee9658dc8d3494",
+          "bytes": 8680
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_size_invalid.native.o",
+          "sha256": "42aea0afa11f0992f2e372e98feb3d29fd16c8ebe40877c7bf9b8ec76e8b6e4e",
+          "bytes": 8136
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_null.native.o",
+          "sha256": "ef18ea613bd945d8e886d92a789e3b57ce5572e1231b0e2ce25f56a2a1e2033e",
+          "bytes": 898864
+        },
+        {
+          "path": "catalog/verifier_lsm.bpf.o",
+          "sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a",
+          "bytes": 794144
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_invalidate_slice_reinit.native.o",
+          "sha256": "5fbb10e605d80e8b301d1e66e4091923e57b812e0ac5b9aecf4f5a47df777689",
+          "bytes": 9776
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_2.native.o",
+          "sha256": "15298616d88cefc1f2ae940b5260e4452b822b592cf7f52024a55d107e6126b8",
+          "bytes": 15736
+        },
+        {
+          "path": "catalog/test_kfunc_dynptr_param__not_ptr_to_stack.native.o",
+          "sha256": "e19012c1fe4c61c217a7c31f5fe4b650a54ac178ced963e8f40a3b0c6996dd01",
+          "bytes": 899384
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sched_act.native.o",
+          "sha256": "693efc0758d87e8064a475227444ee424fb96f49c72e0837409559aeb2379f01",
+          "bytes": 10904
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername4_good_return_code.native.o",
+          "sha256": "59d3c00cf217db4bc2e2e4a3526c0d253270a10ea7ff1426bdd30d5476373548",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/cpumask_failure.bpf.o",
+          "sha256": "2da6463226cf65557d3e62327d4bdc5f7f88155427f8c2057a76444a0189ed01",
+          "bytes": 834248
+        },
+        {
+          "path": "catalog/map_kptr_fail__non_const_var_off_kptr_xchg.native.o",
+          "sha256": "e476444f08bf146690a2bb04b140b078dd989904ce755a928ed9e39f075f2277",
+          "bytes": 11152
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_full.native.o",
+          "sha256": "f09240b2a94dadfea2d19fb7031cdd8e9ef5257a7c4e5550bc20f4f7d3e7fce8",
+          "bytes": 6936
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect4_bad_return_code.native.o",
+          "sha256": "03979ccc2373d266d3e5756985d5c74f696669d111375117712fa2da268dcad3",
+          "bytes": 7648
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname_unix_good_return_code.native.o",
+          "sha256": "58341bf07055095da9d4b1d2f2fdfad7acd210a276402952be545747c336d84e",
+          "bytes": 7544
+        },
+        {
+          "path": "catalog/verifier_linked_scalars.bpf.o",
+          "sha256": "e427477728fa9ff79c9e692f7649cdecfa3dabbecfa49b169ed377378894a7b3",
+          "bytes": 15320
+        },
+        {
+          "path": "catalog/verifier_array_access__non_stack_key_lookup.native.o",
+          "sha256": "bfc7f618ac9f84a04da2930ee585e5ab0e180b1f402011aff35867e9d40ff2a5",
+          "bytes": 7104
+        },
+        {
+          "path": "catalog/test_global_func7__global_func7.native.o",
+          "sha256": "de5234708377f4c035b457c48d52c1e85ff937c9a6f0d8fb96c5e65bb3749057",
+          "bytes": 8776
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_invalidate_slice_success.native.o",
+          "sha256": "729252062376acd062c029819a8d536627aef9fa289f0ef1e127938fb59db4ea",
+          "bytes": 9880
+        },
+        {
+          "path": "catalog/cpumask_failure__test_mutate_cpumask.native.o",
+          "sha256": "ceabd61e0aac96009ce0bd1ffbdab127da889c4106af23c63dcab07f60325a41",
+          "bytes": 900168
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_untrusted.native.o",
+          "sha256": "168d7700213e5d81451a8f2ca069082f536c725969b1344fd01f86b10bafabf9",
+          "bytes": 901792
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_null_context_write.native.o",
+          "sha256": "314a4462aa3355e09d353e6c92065a38f52508158bb84069928b45b28628f5de",
+          "bytes": 7216
+        },
+        {
+          "path": "catalog/test_global_func9__global_func9.native.o",
+          "sha256": "915c77aeba5fa6b9fc9163aa7bab731d3ec7de4556b0c0030a2333ca39b402f1",
+          "bytes": 13120
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_ctx_fentry.native.o",
+          "sha256": "a9c8260891305ee9602b84416a3dac24ca8dd2a067fcb55993b94826df85f137",
+          "bytes": 12080
+        },
+        {
+          "path": "catalog/verifier_lsm__null_check.native.o",
+          "sha256": "19dd519dd9375034c4af9f021d8a230218b882d65dfc1f5e345749e5b4bf1529",
+          "bytes": 898136
+        },
+        {
+          "path": "catalog/dynptr_fail.bpf.o",
+          "sha256": "7712ddbeb29c6fe427d7eb4b944781c27df03c3b539890b504e8108e3b07b26d",
+          "bytes": 127680
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_use_after_release2.native.o",
+          "sha256": "3d1b2a6d4c38cd00df273978d742450b48c065225f839864ac9cae94bf32c10d",
+          "bytes": 9336
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind6_bad_return_code.native.o",
+          "sha256": "d7daf0455dcf7bd841d92a52750ee3706178ab6f1be078d45d5417821957c4fe",
+          "bytes": 7632
+        },
+        {
+          "path": "catalog/verifier_array_access__a_pcpu_array_with_a_constant_no_nullness.native.o",
+          "sha256": "f43ab263dd8da5985bd3e66d159b0a386bddf0f100235e0787816814e9210438",
+          "bytes": 7416
+        },
+        {
+          "path": "catalog/irq__irq_flag_overwrite_partial.native.o",
+          "sha256": "a97a6db304bd565fea314400b30614e28597a24f850f2d02302b150d7a6a5bf9",
+          "bytes": 15792
+        },
+        {
+          "path": "catalog/dynptr_fail__ro_skb_slice_invalid_after_metadata_write.native.o",
+          "sha256": "4ac67192d1a23a5c630b27b9db523cde004ca1f5a0929c1d33ef3095b73c0dcb",
+          "bytes": 13408
+        },
+        {
+          "path": "catalog/verifier_bits_iter__zero_words.native.o",
+          "sha256": "b9239ffd5cceadbac803ef9fa01d8fccf998e5d4746f76661671aa827e16de20",
+          "bytes": 899528
+        },
+        {
+          "path": "catalog/test_global_func2__global_func2.native.o",
+          "sha256": "09c8a8ef2ef40f0784e56afb8cafedd4d385734dde7114ff4fe4617c0d39eb93",
+          "bytes": 10264
+        },
+        {
+          "path": "catalog/test_kfunc_dynptr_param.bpf.o",
+          "sha256": "d2c95031713e7ad1b9ed1238c2642ef863f390ec9584547c4f62890580b0115e",
+          "bytes": 787032
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalid1.native.o",
+          "sha256": "761e199b8fb726503a5065469266d841ecb22e8961b529520d5a19b4633bfdba",
+          "bytes": 8200
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg6_good_return_code_1.native.o",
+          "sha256": "5816ec0fc7496e7fbfa176604b8faf969e43e80470c60724f6fade93f4372f5b",
+          "bytes": 7504
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__get_task_exe_file_and_put_kfunc_from_current_non_sleepable.native.o",
+          "sha256": "41357451d8d947e11d10ee852c7bd8ef5d7a8c72683c1fab1d335065e6628f5a",
+          "bytes": 898744
+        },
+        {
+          "path": "catalog/dynptr_fail__xdp_invalid_data_slice1.native.o",
+          "sha256": "9aac1d20a7067465c4fb32d9c05ed83b597ffba216bcc968ae5aa85dee0fba4d",
+          "bytes": 10384
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cgrp_kfunc_perf_event.native.o",
+          "sha256": "ca0336e12b9f1ac12d4ba186328af53e7c60a9681207f119e4a8a3298143f5e4",
+          "bytes": 900408
+        },
+        {
+          "path": "catalog/verifier_bits_iter__huge_words.native.o",
+          "sha256": "0a8c71461eeb2e6ddb6e693010802fff7fd6c7ea464e1fcce1abebdbb731fb73",
+          "bytes": 899576
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__get_task_exe_file_and_put_kfunc_from_current_sleepable.native.o",
+          "sha256": "643d3a1fafd87c939038992a0e58e2d0e6ca454c548e98a79090bdb7abdca52e",
+          "bytes": 898704
+        },
+        {
+          "path": "catalog/irq__irq_global_subprog.native.o",
+          "sha256": "7872847fb2f47d6e4bd31c1ec1d40ecf4326ce304a3bb6d6711f6557168ea077",
+          "bytes": 15712
+        },
+        {
+          "path": "catalog/test_global_func1.bpf.o",
+          "sha256": "1a8dbb7f408d1a3cda00e41cf28edc57c696363a0fc182be92b47ea44b8608ab",
+          "bytes": 13584
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg_unix_bad_return_code.native.o",
+          "sha256": "4ebfc0e24f8e822cc77eeac63b7a38b64396ec56c3b445c234dd7b4904055c3a",
+          "bytes": 7656
+        },
+        {
+          "path": "catalog/cpumask_failure__test_acquire_wrong_cpumask.native.o",
+          "sha256": "266de75d1ef66f93342aa94c16395d5d6f782b876caf2b262d53acaa7aa6b444",
+          "bytes": 900360
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_from_pid_no_null_check.native.o",
+          "sha256": "43058911e643b32a315ea034ff397c56f6b1afe3226012ff1ba95f26e4a16e94",
+          "bytes": 898976
+        },
+        {
+          "path": "catalog/verifier_const__tcx4.native.o",
+          "sha256": "e99a0a7f614c11a0b3e17976599f716da985bf42b8269d4eea17b1164797b29c",
+          "bytes": 9464
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_out_of_bounds_map_value.native.o",
+          "sha256": "b9406fed1395f2264384164a795f5f1d534317ec10f21fa57308bc40835c9e74",
+          "bytes": 9288
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect_unix_good_return_code_0.native.o",
+          "sha256": "37bd8aab645a5254972d5afc7bfc9989499ea6f8ca166d3c85e4f6df0c73d06c",
+          "bytes": 7552
+        },
+        {
+          "path": "catalog/dynptr_fail__use_after_invalid.native.o",
+          "sha256": "4098ebc0a0c418c003dc7f79c519a10d74001e2b9338da0fad6bb9c98a50360c",
+          "bytes": 8712
+        },
+        {
+          "path": "catalog/map_kptr_fail__size_not_bpf_dw.native.o",
+          "sha256": "577340f90015a7da2b58e566ffb110073c68677438fd71df9465104f052caf23",
+          "bytes": 10840
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_type_mismatch.native.o",
+          "sha256": "a5c9766547484be03e0cf7cd5f769bad3645ce8228a1b62305d68aac838b5879",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_helper2.native.o",
+          "sha256": "664a3f1cde97c9238150d94705c986e789a4307f80417d9b405b41d0190f644d",
+          "bytes": 9120
+        },
+        {
+          "path": "catalog/map_kptr_fail__misaligned_access_write.native.o",
+          "sha256": "857ab56a82f4a9835c76ddc598775c2897b0ff391da5bfe589fcd7680148a126",
+          "bytes": 10856
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_invalid_buf_sz.native.o",
+          "sha256": "cf6301f67c50c5871131465ab8ce6bd56dd3a677b6979764b0cc7743849e4a99",
+          "bytes": 898952
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_overwrite_unref.native.o",
+          "sha256": "ef4c44504c886016ee5142d80f54f935a7cf60c6fca476d949c07244b92ad894",
+          "bytes": 9640
+        },
+        {
+          "path": "catalog/test_global_func13__global_func13.native.o",
+          "sha256": "0df8948ccce11dad66e681c49828cb8e4140f05141fcb46de41e7b2d2c2b8a0a",
+          "bytes": 9248
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sk_lookup.native.o",
+          "sha256": "54e4c182abf675f7a20c3fda33976eb4a096b3c466db344b9b8861b114ad463e",
+          "bytes": 8904
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate.bpf.o",
+          "sha256": "9436f9129756a4a32744cdab94a87055bf244bde60d9f883817768e543362bbb",
+          "bytes": 31712
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_release_null.native.o",
+          "sha256": "c66c1da3997fc0625f1ab32bc8660df560fb6180fb14e08ffc13aaa99587b36d",
+          "bytes": 900608
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate2.native.o",
+          "sha256": "41c0d705b20eff0ce7db5608bad070746ddaf83a43b8447b2b8b9d6dafb8d6d3",
+          "bytes": 9048
+        },
+        {
+          "path": "catalog/verifier_jit_inline.bpf.o",
+          "sha256": "0414e59885a54afd4b4d31d9679bf18d1fa8a50f21a9e44a9ad0cdd43330bd72",
+          "bytes": 5384
+        },
+        {
+          "path": "catalog/test_global_func9.bpf.o",
+          "sha256": "192019989090a897959f86364274ae89b31dbcbfc9585526090835b1c6912289",
+          "bytes": 17296
+        },
+        {
+          "path": "catalog/test_global_func8.bpf.o",
+          "sha256": "fca0ace4be6d01fc207d32f644c12ef4e269710efb7cccbaa9aa44b1cc8021d4",
+          "bytes": 9728
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_2_subprog.native.o",
+          "sha256": "4157b32f91918740222b77c7a6e84e0137e6d91f58a8f848923ad46738f038ba",
+          "bytes": 14480
+        },
+        {
+          "path": "catalog/test_global_func12.bpf.o",
+          "sha256": "9b3139ce1dbbf4296730b9c6f51b726514abee6b6f8c28c36c664523f59dcea5",
+          "bytes": 10616
+        },
+        {
+          "path": "catalog/dynptr_fail__xdp_invalid_data_slice2.native.o",
+          "sha256": "716205de87d3ef2f94ec8957f28a2ed35fda370609df038409ccc38ca930d6e5",
+          "bytes": 10320
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_overwrite_ref.native.o",
+          "sha256": "4e1760386cf04f6931ae0d55283ccbec0b30f6a78f31946978e93ba2f3efcacd",
+          "bytes": 9240
+        },
+        {
+          "path": "catalog/verifier_array_access.bpf.o",
+          "sha256": "e0fc70fa9ce5fff757cc7fab3ac12f90870f8633dea3a351b5278eef27477b55",
+          "bytes": 37408
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_release_untrusted.native.o",
+          "sha256": "0969ee601b5cce39a35820d2cd82b9c53978ed87661bc80c84e2034e3330356d",
+          "bytes": 901688
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_flow_dissector_delete.native.o",
+          "sha256": "321ba724748419c4bc7ef15b8033ee19e897c4b966733287ea7a1f200c3b6668",
+          "bytes": 9848
+        },
+        {
+          "path": "catalog/uptr_failure__uptr_kptr_xchg.native.o",
+          "sha256": "d909ce62f8dd089501eef440c61b3589051be9e932c6f2de90b5efc510209f4d",
+          "bytes": 899032
+        },
+        {
+          "path": "catalog/iters_testmod_seq.bpf.o",
+          "sha256": "870ca6bc76c76a59ef3aa7a3850c3ee7f5ae50b3d58515b2768f58cdc8de926d",
+          "bytes": 18528
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__task_kfunc_tracepoint.native.o",
+          "sha256": "8cfe2575ffc4a22c65377d0f66d8accf84bf1c319eea3d8a1d6311ed62a2e9df",
+          "bytes": 900752
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname4_good_return_code.native.o",
+          "sha256": "02e79a498f7830a2fa6427e98d1ffb85385edcf3c7b073ad13e52ae58d173868",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/test_kfunc_dynptr_param__not_valid_dynptr.native.o",
+          "sha256": "5e79a38f08161148d84a718945d5496f897cb55084653272ae0e39441fa19282",
+          "bytes": 899216
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_reinit_dynptr_mem.native.o",
+          "sha256": "00c3e865059e617e90b301abd1c3602cfc652c53fa3b2c7be1040c2ace3a8075",
+          "bytes": 7800
+        },
+        {
+          "path": "catalog/dynptr_fail__ringbuf_missing_release2.native.o",
+          "sha256": "a2d1b5ecf2da30f569861d2d2caa6f17127802df3e37418f15f58b151df44302",
+          "bytes": 9168
+        },
+        {
+          "path": "catalog/dynptr_fail__rw_skb_meta_slice_invalid_after_payload_helper.native.o",
+          "sha256": "9e48be848dc88644d5e85026b0ccfea128fe7274fe18a5af73fe543899fe4993",
+          "bytes": 12848
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_untrusted_from_argument.native.o",
+          "sha256": "823ff7aa134993d765499051ef081779f9d360e9276a4ea66292176e8340c131",
+          "bytes": 899024
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect4_good_return_code_0.native.o",
+          "sha256": "22efe9bb1a69b41f43f739cbfb59e5ae4c15f33f25607e21b09cd0d316995938",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_access_comm2.native.o",
+          "sha256": "3e958e8ce0596bad63f7cb6d9f1e665b5b0dd961a03dcc4d778fd22486edc962",
+          "bytes": 898944
+        },
+        {
+          "path": "catalog/verifier_array_access__multiple_array_with_a_constant_no_nullness.native.o",
+          "sha256": "88608fad4f01c03abb874dc5235a5c4f54633b5d3d2c9c641a3f8dc298698a8b",
+          "bytes": 7832
+        },
+        {
+          "path": "catalog/verifier_bits_iter__bits_too_big.native.o",
+          "sha256": "ab16b9645235e7291e006bd92c7ae9f37a61d95f27f933d68d547d174c0dcc73",
+          "bytes": 899408
+        },
+        {
+          "path": "catalog/verifier_const__tcx5.native.o",
+          "sha256": "c6a6e425ea7945f715d2b688e2c4159c888ccfd33e23b21ab379871928f3cfdb",
+          "bytes": 9368
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername6_bad_return_code.native.o",
+          "sha256": "6f3f97a7680b0d23ad25806975688948e13360d7f6ad0e460b3ee2211cfc918e",
+          "bytes": 7656
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect6_good_return_code_1.native.o",
+          "sha256": "b9e5c82bbc4225b7e042c1a72acda079b64ad4f00aa09072fcc6adb49018b82e",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_slice_rdwr_rdonly.native.o",
+          "sha256": "835a2c9771ae28596af1c6affc4979dbd9ff6f55d8a755bff2fc68e6c0c7f435",
+          "bytes": 12464
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_unreleased.native.o",
+          "sha256": "20edabefbe4d6f32b91836861ad022bb9393145ba7f916d97cedb2d6c3842c7d",
+          "bytes": 898880
+        },
+        {
+          "path": "catalog/map_kptr_fail__mark_ref_as_untrusted_or_null.native.o",
+          "sha256": "5582c0e677daf01a50c33f72f155028ed85bc3a668a4bec94ff3d7f6c5f29ef9",
+          "bytes": 11048
+        },
+        {
+          "path": "catalog/test_global_func4__global_func4.native.o",
+          "sha256": "213c6f47bbd76e8c3bdceb23fd20cd295d2e4aa3ed4c22eed531690783edf86c",
+          "bytes": 10840
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_indirect_global_func_access.native.o",
+          "sha256": "e6183a4b0c7996c82dcae0d172dbe9361b2fc466e58a425e9a89b66b3c748ae2",
+          "bytes": 10976
+        },
+        {
+          "path": "catalog/cpumask_failure__test_invalid_nested_array.native.o",
+          "sha256": "a5acdac4e31a8ac7821fec8888785ef2cb7cd11510d8947f8fc439cfc50220bd",
+          "bytes": 901528
+        },
+        {
+          "path": "catalog/uptr_failure__uptr_write.native.o",
+          "sha256": "588d8dcf48ffb3f923fa911bda835df8dd0ac0d17cfdbdb7f7dc89168548e1ef",
+          "bytes": 898880
+        },
+        {
+          "path": "catalog/verifier_sock_addr.bpf.o",
+          "sha256": "e4da695f70e2114231e8c2776bf7fa034bff52bad16703b4359a05fe0c0f8271",
+          "bytes": 31688
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_slice_var_len2.native.o",
+          "sha256": "a716ae2e45c3a3ab267ad88c8cc81bf9039ab9602a92bc924f6a0c3c74ee2cf5",
+          "bytes": 12656
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_balance_subprog_test.native.o",
+          "sha256": "e6de240c23672534ff2f588042840c1bedc30ae917f7373b7f3e1b097b718d34",
+          "bytes": 14304
+        },
+        {
+          "path": "catalog/dynptr_fail__ringbuf_release_uninit_dynptr.native.o",
+          "sha256": "8777efcb1d3bcc412bff6001fb3530635a5632b7c90a7a13772c19004995e944",
+          "bytes": 8096
+        },
+        {
+          "path": "catalog/verifier_netfilter_ctx.bpf.o",
+          "sha256": "6d8f466b4704d423b80c0656a446882be9d1d236e494962d714192b655e756b3",
+          "bytes": 854760
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_is_rdonly_invalid.native.o",
+          "sha256": "bef8e7f260f8d053feac3dd45eb9a805ce41a27447838dd5bc97a2f1b7b03537",
+          "bytes": 8216
+        },
+        {
+          "path": "catalog/kprobe_multi_verifier__kprobe_session_return_2.native.o",
+          "sha256": "6c1f301be2752161712045846605aa2b963e26b89819429277752e4e36be989e",
+          "bytes": 12720
+        },
+        {
+          "path": "catalog/test_global_func17__global_func17.native.o",
+          "sha256": "fd5316a74e9ae86945643613b13f70b95b12d4e937f130014558f2b5e9881cbe",
+          "bytes": 8752
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_bad_type_match.native.o",
+          "sha256": "7f88587fdf521c59e5f026535c085658852e9ca5b74df72630ef574bc447e3d9",
+          "bytes": 10904
+        },
+        {
+          "path": "catalog/map_kptr_fail__kptr_xchg_possibly_null.native.o",
+          "sha256": "ab7542f3dbaa9ff29a37135a6c3c4a83d28087fa1c68269d585efbcc0765f251",
+          "bytes": 11720
+        },
+        {
+          "path": "catalog/verifier_gotol__dummy_test.native.o",
+          "sha256": "6cec2b53a1b97f2f5fb220dd0a4a63192b1b646d8185505303968f264f83c440",
+          "bytes": 3040
+        },
+        {
+          "path": "catalog/dynptr_fail__ro_skb_meta_slice_invalid_after_payload_helper.native.o",
+          "sha256": "f39a8235190dd304a248453fea5f10c1232a23df0df106bc422ad43d59c90be8",
+          "bytes": 12912
+        },
+        {
+          "path": "catalog/verifier_async_cb_context.bpf.o",
+          "sha256": "2ade838667ab51a7b4bbddfd784e371e1132f895fb7f99dc07beda78ddb67f06",
+          "bytes": 822408
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_meta_invalid_slice_write.native.o",
+          "sha256": "4295835528df50c211fa7b91eeedd62e2336e01305d30c007bf4aa21a1fde63d",
+          "bytes": 12360
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_null_context_read.native.o",
+          "sha256": "187191d53fd8a6c4ae236c5740eef18e77404457f01925aa131d87b3c4be65b4",
+          "bytes": 7880
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_offset.native.o",
+          "sha256": "5d97950d7086828ca3918117bfaf3c0f8618584f997a85148d688a7a30bbe44d",
+          "bytes": 8304
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_write_forbidden.native.o",
+          "sha256": "a172ef4e8ad2ce0b944e72357191b248a9c71a852e7cb3158e00a801b9e7cc90",
+          "bytes": 7208
+        },
+        {
+          "path": "catalog/map_kptr_fail__misaligned_access_read.native.o",
+          "sha256": "dd2d7dba315cc441e3f1fae09c0a617e0fa6e3f4a25f3a8242efee727140352b",
+          "bytes": 10888
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_3_minus_2.native.o",
+          "sha256": "6c1dbcbc70750c935a4fdd80d8d4d3df96cdadc4c3a9df56dd0158699707108c",
+          "bytes": 16024
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_invalidate_slice_or_null.native.o",
+          "sha256": "84908cf17d633b06ceda3c58655a8b57c8ac76936b9143b634bde662e9a1258f",
+          "bytes": 9416
+        },
+        {
+          "path": "catalog/verifier_const.bpf.o",
+          "sha256": "a19f526901d96fab4af5bb81ba4c6f69a6175d9a9b6973d8425cca88dfc2958e",
+          "bytes": 790928
+        },
+        {
+          "path": "catalog/test_global_func13.bpf.o",
+          "sha256": "0b92e6c96eb4c77695a7f935d85f3e56f2552a816fe4e9c35ec7f26d36c8641c",
+          "bytes": 10520
+        },
+        {
+          "path": "catalog/map_kptr_fail__marked_as_untrusted_or_null.native.o",
+          "sha256": "b5f28e3d0f146d75b6610229b5433b916eda940c76a34a38559c50b1f7a60070",
+          "bytes": 11048
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect6_good_return_code_0.native.o",
+          "sha256": "f87468d2203b0684d8fdd63ecc7656fa6ab80789daeba5399599b4482199f57c",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cgrp_kfunc_raw_tp.native.o",
+          "sha256": "46ca0ce4e1bbdf4eba85b0704b444f2fa6518bf803dd0dd044141f9a17f6ecb3",
+          "bytes": 900376
+        },
+        {
+          "path": "catalog/verifier_const__tcx1.native.o",
+          "sha256": "c7e4df7a24119a3e908da752b8341bb63bd7734da63f1ac4d141ff8a6f18e76e",
+          "bytes": 9496
+        },
+        {
+          "path": "catalog/nested_acquire.bpf.o",
+          "sha256": "fa41f64dc53907f14e3821542818f7fd36312f96703f867994dc30b95543465f",
+          "bytes": 818152
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_data_slice4.native.o",
+          "sha256": "e5d2e7958c61af1922e1791e7acea4ca5f8709fb385943c532e231daf605fb06",
+          "bytes": 13312
+        },
+        {
+          "path": "catalog/verifier_bits_iter__null_pointer.native.o",
+          "sha256": "8e40365e49f4f82d3c0e907541b13d39d07074c3a74196aa8b6af0807d2cc0b6",
+          "bytes": 899608
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_1_subprog.native.o",
+          "sha256": "3e5c838127ba84e979248844b50d40228500fe52702c2b36ce35e12c4a882a47",
+          "bytes": 14416
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_read3.native.o",
+          "sha256": "97cade5166cf6b8ade24f7f825a7024579a6422b2b5db22bb8488f5288a94202",
+          "bytes": 8576
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalid2.native.o",
+          "sha256": "b87a3fb4ef945415afc3799d965441cd27af2f4ef15dce3bfa90e3a957319574",
+          "bytes": 9296
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername6_good_return_code.native.o",
+          "sha256": "cf95320b12ea81fd19c0896eaff45f3a1b42920b7cb18e28f9c72144c35cccc5",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/test_global_func12__global_func12.native.o",
+          "sha256": "86591af274ab32990cdb5c6bc4bd3948190046b91193a1a62e06b510ad0d449d",
+          "bytes": 9280
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_submit_dynptr.native.o",
+          "sha256": "1c779e9ea05ade26dd80777d56cac2bdbca33b36448d9bde830821012a25dab6",
+          "bytes": 7376
+        },
+        {
+          "path": "catalog/cpumask_failure__test_global_mask_rcu_no_null_check.native.o",
+          "sha256": "08ffa400a55f5f5b203edcc9e2310a57609fa4ee7fb3a1d5bbe3621155b80047",
+          "bytes": 901328
+        },
+        {
+          "path": "catalog/async_stack_depth__async_call_root_check.native.o",
+          "sha256": "766626c4fd43792069954b17d91da34eeacbaa36d36dbdb09928cea1f03ef879",
+          "bytes": 11112
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_use_after_release1.native.o",
+          "sha256": "ef49c9a5e13dae4c181af7fb0a546e0accd90ad2092134580aac5fb1be508e38",
+          "bytes": 9088
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg_unix_good_return_code_0.native.o",
+          "sha256": "b876b186f44542a83104cf74c79a6116dedc3067d3e7f798e188b13ff16304fd",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/cpumask_failure__test_alloc_double_release.native.o",
+          "sha256": "076a5472d8fcd3c864e60ec849d32f8980486f2ef22c6bf0a1971531064d51ec",
+          "bytes": 901000
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__task_kfunc_raw_tp.native.o",
+          "sha256": "26cc3d6efa53bc1eaf92822ff47c2395570478ed0e21a44bbdadc5ba768e9fd7",
+          "bytes": 900728
+        },
+        {
+          "path": "catalog/verifier_bits_iter__bits_memalloc.native.o",
+          "sha256": "16b98c3abb2b60c587a75daf79e7e86af02746851673884c710587d6f0291226",
+          "bytes": 899416
+        },
+        {
+          "path": "catalog/irq__irq_non_sleepable_global_subprog.native.o",
+          "sha256": "3e39276cb27f7d8072361cba5dbe775735b9912be44e81a0af1e0498472350cb",
+          "bytes": 12416
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_getter_before_bad.native.o",
+          "sha256": "392758e396ae62cf1a9fb77697520bf9c03392c081f899be78ae85c1c8c6a631",
+          "bytes": 5848
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__get_task_exe_file_kfunc_untrusted.native.o",
+          "sha256": "01ec814ffaad17065aa62e89f00eb735e7a85cb3f833384d792a16d538b7888a",
+          "bytes": 898680
+        },
+        {
+          "path": "catalog/dynptr_fail__release_twice_callback.native.o",
+          "sha256": "41d7441bf9c797e687dbd96e69c2def073b16488c9a3a74487834ab3e20489c6",
+          "bytes": 9008
+        },
+        {
+          "path": "catalog/test_global_func10.bpf.o",
+          "sha256": "f0fd52128dee644596bf20aaf9dd6fc130ac428732c69eb6bcd279b2b7485c4d",
+          "bytes": 10872
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate6.native.o",
+          "sha256": "eaf8fcf9e73639558d4480bfa25a85eef422e4357035c4b15e31d9c32739acbe",
+          "bytes": 9192
+        },
+        {
+          "path": "catalog/test_global_func1__global_func1.native.o",
+          "sha256": "8086a159fd5d54ad72f579f3b3a5363e663ba1ae22f5b4e0547c2fea4a24c5e1",
+          "bytes": 10864
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__get_task_exe_file_kfunc_null.native.o",
+          "sha256": "aeba0e06ef068b6f58110dc7b47cb1a964fc29a27152bec083dea85d2240daf6",
+          "bytes": 898816
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_no_null_check.native.o",
+          "sha256": "91b52ae90e922881b7bc4c383d82d2166da2e29e86646f35977dea7d58c73c66",
+          "bytes": 898944
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_write3.native.o",
+          "sha256": "c3a7770036596685e8196b5e91ee13eb0e878f3c841661946e31ad3750d57b32",
+          "bytes": 8664
+        },
+        {
+          "path": "catalog/verifier_async_cb_context__timer_sleepable_prog.native.o",
+          "sha256": "91d5256982c11b347fad84b6eeac9bdeb6a3ec368eadc01d5be59ba516769240",
+          "bytes": 7896
+        },
+        {
+          "path": "catalog/dynptr_fail__add_dynptr_to_map1.native.o",
+          "sha256": "4689700a5ddc04a1e2c47d9158315ad12a92b79740c444f4f08b278573176894",
+          "bytes": 8672
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types.bpf.o",
+          "sha256": "9640fcef5f587aac6a0215dfad19c36e1e378e889ff5241e0c0fa8f4f9624d0f",
+          "bytes": 832216
+        },
+        {
+          "path": "catalog/irq__irq_restore_bad_arg.native.o",
+          "sha256": "b4edb5a84dcb0e495ca815cee243b58710bbf12894ae433ade9785a7de987c3b",
+          "bytes": 15624
+        },
+        {
+          "path": "catalog/dynptr_fail__release_twice.native.o",
+          "sha256": "30caabbaaed65e4ae77c7a194d5de507b0b127946357600127f3493345604bd6",
+          "bytes": 8344
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_1_subprog.native.o",
+          "sha256": "09bc852d0657778b1bbacacbb3a9e921168eb32d9fb0bfc74c67c4e75bae8f91",
+          "bytes": 15736
+        },
+        {
+          "path": "catalog/verifier_bits_iter__next_uninit.native.o",
+          "sha256": "45fd2f99c859938c44ac277d90ea3ce5b1b19a11ce199a4308816341b2226cfb",
+          "bytes": 898944
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname6_good_return_code.native.o",
+          "sha256": "7a0511ee1ba5ef3b4de605d48f6ac9bee1f19a0722f1bd6aa61c9f7c43b1fbdd",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/preempt_lock__preempt_lock_missing_3.native.o",
+          "sha256": "e37b4034876e6dacee413c69d5e41941accb1623873187add3c0b7efce8fd8f3",
+          "bytes": 14456
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_untrusted_store_to_ref.native.o",
+          "sha256": "77629b1a16be171e016d5447dec52569dc7a97f899f4348ce978bba2651d62f0",
+          "bytes": 10912
+        },
+        {
+          "path": "catalog/test_global_func6.bpf.o",
+          "sha256": "be28abf1635d61f43b95cdb93b7fb04f25efd28a00d599737280940778e77427",
+          "bytes": 11376
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_data_slice3.native.o",
+          "sha256": "2a7d63cbe17087002d44a98432e7f1e398cace3c58fee7d93be4cd34eb87ebe2",
+          "bytes": 13384
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_helper1.native.o",
+          "sha256": "fd78ca199c8d2be61c87d9a3eaa0153ebdafa27c37ed59c095abe7af71e7c03d",
+          "bytes": 9248
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_unsafe_kretprobe.native.o",
+          "sha256": "650213a5c0fbda23f45fd584ef75c7184b6960a969ed63234192dcabf3b52073",
+          "bytes": 899000
+        },
+        {
+          "path": "catalog/verifier_default_trusted_ptr.bpf.o",
+          "sha256": "941912371eba1b164e5ce09fe3ac15568c94d5e73c95c222e3bee2be10eca6a5",
+          "bytes": 6248
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure.bpf.o",
+          "sha256": "9ceffc9426af2b5985e30345ce9b5aa6053aa4778bc10e14c2fde46bbba67ed7",
+          "bytes": 807464
+        },
+        {
+          "path": "catalog/map_kptr_fail__kptr_xchg_ref_state.native.o",
+          "sha256": "f5a149bdc63a1020a926288fe1fbf5e76d645911f272fb000cc1afd269e2a8cd",
+          "bytes": 11480
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind4_bad_return_code.native.o",
+          "sha256": "9489807c49655a21331bb159fab50965d2ebacd84e991b4e1f8436d57e04bbcf",
+          "bytes": 7632
+        },
+        {
+          "path": "catalog/cpumask_failure__test_insert_remove_no_release.native.o",
+          "sha256": "1f366612ca75fc4deb2e20c020d9d36824d08923bb1decce8eee696c0d3f4d54",
+          "bytes": 902960
+        },
+        {
+          "path": "catalog/cpumask_failure__test_global_mask_no_null_check.native.o",
+          "sha256": "79e8bedbcc1fa42fc5cd2e9447d770a43b09f9bc25117d371bb9722dc23460c7",
+          "bytes": 902272
+        },
+        {
+          "path": "catalog/irq__irq_flag_overwrite.native.o",
+          "sha256": "e37dc0e101dd69bc28caf7cd4d38c813e554446e8c0cee661437300f1f8bbf36",
+          "bytes": 15752
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_flow_dissector_update.native.o",
+          "sha256": "04ba6e0b8ffed4c7e5f38fbf90f9225ce34f0eedeef507aa18e7bd6a12ed65a8",
+          "bytes": 11080
+        },
+        {
+          "path": "catalog/test_global_func5.bpf.o",
+          "sha256": "c62b9ac4be66ddceb2bb7203479117ef6b06f3248ee7ee42ae1638c0f2e1de5c",
+          "bytes": 11368
+        },
+        {
+          "path": "catalog/verifier_load_acquire__dummy_test.native.o",
+          "sha256": "656859f791682de4a9da76669717d7bea64b48b6d512663baa9c969d0de1d08a",
+          "bytes": 4016
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_bad_type_xchg.native.o",
+          "sha256": "effcfe6cf4c8caebcacb180d5fc27c4ee384368a690b136f08ca60d4a317da9f",
+          "bytes": 11544
+        },
+        {
+          "path": "catalog/verifier_sock_addr__connect4_good_return_code_1.native.o",
+          "sha256": "fa3a2893c55b560d1515f5c700f40db7c6659b70333b6d4ad5515170fe0270e4",
+          "bytes": 7528
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_release_unacquired.native.o",
+          "sha256": "d734515fac8252f99dacdc95db63b0a3f2a560a7fdffbf4a40443540a97fcab1",
+          "bytes": 898696
+        },
+        {
+          "path": "catalog/uprobe_multi_verifier__uprobe_sesison_return_1.native.o",
+          "sha256": "729f1b984161d052a271e7e25a0066152e5c4cec65c7c988cfc6d0a4789d056c",
+          "bytes": 12584
+        },
+        {
+          "path": "catalog/dynptr_fail__rw_skb_slice_invalid_after_metadata_write.native.o",
+          "sha256": "fa6069661ac7cba9aacd1087c68484ab93f9cb03bc07d69e9144f04734646f75",
+          "bytes": 13360
+        },
+        {
+          "path": "catalog/dynptr_fail__ringbuf_missing_release_callback.native.o",
+          "sha256": "68ab5bc9f2c395e2b976be6073e36fabaface9ad049d62e0dfbdee6b966f0301",
+          "bytes": 8984
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cpumask_kfunc_tracepoint.native.o",
+          "sha256": "a9a92152ab4072781b3445aeb9b5bf32558341cb6ff4b8defca79b619933004c",
+          "bytes": 900840
+        },
+        {
+          "path": "catalog/irq__irq_balance_subprog.native.o",
+          "sha256": "66bd9d483eb7049cd33088c75be00118744d66fbbd01309f955fc0a9083975ac",
+          "bytes": 15904
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate4.native.o",
+          "sha256": "f68865069c40e6e37d571423afaa2f21d9cc2859d5e59b36357d976ebd55313e",
+          "bytes": 9056
+        },
+        {
+          "path": "catalog/dynptr_fail__ringbuf_missing_release1.native.o",
+          "sha256": "e7584d908463c332bebdb7e7a616d7a999ad9c3aae7621491a147b17653346fd",
+          "bytes": 8280
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_access_comm4.native.o",
+          "sha256": "2d1521bb3ff0a86d1b471315b10f337d2b7f7cb7e2a06f49f3fda651fbfce6ec",
+          "bytes": 898896
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_from_vpid_no_null_check.native.o",
+          "sha256": "d7ad947cee65c49748747f90226efe851e50a1c90920928f74cabcb25ac09f54",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/uptr_failure__uptr_write_nested.native.o",
+          "sha256": "64dca96319abdc449fc4592827c6671a977ebbaa907bad89656e48670c16c344",
+          "bytes": 898928
+        },
+        {
+          "path": "catalog/kfunc_implicit_args__test_kfunc_implicit_arg_impl_illegal.native.o",
+          "sha256": "41b8a3d0646f491fcbdd3f0296dd3a4e46cc08654fd74c19142e77663d574293",
+          "bytes": 898952
+        },
+        {
+          "path": "catalog/dynptr_fail__test_dynptr_skb_small_buff.native.o",
+          "sha256": "8a25cd24d16cd36215160886d4eaf481858a85a6d87acb23fffe06fa86a05081",
+          "bytes": 12280
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cgrp_kfunc_tracepoint.native.o",
+          "sha256": "5edcc12baa6e26d71843812930419cb34ec9aeb39c64f8a5ce5cee462ed35ace",
+          "bytes": 900408
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cpumask_kfunc_syscall.native.o",
+          "sha256": "d003837e7de66521b2deb1dfa2a1d0411bb1bd6437169a256018ddfb2af84e8f",
+          "bytes": 900808
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_ctx_fexit.native.o",
+          "sha256": "4de1d8b3c04fbe68c4440099d9c3903280ea6d1894a1d6ab1f855f20aa0ae58a",
+          "bytes": 12072
+        },
+        {
+          "path": "catalog/verifier_linked_scalars__alu32_negative_offset.native.o",
+          "sha256": "9c3645fba8ee47492618c785ee1b5ab2ebe62e0e508ad720073f5326cd0da32d",
+          "bytes": 6552
+        },
+        {
+          "path": "catalog/irq__irq_balance.native.o",
+          "sha256": "64752b6e333535501997845ade733b727b0adf731d13184a78033c2a394bcfe3",
+          "bytes": 15520
+        },
+        {
+          "path": "catalog/dynptr_fail__data_slice_missing_null_check1.native.o",
+          "sha256": "bda0039ac450550902b5bd4154a6b9bea9cf6c515ef7eeedb36e15a376f9d1ad",
+          "bytes": 8728
+        },
+        {
+          "path": "catalog/irq__irq_restore_iter.native.o",
+          "sha256": "18e55e931ac6a975f9ca097a35ffb369072d11ee9d570e6b648b1cc90d28b289",
+          "bytes": 16056
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate3.native.o",
+          "sha256": "6888258dc3b432ea92031f895127d1653c25b22ca5195f5df96871ec05e0d76c",
+          "bytes": 9192
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_fp.native.o",
+          "sha256": "6bc767f50f4d63ac3275b5eeb80a4dfd46d0611ef6c4e3909908fa2a18739c76",
+          "bytes": 898992
+        },
+        {
+          "path": "catalog/verifier_array_access__an_array_with_a_constant_too_small.native.o",
+          "sha256": "adceeedf0efed33d4bb39a91a78da273a68fd357cc8cbd42edd8d9f1693d13fb",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/uprobe_multi_verifier__uprobe_sesison_return_0.native.o",
+          "sha256": "6bdfe1427f8dd23b0dbe6966d148e0a8067d3fb247b69b78a453c2762138e665",
+          "bytes": 12584
+        },
+        {
+          "path": "catalog/verifier_array_access__an_array_with_a_32bit_constant_0_no_nullness.native.o",
+          "sha256": "72a0ab9a8fb8b897b7acbada94c6a93d800d8caccfdeab0b1003a3a994993fcd",
+          "bytes": 7240
+        },
+        {
+          "path": "catalog/test_global_func11__global_func11.native.o",
+          "sha256": "47614ad97f6dc7bc0b5c0a8320df366fbe8f51248ba1a7bbba4623f23df01ba9",
+          "bytes": 9248
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_slice_var_len1.native.o",
+          "sha256": "bb7b64b36592730012dcbe606a6b57fcc3a11faab4d651d9bb3f051b2c46893a",
+          "bytes": 12640
+        },
+        {
+          "path": "catalog/kprobe_multi_verifier__kprobe_session_return_1.native.o",
+          "sha256": "ab38332d05ec5a55e38b5cba4c83248f86d42ca5438ef05958d5e2786c47153d",
+          "bytes": 12584
+        },
+        {
+          "path": "catalog/uprobe_multi_verifier.bpf.o",
+          "sha256": "810d9f77f5f4fc51fed1b0335b9cefaca5bc93f499a41393b99f2b216155439b",
+          "bytes": 20800
+        },
+        {
+          "path": "catalog/verifier_sdiv__dummy_test.native.o",
+          "sha256": "893358f7fade990f0c939049ca5ecb7ee87910e9f4321aecc474c722ba5bcef8",
+          "bytes": 3040
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_release_untrusted.native.o",
+          "sha256": "44cd626320d977e6599ea04208c46a3354dfeb1edb4d64fd459bee4cd620222d",
+          "bytes": 901696
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cpumask_kfunc_raw_tp.native.o",
+          "sha256": "707d04083c4da78be82fc48b35101e4efc117c0f55072bc01ded54efae78f580",
+          "bytes": 900808
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_release_in_map.native.o",
+          "sha256": "d64fbc83478eff4329e1d789991d886fe1b4675c198a9565080f81d86dd384a4",
+          "bytes": 901968
+        },
+        {
+          "path": "catalog/cpumask_failure__test_populate_invalid_source.native.o",
+          "sha256": "d683969214e8c67ff81f5f714d6027a2fc02bfe20dffb62834e3d915711c410a",
+          "bytes": 901496
+        },
+        {
+          "path": "catalog/cpumask_failure__test_global_mask_out_of_rcu.native.o",
+          "sha256": "e3c75cd21d6f81e86bf55653ebaa6c56a92e40445d3e9857f6c21b8e927daedc",
+          "bytes": 902416
+        },
+        {
+          "path": "catalog/verifier_load_acquire.bpf.o",
+          "sha256": "7ef24f37a8e75e83224ecee0ed2a1c439d0a85d32b3cd26339eda4da22f9a5c6",
+          "bytes": 4608
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg4_good_return_code_1.native.o",
+          "sha256": "748f62cdcd1b756617be4f91cc337396e6a9d764f33487e45ab86730ac9135bd",
+          "bytes": 7504
+        },
+        {
+          "path": "catalog/verifier_sock_addr__bind6_good_return_code_2.native.o",
+          "sha256": "51c449555eba5dbc1105bbc073f6682522fd81b6b069733f8a1764c92fe68ae8",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/dummy_st_ops_fail__test_unsupported_field_sleepable.native.o",
+          "sha256": "a99bddbec77d853d2a2c5b94402fb1e9814dfd7c372f1f514459798e9964c439",
+          "bytes": 5176
+        },
+        {
+          "path": "catalog/test_global_func5__global_func5.native.o",
+          "sha256": "f6bddaeb642e6222cf1263a8883921736c45f6d127542add6524fd4098a63e0f",
+          "bytes": 9776
+        },
+        {
+          "path": "catalog/dynptr_fail__clone_invalidate5.native.o",
+          "sha256": "9d1e213bfff1e7fb09e08287e1b60b406d0dccf25af11391ac826d0b2192ebb9",
+          "bytes": 9056
+        },
+        {
+          "path": "catalog/verifier_sock_addr__sendmsg6_bad_return_code.native.o",
+          "sha256": "2c543512e8d7ac9cce94394b677e4d7eb5a7eae7d7a116ba554161cf911503db",
+          "bytes": 7624
+        },
+        {
+          "path": "catalog/nested_acquire__test_nested_acquire_zero.native.o",
+          "sha256": "21757e2c7fa39a3c0ca39ae5bbcb58d4bb1be5a87a6f4847c56f8a18f37e8b6b",
+          "bytes": 899584
+        },
+        {
+          "path": "catalog/dynptr_fail__skb_invalid_slice_write.native.o",
+          "sha256": "096cc6a7bd9f1242d96724a7d0852b89890077f1e1fb338be803a46737bd0432",
+          "bytes": 12616
+        },
+        {
+          "path": "catalog/verifier_const__bprm.native.o",
+          "sha256": "7265533350aac95d4672af3e17454964cbd195fe11362741d2f391407deb5ba8",
+          "bytes": 899656
+        },
+        {
+          "path": "catalog/verifier_array_access__an_array_with_a_constant_no_nullness_out_of_bounds.native.o",
+          "sha256": "adb703db88101b84fd5356a2df9cafc1b2cef7a6971ab48a7b35fb6721e83235",
+          "bytes": 7304
+        },
+        {
+          "path": "catalog/sock_destroy_prog_fail.bpf.o",
+          "sha256": "305788b258416658a07c8bc41a48eb16e4afa28f71ec946d8a21168f51a2e25d",
+          "bytes": 784032
+        },
+        {
+          "path": "catalog/verifier_vfs_accept__path_d_path_from_file_argument.native.o",
+          "sha256": "86269b0c40b2d40f623c6c50863a5beba18ba6380abd4f9ef7c446e625a1ab38",
+          "bytes": 899040
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_truncated.native.o",
+          "sha256": "6a65005e4ffe561a0c089dec26ab99bdfa685863aaa30eac24fa93236c1eedae",
+          "bytes": 7360
+        },
+        {
+          "path": "catalog/verifier_bits_iter__bits_copy.native.o",
+          "sha256": "7dee2e18fce2c5e70b040ee8ca9d414d7046f0568a564e8df40b1f63636cda44",
+          "bytes": 899400
+        },
+        {
+          "path": "catalog/irq__irq_restore_missing_2_subprog.native.o",
+          "sha256": "074487b318906c89a417a1ef2f3795623f62740bf1682254811f28c93e300f9d",
+          "bytes": 15832
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_release_fp.native.o",
+          "sha256": "26cfeda92278301f9ba4962a8949d516a2df37229ae9b855917e2cdefff3be5a",
+          "bytes": 898688
+        },
+        {
+          "path": "catalog/nested_acquire__test_nested_acquire_nonzero.native.o",
+          "sha256": "5e320672977b1d1de3f83b5b2bf0d520f4a63aaf70c90d85ba08b9c1a10b3f93",
+          "bytes": 899616
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cpumask_kfunc_perf_event.native.o",
+          "sha256": "cd54386d4277cfbe4829f222deae6ebe68b6992398e75e6a95a917066b368d17",
+          "bytes": 900840
+        },
+        {
+          "path": "catalog/nested_trust_failure__test_invalid_nested_user_cpus.native.o",
+          "sha256": "be2ab3e332b92d8945fb41ddfc67f15995a8f4c0e1bd8a23c58fabe93f6bbc6e",
+          "bytes": 899032
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_acquire_unsafe_kretprobe_rcu.native.o",
+          "sha256": "02fe0cb52a9c9ac7573b822b90b0591c819afcc46de31624f5d262055d268a78",
+          "bytes": 899392
+        },
+        {
+          "path": "catalog/dynptr_fail__xdp_invalid_ctx.native.o",
+          "sha256": "ce05923a0e63ab52db277317afba2b6292d33f921395dd866c0aaede8cc6146f",
+          "bytes": 8528
+        },
+        {
+          "path": "catalog/map_kptr_fail__reject_untrusted_xchg.native.o",
+          "sha256": "6e420a1c4e0da1385ac3a15ccf677d82db643037924390b811d991737e6ffc07",
+          "bytes": 10976
+        },
+        {
+          "path": "catalog/async_stack_depth__pseudo_call_check.native.o",
+          "sha256": "6d999a4b801fb0ba155c6492af3ae6e8d4f7f3986a636c18c1c2c3354ed27353",
+          "bytes": 10632
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_const_ptr_to_dynptr_reg_off.native.o",
+          "sha256": "de6c1eeb1606c85a23fadfcd46533a2d1557c05a0ad1be40ad85b0b79ddb4c77",
+          "bytes": 7552
+        },
+        {
+          "path": "catalog/irq.bpf.o",
+          "sha256": "80005164fc1c379e5ba3163a69f0115d4a4f6874ad8d9d48f74c9aff4cbaf407",
+          "bytes": 55344
+        },
+        {
+          "path": "catalog/dynptr_fail__invalid_data_slices.native.o",
+          "sha256": "15ec4599a902c5f19b6af6714f0ee35654abb4f2e17e0d10a55480efa5199e86",
+          "bytes": 9712
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getsockname4_bad_return_code.native.o",
+          "sha256": "ed9bce80f57553456d14e9e25dd8c72ba9582aed251fffcb6aa19881c39d053b",
+          "bytes": 7656
+        },
+        {
+          "path": "catalog/test_bpf_nf_fail__xdp_lookup_null_bpf_tuple.native.o",
+          "sha256": "85bc2a5e06c47c204c868d9a1cd2907639334e95eeecde7aa8a2e5479892fb60",
+          "bytes": 899744
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg_unix_bad_return_code.native.o",
+          "sha256": "2678254074de5e784fbbc6a4615720e2bd3e0c1a8772241f67d1c3de9b45e973",
+          "bytes": 7648
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_acquire_unreleased.native.o",
+          "sha256": "a40cabbb1f5217df0892c0def2ddc8b497771b9e4fa816cb223ed699e21fcb57",
+          "bytes": 898872
+        },
+        {
+          "path": "catalog/irq__irq_restore_invalid.native.o",
+          "sha256": "339be3be6395e46a7532265e17606bab885bb30325df715a68136ffb3c3acafa",
+          "bytes": 15744
+        },
+        {
+          "path": "catalog/irq__irq_save_bad_arg.native.o",
+          "sha256": "2022fb39662e93460d4d464e4ae9463ca1774243ccc133b0a87167086a7eeaa7",
+          "bytes": 15616
+        },
+        {
+          "path": "catalog/verifier_vfs_reject__path_d_path_kfunc_non_lsm.native.o",
+          "sha256": "8156d2fbbec2d63f8c6f01ba9bdce0284e9bd78fa626fffcb1b9a3866ced942e",
+          "bytes": 899680
+        },
+        {
+          "path": "catalog/preempt_lock.bpf.o",
+          "sha256": "702f35600e98ff21b1903602ebfb6d27a38ca7573a64f8ec66b39ad3d727b789",
+          "bytes": 29624
+        },
+        {
+          "path": "catalog/user_ringbuf_fail__user_ringbuf_callback_bad_access1.native.o",
+          "sha256": "af9f568d994ac7dec16149a6cead1493612e882a95c2b9a63f8bff331d13a6f1",
+          "bytes": 8136
+        },
+        {
+          "path": "catalog/dynptr_fail__dynptr_invalidate_slice_failure.native.o",
+          "sha256": "d39a221d30a38163ca2b6a4baa796a3403f0bf2c90c1f423b83b51f157672c32",
+          "bytes": 9944
+        },
+        {
+          "path": "catalog/cgrp_kfunc_failure__cgrp_kfunc_release_fp.native.o",
+          "sha256": "11bca94f5f19f58b69a80fab33e5b4b1801a5c4e012db7e69fd6638dcebce5a7",
+          "bytes": 898680
+        },
+        {
+          "path": "catalog/task_kfunc_failure__task_kfunc_xchg_unreleased.native.o",
+          "sha256": "c6afc21f5b97385c1860a2fe2d7353f171467c6200a17e1057542b67c87f55f2",
+          "bytes": 901800
+        },
+        {
+          "path": "catalog/cpumask_failure__test_populate_invalid_destination.native.o",
+          "sha256": "a6bb448178a2ea3ebe9989f53df5955fceeaceacd908460c91f6a3d761fd10e7",
+          "bytes": 900560
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg_unix_good_return_code.native.o",
+          "sha256": "dc03364c0f2b3010d46ae69b20119a96ecb3805f21fb892dedf0b67907ab9cdc",
+          "bytes": 7520
+        },
+        {
+          "path": "catalog/verifier_sock_addr__getpeername_unix_good_return_code.native.o",
+          "sha256": "44a7418beb57b2cb31554d0659cf1871701e6da0c10249f2bd87ca646066c848",
+          "bytes": 7544
+        },
+        {
+          "path": "catalog/verifier_sock_addr__recvmsg4_bad_return_code.native.o",
+          "sha256": "52d9cb75580365714ba377bf4807e35b26d764291598c7f696df2f8da1e42a8f",
+          "bytes": 7616
+        },
+        {
+          "path": "catalog/irq__irq_restore_ooo.native.o",
+          "sha256": "54b65bb9becc6c9879ebf240ff37de94e6d9caccf34c06d0c91d2c61e2cbb574",
+          "bytes": 15880
+        },
+        {
+          "path": "catalog/verifier_sockmap_mutate__test_sched_cls.native.o",
+          "sha256": "ed845cb0c023a9bf2f7981d484e8da127057906b19c8c258ac8b2ec2d5462ba1",
+          "bytes": 10904
+        },
+        {
+          "path": "catalog/kprobe_multi_verifier.bpf.o",
+          "sha256": "7b665d5547ce449fa99a58f74e4cef5ef0b3d85da589619aedc40b2d533d4759",
+          "bytes": 20800
+        },
+        {
+          "path": "catalog/verifier_kfunc_prog_types__cgrp_kfunc_syscall.native.o",
+          "sha256": "74fb14245949e5d55ea388f1281be89b9ae6b1480c71d990a21ee80038c8e67c",
+          "bytes": 900384
+        },
+        {
+          "path": "catalog/verifier_bits_iter.bpf.o",
+          "sha256": "f495b1b128fa2a7293e7d1f71fa4ec882c4994cc839b78543b34739c590b642c",
+          "bytes": 801872
+        },
+        {
+          "path": "catalog/user_ringbuf_fail.bpf.o",
+          "sha256": "ff88d3cd5d429f546e4119faa8890501c763fd6b01e23b6fc21b877c59c26479",
+          "bytes": 23640
+        },
+        {
+          "path": "catalog/iters_testmod_seq__testmod_seq_empty.native.o",
+          "sha256": "ce5502d718c1ed56ce8a2cb08f7b7940604fb534f463541056a9a74658f0485e",
+          "bytes": 7128
+        },
+        {
+          "path": "catalog/include/vmlinux.h",
+          "sha256": "b6358a878293eff0a4b41101258d0727cce4c4b8cd162ddf74df998fcefdbc4f",
+          "bytes": 2728521
+        },
+        {
+          "path": "catalog/include/bpf/libbpf_legacy.h",
+          "sha256": "7c728386dee398a1f520c1c7d03eb2d0fa6b8c0a09900127a651d43d385f4522",
+          "bytes": 5191
+        },
+        {
+          "path": "catalog/include/bpf/libbpf_common.h",
+          "sha256": "d58d7044c3e30f322614da76e3832c5b31e61469d31c29c53ee8abf736664414",
+          "bytes": 3437
+        },
+        {
+          "path": "catalog/include/bpf/bpf_helper_defs.h",
+          "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+          "bytes": 176025
+        },
+        {
+          "path": "catalog/include/bpf/usdt.bpf.h",
+          "sha256": "c88a507912c9ea1dcc793be4d63e627f51ffa877e3521969860dc0665d93fb73",
+          "bytes": 10800
+        },
+        {
+          "path": "catalog/include/bpf/btf.h",
+          "sha256": "bc73429e701401d8c731c793deb624e98efb2d59449b4c575a366cdc607ebfe8",
+          "bytes": 23774
+        },
+        {
+          "path": "catalog/include/bpf/bpf_endian.h",
+          "sha256": "64b77c97b089ca06203d0451407844fe93933b4e36e7315a294745fa29d058fb",
+          "bytes": 3750
+        },
+        {
+          "path": "catalog/include/bpf/libbpf_version.h",
+          "sha256": "789b020145ae794421f9273520fcb754983794c3ab6f2a1ab7006a8a9be3b920",
+          "bytes": 242
+        },
+        {
+          "path": "catalog/include/bpf/bpf_helpers.h",
+          "sha256": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865",
+          "bytes": 16601
+        },
+        {
+          "path": "catalog/include/bpf/bpf.h",
+          "sha256": "45c534693a962a9ea3209c797a03c7d920b479a1a253120843c482565e7dcc62",
+          "bytes": 27708
+        },
+        {
+          "path": "catalog/include/bpf/bpf_tracing.h",
+          "sha256": "84f497bcc97544189255ded585b11f82442fc4f518cf56f6adc4b9d1575756d7",
+          "bytes": 38534
+        },
+        {
+          "path": "catalog/include/bpf/libbpf.h",
+          "sha256": "b974e03e2036d2b478f40c8ff2ac54823a0dfce0afb32e900b23b5d5f86e48d4",
+          "bytes": 81067
+        },
+        {
+          "path": "catalog/include/bpf/skel_internal.h",
+          "sha256": "238bfbe14392f75dbae627526a6f2d42eb0503cebba07919d452889fc0b1a7f0",
+          "bytes": 11193
+        },
+        {
+          "path": "catalog/include/bpf/bpf_core_read.h",
+          "sha256": "ffd0d663cb7f3a5c243c7dfc13313438bb83c73d6646da92ef1e912a8d5d9e35",
+          "bytes": 22647
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/runtime",
+      "bytes": 50098520,
+      "files": [
+        {
+          "path": "runtime/Image",
+          "sha256": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
+          "bytes": 42674688
+        },
+        {
+          "path": "runtime/bpf_testmod.ko",
+          "sha256": "5babd44d352a0837176bd8821fdf971431f2b73ee0aa9af4377eb7b0fba0d364",
+          "bytes": 1009880
+        },
+        {
+          "path": "runtime/trusted-service-client",
+          "sha256": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb",
+          "bytes": 813280
+        },
+        {
+          "path": "runtime/bpf_arm64_native_lab.ko",
+          "sha256": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
+          "bytes": 1146368
+        },
+        {
+          "path": "runtime/native-link",
+          "sha256": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
+          "bytes": 2759336
+        },
+        {
+          "path": "runtime/trusted-native-loader",
+          "sha256": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d",
+          "bytes": 813264
+        },
+        {
+          "path": "runtime/libnative_loader.so",
+          "sha256": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+          "bytes": 881704
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34/current-kfunc-catalog/paired-modules",
+      "bytes": 1632258,
+      "files": [
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.alias",
+          "sha256": "cc14d894ad59ae6bc354f58661ef4a2f46d712c08226e4ca40d4876c05a90401",
+          "bytes": 200283
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.builtin.modinfo",
+          "sha256": "2e6434a9e5f900ff8ec46479fd9c868b914a0a85886de2980606a043b80e7db4",
+          "bytes": 93456
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.devname",
+          "sha256": "855cc880ea98918e95ed0a213727a2cd61be25a3db08765af9ad49cefd1d135e",
+          "bytes": 312
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.dep.bin",
+          "sha256": "32bddd23e52facb46a0ae64f0cb3df33cdeee0b2c15d49573dc20c838e6fc0c4",
+          "bytes": 96892
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.symbols.bin",
+          "sha256": "0d4e04c36d42a51c74835a5777c41a36b37cb3d29ed4ee5d112a88f0c5924323",
+          "bytes": 285859
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.builtin.bin",
+          "sha256": "60545e6ab407d5ae37f0215763c813d86cb6eda869fe60de76bf743a0cd36f60",
+          "bytes": 6096
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.builtin.alias.bin",
+          "sha256": "91ac8214c331599390c374d178f5c65ccbc29f13c84207dfbc18de6bbf05fb77",
+          "bytes": 51875
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.softdep",
+          "sha256": "8c845e92b773749467b476b215bb8e7ec4f9d7aea775f194ed6e455b68adb957",
+          "bytes": 535
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.order",
+          "sha256": "b3fddd0861c9ed9b791d688a38bde2b4b18228900b44476f6832cf8a123f35d3",
+          "bytes": 26973
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.builtin",
+          "sha256": "e2b32f1920c4ef91118e8dd1fc36034391c9a69b84c905169bf87c0585011ee8",
+          "bytes": 4995
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.alias.bin",
+          "sha256": "e74d076b634ad8d2524a3a34ac296ed4e8c83f6f1a2fea6f0232f9ff1f231e6d",
+          "bytes": 204069
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.dep",
+          "sha256": "49cae6bfb464797e0d906ee333c33010b1a235785e06a35a4d3709accaebb939",
+          "bytes": 68307
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/modules.symbols",
+          "sha256": "6d123ee95f8450c3e9cc382916e05daa472a6bd7ca9eb386f7441b90c359d001",
+          "bytes": 243523
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/kernel/net/netfilter/nf_conntrack.ko",
+          "sha256": "ad0893d46c499899eb62a058e579d4df478bf77404c672e57cba1a0a399a52ce",
+          "bytes": 300817
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/netfilter/nf_defrag_ipv4.ko",
+          "sha256": "1799fe0449f9b3baf6e7ee196db2df633468d89454212d6f98e016c6e6d68e84",
+          "bytes": 11657
+        },
+        {
+          "path": "paired-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv6/netfilter/nf_defrag_ipv6.ko",
+          "sha256": "657670f6f31c55090f4920fdc7481523a4dc4ec48609aa62696320b312df992f",
+          "bytes": 36609
+        }
+      ]
+    }
+  ],
+  "extra_archive": null,
+  "extra_archive_sha256": null,
+  "retired_bytes": 185423638,
+  "runtime_admission_additions": 0
+}
