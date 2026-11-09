@@ -43,6 +43,11 @@ its own decode boundary and monitor profiles in the archive. Observations cover
 X0..X30, SP, PC, NZCV, V0 and32 memory bytes. Events, translation, access permissions,
 interthread ordering and compiler/link premises retain their stated interfaces.
 
+S4 adds two parametric shared-macro routing laws and a two-mode RET control
+model. These do not increase the72 complete C-model token count; the
+[source/model review](s4-o2-review.md) records their precise boundary. S5/S6
+add nine partial universal O4 components with explicit production goals.
+
 The 72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.

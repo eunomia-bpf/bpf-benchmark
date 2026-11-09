@@ -24547,6 +24547,292 @@
       "time": "2026-11-08T10:21:36.713400+00:00"
     }
   },
+  "temporary_lane_coverage_review_20261109": {
+    "archive_block_sha256": "6a4ee68d3de227f17cf4237af7f59456a8883dcfab63b5c9f3d76f7b3e6720f7",
+    "archive_file": "kprog/results/kprog_verification_20261107/s4-s6-coverage-review.log.gz",
+    "archive_marker": "=== TEMPORARY LANE COVERAGE REVIEW V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/S6/Audit.lean": {
+        "bytes": 2688,
+        "sha256": "6d35aee58e492fbc6e9cc711dcea541930dbf5289df81393b1d431815d6e9335"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S6/audit.log": {
+        "bytes": 3621,
+        "sha256": "8119317479aad4edaee0c14a98d69c6be34c60052f36705c62c6046bff78b83e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S6/coverage-updates.tsv": {
+        "bytes": 11917,
+        "sha256": "4247ef56182c9922aeec11000478a34498130361dd6e3395c2f4f785727a50ec"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S6/publication.json": {
+        "bytes": 832,
+        "sha256": "46a007adf9371e3ad772b66e725c2b8e218925b00dbc3bf8ee569e989dfbdd69"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S6/terminal.json": {
+        "bytes": 1096,
+        "sha256": "464b98860dee4cc742ee85cf2f735532badd9a74cced8857504ab33eb95b3ad1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-coverage-proposal.tsv": {
+        "bytes": 9040,
+        "sha256": "522cce06e362cf8f3a1bb4742497df2026c77e7b47a9504b6123b345d3bf5c4e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-s6-focused-build.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-s6-focused-build.json": {
+        "bytes": 1363,
+        "sha256": "a900c8afb671b9569f9451a21ee304529a647efc84f7d79b40a4d945aa89985a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-s6-focused-build.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-s6-focused-build.log": {
+        "bytes": 8855,
+        "sha256": "7249f11954239961eecaa15de4ca78ee546be6f908e42c7ace5d6cbf65dce15c"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s4-s6-focused-build.py": {
+        "bytes": 1217,
+        "sha256": "1e6dce1a2bb2d96079c900be2cbe9e88512f2eddb7c010e85718322087546e22"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/s5-coverage-proposal.tsv": {
+        "bytes": 15276,
+        "sha256": "eb6759aded1e85f2ad43f29701f8cbe797bf9c50189d003f10762adbcae68a3d"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/HelperABI.lean": {
+        "bytes": 7252,
+        "sha256": "d9691f97ecbf1dea3bb8537478a1aa0db71531f3c7d2be1973169bb3f41a3e9b"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/InvocationABI.lean": {
+        "bytes": 8156,
+        "sha256": "59ed5481fd00cb40b8770ad32bf703600db50e608ef4411d348dd815f103acb5"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/NativeLinkProducer.lean": {
+        "bytes": 10980,
+        "sha256": "2e44d7e077e4ea2fa16fac1ad026c7e5b3a1ebe33133d2931f65f9f5a2620ed5"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/NativeLinkProducerImage.lean": {
+        "bytes": 18901,
+        "sha256": "f777bbbb078bb2a0be3be90c717079c1d06227fae654e8123aa4e2ab4096dd65"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean": {
+        "bytes": 399592,
+        "sha256": "3a2d6963ef26b4123d1dae91d6ef083abbb33e54867b8840e0c5a1465fb08a55"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/SpillControl.lean": {
+        "bytes": 6362,
+        "sha256": "a493e2c04f03a833acfdf5bbca9117ab4e2c560ef61730a04c502e7cc81a4952"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/TailCallBinding.lean": {
+        "bytes": 8979,
+        "sha256": "7ee8c2a33f1b1855e59660a6d18d7c8596179b51ad7c5e65a4fbd6f89b094752"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86HelperDispatch.lean": {
+        "bytes": 23172,
+        "sha256": "a878a84c2b64d0018663c9f211b21e47aade6431eeffd8d5f3e094589a650f8f"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean": {
+        "bytes": 10576,
+        "sha256": "fd1805131bfdf5dc5f3c08c3cd5ced800278fd08825361beed9f0d4f18d00a32"
+      },
+      "/workspaces/repository/kprog/formal/contracts/x86_helper_dispatch_spec.json": {
+        "bytes": 12150,
+        "sha256": "520e2f936a939a6823affe82414eb5248f1540ba0812cac247b42591c2a8c3b5"
+      },
+      "/workspaces/repository/kprog/formal/contracts/x86_specialization_spec.json": {
+        "bytes": 12355,
+        "sha256": "8a780b018fb388d3226f86a4d848d6b56bb62331ff2c93d303d837790f1412e3"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/formal/tools/generate_x86_helper_dispatch_spec.py": {
+        "bytes": 12514,
+        "sha256": "683955b03c9b96a0de5461a5db355ff8fa9938a8e777552fa047d7284498d1c2"
+      },
+      "/workspaces/repository/kprog/formal/tools/generate_x86_specialization_spec.py": {
+        "bytes": 20095,
+        "sha256": "7bdbb21e0083c8064d351715a95e487cd2a541ff244949d3418075a75892cb98"
+      },
+      "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+        "bytes": 88153,
+        "sha256": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 187684,
+        "sha256": "d25f13deeb0a5e9c6959186da9119dfadc8435ba0bf43f9e52de9f60b5101eaa"
+      }
+    },
+    "commits": {
+      "S4": "8438520f5ccb83f09c36fbe65259c6860571b9c7",
+      "S5": "be8c79913dfa3963c53b515250fd957015e00dd8",
+      "S6": "2ec16637595f2d8cf05f1722cc68be8b5322da1f"
+    },
+    "decisions": [
+      {
+        "component_label": "parametric-macro-routing",
+        "lane": "S4",
+        "operation": "X86_OP_CALL_HELPER",
+        "proposed_status": "proved-C-model",
+        "retained_status": "returning-helper-interface-proved",
+        "row_kind": "operation"
+      },
+      {
+        "component_label": "parametric-macro-routing",
+        "lane": "S4",
+        "operation": "X86_OP_CALL_HELPER",
+        "proposed_status": "proved-C-model",
+        "retained_status": "returning-helper-interface-proved",
+        "row_kind": "specialization-token"
+      },
+      {
+        "component_label": "parametric-macro-routing",
+        "lane": "S4",
+        "operation": "X86_OP_CALL_REG",
+        "proposed_status": "proved-C-model",
+        "retained_status": "returning-helper-interface-proved",
+        "row_kind": "operation"
+      },
+      {
+        "component_label": "parametric-macro-routing",
+        "lane": "S4",
+        "operation": "X86_OP_CALL_REG",
+        "proposed_status": "proved-C-model",
+        "retained_status": "returning-helper-interface-proved",
+        "row_kind": "specialization-token"
+      },
+      {
+        "component_label": "modeled-return-control-equality",
+        "lane": "S4",
+        "operation": "X86_OP_RET",
+        "proposed_status": "proved-C-model",
+        "retained_status": "partial-C-model",
+        "row_kind": "operation"
+      },
+      {
+        "component_label": "modeled-return-control-equality",
+        "lane": "S4",
+        "operation": "X86_OP_RET",
+        "proposed_status": "proved-C-model",
+        "retained_status": "partial-C-model",
+        "row_kind": "specialization-token"
+      },
+      {
+        "lane": "S5",
+        "operation": "MAP_POINTER_KIND5",
+        "previous_publication": "source-snapshot:f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+        "previous_status": "partial-universal-component",
+        "publication": "commit:be8c79913dfa3963c53b515250fd957015e00dd8",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S5",
+        "operation": "MAP_VALUE_KIND6",
+        "previous_publication": "source-snapshot:f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+        "previous_status": "partial-universal-component",
+        "publication": "commit:be8c79913dfa3963c53b515250fd957015e00dd8",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S5",
+        "operation": "HELPER_POINTER_KIND7",
+        "previous_publication": "source-snapshot:f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+        "previous_status": "partial-universal-component",
+        "publication": "commit:be8c79913dfa3963c53b515250fd957015e00dd8",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S5",
+        "operation": "READONLY_DATA_KIND8",
+        "previous_publication": "source-snapshot:843dfc482654d81f21ab5de66b4c0f14b2270fedf96aa3f5741219a9aa35911f",
+        "previous_status": "partial-universal-component",
+        "publication": "commit:be8c79913dfa3963c53b515250fd957015e00dd8",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S5",
+        "operation": "CHUNK_AND_CODE_LAYOUT",
+        "previous_publication": "source-snapshot:f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+        "previous_status": "partial-universal-component",
+        "publication": "commit:be8c79913dfa3963c53b515250fd957015e00dd8",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S6",
+        "operation": "SPILL_INSERTION_RELOAD_CONTROL",
+        "previous_publication": "source-snapshot:c7754031523b9ac4adceb1a9939cc67513d77ad5e1c909e5159bfde34f12797c",
+        "previous_status": "partial-universal-component",
+        "publication": "source-snapshot:2ec16637595f2d8cf05f1722cc68be8b5322da1f",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S6",
+        "operation": "HELPER_IDENTITY_AND_ABI",
+        "previous_publication": "source-snapshot:a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+        "previous_status": "partial-universal-component",
+        "publication": "source-snapshot:2ec16637595f2d8cf05f1722cc68be8b5322da1f",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S6",
+        "operation": "TAIL_CALL_BINDING",
+        "previous_publication": "source-snapshot:5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5",
+        "previous_status": "pending-universal-law",
+        "publication": "source-snapshot:2ec16637595f2d8cf05f1722cc68be8b5322da1f",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      },
+      {
+        "lane": "S6",
+        "operation": "INVOCATION_ENTRY_ABI",
+        "previous_publication": "source-snapshot:5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+        "previous_status": "pending-universal-law",
+        "publication": "source-snapshot:2ec16637595f2d8cf05f1722cc68be8b5322da1f",
+        "row_kind": "o4-transformation",
+        "status": "partial-universal-component"
+      }
+    ],
+    "focused_build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.X86RemainingTokenO2",
+        "KProgFormal.NativeLinkProducerImage",
+        "KProgFormal.InvocationABI",
+        "KProgFormal.TailCallBinding",
+        "KProgFormal.HelperABI",
+        "KProgFormal.SpillControl"
+      ],
+      "exit": 0,
+      "scope": "Existing focused module builds for review and shared-cache completion. Not a second full check or production-source extraction proof.",
+      "sources": {
+        "kprog/formal/KProgFormal/HelperABI.lean": "d9691f97ecbf1dea3bb8537478a1aa0db71531f3c7d2be1973169bb3f41a3e9b",
+        "kprog/formal/KProgFormal/InvocationABI.lean": "59ed5481fd00cb40b8770ad32bf703600db50e608ef4411d348dd815f103acb5",
+        "kprog/formal/KProgFormal/NativeLinkProducer.lean": "2e44d7e077e4ea2fa16fac1ad026c7e5b3a1ebe33133d2931f65f9f5a2620ed5",
+        "kprog/formal/KProgFormal/NativeLinkProducerImage.lean": "f777bbbb078bb2a0be3be90c717079c1d06227fae654e8123aa4e2ab4096dd65",
+        "kprog/formal/KProgFormal/SpillControl.lean": "a493e2c04f03a833acfdf5bbca9117ab4e2c560ef61730a04c502e7cc81a4952",
+        "kprog/formal/KProgFormal/TailCallBinding.lean": "7ee8c2a33f1b1855e59660a6d18d7c8596179b51ad7c5e65a4fbd6f89b094752",
+        "kprog/formal/KProgFormal/X86RemainingTokenO2.lean": "fd1805131bfdf5dc5f3c08c3cd5ced800278fd08825361beed9f0d4f18d00a32"
+      },
+      "sources_unchanged": true,
+      "utc": "2026-11-09T05:58:14.564430+00:00"
+    },
+    "remaining": "Concrete C interpretation, source/producer/ABI/compiler and physical goals remain, not new runtime checks.",
+    "runtime_admission_additions": 0,
+    "s4_same_complete_c_model_extraction_standard": false,
+    "scope": "Six S4 operation/token evidence updates retain helper-interface and partial RET categories; nine O4 rows add partial universal operational components and preserve all previous evidence/epochs.",
+    "utc": "2026-11-09T06:03:35.442512+00:00",
+    "x86_complete_c_model_tokens": 72
+  },
   "typed_helper_oracle_refresh": {
     "added_generated_identities": [
       188,
