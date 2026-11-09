@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-09T00:25:07.970283+00:00",
+  "source": "f1caa1cd9c859c7c9e53737f88f7e7b757d13795",
+  "build": "6a1f39868",
+  "symbol_fix": "e5a3270f056f153b6b01e052aedb12bb61510f6a",
+  "control": "99b2f95617881440a990173aff8876d6985e798d",
+  "result": {
+    "native_prog_id": 1,
+    "attach_btf_id": 69911,
+    "extable_entries": 2,
+    "control": 4294967295,
+    "null_result": 0
+  },
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "compiler_exit": 0
+  },
+  "native_read": "Full8byte volatile BTF file.f_pos; existingLSM return range uses negated lowbit",
+  "scope": "Authorized functional recovery control; generic B protected-read/fault-prefix correspondence remains active"
+}
