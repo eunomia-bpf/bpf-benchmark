@@ -21,3 +21,5 @@ cilium-cache: 1242 raw paths (6914669 bytes) preserved in 1 closed groups; statu
 fidelity-replay: 403 raw paths (358010035 bytes) preserved in 17 closed groups; status 2042 ? 1641. Per-file content hashes and destinations: `fidelity-replay-moves.json.gz`. Deferred units: 0.
 
 corpus-runs: 405 raw paths (3978314 bytes) preserved in 103 closed groups; status 1639 ? 1236. Per-file content hashes and destinations: `corpus-runs-moves.json.gz`. Deferred units: 0.
+
+micro-test-core: 88 raw paths (26811853 bytes) preserved in 38 closed groups; status 1234 ? 1148. Per-file content hashes and destinations: `micro-test-core-moves.json.gz`. Deferred units: 0.
