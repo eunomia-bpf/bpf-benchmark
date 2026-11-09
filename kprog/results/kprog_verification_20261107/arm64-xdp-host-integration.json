@@ -29982,6 +29982,109 @@
     },
     "utc": "2026-11-09T00:56:45.013685+00:00"
   },
+  "signed_div_magnitude_refinement": {
+    "actual_C_interfaces": "Captured limbs/first high-magnitude fault/restoring division realization, six fresh flag assignments, AUX specialization and source extraction, physical memory/ABI/compiler transport.",
+    "compiled_scalar_families": "13/75",
+    "current_complete_C_model_families": "70/75",
+    "magnitude": {
+      "archive": "kprog/results/kprog_verification_20261107/signed-div-magnitude.log.gz",
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.X86DivHandler\n#print axioms KProgFormal.X86SignedDivision.restore_signed\n#print axioms KProgFormal.X86SignedDivision.quotient_sign\n#print axioms KProgFormal.X86SignedDivision.remainder_sign\n#print axioms KProgFormal.X86SignedDivision.quotient_range\n#print axioms KProgFormal.X86SignedDivision.magnitude_to_nat\n#print axioms KProgFormal.X86SignedDivision.pair_magnitude_correct\n#print axioms KProgFormal.X86SignedDivision.pair_magnitude_to_nat\n",
+      "compile_exit": 0,
+      "final_source_change": "Trailing blank line normalized after the successful compile and audit; theorem terms retained.",
+      "laws": [
+        "restore_signed",
+        "quotient_sign",
+        "remainder_sign",
+        "quotient_range",
+        "magnitude_to_nat",
+        "pair_magnitude_correct",
+        "pair_magnitude_to_nat"
+      ],
+      "publication": "d26b195977e178a0a724717dbd908e841bf58e1a",
+      "reduction_bridge": 2,
+      "scope": "Universal captured-limb magnitude carry, signed quotient/remainder restoration, exact signed range and full-minimum unsigned magnitude. Production operand capture, fault/read/write ordering, undefined flags, dispatch AUX branch, source extraction and compiler/native interfaces remain active.",
+      "sorryAx": 0,
+      "source_sha256": "f8ffecd04c8722d2a61d9e90188b8033ff75eec28e0c18f5e5aec0a7a56f7eb0"
+    },
+    "refinement": {
+      "archive": "kprog/results/kprog_verification_20261107/signed-div-refinement.log.gz",
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.Refinement.X86Divide.signed_results\n#print axioms KProgFormal.Refinement.X86Divide.signed_magnitude_refines\n#print axioms KProgFormal.Refinement.X86Divide.signed_magnitude_handler_refines\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-refinement/olean/KProgFormal/Reference/X86.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Reference/X86",
+          "reused": true,
+          "source_sha256": "b3df9fd30e2d9093f3da32ea2407911b8656e1fb0be31daccdcd35e913a1784b"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-refinement/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "f8ffecd04c8722d2a61d9e90188b8033ff75eec28e0c18f5e5aec0a7a56f7eb0"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-refinement/olean/KProgFormal/Refinement/X86Scalar.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Scalar.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Scalar",
+          "reused": true,
+          "source_sha256": "aa9d8527e111c7bb9e9fbd494045855135defdb670f06e27acc7be7b294b50ce"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-refinement/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "629a8d9831e5c7e78a3dca8722e24640f28cc024bda4a7a905879ca1b6e0aa22"
+        }
+      ],
+      "laws": [
+        "signed_results",
+        "signed_magnitude_refines",
+        "signed_magnitude_handler_refines"
+      ],
+      "publication": "43e09d05eedcb176cf8dd142cc2241a2c1ecd563",
+      "reduction_bridge": 2,
+      "scope": "Generic full-state signed magnitude arithmetic/read/fault/width-write refinement for all four widths and aliases. Actual captured-limb magnitude/source extraction, C preliminary high-limb fault/restoring-loop realization, fresh flags, AUX dispatcher and compiler/physical memory remain explicit interfaces.",
+      "sorryAx": 0
+    },
+    "runtime_predicate_additions": 0,
+    "status": "partial-universal-magnitude-state-model"
+  },
   "signed_div_reference": {
     "archive": "kprog/results/kprog_verification_20261107/signed-div-reference.log.gz",
     "canonical_module_compiles": {

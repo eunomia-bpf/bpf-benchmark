@@ -6005,3 +6005,22 @@ C-model coverage therefore changes from71/75 to70/75. The DIV operation/token
 rows are `partial-unsigned-C-model`. Historical counts retain their source
 epochs. Compiled scalar family coverage remains13/75; the sole full at
 `8f62cbf0e2f81de135ab83347b31ef4da2ae564c` uses its earlier reference epoch.
+
+### Signed IDIV magnitude and state refinement
+
+The [seven magnitude laws](signed-div-magnitude.log.gz), published as
+`d26b195977e178a0a724717dbd908e841bf58e1a`, prove full double-width negation carry,
+signed-minimum magnitude, quotient/remainder sign restoration and the exact
+positive/negative quotient limits. The [three state laws](signed-div-refinement.log.gz),
+published as `43e09d05eedcb176cf8dd142cc2241a2c1ecd563`, compose magnitude arithmetic
+with existing eager scalar reads and generated width-aware writes. They prove
+canonical signedDivide transition equality and its Step relation for every
+width, source alias and input state, retaining ordered memory/read-fault and
+divide-fault events, byte packing and the complete architectural frame.
+
+The actual C limb extraction, preliminary high-limb fault, restoring-loop
+realization, six fresh flags, AUX dispatcher and source/physical-memory/ABI/
+compiler transport remain explicit interfaces. Both module compilations and
+axiom audits finish exit0; the reports disclose inherited executable reduction.
+The DIV rows retain their partial signed-body scope and complete current
+C-model coverage remains70/75, with13/75 compiled scalar families.
