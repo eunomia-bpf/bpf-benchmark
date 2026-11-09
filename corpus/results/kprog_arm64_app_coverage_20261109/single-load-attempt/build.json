@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-09T09:29:52.804718+00:00",
+  "make_exit": 0,
+  "source_head": "d99b636c40fc7a04bd5d28fca14d3f6cf7a58047",
+  "approved_change": "fb23a234d88f80a397a893d3d9188d680bdd6d13",
+  "source_sha256": {
+    "kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
+    "kprog/test/trusted_service_client.cpp": "2dd95f9ee416c224dd2881282565255d5580ba6e37615e5521d59a6e7567b49a",
+    "kprog/libnativeloader/CMakeLists.txt": "4ae1bb6fa3516a91b0129b3e4b32f618cfd178467cbbeb800631252e08291a80",
+    "kprog/libnativeloader/src/native_data_layout.hpp": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
+    "kprog/libnativeloader/src/native_loader_fd_scan.hpp": "545c2cdbc6bec151250c95729d28acd4e3dbb72e416eb589c087df7597e32027",
+    "kprog/libnativeloader/src/native_loader_cache.hpp": "39d7c8ed55f3107fac778dc8f5ffdf4f65eef23383c72b94972f61d1ed90f14d",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8",
+    "kprog/libnativeloader/src/native_loader.cpp": "ed027ab4ab61e66aaacc7e6c481377b8fcfc92ae3037bf2dcec5f31b22912f86",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "87c7cbf13d0b72f379e04f92c509637b6b37570a92b2f0bfaa849e3b4f02b0ab",
+    "kprog/libnativeloader/src/native_loader_link_plan.hpp": "b1024931b2b97d698620856b2222dedcf2115f146eaeb573dcc67429eda95f9d",
+    "kprog/libnativeloader/src/native_loader_bytecode.hpp": "f7e0184d400aad9ba981f03be14644677c61473b5ba022e54175099827dc68e1",
+    "kprog/libnativeloader/include/native_loader.hpp": "89f4f112bde0f9332b4dc9a8c997dfc7235c4d17b041151648180ffdf3437573",
+    "kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+    "kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+    "kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+    "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+    "kinsn/module/include/native_lab_group.h": "470495ac3e73284e85dec1c2fc651b9063a8574fae2138bea0417018edc34ed3",
+    "kinsn/module/include/native_lab_binding.h": "d6ac55a398f7fd56ac883ae8c44f15e62a3826ac85fcff25fbc720872e623fcc"
+  },
+  "runtime_admission_additions": 0,
+  "runtime_sha256": {
+    "libnative_loader.a": "670b887d6830af7865c502fc4fb67df59ee0fcd0a397fcee85648c600921894c",
+    "libnative_loader.so": "4a6a56241aff1a659bf4e96f6d9731a187f85ecb0fe7268619186dcdc54d7926",
+    "trusted-service-client": "ca7b5749df99c794e965881db3349851a50270cbfeeef05fae8cfa0186d1698a",
+    "trusted-native-loader": "7ff1a859bfcd3dd65883114236fc4523d6c15961a4c085b70ccc8e3e2fdbcb43"
+  }
+}
