@@ -21354,6 +21354,713 @@
     },
     "source_pins_stable": true
   },
+  "shared_helper_registry_oracle_refresh": {
+    "actual_existing_commands": [
+      {
+        "command": [
+          "python3",
+          "tools/generate_helper_oracle.py"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_helper_oracle.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "cc",
+          "-Wall",
+          "-Wextra",
+          "-O2",
+          "-I.",
+          "-I../x86",
+          "-I../../kprog",
+          "-I../../vendor/libbpf/src",
+          "oracles/test_x86_helper_dispatch_route_host.c",
+          "-o",
+          "build/test_x86_helper_dispatch_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_x86_helper_dispatch_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "cc",
+          "-include",
+          "oracles/arm64_entry_environment_host.h",
+          "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+          "-include",
+          "oracles/arm64_exclusive_choice_host.h",
+          "-Wall",
+          "-Wextra",
+          "-O2",
+          "-I.",
+          "-I../arm64",
+          "-I../../kprog",
+          "-I../../vendor/libbpf/src",
+          "oracles/helper_route_host.c",
+          "-o",
+          "build/helper_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/helper_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "cc",
+          "-include",
+          "oracles/arm64_entry_environment_host.h",
+          "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+          "-include",
+          "oracles/arm64_exclusive_choice_host.h",
+          "-Wall",
+          "-Wextra",
+          "-O2",
+          "-I.",
+          "-I../arm64",
+          "-I../../kprog",
+          "-I../../vendor/libbpf/src",
+          "oracles/test_arm64_helper_call_host.c",
+          "-o",
+          "build/test_arm64_helper_call_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_helper_call_host"
+        ],
+        "exit": 0
+      }
+    ],
+    "actual_focused_exit": 0,
+    "archive_block_sha256": "4d9f2e353c19c7c697106ff2a6823f6db9f6f7bb1aadf88ce91f10d4fc119da2",
+    "archive_file": "kprog/results/kprog_verification_20261107/helper-registry-oracle-refresh.log.gz",
+    "archive_marker": "=== SHARED HELPER REGISTRY ORACLE REFRESH V2 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-finalize.py": {
+        "bytes": 1907,
+        "sha256": "2a9726f9cd5408847ea3abb572d77b03b626a9497434b0d185094ac3dff03fa1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.archive-writer.py": {
+        "bytes": 4531,
+        "sha256": "be047e12b317fcea959c36bc16d67fa3b07e32d7605cfa2c40e26828bceca643"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.head": {
+        "bytes": 41,
+        "sha256": "3e55aa5f562821f322600bc0db1da6aa1c673cb8aa36e7621d1d5500745035f1"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.launch.log": {
+        "bytes": 102,
+        "sha256": "0725df4f91546c289c6ec442d288ffe8de8bc59dc43531968ed7dd91802bedc4"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.log": {
+        "bytes": 8492,
+        "sha256": "89bfa33fb965eba124dc40aa2d05d0addc930c0e08cd156c4806a241400dcd0a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.py": {
+        "bytes": 4248,
+        "sha256": "e4d7216d61928dba99139d97bacff880b5d7f456d25523de81f0f3bb3a41c941"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.sources": {
+        "bytes": 143175,
+        "sha256": "b060cc618ca6f78053f163331ba5cf1eea4e67dad76090edb714366894f66bae"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/compiled-bzhi-full.state": {
+        "bytes": 52,
+        "sha256": "e071ca9bf686a32b12a668db1ed93cfcd8ec32d28486e97bed99d9e92f8692fd"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh-0.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh-1.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh-2.log": {
+        "bytes": 186529,
+        "sha256": "9e868518575592a6ae9dffe1a528fde0b5f1120b7e6a5623d3b3f6109565ab6b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh-3.log": {
+        "bytes": 59,
+        "sha256": "0964df78bd4584273bf9b930f91a4623665ce94836993de67750b8543bdb12f6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh-4.log": {
+        "bytes": 65945,
+        "sha256": "a679ec241f691ee15a9a595b458e6ee1b063e6b731f3a70d4da71ccb5ddfaee7"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.exit.attempt2": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.json": {
+        "bytes": 1727,
+        "sha256": "0c2d2fa081152ca80cbe826656af27b7313034b63d43a569fe5bb1927a6d4f7f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.json.attempt1": {
+        "bytes": 903,
+        "sha256": "c5861a9537d9e34202626001c40494f32c9b88fcc520a3b045f4fcde114f633a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.json.attempt2": {
+        "bytes": 124,
+        "sha256": "1da4dd8ea7b749f6c02925e630ffdce54aaec06b39fdfae6fdc7ff09d7f8ab85"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.log": {
+        "bytes": 32,
+        "sha256": "0a6de13c947b7a4619a0d68c9a6e00b5f5e8b23cb4b9069e238c3a54296f4887"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.log.attempt1": {
+        "bytes": 365,
+        "sha256": "1f40ca4a526d65b0040314c4e8b7a3f6b4aac9f69bec148c870d77f7cddaecb9"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.log.attempt2": {
+        "bytes": 356,
+        "sha256": "14df303592f8d277c32b83602ecd5a3399e7ec800a61ce93b830cc9eee7da8db"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.py": {
+        "bytes": 1546,
+        "sha256": "b258ee07c1f564b78345bb9cca1c14a0c0c6c8d945d0c04773e06d6ecbe853cc"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.py.attempt1": {
+        "bytes": 1262,
+        "sha256": "ed299fa133b9a31d01c1af46023607fe508c7b32d8c7056cbb6413844f9aa5c8"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-refresh.py.attempt2": {
+        "bytes": 1500,
+        "sha256": "82b7a8c44a592224aba47ad6f62b81ab669e95e304c182927f7976ec81b91cde"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-0.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-0.log.attempt2": {
+        "bytes": 36,
+        "sha256": "8c2f7d202c490b6638ce7b0ef9240b8083fd01ec6fe9a164ce3f70a9f7a2fd3a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-1.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-2.log": {
+        "bytes": 21364,
+        "sha256": "b50314b29fc27d044ec3acbab33685bf8a86161625c7ad55a87e0bb69df5973a"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-3.log": {
+        "bytes": 61,
+        "sha256": "2cfe531f80c84eaec0f594ab802070080b724a4f97b813ecaf756b197c7eb034"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-4.log": {
+        "bytes": 9999,
+        "sha256": "ad5cf5f8923e18ccac33d1d30da793c9b778761ab2454ce7dbfb9b838d9e873b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-5.log": {
+        "bytes": 54,
+        "sha256": "f1e04a8122e3dc4bfb3aefb1e2208d971d03345f25260aaf960b6854ceaa591d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-6.log": {
+        "bytes": 65786,
+        "sha256": "df52ced31221bb629bdbea0341f8b4d6bc1c0fcbcc002765674f040a77205b42"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helper91-semantic-7.log": {
+        "bytes": 45,
+        "sha256": "a22650d303615858ab53f0858d7b06336a611120cf7f960acd58650c927b6adc"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helpercall-publication-finalize.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helpercall-publication-finalize.log": {
+        "bytes": 663,
+        "sha256": "ecefdec012bf9192f5e5e986a143f4dce33ee0f1f9d75441bb4ed844d7504ac6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helpercall-publication-finalize.py": {
+        "bytes": 4026,
+        "sha256": "ce39cfd2a9c9e04060a7aa0817851359bfa113f007824e1033ec2a92e5647f3d"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helpercall-publication-finalize.state": {
+        "bytes": 67,
+        "sha256": "2c69d6184b4339970a8642f5c42eae81fe6a0ed51522c64ea3e2c5a78d766f89"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/helpercall-publication-prepare.py": {
+        "bytes": 8570,
+        "sha256": "503f52035729ebfa3362edc893f6b71c0dc64550c84507ad09366b538bdd28cf"
+      },
+      "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": {
+        "bytes": 142406,
+        "sha256": "f658e9299669bba9d6ad35e1a5d5f15da00fe94f952a31047fab4f8a13fc46c3"
+      },
+      "/workspaces/repository/kprog/formal/Makefile": {
+        "bytes": 54492,
+        "sha256": "331ab2b051aa5b9321f7ad3b7909b67b35ec90a69b4c191b1d81fbe4a8304773"
+      },
+      "/workspaces/repository/kprog/formal/contracts/arm64_helper_idents_spec.json": {
+        "bytes": 4388,
+        "sha256": "7f2b36457ff74b73be12e12510ae1b55b2ef707f908b7c8377efaf7be7727b93"
+      },
+      "/workspaces/repository/kprog/formal/contracts/x86_helper_dispatch_spec.json": {
+        "bytes": 12150,
+        "sha256": "520e2f936a939a6823affe82414eb5248f1540ba0812cac247b42591c2a8c3b5"
+      },
+      "/workspaces/repository/kprog/formal/oracles/generated_helper_calls.h": {
+        "bytes": 54678,
+        "sha256": "572468660ec0411ec4777b4f84207af23e34b9a79e272ac816340abfc1e78e47"
+      },
+      "/workspaces/repository/kprog/formal/oracles/helper_route_host.c": {
+        "bytes": 39505,
+        "sha256": "2621d169fca820c40f9be3981ced0bc29a040420c88f8be7406e69161d67c0dc"
+      },
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_helper_call_host.c": {
+        "bytes": 58462,
+        "sha256": "6b4fd46d28f5d6331f8f88af04865e39c0115e07c8be47d820a38c5b35e9156a"
+      },
+      "/workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c": {
+        "bytes": 9788,
+        "sha256": "a553e47e8c6afc9e20fe00790f3148564a2d4ec6c3116b5c973d1ca4e31cd456"
+      },
+      "/workspaces/repository/kprog/formal/tools/generate_helper_oracle.py": {
+        "bytes": 6740,
+        "sha256": "acd15cac18815e9591382fd59d588ea79608d659e0017161df1f3c2b37baf12a"
+      },
+      "/workspaces/repository/kprog/helper_abi.py": {
+        "bytes": 1879,
+        "sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b"
+      },
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+        "bytes": 186440,
+        "sha256": "7d2cec0272ab384b74e6443490395a655215a65f160e4c08caaf7a4fa9d2cfd3"
+      },
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": {
+        "bytes": 176025,
+        "sha256": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697"
+      }
+    },
+    "failed_full_exit": 2,
+    "failed_full_phase": "Existing generated shared helper oracle freshness check after registry extension; not a passed full.",
+    "failed_full_source": "f0343d49c404745d3ad0f9ea0fd085a8f034b249",
+    "helper_contract_rows": {
+      "arm64": 92,
+      "unique_identities": 92,
+      "x86": 70
+    },
+    "identities": [
+      {
+        "id": 1,
+        "name": "bpf_map_lookup_elem"
+      },
+      {
+        "id": 2,
+        "name": "bpf_map_update_elem"
+      },
+      {
+        "id": 3,
+        "name": "bpf_map_delete_elem"
+      },
+      {
+        "id": 4,
+        "name": "bpf_probe_read"
+      },
+      {
+        "id": 5,
+        "name": "bpf_ktime_get_ns"
+      },
+      {
+        "id": 6,
+        "name": "bpf_trace_printk"
+      },
+      {
+        "id": 7,
+        "name": "bpf_get_prandom_u32"
+      },
+      {
+        "id": 8,
+        "name": "bpf_get_smp_processor_id"
+      },
+      {
+        "id": 9,
+        "name": "bpf_skb_store_bytes"
+      },
+      {
+        "id": 10,
+        "name": "bpf_l3_csum_replace"
+      },
+      {
+        "id": 11,
+        "name": "bpf_l4_csum_replace"
+      },
+      {
+        "id": 12,
+        "name": "bpf_tail_call"
+      },
+      {
+        "id": 13,
+        "name": "bpf_clone_redirect"
+      },
+      {
+        "id": 14,
+        "name": "bpf_get_current_pid_tgid"
+      },
+      {
+        "id": 15,
+        "name": "bpf_get_current_uid_gid"
+      },
+      {
+        "id": 16,
+        "name": "bpf_get_current_comm"
+      },
+      {
+        "id": 20,
+        "name": "bpf_skb_get_tunnel_key"
+      },
+      {
+        "id": 21,
+        "name": "bpf_skb_set_tunnel_key"
+      },
+      {
+        "id": 23,
+        "name": "bpf_redirect"
+      },
+      {
+        "id": 25,
+        "name": "bpf_perf_event_output"
+      },
+      {
+        "id": 26,
+        "name": "bpf_skb_load_bytes"
+      },
+      {
+        "id": 27,
+        "name": "bpf_get_stackid"
+      },
+      {
+        "id": 28,
+        "name": "bpf_csum_diff"
+      },
+      {
+        "id": 31,
+        "name": "bpf_skb_change_proto"
+      },
+      {
+        "id": 32,
+        "name": "bpf_skb_change_type"
+      },
+      {
+        "id": 33,
+        "name": "bpf_skb_under_cgroup"
+      },
+      {
+        "id": 35,
+        "name": "bpf_get_current_task"
+      },
+      {
+        "id": 36,
+        "name": "bpf_probe_write_user"
+      },
+      {
+        "id": 37,
+        "name": "bpf_current_task_under_cgroup"
+      },
+      {
+        "id": 38,
+        "name": "bpf_skb_change_tail"
+      },
+      {
+        "id": 39,
+        "name": "bpf_skb_pull_data"
+      },
+      {
+        "id": 43,
+        "name": "bpf_skb_change_head"
+      },
+      {
+        "id": 44,
+        "name": "bpf_xdp_adjust_head"
+      },
+      {
+        "id": 45,
+        "name": "bpf_probe_read_str"
+      },
+      {
+        "id": 46,
+        "name": "bpf_get_socket_cookie"
+      },
+      {
+        "id": 50,
+        "name": "bpf_skb_adjust_room"
+      },
+      {
+        "id": 54,
+        "name": "bpf_xdp_adjust_meta"
+      },
+      {
+        "id": 58,
+        "name": "bpf_override_return"
+      },
+      {
+        "id": 65,
+        "name": "bpf_xdp_adjust_tail"
+      },
+      {
+        "id": 67,
+        "name": "bpf_get_stack"
+      },
+      {
+        "id": 68,
+        "name": "bpf_skb_load_bytes_relative"
+      },
+      {
+        "id": 69,
+        "name": "bpf_fib_lookup"
+      },
+      {
+        "id": 80,
+        "name": "bpf_get_current_cgroup_id"
+      },
+      {
+        "id": 85,
+        "name": "bpf_sk_lookup_udp"
+      },
+      {
+        "id": 86,
+        "name": "bpf_sk_release"
+      },
+      {
+        "id": 87,
+        "name": "bpf_map_push_elem"
+      },
+      {
+        "id": 88,
+        "name": "bpf_map_pop_elem"
+      },
+      {
+        "id": 95,
+        "name": "bpf_sk_fullsock"
+      },
+      {
+        "id": 99,
+        "name": "bpf_skc_lookup_tcp"
+      },
+      {
+        "id": 105,
+        "name": "bpf_strtol"
+      },
+      {
+        "id": 109,
+        "name": "bpf_send_signal"
+      },
+      {
+        "id": 112,
+        "name": "bpf_probe_read_user"
+      },
+      {
+        "id": 113,
+        "name": "bpf_probe_read_kernel"
+      },
+      {
+        "id": 114,
+        "name": "bpf_probe_read_user_str"
+      },
+      {
+        "id": 115,
+        "name": "bpf_probe_read_kernel_str"
+      },
+      {
+        "id": 118,
+        "name": "bpf_jiffies64"
+      },
+      {
+        "id": 122,
+        "name": "bpf_get_netns_cookie"
+      },
+      {
+        "id": 124,
+        "name": "bpf_sk_assign"
+      },
+      {
+        "id": 125,
+        "name": "bpf_ktime_get_boot_ns"
+      },
+      {
+        "id": 127,
+        "name": "bpf_seq_write"
+      },
+      {
+        "id": 130,
+        "name": "bpf_ringbuf_output"
+      },
+      {
+        "id": 131,
+        "name": "bpf_ringbuf_reserve"
+      },
+      {
+        "id": 132,
+        "name": "bpf_ringbuf_submit"
+      },
+      {
+        "id": 133,
+        "name": "bpf_ringbuf_discard"
+      },
+      {
+        "id": 148,
+        "name": "bpf_copy_from_user"
+      },
+      {
+        "id": 152,
+        "name": "bpf_redirect_neigh"
+      },
+      {
+        "id": 154,
+        "name": "bpf_this_cpu_ptr"
+      },
+      {
+        "id": 155,
+        "name": "bpf_redirect_peer"
+      },
+      {
+        "id": 158,
+        "name": "bpf_get_current_task_btf"
+      },
+      {
+        "id": 160,
+        "name": "bpf_ktime_get_coarse_ns"
+      },
+      {
+        "id": 161,
+        "name": "bpf_ima_inode_hash"
+      },
+      {
+        "id": 163,
+        "name": "bpf_check_mtu"
+      },
+      {
+        "id": 173,
+        "name": "bpf_get_func_ip"
+      },
+      {
+        "id": 174,
+        "name": "bpf_get_attach_cookie"
+      },
+      {
+        "id": 175,
+        "name": "bpf_task_pt_regs"
+      },
+      {
+        "id": 181,
+        "name": "bpf_loop"
+      },
+      {
+        "id": 182,
+        "name": "bpf_strncmp"
+      },
+      {
+        "id": 183,
+        "name": "bpf_get_func_arg"
+      },
+      {
+        "id": 184,
+        "name": "bpf_get_func_ret"
+      },
+      {
+        "id": 185,
+        "name": "bpf_get_func_arg_cnt"
+      },
+      {
+        "id": 186,
+        "name": "bpf_get_retval"
+      },
+      {
+        "id": 188,
+        "name": "bpf_xdp_get_buff_len"
+      },
+      {
+        "id": 189,
+        "name": "bpf_xdp_load_bytes"
+      },
+      {
+        "id": 190,
+        "name": "bpf_xdp_store_bytes"
+      },
+      {
+        "id": 191,
+        "name": "bpf_copy_from_user_task"
+      },
+      {
+        "id": 193,
+        "name": "bpf_ima_file_hash"
+      },
+      {
+        "id": 194,
+        "name": "bpf_kptr_xchg"
+      },
+      {
+        "id": 195,
+        "name": "bpf_map_lookup_percpu_elem"
+      },
+      {
+        "id": 197,
+        "name": "bpf_dynptr_from_mem"
+      },
+      {
+        "id": 198,
+        "name": "bpf_ringbuf_reserve_dynptr"
+      },
+      {
+        "id": 199,
+        "name": "bpf_ringbuf_submit_dynptr"
+      },
+      {
+        "id": 200,
+        "name": "bpf_ringbuf_discard_dynptr"
+      }
+    ],
+    "next_full": "Sole fixed-source full at this refresh commit, reusing shared incremental caches; no failed full or prototype is relabelled.",
+    "remaining_interface": "Host identity/argument/result/frame oracles and generated freshness are finite checks, not universal kernel helper/dynptr memory/tag/lifetime/ABI or compiled-B refinement. Current helper1/5 compiler-unit publication still waits corrected full0.",
+    "result": "Existing generator regenerated the shared typed public-ABI stubs/results from published contracts. Existing x86 route19458/ARM route18770 and ARM real typed ABI164 cases pass; initial x86 helper-call12cases also passed. The initial standalone ARM invocation omitted existing ARM64_HOST_ENV and failed linkage; corrected exact existing flags pass. A concurrent registry extension made one intervening freshness attempt stale; every original log/source/exit is retained.",
+    "runtime_admission_additions": 0,
+    "scope": "Refresh existing shared typed helper oracle from the exact currently published helper contracts; keep every semantic route. No new check/gate or generator policy.",
+    "source_pins": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "f658e9299669bba9d6ad35e1a5d5f15da00fe94f952a31047fab4f8a13fc46c3",
+      "kprog/formal/Makefile": "331ab2b051aa5b9321f7ad3b7909b67b35ec90a69b4c191b1d81fbe4a8304773",
+      "kprog/formal/contracts/arm64_helper_idents_spec.json": "7f2b36457ff74b73be12e12510ae1b55b2ef707f908b7c8377efaf7be7727b93",
+      "kprog/formal/contracts/x86_helper_dispatch_spec.json": "520e2f936a939a6823affe82414eb5248f1540ba0812cac247b42591c2a8c3b5",
+      "kprog/formal/oracles/generated_helper_calls.h": "572468660ec0411ec4777b4f84207af23e34b9a79e272ac816340abfc1e78e47",
+      "kprog/formal/oracles/helper_route_host.c": "2621d169fca820c40f9be3981ced0bc29a040420c88f8be7406e69161d67c0dc",
+      "kprog/formal/oracles/test_arm64_helper_call_host.c": "6b4fd46d28f5d6331f8f88af04865e39c0115e07c8be47d820a38c5b35e9156a",
+      "kprog/formal/oracles/test_x86_helper_dispatch_route_host.c": "a553e47e8c6afc9e20fe00790f3148564a2d4ec6c3116b5c973d1ca4e31cd456",
+      "kprog/formal/tools/generate_helper_oracle.py": "acd15cac18815e9591382fd59d588ea79608d659e0017161df1f3c2b37baf12a",
+      "kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+      "kprog/x86/x86_sim_local_bpf.h": "7d2cec0272ab384b74e6443490395a655215a65f160e4c08caaf7a4fa9d2cfd3",
+      "vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697"
+    },
+    "utc": "2026-11-09T00:56:45.013685+00:00"
+  },
   "source_emission_composition": {
     "commands": [
       {

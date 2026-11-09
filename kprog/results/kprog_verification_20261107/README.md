@@ -5599,3 +5599,15 @@ and2 new function bytes match the combined120 object. Memory/exclusive remain
 equal, visit advances25 and fault/events are absent. [Original evidence](compiled-bzhi.log.gz)
 retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
 native register/tag frame, physical ABI and compiler embedding remain explicit.
+
+### Shared helper oracle synchronized after registry extension
+
+The existing shared typed oracle is regenerated from the currently published
+helper contracts (x8670, ARM92, union92). Existing x8619458/ARM18770 route observations and ARM164 typed
+ABI checks pass with the established host environment flags.
+[Original records](helper-registry-oracle-refresh.log.gz) retain the complete
+failed full atf0343d49, its source manifest/CPU/log/exit, all focused attempts
+and the corrected passing commands. The full failure remains exit2 at generated
+freshness, not a passing result. The new fixed-source retry reuses shared caches.
+Generic helper/dynptr memory/tag/lifetime, physical ABI and compiler interfaces
+stay explicit; no new check, gate or production behavior is added.
