@@ -1,7 +1,7 @@
 {
-  "utc": "2026-11-09T07:17:03.741938+00:00",
-  "source_head": "b409daa939ab59b072561f03079d50e1678f8785",
-  "source_epoch": "Published complete-effective-address/exit-stack model with retained canonical runtime binaries",
+  "utc": "2026-11-09T07:36:57.195708+00:00",
+  "source_head": "cc245743cfc34f873fe51c79864756873ccf4f27",
+  "source_epoch": "Published model including helper output lifetime and scalar-only decoder; retained canonical SMAP runtime binaries",
   "canonical_base_image": "sha256:05ceed1e263ad3f29b928065f88a5437aacb81b17063c438d6975a56c0819f2d",
   "bindings": {
     "capable": {
@@ -58,7 +58,7 @@
     "capable.my_pid"
   ],
   "frozen_workload": "9f3855f6f",
-  "native_compile": "7ccdcff49e9cc87e553d1ad3ad00fc3be0ed7831",
+  "native_compile": "37fea6858ee85b77da1331b171ed22c287414df8",
   "producer_target": {
     "source_head": "860e77f17fdf0199126a79fd43f165b9aeaf258f",
     "frozen_workload": "9f3855f6f",
@@ -209,7 +209,7 @@
     "source/kprog/fidelity/x86_control.py": "b9a64adc20075a00976d93667bb8c6d5168289e292885c87b6ddf6a73ccdf824",
     "source/kprog/fidelity/arm64_bank.py": "f444e6f758f0c6c8e8b8353b4fce3131d162f6e83ae617afdf129b52c85e3c7c",
     "source/kprog/fidelity/arm64_reference_path.py": "d6f89aa34c5049da01f1dbb7b90f5840c8c13d47e90aec607cb1562f65249697",
-    "source/kprog/fidelity/negative.py": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
+    "source/kprog/fidelity/negative.py": "5fde3d9d6883b36b5b523fdc447f1ffe89902233c0d9e3b7bd60b87605dce5cf",
     "source/kprog/fidelity/arm64_control.py": "23d364a638c93fbfe04160338ed5294d8b73ca3ccd03bc36cb18b084c1d39508",
     "source/kprog/fidelity/x86_stack.py": "441a19b1b01a1ad322528edbc2ad2150c71ae424bdcf306daac99e415e270029",
     "source/kprog/fidelity/stage2.py": "0b57740e766c559e13574b0e72bfd278d865ae2c3a518c70460b800a944f44ee",
@@ -217,11 +217,11 @@
     "source/kprog/fidelity/reference_check.py": "5ea8c03e03dc74c374a24137344eeb92d152b1fdd962161052b3474b97358348",
     "source/kprog/fidelity/x86_reference_path.py": "ca41a0cd58bef1befa759dbbcc57dd9f41d4568b7a387ae7bb1698f1b3dd5349",
     "source/kprog/test-others/native_lab_attach.hpp": "82049f9a017c1623b8d57d4a1ff1cf53a4cbc66dfc484c3f9bf1d713ab309891",
-    "source/kprog/x86/x86_sim_local_bpf.h": "fe86146d943510e5e38f48589c01785d62449904d98706cdb467ada0b1c99943",
+    "source/kprog/x86/x86_sim_local_bpf.h": "e5209c7135b333201c66086d7bd1050abf4c929e665f5ed9a0023c74756f780b",
     "source/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
     "source/kprog/x86/run_app_sim_smoke.py": "ca86b8003d61c88ccbdb64fd59ce1c1bd4e26a40c3126b1f59dfe1917d86d2a3",
     "source/kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
-    "source/kprog/arm64/arm64_sim_local_bpf.h": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+    "source/kprog/arm64/arm64_sim_local_bpf.h": "2f98fec109486f186be41e39ed1fc4188f42a319e2f68655b1aa35d663492983",
     "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
     "source/kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
     "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
@@ -240,7 +240,7 @@
     "source/kprog/x86/micro-prog/generated_x86_cc_decode.py": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
     "source/kprog/x86/micro-prog/generated_x86_full_condition.py": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
     "source/kprog/x86/micro-prog/generated_x86_reg_lane_aux.py": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9",
-    "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "7aac3c487eb4bd7e26a7c8c6d73f7a3372b456f17e99f89db2b4d056ec937c1a",
+    "source/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "3164076013a1759fb91809ca3c48b7b4c508e8f860649cfc6107dd027415c9ca",
     "source/kprog/x86/micro-prog/x86_abi.py": "dcde8929e8176acf0f76caa1509f607134c3c14680566610dcb2a646e87bf076",
     "source/kprog/x86/native_lab/native_link/target/release/native-link": "a58076fb72ebbfcf11ee1316d8cd622cda4426e5682daa7ee5ae22be87e1ddd4",
     "source/kprog/formal/tools/generate_arm64_unary_spec.py": "73cf66c46f06d54a62dc33125a89bdfa96629d4a54d7a694caa1329a4aa850bc",
@@ -414,7 +414,7 @@
     "source/kprog/formal/tools/generate_arm64_stack_tag_spec.py": "2579dd88e972c9bfd5ae4bfe9a242a62692bffdc55955ea951cdff11136abc85",
     "source/kprog/formal/tools/check_x86_high_load.py": "fde27f43ccc2dd000e29fc8fec561ab26a7ddf80dc19c2599f3b6dba54947860",
     "source/kprog/formal/tools/check_reference_x86_unary.py": "1458029e6a13c91532ac2a55ef0cba4ae32df302de9fe7ba66b0ad2cf0b92fd3",
-    "source/kprog/formal/tools/generate_arm64_helper_idents_spec.py": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+    "source/kprog/formal/tools/generate_arm64_helper_idents_spec.py": "29ee1ae07ef8f97b89f9a4dbe6ba577a3905fae0acebc071f571fd1c2da1a3ea",
     "source/kprog/formal/tools/check_arm64_pointer_access.py": "5d0744e12aa4114bc70d82c1cc119e0fd06b0a1dc8991c2abdc843fc55ac107c",
     "source/kprog/formal/tools/generate_arm64_flag_operand_spec.py": "099397bce747c308c04fe63a55a6f8a98817217243ddd644295da6f093a42868",
     "source/kprog/formal/generated/arm64_shift.h": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
@@ -539,7 +539,7 @@
     "source/kprog/formal/generated/x86_setcc.h": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
     "source/kprog/formal/generated/arm64_decode.h": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
     "source/kprog/formal/generated/arm64_stack_write_tag_action.h": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
-    "source/kprog/formal/generated/arm64_helper_idents.h": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e",
+    "source/kprog/formal/generated/arm64_helper_idents.h": "e0ee64d34133f6c393bb8b4e5859942fcbb133790e5799ea3c9748dd238da5a8",
     "source/kprog/formal/generated/x86_reg_presence.h": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
     "source/kprog/formal/generated/arm64_orn.h": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
     "source/kprog/formal/generated/arm64_ccmp_handler.h": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
@@ -559,7 +559,7 @@
     "source/kprog/formal/generated/arm64_byte_lane.h": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
     "source/kprog/formal/oracles/arm64_exclusive_choice_host.h": "fa034710ec824229b36d0b90067163fdfb64f7638e548e5a5090e8314803a6b5",
     "source/kprog/formal/oracles/guarded_memory_host.h": "3360de356f027fbaceff64acf30d339a0124df7d374f9f64739a3fef07670223",
-    "source/kprog/formal/oracles/generated_helper_calls.h": "572468660ec0411ec4777b4f84207af23e34b9a79e272ac816340abfc1e78e47",
+    "source/kprog/formal/oracles/generated_helper_calls.h": "1cfef8c11a66000aa85c35611c9e28cbf205e556b81f568b9bcd6fa1a68075a9",
     "source/kprog/formal/oracles/x86_helper_environment_host.h": "b19ce1e1d933cf0787aec87fcdac013b13500b9b66b27513786c14fc945af5ef",
     "source/kprog/formal/oracles/x86_no_helpers_host.h": "c47df126fb5e8b86011e99c337273727987cf5fdfaf24a5f9559be77dc4d50ae",
     "source/kprog/formal/oracles/x86_helper_failure_host.h": "e3c1e183d2ccca13baa580af6062659d92cf6cbaf43b9f21029b16e2d90ae521",
@@ -572,9 +572,9 @@
     "source/kprog/formal/tools/mutations/mut_x86_stack_trio.py": "7706e2d1535076ecc7c990a4e9ffc77f04ef64ea1f60297de6f0a0b07d865153",
     "source/kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
     "source/kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
-    "source/kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+    "source/kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "3e115004d8a313b932b9497432083ace190d8629b2ec22fd80d071aca042af90",
     "source/kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
-    "source/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b5d9bdb9877aeba971cb12df2352966d755c4948e0a828a896819506bdcd9780",
+    "source/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "87e664fbdcd9e8fd8cb55c73b73882d776a1fe6e6fa8c5ae40a681d481631277",
     "source/kprog/libnativeloader/src/native_data_layout.hpp": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
     "source/kprog/libnativeloader/src/native_loader_fd_scan.hpp": "545c2cdbc6bec151250c95729d28acd4e3dbb72e416eb589c087df7597e32027",
     "source/kprog/libnativeloader/src/native_loader_cache.hpp": "39d7c8ed55f3107fac778dc8f5ffdf4f65eef23383c72b94972f61d1ed90f14d",
@@ -591,26 +591,76 @@
   "native_files": {
     "control": {
       "manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
-      "opensnoop.native.o": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
-      "tcplife.native.o": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
-      "syscount.native.o": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
-      "vfsstat.native.o": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "runqlat.native.o": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
-      "capable.native.o": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
-      "tcpconnect.native.o": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
-      "biosnoop.native.o": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      "opensnoop.native.o": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "tcplife.native.o": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "syscount.native.o": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "vfsstat.native.o": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "runqlat.native.o": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "capable.native.o": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "tcpconnect.native.o": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "biosnoop.native.o": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3"
     },
     "candidate": {
       "manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
-      "opensnoop.native.o": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
-      "tcplife.native.o": "02569e84e1ad0efdc195b640df87631e372568dc01050a245d918b864a739af0",
-      "syscount.native.o": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b",
-      "vfsstat.native.o": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "runqlat.native.o": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a",
-      "capable.native.o": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c",
-      "tcpconnect.native.o": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
-      "biosnoop.native.o": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1"
+      "opensnoop.native.o": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "tcplife.native.o": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920",
+      "syscount.native.o": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+      "vfsstat.native.o": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "runqlat.native.o": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "capable.native.o": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "tcpconnect.native.o": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "biosnoop.native.o": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
     }
   },
-  "controller_pid": 3181674
+  "actual_compiled_B": "0c76fc0d6eb0b36dadfa87b92617b9d138560e2b",
+  "control_origin": "Archived actual kernel-copied canonical SMAP BCC ELF objects,605968ec9 and62ae10ecb",
+  "source_delta": [
+    {
+      "path": "kprog/fidelity/negative.py",
+      "before": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
+      "after": "5fde3d9d6883b36b5b523fdc447f1ffe89902233c0d9e3b7bd60b87605dce5cf"
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "before": "fe86146d943510e5e38f48589c01785d62449904d98706cdb467ada0b1c99943",
+      "after": "e5209c7135b333201c66086d7bd1050abf4c929e665f5ed9a0023c74756f780b"
+    },
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "before": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+      "after": "2f98fec109486f186be41e39ed1fc4188f42a319e2f68655b1aa35d663492983"
+    },
+    {
+      "path": "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "before": "7aac3c487eb4bd7e26a7c8c6d73f7a3372b456f17e99f89db2b4d056ec937c1a",
+      "after": "3164076013a1759fb91809ca3c48b7b4c508e8f860649cfc6107dd027415c9ca"
+    },
+    {
+      "path": "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+      "before": "b6ec7a4a26cfc096d8d48a54855c567af44e60c5587717389013ffb190837fad",
+      "after": "29ee1ae07ef8f97b89f9a4dbe6ba577a3905fae0acebc071f571fd1c2da1a3ea"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_helper_idents.h",
+      "before": "ae4299ceae09a54d3cfca2a1093039d909b388465b55ad1a130164c0dd5dd44e",
+      "after": "e0ee64d34133f6c393bb8b4e5859942fcbb133790e5799ea3c9748dd238da5a8"
+    },
+    {
+      "path": "kprog/formal/oracles/generated_helper_calls.h",
+      "before": "572468660ec0411ec4777b4f84207af23e34b9a79e272ac816340abfc1e78e47",
+      "after": "1cfef8c11a66000aa85c35611c9e28cbf205e556b81f568b9bcd6fa1a68075a9"
+    },
+    {
+      "path": "kprog/arm64/micro-prog/generated_arm64_helper_idents.py",
+      "before": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+      "after": "3e115004d8a313b932b9497432083ace190d8629b2ec22fd80d071aca042af90"
+    },
+    {
+      "path": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+      "before": "b5d9bdb9877aeba971cb12df2352966d755c4948e0a828a896819506bdcd9780",
+      "after": "87e664fbdcd9e8fd8cb55c73b73882d776a1fe6e6fa8c5ae40a681d481631277"
+    }
+  ],
+  "prior_queue": "810425b5cbca3c641b165b97882dcafc06be0b4e",
+  "controller_pid": 3230778
 }
