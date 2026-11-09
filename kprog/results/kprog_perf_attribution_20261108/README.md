@@ -1207,9 +1207,19 @@ measurement phase:
 | shim-log lines | 3,828 | 505 |
 | reached `measure_finish` | no | yes (at 225 s) |
 
-The shim is polling the program list while the application never gets to its
-workload, so the 20 s measurement never starts. The baseline arm on the same
-restored workload completes in 225 s.
+The shim's last activity is at **268 s**, and it is the load of one
+program:
+
+```
+native-loader replaced prog=perf_unwind_sto original_fd=52 native_fd=58
+BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_nat insn_cnt=6972
+native-loader source-context flags=0 token_fd=-1
+```
+
+`perf_unwind_nat` is a 6,972-instruction program whose native generation and
+load never returns, so the shim keeps polling `list_progs` and the workload
+never starts. The baseline arm on the same restored workload completes in
+225 s, so the stall is in the native path for that one program.
 
 The mechanism behind the four requirements above, in order, was: C's broker
 down (fixed by serving it), `CLANG` unset (fixed in the recipe's
