@@ -161,6 +161,9 @@ static void heap_write(__u64 addr, unsigned width, __u64 value)
  * boundary). */
 static __u64 stack_read(__u32 idx, unsigned width)
 {
+	/* The host fresh-input environment is zero below the live SP. */
+	if ((__s64)idx - ARM64_SIM_STACK_BIAS < msp)
+		return 0;
 	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U)
 		return img_load(&stk_exp[idx], ARM64_WIDTH_64);
 	return img_load(&stk_exp[idx], width);
@@ -168,6 +171,8 @@ static __u64 stack_read(__u32 idx, unsigned width)
 
 static __u8 stack_read_tag(__u32 idx, unsigned width)
 {
+	if ((__s64)idx - ARM64_SIM_STACK_BIAS < msp)
+		return ARM64_SIM_TAG_SCALAR;
 	return KPROG_ARM64_STACK_TAG(width == ARM64_WIDTH_64,
 				     (idx & 7U) == 0U)
 		       ? stk_tag_exp[idx >> 3]
@@ -178,6 +183,14 @@ static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
 {
 	img_store(&stk_exp[idx], width, value);
 	host_stack_store_tags(stk_tag_exp, idx, width, tag);
+	/* A store cannot retain private bytes below the current frame. */
+	for (unsigned i = 0; i < width; i++) {
+		if ((__s64)(idx + i) - ARM64_SIM_STACK_BIAS < msp) {
+			stk_exp[idx + i] = 0;
+			host_stack_store_tags(stk_tag_exp, idx + i, 1U,
+					      ARM64_SIM_TAG_SCALAR);
+		}
+	}
 }
 
 static __u64 m_base_val(unsigned base)
@@ -260,9 +273,11 @@ static void model_mem_write(unsigned base, unsigned index, unsigned aux,
 
 static void model_writeback(unsigned base, __s64 imm)
 {
-	if (base == ARM64_SP)
+	if (base == ARM64_SP) {
+		host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+					ARM64_SIM_STACK_BIAS, msp, msp + imm);
 		msp += imm;
-	else
+	} else
 		mreg[base] = mreg[base] + (__u64)imm;
 }
 
@@ -271,6 +286,8 @@ static void model_write_reg_width(unsigned reg, __u64 value, unsigned width)
 	__u64 next = KPROG_ARM64_APPLY_WIDTH(value, width);
 
 	if (reg == ARM64_SP) {
+		host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+					ARM64_SIM_STACK_BIAS, msp, (__s64)next);
 		msp = (__s64)next;
 	} else if (reg != ARM64_XZR && reg != ARM64_REG_NONE) {
 		if (width == ARM64_WIDTH_32)
