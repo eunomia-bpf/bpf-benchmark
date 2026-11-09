@@ -23190,6 +23190,145 @@
     "trust": "CALL and caller-frame laws use propext/Quot.sound. Saved-word/RET laws reuse existing spill_read/spill_word and inherit Classical.choice/Lean.ofReduceBool in addition; no sorryAx or new axioms.",
     "utc": "2026-11-08T23:30:21.557690+00:00"
   },
+  "o4_source_and_control_component_review": {
+    "actual_focused_import_axiom_replay_exits": 0,
+    "archive_block_sha256": "2d177ab06c77eb552888c7f72c2cfb1de1b14e7a843f10c79b63e78947b6ee46",
+    "archive_file": "kprog/results/kprog_verification_20261107/o4-source-control-review.log.gz",
+    "archive_marker": "=== O4 SOURCE AND CONTROL COMPONENT REVIEW V1 ===",
+    "archived_inputs": {
+      "/var/tmp/kprog-tmp/S11/coverage-updates.tsv": {
+        "bytes": 8183,
+        "sha256": "cbe6a9791ec3132d9b34e321758ba714a1c3f838ca28c55de6bc6a8b571baef6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S12/coverage-updates.tsv": {
+        "bytes": 23322,
+        "sha256": "37f2296cc46222bd68f7c84fa8e4a3ed060759f1161eb103756094601fd234ae"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S12/publication.json": {
+        "bytes": 590,
+        "sha256": "526e595127566e50318ef4a5c538defb47f3aee5f32f3f14b3b973a83a35ab11"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S12/source-mutations.json": {
+        "bytes": 6384,
+        "sha256": "9b562412afd69a4073259bf7caaf31679ca8f7cad044574b2f36ef5ebc892c00"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S12/summary.json": {
+        "bytes": 2049,
+        "sha256": "7aa62bc48ab538a4d4236b77d933d16c3b4b12d3600b1ccb26b2fe6a15562f85"
+      },
+      "/workspaces/.agent-state/kprog-lanes/S12/verify.log": {
+        "bytes": 7910,
+        "sha256": "2a12a416e373f195436f90e4eb91862f45fcd5db85f2b7b1002ce0b53981a11c"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/ControlABI.lean": {
+        "bytes": 20683,
+        "sha256": "10b3809433919de1459b88bb6bf3d8327380aaa9f3d971e87d1b22c610088d73"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Generated/NativeLinkFields.lean": {
+        "bytes": 1455,
+        "sha256": "8e3f8ce4db1afcecf3d84e2a6fe4beb44f25fba32503a656fb758bd459f9e684"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Generated/NativeLinkSource.lean": {
+        "bytes": 9687,
+        "sha256": "ec6409f9e35a9507da5cadae46391c48eaf8f8c6e8804b58fc4a525073519537"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/NativeLinkSourceLayout.lean": {
+        "bytes": 5718,
+        "sha256": "7b50434af7885345b298a4639324fadbce3cd3e0f91a2120b787e15369437b14"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/NativeLinkSourceProducer.lean": {
+        "bytes": 3434,
+        "sha256": "9c83e69641a4f03e2f283b7cc4485b5e2b298ecf1de2cedfa261ef7aac6f35aa"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/NativeLinkSourceRefinement.lean": {
+        "bytes": 21187,
+        "sha256": "932b692b2d5eaf95b2d26e7714e3a6e1ad8528b72875227193c3af9eb658c139"
+      },
+      "/workspaces/repository/kprog/formal/tools/extract_native_field_source.py": {
+        "bytes": 4160,
+        "sha256": "7233610350a7ff4fcdb99731245e2e58d8ab02914353e225952b2fb1c1451415"
+      },
+      "/workspaces/repository/kprog/formal/tools/extract_native_link_source.py": {
+        "bytes": 30151,
+        "sha256": "9dc9dc83d4502ffcd8cc8e21dcf319bf5bd92e7a43b8d63501595dc631ad6f8b"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/Audit.lean": {
+        "bytes": 2389,
+        "sha256": "3e8f07aa5a9b705d722fac156052b984b8a47fe60f70768215dd1d76605e3326"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/coverage-updates.tsv": {
+        "bytes": 12323,
+        "sha256": "dc65b60d2405ee31d2d96a0ba6a098e140c82ddaeb28b89495085697aa6026f0"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/manifest.json": {
+        "bytes": 798,
+        "sha256": "156933b309a3f8d86a6e7335f7bd6985b14650978d6e2528b5105682754c5be8"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/proof-checks.log": {
+        "bytes": 4403,
+        "sha256": "21692e6fec3c9f0457da7c4f77d31e32a6e4615f6f46f0d05af4e4bc2d6faa1d"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/replay.sh": {
+        "bytes": 938,
+        "sha256": "2292b2af62bce70dd26a17a94b23b076bdf34ac64a54631277149f017d77dd8d"
+      },
+      "/workspaces/repository/kprog/results/kprog_control_abi_20261109/source-audit.json": {
+        "bytes": 20785,
+        "sha256": "354f61b4a91b2e78428e8027ec76f7a6073eb2a3855a1f7c6a93789399a6f11a"
+      },
+      "/workspaces/repository/kprog/results/kprog_s11_context_tail_flags_20261109/README.md": {
+        "bytes": 4294,
+        "sha256": "92ca1c806225a442741f56a829c69ba3b0f418680d704aa3ee58f0cae7a488a1"
+      },
+      "/workspaces/repository/kprog/results/kprog_s11_context_tail_flags_20261109/summary.json": {
+        "bytes": 3814,
+        "sha256": "f6bf990fd78334a8932dcd498564801e3f68c4de121adddd069880b085322edd"
+      },
+      "/workspaces/repository/kprog/tv/ControlABIComposition.lean": {
+        "bytes": 14962,
+        "sha256": "d34350665fc7257b7f52bd5a9784b05e83e911777e9ae5be76e3c9069e2e3628"
+      },
+      "coverage-before.tsv": {
+        "bytes": 1016028,
+        "sha256": "f6fda080837fa5dc099a1712a3e8301671a3a9152c32752833194aa7f3457453"
+      }
+    },
+    "control_abi_commit": "fcc80a6118358cdaecfaebcd6e696b4b999b11c5",
+    "control_abi_laws": 39,
+    "control_abi_receipt": "bc4f1151fb72756be187af51ed5d4ff0b76508a3",
+    "coverage_rows": [
+      "CHUNK_AND_CODE_LAYOUT",
+      "HELPER_IDENTITY_AND_ABI",
+      "HELPER_POINTER_KIND7",
+      "INVOCATION_ENTRY_ABI",
+      "MAP_POINTER_KIND5",
+      "MAP_VALUE_KIND6",
+      "READONLY_DATA_KIND8",
+      "SPILL_INSERTION_RELOAD_CONTROL",
+      "TAIL_CALL_BINDING"
+    ],
+    "full_check": "V sole next immutable full includes the published source modules; focused results are not a full-check pass.",
+    "preserved_status": "partial-universal-component",
+    "remaining_interface": "Actual whole Rust/iced final-edit and JIT Block traces, concurrent capsule/aux OwnershipRun including same-capsule reuse, physical executable ROX/RCU lifetime, complete native/B object identity and helper effects, compiler localStep/private-slot ownership, physical JIT/entry/transfer execution and whole-image allocation/range transport. S7 opaque native-helper writes below caller SP retain their callee-frame/control-effect obligation. No row promoted.",
+    "scope": "Source-linked record ABI, selected encoded-field and chunk/image constructors, ordered literal/map/helper/kfunc components, final tail-write ownership and ARM word copies; compiler spill CFG, typed helper lifetime, dynamic tail-transfer and physical entry/return components. S11 finite source/runtime receipts retain their original outcome labels.",
+    "source_modules_sha256": {
+      "kprog/formal/KProgFormal/ControlABI.lean": "10b3809433919de1459b88bb6bf3d8327380aaa9f3d971e87d1b22c610088d73",
+      "kprog/formal/KProgFormal/Generated/NativeLinkFields.lean": "8e3f8ce4db1afcecf3d84e2a6fe4beb44f25fba32503a656fb758bd459f9e684",
+      "kprog/formal/KProgFormal/Generated/NativeLinkSource.lean": "ec6409f9e35a9507da5cadae46391c48eaf8f8c6e8804b58fc4a525073519537",
+      "kprog/formal/KProgFormal/NativeLinkSourceLayout.lean": "7b50434af7885345b298a4639324fadbce3cd3e0f91a2120b787e15369437b14",
+      "kprog/formal/KProgFormal/NativeLinkSourceProducer.lean": "9c83e69641a4f03e2f283b7cc4485b5e2b298ecf1de2cedfa261ef7aac6f35aa",
+      "kprog/formal/KProgFormal/NativeLinkSourceRefinement.lean": "932b692b2d5eaf95b2d26e7714e3a6e1ad8528b72875227193c3af9eb658c139",
+      "kprog/formal/tools/extract_native_field_source.py": "7233610350a7ff4fcdb99731245e2e58d8ab02914353e225952b2fb1c1451415",
+      "kprog/formal/tools/extract_native_link_source.py": "9dc9dc83d4502ffcd8cc8e21dcf319bf5bd92e7a43b8d63501595dc631ad6f8b",
+      "kprog/tv/ControlABIComposition.lean": "d34350665fc7257b7f52bd5a9784b05e83e911777e9ae5be76e3c9069e2e3628"
+    },
+    "source_producer_commits": [
+      "1cd664f04623cd70149a763686b127eed12eee63",
+      "342f94212f8e567251c811994ab7c0ff5e1b8706"
+    ],
+    "source_producer_laws": 46,
+    "trusted_axiom_note": "S12 audit records propext, Classical.choice, Quot.sound and Lean.ofReduceBool on the indicated reduction-derived components; no sorryAx."
+  },
   "pair_focused": {
     "commands": [
       {

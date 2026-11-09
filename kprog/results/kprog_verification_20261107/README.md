@@ -5759,3 +5759,16 @@ counts and the2432live-XDP-RSP cases remain in the [raw receipts](live-memory-fr
 The archive retains exact preprocessed C as nested gzip with unpacked hashes,
 executables and the original full source manifest/log/CPU/exit. S7 lifetime
 cases cover below-SP forgetting.
+
+### Source and control O4 components
+
+The [reviewed source/control handoff](o4-source-control-review.log.gz) adds S12's46 source-linked laws and S13's39 control/ABI laws to nine O4 rows. The rows retain
+`partial-universal-component`. The components cover record/field/image construction,
+spill CFG composition, helper identity and typed lifetime, finite tail-transfer
+composition and entry/return primitives. S11's final-JIT-depth tail relocation and
+context/flag receipts keep their captured source and outcome labels.
+
+Whole compiler/JIT traces, physical entry/transfer, helper effects and callee-frame
+ownership, concurrent object retention and executable permissions remain explicit
+premises. The archive retains the module hashes, original proposals and axiom
+audits; the next sole full check records these modules together.
