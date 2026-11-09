@@ -25306,9 +25306,9 @@
       "upstream_machine_source": "37292996d867d74c30192bc09472e135d70a3595"
     },
     "combined_current_isa_labels": {
-      "agree": 62,
+      "agree": 63,
       "model_stopped": 4,
-      "state_difference": 1,
+      "state_difference": 0,
       "total": 67
     },
     "new_agreeing_operation_labels": [
@@ -25318,7 +25318,33 @@
       "X86_OP_SHIFTX_MEM"
     ],
     "publication": "fee4c86c967ce44b04a590d40935ba306fd14370",
-    "remaining_boundary": "ANDN/BZHI register/memory retain NIL semantic bindings; REP MOVS48 clear-state one-element versus whole-instruction observations differ. Every original state difference and source epoch retained. Finite replay does not establish compiler, physical event or universal ISA refinement.",
+    "remaining_boundary": "ANDN/BZHI register/memory retain NIL semantic bindings. All48 original REP cases match under explicit element composition; original one-element differences retained. Finite replay does not establish arbitrary-count/event/compiler/physical refinement.",
+    "rep_element_composition": {
+      "archive": "kprog/results/kprog_verification_20261107/reference-x86-rep-grain.log.gz",
+      "comparison": "All48 original RCX3 inputs agree after four unmodified operational elements, including the final zero-counter PC advance. Original576 one-element observations and their48differences are retained independently.",
+      "publication": "596a346ef59ce779a96a90afdc94f69900a5926d",
+      "remaining_scope": "Finite sampled instruction-grain correspondence only. No whole-domain theorem, physical event/permission/ABI or compiler claim; no production iteration bound added.",
+      "steps": {
+        "4": 48
+      },
+      "summary": {
+        "acl2_errors": 0,
+        "canonical_binary_epoch": "3bc4ccd89914c82e5aa23eee626ea5ca0a0447a5965057a06c9b4b9b69ea0173",
+        "cases": 48,
+        "model_source": "37292996d867d74c30192bc09472e135d70a3595",
+        "process_exit": 0,
+        "scope": "Diagnostic composition of unmodified official operational elements, stopping on RIP change/fault or original RCX+1. All original one-element differences retained in the previous archive. No model edit, production bound or compiler/physical claim.",
+        "statuses": {
+          "agree-composed-elements": 48
+        }
+      }
+    },
+    "single_element_combined_labels": {
+      "agree": 62,
+      "model_stopped": 4,
+      "state_difference": 1,
+      "total": 67
+    },
     "summary": {
       "acl2_errors": 0,
       "by_operation": {

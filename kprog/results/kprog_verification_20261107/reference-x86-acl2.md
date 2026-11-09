@@ -111,3 +111,18 @@ among67 canonical forms. The earlier8.5/8.7 state differences remain historical
 observations; source capability, successful certification and instruction-state
 agreement are recorded separately. These sampled results do not establish
 physical events, permissions/concurrency, C/compiler or link/ABI correspondence.
+
+## REP operational element composition
+
+The separate [48-case replay](reference-x86-rep-grain.log.gz) stops the
+unmodified current model at the original instruction's RIP change, a fault,
+or original RCX+1 operational steps. Every original RCX3 input completes in
+4steps: three stores/copies and the zero-counter PC advance. All16 GPRs,
+defined flags, PC, XMM0 and supplied memory equal the canonical whole-instruction
+result. The previous48 one-element differences remain verbatim in their archive.
+
+Combined selected instruction coverage is now63agreeing/4model-stopped/0remaining
+state-difference labels among67. This is sampled grain alignment; it neither
+changes the official model nor adds a production bound, and does not prove
+arbitrary-count operational composition, data events, permissions, compiler
+or physical/link ABI correspondence.

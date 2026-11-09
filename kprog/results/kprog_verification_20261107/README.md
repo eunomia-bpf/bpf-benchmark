@@ -24,9 +24,9 @@ specialization token also has its own row.
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
-| Upstream machine-model sampled architectural-state agreement | 62/75 | 74/74 selected profiles |
+| Upstream machine-model sampled architectural-state agreement | 63/75 | 74/74 selected profiles |
 | Upstream model-stopped operation rows | 4/75 | 0/74 selected forms |
-| Upstream model-differing operation rows | 1/75 | 1/74 explicit monitor profile |
+| Upstream model-differing operation rows | 0/75 | 1/74 explicit monitor profile |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/74 |
 | Additional explicit-monitor-only replay | 0 | 1/74 |
 | Numeric operations awaiting selected replay | 9/75 | 6/74 |
@@ -44,8 +44,10 @@ is outside the numeric catalogue and the13 compiled scalar families above.
 The [certified current ACL2 replay](reference-x86-acl2.md) executes the same576
 inputs:432 complete observed states agree,96 ANDN/BZHI cases stop at missing
 model semantics and48 REP MOVS cases retain the operational element/whole-step
-difference. MULX, RORX register/memory and memory SHIFTX newly agree, bringing
-combined selected coverage to62 agreeing/4stopped/1differing labels among67.
+difference. MULX, RORX register/memory and memory SHIFTX newly agree. The48
+REP inputs also agree when four operational elements complete each count3
+instruction, including the final zero-count PC advance. Combined selected
+coverage is63agree/4stopped/0unresolved differences among67labels.
 The unchanged official machine source37292996 certifies and loads with actual0;
 certification, finite replay and universal simulator/compiler closure stay distinct.
 
@@ -5867,3 +5869,8 @@ retain every original lane/tag/address assertion and the failed full source/log.
 The sole successor full includes this fixture and REP STOS; its own actual exit
 and immutable source receipt are recorded separately. Last completed passing
 full source remains98122928d until a successor actually returns0.
+
+The [REP grain replay](reference-x86-rep-grain.log.gz) retains the original
+48 single-element differences and a separate48-case composed observation.
+Each original RCX3 input takes4 operational steps to canonical completion.
+This finite alignment adds no production bound or whole-domain grain theorem.
