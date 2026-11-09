@@ -1,0 +1,3 @@
+# Whole BCC and Katran after approved SMAP recovery
+
+Approved SMAPaee6 uses the fresh paired kernel/module/loader. The captured compatibility workload epoch and original native inputs remain recorded; R owns restored05-29 timing. Loader resolves public helper calls through the existing generic ABI; native compilation is the optimization boundary. Original application sources, native inputs and workloads retain their definitions. Actual G/C/I/failed(26, 26, 26, 0); Makeexit0. Every original native/C/B/compiler/verifier/service record and actual phase work counter accompanies this cohort. Runtime admission additions0.
