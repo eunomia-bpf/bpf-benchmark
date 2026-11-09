@@ -5636,3 +5636,12 @@ ELF, arrays and proofs. These are partial returning-helper compiler units,
 without increasing completed operation-family totals. Other helper identities,
 typed pointer/tag/register frame, native/physical ABI, real helper semantics,
 compiler embedding and successful tail transfer remain explicit interfaces.
+
+### Published source full check b980319dc
+
+`make check` on immutable publishedb980319dc exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_b980319dc`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-b980319dc.log.gz](full-make-check-b980319dc.log.gz).
