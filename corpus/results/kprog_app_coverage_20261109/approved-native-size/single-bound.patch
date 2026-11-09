@@ -1,0 +1,32 @@
+--- a/kinsn/module/include/native_lab_trusted.h
++++ b/kinsn/module/include/native_lab_trusted.h
+@@ -152,8 +152,6 @@
+ 	} else if (copy_from_user(&request, argument, sizeof(request))) {
+ 		return -EFAULT;
+ 	}
+-	if (request.native_size >= (1U << 30))
+-		return -E2BIG;
+ 	capsule = kzalloc(sizeof(*capsule), GFP_KERNEL);
+ 	if (!capsule)
+ 		return -ENOMEM;
+--- a/kinsn/module/x86/bpf_x86_native_lab.c
++++ b/kinsn/module/x86/bpf_x86_native_lab.c
+@@ -76,14 +76,16 @@
+     int err;
+     if (copy_from_user(&input, argument, sizeof(input)))
+         return -EFAULT;
+-    if (input.native_size >= (1U << 30))
+-        return -E2BIG;
+     capsule = native_lab_active_capsule(input.request_id);
+     if (IS_ERR(capsule))
+         return PTR_ERR(capsule);
+     blob = kzalloc(sizeof(*blob), GFP_KERNEL);
+     if (!blob) { err = -ENOMEM; goto out; }
+     blob->len = input.native_size;
++    if (blob->len >= (1U << 30)) {
++        err = -E2BIG;
++        goto fail;
++    }
+     blob->proof_len = input.proof_insns;
+     blob->reloc_count = input.reloc_count;
+     blob->capsule = capsule;

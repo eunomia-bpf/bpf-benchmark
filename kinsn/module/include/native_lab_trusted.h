@@ -152,8 +152,6 @@ static int native_lab_trusted_submit(struct native_lab_trusted_file *owner,
 	} else if (copy_from_user(&request, argument, sizeof(request))) {
 		return -EFAULT;
 	}
-	if (request.native_size >= (1U << 30))
-		return -E2BIG;
 	capsule = kzalloc(sizeof(*capsule), GFP_KERNEL);
 	if (!capsule)
 		return -ENOMEM;

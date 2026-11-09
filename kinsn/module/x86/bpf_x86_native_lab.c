@@ -76,14 +76,16 @@ static int native_lab_store_chunk(void __user *argument)
     int err;
     if (copy_from_user(&input, argument, sizeof(input)))
         return -EFAULT;
-    if (input.native_size >= (1U << 30))
-        return -E2BIG;
     capsule = native_lab_active_capsule(input.request_id);
     if (IS_ERR(capsule))
         return PTR_ERR(capsule);
     blob = kzalloc(sizeof(*blob), GFP_KERNEL);
     if (!blob) { err = -ENOMEM; goto out; }
     blob->len = input.native_size;
+    if (blob->len >= (1U << 30)) {
+        err = -E2BIG;
+        goto fail;
+    }
     blob->proof_len = input.proof_insns;
     blob->reloc_count = input.reloc_count;
     blob->capsule = capsule;
