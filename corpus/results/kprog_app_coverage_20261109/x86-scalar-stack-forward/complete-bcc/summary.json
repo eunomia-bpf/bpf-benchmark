@@ -1,0 +1,1131 @@
+{
+  "source": "5d8c38d3aeee2909b9dee59178f990f675786f30",
+  "compiler_exit": 0,
+  "counts": {
+    "control": {
+      "entries": 25,
+      "compiled": 25,
+      "diagnostic": 0
+    },
+    "candidate": {
+      "entries": 25,
+      "compiled": 25,
+      "diagnostic": 0
+    }
+  },
+  "programs": [
+    {
+      "label": "control",
+      "request_id": 5,
+      "entry": "kprobe__cap_capable_entry",
+      "object": "capable.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/5.success.tar.gz",
+      "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 1,
+      "entry": "fentry_vfs_read",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/1.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/1/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/1/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/1/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_read",
+        "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 2,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/2.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 3,
+      "entry": "blk_account_io_merge_bio",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/3.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/3/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/3/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/3/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 4,
+      "entry": "inet_sock_set_state",
+      "object": "tcplife.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/4.success.tar.gz",
+      "canonical_native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/4/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/4/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 6,
+      "entry": "sys_enter",
+      "object": "syscount.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/6.success.tar.gz",
+      "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/6/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/6/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/6/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_enter",
+        "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 7,
+      "entry": "tcp_v4_connect",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/7.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/7/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/7/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/7/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect",
+        "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 8,
+      "entry": "sched_wakeup",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/8.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/8/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/8/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/8/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup",
+        "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 9,
+      "entry": "fentry_vfs_write",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/9.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/9/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/9/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/9/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_write",
+        "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 10,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/10.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/10/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/10/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_openat",
+        "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 11,
+      "entry": "block_rq_insert",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/11.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/11/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/11/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 12,
+      "entry": "kprobe__cap_capable_exit",
+      "object": "capable.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/12.success.tar.gz",
+      "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/12/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/12/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 13,
+      "entry": "sys_exit",
+      "object": "syscount.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/13.success.tar.gz",
+      "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/13/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/13/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/13/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_exit",
+        "native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 14,
+      "entry": "tcp_v4_connect_ret",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/14.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/14/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/14/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/14/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect_ret",
+        "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 15,
+      "entry": "sched_wakeup_new",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/15.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/15/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/15/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/15/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup_new",
+        "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 16,
+      "entry": "fentry_vfs_fsync",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/16.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/16/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/16/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_fsync",
+        "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 17,
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/17.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/17/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/17/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/17/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_open",
+        "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 18,
+      "entry": "block_rq_issue",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/18.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/18/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/18/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/18/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_issue",
+        "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 19,
+      "entry": "tcp_v6_connect",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/19.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/19/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/19/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/19/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect",
+        "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 20,
+      "entry": "sched_switch",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/20.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/20/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/20/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/20/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_switch",
+        "native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 21,
+      "entry": "fentry_vfs_open",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/21.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/21/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/21/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/21/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_open",
+        "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 22,
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/22.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/22/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/22/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/22/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 23,
+      "entry": "block_rq_complete",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/23.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/23/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/23/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/23/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_complete",
+        "native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 24,
+      "entry": "tcp_v6_connect_ret",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/24.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/24/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/24/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/24/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect_ret",
+        "native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "control",
+      "request_id": 25,
+      "entry": "fentry_vfs_create",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/25.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/25/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/25/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/control/25/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_create",
+        "native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 5,
+      "entry": "kprobe__cap_capable_entry",
+      "object": "capable.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/5.success.tar.gz",
+      "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 1,
+      "entry": "fentry_vfs_read",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/1.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/1/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/1/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/1/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_read",
+        "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 2,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/2.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 3,
+      "entry": "blk_account_io_merge_bio",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/3.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/3/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/3/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/3/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 4,
+      "entry": "inet_sock_set_state",
+      "object": "tcplife.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/4.success.tar.gz",
+      "canonical_native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
+      "native_sha256": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/4/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/4/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 6,
+      "entry": "sys_enter",
+      "object": "syscount.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/6.success.tar.gz",
+      "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/6/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/6/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/6/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_enter",
+        "native_sha256": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 7,
+      "entry": "tcp_v4_connect",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/7.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/7/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/7/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/7/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect",
+        "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 8,
+      "entry": "sched_wakeup",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/8.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/8/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/8/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/8/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup",
+        "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 9,
+      "entry": "fentry_vfs_write",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/9.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/9/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/9/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/9/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_write",
+        "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 10,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/10.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/10/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/10/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_openat",
+        "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 11,
+      "entry": "block_rq_insert",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/11.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/11/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/11/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 12,
+      "entry": "kprobe__cap_capable_exit",
+      "object": "capable.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/12.success.tar.gz",
+      "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
+      "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/12/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/12/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 13,
+      "entry": "sys_exit",
+      "object": "syscount.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/13.success.tar.gz",
+      "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
+      "native_sha256": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/13/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/13/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/13/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_exit",
+        "native_sha256": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 14,
+      "entry": "tcp_v4_connect_ret",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/14.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/14/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/14/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/14/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect_ret",
+        "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 15,
+      "entry": "sched_wakeup_new",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/15.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/15/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/15/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/15/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup_new",
+        "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 16,
+      "entry": "fentry_vfs_fsync",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/16.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/16/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/16/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_fsync",
+        "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 17,
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/17.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/17/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/17/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/17/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_open",
+        "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 18,
+      "entry": "block_rq_issue",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/18.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/18/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/18/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/18/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_issue",
+        "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 19,
+      "entry": "tcp_v6_connect",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/19.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/19/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/19/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/19/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect",
+        "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 20,
+      "entry": "sched_switch",
+      "object": "runqlat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/20.success.tar.gz",
+      "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
+      "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/20/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/20/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/20/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_switch",
+        "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 21,
+      "entry": "fentry_vfs_open",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/21.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/21/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/21/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/21/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_open",
+        "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 22,
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "object": "opensnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/22.success.tar.gz",
+      "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/22/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/22/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/22/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 23,
+      "entry": "block_rq_complete",
+      "object": "biosnoop.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/23.success.tar.gz",
+      "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
+      "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/23/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/23/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/23/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_complete",
+        "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 24,
+      "entry": "tcp_v6_connect_ret",
+      "object": "tcpconnect.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/24.success.tar.gz",
+      "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
+      "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/24/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/24/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/24/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect_ret",
+        "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1"
+      },
+      "status": "compiled"
+    },
+    {
+      "label": "candidate",
+      "request_id": 25,
+      "entry": "fentry_vfs_create",
+      "object": "vfsstat.native.o",
+      "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-smap-recovery/corpus-20261109T062731760858Z.tar.gz",
+      "member": "corpus/requests/25.success.tar.gz",
+      "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/25/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/25/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/generated-current/candidate/25/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_create",
+        "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d"
+      },
+      "status": "compiled"
+    }
+  ],
+  "host": [
+    {
+      "compiler": "gcc",
+      "name": "cache",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/cache-host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-cache"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "name": "exit",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_invocation_exit_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-exit"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "name": "output",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-output"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "cache",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/cache-host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-cache",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "exit",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_invocation_exit_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-exit",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "output",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-output",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": -11
+    },
+    {
+      "compiler": "gcc",
+      "name": "parent-output",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/parent-source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/gcc-parent-output"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "name": "parent-output",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/parent-source",
+        "-I/workspaces/repository",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/workspaces/repository/kprog/formal/oracles/test_stack_output_lifetime_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/x86-scalar-stack-forward/allocated/clang-18-parent-output",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": -11
+    }
+  ],
+  "native_executions": 0
+}
