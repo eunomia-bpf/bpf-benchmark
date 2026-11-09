@@ -34,3 +34,7 @@ image:
 .PHONY: producer
 producer:
 	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-caller-registers/producer.py
+
+.PHONY: array-producer
+array-producer:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/map-lookup-native/producer.py

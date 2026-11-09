@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess,json,sys,tarfile,os,shutil,select,hashlib,traceback,resource
 from datetime import datetime,timezone
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');D=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-runtime');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-runtime';h=sys.argv[1];OUT=D/'regalloc9-application'
+R=Path('/workspaces/repository');D=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-runtime');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-runtime';h=sys.argv[1];OUT=D/'array-cleanup-application'
 producer=Path(sys.argv[2])if len(sys.argv)>2 else Path('/var/tmp/kprog-tmp/C/katran-regression-current/producer/native/katran')
 if len(sys.argv)>3:
  try:fd=os.pidfd_open(int(sys.argv[3]));select.select([fd],[],[]);os.close(fd)

@@ -1,26 +1,33 @@
 from pathlib import Path
-import subprocess,json,hashlib,tarfile,sys,resource
-from datetime import datetime,timezone
+import subprocess,json,hashlib,tarfile,sys,shutil,resource
 from elftools.elf.elffile import ELFFile
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/map-lookup-native';G=Path('/var/tmp/kprog-tmp/C/map-lookup-native');D=G/'native/katran';D.mkdir(parents=True,exist_ok=True);plugin=G/'native_division.so';h=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()
-flags=['clang-18','-O3','-g','-fPIC','-c','-DMICRO_NATIVE','-fpass-plugin='+str(plugin),'-D__TARGET_ARCH_x86','-fomit-frame-pointer','-march=native','-mno-red-zone','-mretpoline-external-thunk','-mfunction-return=thunk-extern','-fcf-protection=branch','-mgeneral-regs-only','-mno-sse','-mno-mmx','-mno-sse2','-mno-3dnow','-mno-avx','-mno-sse4a','-msoft-float','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-jump-tables','-fno-optimize-sibling-calls','-Wno-unknown-attributes','-Wno-compare-distinct-pointer-types','-mllvm','-switch-to-lookup=false','-mllvm','-inline-threshold=1000','-mllvm','-inline-cold-callsite-threshold=1000','-Rpass=inline','-Rpass-missed=inline','-I'+str(R/'vendor/bpf/katran'),'-I'+str(R/'vendor/bpf/katran/katran/lib/linux_includes'),'-I/usr/include','-I/usr/include/x86_64-linux-gnu']
-commands=[];objects=[]
-for n in ['balancer','healthchecking','healthchecking_ipip','xdp_root']:
- source=R/('vendor/bpf/katran/katran/lib/bpf/'+n+'.c');obj=D/(n+'.native.o');cmd=flags+['-o',str(obj),str(source)];commands.append(cmd)
- with(G/(n+'.log')).open('w')as f:p=subprocess.run(cmd,cwd=R,stdout=f,stderr=subprocess.STDOUT)
- p.check_returncode();nm=subprocess.check_output(['llvm-nm-18','--defined-only','--print-size',str(obj)],text=True);(G/(n+'.symbols.txt')).write_text(nm)
- with obj.open('rb')as elf_input:executable_bytes=sum(int(sec['sh_size'])for sec in ELFFile(elf_input).iter_sections()if int(sec['sh_flags'])&4)
- size=subprocess.check_output(['llvm-size-18','-A',str(obj)],text=True);(G/(n+'.sections.txt')).write_text(size);objects.append(dict(object=obj.name,sha256=hashlib.sha256(obj.read_bytes()).hexdigest(),source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),text_symbols=[l for l in nm.splitlines()if' t 'in l or' T 'in l],executable_bytes=executable_bytes))
-cmd=['python3',str(R/'vendor/bpf/write_native_manifest.py'),'--app','katran','--llvm-nm','llvm-nm-18','--output',str(D/'manifest.json')]
-for o in objects:cmd+=['--object',str(D/o['object'])]
-commands.append(cmd);subprocess.run(cmd,cwd=R,check=True);(G/'commands.json').write_text(json.dumps(commands,indent=2)+'\n');result=dict(source_commit=h,change='pre-submission array map lookup body in P; same source/inline flags and division semantics as32dad; runtime header bounds/mask/stride with existing map relocations',objects=objects,plugin_sha256=hashlib.sha256(plugin.read_bytes()).hexdigest());(G/'summary.json').write_text(json.dumps(result,indent=2)+'\n');P=O;P.mkdir(exist_ok=True);(P/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
-result['lowered_array_sites']=sum((G/(n+'.log')).read_text().count('native-map-lowering: array ')for n in ['balancer','healthchecking','healthchecking_ipip','xdp_root']);(P/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
-with tarfile.open(P/'payload.tar.gz','w:gz')as t:
- for p in [G/'native',G/'commands.json',G/'summary.json',*G.glob('balancer.log'),*G.glob('healthchecking.log'),*G.glob('healthchecking_ipip.log'),*G.glob('xdp_root.log'),*G.glob('*.symbols.txt'),*G.glob('*.sections.txt')]:t.add(p,arcname=p.name)
- t.add(plugin,arcname='native_division.so')
- for n in ['btf-layout.json','plugin-command.json','plugin-build.log']:t.add(G/n,arcname=n)
-(P/'README.md').write_text('# Pre-submission array map lookup body in native P\n\nThe compiler plugin uses BTF C static map metadata to select array lookups. It emits the original unsigned key/max-entry branch, live array index mask and live element-size multiplication before native submission. The map symbol retains its existing relocation; an empty compiler barrier preserves its runtime address identity through LLVM. Every other map operation retains its existing helper call. Layout offsets come from pahole on the matched7rc2 vmlinux and are recorded with exact build flags. The final kernel emitter retains its submitted-copy behavior.\n\nThe complete4object Katran payload uses identical original C and native inline flags to32dad control. summary.json records actual lowered sites, executable sizes, symbols and hashes. payload.tar.gz includes full manifest/objects/plugin/commands/diagnostics and BTF layout. R owns unbound timing and actual work; generation-bound acceptance stays a separate observation.\n')
-sys.path.insert(0,str(O.parent));from publish_owned import publish
-commit=publish(['vendor/bpf/native_division.cpp']+[str(p.relative_to(R))for p in P.iterdir()if p.is_file()],'Publish complete Katran P with pre-submission array lookup bodies',G/'publication.json');print('PUSHED',commit,flush=True)
-with Path('/workspaces/.agent-state/kprog-lanes/COORDINATION.md').open('a')as f:f.write('\n### Timing request: complete Katran pre-submission array map lookup P '+commit+'\n\nR: complete4object manifest/P/plugin and matched BTF layout at corpus/results/kprog_app_coverage_20261109/map-lookup-native/payload.tar.gz; live /var/tmp/kprog-tmp/C/map-lookup-native/native/katran. Same original C/native inline flags/division semantics as32dad control; array lookups now reside in submitted P, using the existing map relocation and kernel max/indexmask/stride semantics. Other map kinds retain their helper calls in this increment. Final verified kernel copy path retains bytes. Time unbound candidate/control/JIT using frozen workload/common Makefile, fourworkers/65535flows, both stats modes,3x180 on0-7. Record replacements/fallbacks/work/drop reasons/XDP actions/invocations/time/latency/CPU. Actual lowering count='+str(result['lowered_array_sites'])+'; current bound Katran frontier and separate original38 remain recorded.\n')
+R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/map-lookup-native/cleanup';G=Path('/var/tmp/kprog-tmp/C/map-lookup-native/cleanup');G.mkdir(parents=True,exist_ok=True)
+h=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()
+base=json.loads(Path('/var/tmp/kprog-tmp/C/katran-caller-registers/regalloc9/commands.json').read_text())[0]
+profiles={}
+for label,plugin in [('control',Path('/var/tmp/kprog-tmp/C/map-lookup-native/native_division.so')),('candidate',G/'native_division.so')]:
+ d=G/label;native=d/'native/katran';native.mkdir(parents=True,exist_ok=True);shutil.copy2(plugin,d/'native_division.so');commands=[];objects=[]
+ for name in ['balancer','healthchecking','healthchecking_ipip','xdp_root']:
+  source=R/('vendor/bpf/katran/katran/lib/bpf/'+name+'.c');obj=native/(name+'.native.o')
+  cmd=[('-fpass-plugin='+str(plugin))if x.startswith('-fpass-plugin=')else x for x in base];cmd[cmd.index('-o')+1]=str(obj);cmd[-1]=str(source);commands.append(cmd)
+  with(d/(name+'.log')).open('w')as f:done=subprocess.run(cmd,cwd=R,stdout=f,stderr=subprocess.STDOUT)
+  done.check_returncode()
+  with obj.open('rb')as f:executable_bytes=sum(int(s['sh_size'])for s in ELFFile(f).iter_sections()if int(s['sh_flags'])&4)
+  objects.append(dict(object=obj.name,sha256=hashlib.sha256(obj.read_bytes()).hexdigest(),source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),executable_bytes=executable_bytes,lowered_sites=(d/(name+'.log')).read_text().count('native-map-lowering: array ')))
+ cmd=['python3',str(R/'vendor/bpf/write_native_manifest.py'),'--app','katran','--llvm-nm','llvm-nm-18','--output',str(native/'manifest.json')]
+ for row in objects:cmd+=['--object',str(native/row['object'])]
+ commands.append(cmd);subprocess.run(cmd,cwd=R,check=True);(d/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+ profiles[label]=dict(objects=objects,plugin_sha256=hashlib.sha256(plugin.read_bytes()).hexdigest(),lowered_sites=sum(row['lowered_sites']for row in objects))
+result=dict(source_commit=h,change='standard LLVM SROA, InstCombine and SimplifyCFG after pre-submission array lookup lowering; matched original source and allocator9 flags',profiles=profiles)
+O.mkdir(exist_ok=True);(G/'summary.json').write_text(json.dumps(result,indent=2)+'\n');(O/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
+with tarfile.open(O/'payload.tar.gz','w:gz')as t:
+ for name in ['control','candidate','plugin-command.json','plugin-build.log','component.json','summary.json']:t.add(G/name,arcname=name)
+ t.add(Path('/var/tmp/kprog-tmp/C/map-lookup-native/btf-layout.json'),arcname='btf-layout.json')
+p=O/'README.md';p.write_text(p.read_text()+'\nComplete paired4object control/candidate payloads are in payload.tar.gz, with manifests, plugins, exact commands and source/object hashes. Both use the same original source and allocator9 flags, and both lower'+str(profiles['candidate']['lowered_sites'])+'array sites. The candidate differs only by the standard cleanup pipeline. R times the unbound pair against the frozen JIT arm; native acceptance remains a separate actual run.\n')
+sys.path.insert(0,str(O.parent.parent));from publish_owned import publish
+commit=publish([str(O/name)for name in ['README.md','summary.json','payload.tar.gz']],'Publish matched Katran array lowering and cleanup payloads',G/'publication.json');(G/'launch-commit').write_text(commit+'\n')
+with Path('/workspaces/.agent-state/kprog-lanes/COORDINATION.md').open('a')as f:f.write('\n### Timing request: complete matched Katran array cleanup P '+commit+'\n\nR: paired4object manifests/P/plugins at corpus/results/kprog_app_coverage_20261109/map-lookup-native/cleanup/payload.tar.gz; live /var/tmp/kprog-tmp/C/map-lookup-native/cleanup/{control,candidate}/native/katran. Both use original matched source, allocator9, normal/cold inline1000 and21array-lowered sites. Candidate adds only standard SROA/InstCombine/SimplifyCFG after lowering. Overlay each complete native/katran directory into the existing native artifact path; frozen workload/framework and final kernel copy path retain bytes. Compare unbound control/candidate/JIT with the existing common Makefile, both stats modes and3x180s; retain replacements/fallbacks, sent/received/drops/reasons/XDP actions, invocations/time, latency and CPU. Full payload receipt is independent of the still-open bound stack frontier.\n')
+command=['python3',str(R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current/runtime.py'),commit,str(G/'candidate/native/katran'),Path('/var/tmp/kprog-tmp/C/katran-caller-registers/regalloc9/controller.pid').read_text().strip()]
+with(G/'application-controller.log').open('w')as f:done=subprocess.run(command,cwd=R,stdout=f,stderr=subprocess.STDOUT)
+(G/'application-controller.exit').write_text(str(done.returncode)+'\n')
