@@ -44,8 +44,9 @@ unsigned index/condition correspondence, ordered write/fault events and final
 RDI/RCX writeback with a canonical Step theorem. The successful native64/DF-clear
 store profile and primitive/tag/provenance/physical/ABI/compiler interfaces are
 explicit. Both source rows are `partial-indexed-success-model`, outside the
-numeric catalogue and the13 compiled scalar families above. The existing sole
-full at `2d8fb3ac005b1c02c8af4d9c132d950aee109696` retains its earlier source.
+numeric catalogue and the13 compiled scalar families above. The earlier full
+at `2d8fb3ac005b1c02c8af4d9c132d950aee109696` retains its captured source and
+STLXR fixture failure; its repaired successor is recorded below.
 
 The [certified current ACL2 replay](reference-x86-acl2.md) executes the same576
 inputs:432 complete observed states agree,96 ANDN/BZHI cases stop at missing
@@ -5888,7 +5889,7 @@ sequential overlap and fault prefixes, numeric/raw/tag frame, token body and
 dispatcher step. The native64/DF-clear successful normal-access profile is
 explicit. Recovery-choice coupling, primitive/provenance/lifetime, physical
 access/ABI and compiled B remain active interfaces. The current row is
-`partial-current-full-count-success-model`; the complete C-model family tally
+`partial-current-full-count-recovery-model`; the complete C-model family tally
 stays71/75. Prior bounded laws and48 sampled official-model grain agreements
 retain their existing domains.
 
@@ -5898,5 +5899,26 @@ specialization534 and fullframe665600 cases, including332800 same-image overlaps
 all exit0 against the captured published fullRCX header. The singleton expected
 model uses actualRCX and sequential element sampling. It also records the
 original full `d4b1da6b478e7dfbaa3147f58301d3c5258cf079` failure at that fixture.
-The sole successor full check runs at `2d8fb3ac005b1c02c8af4d9c132d950aee109696`;
-its eventual result has its own immutable source receipt.
+That full check finished exit2 at the legacy STLXR fixture: its expected SP
+write omitted released-stack bytes/tags. The [fixture repair](stlxr-status-frame.log.gz),
+published as `091c9522e9eca4929feb1e8af759e8755c3b5ef2`, preserves all original assertions
+and passes686110 full-state,2056 status and400 direct-route cases. The sole
+successor full check runs at `b2fd6f3b3f475f84a99566ce95efd8e4705d0e90`, including this repair,
+the17 STOS indexed laws and the7 REP recovery-prefix laws below. Its eventual
+result has its own immutable source receipt.
+
+### REP MOVS copied-prefix recovery
+
+The [seven recovery-prefix laws](rep-recovery-prefix.log.gz), published as
+`b2fd6f3b3f475f84a99566ce95efd8e4705d0e90`, compose any successful copied prefix followed by a
+source-read fault with the registered x86 handler. The captured-index C finish
+matches canonical progress followed by whole-RCX clearing and the recorded
+instruction-length PC advance. The raw diagnostic read-fault event follows the
+exact prefix read/write events. Four linked width examples record RCX as the
+recovery target and lengths2/3/2/3.
+
+The theorem states native64/DF-clear, completed<count, successful prefix, next
+source-read fault and nextPC/length premises. Source recovery-choice coupling,
+primitive/tag/provenance/lifetime, physical fault/table/site/frame/ABI and
+compiled-B relations remain active. The O2 REP rows and O4 LOAD_FAULT_RECOVERY
+row stay partial; complete family counts remain71/75 C-model and13/75 compiled.

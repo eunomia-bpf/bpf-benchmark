@@ -28024,7 +28024,10 @@
       "sorryAx": 0
     },
     "current_complete_c_model_families": "71/75",
-    "current_goal": "Recovery-choice coupling, primitive/tag/provenance/ownership/lifetime, compiled B and physical/native ABI/access once for all programs.",
+    "current_goal": "Selected recovery-choice/index coupling, primitive/tag/provenance/ownership/lifetime, compiled B and physical exception/table/site/frame/native ABI/access once for all programs.",
+    "earlier_full_actual_exit": 2,
+    "earlier_full_archive": "kprog/results/kprog_verification_20261107/stlxr-status-frame.log.gz",
+    "earlier_full_source": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
     "finite_receipt": "COORDINATION LOCAL C2026-11-09T09:05:33, sourcebc0b5b1c5: GCC/Clang34816 each, original route127, generic native fixtures7 generated/compiled.",
     "fixture_actual_exits": {
       "dedicated_rep127": 0,
@@ -28034,16 +28037,65 @@
     },
     "fixture_archive": "kprog/results/kprog_verification_20261107/rep-current-fixtures.log.gz",
     "fixture_publication": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
-    "full_check_source": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
+    "full_check_source": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
     "full_check_status": "running; separate eventual immutable receipt",
     "prior_bounded_laws": "Retained unchanged, explicit count<=64 and incomingRCX/count equality domain.",
+    "recovery_prefix_archive": "kprog/results/kprog_verification_20261107/rep-recovery-prefix.log.gz",
+    "recovery_prefix_publication": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
     "runtime_admission_additions": 0,
     "source": "bc0b5b1c51b76b2a4afda019e59618f1562be769",
     "source_profile": "FullRCX native64 DFclear successful normal-access indexed loop; arbitrary legacy IMM/aux/dst/src; exact sequential overlap/fault prefixes and numeric/raw/tag frame.",
-    "status": "partial-current-full-count-success-model",
+    "status": "partial-current-full-count-recovery-model",
     "success_model_archive": "kprog/results/kprog_verification_20261107/rep-full-count-success.log.gz",
     "success_model_laws": 32,
     "success_model_publication": "ecf6001dca4fddd93aab9fc232fe33223d4d4ab0"
+  },
+  "rep_movs_recovery_prefix": {
+    "archive": "kprog/results/kprog_verification_20261107/rep-recovery-prefix.log.gz",
+    "axiom_audit_exit": 0,
+    "law_count": 7,
+    "laws": [
+      "KProgFormal.Refinement.X86RepMovs.element_pc",
+      "KProgFormal.Refinement.X86RepMovs.loop_prefix_split",
+      "KProgFormal.Refinement.X86RepMovs.loop_read_fault_after_prefix",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.loop_events_match",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_finish_matches_progress",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_rep_movs",
+      "KProgTV.NativeLinkFinalImage.x86_rep_recovery_frame"
+    ],
+    "native_link_width_examples": {
+      "destinations": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "lengths": [
+        2,
+        3,
+        2,
+        3
+      ],
+      "offset": 3,
+      "proof_and_kernel_exits": 0,
+      "scope": "Finite linker metadata only, selected captured toolhash; native execution/whole decoder relation remain separate.",
+      "widths": [
+        8,
+        16,
+        32,
+        64
+      ]
+    },
+    "publication": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
+    "reduction_bridge": 4,
+    "runtime_admission_additions": 0,
+    "scope": "Arbitrary successful fullRCX/native64/DFclear copied prefix followed by source-read fault. Indexed source finish equals canonical progress plus RCXclear/PCadvance, raw diagnostic fault appended to full read/write trace. Actual selected recovery branch, physical access/fault class/site/table/frame/ABI, primitive/tag/provenance/lifetime and compiled-B correspondence remain explicit.",
+    "sorryAx": 0,
+    "source_sha256": {
+      "kprog/formal/KProgFormal/Refinement/X86RepMovs.lean": "7e8d81d067d9bd5b85db6b9963764b817f2149cce1a78fa5eb982a7989c8e86e",
+      "kprog/tv/NativeLinkFinalImage.lean": "bf2eea0bc1d33812eb9b0445a9400ace15e4cfb1cd6a4b2b23c12b4056fece38"
+    },
+    "status": "partial-universal-component"
   },
   "rep_stos_reference_progress": {
     "actual_compiled_B": "pending",
@@ -29660,6 +29712,22 @@
       "check_oracle_composition.py"
     ],
     "unchanged_semantic_source_files": 781
+  },
+  "stlxr_status_frame_fixture": {
+    "archive": "kprog/results/kprog_verification_20261107/stlxr-status-frame.log.gz",
+    "change": "Existing host_stack_release_zero expected byte/tag effect before SP-coordinate status update, preserving every original case/assertion.",
+    "current_full_source": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
+    "current_full_status": "running",
+    "earlier_full_exit": 2,
+    "earlier_full_failures": 960,
+    "earlier_full_source": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
+    "existing_cases_actual_exit": {
+      "direct_route400": 0,
+      "full_state686110": 0,
+      "status2056": 0
+    },
+    "production_changes": 0,
+    "publication": "091c9522e9eca4929feb1e8af759e8755c3b5ef2"
   },
   "superseded_full_7081bee34": {
     "archive_compressed_prefix_bytes": 95668384,
