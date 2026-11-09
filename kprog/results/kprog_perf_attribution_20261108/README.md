@@ -678,13 +678,27 @@ one. Both complete current-ABI runs, eight guest CPUs:
 | app | arm | BPF seconds | duration | share of 8 CPUs |
 | --- | --- | ---: | ---: | ---: |
 | bcc/set | JIT | 777.5 | 542.1 s | **17.93%** |
-
-(These two runs also had the shim off, so the rows below are the eBPF-against-eBPF
-runs; the JIT column is the valid one, since the JIT arm runs the same code
-either way.)
 | bcc/set | native-requested | 784.3 | 541.1 s | 18.12% |
 | katran | JIT | 174.1 | 540.2 s | **4.03%** |
 | katran | native-requested | 175.4 | 540.3 s | 4.06% |
+
+Both of those BCC rows come from a run whose shim was off, so they measured
+eBPF against eBPF. The JIT column is still valid, because the JIT arm runs
+the same code either way, and the share is a property of the workload rather
+than of the arm.
+
+**Re-measured on the corrected Katran runs**, where the shim is attached and
+the native arm really is native:
+
+| run | arm | BPF seconds | duration | share of 8 CPUs |
+| --- | --- | ---: | ---: | ---: |
+| `..._181234_983977` (step 1) | JIT | 175.0 | 540.3 s | **4.05%** |
+| `..._181234_983977` (step 1) | native | 174.4 | 540.2 s | 4.04% |
+| `..._192548_978152` (step 3) | JIT | 175.0 | 540.3 s | 4.05% |
+| `..._192548_978152` (step 3) | native | 174.4 | 540.2 s | 4.04% |
+
+So Katran's 4% share is confirmed on runs that really did the comparison: the
+figure was right, and it is the ceiling that matters below.
 
 These are hard ceilings on each application's achievable native/JIT
 throughput ratio, not estimates: an application whose programs consume 17.9%
