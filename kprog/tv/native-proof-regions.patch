@@ -204,10 +204,61 @@ diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
  			env->subprog_info[0].stack_depth = max_t(u32,
  				env->subprog_info[0].stack_depth, kinsn->native_stack_depth);
  		}
-@@ -3866,20 +3817,6 @@
+@@ -3866,20 +3817,57 @@
++static void retain_kinsn_proof_flags(struct bpf_verifier_env *env)
++{
++	struct bpf_prog *prog = env->prog;
++	u32 i, j;
++
++	for (i = 0; i < env->kinsn_region_cnt; i++) {
++		const struct bpf_kinsn_region *r = &env->kinsn_regions[i];
++
++		if (!r->kinsn->native_proof)
++			continue;
++		for (j = r->start; j < r->start + r->proof_len; j++) {
++			struct bpf_insn si = prog->insnsi[j];
++			const struct bpf_insn_aux_data *aux = &env->insn_aux_data[j];
++
++			if (!aux->seen)
++				continue;
++			if (si.code == (BPF_JMP | BPF_CALL) && !si.src_reg) {
++				if (si.imm == BPF_FUNC_get_route_realm)
++					prog->dst_needed = 1;
++				if (si.imm == BPF_FUNC_get_prandom_u32)
++					bpf_user_rnd_init_once();
++				if (si.imm == BPF_FUNC_override_return)
++					prog->kprobe_override = 1;
++				if (si.imm == BPF_FUNC_tail_call) {
++					prog->cb_access = 1;
++					prog->aux->max_pkt_offset = U16_MAX;
++					if (!prog->jit_requested || !bpf_jit_supports_subprog_tailcalls())
++						env->subprog_info[0].stack_depth = MAX_BPF_STACK;
++				}
++			} else if (aux->ptr_type == PTR_TO_CTX && env->ops->convert_ctx_access &&
++				   BPF_MODE(si.code) == BPF_MEM &&
++				   (BPF_CLASS(si.code) == BPF_LDX ||
++				    BPF_CLASS(si.code) == BPF_ST || BPF_CLASS(si.code) == BPF_STX)) {
++				struct bpf_insn insn_buf[16];
++				u32 target_size = 0;
++				enum bpf_access_type type = BPF_CLASS(si.code) == BPF_LDX ? BPF_READ : BPF_WRITE;
++
++				/* Retain callback effects with the stock narrow-load normalization. */
++				if (BPF_LDST_BYTES(&si) < aux->ctx_field_size) {
++					si.off &= ~(bpf_ctx_off_adjust_machine(aux->ctx_field_size) - 1);
++					si.code = BPF_LDX | BPF_MEM | (aux->ctx_field_size == 8 ? BPF_DW :
++						aux->ctx_field_size == 4 ? BPF_W : BPF_H);
++				}
++				env->ops->convert_ctx_access(type, &si, insn_buf, prog, &target_size);
++			}
++		}
++	}
++}
++
  static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)
  {
  	u32 i;
++
++	retain_kinsn_proof_flags(env);
 -
 -	/* Check resolved external identities while every proof is still present. */
 -	for (i = 0; i < env->kinsn_region_cnt; i++) {
