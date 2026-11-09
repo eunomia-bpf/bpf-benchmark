@@ -1,0 +1,43 @@
+{
+  "sources": 36,
+  "request_observations": 203,
+  "summary": {
+    "bcc": {
+      "entry_names": 23,
+      "best_stage_counts": {
+        "verifier_accepted_installed": 23
+      }
+    },
+    "cilium": {
+      "entry_names": 0,
+      "best_stage_counts": {}
+    },
+    "katran": {
+      "entry_names": 1,
+      "best_stage_counts": {
+        "verifier_accepted_installed": 1
+      }
+    },
+    "otelcol-ebpf-profiler": {
+      "entry_names": 3,
+      "best_stage_counts": {
+        "verifier_rejected": 1,
+        "verifier_accepted_installed": 2
+      }
+    },
+    "tetragon": {
+      "entry_names": 6,
+      "best_stage_counts": {
+        "verifier_rejected": 2,
+        "verifier_accepted_installed": 4
+      }
+    },
+    "tracee": {
+      "entry_names": 3,
+      "best_stage_counts": {
+        "verifier_accepted_installed": 2,
+        "verifier_rejected": 1
+      }
+    }
+  }
+}

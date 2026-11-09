@@ -1,0 +1,28 @@
+{
+  "source_commit": "1a09f0e1454738fdadf61f53f3c7d689ac1fd0b2",
+  "groups": 8,
+  "compilers": [
+    "GCC",
+    "Clang18"
+  ],
+  "instrumented_compiles": 16,
+  "instrumented_compile_successes": 16,
+  "instrumented_run_successes": 13,
+  "instrumented_boundary_oracles": [
+    {
+      "source": "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c",
+      "stdout": "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c:70:9: runtime error: index 160 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\n/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c:70:9: runtime error: index 160 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\n/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c:70:9: runtime error: index 160 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\nMISMATCH out-of-range write width=1 did not fault\nMISMATCH out-of-range write width=2 did not fault\nMISMATCH out-of-range write width=4 did not fault\narm64 stack write lanes route host cross-check: FAIL (3)\n"
+    },
+    {
+      "source": "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_arena_route_host.c",
+      "stdout": "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_arena_route_host.c:67:15: runtime error: index 160 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\nMISMATCH unmapped read width=4 did not fault\narm64 stack arena route host cross-check: FAIL (1)\n"
+    },
+    {
+      "source": "/workspaces/repository/kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c",
+      "stdout": "/workspaces/repository/kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c:71:61: runtime error: index 168 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\n/workspaces/repository/kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c:71:61: runtime error: index 256 out of bounds for type 'volatile __u8[160]' (aka 'volatile unsigned char[160]')\nMISMATCH helper pointer dereference off=72 did not fault\nMISMATCH helper pointer dereference off=160 did not fault\narm64 helper arg ptr route host cross-check: FAIL (2)\n"
+    }
+  ],
+  "original_flag_boundary_compiles": 3,
+  "original_flag_boundary_successes": 3,
+  "native_executions": 0
+}

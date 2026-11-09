@@ -64,7 +64,7 @@
 - [ ] **R/C** 应用级 B 生成时间（clang 单个 body 12–2,819 秒，最高 15.1 GB），论文的 54.52x 只来自 micro。
 - [ ] **C** 100–100K 规模扫描，verifier 时间和内存。
 
-- [x] **A** 按协调者21:50决策恢复ARM原始volatile栈表示（本提交）：撤回729/e2e scalar forwarding及六个host fixture中的cache声明/reset，保留全部原有语义assertions、隐式SP release与异常恢复；Python语法通过，direct dispatcher逐字相同。现有host回放单独收据。
+- [x] **A** 按协调者21:50决策恢复ARM原始volatile栈表示（本提交）：撤回729/e2e scalar forwarding及六个host fixture中的cache声明/reset，保留全部原有语义assertions、隐式SP release与异常恢复；Python语法通过，direct dispatcher逐字相同。现有host回放单独收据。 host stage完成：GCC8/8 UBSan通过；Clang5/8 UBSan通过，三个child-fault boundary oracle按原Makefile flags全部通过，完整instrumentation诊断保留。11-08参考目录36覆盖文件/203原始观察/36entry名及native身份齐全。
 - [ ] **A/C** 共享reverts完成后，用统一kinsn-free路径进行一次verified回放，与11-08最佳行逐行比较；A负责ARM，C负责x86。
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
