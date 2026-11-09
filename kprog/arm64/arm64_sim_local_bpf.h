@@ -196,6 +196,24 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_UNSPECIFIED() 0ULL
 #endif
 
+/* Each potentially faulting native read has a fresh environment outcome.
+ * The fault arm precedes writeback and all data effects. Its fallthrough is
+ * the next four-byte native instruction, as in ex_handler_bpf. Simulator
+ * stack storage and translated XDP/SKB context fields are mapped objects.
+ * Hosts may supply a dynamic choice to exercise both outcomes explicitly.
+ */
+#ifndef ARM64_SIM_L_READ_FAULT
+#define ARM64_SIM_L_READ_FAULT(BASE) \
+    (((BASE) != ARM64_SP && \
+      ARM64_SIM_L_REG_TAG(BASE) != ARM64_SIM_TAG_STACK && \
+      ARM64_SIM_L_REG_TAG(BASE) != ARM64_SIM_TAG_RELOC_ADDR && \
+      !((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) && \
+        ARM64_SIM_L_REG_TAG(BASE) == ARM64_SIM_TAG_ABI)) && \
+     ARM64_SIM_L_UNSPECIFIED())
+#endif
+#define ARM64_SIM_L_CLEAR_READ_DEST(DST) \
+    ARM64_SIM_L_WRITE_REG_WIDTH((DST), 0ULL, ARM64_WIDTH_64)
+
 #define ARM64_SIM_L_DECLARE_REG(REG, NAME)                                  \
 	union arm64_sim_gpr __a64_##NAME = { .x = (REG) == ARM64_X30 ? 0ULL : ARM64_SIM_L_UNSPECIFIED() };                    \
 	__u8 __a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;
@@ -1221,6 +1239,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
             (__a64_pm_load ? (DST) : (SRC)), (AUX));                      \
         ARM64_SIM_L_WRITEBACK_OVERLAP((BASE),                             \
             (__a64_pm_load ? (SRC) : (SRC2)), (AUX));                     \
+        if (__a64_pm_load && ARM64_SIM_L_READ_FAULT(BASE)) {               \
+            ARM64_SIM_L_CLEAR_READ_DEST(DST);                             \
+            ARM64_SIM_L_CLEAR_READ_DEST(SRC);                             \
+            break;                                                       \
+        }                                                                \
 		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));             \
 		if (__a64_pm_load) {                                   \
 			__u64 __a64_pm_v0 = ARM64_SIM_L_MEM_READ((BASE),\
@@ -1361,6 +1384,10 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 #define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
  do { \
         ARM64_SIM_L_SP_ALIGNMENT(BASE); \
+    if (ARM64_SIM_L_READ_FAULT(BASE)) { \
+        ARM64_SIM_L_CLEAR_READ_DEST(DST); \
+        break; \
+    } \
     void *__a64_la_addr = ARM64_SIM_L_HELPER_ARG_PTR(BASE); \
     __u64 __a64_la_add = ARM64_SIM_L_READ_REG(SRC); \
     if (COMPLEMENT) __a64_la_add = ~__a64_la_add; \
@@ -1569,6 +1596,10 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			}                                                 \
 		} else if (KPROG_ARM64_DISP_LOAD_HANDLED(OP)) {                \
+            if (ARM64_SIM_L_READ_FAULT(SRC)) {                            \
+                ARM64_SIM_L_CLEAR_READ_DEST(DST);                         \
+                break;                                                   \
+            }                                                            \
 			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
@@ -1583,6 +1614,10 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_LDRSX_HANDLED(OP)) {                \
+            if (ARM64_SIM_L_READ_FAULT(SRC)) {                            \
+                ARM64_SIM_L_CLEAR_READ_DEST(DST);                         \
+                break;                                                   \
+            }                                                            \
 			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP)));\

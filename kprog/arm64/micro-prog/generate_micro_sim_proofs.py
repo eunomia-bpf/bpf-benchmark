@@ -943,6 +943,13 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         f"\tARM64_SIM_RUN_KNOWN_OP3({enc.op}, {enc.dst}, {enc.src}, {enc.src2}, {enc.src3}, "
         f"{enc.width}, {enc.aux}, {enc.imm});"
     )
+    # A recovered native read resumes at PC+4. The explicit edge also keeps
+    # that continuation when function/section layout differs from listing order.
+    if enc.op in {"ARM64_OP_LOAD", "ARM64_OP_LDRSB", "ARM64_OP_LDRSH",
+                  "ARM64_OP_LDRSW", "ARM64_OP_LDP", "ARM64_OP_LOAD_D0",
+                  "ARM64_OP_LOAD_Q0", "ARM64_OP_LDADD", "ARM64_OP_LDSET",
+                  "ARM64_OP_LDCLR"}:
+        lines.append(f"\tgoto {label(insn.addr + 4)};")
 
 
 def render_program(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]],

@@ -277,7 +277,11 @@ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
+if (ARM64_SIM_L_READ_FAULT(SRC)) { \
+                ARM64_SIM_L_CLEAR_READ_DEST(DST); \
+                break; \
+            } \
+			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width); \
 			__u8 __a64_l_value_tag = ARM64_SIM_L_MEM_READ_TAG( \
@@ -295,7 +299,11 @@ ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
+if (ARM64_SIM_L_READ_FAULT(SRC)) { \
+                ARM64_SIM_L_CLEAR_READ_DEST(DST); \
+                break; \
+            } \
+			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP))); \
 			__u64 __a64_l_sxop = ARM64_SIM_L_LDRSX_SXOP((OP)); \
