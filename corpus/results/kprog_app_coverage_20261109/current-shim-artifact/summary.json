@@ -1,0 +1,39 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T09:57:05.579465+00:00",
+    "source_head": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
+    "source_files": {
+      "selftest_full.c": "9ee1636d3f6f492d3910e401391dcacedfec01f94607c180796fc8580b08b0cc",
+      "shim_measure.h": "703b718cd7a40f8ba51498659670eb79d72526b823a8c4e42e5ee40fadadf27f",
+      "Makefile": "ad7a5e8d74787b66c8bbb46d0201ae309744a72f80a583c3f7058294eb090a95",
+      "shim_execute_plan.h": "3fd6ec73ad462d3e2588e74e6851971ef1a03b51c824b5b096bd4c9315c55bf9",
+      "libbpfrejit_shim.c": "61b07a65e6cb3df347f931e05fcae7d1da4b00ee7a45a002b845ed8c734f29c6",
+      "shim_snapshot.h": "45b055db8e86ffeac2a8e3a1a5b54d2fa469eb9f4e0bc36a503a3ad225a2f628",
+      "shim_reload.h": "8ccc385ee226131fdab1881ecc89895ae6aa08f0093655969fd6bf56e8bb6335",
+      "jsmn.h": "1ed6154dedf009212a08a397e9c4ed50a0ce31d5a8301bb294e137ae3188c13b",
+      "shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
+      "shim_loadtime.h": "6c0ba9c99212aaf95937256a631e16eb91cfc5d92aaedb4da76131151f95557f",
+      "shim_state.h": "13c9b5d0ec57821acf8a68ad5986262b572ef3701460dcf1ee74b1935c481181",
+      "selftest.c": "8901930561e7689bc175f73449dfd1a731ea4ace9cffedefd373589659c77a19",
+      "shim_json.h": "995b52daf807e1388a1d0d87ddaa34cca62128af625439ddc6cc54ca2db5c4e6",
+      "shim_netlink.h": "1751f878eb05e1114eec95b886c423006f50cc8ae4e10e855d74a464f06e9940"
+    },
+    "prior_result": "53b44c83b6eaac4a15b1991ef4da88874517fd13",
+    "cause": "inherited image shim resolves removed native_loader_bound_proof_abi_version symbol; current shim uses existing context-load entrypoint",
+    "production_change": "current published shim source rebuilt only"
+  },
+  "make_exit": 0,
+  "shim_sha256": "26907ed079b3635cec0f0a9a2cbcfad9dd81b1efb254c69c2bf2021d234f92bd",
+  "prior_actual_errors": {
+    "x86_kvm_corpus_20261109_095103_447012/details/shim-logs/cilium__agent.post_rejit.log": [
+      "[267.712284 pid=3581 tid=3642] verified native runtime requires native-loader bound-proof ABI version 1: /usr/local/lib/bpfrejit/libnative_loader.so: undefined symbol: native_loader_bound_proof_abi_version"
+    ],
+    "x86_kvm_corpus_20261109_095103_447012/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log": [
+      "[223.146308 pid=1801 tid=1801] verified native runtime requires native-loader bound-proof ABI version 1: /usr/local/lib/bpfrejit/libnative_loader.so: undefined symbol: native_loader_bound_proof_abi_version"
+    ]
+  },
+  "matched_loader": "/var/tmp/kprog-tmp/C/single-load-attempt/build/libnative_loader.so",
+  "matched_loader_sha256": "6fd5ced543b2467c7455fd3fc1c457a399af8d82e912bbe11ee56cf4657dd4e6",
+  "production_source_change": 0,
+  "new_runtime_predicates": 0
+}

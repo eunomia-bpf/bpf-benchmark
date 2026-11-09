@@ -1,0 +1,5 @@
+# Current five-step shim and loader runtime artifact
+
+Actual matched four-app53b44c83b reaches the inherited runtime shim in Cilium and OTel. That older binary resolves native_loader_bound_proof_abi_version and exits before native submission. Current published shim82f8e9e77 resolves the existing context-load entrypoint directly; the current first-attempt loaderfb23 exposes that entrypoint. This receipt rebuilds the published shim privately with its existing make target and pairs its bytes with the current loader. Production source changes0; new runtime predicates0.
+
+Actual make0. summary.json identifies source/binary hashes and the exact two original shim log errors. raw.tar.gz retains current source, compiler output, binary and original error lines. Runtime image destination is `/usr/local/lib/bpfrejit/libbpfrejit_shim.so`; current loader remains `/usr/local/lib/bpfrejit/libnative_loader.so`. Frozen benchmark workload/launcher definitions retain their bytes. Complete app startup follows their coherent image successor.
