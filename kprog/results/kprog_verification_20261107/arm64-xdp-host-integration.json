@@ -19695,6 +19695,125 @@
       "KProgTV.ShiftxCertificate.compiled_execution"
     ]
   },
+  "current_read_recovery_receipts": {
+    "archive_block_sha256": "c324071dd0140c26c67257d32c6209c083bcd0b77a457a1605ff617eb5651e3e",
+    "archive_file": "kprog/results/kprog_verification_20261107/current-read-recovery-receipts.log.gz",
+    "archive_marker": "=== CURRENT X86 ARM READ RECOVERY RECEIPTS V1 ===",
+    "archived_inputs": {
+      "S10-proposed-row.tsv": {
+        "bytes": 2986,
+        "sha256": "6e662a2f5780c46aa36e28619f94d327f04cf26bbf95134e098ac33ab201800e"
+      },
+      "coverage-before.tsv": {
+        "bytes": 1040982,
+        "sha256": "f145016f71a96f6c1bf119a9222a080689d1ba00fa17f7aaf9cc31fe0cba0279"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/README.md": {
+        "bytes": 4249,
+        "sha256": "d72673cbe076667f11765625cfc1268b8d08973912e7430ef545d6b390e19bfd"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/effective-address/reproduction.json": {
+        "bytes": 710,
+        "sha256": "1ca7884706a9dd052e6aeac7186a8dd88b56796e8a05a11056c767d79b73c1b9"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/final-summary.json": {
+        "bytes": 1056,
+        "sha256": "cce6e8d744b0aaf41cae35e105ee94206b813bdc521c3ad2597e2caa9bb43f7c"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/guest5/summary.json": {
+        "bytes": 4660,
+        "sha256": "865d39bf57ae1bb311c77c4f6a3e36e72f4e20044b2bd03507c5bdd9b65cf5a4"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/summary.json": {
+        "bytes": 926,
+        "sha256": "8a91d05a8e65cc4f15a3c6878e4b1e7068ba74bb00ed7c40e87e3fb0b140006e"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/host-comparison.json": {
+        "bytes": 1899,
+        "sha256": "ae6c737a4e7fdf9cf5a6af90673343b43581b9055caf2149a0f5dfd6ad23f4ee"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/host-summary.json": {
+        "bytes": 2951,
+        "sha256": "e2182ca34f33622e0d69ae71906c7be67586bde1fdb7c9e1a8f2885d3875b05d"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/followup/README.md": {
+        "bytes": 5986,
+        "sha256": "073d85e5f14f8092d8bcb77c946007c3f0bb81c254d3017ffc35d65e43d78c2d"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/followup/coverage-proposal.tsv": {
+        "bytes": 9058,
+        "sha256": "fccc1dc0eff7287f5fbf76f01983fe66cd600ad7b01cb322c7e11f784a1c1554"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/followup/summary.json": {
+        "bytes": 6108,
+        "sha256": "538f2b865285577bdf8a586c8590316e3b339eafe9707ac7dde1ac79796810a0"
+      }
+    },
+    "archives_sha256": {
+      "kprog/results/kprog_arm64_read_followup_20261109/guest5/raw.tar.gz": {
+        "bytes": 9075534,
+        "sha256": "b1133c40a659e12e8fdbadcb872ec2ce4cfe35cd69a8fe38e3581002029cbf0f"
+      },
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/raw.tar.gz": {
+        "bytes": 746054,
+        "sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220"
+      },
+      "kprog/results/kprog_x86_read_recovery_20261109/followup/receipts.tar.gz": {
+        "bytes": 1148274,
+        "sha256": "3f78c9f41869d24f7f7212e379ef78b98dbbaab6c625cf669a6241bf11b6ac79"
+      }
+    },
+    "arm_original34_stages": {
+      "accepted_finding": 7,
+      "specialization_rejected": 2,
+      "valid_executed": 4,
+      "verifier_rejected": 21
+    },
+    "arm_original_negative_native_executions": 0,
+    "arm_pair_successor": {
+      "archive_bytes": 746054,
+      "archive_sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220",
+      "controller_exit": 0,
+      "forms": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+            "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+            "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+            "entry_pair"
+          ],
+          "exit": 0,
+          "stderr": "",
+          "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"verified_insns\":132,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+          "symbol": "entry_pair"
+        }
+      ],
+      "observation": "64-bit LDP retained; first parity plus second full-word zero comparison through CMP/CSET",
+      "ok": true,
+      "source_model": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74"
+    },
+    "arm_primary_form_count": 14,
+    "arm_primary_form_pass_count": 13,
+    "arm_source": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+    "coverage_row": "shared:LOAD_FAULT_RECOVERY",
+    "preserved_status": "partial-universal-component",
+    "reference_semantics_premise": "Above raw ISA, registered same-byte native load exception entries use the stock saved-frame behavior. The complete effective address in the unmapped low4KiB page supplies the forced fault/recovery premise; outside that page, a fresh scalar recovery choice overapproximates the physical outcome. Canonical raw read validity/permission, fault class, ordered completed prefix, destination/vector/base effects, entered memory/provenance and actual exception-site/table/frame identity require a coupled native/B platform witness.",
+    "remaining_interface": "Universal current C/Lean/O2/compiled-B composition; actual physical guard/exception class/site/decoder/saved frame/extable lifetime; native/B ordered effects and O3 correspondence; external-copy and later write-side prefixes; helper outputs and entry/private-frame ownership. All existing universal theorem evidence retained. Finite guest results do not close these premises.",
+    "source_components_status": "partial-C-model-component",
+    "x86_original38_stages": {
+      "accepted_finding": 4,
+      "positive_infrastructure_error": 1,
+      "specialization_rejected": 1,
+      "valid_executed": 8,
+      "verifier_rejected": 24
+    },
+    "x86_original_negative_native_executions": 0,
+    "x86_physical_read_forms_passed": 6,
+    "x86_source": [
+      "d717641ae4a869ace042b59544ed65ddc7c214f1",
+      "73f51958b5dc453b520debdfaa624919f277f2be"
+    ]
+  },
   "d_focused": {
     "commands": [
       {

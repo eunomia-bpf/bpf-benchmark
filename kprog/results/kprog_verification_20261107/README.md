@@ -5790,3 +5790,18 @@ proves the complete result, scratch memory, visit40 and ordered helper/call/stor
 events under the stated successful-store premise. These remain partial helper
 units. Private-slot ownership, helper footprints, native register/tag/flag frame,
 physical invocation ABI and compiler embedding remain explicit.
+
+### Current protected-read observations
+
+The shared `LOAD_FAULT_RECOVERY` row includes S9/S10's [source-pinned receipts](current-read-recovery-receipts.log.gz).
+x86 records six physical read forms. ARM records13/14 primary forms and the
+separate64-bit LDP observation successor; the original ORR-W rejection stays
+in the evidence. The original ARM34 and x8638 suites retain every outcome
+label; all negative cases in these captures are load-only.
+
+The forced recovery premise uses the complete effective address in the unmapped
+low4KiB page. Other scalar addresses retain the fresh recovery choice. The raw
+ISA read/permission model and physical fault, site, saved frame, registered
+extable lifetime, ordered effects and current C/O2/compiler/O3 correspondence
+remain explicit interfaces. The shared row keeps its universal components and
+partial status.
