@@ -1,0 +1,39 @@
+{
+  "application": "cilium/agent",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-09T00:55:13.122195+00:00",
+    "apps": "cilium/agent",
+    "samples": 3,
+    "duration": 180,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/trusted-f90whlpc/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/runtime.image.tar",
+      "SAMPLES=3",
+      "WORKLOAD_DURATION=180"
+    ],
+    "returncode": 2,
+    "error": "Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/runtime.image.tar', 'SAMPLES=3', 'WORKLOAD_DURATION=180']' returned non-zero exit status 2.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/guest.py\", line 33, in <module>\n    summary['returncode']=done.returncode;done.check_returncode()\n                                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/runtime.image.tar', 'SAMPLES=3', 'WORKLOAD_DURATION=180']' returned non-zero exit status 2.\n",
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-09T00:58:20.984961+00:00",
+    "corpus_metadata": [],
+    "archive": "corpus-20261109T005829036270Z.tar.gz",
+    "archive_sha256": "2cfea6c0317c80c5c8fdd5d6e077f822e17c8ddfff97ca95fed75e8e96f8104b"
+  },
+  "results": []
+}
