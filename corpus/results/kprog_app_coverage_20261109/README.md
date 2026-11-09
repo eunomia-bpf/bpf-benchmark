@@ -1,6 +1,23 @@
 # x86 application coverage, November 9 UTC
 
-This index records the selected canonical O3 whole-application source/runtime epoch and the current serial continuation. Compiler candidate trials retain their separate outcomes below. Counts refer to actual native service requests; resident program census is attributed to its recorded startup epoch. Complete startup and correct measured work for all six applications remain the target.
+This index records the reference completed canonical O3 epoch, the coherent current-master whole-application cohort and the current serial continuation. Compiler candidate trials retain their separate outcomes below. Counts refer to actual native service requests; resident program census is attributed to its recorded startup epoch. Complete startup and correct measured work for all six applications remain the target.
+
+## Coherent current-master cohort
+
+[Complete six-application receipt](coherent-six-app-runtime/README.md), commit109c86a05, pairs matched46125883be kernel/module, current shim2312b25f5, loaderfb23, canonical simulator c4fe77f3 and complete current-ABI native manifests. Tracee baseline now completes with151 resident programs from its paired09f40af86 application source. All six native startups reach the following recorded frontiers. The native service accepts7 of15actual requests; full native work remains the next application milestone.
+
+| Application | Baseline resident census | Native requests | Generated | Compiled | Installed | Preparation / specialization cause | Verifier error class | Native whole work |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
+| BCC | 25 | 11 | 11 | 11 | 7 | 1: client teardown with active-capsule ENOENT | 3: callee-save equality fault arm, R0 scalar | startup error |
+| OTel | 13 | 1 | 1 | 1 | 0 | 0 | 1: callee-save equality fault arm, R0 scalar | startup error |
+| Cilium | 72 | 1 | 1 | 1 | 0 | 0 | 1: callee-save equality fault arm, R0 scalar | startup error |
+| Tetragon | earlier census287; current baseline reaches verifier error | 0 | 0 | 0 | 0 | baseline startup reaches helper4 R2 unbounded | baseline generic_kprobe_filter_arg | startup error |
+| Katran | 1 | 1 | 1 | 0 | 0 | 1: Clang x86_sim_unmapped_xdp_read,11diagnostics | compiler stage | startup error |
+| Tracee | 151 | 1 | 1 | 1 | 0 | 1: tail-call frame lowering requires BPF rbp location | native-link stage | startup error |
+
+The [cohort analysis](coherent-six-app-runtime/analysis.json) maps each service request to its application and preserves the scope of each census. coverage.json, request archives, runtime-inputs.tar.gz and their commands retain every original error/work stream. [Tail-frame source repair](tail-helper-reaching-frame/README.md)7f906c429 subsequently reuses the existing finite reaching-helper analysis: the original Tracee19 input links successfully and all92Rust tests pass. Its full application replay uses the complete BCC native profile alongside Katran and Tracee on CPUs20-23. Throughput measurement belongs to R on CPUs0-7 with the restored May29 workload.
+
+## Reference completed and earlier runtime epochs
 
 | Application | Program census | Native requests | Proof generated | Compiled | Verifier accepted / installed | Specialization or preparation cause | Verifier error class | Whole work |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
@@ -11,7 +28,7 @@ This index records the selected canonical O3 whole-application source/runtime ep
 | Katran | 1 in completed startup | 1 | 1 | 1 | 1 | 0 | 0 | completed |
 | Tracee | 151 resident in earlier original startup; paired census continues | 0 | 0 | 0 | 0 | paired startup reaches baseline verifier | baseline verifier log retained in current paired-source receipt | startup error |
 
-The [machine-readable index](coverage-index.json) records exact artifact hashes, request failures and application outcomes. Original census and earlier source epochs remain in the [November 8 ledger](../kprog_app_coverage_20261108/README.md). The current terminal cohorts are [BCC/Katran](smap-recovery/bcc-katran/README.md), [OTel](../kprog_app_coverage_20261108/otel-counted-native-loop/application/README.md), [Cilium](cilium-map-caller-frame/README.md), [Tetragon](../kprog_app_coverage_20261108/tetragon-paired-source/application/README.md) and [Tracee](tracee-clamp-macro/README.md). Every observed failure and original program input stays in its raw archive.
+The [machine-readable index](coverage-index.json) records exact artifact hashes, request failures and application outcomes. Original census and earlier source epochs remain in the [November 8 ledger](../kprog_app_coverage_20261108/README.md). The reference terminal cohorts are [BCC/Katran](smap-recovery/bcc-katran/README.md), [OTel](../kprog_app_coverage_20261108/otel-counted-native-loop/application/README.md), [Cilium](cilium-map-caller-frame/README.md), [Tetragon](../kprog_app_coverage_20261108/tetragon-paired-source/application/README.md) and [Tracee](tracee-clamp-macro/README.md). Every observed failure and original program input stays in its raw archive.
 
 ## Approved SMAP recovery chain
 

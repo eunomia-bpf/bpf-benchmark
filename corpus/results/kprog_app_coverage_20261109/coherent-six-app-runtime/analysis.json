@@ -1,0 +1,220 @@
+{
+  "cohort_commit": "109c86a050ef16eb22dcb7170d4479938fe880f4",
+  "scope": "actual full application startup; service request counts cover observed attempted programs; baseline census is attributed to the same cohort",
+  "apps": [
+    {
+      "application": "bcc/set",
+      "baseline_resident_census": 25,
+      "native_requests": 11,
+      "generated": 11,
+      "compiled": 11,
+      "installed": 7,
+      "programs": [
+        {
+          "request_id": 1,
+          "entry": "fentry_vfs_read",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 2,
+          "entry": "kprobe__cap_capable_entry",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 3,
+          "entry": "tracepoint__syscalls__sys_enter_open",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 4,
+          "entry": "tcp_v4_connect",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 5,
+          "entry": "sys_enter",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 6,
+          "entry": "blk_account_io_merge_bio",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": [
+            "R0 invalid mem access 'scalar'",
+            "processed 233 insns (limit 1000000) max_states_per_insn 0 total_states 6 peak_states 6 mark_read 0",
+            "native_lab stub context: prog_type=2 blob_bytes=129 reloc_records=7 reloc_bytes=112 chunks=2 proof_bound=1 callee_saved_mask=1 tail_call_reachable=0 retained_map_fds=3 relocated_map_ids=3 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129918",
+            "retained_map_info=8:id=98:type=2:name=biosnoop.rodata,9:id=67:type=8:name=cgroup_map,10:id=68:type=1:name=infobyreq"
+          ]
+        },
+        {
+          "request_id": 7,
+          "entry": "inet_sock_set_state",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": [
+            "R0 invalid mem access 'scalar'",
+            "processed 1761 insns (limit 1000000) max_states_per_insn 0 total_states 70 peak_states 70 mark_read 0",
+            "retained_map_info=9:id=105:type=2:name=tcplife_.rodata,10:id=89:type=1:name=birth,11:id=95:type=1:name=idents,12:id=102:type=4:name=events"
+          ]
+        },
+        {
+          "request_id": 8,
+          "entry": "sched_wakeup",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 9,
+          "entry": "fentry_vfs_write",
+          "status": 0,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        },
+        {
+          "request_id": 10,
+          "entry": "kprobe__cap_capable_exit",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": [
+            "R0 invalid mem access 'scalar'",
+            "processed 621 insns (limit 1000000) max_states_per_insn 0 total_states 17 peak_states 17 mark_read 0",
+            "retained_map_info=12:id=63:type=1:name=start,13:id=93:type=2:name=capable.kconfig,14:id=91:type=2:name=capable_.rodata,15:id=79:type=1:name=seen,16:id=73:type=7:name=stackmap,17:id=77:type=1:name=info,18:id=70:type=4:name=events"
+          ]
+        },
+        {
+          "request_id": 11,
+          "entry": "tracepoint__syscalls__sys_enter_openat",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        }
+      ],
+      "native_work_status": "error"
+    },
+    {
+      "application": "katran",
+      "baseline_resident_census": 1,
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "installed": 0,
+      "programs": [
+        {
+          "request_id": 18,
+          "entry": "balancer_ingress",
+          "status": -5,
+          "generated": true,
+          "compiled": false,
+          "verifier_excerpt": []
+        }
+      ],
+      "native_work_status": "error"
+    },
+    {
+      "application": "cilium/agent",
+      "baseline_resident_census": 72,
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "installed": 0,
+      "programs": [
+        {
+          "request_id": 17,
+          "entry": "cil_xdp_entry",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": [
+            "R0 invalid mem access 'scalar'",
+            "processed 388 insns (limit 1000000) max_states_per_insn 0 total_states 11 peak_states 11 mark_read 0",
+            "retained_map_info=10:id=498:type=2:name=.rodata.config,11:id=471:type=6:name=cilium_percpu_t,12:id=496:type=6:name=cilium_xdp_scra,13:id=463:type=11:name=cilium_cidr_v4_,14:id=464:type=1:name=cilium_cidr_v4_"
+          ]
+        }
+      ],
+      "native_work_status": "error"
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "baseline_resident_census": 13,
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "installed": 0,
+      "programs": [
+        {
+          "request_id": 16,
+          "entry": "read_task_struct",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": [
+            "R0 invalid mem access 'scalar'",
+            "processed 374 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0",
+            "retained_map_info=7:id=349:type=2:name=system_analysis,8:id=350:type=2:name=.rodata.var"
+          ]
+        }
+      ],
+      "native_work_status": "error"
+    },
+    {
+      "application": "tracee/monitor",
+      "baseline_resident_census": 151,
+      "native_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "installed": 0,
+      "programs": [
+        {
+          "request_id": 19,
+          "entry": "tracepoint__raw_syscalls__sys_enter",
+          "status": -5,
+          "generated": true,
+          "compiled": true,
+          "verifier_excerpt": []
+        }
+      ],
+      "native_work_status": "error"
+    },
+    {
+      "application": "tetragon/observer",
+      "baseline_resident_census": null,
+      "native_requests": 0,
+      "generated": 0,
+      "compiled": 0,
+      "installed": 0,
+      "programs": [],
+      "native_work_status": "error"
+    }
+  ],
+  "total": {
+    "native_requests": 15,
+    "generated": 15,
+    "compiled": 14,
+    "installed": 7,
+    "failed": 8
+  },
+  "followup_tail_frame_source": "7f906c4298c0b7ef92206d5d6ecbf45942987313"
+}
