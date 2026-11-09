@@ -1,0 +1,43 @@
+{
+  "utc": "2026-11-09T10:39:43.485991+00:00",
+  "source_head": "c84a4ccd4d1afbb8a36d93bf0acc443366f0f05a",
+  "base_restored_image": "sha256:03cc5c15b546394dece4934c7ae601d44bf19c04aad5495b55b2bfacc163977f",
+  "image_tag": "bpf-benchmark/kprog-bcc-profile:c-20261109",
+  "kernel_build": "46125883be418abdeecf2f4c2e5641693ece9397",
+  "payloads": [
+    "b120d49fe209706f07843943af1e2595929796b7",
+    "29e8c1bf01a88a49a41b2235a1e1d4d5db0b9eeb",
+    "174e4a6be1fecb32e7bbc409d48709207e593e19",
+    "b316f05479f2048ab98adb2a7505ada52135f3bb"
+  ],
+  "frozen_workload": "9f3855f6f",
+  "virtual_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-native-profile-runtime",
+  "profile": "original complete four-app startup; one sample2s functional replay on20-23; R retains performance ownership",
+  "preceding_result": "fc50455dc034711bb21f79b0dca8403857984864",
+  "correction": "package actual kernel release7.0.0-rc2, matching842 ordinary and15 custom modules",
+  "prior_result": "53b44c83b6eaac4a15b1991ef4da88874517fd13",
+  "shim": "2312b25f55c403d22c300b3c2be20e216b56bacb",
+  "tracee_current_source": "626eae6152bd3aa71639b8f05c6acc24c7a44cd7",
+  "tetragon_baseline_destination": "/artifacts/user/repo-artifacts/x86_64/tetragon/",
+  "applications": [
+    "bcc/set",
+    "katran",
+    "tracee/monitor"
+  ],
+  "scope": "complete8object frozen-config native producer; same helper-output candidate; corrected reaching-frame linker; original38 then whole applications",
+  "native_profile_commit": "37fea6858ee85b77da1331b171ed22c287414df8",
+  "linker_source_commit": "7f906c4298c0b7ef92206d5d6ecbf45942987313",
+  "helper_candidate_commit": "cbae86808",
+  "model_sha256": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+  "native_payload": {
+    "manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "opensnoop.native.o": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+    "tcplife.native.o": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920",
+    "syscount.native.o": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+    "vfsstat.native.o": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+    "runqlat.native.o": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+    "capable.native.o": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+    "tcpconnect.native.o": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+    "biosnoop.native.o": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+  }
+}
