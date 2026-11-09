@@ -47,7 +47,7 @@ int main(int argc,char **argv)
                     loaded.native_prog_id,target,parameter("extable_count"),control,zero);
         syscall(SYS_delete_module,"native_load_fault_module",0);
         native_loader::close_loaded_program(&loaded);
-        return control==0x1234abcd && zero==0 ? 0 : 1;
+        return control==0xffffffffUL && zero==0 ? 0 : 1;
     } catch (const std::exception &e) {
         native_loader::close_loaded_program(&loaded);
         std::fprintf(stderr,"native load guest fixture: %s\n",e.what());return 1;

@@ -4,5 +4,6 @@ __attribute__((section("lsm/file_open"), used, noinline))
 unsigned long entry(unsigned long *ctx)
 {
     const struct file *file = (const void *)ctx[0];
-    return *(const volatile unsigned long *)&file->f_pos;
+    unsigned long value = *(const volatile unsigned long *)&file->f_pos;
+    return -(value & 1UL);
 }
