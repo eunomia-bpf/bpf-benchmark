@@ -5611,3 +5611,12 @@ and the corrected passing commands. The full failure remains exit2 at generated
 freshness, not a passing result. The new fixed-source retry reuses shared caches.
 Generic helper/dynptr memory/tag/lifetime, physical ABI and compiler interfaces
 stay explicit; no new check, gate or production behavior is added.
+
+### Published source full check e69f060e4
+
+`make check` on immutable publishede69f060e4 exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_e69f060e4`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-e69f060e4.log.gz](full-make-check-e69f060e4.log.gz).
