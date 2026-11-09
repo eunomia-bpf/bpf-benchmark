@@ -335,15 +335,17 @@
  #define LR_ENTRY_BITS	(LR_SPI_BITS + LR_FRAMENO_BITS + 1)
  #define LR_SIZE_BITS	4
  #define LR_FRAMENO_MASK	((1ull << LR_FRAMENO_BITS) - 1)
-@@ -4011,7 +4011,7 @@
+@@ -4011,8 +4011,8 @@
  struct linked_reg {
  	u8 frameno;
  	union {
 -		u8 spi;
+-		u8 regno;
 +		u16 spi;
- 		u8 regno;
++		u16 regno;
  	};
  	bool is_reg;
+ };
 @@ -4030,21 +4030,21 @@
  	return NULL;
  }

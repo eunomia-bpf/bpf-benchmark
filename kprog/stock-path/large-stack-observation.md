@@ -10,3 +10,6 @@ The completed table covers549 resident IDs, with identical-body sampling stated 
 
 
 Bookkeeping receipt: resident-census/large-stack-observation/slot-storage. GCC/Clang18 each execute1,218,560 observations under UBSan, and retained-kernel GCC syntax compilation succeeds for verifier/liveness/log. Full object generation and linked kernel follow separately. After the source owner provides the kernel location and the matching six-save entry patch, apply large-stack-observation.patch and reuse the S17 configuration/cache under A/large-stack-observation/build; the normal kernel make command uses the packaged helper and existing flags.
+
+
+Collector boundary receipt: the shared spi/regno union uses16bits for both aliases, preserving the existing writer that assigns regno for stack and register records. Actual extracted collector tests reproduce slot256→0 with the former8-bit alias, and the corrected GCC/Clang runs each pass1,226,840 observations. The updated full verifier object rebuild exits0. This representation change keeps the existing admission conditions and extends their slot storage consistently.
