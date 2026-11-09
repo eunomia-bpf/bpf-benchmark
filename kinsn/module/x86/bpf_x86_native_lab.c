@@ -76,6 +76,8 @@ static int native_lab_store_chunk(void __user *argument)
     int err;
     if (copy_from_user(&input, argument, sizeof(input)))
         return -EFAULT;
+    if (input.native_size >= (1U << 30))
+        return -E2BIG;
     capsule = native_lab_active_capsule(input.request_id);
     if (IS_ERR(capsule))
         return PTR_ERR(capsule);

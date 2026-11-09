@@ -1,0 +1,11 @@
+--- a/kinsn/module/x86/bpf_x86_native_lab.c
++++ b/kinsn/module/x86/bpf_x86_native_lab.c
+@@ -76,6 +76,8 @@
+     int err;
+     if (copy_from_user(&input, argument, sizeof(input)))
+         return -EFAULT;
++    if (input.native_size >= (1U << 30))
++        return -E2BIG;
+     capsule = native_lab_active_capsule(input.request_id);
+     if (IS_ERR(capsule))
+         return PTR_ERR(capsule);
