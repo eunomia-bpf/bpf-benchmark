@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 32/74 |
-| Raw register dispatcher arm composition | 32/75 | 32/74 |
+| Raw register handler refinement | 32/75 | 34/74 |
+| Raw register dispatcher arm composition | 32/75 | 34/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6610,3 +6610,29 @@ Twelve new and91 preceding laws audit with module/root checks0, sorryAx0 and
 exact previous public source prefix, original first-draft diagnostic, final
 compiled module and all proof logs. Source-control ledger rows retain their
 separate6/6 count and selected replay interfaces.
+
+### ARM raw conditional compare and NZCV refinement
+
+CCMP_IMM and CCMP_REG now capture the materialized left operand from DST and
+the selected right operand from IMM/SRC. The generated CCMP handler uses input
+NZCV to select subtraction flags or fallback low4 bits. `flags_projects`,
+`flags_frame` and `body_tag_frame` preserve complete raw GPR/tag/data state;
+canonical projection retains every flag bit outside NZCV and commits PC+4.
+Native immediate5-bit bounds, W/X widths, all aliases/XZR, arbitrary fallback
+high bits and existing NV15-to-AL14 normalization remain explicit.
+
+`production`, `production_immediate_unused` and
+`production_register_unused_value` derive actual numerical dispatcher equality.
+Unused SRC2/SRC3 and AUX2/AUX3 retain arbitrary bytes; immediate CCMP also keeps
+all unused SRC bytes including NONE255, and register CCMP keeps the full unused
+IMM word. `Compare.step_refines` composes34 numeric raw operations, and its
+emission step retains all six source branch families. Entry/native-label/data/
+code-address, C extraction/union and physical/compiler transport remain generic
+interfaces independent of B forwarding and callee comparison storage.
+
+Nineteen new and103 preceding laws audit with module/root checks0, sorryAx0 and82
+inherited Lean.ofReduceBool dependencies. The
+[raw CCMP receipt](arm-raw-ccmp.log.gz) preserves exact previous public source,
+canonical ISA, C/generated/producer sources, original first-draft diagnostic,
+final compiled module and all proof logs. Numeric raw ARM coverage advances
+32to34/74, with source branch coverage separately6/6.

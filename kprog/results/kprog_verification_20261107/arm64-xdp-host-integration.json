@@ -78378,5 +78378,37 @@
       "source-Arm64Logic.lean.txt": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
     },
     "scope": "RawORN_REG and prior31 numericraw/sixsource branches; actualmaterializedoperands/modifier/amount/generatedORN/widthtagwrite/fullarchitecture. Native W/X/shiftbounds andomittedmodifier/arbitraryamount; unusedbytes incl255. Productiondispatcher equality andcombined numeric32+source6 emissionstep. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
+  },
+  "arm64_raw_conditional_compare_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "106c76908c5401ecb860cef23b384e99cd3f916c08a740637fc4602b69872bfc",
+      "sorryAx": 0,
+      "reduction_bridge": 82,
+      "scope": "Raw CCMP_IMM/CCMP_REG plus prior32 numeric raw and six source branches; incoming DST/SRC materialization and NZCV, actual AUXcondition/fallback, generated compare/fallback flags, low4 fallback and nativeIMM5/NVnormalization. Full register/tag/data frame and combined emission step; arbitrary unused fields. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_CCMP_IMM",
+      "ARM64_OP_CCMP_REG"
+    ],
+    "raw_operation_count": 34,
+    "source_branch_count": 6,
+    "new_audits": 19,
+    "total_audits": 122,
+    "archive": "arm-raw-ccmp.log.gz",
+    "source_snapshots": {
+      "source-arm64_ccmp_handler.h.txt": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+      "source-arm64_ccmp_decode.h.txt": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "ebf45b3a5653ea5b9c32218c4a9301c7bf1f423bd36960426cbaaa437e6d3147",
+      "source-arm64_flag_operand.h.txt": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-Arm64Arithmetic.lean.txt": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac",
+      "source-generate_micro_sim_proofs.py.txt": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+    },
+    "scope": "RawCCMP2 +prior32numeric/sixsource branches; actualDSTleft/SRCoptionalright/inputNZCV/generatedcompareorlow4fallback/PC4, completeGPR/tag/data andotherflags retained. NativeIMM5/WX/NVnormalization, arbitraryfallbackhighbits/unusedbytefields including255 andregisterunusedIMM. Productiondispatcher equality andcombined numeric34+source6 step. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
   }
 }

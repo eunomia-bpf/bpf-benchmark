@@ -1546,3 +1546,275 @@ end KProgFormal.Refinement.Arm64RawRegister.Orn
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.step_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.earlier_emission_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.emission_step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.Compare
+open Reference
+open Reference.AArch64 (Register Width)
+
+def setFlags (state : State) (flags : Word) : State :=
+  { state with raw := { state.raw with flags := flags } }
+
+theorem flags_projects (origins : Origins) (state : State) (flags : Word) :
+    image origins (setFlags state flags) = { image origins state with flags := flags } := rfl
+
+theorem flags_frame (state : State) (flags : Word) :
+    (setFlags state flags).tags = state.tags ∧ (setFlags state flags).raw.gpr = state.raw.gpr := ⟨rfl, rfl⟩
+
+/-- DST is the left source, SRC supplies only register RHS, and the generated
+CCMP handler chooses compare NZCV or low4 fallback from the incoming flags. -/
+def body (op : GeneratedArm64FlagOperand.FlagOp) (width : Width) (dst src : Register)
+    (value : Word) (predicate : Arm64Cond) (fallback : Byte) (origins : Origins) (state : State) : Transition State :=
+  let rhs := if GeneratedArm64FlagOperand.immediate op then value else readRegister origins state src
+  let result := GeneratedArm64CcmpHandler.apply (Arm64Arithmetic.incomingFlags state.raw.flags) predicate
+    (readRegister origins state dst) rhs (Arm64Register.handlerWidth width) fallback
+  ⟨advance (setFlags state (Arm64Logic.flagsWord state.raw.flags result.flags)), [], none⟩
+
+theorem body_projects (op : GeneratedArm64FlagOperand.FlagOp) (width : Width) (dst src : Register)
+    (value : Word) (predicate : Arm64Cond) (fallback : Byte) (origins : Origins) (state : State) :
+    observe origins (body op width dst src value predicate fallback origins state) =
+      Arm64Arithmetic.ConditionalCompare.rawStep op width dst src value predicate fallback (image origins state) := by
+  simp only [body, observe, advance_refines, flags_projects, read_refines,
+    Arm64Arithmetic.ConditionalCompare.rawStep, Arm64Register.read_refines]
+  rfl
+
+theorem body_tag_frame (op : GeneratedArm64FlagOperand.FlagOp) (width : Width) (dst src : Register)
+    (value : Word) (predicate : Arm64Cond) (fallback : Byte) (origins : Origins) (state : State) :
+    (body op width dst src value predicate fallback origins state).state.tags = state.tags := rfl
+
+theorem body_immediate_refines (width : Width) (dst src : Register) (value : BitVec 5)
+    (predicate : Arm64Cond) (fallback : Byte) (origins : Origins) (state : State) :
+    observe origins (body .ccmpImm width dst src (value.setWidth 64) predicate fallback origins state) =
+      Reference.AArch64.step (.compare width dst (.immediate value)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) (image origins state) := by
+  rw [body_projects, Arm64Arithmetic.ConditionalCompare.raw_immediate_refines]
+
+theorem body_register_refines (width : Width) (dst src : Register) (value : Word)
+    (predicate : Arm64Cond) (fallback : Byte) (origins : Origins) (state : State) :
+    observe origins (body .ccmpReg width dst src value predicate fallback origins state) =
+      Reference.AArch64.step (.compare width dst (.register src)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) (image origins state) := by
+  rw [body_projects, Arm64Arithmetic.ConditionalCompare.raw_register_refines]
+
+def opcode (immediate : Bool) : Nat :=
+  GeneratedArm64DispatchFamily.code (if immediate then .ccmpImm else .ccmpReg)
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match Orn.dispatch code aux width dst src src2 src3 value origins state with
+  | some result => some result
+  | none => (Arm64Arithmetic.ConditionalCompare.decodeOpcode code).bind (fun op =>
+      (Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat).map (fun predicate =>
+        body op width dst src value predicate ((GeneratedArm64CcmpDecode.ccmpNzcv aux).setWidth 8) origins state))
+
+theorem leading_passes (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    Orn.dispatch (opcode immediate) aux width dst src src2 src3 value origins state = none := by cases immediate <;> rfl
+
+theorem reached (immediate : Bool) (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (width : Width)
+    (dst src src2 src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (opcode immediate) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 value origins state =
+      some (body (if immediate then .ccmpImm else .ccmpReg) width dst src value predicate fallback origins state) := by
+  have decoded : Arm64Arithmetic.ConditionalCompare.decodeOpcode (opcode immediate) =
+      some (if immediate then .ccmpImm else .ccmpReg) := by cases immediate <;> rfl
+  simp only [dispatch, leading_passes, decoded, Option.bind_some,
+    Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  rfl
+
+theorem production (immediate : Bool) (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (width : Width)
+    (dst src src2 src3 : Register) (unused2 unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (opcode immediate) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 value origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchThroughCompare (opcode immediate)
+      (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) unused2 unused3 value
+      sourceScalar sourceStack (image origins state) := by
+  rw [reached]
+  unfold opcode
+  rw [Arm64Dispatcher.compare_reached immediate,
+    Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  simp only [Option.map]
+  rw [Arm64Dispatcher.compare_body_typed]
+  exact congrArg some (body_projects _ width dst src value predicate fallback origins state)
+
+/-- Immediate CCMP retains every unused SRC byte, including NONE255. -/
+theorem production_immediate_unused (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (width : Width)
+    (dst src src2 src3 : Register) (unusedSrc unused2 unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (opcode true) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 value origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchThroughCompare (opcode true)
+      (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+      (Arm64Register.registerCode dst) unusedSrc unused2 unused3 value sourceScalar sourceStack (image origins state) := by
+  rw [reached]
+  unfold opcode
+  rw [Arm64Dispatcher.compare_reached true,
+    Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  simp only [Option.map, ↓reduceIte]
+  have ignored : Arm64Dispatcher.compareBody .ccmpImm predicate fallback width
+      (Arm64Register.registerCode dst) unusedSrc value (image origins state) =
+      Arm64Dispatcher.compareBody .ccmpImm predicate fallback width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) value (image origins state) := rfl
+  rw [ignored, Arm64Dispatcher.compare_body_typed]
+  exact congrArg some (body_projects .ccmpImm width dst src value predicate fallback origins state)
+
+/-- Register CCMP retains the full unused IMM word. -/
+theorem production_register_unused_value (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (width : Width)
+    (dst src src2 src3 : Register) (unused2 unused3 : Byte) (value otherValue : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (opcode false) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 value origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchThroughCompare (opcode false)
+      (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) unused2 unused3 otherValue
+      sourceScalar sourceStack (image origins state) := by
+  rw [reached]
+  unfold opcode
+  rw [Arm64Dispatcher.compare_reached false,
+    Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  simp only [Option.map, Bool.false_eq_true, ↓reduceIte]
+  rw [Arm64Dispatcher.compare_body_typed]
+  have ignored : Arm64Arithmetic.ConditionalCompare.rawStep .ccmpReg width dst src value predicate fallback (image origins state) =
+      Arm64Arithmetic.ConditionalCompare.rawStep .ccmpReg width dst src otherValue predicate fallback (image origins state) := rfl
+  exact congrArg some ((body_projects .ccmpReg width dst src value predicate fallback origins state).trans ignored)
+
+theorem immediate_refines (width : Width) (dst src src2 src3 : Register) (value : BitVec 5)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (opcode true) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 (value.setWidth 64) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.compare width dst (.immediate value)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_immediate_refines width dst src value predicate fallback origins state)
+
+theorem register_refines (width : Width) (dst src src2 src3 : Register) (value : Word)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (opcode false) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+      width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.compare width dst (.register src)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_register_refines width dst src value predicate fallback origins state)
+
+theorem immediate_nv_refines (width : Width) (dst src src2 src3 : Register) (value : BitVec 5)
+    (fallback lane2 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (opcode true) (Arm64Arithmetic.ConditionalCompare.packedAux .al fallback lane2 lane3)
+      width dst src src2 src3 (value.setWidth 64) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.compare width dst (.immediate value) 15 (fallback.setWidth 4)) (image origins state)) :=
+  immediate_refines width dst src src2 src3 value .al fallback lane2 lane3 origins state
+
+theorem register_nv_refines (width : Width) (dst src src2 src3 : Register) (value : Word)
+    (fallback lane2 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (opcode false) (Arm64Arithmetic.ConditionalCompare.packedAux .al fallback lane2 lane3)
+      width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.compare width dst (.register src) 15 (fallback.setWidth 4)) (image origins state)) :=
+  register_refines width dst src src2 src3 value .al fallback lane2 lane3 origins state
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Orn.Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := Orn.step_refines origins state code aux width dst src src2 src3 value instruction binding
+  unfold dispatch
+  cases leading : Orn.dispatch code aux width dst src src2 src3 value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Orn.Binding code aux width dst src src2 src3 value instruction) :
+      Binding code aux width dst src src2 src3 value instruction
+  | immediate (width : Width) (dst src src2 src3 : Register) (value : BitVec 5)
+      (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+      Binding (opcode true) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+        width dst src src2 src3 (value.setWidth 64)
+        (.compare width dst (.immediate value) (Arm64Condition.nativeCode predicate) (fallback.setWidth 4))
+  | register (width : Width) (dst src src2 src3 : Register) (value : Word)
+      (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+      Binding (opcode false) (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+        width dst src src2 src3 value (.compare width dst (.register src) (Arm64Condition.nativeCode predicate) (fallback.setWidth 4))
+  | immediateNv (width : Width) (dst src src2 src3 : Register) (value : BitVec 5) (fallback lane2 lane3 : Byte) :
+      Binding (opcode true) (Arm64Arithmetic.ConditionalCompare.packedAux .al fallback lane2 lane3)
+        width dst src src2 src3 (value.setWidth 64) (.compare width dst (.immediate value) 15 (fallback.setWidth 4))
+  | registerNv (width : Width) (dst src src2 src3 : Register) (value : Word) (fallback lane2 lane3 : Byte) :
+      Binding (opcode false) (Arm64Arithmetic.ConditionalCompare.packedAux .al fallback lane2 lane3)
+        width dst src src2 src3 value (.compare width dst (.register src) 15 (fallback.setWidth 4))
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src src2 src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst src src2 src3 value instruction bound
+  | immediate => apply immediate_refines
+  | register => apply register_refines
+  | immediateNv => apply immediate_nv_refines
+  | registerNv => apply register_nv_refines
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Branch.Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .execute code aux width dst src src2 src3 value => dispatch code aux width dst src src2 src3 value origins state
+  | _ => Orn.dispatchEmission nativeAddress emission origins state
+
+theorem earlier_emission_step (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : Orn.EmissionBinding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have prior := Orn.emission_step_refines nativeAddress emission origins state instruction binding
+  cases emission with
+  | execute code aux width dst src src2 src3 value =>
+      change (Orn.dispatch code aux width dst src src2 src3 value origins state).map (observe origins) = _ at prior
+      change (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) = _
+      unfold dispatch
+      cases leading : Orn.dispatch code aux width dst src src2 src3 value origins state with
+      | none => simp [leading] at prior
+      | some output => simpa only [leading] using prior
+  | jump current target => exact prior
+  | condition code current fallthrough target => exact prior
+  | zero width nonzero src current fallthrough target => exact prior
+  | bit nonzero src bit current fallthrough target => exact prior
+
+inductive EmissionBinding (nativeAddress : Word → Word) (pc : Word) : Branch.Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Branch.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Orn.EmissionBinding nativeAddress pc emission instruction) : EmissionBinding nativeAddress pc emission instruction
+  | execute (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Binding code aux width dst src src2 src3 value instruction) :
+      EmissionBinding nativeAddress pc (.execute code aux width dst src src2 src3 value) instruction
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : EmissionBinding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound => exact earlier_emission_step nativeAddress emission origins state instruction bound
+  | execute code aux width dst src src2 src3 value instruction bound =>
+      exact step_refines origins state code aux width dst src src2 src3 value instruction bound
+
+end KProgFormal.Refinement.Arm64RawRegister.Compare
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.flags_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.flags_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.body_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.body_immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.body_register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.leading_passes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.production_immediate_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.production_register_unused_value
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.immediate_nv_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.register_nv_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.step_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.earlier_emission_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Compare.emission_step_refines
