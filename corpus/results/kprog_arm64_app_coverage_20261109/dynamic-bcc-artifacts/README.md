@@ -1,0 +1,5 @@
+Paired ARM BCC dynamic executable repair
+
+The original paired biosnoop5f and opensnoop4474user objects are relinked as dynamic ELF executables with their existing embedded BPF objects. PT_INTERP selects the normal AArch64 interpreter and permits the existing LD_PRELOAD shim to capture application startup. Native P/source/BPF/field/size/helper/workload bytes retain their captured definitions. Biosnoop uses source0185creation-state; opensnoop uses source4474ret-store order. Exact linker commands, object dependencies, ELF interpreter/NEEDED records, source/BPF/binary hashes and both binaries accompany this receipt.
+
+The initial static biosnoop produces only its application thread while the other7BCC tools expose shim accept threads. A own guest task dump records Python waiting in unix_stream_connect/p9_client_walk and biosnoop in perf-buffer epoll; its partial actual source/runtime/raw observations remain in the original cohort. Dynamic relink repairs the concrete preload boundary. Existing frozen framework and baseline/native source pairing remain intact. Runtime predicates added:0.

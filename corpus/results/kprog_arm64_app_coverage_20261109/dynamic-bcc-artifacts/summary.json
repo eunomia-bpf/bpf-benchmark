@@ -1,0 +1,83 @@
+{
+  "utc": "2026-11-09T10:20:09.669306+00:00",
+  "rows": [
+    {
+      "tool": "biosnoop",
+      "make_exit": 0,
+      "source_sha256": "b6eac277f947e2a86d8d21efb57a317f718b0439ce4ba7d11680881a917e9a1a",
+      "bpf_sha256": "ab3cac3a0db4c7c882a9e790c446ac6c08283e7d7f727003309ea673969d56f4",
+      "binary_sha256": "b5404e0abba8fe6f0d30645ffce81ab00898034f0fec1d42f231eaf67fb27f9b",
+      "file": "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/biosnoop: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=b6e9ca478ea2b92f0c126d443c2a0b68b6319487, for GNU/Linux 3.7.0, with debug_info, not stripped",
+      "program_headers": "\nElf file type is DYN (Position-Independent Executable file)\nEntry point 0x6c80\nThere are 10 program headers, starting at offset 64\n\nProgram Headers:\n  Type           Offset             VirtAddr           PhysAddr\n                 FileSiz            MemSiz              Flags  Align\n  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040\n                 0x0000000000000230 0x0000000000000230  R      0x8\n  INTERP         0x0000000000000270 0x0000000000000270 0x0000000000000270\n                 0x000000000000001b 0x000000000000001b  R      0x1\n      [Requesting program interpreter: /lib/ld-linux-aarch64.so.1]\n  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000\n                 0x00000000000620b0 0x00000000000620b0  R E    0x10000\n  LOAD           0x000000000006d6a8 0x000000000007d6a8 0x000000000007d6a8\n                 0x0000000000002a20 0x0000000000002b68  RW     0x10000\n  DYNAMIC        0x000000000006f910 0x000000000007f910 0x000000000007f910\n                 0x0000000000000220 0x0000000000000220  RW     0x8\n  NOTE           0x000000000000028c 0x000000000000028c 0x000000000000028c\n                 0x0000000000000044 0x0000000000000044  R      0x4\n  TLS            0x000000000006d6a8 0x000000000007d6a8 0x000000000007d6a8\n                 0x0000000000000000 0x000000000000000c  R      0x8\n  GNU_EH_FRAME   0x000000000005719c 0x000000000005719c 0x000000000005719c\n                 0x00000000000015a4 0x00000000000015a4  R      0x4\n  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000\n                 0x0000000000000000 0x0000000000000000  RW     0x10\n  GNU_RELRO      0x000000000006d6a8 0x000000000007d6a8 0x000000000007d6a8\n                 0x0000000000002958 0x0000000000002958  R      0x1\n\n Section to Segment mapping:\n  Segment Sections...\n   00     \n   01     .interp \n   02     .interp .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .text .fini .rodata .eh_frame_hdr .eh_frame \n   03     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss \n   04     .dynamic \n   05     .note.gnu.build-id .note.ABI-tag \n   06     .tbss \n   07     .eh_frame_hdr \n   08     \n   09     .init_array .fini_array .data.rel.ro .dynamic .got \n",
+      "dynamic_dependencies": "\nDynamic section at offset 0x6f910 contains 30 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libelf.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]\n 0x000000000000000c (INIT)               0x5b70\n 0x000000000000000d (FINI)               0x417d4\n 0x0000000000000019 (INIT_ARRAY)         0x7d6a8\n 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x7d6b8\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x2d0\n 0x0000000000000005 (STRTAB)             0x1138\n 0x0000000000000006 (SYMTAB)             0x2f8\n 0x000000000000000a (STRSZ)              1759 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000015 (DEBUG)              0x0\n 0x0000000000000003 (PLTGOT)             0x7fb30\n 0x0000000000000002 (PLTRELSZ)           3384 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x4e38\n 0x0000000000000007 (RELA)               0x1a48\n 0x0000000000000008 (RELASZ)             13296 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000000000001e (FLAGS)              BIND_NOW\n 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE\n 0x000000006ffffffe (VERNEED)            0x1948\n 0x000000006fffffff (VERNEEDNUM)         4\n 0x000000006ffffff0 (VERSYM)             0x1818\n 0x000000006ffffff9 (RELACOUNT)          546\n 0x0000000000000000 (NULL)               0x0\n"
+    },
+    {
+      "tool": "opensnoop",
+      "make_exit": 0,
+      "source_sha256": "42b2a91cf3d27bd12c630e888c82a3335aae965d22d9c868ff863624afc09d8b",
+      "bpf_sha256": "c3cb75d0a8126e9f5c0bf9f357064620ed5d847904011b819c178d9040d40052",
+      "binary_sha256": "70ee8363382860656645dc814327f862c549155cb49e9d8c79bfd3d2342563e2",
+      "file": "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/opensnoop: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=0adf5dd08dee2df78fa6931822503e622bf47112, for GNU/Linux 3.7.0, with debug_info, not stripped",
+      "program_headers": "\nElf file type is DYN (Position-Independent Executable file)\nEntry point 0x6cc0\nThere are 10 program headers, starting at offset 64\n\nProgram Headers:\n  Type           Offset             VirtAddr           PhysAddr\n                 FileSiz            MemSiz              Flags  Align\n  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040\n                 0x0000000000000230 0x0000000000000230  R      0x8\n  INTERP         0x0000000000000270 0x0000000000000270 0x0000000000000270\n                 0x000000000000001b 0x000000000000001b  R      0x1\n      [Requesting program interpreter: /lib/ld-linux-aarch64.so.1]\n  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000\n                 0x000000000005d870 0x000000000005d870  R E    0x10000\n  LOAD           0x000000000006d578 0x000000000006d578 0x000000000006d578\n                 0x0000000000002b70 0x0000000000002c88  RW     0x10000\n  DYNAMIC        0x000000000006f900 0x000000000006f900 0x000000000006f900\n                 0x0000000000000220 0x0000000000000220  RW     0x8\n  NOTE           0x000000000000028c 0x000000000000028c 0x000000000000028c\n                 0x0000000000000044 0x0000000000000044  R      0x4\n  TLS            0x000000000006d578 0x000000000006d578 0x000000000006d578\n                 0x0000000000000000 0x000000000000000c  R      0x8\n  GNU_EH_FRAME   0x000000000005293c 0x000000000005293c 0x000000000005293c\n                 0x00000000000015a4 0x00000000000015a4  R      0x4\n  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000\n                 0x0000000000000000 0x0000000000000000  RW     0x10\n  GNU_RELRO      0x000000000006d578 0x000000000006d578 0x000000000006d578\n                 0x0000000000002a88 0x0000000000002a88  R      0x1\n\n Section to Segment mapping:\n  Segment Sections...\n   00     \n   01     .interp \n   02     .interp .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .text .fini .rodata .eh_frame_hdr .eh_frame \n   03     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss \n   04     .dynamic \n   05     .note.gnu.build-id .note.ABI-tag \n   06     .tbss \n   07     .eh_frame_hdr \n   08     \n   09     .init_array .fini_array .data.rel.ro .dynamic .got \n",
+      "dynamic_dependencies": "\nDynamic section at offset 0x6f900 contains 30 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libelf.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]\n 0x000000000000000c (INIT)               0x5d48\n 0x000000000000000d (FINI)               0x40894\n 0x0000000000000019 (INIT_ARRAY)         0x6d578\n 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x6d588\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x2d0\n 0x0000000000000005 (STRTAB)             0x1168\n 0x0000000000000006 (SYMTAB)             0x2f8\n 0x000000000000000a (STRSZ)              1770 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000015 (DEBUG)              0x0\n 0x0000000000000003 (PLTGOT)             0x6fb20\n 0x0000000000000002 (PLTRELSZ)           3432 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x4fe0\n 0x0000000000000007 (RELA)               0x1a88\n 0x0000000000000008 (RELASZ)             13656 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000000000001e (FLAGS)              BIND_NOW\n 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE\n 0x000000006ffffffe (VERNEED)            0x1988\n 0x000000006fffffff (VERNEEDNUM)         4\n 0x000000006ffffff0 (VERSYM)             0x1852\n 0x000000006ffffff9 (RELACOUNT)          561\n 0x0000000000000000 (NULL)               0x0\n"
+    }
+  ],
+  "commands": [
+    {
+      "tool": "biosnoop",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261109/biosnoop-creation-state/build-inputs.tar.gz",
+      "command": [
+        "aarch64-linux-gnu-gcc",
+        "-g",
+        "-O2",
+        "-Wall",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/biosnoop.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/trace_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/syscall_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/errno_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/map_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/uprobe_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/btf_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/jit/compat.o",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+        "-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+        "-Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+        "-lelf",
+        "-lz",
+        "-ldl",
+        "-pthread",
+        "-o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/biosnoop/biosnoop"
+      ]
+    },
+    {
+      "tool": "opensnoop",
+      "archive": "corpus/results/kprog_arm64_app_coverage_20261109/opensnoop-ret-order/raw.tar.gz",
+      "command": [
+        "aarch64-linux-gnu-gcc",
+        "-g",
+        "-O2",
+        "-Wall",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/opensnoop.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/trace_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/syscall_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/errno_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/map_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/uprobe_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/btf_helpers.o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/jit/compat.o",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+        "-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+        "-Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+        "-lelf",
+        "-lz",
+        "-ldl",
+        "-pthread",
+        "-o",
+        "/var/tmp/kprog-tmp/A/dynamic-bcc-artifacts/opensnoop/opensnoop"
+      ]
+    }
+  ],
+  "scope": "Relink existing completed paired user objects dynamically so existing LD_PRELOAD shim intercepts unchanged embedded BPF program startup; native P and selected source bytes remain exact.",
+  "runtime_admission_additions": 0
+}
