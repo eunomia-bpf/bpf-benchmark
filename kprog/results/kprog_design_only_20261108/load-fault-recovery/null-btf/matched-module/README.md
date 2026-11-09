@@ -1,0 +1,5 @@
+# Actual full-word NULL BTF load recovery
+
+The authorized guest fixture loads one native LSM file_open program through source0 and the registered service. The original native body reads file.f_pos through the BTF pointer. An isolated guest module invokes that same loaded program first with a live struct file and then with its file argument0; results, program extable count, actual service/native/B/compiler/kernel records and guest survival are retained below. Program execution here is the explicitly requested recovery fixture, separate from the original kernel load-only catalog. Partial-register/ALU/implicit/vector fault-prefix correspondence remains the shared model/O4 work item.
+
+Actual outcome: {'probe_exit': 1, 'stdout': '', 'stderr': 'native load guest fixture: trusted specializer refused native program: Input/output error\n', 'guest_exit': 1, 'native_sha256': '64ddc8d665e84cfd3c7d04a4e5d1bf0d1eb3eb48e67f5bddad89c3980c8349e5', 'kernel_sha256': 'a7de6824e381036c75b224207ba937e9e63ed5b8cc8afaa5953f342ea20bc8ef', 'module_sha256': '1b42ffa33fc95ef82fa7969e546760831f4827a4ff27f64ac34748086283cd3f'}.
