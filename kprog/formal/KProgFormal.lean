@@ -260,3 +260,4 @@ import KProgFormal.ControlFlowTrace
 import KProgFormal.Generated.GeneratedX86MulxArm
 import KProgFormal.X86MulxArmHandler
 import KProgFormal.X86RemainingTokenO2
+import KProgFormal.NativeLinkProducerImage
