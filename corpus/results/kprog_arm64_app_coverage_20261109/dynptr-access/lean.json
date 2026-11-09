@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-09T07:40:41.509920+00:00",
+  "scope": "Existing universal helper identity/table theorems,95row source; private output prefix and retained compiler environment",
+  "source_publication": "6737766140096384da964e3044d16bf662365f16",
+  "commands": [
+    {
+      "source": "KProgFormal/Generated/GeneratedArm64HelperIdents.lean",
+      "source_sha256": "512ecb023060ffb980234bd593ab8232593ace83ef1b3940385e9a8658990101",
+      "command": [
+        "/root/.elan/toolchains/leanprover--lean4---v4.19.0/bin/lean",
+        "--root=/var/tmp/kprog-tmp/A/dynptr-access/source/kprog/formal",
+        "-o",
+        "/var/tmp/kprog-tmp/A/dynptr-access/lean-out/KProgFormal/Generated/GeneratedArm64HelperIdents.olean",
+        "/var/tmp/kprog-tmp/A/dynptr-access/source/kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
+      ],
+      "exit": 0,
+      "output_sha256": "29a49efb17f60ed9f412611c16a76beb2f1bbcb06b19ea7cdd6266bd7840b0e0"
+    },
+    {
+      "source": "KProgFormal/Arm64HelperIdents.lean",
+      "source_sha256": "7cce2b83b38ff50e7cdcf4c7ec3e29ffabc2eda06b5d6e2da788a9bdaab5bfc9",
+      "command": [
+        "/root/.elan/toolchains/leanprover--lean4---v4.19.0/bin/lean",
+        "--root=/var/tmp/kprog-tmp/A/dynptr-access/source/kprog/formal",
+        "-o",
+        "/var/tmp/kprog-tmp/A/dynptr-access/lean-out/KProgFormal/Arm64HelperIdents.olean",
+        "/var/tmp/kprog-tmp/A/dynptr-access/source/kprog/formal/KProgFormal/Arm64HelperIdents.lean"
+      ],
+      "exit": 0,
+      "output_sha256": "3e85f59b5b33379c3a1295556718c13f67c268e9d1eca33ab4abc2548304a229"
+    }
+  ],
+  "runtime_admission_additions": 0
+}
