@@ -13,7 +13,7 @@ unsigned long entry(unsigned long *context)
         return result == -14 && (value & mask) == 0 ? 0 : 2;
     long zero_result = bpf_probe_read_kernel(&zero, PROBE_WIDTH, &file->f_flags);
     long user_result = bpf_probe_read_kernel(&user_zero, PROBE_WIDTH, (const void *)0);
-    if (result || zero_result || (zero & mask) || user_result != -14 || (user_zero & mask))
+    if (result || zero_result || (zero & mask) || user_result != -34 || (user_zero & mask))
         return 2;
     return -(value & 1UL);
 }

@@ -1,7 +1,8 @@
 {
   "inputs": {
-    "parent": "191f9dc1d60cfd2727efef3bbe9bf84b7ae1fab1",
-    "native_header_sha256": "049655c2df713e19731220de85668522f6569aeac2f42cb9c49e0b1bc04679d8",
+    "parent": "b869730d9eb8416babdf423b305b319a51c17766",
+    "control_revision": "191f9dc1d60cfd2727efef3bbe9bf84b7ae1fab1",
+    "native_header_sha256": "fcbef510c4fae1ca7621958788d87c01527ed0271e80f96a82a5a9f2951c31ae",
     "control_header_sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
     "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
     "source_sha256": {
@@ -35,25 +36,25 @@
     "manifest_entries": 114
   },
   "candidate": {
-    "header_sha256": "049655c2df713e19731220de85668522f6569aeac2f42cb9c49e0b1bc04679d8",
+    "header_sha256": "fcbef510c4fae1ca7621958788d87c01527ed0271e80f96a82a5a9f2951c31ae",
     "objects": [
       {
         "object": "kprobe_check.native.o",
-        "sha256": "f4958c6564b22e9d9fcbdccaa93a072d5c9d51c19ef20e8f7fef1a1144a6eb51",
+        "sha256": "acab1591bf3bc569a60434435a625e9a30eb852c4a326645315e7c5de6b8d1a3",
         "executable_bytes": 60,
         "rep_movs_sites": 0
       },
       {
         "object": "lsm_check.native.o",
-        "sha256": "bd9a5be00b9e689637afe0ce0fc91d9ef4b77095c4f3c21576e62909aedb2c82",
+        "sha256": "448d98b78e2e63b6a19a59eaec7280224be4ad06518a607158077e3868966d7d",
         "executable_bytes": 60,
         "rep_movs_sites": 0
       },
       {
         "object": "tracee.native.o",
-        "sha256": "cf3f240bef94b59c892fdf5a704cf0fbb402941e75c7439648c247d004d60edb",
-        "executable_bytes": 2784446,
-        "rep_movs_sites": 16980
+        "sha256": "efe8f54088289e9760054a286752cb07914d34678a28099ce954052cb59057f7",
+        "executable_bytes": 2621972,
+        "rep_movs_sites": 17100
       }
     ],
     "manifest_entries": 114

@@ -689,8 +689,9 @@ static __always_inline long __native_probe_read_kernel(
         }
         if ((unsigned long)from == address + size && count == 0)
             return 0;
-        __builtin_memset(dst, 0, size);
-        return -14;
+        /* Preserve the helper's original error class and zeroing behavior.
+         * A rejected address domain returns -ERANGE; a failed valid-domain
+         * access returns -EFAULT. The existing helper supplies both. */
     }
 #endif
     return native_bpf_helper3(long (*)(void *, unsigned int, const void *),
