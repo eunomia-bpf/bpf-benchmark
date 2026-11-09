@@ -1,0 +1,9 @@
+{
+  "utc": "2026-11-09T05:18:31.097557+00:00",
+  "approval": "COORDINATOR DECISION 2026-11-09 05:20 UTC",
+  "approved_case": "a66cfcc6753a1272a8efaf9ae7a4a6ec60fe3bd5",
+  "source_sha256_before": "f99b0e1f5b3a3d091388fb97410b4c37a398786abd3365756bcc804cc88aaad2",
+  "source_sha256_after": "573ab39f293da97c29713fbe79a01fbe0b7c351e398fcad61267f3052a0e85be",
+  "patch_sha256": "aec094c9c1fbd52db5978035989672632fc9893f5754bdd9936bc28a2fa96fd2",
+  "scope": "Existing BPF exception-site recovery in the x86 SMAP fault branch; submitted native bytes and exception metadata retain their definition"
+}
