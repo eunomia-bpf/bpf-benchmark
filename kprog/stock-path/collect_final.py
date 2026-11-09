@@ -86,7 +86,8 @@ summary['integration_tests']={
  'x86-physical-tail-frame':dict(fixture_exit=0,**frame_state),
  **{name:dict(fixture_exit=0,**row) for name,row in errors.items()}}
 lines=['case\tfixture_exit\tclient_exit\tservice_status\traw_load_attempts\tverifier_completed\tnative_test_run']
-lines.append('x86-physical-tail-frame\t0\t0\t0\t1\t1\t1')
+# The tail-frame run used the ordinary loader, so its load-attempt cell stays unmeasured.
+lines.append('x86-physical-tail-frame\t0\t0\t0\t-\t1\t1')
 for name,row in errors.items():
  lines.append(f"{name}\t0\t{row['client_exit']}\t{row['service_status']}\t{row['raw_load_attempts']}\t{int(row['verifier_completed'])}\t0")
 (D/'integration-cases.tsv').write_text('\n'.join(lines)+'\n')
