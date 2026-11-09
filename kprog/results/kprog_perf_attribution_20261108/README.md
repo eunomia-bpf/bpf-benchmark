@@ -986,3 +986,34 @@ run's log shows it is the app exiting during startup, with libbpf skipping
 `.eh_frame` sections in its stderr tail. The timing below therefore covers
 the baseline arm on the restored workload and reports that the native arm
 needs C.
+
+### The native arm's blocker, located
+
+The restored workload's baseline arm passes and its native arm fails at the
+trusted specializer, before any packet flows:
+
+```
+native-loader failed prog=balancer_ingres
+  manifest=/opt/bpf-benchmark/native-bpf/x86_64/katran/manifest.json
+  error=trusted specializer refused native program: Input/output error
+```
+
+That is a generation failure upstream of the workload, so the restored
+packet shape cannot cause it. The evidence that it is a regression rather
+than a property of the restore:
+
+| observation | value |
+| --- | --- |
+| last Katran run where `balancer_ingres` was replaced | `x86_kvm_corpus_20261108_232046_843736`, generated 2026-11-08T23:30 |
+| that run's workload | `Flags: SHARED`, `ifname: rtlb0@7` (the pre-restore shape) |
+| this run | fails at the specializer, 2026-11-09T01:50 |
+| `trusted_service.py` and `trusted_generation.py` in the runner image | **absent** -- the service runs from the host, so the image is not the variable |
+| service/generator commits between the last good run and this one | `5598b9321` 23:49, `dc120a8eb` 23:13, `0818f5677` 22:00, `e46b05a25` 01:07 |
+
+So the specializer began refusing Katran's program between 23:30 and 01:50
+on 2026-11-08/09, and the change is in the host's service or generator, not
+in the workload. `5598b9321` ("Carry native load sites into stock x86
+exception-table emission") lands in that window and is the first to check.
+
+Under the task's division this is a trusted-service/generation failure for
+lane C, so the six-application timing on the restored workload waits on it.
