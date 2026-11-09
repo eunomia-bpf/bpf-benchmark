@@ -1,0 +1,9 @@
+Large-stack observation kernel
+
+Coordinator instruction, 2026-11-09 16:00 UTC: load all549 resident programs B on a test kernel with larger MAX_BPF_STACK to identify classes behind the512-byte wall. This kernel supplies load-only observations; production acceptance retains its512-byte result.
+
+The companion patch changes MAX_BPF_STACK from512 to8192. Existing instruction-history slot encoding grows from6 to10bits, flags move to bits13–15 and their field grows to16bits. Both existing static assertions remain. The verifier algorithm source verifier.c retains its bytes. This bookkeeping carries stack-slot numbers0–1023 through the existing precision backtracking.
+
+Inputs: existing stock source35ea2cde39fc at /var/tmp/kprog-tmp/CK/linux; warm x86 build /var/tmp/kprog-tmp/S17/x86-build. Patch applicability exits0. Source changes remain in this master-owned patch; C/coordinator provide the kernel source location disposition under the one-tree rule before application. The warm observation build belongs under /var/tmp/kprog-tmp/A/large-stack-observation/build and reuses the completed config/cache. Compilation of B uses the same8192-byte observation capacity and reports its exact commands. The comparison keeps native P, simulator revision, context and maps explicit for each row; native execution requests stay0.
+
+The completed table covers549 resident IDs, with identical-body sampling stated explicitly. Generation, compile, resource, native-link and verifier phases each retain their counts and diagnostics. Stage-end publication keeps diagnostic logs in gzip and every tracked file below50MB. Compressed streams larger than the file size are stored as ordered parts with their byte hashes and concatenation order. Repeated identical results share one stage publication.
