@@ -485,6 +485,17 @@ The body is the largest span and the two fixed spans are near-equal, which
 is what this program's shape predicts: it parses a 54-byte packet, hashes,
 and writes one word.
 
+Two other programs with hand-written entries measure as
+`flow_5tuple_rss_hash` at 33.3/33.3/33.3% and
+`packet_vlan_tcpopt_parser` at 32.1/33.1/34.8%, which is the instrument's
+floor. The build emits six `rdtsc` reads for its three spans (one to open,
+one per `MARK`, and one pair around the write), so a program whose body is a
+few instructions spends most of its measured time inside the marks and shows
+roughly a third per span whatever it does. Katran's 55.7% body is
+above that floor and is real signal; the other two sit on it and carry none.
+The floor is a third per span for three spans, and lowering it means fewer
+spans, or timing the body alone against the whole run instead.
+
 **The overhead, stated:** the instrumented build costs 1,956,385 cycles
 against the published build's 442,342 for the same work, a 4.4x factor,
 because each of the five `rdtsc` pairs carries a serializing read plus a

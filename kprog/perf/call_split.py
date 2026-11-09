@@ -97,18 +97,19 @@ def build(unit, out, arch_dir):
     return done.returncode == 0, done.stderr
 
 
-def run(library, program):
-    script = (
-        "import ctypes,sys\n"
-        "lib=ctypes.CDLL(%r)\n"
-        "f=getattr(lib,%r); f.restype=ctypes.c_long\n"
-        "f.argtypes=[ctypes.c_void_p]\n"
-        "buf=ctypes.create_string_buffer(65536)\n"
-        "for _ in range(10000): f(ctypes.cast(buf,ctypes.c_void_p))\n"
-    ) % (str(library), program)
-    # The destructor prints the tallies; run in a child so it fires.
-    done = subprocess.run([sys.executable, "-c", script],
-                          capture_output=True, text=True)
+def run(library, bpf, memory, repeat):
+    """Run through the staged runner, which supplies the program's input.
+
+    The runner dlopens the library in its own process and the destructor
+    prints the tallies on stderr, so the input is the program's own and the
+    counters cover exactly the repeats the runner made.
+    """
+    command = ["./runner/build-llvmbpf/micro_exec", "run-native",
+               "--program", bpf, "--native-program", str(library),
+               "--inner-repeat", str(repeat)]
+    if memory:
+        command += ["--memory", memory, "--io-mode", "packet"]
+    done = subprocess.run(command, capture_output=True, text=True)
     return done.stderr
 
 
@@ -117,6 +118,9 @@ def main(argv):
     ap.add_argument("--program", default="katran_lb_consistent_hash_select"
                                         ".bpf.c")
     ap.add_argument("--symbol", default="katran_lb_consistent_hash_select_xdp")
+    ap.add_argument("--memory", default="",
+                    help="generated input; defaults to the program's own")
+    ap.add_argument("--repeat", default="10000")
     ap.add_argument("--out-dir", default=str(ROOT / "kprog/perf/measure"))
     args = ap.parse_args(argv[1:])
     out_dir = pathlib.Path(args.out_dir)
@@ -125,13 +129,20 @@ def main(argv):
         print("the entry did not carry the spans to instrument",
               file=sys.stderr)
         return 1
-    library = out_dir / (pathlib.Path(args.program).stem + ".native.so")
+    library = out_dir / (pathlib.Path(args.program).name
+                       .replace(".bpf.c", "") + ".native.so")
     ok, err = build(unit, library, BUILD)
     if not ok:
         print(err[-800:], file=sys.stderr)
         return 1
     print(library)
-    print(run(library, args.symbol).strip())
+    base = pathlib.Path(args.program).name.replace(".bpf.c", "")
+    bpf = str(BUILD / (base + ".bpf.o"))
+    memory = args.memory or str(
+        ROOT / "micro/generated-inputs" / (base + ".mem"))
+    if not pathlib.Path(memory).exists():
+        memory = ""
+    print(run(library, bpf, memory, args.repeat).strip())
     return 0
 
 
