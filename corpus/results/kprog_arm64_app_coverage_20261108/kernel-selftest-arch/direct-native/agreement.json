@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-08T22:39:23.175674+00:00",
+  "utc": "2026-11-09T00:40:47.710436+00:00",
   "scope": "Complete direct ARM original native catalog; installed is a load-only stage; native execution records retain their own outcomes",
   "epochs": [
     {
@@ -126,6 +126,68 @@
           "installed": 52,
           "verifier_rejected": 11,
           "agrees": 52
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "stage": "installed"
+        },
+        {
+          "file": "map_kptr_fail.c",
+          "program": "misaligned_access_read",
+          "stage": "installed"
+        },
+        {
+          "file": "test_global_func14.c",
+          "program": "global_func14",
+          "stage": "installed"
+        },
+        {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "stage": "installed"
+        }
+      ]
+    },
+    {
+      "epoch": "full-paired-resources",
+      "publication": "42c907e1c22a7d67fd3bf47dbcfd78d6734849cf",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-arch/direct-native/full-paired-resources/summary.json",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 380,
+        "submitted": 376,
+        "installed": 22,
+        "verifier_rejected": 47,
+        "generation_failed": 252,
+        "compilation_failed": 0,
+        "resource_failed": 4,
+        "transport_failed": 0,
+        "load_failed": 55,
+        "skipped": 0,
+        "failure": 42,
+        "failure_agrees": 38,
+        "failure_installed": 4,
+        "success": 27,
+        "success_agrees": 18,
+        "success_installed": 18
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 42,
+          "installed": 4,
+          "verifier_rejected": 38,
+          "agrees": 38
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 27,
+          "installed": 18,
+          "verifier_rejected": 9,
+          "agrees": 18
         }
       ],
       "installed_failure": [
