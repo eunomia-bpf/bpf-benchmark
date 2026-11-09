@@ -1,0 +1,2639 @@
+{
+  "configurations": 3,
+  "resident_instances": 72,
+  "native_execution_requests": 0,
+  "programs": [
+    {
+      "family": "bpf_xdp",
+      "configuration": "45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd",
+      "resident_instances": 1,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd.o",
+      "source_sha256": "b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c",
+      "original_command": [
+        "/usr/bin/clang",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state",
+        "-I/var/lib/cilium/bpf",
+        "-I/var/lib/cilium/bpf/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/lib/cilium/bpf/bpf_xdp.c",
+        "-o",
+        "-"
+      ],
+      "command": [
+        "clang-18",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/native-abi-overlay",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/native-abi-overlay/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/native-abi-overlay/bpf_xdp.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/bpf_xdp.bpf.o"
+      ],
+      "compiler_exit": 0,
+      "wall_seconds": 0.8887060810811818,
+      "source_program_ids": [
+        286
+      ],
+      "reference_object": "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/bpf_xdp.bpf.o",
+      "reference_sha256": "f3ccfae471dd8afd01c70d253b5a0dfef4f79bce2588a8c948b6d26d622e38f2",
+      "original_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_xdp_scratch": {
+          "type": 6,
+          "key_size": 4,
+          "value_size": 28,
+          "pinning": 1,
+          "max_entries": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_cidr_v4_fix": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 20971520,
+          "map_flags": 129
+        },
+        "cilium_cidr_v4_dyn": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_cidr_v6_fix": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 20971520,
+          "map_flags": 129
+        },
+        "cilium_cidr_v6_dyn": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        }
+      },
+      "reference_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_xdp_scratch": {
+          "type": 6,
+          "key_size": 4,
+          "value_size": 28,
+          "pinning": 1,
+          "max_entries": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_cidr_v4_fix": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 20971520,
+          "map_flags": 129
+        },
+        "cilium_cidr_v4_dyn": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_cidr_v6_fix": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 20971520,
+          "map_flags": 129
+        },
+        "cilium_cidr_v6_dyn": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        }
+      },
+      "original_instructions": {
+        ".text": {
+          "bytes": 64,
+          "sha256": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e"
+        },
+        "xdp/tail": {
+          "bytes": 46752,
+          "sha256": "c53c3362736cd25e18f330d28f258e4ff8f5ef968ac2ad9f8a8c243ba96da197"
+        },
+        "xdp/entry": {
+          "bytes": 2240,
+          "sha256": "7a28cfa93b451daf9db8bede6d0a99077cccf4dccd5ad21c8991c060cb19c265"
+        }
+      },
+      "reference_instructions": {
+        ".text": {
+          "bytes": 64,
+          "sha256": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e"
+        },
+        "xdp/tail": {
+          "bytes": 46752,
+          "sha256": "c53c3362736cd25e18f330d28f258e4ff8f5ef968ac2ad9f8a8c243ba96da197"
+        },
+        "xdp/entry": {
+          "bytes": 2240,
+          "sha256": "7a28cfa93b451daf9db8bede6d0a99077cccf4dccd5ad21c8991c060cb19c265"
+        }
+      },
+      "instruction_sections_equal": true
+    },
+    {
+      "family": "bpf_host",
+      "configuration": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c",
+      "resident_instances": 35,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.o",
+      "source_sha256": "c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8",
+      "original_command": [
+        "/usr/bin/clang",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/templates/be129f26877ac608f2b984e068d96471fdb625dcc5b14af82197a82820ee7ede",
+        "-I/var/lib/cilium/bpf",
+        "-I/var/lib/cilium/bpf/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/lib/cilium/bpf/bpf_host.c",
+        "-o",
+        "-"
+      ],
+      "command": [
+        "clang-18",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/native-abi-overlay",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/native-abi-overlay/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/native-abi-overlay/bpf_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/bpf_host.bpf.o"
+      ],
+      "compiler_exit": 0,
+      "wall_seconds": 2.1493866122327745,
+      "source_program_ids": [
+        287,
+        288,
+        289,
+        294,
+        300,
+        301,
+        304,
+        307,
+        308,
+        312,
+        313,
+        319,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        339,
+        340,
+        347,
+        348,
+        350,
+        352,
+        353,
+        354,
+        355,
+        361,
+        362,
+        363
+      ],
+      "reference_object": "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/bpf_host.bpf.o",
+      "reference_sha256": "0f2ad818f9a520c6c77baffd3164463247e4f34d3d8d5e07e01a89548d943c8c",
+      "original_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_runtime_config": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 256,
+          "map_flags": 128
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_policystats": {
+          "type": 10,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 2
+        },
+        "cilium_policy_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egresscall_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_call_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_node_map_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_encrypt_state": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 1,
+          "map_flags": 128
+        },
+        "cilium_l2_responder_v4": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 4096,
+          "map_flags": 1
+        },
+        "cilium_l2_responder_v6": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 4096,
+          "map_flags": 1
+        },
+        "cilium_vtep_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 8,
+          "map_flags": 128
+        },
+        "cilium_subnet_map": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 129
+        },
+        "cilium_tail_call_buffer6": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_tail_call_buffer4": {
+          "type": 6,
+          "max_entries": 1
+        }
+      },
+      "reference_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_runtime_config": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 256,
+          "map_flags": 128
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_policystats": {
+          "type": 10,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 2
+        },
+        "cilium_policy_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egresscall_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_call_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_node_map_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_encrypt_state": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 1,
+          "map_flags": 128
+        },
+        "cilium_l2_responder_v4": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 4096,
+          "map_flags": 1
+        },
+        "cilium_l2_responder_v6": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 4096,
+          "map_flags": 1
+        },
+        "cilium_vtep_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 8,
+          "map_flags": 128
+        },
+        "cilium_subnet_map": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 129
+        },
+        "cilium_tail_call_buffer6": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_tail_call_buffer4": {
+          "type": 6,
+          "max_entries": 1
+        }
+      },
+      "original_instructions": {
+        ".text": {
+          "bytes": 96,
+          "sha256": "861e8fec5db91fb033fbe794106523b819e234a08e67f3d2831638501a12e6ab"
+        },
+        "tc/tail": {
+          "bytes": 98264,
+          "sha256": "82b67ee8b1f54c8d241dd420d8799285e637d1702c23a491bc47d366111a1499"
+        },
+        "tc/entry": {
+          "bytes": 44200,
+          "sha256": "0a678036027bd0f5329b3090a6656a8d2b0f1c64e52ddbad59216aaf3fa4e289"
+        }
+      },
+      "reference_instructions": {
+        ".text": {
+          "bytes": 96,
+          "sha256": "861e8fec5db91fb033fbe794106523b819e234a08e67f3d2831638501a12e6ab"
+        },
+        "tc/tail": {
+          "bytes": 98264,
+          "sha256": "82b67ee8b1f54c8d241dd420d8799285e637d1702c23a491bc47d366111a1499"
+        },
+        "tc/entry": {
+          "bytes": 44200,
+          "sha256": "0a678036027bd0f5329b3090a6656a8d2b0f1c64e52ddbad59216aaf3fa4e289"
+        }
+      },
+      "instruction_sections_equal": true
+    },
+    {
+      "family": "bpf_lxc",
+      "configuration": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315",
+      "resident_instances": 36,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.o",
+      "source_sha256": "30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28",
+      "original_command": [
+        "/usr/bin/clang",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+        "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/templates/a3e8d10a913ae0c9eb50bbfe67eabff02218f0e2d9206f3ceff8593dc8c71b9f",
+        "-I/var/lib/cilium/bpf",
+        "-I/var/lib/cilium/bpf/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/lib/cilium/bpf/bpf_lxc.c",
+        "-o",
+        "-"
+      ],
+      "command": [
+        "clang-18",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/native-abi-overlay",
+        "-I/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/native-abi-overlay/include",
+        "-g",
+        "-O2",
+        "--target=bpf",
+        "-std=gnu99",
+        "-nostdinc",
+        "-ftrap-function=__undefined_trap",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wshadow",
+        "-Wno-address-of-packed-member",
+        "-Wno-unknown-warning-option",
+        "-Wno-gnu-variable-sized-type-not-at-end",
+        "-Wimplicit-int-conversion",
+        "-Wenum-conversion",
+        "-Wimplicit-fallthrough",
+        "-mcpu=v3",
+        "-c",
+        "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/native-abi-overlay/bpf_lxc.c",
+        "-o",
+        "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/bpf_lxc.bpf.o"
+      ],
+      "compiler_exit": 0,
+      "wall_seconds": 2.1963515877723694,
+      "source_program_ids": [
+        291,
+        293,
+        295,
+        296,
+        297,
+        298,
+        299,
+        302,
+        303,
+        306,
+        309,
+        310,
+        314,
+        316,
+        317,
+        318,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        338,
+        341,
+        343,
+        344,
+        345,
+        346,
+        349,
+        351,
+        356,
+        357,
+        358,
+        359,
+        360
+      ],
+      "reference_object": "/var/tmp/kprog-tmp/A/cilium-reference-rebuild/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/bpf_lxc.bpf.o",
+      "reference_sha256": "ca215493e3cabccc01ef2fd905485428c2888610806845903707f1df687bfda9",
+      "original_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_tail_call_buffer4": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_runtime_config": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 256,
+          "map_flags": 128
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_node_map_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_auth_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 524288,
+          "map_flags": 129
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_egresscall_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_call_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_skip_lb6": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 100,
+          "map_flags": 129
+        },
+        "cilium_skip_lb4": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 100,
+          "map_flags": 129
+        },
+        "cilium_policystats": {
+          "type": 10,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 2
+        },
+        "cilium_policy_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_mcast_group_outer_v4_map": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_vtep_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 8,
+          "map_flags": 128
+        },
+        "cilium_subnet_map": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 129
+        },
+        "cilium_nodeport_nat_buffer": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_tail_call_buffer6": {
+          "type": 6,
+          "max_entries": 1
+        }
+      },
+      "reference_maps": {
+        "cilium_events": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_tail_call_buffer4": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_ipcache_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 512000,
+          "map_flags": 129
+        },
+        "cilium_runtime_config": {
+          "type": 2,
+          "pinning": 1,
+          "max_entries": 256,
+          "map_flags": 128
+        },
+        "cilium_signals": {
+          "type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "pinning": 1
+        },
+        "cilium_metrics": {
+          "type": 5,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ipv6_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_lxc": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 128
+        },
+        "cilium_node_map_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_auth_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 524288,
+          "map_flags": 129
+        },
+        "cilium_calls": {
+          "type": 3,
+          "key_size": 4,
+          "max_entries": 50,
+          "pinning": 16
+        },
+        "cilium_throttle": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65535,
+          "map_flags": 1
+        },
+        "cilium_ipv4_frag_datagrams": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 8192,
+          "map_flags": 0
+        },
+        "cilium_ratelimit": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_ratelimit_metrics": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 64,
+          "map_flags": 0
+        },
+        "cilium_percpu_trace_id": {
+          "type": 6,
+          "max_entries": 1,
+          "pinning": 1
+        },
+        "cilium_egresscall_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_call_policy": {
+          "type": 3,
+          "pinning": 1,
+          "max_entries": 65535
+        },
+        "cilium_skip_lb6": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 100,
+          "map_flags": 129
+        },
+        "cilium_skip_lb4": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 100,
+          "map_flags": 129
+        },
+        "cilium_policystats": {
+          "type": 10,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 2
+        },
+        "cilium_policy_v2": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_mcast_group_outer_v4_map": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 0
+        },
+        "cilium_lb6_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb6_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb6_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb6_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_reverse_nat": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_services_v2": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb4_backends_v3": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_affinity": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_source_range": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 129
+        },
+        "cilium_lb4_health": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_lb4_maglev": {
+          "type": 13,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_affinity_match": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 128
+        },
+        "cilium_lb_act": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_srv6_vrf_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_sid": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_vrf_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_srv6_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_ct6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any6_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any6": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ct4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_ct_any4_global": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 65536,
+          "map_flags": 0
+        },
+        "cilium_per_cluster_ct_tcp4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_per_cluster_ct_any4": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_devices": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 512,
+          "map_flags": 1
+        },
+        "cilium_nodeport_neigh6": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_nodeport_neigh4": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_egress_gw_policy_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_egress_gw_policy_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v4_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v4_alloc_retries": {
+          "type": 6,
+          "pinning": 1,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v4_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v4": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_snat_v6_external": {
+          "type": 9,
+          "pinning": 1,
+          "max_entries": 131072,
+          "map_flags": 0
+        },
+        "cilium_snat_v6_alloc_retries": {
+          "type": 6,
+          "max_entries": 33
+        },
+        "cilium_per_cluster_snat_v6_external": {
+          "type": 12,
+          "pinning": 1,
+          "max_entries": 256
+        },
+        "cilium_ipmasq_v6": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 16384,
+          "map_flags": 129
+        },
+        "cilium_vtep_map": {
+          "type": 1,
+          "pinning": 1,
+          "max_entries": 8,
+          "map_flags": 128
+        },
+        "cilium_subnet_map": {
+          "type": 11,
+          "pinning": 1,
+          "max_entries": 1024,
+          "map_flags": 129
+        },
+        "cilium_nodeport_nat_buffer": {
+          "type": 6,
+          "max_entries": 1
+        },
+        "cilium_tail_call_buffer6": {
+          "type": 6,
+          "max_entries": 1
+        }
+      },
+      "original_instructions": {
+        ".text": {
+          "bytes": 64,
+          "sha256": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e"
+        },
+        "tc/tail": {
+          "bytes": 138704,
+          "sha256": "67b6247c5efbd27e2d7ae3960124ad0492030a5e6f31bb34f3a307b8d0fbb8dd"
+        },
+        "tc/entry": {
+          "bytes": 19992,
+          "sha256": "9ca2b0124f3a276049af9a89836f26390c4e4b65f0401bb5b07baef8920c9357"
+        }
+      },
+      "reference_instructions": {
+        ".text": {
+          "bytes": 64,
+          "sha256": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e"
+        },
+        "tc/tail": {
+          "bytes": 138704,
+          "sha256": "d63d0eb1c0b0476262966d2c2cd1924bf3a1318b521634458dce775380a51eba"
+        },
+        "tc/entry": {
+          "bytes": 19992,
+          "sha256": "9ca2b0124f3a276049af9a89836f26390c4e4b65f0401bb5b07baef8920c9357"
+        }
+      },
+      "instruction_sections_equal": false
+    }
+  ]
+}
