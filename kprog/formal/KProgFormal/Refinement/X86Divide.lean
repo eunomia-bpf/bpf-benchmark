@@ -655,3 +655,238 @@ theorem handler_refines (width : ScalarWidth) (source : Reference.X86.ScalarSour
   exact (fresh_flags_mask state.rflags fresh).symm
 
 end KProgFormal.Refinement.X86Divide.SourceState
+
+namespace KProgFormal.Refinement.X86Divide.RestoringLoop
+
+/-- The local C loop's word-sized update, including its separately saved carry. -/
+def advance (quotient remainder divisor bit : Reference.Word) :
+    Reference.Word × Reference.Word :=
+  let trial := (remainder <<< 1) ||| bit
+  let take := remainder.getLsbD 63 || BitVec.ule divisor trial
+  ((quotient <<< 1) ||| (if take then 1 else 0),
+    if take then trial - divisor else trial)
+
+theorem carry_comparison (remainder divisor bit : Reference.Word)
+    (hb : BitVec.ule bit 1 = true) :
+    (remainder.getLsbD 63 || BitVec.ule divisor ((remainder <<< 1) ||| bit)) =
+      BitVec.ule (divisor.setWidth 65)
+        ((remainder.setWidth 65 <<< 1) ||| bit.setWidth 65) := by
+  simp only [Reference.Word] at *
+  bv_decide
+
+theorem trial_value (remainder bit : Reference.Word)
+    (hb : bit.toNat ≤ 1) :
+    (((remainder.setWidth 65 <<< 1) ||| bit.setWidth 65).toNat) =
+      2 * remainder.toNat + bit.toNat := by
+  have bound := remainder.isLt
+  have extended : remainder.toNat < 2^65 := by omega
+  have bitBound : bit.toNat < 2^65 := by omega
+  rw [machine_trial remainder bit (BitVec.ule_iff_toNat_le.mpr (by simpa using hb))]
+  simp only [BitVec.toNat_add, BitVec.toNat_mul, BitVec.toNat_setWidth,
+    BitVec.toNat_ofNat]
+  change (2 * (remainder.toNat % 36893488147419103232) % 36893488147419103232 +
+    bit.toNat % 36893488147419103232) % 36893488147419103232 = _
+  rw [Nat.mod_eq_of_lt extended, Nat.mod_eq_of_lt bitBound,
+    Nat.mod_eq_of_lt (show 2 * remainder.toNat < 36893488147419103232 by omega),
+    Nat.mod_eq_of_lt (by omega)]
+
+theorem advance_remainder (quotient remainder divisor bit : Reference.Word)
+    (hr : remainder.toNat < divisor.toNat) (hb : bit.toNat ≤ 1) :
+    (advance quotient remainder divisor bit).2.toNat =
+      if divisor.toNat ≤ 2 * remainder.toNat + bit.toNat then
+        2 * remainder.toNat + bit.toNat - divisor.toNat
+      else 2 * remainder.toNat + bit.toNat := by
+  have bitRule : BitVec.ule bit 1 = true := BitVec.ule_iff_toNat_le.mpr (by simpa using hb)
+  have remainderRule : BitVec.ult remainder divisor = true := BitVec.ult_iff_toNat_lt.mpr hr
+  have equation := congrArg BitVec.toNat (machine_remainder remainder divisor bit remainderRule bitRule)
+  have wideValue := trial_value remainder bit hb
+  have widen (x : Reference.Word) : (x.setWidth 65).toNat = x.toNat := by
+    rw [BitVec.toNat_setWidth, Nat.mod_eq_of_lt (by have := x.isLt; omega)]
+  change ((if remainder.getLsbD 63 || BitVec.ule divisor ((remainder <<< 1) ||| bit)
+    then ((remainder <<< 1) ||| bit) - divisor else (remainder <<< 1) ||| bit).setWidth 65).toNat = _ at equation
+  rw [widen] at equation
+  change (advance quotient remainder divisor bit).2.toNat = _
+  rw [show (advance quotient remainder divisor bit).2.toNat =
+    (if remainder.getLsbD 63 || BitVec.ule divisor ((remainder <<< 1) ||| bit)
+      then ((remainder <<< 1) ||| bit) - divisor else (remainder <<< 1) ||| bit).toNat from rfl,
+    equation]
+  by_cases take : divisor.toNat ≤ 2 * remainder.toNat + bit.toNat
+  · have wordTake : divisor.setWidth 65 ≤ (remainder.setWidth 65 <<< 1) ||| bit.setWidth 65 := by
+      apply BitVec.le_def.mpr
+      simpa only [widen, wideValue] using take
+    simp only [BitVec.ule_iff_le.mpr wordTake, ↓reduceIte, take]
+    rw [BitVec.toNat_sub_of_le wordTake, wideValue, widen]
+  · have wordSkip : ¬divisor.setWidth 65 ≤ (remainder.setWidth 65 <<< 1) ||| bit.setWidth 65 := by
+      simpa only [BitVec.le_def, widen, wideValue] using take
+    have skipped : BitVec.ule (divisor.setWidth 65)
+        ((remainder.setWidth 65 <<< 1) ||| bit.setWidth 65) = false := by
+      simpa only [BitVec.ule_eq_decide_le, decide_eq_false_iff_not] using wordSkip
+    simp only [skipped, Bool.false_eq_true, ↓reduceIte, take, wideValue]
+
+theorem advance_quotient (quotient remainder divisor bit : Reference.Word)
+    (hb : bit.toNat ≤ 1) (hq : 2 * quotient.toNat + 1 < 2^64) :
+    (advance quotient remainder divisor bit).1.toNat =
+      2 * quotient.toNat +
+        (if divisor.toNat ≤ 2 * remainder.toNat + bit.toNat then 1 else 0) := by
+  have bitRule : BitVec.ule bit 1 = true := BitVec.ule_iff_toNat_le.mpr (by simpa using hb)
+  have wideValue := trial_value remainder bit hb
+  have widen (x : Reference.Word) : (x.setWidth 65).toNat = x.toNat := by
+    rw [BitVec.toNat_setWidth, Nat.mod_eq_of_lt (by have := x.isLt; omega)]
+  have takeRule : (remainder.getLsbD 63 || BitVec.ule divisor ((remainder <<< 1) ||| bit)) =
+      decide (divisor.toNat ≤ 2 * remainder.toNat + bit.toNat) := by
+    rw [carry_comparison remainder divisor bit bitRule]
+    simp only [BitVec.ule_eq_decide_le, BitVec.le_def, widen, wideValue]
+  simp only [advance, takeRule, machine_quotient]
+  by_cases take : divisor.toNat ≤ 2 * remainder.toNat + bit.toNat
+  · simp only [take, decide_true, ↓reduceIte, BitVec.toNat_add, BitVec.toNat_mul]
+    change (2 * quotient.toNat % 18446744073709551616 + 1) %
+      18446744073709551616 = 2 * quotient.toNat + 1
+    rw [Nat.mod_eq_of_lt (show 2 * quotient.toNat < 18446744073709551616 by omega),
+      Nat.mod_eq_of_lt hq]
+  · simp only [take, decide_false, Bool.false_eq_true, ↓reduceIte,
+      BitVec.toNat_add, BitVec.toNat_mul]
+    change (2 * quotient.toNat % 18446744073709551616 + 0) %
+      18446744073709551616 = 2 * quotient.toNat + 0
+    rw [Nat.mod_eq_of_lt (show 2 * quotient.toNat < 18446744073709551616 by omega)]
+    simp only [Nat.add_zero]
+    exact Nat.mod_eq_of_lt (by omega)
+
+/-- The C `for (bit=63; bit>=0; --bit)` recurrence, parameterized by its count. -/
+def run : Nat → (Reference.Word × Reference.Word) → Reference.Word →
+    Reference.Word → Reference.Word × Reference.Word
+  | 0, result, _, _ => result
+  | n+1, result, low, divisor =>
+      run n (advance result.1 result.2 divisor ((low >>> n) &&& 1)) low divisor
+
+theorem run_last (n : Nat) (result : Reference.Word × Reference.Word)
+    (low divisor : Reference.Word) :
+    run (n+1) result low divisor =
+      let previous := run n result (low >>> 1) divisor
+      advance previous.1 previous.2 divisor (low &&& 1) := by
+  induction n generalizing result with
+  | zero => simp [run]
+  | succ n ih =>
+      rw [run, ih]
+      have shift : low >>> 1 >>> n = low >>> (n+1) := by
+        apply BitVec.eq_of_toNat_eq
+        simp only [BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow, Nat.div_div_eq_div_mul]
+        congr 1
+        simp [Nat.pow_succ, Nat.mul_comm]
+      simp only [run, shift]
+
+/-- Every descending C iteration realizes the unbounded radix-two recurrence.
+The remainder invariant protects its 65th bit; the count bounds quotient writes. -/
+theorem run_matches (n : Nat) (high low divisor : Reference.Word)
+    (count : n ≤ 64) (initial : high.toNat < divisor.toNat)
+    (input : low.toNat < 2^n) :
+    let result := run n (0, high) low divisor
+    (result.1.toNat, result.2.toNat) =
+      longDivide n high.toNat low.toNat divisor.toNat := by
+  induction n generalizing low with
+  | zero => rfl
+  | succ n ih =>
+      have halfValue : (low >>> 1).toNat = low.toNat / 2 := by
+        simp [BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow]
+      have halfBound : (low >>> 1).toNat < 2^n := by
+        rw [halfValue]
+        apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
+        simpa only [Nat.pow_succ] using input
+      have previous := ih (low >>> 1) (by omega) halfBound
+      simp only [halfValue] at previous
+      have quotientValue := congrArg Prod.fst previous
+      have remainderValue := congrArg Prod.snd previous
+      dsimp only at quotientValue remainderValue
+      have bounds := longDivide_correct n high.toNat (low.toNat / 2) divisor.toNat initial
+        (by simpa only [halfValue] using halfBound)
+      have quotientBound : 2 * (run n (0, high) (low >>> 1) divisor).1.toNat + 1 < 2^64 := by
+        have power : 2^n * 2 ≤ 2^64 := by
+          simpa only [Nat.pow_succ] using Nat.pow_le_pow_right (by decide : 1 ≤ 2) count
+        simp only [quotientValue]
+        omega
+      have remainderBound : (run n (0, high) (low >>> 1) divisor).2.toNat < divisor.toNat := by
+        rw [remainderValue]; exact bounds.2.2
+      have bitValue : (low &&& 1).toNat = low.toNat % 2 := by
+        simp only [BitVec.toNat_and]; exact Nat.and_one_is_mod _
+      have bitBound : (low &&& 1).toNat ≤ 1 := by
+        rw [bitValue]; have := Nat.mod_lt low.toNat (by decide : 0 < 2); omega
+      rw [run_last]
+      apply Prod.ext
+      · rw [advance_quotient _ _ _ _ bitBound quotientBound]
+        simp only [longDivide, quotientValue, remainderValue, bitValue]
+        split <;> rename_i take <;> simp [take]
+      · rw [advance_remainder _ _ _ _ remainderBound bitBound]
+        simp only [longDivide, quotientValue, remainderValue, bitValue]
+        split <;> rename_i take <;> simp [take]
+
+/-- The complete source loop computes division of every fitting 128-bit pair. -/
+theorem run64_quot_rem (high low divisor : Reference.Word)
+    (initial : high.toNat < divisor.toNat) :
+    let result := run 64 (0, high) low divisor
+    result.1.toNat = (high.toNat * 2^64 + low.toNat) / divisor.toNat ∧
+      result.2.toNat = (high.toNat * 2^64 + low.toNat) % divisor.toNat := by
+  have loop := run_matches 64 high low divisor (by decide) initial low.isLt
+  have exactResult := longDivide_quot_rem 64 high.toNat low.toNat divisor.toNat initial low.isLt
+  exact ⟨(congrArg Prod.fst loop).trans exactResult.1,
+    (congrArg Prod.snd loop).trans exactResult.2⟩
+
+/-- The emitted qword branch keeps its native unsigned zero-high fast path. -/
+def qword (high low divisor : Reference.Word) : Reference.Word × Reference.Word :=
+  if high = 0 then (low.udiv divisor, low.umod divisor)
+  else run 64 (0, high) low divisor
+
+theorem qword_matches (high low divisor : Reference.Word)
+    (initial : high.toNat < divisor.toNat) :
+    let result := qword high low divisor
+    (result.1.toNat, result.2.toNat) =
+      SignedArithmetic.quotRem .w64 high.toNat low.toNat divisor.toNat := by
+  by_cases zero : high = 0
+  · subst high
+    simp [qword, SignedArithmetic.quotRem, BitVec.toNat_udiv, BitVec.toNat_umod]
+  · have numeric : high.toNat ≠ 0 := by
+      intro eq
+      apply zero
+      apply BitVec.eq_of_toNat_eq
+      exact eq
+    simp only [qword, zero, ↓reduceIte, SignedArithmetic.quotRem, numeric]
+    exact run_matches 64 high low divisor (by decide) initial low.isLt
+
+/-- The two source fault sites compose the word loop with the signed magnitude
+contract, for either sign and every word, before any architectural write. -/
+def guardedQword (negative : Bool) (high low divisor : Reference.Word) :
+    Option (Nat × Nat) :=
+  if divisor = 0 ∨ divisor.toNat ≤ high.toNat then none else
+    let result := qword high low divisor
+    if SignedArithmetic.limit .w64 negative < result.1.toNat then none
+    else some (result.1.toNat, result.2.toNat)
+
+theorem guarded_qword_matches (negative : Bool) (high low divisor : Reference.Word) :
+    guardedQword negative high low divisor =
+      SignedArithmetic.guarded .w64 negative high.toNat low.toNat divisor.toNat := by
+  have zero : divisor = 0 ↔ divisor.toNat = 0 := by
+    constructor
+    · intro h; simp [h]
+    · intro h; apply BitVec.eq_of_toNat_eq; exact h
+  have fields : (divisor = 0 ∨ divisor.toNat ≤ high.toNat) ↔
+      (divisor.toNat = 0 ∨ divisor.toNat ≤ high.toNat) := or_congr zero Iff.rfl
+  by_cases early : divisor.toNat = 0 ∨ divisor.toNat ≤ high.toNat
+  · simp only [guardedQword, if_pos (fields.mpr early),
+      SignedArithmetic.guarded, if_pos early]
+  · have initial : high.toNat < divisor.toNat := by omega
+    have result := qword_matches high low divisor initial
+    have quotient := congrArg Prod.fst result
+    have remainder := congrArg Prod.snd result
+    dsimp only at quotient remainder
+    simp only [guardedQword, if_neg (mt fields.mp early), SignedArithmetic.guarded,
+      if_neg early, quotient, remainder]
+
+/-- The captured signed qword magnitudes now consume the concrete word loop
+and its native fast path before the established state/refinement laws. -/
+theorem source_qword_outcome (s : Reference.X86.State) (operand : Reference.Word) :
+    let limbs := KProgFormal.X86SignedDivision.sourceMagnitudeLimbs
+      (X86Scalar.handlerWidth .w64) (Capture.highWord .w64 s) (s.gpr 0)
+    guardedQword (Bool.xor (Capture.sourceNegative .w64 (Capture.highWord .w64 s))
+        (Capture.sourceNegative .w64 operand)) limbs.1 limbs.2
+        (Capture.divisorMagnitude .w64 operand) = SourceState.outcome .w64 s operand := by
+  exact guarded_qword_matches _ _ _ _
+
+end KProgFormal.Refinement.X86Divide.RestoringLoop

@@ -6176,3 +6176,15 @@ XDP RSP cases after the manual fixture supplies the existing ENTRY_XDP context
 identity. Full source28883 ended exit2 at Makefile213; its original inputs,
 log and CPU are archived. Next sole full source is `099a096fb81c9143663db0bf256eae35400be26a`, incorporating
 these proofs and that fixture; actual terminal receives a separate receipt.
+
+### DIV word restoring-loop composition
+
+The existing `X86Divide.RestoringLoop` module section proves the source-shaped
+word update and descending bit63-to-bit0 loop, its saved carry, bounded quotient
+and remainder invariants, all64 rounds and exact128-bit quotient/remainder.
+The native word zero-high fast path and both signed fault sites compose the
+captured qword magnitudes into `SourceState.outcome`. The
+[loop receipt](div-restoring-loop.log.gz) records the actual dependency compiles
+and axiom audit (all0, sorryAx0, nine inherited executable-reduction dependencies); [the unified TODO](../../docs/todo.md) tracks completion and
+the C-source extraction, compiled-B and physical/ABI interfaces. The current
+complete C-model total remains70/75 and compiled scalar families remain13/75.

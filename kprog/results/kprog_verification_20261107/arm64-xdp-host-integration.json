@@ -20868,6 +20868,103 @@
     },
     "vendor_epoch": "caa25e0b72746fef7ea01497ece7db57187f132c"
   },
+  "div_restoring_word_loop": {
+    "archive": "kprog/results/kprog_verification_20261107/div-restoring-loop.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 70,
+    "remaining_interfaces": [
+      "Actual signed C source and loop extraction correspondence",
+      "Per-token compiled-B transport",
+      "Physical memory/entry/ABI transport"
+    ],
+    "sole_full_source": "099a096fb81c9143663db0bf256eae35400be26a",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.carry_comparison\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.trial_value\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.advance_remainder\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.advance_quotient\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.run_last\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.run_matches\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.run64_quot_rem\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.qword_matches\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.guarded_qword_matches\n#print axioms KProgFormal.Refinement.X86Divide.RestoringLoop.source_qword_outcome\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-restoring-loop/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-restoring-loop/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "8844f428273d2a318b818ca44692625fb82c8dbd305c8adbde2fae0b0d568577"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-restoring-loop/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "source_sha256": "e38f465469282b4af6094a1e640e0eb35028731ef2093eba0c933184b5b6bf15"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-restoring-loop/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Dispatcher",
+          "source_sha256": "9a4a1428f4f3da1694e7db8d05676f042043228b9f193d82943949001d12448b"
+        }
+      ],
+      "laws": [
+        "carry_comparison",
+        "trial_value",
+        "advance_remainder",
+        "advance_quotient",
+        "run_last",
+        "run_matches",
+        "run64_quot_rem",
+        "qword_matches",
+        "guarded_qword_matches",
+        "source_qword_outcome"
+      ],
+      "reduction_bridge": 9,
+      "scope": "Universal exact word-sized restoring-loop recurrence, source descending count and saved carry, all fitting high:low/divisor inputs. Includes zero-high unsigned word fast path, signed early and range faults, captured qword outcome composition. Runtime admission predicates added0.",
+      "sorryAx": 0,
+      "source": {
+        "loop": "x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)\n{\n    struct x86_sim_divmod64 result = {0, high};\n#ifdef __clang__\n#pragma unroll\n#endif\n    for (int bit = 63; bit >= 0; --bit) {\n        __u64 carry = result.remainder >> 63;\n        result.remainder = (result.remainder << 1) | ((low >> bit) & 1ULL);\n        result.quotient <<= 1;\n        if (carry || result.remainder >= divisor) {\n            result.remainder -= divisor;\n            result.quotient |= 1ULL;\n        }\n    }\n    return result;\n}",
+        "loop_sha256": "a27006c98184d419c869bdec88280bf1fa85ef3416dbe88aeaa5ec6f6515c29c",
+        "path": "kprog/x86/x86_sim_local_bpf.h",
+        "sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891",
+        "source_correspondence": "C-to-Lean source extraction and compiler/physical ABI remain explicit interfaces"
+      }
+    },
+    "todo": "kprog/docs/todo.md"
+  },
   "divide_admission_retirement": {
     "archive_compressed_prefix_bytes": 89165612,
     "archive_compressed_prefix_sha256": "afdb8e96a6d35921215c99e742d426ba6fb2317819e9979a2715132d53281397",
