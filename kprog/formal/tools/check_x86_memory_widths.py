@@ -39,6 +39,9 @@ def accesses(instructions, fixed_displacement=None):
             constants[dst] = immediate
         elif code == 0x0F and registers[dst] is not None and old_src is not None:
             registers[dst] += old_src
+        elif code == 0x0F and old_dst is not None and registers[src] is not None:
+            # ADD64 also permits the constant destination plus guest pointer.
+            registers[dst] = old_dst + registers[src]
         elif code in (0x07, 0x17):
             if registers[dst] is not None:
                 registers[dst] += immediate if code == 0x07 else -immediate

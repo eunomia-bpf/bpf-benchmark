@@ -6665,3 +6665,24 @@ data/code-address, C extraction/union and physical/compiler transport remain
 explicit generic interfaces independent of B forwarding and callee storage.
 C's original-ABI ISA48 load-only findings remain linked in the shared TODO for
 physical/model diagnosis with the matching candidate kernel/header profile.
+
+### Commuted ADD64 address observation and full-check repair
+
+The full check of exact source99b11c9d9 exited2 in the existing rotate bytecode
+observer. The actual byte artifact reads at r1+3, computes r3=3; r3+=r1, then
+writes through r3. Both memory events address guest+3 at the expected width.
+The observer tracked pointer-DST plus constant-SRC; its ADD64 transfer now also
+tracks constant-DST plus pointer-SRC. Every address/width/kind/multiplicity,
+host result/frame/flags and bad-offset assertion remains in place. Production
+simulator, native producer and admission predicates retain their definitions.
+
+On the exact frozen99b fixture sources with only the updated observer function,
+all504 encoded rotate handlers,17640 register/CL/flags/RMW results and40 rendered
+BPF artifacts pass. The existing ten generic plus twenty fixed loads, three
+bad-displacement rejections and twelve actual MOVX width cases also pass. All623
+exported fixture-source hashes remain equal to their committed bytes. The
+[observer repair and full failure archive](rotate-observer.log.gz) retains the
+original generated C/object/disassembly, first observer failure, fixed transfer,
+complete suite outputs, and the full make-check log/CPU/exit plus1289 source
+hashes verified against Git. The earlier full2ad receipt remains its actual0
+epoch; the combined later source proceeds through the same full entry point.

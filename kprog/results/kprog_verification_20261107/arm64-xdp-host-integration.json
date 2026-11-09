@@ -78445,5 +78445,46 @@
       "source-Arm64Logic.lean.txt": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
     },
     "scope": "SixANDS/BICS/TST ops andprior34numeric/sixsource branches; actualoperandroles/materialization/immediate-modifier/generatedAND-BIC value+NZCV/widthtagwrite orcompareframe. Allaliases/XZR/nativeWXshift/omittedamount/unusedbytesincl255/unusedIMM; fullarchitecture andotherflagbits/events/fault/PC4. Three productiondispatcher equalities andnumeric40/source6 emissionstep. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
+  },
+  "full_make_check_99b11c9d9_failure": {
+    "actual_exit": 2,
+    "committed_source": "99b11c9d945c8bc81a6e57279f2da3a94333332a",
+    "verified_committed_source_count": 1289,
+    "every_source_sha256_verified_against_git": true,
+    "temporary_export_retired": true,
+    "archive_file": "kprog/results/kprog_verification_20261107/rotate-observer.log.gz",
+    "scope": "Actual full failure at semantic BPF address observer: compiler commuted constant-plus-pointer ADD64. Original full log/CPU/source manifest/exit retained; observer repair is the subsequent source change."
+  },
+  "bpf_commuted_add64_observer_repair": {
+    "check": {
+      "exit": 0,
+      "observer_sha256": "8f32f8f5936fdbab15085348e078deff7a63455ee13a7fc5bb9fbc5bd6422b90",
+      "readonly_source": "99b11c9d945c8bc81a6e57279f2da3a94333332a",
+      "readonly_files": 623,
+      "memory_widths": "x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements, three bad-offset rejections and twelve actual MOVX handler access widths OK",
+      "rotate": "x86 classic rotates: 504 encoded handlers, 17640 register/CL/flag/RMW results, 40 rendered BPF artifacts PASS",
+      "scope": "Only canonical semantic ADD64 observer changed; every prior original suite assertion and copied source retained."
+    },
+    "archive": "rotate-observer.log.gz",
+    "instructions": [
+      "read [r1+3]",
+      "r3=3",
+      "r3+=r1",
+      "write [r3+0]"
+    ],
+    "expected_events": [
+      [
+        "read",
+        3,
+        1
+      ],
+      [
+        "write",
+        3,
+        1
+      ]
+    ],
+    "change": "Existing ADD64 affine observer now tracks either pointer+constant operand order.",
+    "scope": "Same original suites/assertions and exact99b frozen fixture sources, updated canonical observer only. Existing production/ISA/admission definitions retained."
   }
 }

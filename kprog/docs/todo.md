@@ -97,6 +97,8 @@
 - [x] **V** ARM raw ORN_REG：物化SRC/SRC2、实际modifier/amount、四类native shift与omitted modifier任意amount、width/tag写回、全部别名/XZR和unused字节含255；production ORN dispatcher、32操作raw step以及保留六类源分支的统一emission step；新增12条及前91条审计/模块/root通过（本提交，raw32/74）。
 - [x] **V** ARM raw CCMP_IMM/CCMP_REG：DST/SRC物化、输入NZCV、实际条件/比较/fallback low4、完整rawGPR/tag/data frame与NZCV外flag位、native IMM5/WX/NV归一化、unused字段含255和任意IMM；production dispatcher、34数值操作step与六类源分支统一emission step，新增19条及前103条审计/模块/root通过（本提交，raw34/74）。
 - [x] **V** ARM raw ANDS_IMM/ANDS_REG/BICS_REG/TST_IMM/TST_REG/TST_BIC_REG：实际操作数角色/物化、immediate/modifier、AND/BIC result/NZCV、scalar写回或完整TST raw/tag frame、native WX/shift与omitted amount、unused字段含255/任意IMM；production dispatcher、40数值step与六类源分支emission step，新增14条及前122条审计/模块/root通过（本提交，raw40/74）。
+- [x] **V** 完整检查99b的ROR字节码观察器修复：实际r3=3;r3+=r1交换加数顺序，增加既有ADD64仿射传播的常数DST/指针SRC形式；全部原有断言保留，504 handler/17640结果/40 BPF artifact及内存宽度/MOVX/坏偏移原套件通过；原full exit2与1289 Git源SHA和CPU/log归档（本提交）。
+- [ ] **V** raw CCMP/logical flags（40数值操作+6源分支）与交换ADD64观察器合并后的完整make check；保留既有增量cache与精确源/实际exit。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
