@@ -128,6 +128,8 @@ def collect_layout(insns, targets, decode):
         incoming = states[context, addr]
         insn = by_addr[addr]
         op, args = insn.mnemonic, insn.operands
+        if op == "b" and decode.is_kfunc_symbol(insn.reloc_symbol):
+            op = "br"
         where = f'0x{addr:x}: {insn.raw}'
         bits, aliases = list(incoming.defined), list(incoming.aliases)
         opaque, pointers = dict(incoming.opaque), dict(incoming.pointers)
@@ -344,10 +346,10 @@ def collect_layout(insns, targets, decode):
             stack_max = max(stack_max, aliases[31])
         state = State(tuple(bits), tuple(aliases), flags, opaque, pointers, tuple(constants), tuple(ghost), frozenset(ghost_memory),tuple(maxima))
         next_pc = following.get(addr)
-        if op in {'bl','blr'} or (op == 'br' and any(k == 'scalar' for k,v in targets.get(addr,()))):
+        if op in {'bl','blr'} or (op == 'br' and (decode.is_kfunc_symbol(insn.reloc_symbol) or any(k == 'scalar' for k,v in targets.get(addr,())))):
             choices = targets.get(addr, ())
             names = [helper_idents()[value] for kind,value in choices if kind == 'scalar']
-            if decode.is_helper_symbol(insn.reloc_symbol): names.append(insn.reloc_symbol)
+            if decode.is_helper_symbol(insn.reloc_symbol) or decode.is_kfunc_symbol(insn.reloc_symbol): names.append(insn.reloc_symbol)
             if insn.reloc_symbol in {'memcpy','memset'}: names.append(insn.reloc_symbol)
             if insn.reloc_symbol and not names:
                 raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')
@@ -440,7 +442,9 @@ def collect_layout(insns, targets, decode):
                 edge = context, next_pc
                 if edge not in returns.setdefault(child,set()):
                     returns[child].add(edge)
-                    queue.extend(key for key in states if key[0]==child and by_addr[key[1]].mnemonic=='ret')
+                    queue.extend(key for key in states if key[0]==child and
+                        (by_addr[key[1]].mnemonic=='ret' or
+                         (by_addr[key[1]].mnemonic=='b' and decode.is_kfunc_symbol(by_addr[key[1]].reloc_symbol))))
                 push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers,state.constants,tuple(ghost),frozenset(ghost_memory),tuple(maxima)))
         elif op == 'ret':
             if context:

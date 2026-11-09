@@ -215,6 +215,18 @@ def load_benches(config_path: Path) -> list[Bench]:
     ]
 
 
+KFUNC_VOID_NAMES = frozenset({
+    'bpf_preempt_disable',
+    'bpf_preempt_enable',
+    'bpf_rcu_read_lock',
+    'bpf_rcu_read_unlock',
+})
+
+
+def is_kfunc_symbol(symbol: str | None) -> bool:
+    return symbol in KFUNC_VOID_NAMES
+
+
 def is_helper_symbol(symbol: str | None) -> bool:
     return bool(symbol and symbol in HELPER_IDENTS.values())
 
@@ -741,6 +753,8 @@ def indirect_targets(insns: list[NativeInsn]) -> dict[int, frozenset[tuple[str, 
                 callee = list(incoming)
                 callee[30] = frozenset({("code", next_addr[addr])})
                 push(branch_target(args[0]), tuple(callee))
+        if op == "b" and is_kfunc_symbol(insn.reloc_symbol):
+            continue
         if op == "b":
             push(branch_target(args[0]), tuple(outgoing))
         elif op.startswith("b.") or op in {"cbz", "cbnz", "tbz", "tbnz"}:
@@ -811,7 +825,8 @@ def return_targets(insns, indirect):
                    if i.mnemonic == 'blr' else set())
         for target in targets:
             callers.setdefault(target, set()).add(following[i.addr])
-    returns = {i.addr: set() for i in insns if i.mnemonic in {'ret', 'br'}}
+    returns = {i.addr: set() for i in insns if i.mnemonic in {'ret', 'br'}
+               or (i.mnemonic == 'b' and is_kfunc_symbol(i.reloc_symbol))}
     for entry, continuations in callers.items():
         pending, seen = [entry], set()
         while pending:
@@ -821,9 +836,10 @@ def return_targets(insns, indirect):
             seen.add(addr)
             i = by_addr[addr]
             op = i.mnemonic
-            if op in {'ret', 'br'}:
+            external_tail = op == 'b' and is_kfunc_symbol(i.reloc_symbol)
+            if op in {'ret', 'br'} or external_tail:
                 returns.setdefault(addr, set()).update(continuations)
-            if op == 'ret':
+            if op == 'ret' or external_tail:
                 continue
             if op == 'br':
                 pending.extend(v for k, v in indirect.get(addr, ()) if k == 'code')
@@ -874,6 +890,10 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         target = branch_target(insn.operands[0])
         lines.append(f"\tARM64_SIM_A64_JCC({COND[op.split('.', 1)[1]]}, 0x{insn.addr:x}, 0x{target:x}, {label(target)});")
         return
+    if op == "b" and is_kfunc_symbol(insn.reloc_symbol):
+        lines.append(f"\tARM64_SIM_KFUNC_VOID_CALL({insn.reloc_symbol});")
+        lines.append(f"\tARM64_SIM_A64_RET_TO(ARM64_X30, ARM64_SIM_RET_CASES_{insn.addr:x});")
+        return
     if op == "b":
         target = branch_target(insn.operands[0])
         lines.append(f"\tARM64_SIM_A64_JMP(0x{insn.addr:x}, 0x{target:x}, {label(target)});")
@@ -894,6 +914,10 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         if insn.reloc_symbol in {"memcpy", "memset"}:
             lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
             lines.append(f"\tARM64_SIM_LIBC_{insn.reloc_symbol.upper()}();")
+            return
+        if is_kfunc_symbol(insn.reloc_symbol):
+            lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
+            lines.append(f"\tARM64_SIM_KFUNC_VOID_CALL({insn.reloc_symbol});")
             return
         if is_helper_symbol(insn.reloc_symbol):
             lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
@@ -1018,6 +1042,8 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     if prelude:
         lines.append(prelude.rstrip())
         lines.append("")
+    for symbol in sorted({i.reloc_symbol for i in all_insns if is_kfunc_symbol(i.reloc_symbol)}):
+        lines.append(f"extern void {symbol}(void) __ksym;")
     for symbol in sorted(trusted_names & referenced):
         ident = trusted_idents[symbol]
         alias = '' if ident == symbol else ' __asm__(' + json.dumps(symbol) + ')'
@@ -1054,6 +1080,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         if insn.reloc_symbol
         and insn.reloc_symbol not in rodata_idents
         and not is_helper_symbol(insn.reloc_symbol)
+        and not is_kfunc_symbol(insn.reloc_symbol)
         and insn.reloc_symbol not in {"memcpy", "memset"}
         and insn.reloc_symbol not in source_pointers
     })

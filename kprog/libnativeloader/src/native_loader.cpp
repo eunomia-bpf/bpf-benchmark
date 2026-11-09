@@ -442,6 +442,10 @@ constexpr SupportedHelper kSupportedHelpers[] = {
 };
 
 constexpr const char *kRuntimeCallSymbols[] = {
+    "bpf_preempt_disable",
+    "bpf_preempt_enable",
+    "bpf_rcu_read_lock",
+    "bpf_rcu_read_unlock",
     "memset",
     "memcpy",
     "memmove",

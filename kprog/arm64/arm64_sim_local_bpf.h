@@ -1838,6 +1838,14 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
         ARM64_SIM_L_HELPER_CLOBBERS(); \
     } while (0)
 
+/* Void kfuncs preserve the kernel operation and leave the ABI result unspecified. */
+#define ARM64_SIM_KFUNC_VOID_CALL(FUNCTION) \
+    do { \
+        FUNCTION(); \
+        ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_UNSPECIFIED(), ARM64_WIDTH_64); \
+        ARM64_SIM_L_HELPER_CLOBBERS(); \
+    } while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_map_lookup_elem() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_map_lookup_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
 
