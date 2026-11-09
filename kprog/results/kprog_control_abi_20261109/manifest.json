@@ -1,0 +1,18 @@
+{
+  "lane": "S13",
+  "source_baseline": "2ec16637595f2d8cf05f1722cc68be8b5322da1f",
+  "universal_theorems": 39,
+  "focused_modules": 0,
+  "independent_import_axiom_audit": 0,
+  "independent_replay": 0,
+  "proof_modules": {
+    "kprog/formal/KProgFormal/ControlABI.lean": "10b3809433919de1459b88bb6bf3d8327380aaa9f3d971e87d1b22c610088d73",
+    "kprog/tv/ControlABIComposition.lean": "d34350665fc7257b7f52bd5a9784b05e83e911777e9ae5be76e3c9069e2e3628"
+  },
+  "coverage_status": "partial-universal-component",
+  "requested_promotion": "proved-conditional",
+  "remaining_interface": "Actual universal compiler CFG/private-frame, typed kernel effects and full physical JIT/transfer source-to-semantics correspondence",
+  "full_check_owner": "V",
+  "production_changes": 0,
+  "per_program_artifacts": 0
+}

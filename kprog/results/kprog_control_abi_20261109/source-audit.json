@@ -1,0 +1,496 @@
+{
+  "time_utc": "2026-11-09T06:37:54.617502+00:00",
+  "repository_head": "cbd1b10971c0f65337e7e0858acd0c53ac47778f",
+  "kernel_head": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "source_status": "Source snapshots and anchors for explicit implementation-correspondence premises",
+  "S7_publications": [
+    "48eb036f5",
+    "98013a7f6"
+  ],
+  "S11_publications": {
+    "context": "901194c0c",
+    "tail_equations": "COORDINATION notice 2026-11-09T06:30:09Z; kind10=-16-depth, kind11=depth; depth=private-stack?0:round_up(stack_depth,8)"
+  },
+  "sources": [
+    {
+      "path": "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c",
+      "sha256": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1",
+      "anchors": [
+        {
+          "line": 507,
+          "anchor": "static void emit_prologue(",
+          "context": [
+            " */",
+            "static void emit_prologue(u8 **pprog, u8 *ip, u32 stack_depth, bool ebpf_from_cbpf,",
+            "\t\t\t  bool tail_call_reachable, bool is_subprog,",
+            "\t\t\t  bool is_exception_cb)",
+            "{",
+            "\tu8 *prog = *pprog;",
+            "",
+            "\tif (is_subprog) {",
+            "\t\temit_cfi(&prog, ip, cfi_bpf_subprog_hash, 5);",
+            "\t} else {",
+            "\t\temit_cfi(&prog, ip, cfi_bpf_hash, 1);"
+          ]
+        },
+        {
+          "line": 804,
+          "anchor": "static void emit_bpf_tail_call_indirect(",
+          "context": [
+            " */",
+            "static void emit_bpf_tail_call_indirect(struct bpf_prog *bpf_prog,",
+            "\t\t\t\t\tu8 **pprog, bool *callee_regs_used,",
+            "\t\t\t\t\tu32 stack_depth, u8 *ip,",
+            "\t\t\t\t\tstruct jit_context *ctx)",
+            "{",
+            "\tint tcc_ptr_off = BPF_TAIL_CALL_CNT_PTR_STACK_OFF(stack_depth);",
+            "\tu8 *prog = *pprog, *start = *pprog;",
+            "\tint offset;",
+            "",
+            "\t/*"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c",
+      "sha256": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7",
+      "anchors": [
+        {
+          "line": 566,
+          "anchor": "static int build_prologue(",
+          "context": [
+            "",
+            "static int build_prologue(struct jit_ctx *ctx, bool ebpf_from_cbpf)",
+            "{",
+            "\tconst struct bpf_prog *prog = ctx->prog;",
+            "\tconst bool is_main_prog = !bpf_is_subprog(prog);",
+            "\tconst u8 fp = bpf2a64[BPF_REG_FP];",
+            "\tconst u8 arena_vm_base = bpf2a64[ARENA_VM_START];",
+            "\tconst u8 priv_sp = bpf2a64[PRIVATE_SP];",
+            "\tvoid __percpu *priv_stack_ptr;",
+            "\tint cur_offset;",
+            "\tint err;"
+          ]
+        },
+        {
+          "line": 680,
+          "anchor": "static int emit_bpf_tail_call(",
+          "context": [
+            "",
+            "static int emit_bpf_tail_call(struct jit_ctx *ctx)",
+            "{",
+            "\t/* bpf_tail_call(void *prog_ctx, struct bpf_array *array, u64 index) */",
+            "\tconst u8 r2 = bpf2a64[BPF_REG_2];",
+            "\tconst u8 r3 = bpf2a64[BPF_REG_3];",
+            "",
+            "\tconst u8 tmp = bpf2a64[TMP_REG_1];",
+            "\tconst u8 prg = bpf2a64[TMP_REG_2];",
+            "\tconst u8 tcc = bpf2a64[TMP_REG_3];",
+            "\tconst u8 ptr = bpf2a64[TCCNT_PTR];"
+          ]
+        },
+        {
+          "line": 1090,
+          "anchor": "static void build_epilogue(",
+          "context": [
+            "",
+            "static void build_epilogue(struct jit_ctx *ctx, bool was_classic)",
+            "{",
+            "\tconst u8 r0 = bpf2a64[BPF_REG_0];",
+            "\tconst u8 ptr = bpf2a64[TCCNT_PTR];",
+            "",
+            "\t/* We're done with BPF stack */",
+            "\tif (ctx->stack_size && !ctx->priv_sp_used)",
+            "\t\temit(A64_ADD_I(1, A64_SP, A64_SP, ctx->stack_size), ctx);",
+            "",
+            "\tpop_callee_regs(ctx);"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "vendor/linux-framework/kernel/bpf/arraymap.c",
+      "sha256": "5db997dc9c39b80d6f84ec6879048f00c54eb1f3f4faa83131d6abecc890d517",
+      "anchors": [
+        {
+          "line": 996,
+          "anchor": "static void prog_fd_array_put_ptr(",
+          "context": [
+            "",
+            "static void prog_fd_array_put_ptr(struct bpf_map *map, void *ptr, bool need_defer)",
+            "{",
+            "\tstruct bpf_prog *prog = ptr;",
+            "",
+            "\tmutex_lock(&prog->aux->ext_mutex);",
+            "\tprog->aux->prog_array_member_cnt--;",
+            "\tmutex_unlock(&prog->aux->ext_mutex);",
+            "\t/* bpf_prog is freed after one RCU or tasks trace grace period */",
+            "\tbpf_prog_put(prog);",
+            "}"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "vendor/linux-framework/kernel/bpf/syscall.c",
+      "sha256": "1f36abd1ecdc31bf58a1e743d6684a8bbe513bc188f47562c4578d38e279fa26",
+      "anchors": [
+        {
+          "line": 2376,
+          "anchor": "static void __bpf_prog_put_noref(",
+          "context": [
+            "",
+            "static void __bpf_prog_put_noref(struct bpf_prog *prog, bool deferred)",
+            "{",
+            "\tbpf_prog_kallsyms_del_all(prog);",
+            "\tbtf_put(prog->aux->btf);",
+            "\tmodule_put(prog->aux->mod);",
+            "\tkvfree(prog->aux->jited_linfo);",
+            "\tkvfree(prog->aux->linfo);",
+            "\tkfree(prog->aux->kfunc_tab);",
+            "\tkfree(prog->aux->ctx_arg_info);",
+            "\tif (prog->aux->attach_btf)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "vendor/linux-framework/kernel/trace/bpf_trace.c",
+      "sha256": "c7d863136047a05744316d41020fc0c00843ae96e2d44031b00c792a7b8ba2c9",
+      "anchors": [
+        {
+          "line": 3097,
+          "anchor": "rcu_read_lock_trace();",
+          "context": [
+            "\tif (sleepable)",
+            "\t\trcu_read_lock_trace();",
+            "\telse",
+            "\t\trcu_read_lock();",
+            "",
+            "\tmigrate_disable();",
+            "",
+            "\told_run_ctx = bpf_set_run_ctx(&run_ctx.session_ctx.run_ctx);",
+            "\terr = bpf_prog_run(link->link.prog, regs);",
+            "\tbpf_reset_run_ctx(old_run_ctx);",
+            ""
+          ]
+        },
+        {
+          "line": 3110,
+          "anchor": "rcu_read_unlock_trace();",
+          "context": [
+            "\tif (sleepable)",
+            "\t\trcu_read_unlock_trace();",
+            "\telse",
+            "\t\trcu_read_unlock();",
+            "\treturn err;",
+            "}",
+            "",
+            "static bool",
+            "uprobe_multi_link_filter(struct uprobe_consumer *con, struct mm_struct *mm)",
+            "{",
+            "\tstruct bpf_uprobe *uprobe;"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kinsn/module/include/native_lab_trusted.h",
+      "sha256": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+      "anchors": [
+        {
+          "line": 47,
+          "anchor": "static void native_lab_capsule_release(",
+          "context": [
+            "",
+            "static void native_lab_capsule_release(struct kref *ref)",
+            "{",
+            "\tstruct native_lab_trusted_capsule *capsule = container_of(ref,",
+            "\t\tstruct native_lab_trusted_capsule, refs);",
+            "\tu32 i;",
+            "\tif (capsule->release_chunks)",
+            "\t\tcapsule->release_chunks(capsule);",
+            "\tfor (i = 0; i < capsule->resource_count; i++)",
+            "\t\tbpf_map_put(capsule->resource_maps[i]);",
+            "\tkfree(capsule->resource_maps);"
+          ]
+        },
+        {
+          "line": 88,
+          "anchor": "static int native_lab_retain_program(",
+          "context": [
+            " * the callback module reference until after it releases the capsule. */",
+            "static int native_lab_retain_program(struct native_lab_trusted_capsule *capsule,",
+            "\t\tconst struct bpf_prog *prog)",
+            "{",
+            "\tif (prog->aux->native_trusted_request)",
+            "\t\treturn 0;",
+            "\tif (!try_module_get(THIS_MODULE))",
+            "\t\treturn -ENODEV;",
+            "\tkref_get(&capsule->refs);",
+            "\tprog->aux->native_trusted_request = capsule;",
+            "\tprog->aux->native_trusted_put = native_lab_trusted_put;"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kinsn/module/x86/bpf_x86_native_lab.c",
+      "sha256": "12d864bc4fe4a3e65c79e041ef7cc489817ca27cdf89b40a3b7a27b6d3288169",
+      "anchors": [
+        {
+          "line": 221,
+          "anchor": "case NATIVE_LAB_RELOC_X86_TAIL_COUNT:",
+          "context": [
+            "",
+            "\t\t\t\tcase NATIVE_LAB_RELOC_X86_TAIL_COUNT:",
+            "\t\t\t\tcase NATIVE_LAB_RELOC_X86_TAIL_STACK: {",
+            "\t\t\t\t\tu32 depth = prog->aux->priv_stack_ptr ? 0 : round_up(prog->aux->stack_depth, 8);",
+            "\t\t\t\t\ts32 value = r->kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT ? -16 - depth : depth;",
+            "",
+            "\t\t\t\t\tmemcpy(emit_at + r->offset, &value, sizeof(value));",
+            "\t\t\t\t\tbreak;",
+            "\t\t\t\t}",
+            "",
+            "\t\t\t\tcase NATIVE_LAB_RELOC_HELPER_CALL_REL32: {"
+          ]
+        },
+        {
+          "line": 223,
+          "anchor": "u32 depth = prog->aux->priv_stack_ptr ? 0 : round_up(prog->aux->stack_depth, 8);",
+          "context": [
+            "\t\t\t\tcase NATIVE_LAB_RELOC_X86_TAIL_STACK: {",
+            "\t\t\t\t\tu32 depth = prog->aux->priv_stack_ptr ? 0 : round_up(prog->aux->stack_depth, 8);",
+            "\t\t\t\t\ts32 value = r->kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT ? -16 - depth : depth;",
+            "",
+            "\t\t\t\t\tmemcpy(emit_at + r->offset, &value, sizeof(value));",
+            "\t\t\t\t\tbreak;",
+            "\t\t\t\t}",
+            "",
+            "\t\t\t\tcase NATIVE_LAB_RELOC_HELPER_CALL_REL32: {",
+            "\t\t\t\t\tu64 slot_va;",
+            "\t\t\t\t\tu64 rip_after;"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "sha256": "e8719bb67dc3fc53a20fa34504c7c342ee2b1099ed4ee3c1364db4c51d92afa3",
+      "anchors": [
+        {
+          "line": 4131,
+          "anchor": "fn build_x86_tail_call_inline(",
+          "context": [
+            "",
+            "fn build_x86_tail_call_inline(",
+            "    helper_addrs: &HashMap<String, u64>,",
+            "    callee_saved_mask: u8,",
+            "    native_cleanup: &[u8],",
+            "    saved_bpf_rbp_rsp_offset: Option<i32>,",
+            "    bpf_rbp_is_live: bool,",
+            ") -> Result<(Vec<Instruction>, usize, usize)> {",
+            "    const MAX_TAIL_CALL_CNT: u8 = 33;",
+            "    let map_max_entries = x86_required_u32_helper_arg(",
+            "        helper_addrs,"
+          ]
+        },
+        {
+          "line": 4192,
+          "anchor": "bytes.extend_from_slice(&[0x48, 0x81, 0xC4]);",
+          "context": [
+            "    bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt",
+            "    bytes.extend_from_slice(&[0x48, 0x81, 0xC4]); // add rsp, rounded JIT stack depth",
+            "    let stack_offset = bytes.len();",
+            "    bytes.extend_from_slice(&0u32.to_le_bytes());",
+            "    bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]",
+            "    bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());",
+            "    append_x86_add_rcx_imm(&mut bytes, tail_call_offset);",
+            "    bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx",
+            "",
+            "    let out = bytes.len();",
+            "    patch_x86_rel32(&mut bytes, jbe_out, out)?;"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kprog/libnativeloader/src/native_loader.cpp",
+      "sha256": "126bb39804c82edffbfaa6020ef4e69c9623bc77abd5327bb78226e3426b52ea",
+      "anchors": [
+        {
+          "line": 1877,
+          "anchor": "uint64_t helper_kernel_addr(int helper_id)",
+          "context": [
+            "",
+            "uint64_t helper_kernel_addr(int helper_id)",
+            "{",
+            "    const char *symbol = helper_symbol_for_id(helper_id);",
+            "    if (!symbol) {",
+            "        return 0;",
+            "    }",
+            "    return kallsyms_lookup(symbol);",
+            "}",
+            "",
+            "uint64_t required_kernel_symbol_addr(const char *symbol)"
+          ]
+        },
+        {
+          "line": 1985,
+          "anchor": "const char *helper_symbol_for_id(int helper_id)\n{",
+          "context": [
+            "",
+            "const char *helper_symbol_for_id(int helper_id)",
+            "{",
+            "    for (const auto &helper : kSupportedHelpers) {",
+            "        if (helper.id == helper_id) {",
+            "            return helper.symbol;",
+            "        }",
+            "    }",
+            "    return nullptr;",
+            "}",
+            ""
+          ]
+        },
+        {
+          "line": 1995,
+          "anchor": "HelperAlias helper_alias_for_call(",
+          "context": [
+            "",
+            "HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t expected_attach_type)",
+            "{",
+            "    if (helper_id == BPF_FUNC_get_func_ip) {",
+            "        const char *symbol = \"bpf_get_func_ip_tracing\";",
+            "        if (prog_type == BPF_PROG_TYPE_KPROBE) {",
+            "            if (expected_attach_type == BPF_TRACE_KPROBE_MULTI ||",
+            "                expected_attach_type == BPF_TRACE_KPROBE_SESSION)",
+            "                symbol = \"bpf_get_func_ip_kprobe_multi\";",
+            "            else if (expected_attach_type == BPF_TRACE_UPROBE_MULTI ||",
+            "                expected_attach_type == BPF_TRACE_UPROBE_SESSION)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kprog/trusted_compile.py",
+      "sha256": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
+      "anchors": [
+        {
+          "line": 32,
+          "anchor": "def compile_command(",
+          "context": [
+            "",
+            "def compile_command(source: Path, output: Path, arch: str, clang: str, arm64_sysroot: Path | None = None) -> list[str]:",
+            "    if arch == 'arm64' and arm64_sysroot is not None:",
+            "        return [clang, '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm',",
+            "                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',",
+            "                '--sysroot=' + str(arm64_sysroot),",
+            "                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),",
+            "                '-I', str(ROOT / 'vendor/libbpf/src'),",
+            "                '-I', str(arm64_sysroot / 'usr/include/aarch64-linux-gnu'),",
+            "                '-c', str(source), '-o', str(output)]",
+            "    return [clang, '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm',"
+          ]
+        },
+        {
+          "line": 50,
+          "anchor": "def execute(",
+          "context": [
+            "",
+            "def execute(job: dict, scope: Path, clang: str, arm64_sysroot: Path | None = None) -> dict:",
+            "    source, output, arch = Path(job['source']), Path(job['output']), job['arch']",
+            "    command = compile_command(source, output, arch, clang, arm64_sysroot)",
+            "    start = time.monotonic()",
+            "    with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:",
+            "        child = subprocess.Popen(command, stdout=stdout, stderr=stderr)",
+            "        _, status, usage = os.wait4(child.pid, 0)",
+            "        child.returncode = os.waitstatus_to_exitcode(status)",
+            "        stdout.seek(0)",
+            "        stderr.seek(0)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "sha256": "75d9196ad1f08bfdaa0460e9646b15b1b4ac8295e24012f13f7a0d9ea6ecc15c",
+      "anchors": [
+        {
+          "line": 3477,
+          "anchor": "__x86_rbx.ptr != __x86_entry_rbx",
+          "context": [
+            "\tdo {                                                               \\",
+            "        if (__x86_rbx_tag != X86_SIM_TAG_SCALAR || __x86_rbx.ptr != __x86_entry_rbx || \\",
+            "            __x86_rbp_tag != X86_SIM_TAG_SCALAR || __x86_rbp.ptr != __x86_entry_rbp || \\",
+            "            __x86_r12_tag != X86_SIM_TAG_SCALAR || __x86_r12.ptr != __x86_entry_r12 || \\",
+            "            __x86_r13_tag != X86_SIM_TAG_SCALAR || __x86_r13.ptr != __x86_entry_r13 || \\",
+            "            __x86_r14_tag != X86_SIM_TAG_SCALAR || __x86_r14.ptr != __x86_entry_r14 || \\",
+            "            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15 || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \\",
+            "\t\treturn (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \\",
+            "\t} while (0)",
+            "",
+            "#define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \\"
+          ]
+        },
+        {
+          "line": 3482,
+          "anchor": "__x86_r15.ptr != __x86_entry_r15",
+          "context": [
+            "            __x86_r14_tag != X86_SIM_TAG_SCALAR || __x86_r14.ptr != __x86_entry_r14 || \\",
+            "            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15 || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \\",
+            "\t\treturn (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \\",
+            "\t} while (0)",
+            "",
+            "#define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \\",
+            "\tdo {                                                               \\",
+            "\t\t__x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, -8);                \\",
+            "\t\tX86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64,\\",
+            "\t\t\t\t      (RETURN_ADDR));                     \\",
+            "\t\tgoto LABEL;                                               \\"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "sha256": "eac07f2c95d682b0e4485762ad6d50f26ce1c5e9bb3651bbedaa5d674c06814b",
+      "anchors": [
+        {
+          "line": 2269,
+          "anchor": "__a64_x19.x != __a64_entry_x19",
+          "context": [
+            "\tdo {                                                               \\",
+            "        if (__a64_x19_tag != ARM64_SIM_TAG_SCALAR || __a64_x19.x != __a64_entry_x19 || \\",
+            "            __a64_x20_tag != ARM64_SIM_TAG_SCALAR || __a64_x20.x != __a64_entry_x20 || \\",
+            "            __a64_x21_tag != ARM64_SIM_TAG_SCALAR || __a64_x21.x != __a64_entry_x21 || \\",
+            "            __a64_x22_tag != ARM64_SIM_TAG_SCALAR || __a64_x22.x != __a64_entry_x22 || \\",
+            "            __a64_x23_tag != ARM64_SIM_TAG_SCALAR || __a64_x23.x != __a64_entry_x23 || \\",
+            "            __a64_x24_tag != ARM64_SIM_TAG_SCALAR || __a64_x24.x != __a64_entry_x24 || \\",
+            "            __a64_x25_tag != ARM64_SIM_TAG_SCALAR || __a64_x25.x != __a64_entry_x25 || \\",
+            "            __a64_x26_tag != ARM64_SIM_TAG_SCALAR || __a64_x26.x != __a64_entry_x26 || \\",
+            "            __a64_x27_tag != ARM64_SIM_TAG_SCALAR || __a64_x27.x != __a64_entry_x27 || \\",
+            "            __a64_x28_tag != ARM64_SIM_TAG_SCALAR || __a64_x28.x != __a64_entry_x28 || \\"
+          ]
+        },
+        {
+          "line": 2279,
+          "anchor": "__a64_x29.x != __a64_entry_x29",
+          "context": [
+            "            __a64_x28_tag != ARM64_SIM_TAG_SCALAR || __a64_x28.x != __a64_entry_x28 || \\",
+            "            __a64_x29_tag != ARM64_SIM_TAG_SCALAR || __a64_x29.x != __a64_entry_x29 || __a64_sp != 0) ARM64_SIM_L_REJECT_PC(); \\",
+            "\t\treturn (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \\",
+            "\t} while (0)",
+            "",
+            "#define ARM64_SIM_A64_JMP(CURRENT, TARGET, LABEL)                           \\",
+            "\tdo {                                                               \\",
+            "\t\tgoto LABEL;                                                \\",
+            "\t} while (0)",
+            "",
+            "#define ARM64_SIM_A64_JCC_BACKWARD(COND, LABEL, ID)                         \\"
+          ]
+        }
+      ]
+    }
+  ]
+}
