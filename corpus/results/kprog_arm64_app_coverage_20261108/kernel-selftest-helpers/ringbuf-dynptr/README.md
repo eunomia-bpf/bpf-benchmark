@@ -1,0 +1,3 @@
+Generic ARM ringbuf dynptr helpers
+
+The model invokes existing kernel helper198 reserve,199 submit and200 discard with the actual AAPCS argument widths and pointer projection. Reservation writes the complete16byte opaque object on every kernel result; the existing shadow-tag transfer scalarizes the overwritten bytes. Release uses the paired kernel zero return and scalarizes its released object. Every original native input and annotation stays published. Existing identity/C-ABI/Lean controls and the complete original dynptr_fail family generation outcomes are in summary.json and inputs.tar.gz. Stock-verifier/native installation outcomes follow through the captured QEMU family replay. Runtime admission additions:0.
