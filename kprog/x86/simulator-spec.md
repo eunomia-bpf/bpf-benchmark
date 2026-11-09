@@ -339,3 +339,27 @@ An accepted artifact may be used for direct-native safety only if:
 
 If any item is missing, the result is an experiment result, not a direct-native
 safety proof.
+
+### REP STOS native string stores
+
+The native64-address, DF-clear ABI form of REP STOS emits one C-authored
+`X86_SIM_L_EXEC_REP_STOS` operation. Widths1/2/4/8 store the corresponding
+low bytes of RAX in forward element order using the original64-bit RCX.
+The operation advances RDI by count times width and writes RCX0; RAX, RSI,
+other registers and arithmetic flags retain their values. Every write uses
+the existing tagged-memory/lifetime store route. The loop follows the
+native count. Zero count performs zero memory writes.
+
+The mechanical decoder extracts width from the STOS memory operand and
+selects the native64-address form. Finite-target analysis preserves RSI
+across this instruction. The address-size32 fixture retains its prior
+generation outcome and stays in C's string-family coverage work. The
+DF-clear ABI is an explicit physical entry premise, shared with the current
+string-operation profile.
+
+[CPU and actual-application evidence](../../corpus/results/kprog_app_coverage_20261109/rep-stos/README.md)
+records GCC/Clang208896cases each, four emitted machine forms and the two
+actual archived Os inputs. Intel SDM Volume2 STOS/REP supplies the
+architectural operation reference; V owns its universal O1/O2/compiler
+composition. Actual stock-verifier/application runtime is recorded
+separately from generation and host observations.

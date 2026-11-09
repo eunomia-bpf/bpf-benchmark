@@ -1238,7 +1238,9 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         elif op == "cdqe":
             implicit = ["X86_RAX"]
         elif op == "rep":
-            implicit = ["X86_RSI", "X86_RDI", "X86_RCX"]
+            implicit = (["X86_RDI", "X86_RCX"] if args and
+                        args[0].startswith("stos ") else
+                        ["X86_RSI", "X86_RDI", "X86_RCX"])
         elif op in {"xchg", "xadd", "mulx"}:
             implicit = [canonical_reg(a) for a in args[:2]]
         elif op == "cmpxchg":
@@ -1361,6 +1363,16 @@ def annotated_fixed_count_ops(insns: list[NativeInsn]) -> list[NativeInsn]:
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
                 step_macro: str = "X86_SIM_RUN_OP",
                 rodata_idents: dict[str, str] | None = None) -> None:
+    if (insn.mnemonic == "rep" and len(insn.operands) == 2 and
+            insn.operands[0].startswith("stos ")):
+        width_bits = operand_width(insn.operands[0][len("stos "):])
+        if ("[rdi]" not in insn.operands[0] or
+                reg_info(insn.operands[1]) != ("X86_RAX", width_bits, 0)):
+            raise ValueError(f"unsupported REP STOS operand form: {insn.raw}")
+        width = WIDTH_CONST[width_bits]
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        lines.append(f"{indent}X86_SIM_L_EXEC_REP_STOS({width});")
+        return
     encoded = encode(insn, rodata_idents or {})
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     # These encodings embed the memory expression in IMM, so recovery

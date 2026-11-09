@@ -1,0 +1,89 @@
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -2113,6 +2113,26 @@
+ 			X86_SIM_L_WRITE_REG_WIDTH((AUX), __x86_l_high,    \
+ 						  __x86_l_width);        \
+ 	} while (0)
++
++/* REP STOS in the native ABI's clear-DF profile uses the full RCX count. */
++#define X86_SIM_L_EXEC_REP_STOS(WIDTH)                                    \
++    do {                                                                 \
++        __u8 __x86_stos_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);           \
++        __u64 __x86_stos_count = X86_SIM_L_READ_REG(X86_RCX);              \
++        __u64 __x86_stos_value = X86_SIM_L_READ_REG(X86_RAX);              \
++        void *__x86_stos_dst = X86_SIM_L_READ_REG_PTR(X86_RDI);            \
++        __u8 __x86_stos_tag = X86_SIM_L_REG_TAG(X86_RDI);                  \
++        for (__u64 __x86_stos_i = 0; __x86_stos_i < __x86_stos_count;       \
++             ++__x86_stos_i)                                             \
++            X86_SIM_L_STORE_ADDR_TAGGED(                                 \
++                KPROG_PTR_ADD64_BITS(__x86_stos_dst,                       \
++                    __x86_stos_i * __x86_stos_width),                     \
++                __x86_stos_width, __x86_stos_value, __x86_stos_tag);        \
++        X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,                              \
++            KPROG_PTR_ADD64_BITS(__x86_stos_dst,                           \
++                __x86_stos_count * __x86_stos_width), __x86_stos_tag);      \
++        X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0, X86_WIDTH_64);               \
++    } while (0)
+ 
+ #define X86_SIM_L_REP_MOVS_ONE(WIDTH, INDEX)                                \
+ 	do {                                                               \
+--- a/kprog/x86/micro-prog/generate_micro_sim_proofs.py
++++ b/kprog/x86/micro-prog/generate_micro_sim_proofs.py
+@@ -1238,7 +1238,9 @@
+         elif op == "cdqe":
+             implicit = ["X86_RAX"]
+         elif op == "rep":
+-            implicit = ["X86_RSI", "X86_RDI", "X86_RCX"]
++            implicit = (["X86_RDI", "X86_RCX"] if args and
++                        args[0].startswith("stos ") else
++                        ["X86_RSI", "X86_RDI", "X86_RCX"])
+         elif op in {"xchg", "xadd", "mulx"}:
+             implicit = [canonical_reg(a) for a in args[:2]]
+         elif op == "cmpxchg":
+@@ -1361,6 +1363,16 @@
+ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
+                 step_macro: str = "X86_SIM_RUN_OP",
+                 rodata_idents: dict[str, str] | None = None) -> None:
++    if (insn.mnemonic == "rep" and len(insn.operands) == 2 and
++            insn.operands[0].startswith("stos ")):
++        width_bits = operand_width(insn.operands[0][len("stos "):])
++        if ("[rdi]" not in insn.operands[0] or
++                reg_info(insn.operands[1]) != ("X86_RAX", width_bits, 0)):
++            raise ValueError(f"unsupported REP STOS operand form: {insn.raw}")
++        width = WIDTH_CONST[width_bits]
++        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
++        lines.append(f"{indent}X86_SIM_L_EXEC_REP_STOS({width});")
++        return
+     encoded = encode(insn, rodata_idents or {})
+     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+     # These encodings embed the memory expression in IMM, so recovery
+--- a/kprog/x86/simulator-spec.md
++++ b/kprog/x86/simulator-spec.md
+@@ -339,3 +339,27 @@
+ 
+ If any item is missing, the result is an experiment result, not a direct-native
+ safety proof.
++
++### REP STOS native string stores
++
++The native64-address, DF-clear ABI form of REP STOS emits one C-authored
++`X86_SIM_L_EXEC_REP_STOS` operation. Widths1/2/4/8 store the corresponding
++low bytes of RAX in forward element order using the original64-bit RCX.
++The operation advances RDI by count times width and writes RCX0; RAX, RSI,
++other registers and arithmetic flags retain their values. Every write uses
++the existing tagged-memory/lifetime store route. The loop follows the
++native count. Zero count performs zero memory writes.
++
++The mechanical decoder extracts width from the STOS memory operand and
++selects the native64-address form. Finite-target analysis preserves RSI
++across this instruction. The address-size32 fixture retains its prior
++generation outcome and stays in C's string-family coverage work. The
++DF-clear ABI is an explicit physical entry premise, shared with the current
++string-operation profile.
++
++[CPU and actual-application evidence](../../corpus/results/kprog_app_coverage_20261109/rep-stos/README.md)
++records GCC/Clang208896cases each, four emitted machine forms and the two
++actual archived Os inputs. Intel SDM Volume2 STOS/REP supplies the
++architectural operation reference; V owns its universal O1/O2/compiler
++composition. Actual stock-verifier/application runtime is recorded
++separately from generation and host observations.

@@ -1,0 +1,88 @@
+{
+  "source_base": "cdeb9804d58acc5d0706e2ade91453221e2519d5",
+  "private_source_base": "cc245743cfc34f873fe51c79864756873ccf4f27",
+  "host": {
+    "state": "host_finished",
+    "gcc_cases": 208896,
+    "clang_cases": 208896,
+    "runtime": "Existing GCC libubsan supplies Clang sanitizer ABI"
+  },
+  "decoder": [
+    {
+      "raw": "rep stos BYTE PTR es:[rdi],al",
+      "status": "emitted",
+      "lines": [
+        "\t/* 0x0: rep stos BYTE PTR es:[rdi],al */",
+        "\tX86_SIM_L_EXEC_REP_STOS(X86_WIDTH_8);"
+      ]
+    },
+    {
+      "raw": "rep stos WORD PTR es:[rdi],ax",
+      "status": "emitted",
+      "lines": [
+        "\t/* 0x0: rep stos WORD PTR es:[rdi],ax */",
+        "\tX86_SIM_L_EXEC_REP_STOS(X86_WIDTH_16);"
+      ]
+    },
+    {
+      "raw": "rep stos DWORD PTR es:[rdi],eax",
+      "status": "emitted",
+      "lines": [
+        "\t/* 0x0: rep stos DWORD PTR es:[rdi],eax */",
+        "\tX86_SIM_L_EXEC_REP_STOS(X86_WIDTH_32);"
+      ]
+    },
+    {
+      "raw": "rep stos QWORD PTR es:[rdi],rax",
+      "status": "emitted",
+      "lines": [
+        "\t/* 0x0: rep stos QWORD PTR es:[rdi],rax */",
+        "\tX86_SIM_L_EXEC_REP_STOS(X86_WIDTH_64);"
+      ]
+    },
+    {
+      "raw": "rep stos DWORD PTR es:[edi],eax",
+      "status": "legacy_generation_form",
+      "error": "unsupported REP STOS operand form: rep stos DWORD PTR es:[edi],eax"
+    }
+  ],
+  "actual_applications": {
+    "state": "finished",
+    "process": 0,
+    "programs": [
+      {
+        "request": 3,
+        "entry": "inet_sock_set_state",
+        "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-native-size/corpus-20261109T070725552150Z.tar.gz",
+        "member": "corpus/requests/3.failure.tar.gz",
+        "status": "compiled",
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/3/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/3/trusted_x86.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/3/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "symbol": "inet_sock_set_state",
+          "native_sha256": "4ad5b0e39b48864dc2ad44915c1f69a67106316ca936e957401c1b36b5a9c842"
+        }
+      },
+      {
+        "request": 12,
+        "entry": "tcp_v4_connect_ret",
+        "archive": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-native-size/corpus-20261109T070725552150Z.tar.gz",
+        "member": "corpus/requests/12.failure.tar.gz",
+        "status": "compiled",
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/12/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/12/trusted_x86.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/C/rep-stos/generated-final/12/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "symbol": "tcp_v4_connect_ret",
+          "native_sha256": "2027f1955bbb3144b6ed04ed36c331af727245e9c49ac4de5afeadad7b82e68f"
+        }
+      }
+    ]
+  },
+  "architectural_reference": "https://cdrdv2-public.intel.com/671110/325383-sdm-vol-2abcd.pdf",
+  "profile": "native64-address and clear DF ABI; native full64-bit RCX count",
+  "native_guest_executions": 0
+}

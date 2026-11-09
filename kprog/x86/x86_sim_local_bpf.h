@@ -2114,6 +2114,26 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 						  __x86_l_width);        \
 	} while (0)
 
+/* REP STOS in the native ABI's clear-DF profile uses the full RCX count. */
+#define X86_SIM_L_EXEC_REP_STOS(WIDTH)                                    \
+    do {                                                                 \
+        __u8 __x86_stos_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);           \
+        __u64 __x86_stos_count = X86_SIM_L_READ_REG(X86_RCX);              \
+        __u64 __x86_stos_value = X86_SIM_L_READ_REG(X86_RAX);              \
+        void *__x86_stos_dst = X86_SIM_L_READ_REG_PTR(X86_RDI);            \
+        __u8 __x86_stos_tag = X86_SIM_L_REG_TAG(X86_RDI);                  \
+        for (__u64 __x86_stos_i = 0; __x86_stos_i < __x86_stos_count;       \
+             ++__x86_stos_i)                                             \
+            X86_SIM_L_STORE_ADDR_TAGGED(                                 \
+                KPROG_PTR_ADD64_BITS(__x86_stos_dst,                       \
+                    __x86_stos_i * __x86_stos_width),                     \
+                __x86_stos_width, __x86_stos_value, __x86_stos_tag);        \
+        X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,                              \
+            KPROG_PTR_ADD64_BITS(__x86_stos_dst,                           \
+                __x86_stos_count * __x86_stos_width), __x86_stos_tag);      \
+        X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0, X86_WIDTH_64);               \
+    } while (0)
+
 #define X86_SIM_L_REP_MOVS_ONE(WIDTH, INDEX)                                \
 	do {                                                               \
 		if (__x86_l_i == (INDEX) && __x86_l_i < __x86_l_count) {  \
