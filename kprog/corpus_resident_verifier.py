@@ -48,6 +48,7 @@ def guest(scratch):
             raise RuntimeError((scratch / "stock-service.log").read_text())
         for row in source["programs"]:
             result = {k: row[k] for k in ["application", "source_prog_id", "name"]}
+            result["model_head"] = source["source_head"]
             selected = row["native_candidates"]
             resource = resources[(row["application"], row["source_prog_id"])]
             if len(selected) != 1:
@@ -188,8 +189,12 @@ def publish_results(scratch, output=None, previous=None, returncode=None):
             indent=2) + "\n")
         return
     result = json.loads(result_path.read_text())
+    for row in result["programs"]:
+        row.setdefault("model_head", result["model_head"])
     if previous:
         retained = json.loads(previous.read_text())
+        for row in retained["programs"]:
+            row.setdefault("model_head", retained["model_head"])
         replacements = {(row["application"], row["source_prog_id"]): row
                         for row in result["programs"]}
         rows = [replacements.get((row["application"], row["source_prog_id"]), row)
@@ -198,6 +203,8 @@ def publish_results(scratch, output=None, previous=None, returncode=None):
                       retained_rows=len(rows) - len(result["programs"]),
                       previous_result=str(previous), programs=rows, attempted=len(rows),
                       stages=dict(collections.Counter(row["stage"] for row in rows)))
+    result["model_epochs"] = dict(collections.Counter(
+        row["model_head"] for row in result["programs"]))
     provenance = scratch / "provenance.json"
     if provenance.is_file():
         result["input_provenance"] = json.loads(provenance.read_text())
@@ -228,7 +235,8 @@ def publish_results(scratch, output=None, previous=None, returncode=None):
               "Application work and performance retain their separate runtime cohorts.",
               "", "Generation, compilation, resource preparation and verifier "
               "diagnostics accompany each row in stock-results.json. "
-              "The immutable model revision is " + result["model_head"] + "."]
+              "Each row retains its immutable model revision. Model epochs: " +
+              json.dumps(result["model_epochs"], sort_keys=True) + "."]
     (base / "ranked-failures.md").write_text("\n".join(table) + "\n")
     request_directory = base / "requests"
     request_directory.mkdir(exist_ok=True)
