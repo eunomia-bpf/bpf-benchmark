@@ -1069,6 +1069,33 @@ three, JIT 775,908 over its three highest. Summed over all four -- which is
 what the workload's total throughput is -- the cold workers roughly cancel,
 one in each arm, giving the 0.995x above.
 
-That is one 20 s sample, so it establishes binding and shape rather than a
-final ratio: the six-application timing at SAMPLES=3 WORKLOAD_DURATION=180
-is the measurement.
+### Both arms passed through XDP and did equal work
+
+The counters the runner records (`runner/libs/app_outcomes.py`, read from
+Katran's `stats` map and the peer interface):
+
+| counter | JIT arm | native arm |
+| --- | ---: | ---: |
+| `tx` packets | 53,743,689 | 53,644,294 |
+| `total` packets | 53,743,690 | 53,644,294 |
+| `drop` | 0 | 0 |
+| `encap_fail` | 0 | 0 |
+| `lru_miss` | 0 | 0 |
+| `consistent_hash_drop` | 0 | 0 |
+| receiver `rx_packets` | 53,743,691 | 53,644,294 |
+| receiver `rx_dropped` / `rx_errors` | 0 / 0 | 0 / 0 |
+
+Every packet the generator sent is counted by the balancer, the balancer
+reports zero drops of every kind, and the receiver's `rx_packets` matches
+the balancer's `tx` count to within 2 packets (the native arm exactly, the
+JIT arm by 2) -- so each arm's packets traversed the XDP program and
+arrived. The two arms differ by 0.18% in packet count, which is a 20 s
+duration against a generator that is not slaved to a fixed count.
+
+The `pass` counter reads 1 in the JIT arm and 0 in the native arm, which is
+one packet of a different path, not a work difference: `total` and `tx`
+agree to within 0.18% and the receiver matches both.
+
+That is one 20 s sample, so it establishes binding, shape and equal work
+rather than a final ratio: the six-application timing at SAMPLES=3
+WORKLOAD_DURATION=180 is the measurement.
