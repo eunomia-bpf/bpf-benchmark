@@ -1,0 +1,7 @@
+# Generic ALU memory-read recovery candidate
+
+This private extension of MOV4839 covers the four existing ALU memory handler bodies. At a scalar-address read, the existing fresh-input outcome selects the ordinary body or the stock table destination effect. Register-destination arithmetic clears the full saved GPR; memory-destination binary/unary arithmetic resumes with the complete input state. Both fault routes preserve flags, raw memory and vectors and precede the actual read. The normal body retains its complete definition.
+
+The fault component executes actual encoder emission for520forms: seven arithmetic/logic operations, all16register destinations and four widths, memory-register/immediate destinations and four unary operations. All64incoming flag states and66register patterns retain full-state comparison. Address0x70 exposes an accidental read/store through the ordinary host fault path. Existing result-route, real CPU memory-frame and unary oracles retain every original case and their source hashes, with the private candidate include. Actual Make exit 0. Complete source/patch/variants/commands and compiler/CPU output accompany raw.tar.gz.
+
+The candidate retains canonical production source. Validity/lifetime of context/stack/map/packet/immutable routes, write-fault or multi-access partial effects, compiled-B/physical prefix correspondence and SMAP dispatch remain explicit interfaces. Original38fixture inputs and benchmark framework keep their published definition. Runtime admission additions0.
