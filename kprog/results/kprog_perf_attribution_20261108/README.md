@@ -1267,8 +1267,9 @@ directory` before any program reached the specializer.
 
 BCC ran on the restored workload at SAMPLES=3 WORKLOAD_DURATION=180 with
 stats off. Its baseline arm completed and produced real per-program
-counters -- 26 programs, the heaviest being `sys_enter` at 6,779,793 runs
-and 1,026,337,247 ns, and `kprobe__cap_cap` at 324,384 runs and 38,814,715
+counters -- 25 programs, 14,784,897 invocations and 2,401,230,511 ns
+(**162.4 ns per invocation**), the heaviest being `sys_enter` at 6,779,793
+runs and 1,026,337,247 ns and `sys_exit` at 6,779,800 runs and 610,341,169
 ns.
 
 Its native arm failed, with the same signature Katran had before its loader
