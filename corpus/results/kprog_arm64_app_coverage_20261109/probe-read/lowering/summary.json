@@ -1,12 +1,9 @@
 {
-  "utc": "2026-11-09T06:00:30.945380+00:00",
+  "utc": "2026-11-09T06:24:01.201872+00:00",
   "scope": "Private ARM native P scalar probe-read lowering candidate; existing application C/native ABI/relocations",
   "plugin_make_exit": 0,
   "plugin_command": [
     "make",
-    "--no-print-directory",
-    "-f",
-    "/var/tmp/kprog-tmp/A/probe-read/lowering/Makefile",
     "NATIVE_DIVISION_PLUGIN=/var/tmp/kprog-tmp/A/probe-read/lowering/native_division.so",
     "/var/tmp/kprog-tmp/A/probe-read/lowering/native_division.so"
   ],
@@ -15,6 +12,7 @@
   "source_patch_sha256": "2bd24adec886b2373f92701a525fca2151eec2c0cbfcd602645d3f03d3e63b49",
   "compiler_callback": "ScalarOptimizerLate, before subsequent standard scalar cleanup",
   "source_scope": "same8BCC and paired61c85Tracee3units",
+  "ARM_target": "armv8.1-a+lse, established verified BCC ISA selection",
   "baseline_inventory": "ef3acc532c38a444da382403473fc0f0b32fe2b2",
   "rows": [
     {
@@ -60,7 +58,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/capable.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 906960,
       "sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
@@ -69,7 +68,7 @@
       "instructions": 183,
       "static_call_sites": 16,
       "IR_compile_exit": 0,
-      "IR_sha256": "d8ae28aafe1996780ad7276fd8390a319934f8a828c4b9967c0b8e72ad09df78",
+      "IR_sha256": "c017ba0c642da0d0e321e96dac0a012ba65701fd467aa1c213487c2413ad8b69",
       "scalar_read_asm_sites": 0
     },
     {
@@ -115,7 +114,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/biosnoop.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 909128,
       "sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
@@ -124,7 +124,7 @@
       "instructions": 293,
       "static_call_sites": 24,
       "IR_compile_exit": 0,
-      "IR_sha256": "9172f117db7f08846577f8f96818beb64143bb9a88c887fdbac02e28358f3ab6",
+      "IR_sha256": "6067801b6d4c24ee9fee1077cde36e967ef2384cbfa2df4c5ad4c7fbb4397f19",
       "scalar_read_asm_sites": 11
     },
     {
@@ -170,16 +170,17 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
-      "bytes": 12680,
-      "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
-      "executable_bytes": 352,
+      "bytes": 12376,
+      "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+      "executable_bytes": 272,
       "disassembly_exit": 0,
-      "instructions": 88,
+      "instructions": 68,
       "static_call_sites": 0,
       "IR_compile_exit": 0,
-      "IR_sha256": "2a1973c1e29aa7e8b72feb9913baae6172e69626c667a96d6d328c05b086fabc",
+      "IR_sha256": "222e6968ad3002699a3350bd990439d62968432bdd7ce1e7eb30eee8dd7d3dbc",
       "scalar_read_asm_sites": 0
     },
     {
@@ -225,7 +226,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/opensnoop.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 16304,
       "sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
@@ -234,7 +236,7 @@
       "instructions": 212,
       "static_call_sites": 26,
       "IR_compile_exit": 0,
-      "IR_sha256": "a6f5c93233a742f7510ddcc74c6fbff40ecd1fc1d5c8a7d759c6401f10b456da",
+      "IR_sha256": "4ea490996e91aeed95ec00d1e7f3abe29bfe70370282ae9f6989357110eb5928",
       "scalar_read_asm_sites": 0
     },
     {
@@ -280,16 +282,17 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/syscount.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
-      "bytes": 904800,
-      "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
-      "executable_bytes": 660,
+      "bytes": 904792,
+      "sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+      "executable_bytes": 636,
       "disassembly_exit": 0,
-      "instructions": 163,
+      "instructions": 157,
       "static_call_sites": 14,
       "IR_compile_exit": 0,
-      "IR_sha256": "f6cb58ea88058d5018a62216824db02d972bbb054b6390e74f69abeac81c3a2d",
+      "IR_sha256": "077f500bf32ebb195a965bf00171cce8db8e79ee39d3a51e67d246ea75f69f0f",
       "scalar_read_asm_sites": 0
     },
     {
@@ -335,16 +338,17 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
-      "bytes": 912952,
-      "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
-      "executable_bytes": 1448,
+      "bytes": 912912,
+      "sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
+      "executable_bytes": 1416,
       "disassembly_exit": 0,
-      "instructions": 352,
+      "instructions": 344,
       "static_call_sites": 30,
       "IR_compile_exit": 0,
-      "IR_sha256": "0a61a4dd63b70af3c76f40771248461423dac568b28165a43f961ff2580bb2ee",
+      "IR_sha256": "2beec9bac5a27cf699dd99ed549a1532def88e9ac520ebaf0b1c4210e9542af6",
       "scalar_read_asm_sites": 8
     },
     {
@@ -390,7 +394,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcplife.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 936344,
       "sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0",
@@ -399,7 +404,7 @@
       "instructions": 220,
       "static_call_sites": 18,
       "IR_compile_exit": 0,
-      "IR_sha256": "cf8606bd1382220f90d67c01841721225df95afc99e93b6228ee50269aa1365f",
+      "IR_sha256": "9a35c8362c19799b8a7cf59a11dcfc0571af5ebf08b836e4006d68694422a27a",
       "scalar_read_asm_sites": 15
     },
     {
@@ -445,16 +450,17 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
-      "bytes": 912336,
-      "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
-      "executable_bytes": 1400,
+      "bytes": 912344,
+      "sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
+      "executable_bytes": 1392,
       "disassembly_exit": 0,
-      "instructions": 347,
+      "instructions": 345,
       "static_call_sites": 27,
       "IR_compile_exit": 0,
-      "IR_sha256": "7a83abd9e0658ade48dced1570507d226567a6adb8c753875d17084d1c066e40",
+      "IR_sha256": "154d39d8d95903812d6c8f729dd405025220237deacc23e6d45e4c06c0c990b8",
       "scalar_read_asm_sites": 12
     },
     {
@@ -503,7 +509,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/tracee.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 6329912,
       "sha256": "72237d83d59b009c50715015f5f10c9a5e0f4db167eaa97034d0f2e96d55fcbb",
@@ -512,7 +519,7 @@
       "instructions": 257419,
       "static_call_sites": 14423,
       "IR_compile_exit": 0,
-      "IR_sha256": "fb00fd4781f12a84a34f26fb3fb819c97779a6af5dc68d22660f0dea5e4276f0",
+      "IR_sha256": "983c334d854a520b28796713f72f1a3a5c673df12662f6e354e96451c0021525",
       "scalar_read_asm_sites": 17935
     },
     {
@@ -560,7 +567,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/lsm_support/kprobe_check.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 7808,
       "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
@@ -569,7 +577,7 @@
       "instructions": 16,
       "static_call_sites": 1,
       "IR_compile_exit": 0,
-      "IR_sha256": "869a33a78b0fa05142043cd2383c26f2cc42bbd50bf6d60bf8d5afbb6ef5969a",
+      "IR_sha256": "437ef73d42252eb7ff8917617c3beafdddf746c02ad0d05f56eca03d9b774ca8",
       "scalar_read_asm_sites": 0
     },
     {
@@ -617,7 +625,8 @@
         "-MMD",
         "-MF",
         "/var/tmp/kprog-tmp/A/probe-read/lowering/native/tracee/lsm_support/lsm_check.native.d",
-        "-c"
+        "-c",
+        "-march=armv8.1-a+lse"
       ],
       "bytes": 6704,
       "sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
@@ -626,11 +635,9 @@
       "instructions": 16,
       "static_call_sites": 1,
       "IR_compile_exit": 0,
-      "IR_sha256": "aa67e62500095993325cf53619b3d609de547fd5887fa71e08e15b153c9e74e2",
+      "IR_sha256": "1d80a11f4bcaf5f5f83a7a1b5c027734c6a430f50177d18edc76045f9240ee96",
       "scalar_read_asm_sites": 0
     }
   ],
-  "runtime_admission_additions": 0,
-  "patch_format": "unified zero context; git apply --unidiff-zero candidate.patch",
-  "raw_archive_patch_format": "Initial equivalent context patch retained in inputs.tar.gz"
+  "runtime_admission_additions": 0
 }
