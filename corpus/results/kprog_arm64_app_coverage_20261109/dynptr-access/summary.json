@@ -1,0 +1,125 @@
+{
+  "utc": "2026-11-09T07:29:54.055515+00:00",
+  "source_publication": {
+    "utc": "2026-11-09T07:27:21.274920+00:00",
+    "commit": "6737766140096384da964e3044d16bf662365f16",
+    "parent": "8579c7ea154a9381b292fdd80a17179a6853ac2d",
+    "tested_source_base": "653e11ebe7e283975a4ee9858945fcd753f999e5",
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h",
+      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py",
+      "kprog/formal/KProgFormal/Arm64HelperIdents.lean",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean",
+      "kprog/formal/contracts/arm64_helper_idents_spec.json",
+      "kprog/formal/generated/arm64_helper_idents.h",
+      "kprog/formal/oracles/test_arm64_helper_idents_host.c",
+      "kprog/formal/tools/generate_arm64_helper_idents_spec.py",
+      "kprog/formal/oracles/generated_helper_calls.h"
+    ],
+    "remote_ancestor_verified": true
+  },
+  "tested_private_source": "Pinned published base653e11ebe plus own helper-family patch",
+  "controls": [
+    {
+      "cohort": "source",
+      "target": "identity",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-f",
+        "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+        "identity",
+        "BIN=/var/tmp/kprog-tmp/A/dynptr-access/source-identity"
+      ],
+      "exit": 0
+    },
+    {
+      "cohort": "source",
+      "target": "abi",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-f",
+        "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+        "abi",
+        "BIN=/var/tmp/kprog-tmp/A/dynptr-access/source-abi"
+      ],
+      "exit": 2
+    },
+    {
+      "cohort": "parent",
+      "target": "identity",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-f",
+        "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+        "identity",
+        "BIN=/var/tmp/kprog-tmp/A/dynptr-access/parent-identity"
+      ],
+      "exit": 0
+    },
+    {
+      "cohort": "parent",
+      "target": "abi",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-f",
+        "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+        "abi",
+        "BIN=/var/tmp/kprog-tmp/A/dynptr-access/parent-abi"
+      ],
+      "exit": 2
+    }
+  ],
+  "paired_generation": {
+    "parent": {
+      "generated_compiled": 20,
+      "generation_or_compile_failed": 61
+    },
+    "candidate": {
+      "generated_compiled": 39,
+      "generation_or_compile_failed": 42
+    },
+    "improved": [
+      "ringbuf_missing_release2",
+      "use_after_invalid",
+      "ringbuf_invalid_api",
+      "data_slice_out_of_bounds_ringbuf",
+      "data_slice_out_of_bounds_map_value",
+      "data_slice_use_after_release1",
+      "data_slice_use_after_release2",
+      "data_slice_missing_null_check1",
+      "data_slice_missing_null_check2",
+      "invalid_helper2",
+      "invalid_write1",
+      "invalid_write2",
+      "invalid_read2",
+      "dynptr_invalidate_slice_reinit",
+      "dynptr_invalidate_slice_or_null",
+      "dynptr_invalidate_slice_failure",
+      "dynptr_invalidate_slice_success",
+      "dynptr_read_into_slot",
+      "invalid_data_slices"
+    ],
+    "regressed": [],
+    "entries": 81
+  },
+  "remaining_causes": {
+    "unresolved native ABI external call bpf_dynptr_from_skb": 18,
+    "unresolved native ABI external call bpf_dynptr_from_skb_meta": 8,
+    "unresolved native ABI external call bpf_dynptr_from_xdp": 5,
+    "unresolved native ABI external call bpf_dynptr_adjust": 1,
+    "unresolved native ABI external call bpf_dynptr_is_null": 1,
+    "unresolved native ABI external call bpf_dynptr_is_rdonly": 1,
+    "unresolved native ABI external call bpf_dynptr_size": 1,
+    "unresolved native ABI external call bpf_dynptr_clone": 7
+  },
+  "scope": "All81 original C-authored native entries of dynptr_fail family, exact archived P and metadata; generation and compilation",
+  "kernel_source_rules": [
+    "kernel/bpf/helpers.c: __bpf_dynptr_read, __bpf_dynptr_write, bpf_dynptr_data",
+    "kernel/bpf/verifier.c: BPF_FUNC_dynptr_from_mem backing PTR_TO_MAP_VALUE"
+  ],
+  "runtime_admission_additions": 0
+}

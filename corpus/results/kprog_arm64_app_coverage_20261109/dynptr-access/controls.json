@@ -1,0 +1,54 @@
+[
+  {
+    "cohort": "source",
+    "target": "identity",
+    "command": [
+      "make",
+      "--no-print-directory",
+      "-f",
+      "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+      "identity",
+      "BIN=/var/tmp/kprog-tmp/A/dynptr-access/source-identity"
+    ],
+    "exit": 0
+  },
+  {
+    "cohort": "source",
+    "target": "abi",
+    "command": [
+      "make",
+      "--no-print-directory",
+      "-f",
+      "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+      "abi",
+      "BIN=/var/tmp/kprog-tmp/A/dynptr-access/source-abi"
+    ],
+    "exit": 2
+  },
+  {
+    "cohort": "parent",
+    "target": "identity",
+    "command": [
+      "make",
+      "--no-print-directory",
+      "-f",
+      "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+      "identity",
+      "BIN=/var/tmp/kprog-tmp/A/dynptr-access/parent-identity"
+    ],
+    "exit": 0
+  },
+  {
+    "cohort": "parent",
+    "target": "abi",
+    "command": [
+      "make",
+      "--no-print-directory",
+      "-f",
+      "/var/tmp/kprog-tmp/A/dynptr-access/Makefile",
+      "abi",
+      "BIN=/var/tmp/kprog-tmp/A/dynptr-access/parent-abi"
+    ],
+    "exit": 2
+  }
+]
