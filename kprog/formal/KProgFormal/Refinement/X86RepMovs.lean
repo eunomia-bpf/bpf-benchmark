@@ -601,3 +601,217 @@ theorem recovery_finish_matches_progress (width : ScalarWidth) (nextPc : Referen
     simp only [emittedRegisters, progressed, if_neg counter, captured, Nat.zero_add]
 
 end KProgFormal.Refinement.X86RepMovs.Indexed
+
+namespace KProgFormal.Refinement.X86RepMovs.Indexed
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+/-- The existing source branch: only a scalar RSI can select recovery; the
+complete effective address forces low-page recovery and otherwise consumes a
+fresh low bit. The per-iteration word view is coupled to the global dynamic
+input stream at the primitive/compiler interface. -/
+def recoveryDecision (scalarSource : Bool) (width : ScalarWidth) (s : State)
+    (choices : Nat → Reference.Word) (index : Nat) : Bool :=
+  scalarSource && (decide ((generatedX86RepMovsAdvance (s.gpr 6) index
+    (X86Scalar.handlerWidth width)).toNat < 4096) || (choices index).getLsbD 0)
+
+theorem recovery_decision_typed (width : ScalarWidth) (s : State)
+    (choices : Nat → Reference.Word) (index : Nat) :
+    recoveryDecision false width s choices index = false := rfl
+
+theorem recovery_decision_low (width : ScalarWidth) (s : State)
+    (choices : Nat → Reference.Word) (index : Nat)
+    (low : (generatedX86RepMovsAdvance (s.gpr 6) index (X86Scalar.handlerWidth width)).toNat < 4096) :
+    recoveryDecision true width s choices index = true := by
+  simp [recoveryDecision, low]
+
+theorem recovery_decision_high (width : ScalarWidth) (s : State)
+    (choices : Nat → Reference.Word) (index : Nat)
+    (high : 4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) index (X86Scalar.handlerWidth width)).toNat) :
+    recoveryDecision true width s choices index = (choices index).getLsbD 0 := by
+  simp [recoveryDecision, Nat.not_lt.mpr high]
+
+/-- Captured-register source loop. The completed index controls final pointer
+writeback. A selected recovery returns before the next read or destination
+store; primitive memory faults retain their ordered effects separately. -/
+def sourceLoop (width : ScalarWidth) (nextPc : Reference.Word) (decisions : Nat → Bool)
+    (index : Nat) : Nat → State → Transition State × Nat
+  | 0, s => (⟨{ s with pc := nextPc }, [], none⟩, index)
+  | n + 1, s =>
+      if decisions index then (⟨{ s with pc := nextPc }, [], none⟩, index) else
+        let first := element width index s
+        if first.fault.isSome then (first, index) else
+          let after := sourceLoop width nextPc decisions (index + 1) n first.state
+          (⟨after.1.state, first.events ++ after.1.events, after.1.fault⟩, after.2)
+
+/-- Any selected first recovery index, or the entire count for ordinary
+completion, gives exactly the earlier scalar-copy prefix and its events. -/
+theorem source_loop_selected (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (completed index count : Nat) (s : State)
+    (within : completed ≤ count)
+    (earlier : ∀ j, index ≤ j → j < index + completed → decisions j = false)
+    (selected : completed < count → decisions (index + completed) = true)
+    (successful : (loop width nextPc index completed s).fault = none) :
+    sourceLoop width nextPc decisions index count s =
+      (loop width nextPc index completed s, index + completed) := by
+  induction completed generalizing index count s with
+  | zero =>
+      cases count with
+      | zero => rfl
+      | succ n =>
+          have first : decisions index = true := by simpa using selected (by omega)
+          simp [sourceLoop, loop, first]
+  | succ n ih =>
+      cases count with
+      | zero => omega
+      | succ remaining =>
+          have firstDecision : decisions index = false := earlier index (by omega) (by omega)
+          by_cases stopped : (element width index s).fault.isSome = true
+          · have bad : (element width index s).fault = none := by simpa [loop, stopped] using successful
+            simp [bad] at stopped
+          · have firstOk : (element width index s).fault = none := by
+              cases h : (element width index s).fault <;> simp_all
+            have restOk : (loop width nextPc (index + 1) n (element width index s).state).fault = none := by
+              simpa [loop, stopped] using successful
+            have restSelected : n < remaining → decisions (index + 1 + n) = true := by
+              intro active
+              have same : index + 1 + n = index + (n + 1) := by omega
+              rw [same]
+              exact selected (by omega)
+            have restEarlier : ∀ j, index + 1 ≤ j → j < index + 1 + n → decisions j = false := by
+              intro j start bound
+              exact earlier j (by omega) (by omega)
+            have rest := ih (index + 1) remaining (element width index s).state
+              (by omega) restEarlier restSelected restOk
+            simp only [sourceLoop, firstDecision, Bool.false_eq_true, ↓reduceIte,
+              firstOk, Option.isSome_none]
+            rw [rest]
+            have same : index + 1 + n = index + (n + 1) := by omega
+            simp only [loop, if_neg stopped, same]
+
+def sourceHandler (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (s : State) : Transition State :=
+  let copied := sourceLoop width nextPc decisions 0 (s.gpr 1).toNat s
+  if copied.1.fault.isSome then copied.1 else
+    ⟨{ copied.1.state with gpr := emittedRegisters width copied.2 s }, copied.1.events, none⟩
+
+theorem source_handler_selected (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (completed : Nat) (s : State)
+    (within : completed ≤ (s.gpr 1).toNat)
+    (earlier : ∀ j, j < completed → decisions j = false)
+    (selected : completed < (s.gpr 1).toNat → decisions completed = true)
+    (successful : (loop width nextPc 0 completed s).fault = none) :
+    sourceHandler width nextPc decisions s =
+      ⟨{ (loop width nextPc 0 completed s).state with gpr := emittedRegisters width completed s },
+        (loop width nextPc 0 completed s).events, none⟩ := by
+  have result := source_loop_selected width nextPc decisions completed 0 (s.gpr 1).toNat s within
+    (by intro j start bound; exact earlier j (by simpa using bound))
+    (by simpa using selected) successful
+  unfold sourceHandler
+  rw [result]
+  simp only [Nat.zero_add, successful, Option.isSome_none, Bool.false_eq_true, ↓reduceIte]
+
+theorem source_handler_success (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (s : State)
+    (ordinary : ∀ j, j < (s.gpr 1).toNat → decisions j = false)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    sourceHandler width nextPc decisions s = handlerStep width nextPc s := by
+  rw [source_handler_selected width nextPc decisions (s.gpr 1).toNat s (by omega) ordinary
+    (by intro impossible; omega) successful]
+  simp [handlerStep, successful]
+
+theorem loop_next_pc (width : ScalarWidth) (nextPc priorPc : Reference.Word)
+    (count index : Nat) (s : State)
+    (successful : (loop width priorPc index count s).fault = none) :
+    loop width nextPc index count s =
+      ⟨{ (loop width priorPc index count s).state with pc := nextPc },
+        (loop width priorPc index count s).events, none⟩ := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      by_cases stopped : (element width index s).fault.isSome = true
+      · have bad : (element width index s).fault = none := by simpa [loop, stopped] using successful
+        simp [bad] at stopped
+      · have restOk : (loop width priorPc (index + 1) n (element width index s).state).fault = none := by
+          simpa [loop, stopped] using successful
+        rw [loop]
+        simp only [if_neg stopped]
+        rw [ih (index + 1) (element width index s).state restOk]
+        simp only [loop, if_neg stopped]
+
+theorem source_handler_recovery_matches (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (completed : Nat) (s : State)
+    (within : completed ≤ (s.gpr 1).toNat)
+    (earlier : ∀ j, j < completed → decisions j = false)
+    (selected : completed < (s.gpr 1).toNat → decisions completed = true)
+    (successful : (loop width s.pc 0 completed s).fault = none) :
+    sourceHandler width nextPc decisions s = recoveryFinish width nextPc completed s := by
+  have changed := loop_next_pc width nextPc s.pc completed 0 s successful
+  have nextOk : (loop width nextPc 0 completed s).fault = none := by rw [changed]
+  rw [source_handler_selected width nextPc decisions completed s within earlier selected nextOk]
+  rw [changed]
+  rfl
+
+theorem source_handler_step_refines (width : ScalarWidth) (nextPc : Reference.Word)
+    (decisions : Nat → Bool) (s : State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (ordinary : ∀ j, j < (s.gpr 1).toNat → decisions j = false)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    Reference.X86.Step (.repMovs width false 0 nextPc) s (sourceHandler width nextPc decisions s) := by
+  rw [source_handler_success width nextPc decisions s ordinary successful]
+  exact handler_step_refines width nextPc s direction successful
+
+theorem recovery_fresh_bit (word : Reference.Word) :
+    decide (word &&& 1 ≠ 0) = word.getLsbD 0 := by bv_decide
+
+theorem recovery_effective_address (width : ScalarWidth) (s : State) (index : Nat) :
+    generatedX86RepMovsAdvance (s.gpr 6) index (X86Scalar.handlerWidth width) =
+      s.gpr 6 + BitVec.ofNat 64 index * BitVec.ofNat 64 width.bytes := by
+  cases width <;> apply BitVec.eq_of_toNat_eq <;>
+    simp [generatedX86RepMovsAdvance, X86Scalar.handlerWidth, x86WidthBitsSpec,
+      Reference.X86.ScalarWidth.bytes, Nat.mul_mod]
+
+/-- Every ordinary physical-copy path above the unmapped low page has a
+constant-zero per-read choice witness. Typed source routes bypass the branch. -/
+theorem ordinary_choices_exist (scalarSource : Bool) (width : ScalarWidth) (s : State)
+    (count : Nat)
+    (high : scalarSource = true → ∀ j, j < count →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat) :
+    ∃ choices : Nat → Reference.Word, ∀ j, j < count →
+      recoveryDecision scalarSource width s choices j = false := by
+  refine ⟨fun _ => 0, ?_⟩
+  intro j within
+  cases scalarSource with
+  | false => rfl
+  | true => rw [recovery_decision_high width s _ j (high rfl j within)]; rfl
+
+/-- Choose the first selected recovery at any index. The lower-page rule and
+fresh-bit route both select that point, while earlier successful addresses
+carry the physical high-page premise. -/
+theorem first_recovery_choices_exist (width : ScalarWidth) (s : State) (completed : Nat)
+    (high : ∀ j, j < completed →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat) :
+    ∃ choices : Nat → Reference.Word,
+      (∀ j, j < completed → recoveryDecision true width s choices j = false) ∧
+      recoveryDecision true width s choices completed = true := by
+  refine ⟨fun j => if j = completed then 1 else 0, ?_, ?_⟩
+  · intro j earlier
+    rw [recovery_decision_high width s _ j (high j earlier)]
+    have different : j ≠ completed := by omega
+    simp [different]
+  · simp [recoveryDecision]
+
+/-- A generic witness for the actual branch predicate along a successful
+physical copy profile. This proof is quantified over the whole state/count. -/
+theorem source_body_success_witness (scalarSource : Bool) (width : ScalarWidth)
+    (nextPc : Reference.Word) (s : State) (direction : s.rflags.getLsbD 10 = false)
+    (high : scalarSource = true → ∀ j, j < (s.gpr 1).toNat →
+      4096 ≤ (generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat)
+    (successful : (loop width nextPc 0 (s.gpr 1).toNat s).fault = none) :
+    ∃ choices : Nat → Reference.Word,
+      Reference.X86.Step (.repMovs width false 0 nextPc) s
+        (sourceHandler width nextPc (recoveryDecision scalarSource width s choices) s) := by
+  obtain ⟨choices, ordinary⟩ := ordinary_choices_exist scalarSource width s (s.gpr 1).toNat high
+  exact ⟨choices, source_handler_step_refines width nextPc _ s direction ordinary successful⟩
+
+end KProgFormal.Refinement.X86RepMovs.Indexed

@@ -853,3 +853,58 @@ theorem x86_rep_recovery_frame (width : X86.ScalarWidth) (completed : Nat)
     simp [counter, source, destination]
 
 end KProgTV.NativeLinkFinalImage
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+open KProgFormal.Refinement
+
+/-- The current source branch predicate and loop select the same prefix as
+registered read recovery. Raw handled-fault diagnostics stay in the trace. -/
+theorem x86_source_recovered_rep_movs (scalarSource : Bool) (width : X86.ScalarWidth)
+    (choices : Nat → Word) (completed : Nat) (nextPc : Word) (length : Nat) (s : X86.State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (remaining : completed < (s.gpr 1).toNat)
+    (earlier : ∀ j, j < completed → X86RepMovs.Indexed.recoveryDecision scalarSource width s choices j = false)
+    (selected : X86RepMovs.Indexed.recoveryDecision scalarSource width s choices completed = true)
+    (successful : (X86RepMovs.Indexed.loop width s.pc 0 completed s).fault = none)
+    (failed : readMemory (X86RepMovs.loop width s.pc completed s).state.memory
+      ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes =
+      .error (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes))
+    (continuation : nextPc = s.pc + BitVec.ofNat 64 length) :
+    let body := X86RepMovs.Indexed.sourceHandler width nextPc
+      (X86RepMovs.Indexed.recoveryDecision scalarSource width s choices) s
+    recoverRead (x86LoadResume (some 1) length) (X86.step (.repMovs width false 0 nextPc) s) =
+      ⟨body.state, body.events ++
+        [.fault (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes)], none⟩ := by
+  have body := X86RepMovs.Indexed.source_handler_recovery_matches width nextPc
+    (X86RepMovs.Indexed.recoveryDecision scalarSource width s choices) completed s (by omega)
+    earlier (by intro _; exact selected) successful
+  simpa only [body] using x86_recovered_rep_movs width completed nextPc length s
+    direction remaining successful failed continuation
+
+/-- Every scalar-source read-fault path after a successful high-page prefix
+has a choice witness in the current source body. Per-read words project from
+the physical/global-input/compiler interface; the platform premise supplies
+the actual fault, registered table and handler state. -/
+theorem x86_source_recovery_choice_witness (width : X86.ScalarWidth) (completed : Nat)
+    (nextPc : Word) (length : Nat) (s : X86.State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (remaining : completed < (s.gpr 1).toNat)
+    (high : ∀ j, j < completed → 4096 ≤
+      (KProgFormal.generatedX86RepMovsAdvance (s.gpr 6) j (X86Scalar.handlerWidth width)).toNat)
+    (successful : (X86RepMovs.Indexed.loop width s.pc 0 completed s).fault = none)
+    (failed : readMemory (X86RepMovs.loop width s.pc completed s).state.memory
+      ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes =
+      .error (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes))
+    (continuation : nextPc = s.pc + BitVec.ofNat 64 length) :
+    ∃ choices : Nat → Word,
+      let body := X86RepMovs.Indexed.sourceHandler width nextPc
+        (X86RepMovs.Indexed.recoveryDecision true width s choices) s
+      recoverRead (x86LoadResume (some 1) length) (X86.step (.repMovs width false 0 nextPc) s) =
+        ⟨body.state, body.events ++
+          [.fault (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes)], none⟩ := by
+  obtain ⟨choices, earlier, selected⟩ := X86RepMovs.Indexed.first_recovery_choices_exist width s completed high
+  exact ⟨choices, x86_source_recovered_rep_movs true width choices completed nextPc length s
+    direction remaining earlier selected successful failed continuation⟩
+
+end KProgTV.NativeLinkFinalImage
