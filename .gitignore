@@ -330,3 +330,6 @@ kprog/selftests/build/
 
 # Private measurement build output (kprog/perf/call_split.py)
 kprog/perf/measure/
+
+# Closed run output preserved by the 2026-11-09 shared-tree cleanup (cilium-cache).
+/corpus/results/kprog_app_coverage_20261107/cilium-update-identity/
