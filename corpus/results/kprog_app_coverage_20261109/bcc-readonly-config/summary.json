@@ -1,0 +1,160 @@
+{
+  "objects": [
+    {
+      "label": "control",
+      "native_sha256": "f75d9ddc53bdd5484d1760f9b16b058ae133aa2f8831b07a058be649ae01465d",
+      "sections": [
+        {
+          "name": "tracepoint/raw_syscalls/sys_enter",
+          "bytes": 112,
+          "sha256": "c9ef397b0f7b725adfbe1113c9f135d8b02a5ff69f1812e6a397bf7e7f9d6df1"
+        },
+        {
+          "name": "tracepoint/raw_syscalls/sys_exit",
+          "bytes": 428,
+          "sha256": "c47c8204f7fa16f99ebdc3ad16faff14e3917f8e0c198c92c25582395eab679b"
+        }
+      ],
+      "instructions": 173,
+      "conditional_branches": 23,
+      "all_calls": 14,
+      "rip_memory_ops": 17
+    },
+    {
+      "label": "candidate",
+      "native_sha256": "d43869064ee2a5fe85f2000a01c8f6c4ac4bbf3c5409cba7a066b90905262977",
+      "sections": [
+        {
+          "name": "tracepoint/raw_syscalls/sys_enter",
+          "bytes": 54,
+          "sha256": "e23d521dedccc2e66985205afb3e3fd49ecafbe42be228e14d5338d51d46b4db"
+        },
+        {
+          "name": "tracepoint/raw_syscalls/sys_exit",
+          "bytes": 179,
+          "sha256": "162d980d40c07d7646f6e1a2c5862272f9eea8618fc802d7082b8cb4b990d2c0"
+        }
+      ],
+      "instructions": 78,
+      "conditional_branches": 6,
+      "all_calls": 9,
+      "rip_memory_ops": 6
+    }
+  ],
+  "replaced_loads": {
+    "bindings": {
+      "filter_cg": 0,
+      "count_by_process": 0,
+      "measure_latency": 1,
+      "filter_failed": 0,
+      "filter_errno": 0,
+      "filter_pid": 0
+    },
+    "replaced_loads": [
+      {
+        "global_name": "filter_cg",
+        "width": 8,
+        "value": 0,
+        "original": "  %8 = load volatile i8, ptr @filter_cg, align 1, !dbg !37518, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "filter_pid",
+        "width": 32,
+        "value": 0,
+        "original": "  %14 = load volatile i32, ptr @filter_pid, align 4, !dbg !37526, !tbaa !37512"
+      },
+      {
+        "global_name": "filter_pid",
+        "width": 32,
+        "value": 0,
+        "original": "  %17 = load volatile i32, ptr @filter_pid, align 4, !dbg !37529, !tbaa !37512"
+      },
+      {
+        "global_name": "filter_cg",
+        "width": 8,
+        "value": 0,
+        "original": "  %5 = load volatile i8, ptr @filter_cg, align 1, !dbg !37555, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "filter_pid",
+        "width": 32,
+        "value": 0,
+        "original": "  %19 = load volatile i32, ptr @filter_pid, align 4, !dbg !37577, !tbaa !37512"
+      },
+      {
+        "global_name": "filter_pid",
+        "width": 32,
+        "value": 0,
+        "original": "  %22 = load volatile i32, ptr @filter_pid, align 4, !dbg !37580, !tbaa !37512"
+      },
+      {
+        "global_name": "filter_failed",
+        "width": 8,
+        "value": 0,
+        "original": "  %25 = load volatile i8, ptr @filter_failed, align 1, !dbg !37583, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "filter_errno",
+        "width": 32,
+        "value": 0,
+        "original": "  %32 = load volatile i32, ptr @filter_errno, align 4, !dbg !37590, !tbaa !37512"
+      },
+      {
+        "global_name": "filter_errno",
+        "width": 32,
+        "value": 0,
+        "original": "  %37 = load volatile i32, ptr @filter_errno, align 4, !dbg !37594, !tbaa !37512"
+      },
+      {
+        "global_name": "measure_latency",
+        "width": 8,
+        "value": 1,
+        "original": "  %42 = load volatile i8, ptr @measure_latency, align 1, !dbg !37598, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "count_by_process",
+        "width": 8,
+        "value": 0,
+        "original": "  %53 = load volatile i8, ptr @count_by_process, align 1, !dbg !37610, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "count_by_process",
+        "width": 8,
+        "value": 0,
+        "original": "  %72 = load volatile i8, ptr @count_by_process, align 1, !dbg !37641, !tbaa !37520, !range !37522, !noundef !5236"
+      },
+      {
+        "global_name": "measure_latency",
+        "width": 8,
+        "value": 1,
+        "original": "  %84 = load volatile i8, ptr @measure_latency, align 1, !dbg !37662, !tbaa !37520, !range !37522, !noundef !5236"
+      }
+    ]
+  },
+  "actual_service_inputs": [],
+  "inputs": {
+    "source": {
+      "vendor/bpf/bcc/libbpf-tools/syscount.bpf.c": "64c7af7ac28b2732f1710b1c52b664c6f170b29631a0e04d6b4066da9f43f4c2",
+      "vendor/repos/bcc/libbpf-tools/syscount.c": "c65c0b9f852017d6848dfc24a49e9b3a26f07ae18bf8d044e09977d6434e1bcd",
+      "vendor/bpf/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+      "vendor/bpf/Makefile": "3d2529d3ccd41b39a81b0bb509050d83db31b5aad5ff999399f4aaf695085a50"
+    },
+    "frozen_workload": "9f3855f6f",
+    "syscount_arguments": [
+      "-L",
+      "-i",
+      "1"
+    ],
+    "configuration_origin": "Frozen bcc_set.py tool spec; syscount.c CLI parser/default env/rodata initialization; stable libbpf read-only configuration",
+    "bindings": {
+      "filter_cg": 0,
+      "count_by_process": 0,
+      "measure_latency": 1,
+      "filter_failed": 0,
+      "filter_errno": 0,
+      "filter_pid": 0
+    }
+  },
+  "native_executions": 0,
+  "guest_executions": 0
+}
