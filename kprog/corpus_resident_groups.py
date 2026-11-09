@@ -5,6 +5,8 @@ import argparse
 import collections
 import concurrent.futures
 import hashlib
+import gzip
+import select
 import importlib.util
 import json
 import os
@@ -69,7 +71,7 @@ def prepare(scratch, original):
     return payload
 
 
-def publish(scratch, data):
+def publish(scratch, data, commit=True):
     base = ROOT / "corpus/results/kprog_app_coverage_20261109/resident-census/grouped-static"
     base.mkdir(parents=True, exist_ok=True)
     classes = collections.Counter()
@@ -88,14 +90,17 @@ def publish(scratch, data):
             stage=outcome["stage"] if outcome else "pending",
             failure_class=label, model_head=group.get("model_head", data["model_head"]),
             observation=group.get("observation", "queued representative"),
-            outcome=outcome))
+            outcome_key=group["body_sha256"] if outcome else None))
     result = dict(instances=data["instances"], native_body_groups=len(records),
         groups_completed=sum("outcome" in g for g in data["groups"]),
         represented_instances=sum(len(g["members"]) for g in data["groups"] if "outcome" in g),
         model_head=data["model_head"], body_identity=data["body_identity"],
         weighted_classes=dict(classes), unique_body_classes=dict(unique),
         instance_scope="Class distribution weighted by identical-body membership; each outcome is the actual representative submission",
-        native_execution_requests=0, groups=records)
+        native_execution_requests=0, raw_outcomes_file="outcomes.json.gz", groups=records)
+    outcomes = {g["body_sha256"]: g["outcome"] for g in data["groups"] if "outcome" in g}
+    (base / "outcomes.json.gz").write_bytes(gzip.compress(
+        (json.dumps(outcomes, indent=2) + "\n").encode(), mtime=0))
     write(base / "result.json", result)
     write(base / "membership.json", {k: v for k, v in data.items() if k != "groups"} |
         {"groups": [{k: v for k, v in g.items() if k != "outcome"} for g in data["groups"]]})
@@ -107,10 +112,11 @@ def publish(scratch, data):
     for label, count in classes.most_common():
         lines.append("| " + label + " | " + str(unique[label]) + " | " + str(count) + " |")
     lines += ["", "Each body is the complete linked native proof ELF with its executable bytes, data and relocation identities. Members retain their resident IDs and original resource/context inputs. The table weights a representative observation by body membership; the source program IDs identify the actual submissions.",
+        "", "Complete representative outcome records, including every diagnostic character, are stored losslessly in outcomes.json.gz, keyed by body SHA256. The compact table retains the class, actual stage and resident membership.",
         "", "Model epoch: " + data["model_head"] + ". Retained completed requests supply their original raw records. Remaining representatives use separate stock-kernel guests and host compilers across CPUs8-19, one representative per body. Each guest uses one vCPU and2GiB. Application execution requests:0. The benchmark framework retains its frozen definition.",
         "", "The initial549-instance census and this275-instance grouped continuation retain separate epochs and counts. Runtime resources and BTF differences remain visible in membership.json; weighted body classes describe this census sampling rule."]
     (base / "README.md").write_text("\n".join(lines) + "\n")
-    paths = [base / n for n in ["result.json", "membership.json", "README.md"]]
+    paths = [base / n for n in ["result.json", "membership.json", "README.md", "outcomes.json.gz"]]
     raw_dir = base / "requests"
     raw_dir.mkdir(exist_ok=True)
     for group in data["groups"]:
@@ -133,6 +139,9 @@ def publish(scratch, data):
             break
     todo.write_text(text)
     paths.append(todo)
+    if not commit:
+        write(scratch / "collection.json", result)
+        return result
     spec = importlib.util.spec_from_file_location("group_publish",
         "/var/tmp/kprog-tmp/A/publication/publish.py")
     publisher = importlib.util.module_from_spec(spec)
@@ -151,9 +160,56 @@ def publish(scratch, data):
     return result
 
 
+def collect_outcome(work, group, cpu, returncode=None):
+    row = group["representative"]
+    provenance = json.loads((work / "provenance.json").read_text())
+    result_path = work / "stock-results.json"
+    if result_path.exists():
+        outcome = json.loads(result_path.read_text())["programs"][0]
+        outcome["compiler_failures"] = census.compiler_failures(outcome)
+        outcome["failure_class"] = census.failure_class(outcome)
+    else:
+        outcome = dict(source_prog_id=row["source_prog_id"], name=row["name"],
+            stage="transport_failed", failure_class="representative_guest_setup",
+            diagnostic=(work / "controller.log").read_text(), returncode=returncode)
+    completed = dict(group)
+    completed.update(outcome=outcome, observation="group representative submission",
+                     model_head=provenance["model_head"], worker=str(work),
+                     cpu=provenance.get("host_cpu", cpu))
+    return completed
+
+
+def active_namespace(work):
+    for process in Path("/proc").iterdir():
+        if not process.name.isdigit():
+            continue
+        try:
+            args = (process / "cmdline").read_bytes().split(b"\0")
+        except (FileNotFoundError, ProcessLookupError, PermissionError):
+            continue
+        if b"namespace" in args and b"--scratch" in args:
+            at = args.index(b"--scratch")
+            if at + 1 < len(args) and args[at + 1] == os.fsencode(work):
+                return int(process.name)
+    return None
+
+
 def shard(scratch, original, group, cpu):
     work = scratch / "workers" / group["body_sha256"][:16]
     work.mkdir(parents=True, exist_ok=True)
+    if (work / "stock-results.json").exists():
+        return collect_outcome(work, group, cpu)
+    active = active_namespace(work)
+    if active is not None:
+        try:
+            descriptor = os.pidfd_open(active)
+            try:
+                select.select([descriptor], [], [])
+            finally:
+                os.close(descriptor)
+        except ProcessLookupError:
+            pass
+        return collect_outcome(work, group, cpu)
     inventory = json.loads((original / "run-inventory.json").read_text())
     resources = json.loads((original / "resource-index.json").read_text())
     row = json.loads(json.dumps(group["representative"]))
@@ -202,22 +258,10 @@ def shard(scratch, original, group, cpu):
                "namespace", "--scratch", str(work)]
     with (work / "controller.log").open("w") as log:
         done = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
-    result_path = work / "stock-results.json"
-    if result_path.exists():
-        outcome = json.loads(result_path.read_text())["programs"][0]
-        outcome["compiler_failures"] = census.compiler_failures(outcome)
-        outcome["failure_class"] = census.failure_class(outcome)
-    else:
-        outcome = dict(source_prog_id=row["source_prog_id"], name=row["name"],
-            stage="transport_failed", failure_class="representative_guest_setup",
-            diagnostic=(work / "controller.log").read_text(), returncode=done.returncode)
-    completed = dict(group)
-    completed.update(outcome=outcome, observation="group representative submission",
-                     model_head=inventory["source_head"], worker=str(work), cpu=cpu)
-    return completed
+    return collect_outcome(work, group, cpu, done.returncode)
 
 
-def run(scratch):
+def run(scratch, commit=True):
     data = json.loads((scratch / "groups.json").read_text())
     original = Path(data["original"])
     pending = [g for g in data["groups"] if "outcome" not in g]
@@ -233,7 +277,7 @@ def run(scratch):
             with lock:
                 group.update(completed)
                 write(scratch / "groups.json", data)
-                publish(scratch, data)
+                publish(scratch, data, commit)
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(cpus)) as pool:
         futures = [pool.submit(drive_publish, cpu, groups) for cpu, groups in zip(cpus, assignments) if groups]
         for future in concurrent.futures.as_completed(futures):
@@ -243,7 +287,7 @@ def run(scratch):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "publish", "run"])
+    parser.add_argument("mode", choices=["prepare", "publish", "run", "collect"])
     parser.add_argument("--scratch", type=Path, default=DEFAULT)
     parser.add_argument("--original", type=Path, default=Path("/var/tmp/kprog-tmp/A/resident-census-linked"))
     args = parser.parse_args()
@@ -254,7 +298,7 @@ def main():
     elif args.mode == "publish":
         publish(args.scratch, json.loads((args.scratch / "groups.json").read_text()))
     else:
-        run(args.scratch)
+        run(args.scratch, commit=args.mode == "run")
 
 
 if __name__ == "__main__":
