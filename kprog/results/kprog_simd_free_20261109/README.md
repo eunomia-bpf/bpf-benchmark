@@ -1,7 +1,7 @@
 # Scalar native programs on x86-64 and AArch64
 
 S14, 2026-11-09. The scalar native scope, compile evidence and paired safety
-replay are complete and published. The lane retires its private outputs after
+replay are complete and published. Private outputs are retired after
 Git archive and remote-ancestry readback.
 
 Native P uses scalar registers in both corpus producer routes. x86-64 combines
@@ -66,7 +66,7 @@ Every positive control executes with its expected result. Negative native
 executions: 0. Integer-case stages remain paired. SIMD/FP generation-domain
 changes: [{"arch": "arm64", "control": "accepted_finding", "name": "scalar_vector_load_clear_high", "scalar": "specialization_rejected", "scalar_handler_domain": true}].
 
-Load-only accepted findings remain recorded by epoch/ISA: {"control/arm64": ["scalar_vector_load_clear_high", "unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "control/x86": ["immediate_push_branch", "stack_base_flags"], "scalar/arm64": ["unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "scalar/x86": ["immediate_push_branch", "stack_base_flags"]}. These preserved model findings retain their C/A/S7 owners.
+Load-only accepted findings remain recorded by epoch/ISA: {"control/arm64": ["scalar_vector_load_clear_high", "unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "control/x86": ["immediate_push_branch", "stack_base_flags"], "scalar/arm64": ["unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "scalar/x86": ["immediate_push_branch", "stack_base_flags"]}. S16 tracks these preserved original outcomes with recovery-aware companion fixtures; C/A/S7 retain simulator/runtime ownership.
 `safety-raw.tar.gz` retains all source-pinned inputs, requests, generated B,
 stock verifier logs and actual outcomes. V retains universal compiled-B and
 physical-composition ownership.
