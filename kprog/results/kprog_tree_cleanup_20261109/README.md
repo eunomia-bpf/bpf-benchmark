@@ -17,3 +17,5 @@ Lane S19 records the shared-tree cleanup requested by the operator. The live ent
 Raw preservation root: `/var/tmp/kprog-tmp/S19/`. The entry status, active-process evidence, queued-input references and move receipts reside there. A moved file retains its content and receives a SHA-256 receipt. Recent files and active inputs stay with their owners. C retains the generated x86 micro sources and selftest launcher; V retains the formal-source backlog. Exact source paths are posted in the coordination notices. Vendor and paper submodule state remains with its existing owners.
 
 cilium-cache: 1242 raw paths (6914669 bytes) preserved in 1 closed groups; status 3284 ? 2044. Per-file content hashes and destinations: `cilium-cache-moves.json.gz`. Deferred units: 0.
+
+fidelity-replay: 403 raw paths (358010035 bytes) preserved in 17 closed groups; status 2042 ? 1641. Per-file content hashes and destinations: `fidelity-replay-moves.json.gz`. Deferred units: 0.
