@@ -1,0 +1,458 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T09:31:00.932490+00:00",
+    "head": "d1b4ac1b78a438e0caef9914b981218e3ffd59c0",
+    "frozen_workload": "9f3855f6f",
+    "target_kernel": "/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build/vmlinux",
+    "source_trees": {
+      "otel": "current tracked vendor/bpf/otel",
+      "tracee": "/workspaces/.agent-state/kprog-lanes/C/design-only/tracee-clamp-macro/tree",
+      "tetragon": "/workspaces/.agent-state/kprog-lanes/C/design-only/tetragon-paired-source/tree"
+    },
+    "profile": "current O3 native flags; full original object manifests; live generation occurs from submitted P"
+  },
+  "producer": {
+    "app": "tetragon",
+    "path": "/var/tmp/kprog-tmp/C/current-abi-app-payloads/payloads/tetragon",
+    "native_objects": 62,
+    "manifest_entries": 237,
+    "files": {
+      "bpf_multi_retkprobe_v511.native.o": {
+        "sha256": "49550ddcf6642b28794bc18f8a252bdfe416c8013202b8a10239990c4a466c92",
+        "bytes": 1333824
+      },
+      "bpf_fork_v310.native.o": {
+        "sha256": "ff8c228445216a759296f1913783d0a54279fc56e9909543142930b07b9f24a5",
+        "bytes": 1146256
+      },
+      "bpf_generic_kprobe_v61.native.o": {
+        "sha256": "39ca4d335c8be400fbb0b0929e5d5cf7fd4d4b2e4b491bc1be7626af4fb9d8f9",
+        "bytes": 1423144
+      },
+      "bpf_multi_retuprobe_v61.native.o": {
+        "sha256": "d7a4daab672fee13745fdbd3b73f2a09b60c74e24ec5e5b395379eb81b51859b",
+        "bytes": 1318728
+      },
+      "bpf_generic_uprobe_v61.native.o": {
+        "sha256": "30cf2e3362fb21e0ebee5eba7f87de1775ac6f932bf37eb8105182f1eb26e613",
+        "bytes": 1431152
+      },
+      "bpf_generic_retuprobe_v53.native.o": {
+        "sha256": "480337a7609c04e8e9124f40c9d38aa7a65cee415b72e61576d80f39ca41eff7",
+        "bytes": 1315736
+      },
+      "bpf_multi_retuprobe_v511.native.o": {
+        "sha256": "b691b58013e3aadf43fcbc79834e733787223d7835eea30e185e8d20f32facbd",
+        "bytes": 1334656
+      },
+      "bpf_generic_tracepoint_v53.native.o": {
+        "sha256": "75c4d5403b3fa05f40a9f8c5063e18f58eb3f4da18d87a369181e73ab75bd3f7",
+        "bytes": 1478752
+      },
+      "bpf_generic_retuprobe_v511.native.o": {
+        "sha256": "decfab8541b4f71c7754ba9b44c41c7b7b4e195cc834f0f8254da5266959a7ff",
+        "bytes": 1334408
+      },
+      "bpf_generic_usdt_v511.native.o": {
+        "sha256": "bc13e209d99878b9112cd3213bf4e6e18ff77b97f3365af5348ff00a1bd34697",
+        "bytes": 1769424
+      },
+      "bpf_execve_event_v310.native.o": {
+        "sha256": "f5248a4070afeed82ecf7687a70acc08292d3cf56e6315ad383f785ce2fa002e",
+        "bytes": 1213696
+      },
+      "bpf_multi_kprobe_v511.native.o": {
+        "sha256": "885ec8ec0e003ac624af6baa4a412ef79b9b97b9e2222a5c20422714b4ac4391",
+        "bytes": 1682320
+      },
+      "bpf_generic_fexit_v61.native.o": {
+        "sha256": "52200369154f2fd490cc192c79aae0162b164ae284e3fafd5c511f405b2a561b",
+        "bytes": 1317304
+      },
+      "bpf_execve_map_update_v511.native.o": {
+        "sha256": "62fd3cedc2ac294bf1ccaafea87b12a388441f8dfac71a78eb0c3b2c4662d8a0",
+        "bytes": 22384
+      },
+      "manifest.json": {
+        "sha256": "9d7cab904e381b362c3b1f18fbb221c90d24bf1ed5ed2cd65b2b639d0a880150",
+        "bytes": 63223
+      },
+      "bpf_generic_lsm_ima_bprm_v61.native.o": {
+        "sha256": "8f9afe0ca0fc07ff6f77cb5579802dc0a0a4d14d6b4cabc55415c924c379cc55",
+        "bytes": 1141728
+      },
+      "bpf_multi_retkprobe_v61.native.o": {
+        "sha256": "1eff32ef1ef5f891dca32d335462602519ce9bb0a5cf1ae7adea354ec65a7f90",
+        "bytes": 1317824
+      },
+      "bpf_multi_usdt_v511.native.o": {
+        "sha256": "6fece9fd70da741244a2021675ab15ab300a776b3a0c03b7c11665ac9fa53d58",
+        "bytes": 1769880
+      },
+      "bpf_generic_kprobe_v53.native.o": {
+        "sha256": "180879d1b9b994b6654d8c7936879bf883964b87cbb612818d0538ac1c15db17",
+        "bytes": 1653336
+      },
+      "bpf_fork_v511.native.o": {
+        "sha256": "9fcba323913de5f79372f0d86c9b8dab9824ed3ed333c104ab19c3a6779b42e5",
+        "bytes": 1158672
+      },
+      "bpf_generic_retkprobe_v53.native.o": {
+        "sha256": "ccbb94a5e5542b1ee7df34e92844d3cd6ec1b007668c440af942fe73c25959ca",
+        "bytes": 1315048
+      },
+      "bpf_multi_retkprobe_v53.native.o": {
+        "sha256": "c28b783a8e21e647c773324de2ad5ca9857be8266166465b82c9bfcfe8cd098a",
+        "bytes": 1316656
+      },
+      "bpf_generic_retkprobe_v61.native.o": {
+        "sha256": "3ed110e21f9431b6420d5f9be657a0b27d06f7a3c80e71482d29c77b202eff4a",
+        "bytes": 1317592
+      },
+      "bpf_generic_uprobe_v53.native.o": {
+        "sha256": "ef2fefac353e9a3bb9ea54ada697b059931578093731505bd3522c4ca31d83a5",
+        "bytes": 1707616
+      },
+      "bpf_execve_event_v61.native.o": {
+        "sha256": "1c697aab1c4581f1b0f23e8d9614f829b331b2eadf26b90334584a85d96fe4c4",
+        "bytes": 1233656
+      },
+      "bpf_generic_fentry_v53.native.o": {
+        "sha256": "276e9bff30b5bcbc26d94e9d72cad3baa46646ef3256fab4964216614160186d",
+        "bytes": 1641920
+      },
+      "bpf_cgroup_rmdir_v511.native.o": {
+        "sha256": "1ed4753cdcb6e0f201ac7c66b6e55beb4fcec915ea7afe16c5d61585edb194c3",
+        "bytes": 1142688
+      },
+      "bpf_generic_tracepoint_v511.native.o": {
+        "sha256": "44a51b30c3a81416151f9bbc2d8bc1759f35a3cd707e7cc0701e825945222b5a",
+        "bytes": 1505480
+      },
+      "bpf_multi_kprobe_v53.native.o": {
+        "sha256": "f42c8683cfbad20ba234133cf9514f16fd24de6bb972cd06e31f96c17c67e4c2",
+        "bytes": 1653584
+      },
+      "bpf_generic_rawtp_v53.native.o": {
+        "sha256": "536c1e2689af30c82bec97bf87554a260e49e08c65f1cdd491ec780c58329b94",
+        "bytes": 1638576
+      },
+      "bpf_generic_usdt_v53.native.o": {
+        "sha256": "8c273b692080a3bfa47165a0935fe5516a8789a46ff5f7ca1d7a7ff4e8b8c3c0",
+        "bytes": 1698136
+      },
+      "bpf_multi_uprobe_v61.native.o": {
+        "sha256": "b23e7495cf29619f13212862846e9d5a064a9b4a08ec3b32164258b08d6a8aa9",
+        "bytes": 1431584
+      },
+      "bpf_cgroup_mkdir_v511.native.o": {
+        "sha256": "03d4b340518b24d490d4b919794f992a1b7025ea6d3e686aaeea26f91781a037",
+        "bytes": 1144624
+      },
+      "bpf_multi_kprobe_v61.native.o": {
+        "sha256": "075c5a5afff42254bb9dad9dc7caaab826dbe11ca92b7dbd085f0e3aabbca8c9",
+        "bytes": 1423384
+      },
+      "bpf_loader_v511.native.o": {
+        "sha256": "ed5e86812fa112d0a4e59fe1038a8af6b9c835bd209142ab566b11910d2b22de",
+        "bytes": 1138256
+      },
+      "bpf_generic_fexit_v511.native.o": {
+        "sha256": "1d6d552b07c9e294063aa349bb524b4c1493b88439457e335611fc0e25646429",
+        "bytes": 1332696
+      },
+      "bpf_generic_lsm_ima_bprm_v511.native.o": {
+        "sha256": "592453155743d47cc7645db240cfdbb85abd53f30c4ad7dfb96f46be1f68cf3a",
+        "bytes": 1142032
+      },
+      "bpf_generic_retkprobe_v511.native.o": {
+        "sha256": "6c588eaadf7c18c18295c34e9c704507b5a7821cba076d974fbcc122a41ea4c0",
+        "bytes": 1333600
+      },
+      "bpf_execve_event_v53.native.o": {
+        "sha256": "31b3037ea2734f1820f7335e031a41b0af46ebb81052cc770704400d91eedb7b",
+        "bytes": 1222224
+      },
+      "bpf_execve_map_update_v53.native.o": {
+        "sha256": "9014b62521ff5bc6fc768756255039f4e996fff9149600b40990b1c23fd7fc6a",
+        "bytes": 20360
+      },
+      "bpf_generic_lsm_ima_file_v61.native.o": {
+        "sha256": "c65f1b4655b93b99c519cd544e8e027547eabcfea5b20b87744c63b7b54e4dbb",
+        "bytes": 1141688
+      },
+      "bpf_execve_event_v511.native.o": {
+        "sha256": "76395ae201229f559a2fb3261fdeb2a7fa46cc7096b133bf7ec4e557924d09f9",
+        "bytes": 1236824
+      },
+      "bpf_generic_uprobe_v511.native.o": {
+        "sha256": "5b3662d319fc33322003124462b06f69edfea39e255ecdd61396b102f659d817",
+        "bytes": 1776344
+      },
+      "bpf_generic_rawtp_v61.native.o": {
+        "sha256": "ae30a3e2ed20436d7213bc019513d3fd75accab4c0c7bd97bbc49d37f58995d3",
+        "bytes": 1407408
+      },
+      "bpf_generic_retuprobe_v61.native.o": {
+        "sha256": "8da5559d99e54f4de6ebc90238aea5728810e1918f4927d4e4121150e9141d2a",
+        "bytes": 1318272
+      },
+      "bpf_exit_v511.native.o": {
+        "sha256": "31b1b62a9b6e1e89a2664521c403ad8bcc4700662ca45453fafe05d7f92576c8",
+        "bytes": 1145424
+      },
+      "bpf_exit_v310.native.o": {
+        "sha256": "2c3b2c6e0503b30c0099a0ccaf18440bd5d6e9071e83d872fbcb5064ced7c975",
+        "bytes": 1141272
+      },
+      "bpf_multi_usdt_v61.native.o": {
+        "sha256": "70410e8bc93a67d785bcea3e5753d72a2780a6f4bf92f4526856515be9bc477b",
+        "bytes": 1438544
+      },
+      "bpf_execve_map_update_v61.native.o": {
+        "sha256": "62fd3cedc2ac294bf1ccaafea87b12a388441f8dfac71a78eb0c3b2c4662d8a0",
+        "bytes": 22384
+      },
+      "bpf_generic_lsm_core_v511.native.o": {
+        "sha256": "3720b0e81c1c00d68219ef46592d77a0e076e8e0a4ea5c5bbf93fd04945fe744",
+        "bytes": 1658680
+      },
+      "bpf_generic_fexit_v53.native.o": {
+        "sha256": "ec16b536f401ff55114ed619569cf2fecc27528147b4ee552cd255f58042f1c0",
+        "bytes": 1315384
+      },
+      "bpf_generic_lsm_output_v61.native.o": {
+        "sha256": "8f7ddf17ebd095d1f70d0b2918e62544c51eafbf45cc48d622a74aa7ad708eac",
+        "bytes": 1155840
+      },
+      "bpf_generic_fentry_v61.native.o": {
+        "sha256": "38ee4ceb5eee0680334d7f3164f17a4b7afec32b3ba19de461d2c738f4e6fb21",
+        "bytes": 1410760
+      },
+      "bpf_generic_kprobe_v511.native.o": {
+        "sha256": "1a6c9cd773e5fdc270437275813b27c219c1d61fae7c09e8b4d904c314dfa0ef",
+        "bytes": 1682072
+      },
+      "bpf_generic_tracepoint_v61.native.o": {
+        "sha256": "df2b5ebab58a283a018ce7fdaa4fe6f55d5c12e9ae11881f030d28e8bde8685d",
+        "bytes": 1478696
+      },
+      "bpf_cgroup_release_v511.native.o": {
+        "sha256": "874f5200605032b0ca28f7d961f1e3b8a02cde728d58166937d0d5db94ad4dad",
+        "bytes": 1142704
+      },
+      "bpf_generic_rawtp_v511.native.o": {
+        "sha256": "464bb5fc780e60d388614656485e11e523ede673c7a50d4fae990b3c87f3b23a",
+        "bytes": 1665280
+      },
+      "bpf_multi_uprobe_v511.native.o": {
+        "sha256": "c2522e55a3fef7eb01423373d92899a97125fbb1769bb6a06481ca7d8606ed99",
+        "bytes": 1776800
+      },
+      "bpf_generic_lsm_core_v61.native.o": {
+        "sha256": "f25f8f4abc2c7ac0117523fda17d3ccb37420ea9b78d74fdbe34c8f660234697",
+        "bytes": 1401328
+      },
+      "bpf_generic_usdt_v61.native.o": {
+        "sha256": "e15793c2c720159284bac0a42927c18c8aa833191fe139346afe2ee35d53f616",
+        "bytes": 1438120
+      },
+      "bpf_generic_lsm_ima_file_v511.native.o": {
+        "sha256": "11ef94a0e408b703450d2f52165b6d1c6a4d7015ab6ca6f2305f495cf8f99587",
+        "bytes": 1141992
+      },
+      "bpf_generic_fentry_v511.native.o": {
+        "sha256": "d10e7f06b51f53f7765cc6c8341956f17585de62ac8ade2d0ad15b254349f36d",
+        "bytes": 1668824
+      },
+      "bpf_generic_lsm_output_v511.native.o": {
+        "sha256": "9bde5dfaa15a8e43ae1bef3822fa01c854a3032328f875a2c141ba66c16ecb47",
+        "bytes": 1156144
+      }
+    }
+  },
+  "source_hashes": {
+    "native_division.so": "61cfaf9983c1871a7b0fa5e3a35e2fc24a78fdad56fe2146bc06097ba7f7c252",
+    "native_division.cpp": "3c65eeb586523a6a03e8192e6e0b51e3a534692328b40e85020a92128252ef87",
+    "Makefile": "e01130838e4562f61f3cdef6392b26468d758535b082a1f6abe2546f78c1d7e4",
+    "native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+    "write_native_manifest.py": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+    "tracee/maps.h": "97d8e7d37ad03ca47a4af5e35028c1a7b381d32751b5be557ee7031d88c87f9a",
+    "tracee/vmlinux_missing.h": "16e0b8cf8cae49da185c48ec96dda13f1e07e2829cd34ed6992e539cf4572395",
+    "tracee/vmlinux_flavors.h": "f308e3f87ec8074693ffa5318cd957b5eefe17c5975fe4d618fe84af9f0cb082",
+    "tracee/capture_filtering.h": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+    "tracee/tracee.bpf.c": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+    "tracee/types.h": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+    "tracee/vmlinux.h": "2b41f61ea8545476dc1bc437bb948a05a98af068822d52f1601d6968f59d7a43",
+    "tracee/tracee.h": "a1931f86d3eebe176e627c83a392541d84e53f2e8e78241836ae0e1ee2a7b174",
+    "tetragon/.gitignore": "59f8a4a842b6822b3a5200a773319a98ae135af9467b164d053e0cb8131cf958",
+    "tetragon/Makefile": "2fe0213c5371abf51f57541d6529da734ed436779f895f114fa38c4a7753af53",
+    "tetragon/Makefile.defs": "1f063099f6a635a536744b882d0355eaeb481f2d959c875980ac4172b766546b",
+    "tetragon/LICENSE.GPL-2.0": "0d5bf346df9e635a29dcdddf832dc5b002ca6cdc1c5c9c6c567d2a61bb0c5c15",
+    "tetragon/LICENSE.BSD-2-Clause": "87f5bcd709fb87016ce5ddbf19186fa4813846641eb74e9b119afa9a03b29406",
+    "tetragon/COPYING": "8ed6cdbc047edbcea7b48dd24bb87f65ab8626a12efc3fb5189ce3ef04c60992",
+    "tracee/lsmsupport/lsm_check_common.h": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79",
+    "tracee/lsmsupport/lsm_check.bpf.c": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2",
+    "tracee/lsmsupport/kprobe_check.bpf.c": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+    "tracee/common/cgroups.h": "6d1e2305f23246aa11291ee8830b7fb8ad6681112e081aa7ada067ea5ae69d51",
+    "tracee/common/arguments.h": "d448e1ac224b2729c049ba0268a581072b88db643920afa93f1d238af8b37c97",
+    "tracee/common/binprm.h": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
+    "tracee/common/filtering.h": "ff720df2eaa7cabdb52e23f3c7ef71fac1fc6d1e2155a7d590b5866c4fb3bb94",
+    "tracee/common/signal.h": "ed71c5ed155036f0e2207b0550d7674cc87fbc8ad5b6eec942f70a1a1333cdc1",
+    "tracee/common/network.h": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76",
+    "tracee/common/task.h": "f97496645f4c146da9078e9bf72ee96a9b8bed542e2a20f4cac40ec173e97a2a",
+    "tracee/common/context.h": "3f75fae98f3af498bccb4df5ddc9bb5bd37199f6ebce31bcb2b14c0ac3b432db",
+    "tracee/common/memory.h": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
+    "tracee/common/probes.h": "cba242a74b5fe68b785aecd976b009847889672eef579782259cf41824f33686",
+    "tracee/common/buffer.h": "7f18e2378b20d5bb2e93a0c4683313f6218a823673f5ec2253f5dfc4e3652755",
+    "tracee/common/filesystem.h": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
+    "tracee/common/capabilities.h": "77c0418f6d769651e7cf0de45b5288be03d0f17acc601d0eb999bd05ff19df87",
+    "tracee/common/ksymbols.h": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
+    "tracee/common/arch.h": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
+    "tracee/common/common.h": "c33baf52ff4ec2b99413299d483d67e9120514b7697aa7e1e5c652f3bdeaf959",
+    "tracee/common/hash.h": "a0c91a568d14bdde2ac6c9e7ac1b00732a723715fdb0793ee9f01cc92e6f043f",
+    "tracee/common/bpf_prog.h": "9640eb4e688a12a40064cd8829a4c6949f1e1ba229e21e07f11af49fc74a1970",
+    "tracee/common/namespaces.h": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
+    "tracee/common/logging.h": "e81bad34d90c86c65a9f7d4006fcb813e2ea90c48d28c97144320287056dacd9",
+    "tracee/common/kconfig.h": "db8eeb7906c8f203f4beb0f507f77b3611ba5107bbd7c0d36434a30dae973036",
+    "tracee/common/consts.h": "60316e0fdb34af948a4795c702db369024e38f5dc3bd329b61e40c563a5434b4",
+    "otel/tools/errors-codegen/main.go": "c59366373416e872a91ae2b80f1f13b91b4d38e3381fa37c8051e2c77fb7bbdd",
+    "otel/tools/errors-codegen/errors.json": "f79c285a2d55fef24e9de0f460e0862c595920ddf80e74ee8638f302b2cf7b62",
+    "otel/tools/errors-codegen/bpf.h.template": "caac3bf47ee87af6161466306fd63eaf9f0e47256792f9edd61c7349d33c8f51",
+    "otel/support/ebpf/stackdeltatypes.h": "c7b507103aa8da1cabf140f0e090f2e57ca4a5ae8276eed25e63a052b34ddb13",
+    "otel/support/ebpf/off_cpu.ebpf.c": "ac50a3eb321b23cfe9cf551ca15ee2bed5314efca8bc5792a8a26a1f7399ed5b",
+    "otel/support/ebpf/.gitignore": "f75b02fa4e82ae60ae25d10f417dce3af4afd92b5356f57da516a1f206c28caa",
+    "otel/support/ebpf/frametypes.h": "d26e84f1e6209cc0a73376a26ad1e22739db55848d7936d729cd9a3c66e4b14b",
+    "otel/support/ebpf/kernel.h": "d84a78ec6b92dc0bd387dec0d7244afe69ca9abdfc3b9290a9650413e929619c",
+    "otel/support/ebpf/ruby_tracer.ebpf.c": "f3f69d90179da916713e25a4860b0b3eb7b969bcaa20d15d4356ce075f304555",
+    "otel/support/ebpf/sched_monitor.ebpf.c": "50a83b6b676001faa71e304a655c85b5bd4ac67ba9d48bd0a177c9419f1d07fc",
+    "otel/support/ebpf/hotspot_tracer.ebpf.c": "00a502aed7b3cc551df739362e74dc0f6dd696eb77e2902302cfa3f5c3d943c8",
+    "otel/support/ebpf/go_labels.ebpf.c": "6789f6ba9c89b1a85a8967e2822ffc954c363a8382329e636fef02eee4a9c5a3",
+    "otel/support/ebpf/interpreter_dispatcher.ebpf.c": "1da8bc07d792b7f29c4a8b31d462fe21d93bc9601d79b69300c53cfc5af86152",
+    "otel/support/ebpf/.clang-format": "7a494977e6dc772bb492cb36fe3f99aeea20431921a682ee661fab560427cfa5",
+    "otel/support/ebpf/v8_tracer.ebpf.c": "442b4bc0e69f50a931c3c625ca07794f391560fa3c829a2b303855d329b4ab2b",
+    "otel/support/ebpf/bloat-o-meter": "10066c0942bcdd33945024a0790aee7b720d58de988d1e6ca4030ce3694c5cbb",
+    "otel/support/ebpf/Makefile": "b1e250a779e95677ce26a8ffcb4bfde83432227f71fabd4a07997c15e9c55fc6",
+    "otel/support/ebpf/print_instruction_count.sh": "81aec0d1d2c4b082abe8551a71ce4677d44174c1b46dab1619307c14a24cf991",
+    "otel/support/ebpf/native_stack_trace.ebpf.c": "fd5130c6e1aca273106652b702eff292b8078b160235465f8866b859dffdb55d",
+    "otel/support/ebpf/extmaps.h": "1750b0c33b5fa450652ee4397db8d0ede5bd60a4b986a02c054c1bfb791ef5ad",
+    "otel/support/ebpf/perl_tracer.ebpf.c": "fac11aed6237538ec85a78aab2534230695fa944e389a43730e3c2318e2fe696",
+    "otel/support/ebpf/php_tracer.ebpf.c": "4ee663e7f21417852b01bbd6df5dfe9e3b00380a4ec621ad6252ec6378b7b2b2",
+    "otel/support/ebpf/types.h": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f",
+    "otel/support/ebpf/uprobe.ebpf.c": "da6e72e340d4681b138385da7bc3034dac344a6431a746ebf8a18a2d4e1d35b8",
+    "otel/support/ebpf/custom_trace.ebpf.c": "ba343402182790a0f07c0c2172a2ac18de106b5942c8ef5a848c3ffa8cbb3133",
+    "otel/support/ebpf/tracemgmt.h": "692941f260c556f21b6eb0a4b2e508366a25776f282ed9d1421b13b9c380bdd8",
+    "otel/support/ebpf/system_config.ebpf.c": "0761fb98a40ba61329b41485650923aa312967c976b6e3a920fe5df29c146655",
+    "otel/support/ebpf/python_tracer.ebpf.c": "e258dbb94c28b751d113929e0d923bac2d7cc3bfba462fa8bc9b1fd7d8cf594b",
+    "otel/support/ebpf/tsd.h": "85fdc10f10b8dfea71812b8a49163155950716b26990ce5bc6e151dc0f915152",
+    "otel/support/ebpf/LICENSE": "0d5bf346df9e635a29dcdddf832dc5b002ca6cdc1c5c9c6c567d2a61bb0c5c15",
+    "otel/support/ebpf/errors.h": "900072dc94ec0ded7d0685159fae050eead732f9e9709474ab37dff1b243415d",
+    "otel/support/ebpf/bpfdefs.h": "32b91c7c2e83227939a99c4ac1a60cce9935cc92769a2eb3264d02b345bcb49d",
+    "otel/support/ebpf/v8_tracer.h": "8507fb30a67d1d6853b32f8ee671e71cc78077bf3341f21a1a833622920936a4",
+    "otel/support/ebpf/dotnet_tracer.ebpf.c": "5626ba9ac1f37d21d19efb7b1d8a632adee4742ba7e517e5ba335de60a57b964",
+    "tetragon/process/bpf_exit.c": "e9986d62d1c20ff4c3a8a45caa82f13c8e706a57bde47be0be11ca8f251313a1",
+    "tetragon/process/bpf_mbset.h": "0391f5244d7635d3f1ab8db1c2b428a2d5e6d28b7d4d87f9e60a79d519ed94fe",
+    "tetragon/process/bpf_loader.c": "7e431388b5a2811411c7a8d50e3e3daeb02ff0e81c32155f02d05c76276bb7b0",
+    "tetragon/process/generic_calls.h": "33b55e40ebd0f7d2b74d9221bdb1ff9e33f9e84b54c46131233d2322834c7d1a",
+    "tetragon/process/generic_path.h": "e70b5430350db6963f5e6cf5b31bc0a4a8f23739fcdf6b3ceffd2a525d055522",
+    "tetragon/process/pfilter.h": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e",
+    "tetragon/process/regs.h": "8480f7a84c8e3dbea64a6f9daf3eaafa696a5c4d0a1b9b8064160346ae450fca",
+    "tetragon/process/syscall64.h": "3037b6650535cbb230b3bbb5d6b9e88db91881a38513310b9f96baf392fbe30e",
+    "tetragon/process/bpf_generic_rawtp.c": "3c60d98aa09ef237311b2af765049c62f3347eedb23eb3beb6e816e9505d5038",
+    "tetragon/process/bpf_generic_lsm_core.c": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64",
+    "tetragon/process/bpf_generic_fentry.c": "07ab14f6304d59162283d17f1113f49b0b2d3f4611635e0d9cb6db223d55e986",
+    "tetragon/process/addr_lpm_maps.h": "1534f46e1a9149652ddc3528dcf26ddb2d4b7a437622f92e232c22abf3be1d32",
+    "tetragon/process/ratelimit_maps.h": "fe5bbf555df627617e2642453f2796f42b86d2b196d4e3cb77d8a293607b14ed",
+    "tetragon/process/heap.h": "0c1599beeb1c4cbc193863a14a681944cae181c7f65e12ff8f0f179dcf932d8e",
+    "tetragon/process/bpf_execve_event.c": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+    "tetragon/process/retprobe_map.h": "9ec9fbdc261620ae7a7816630c752f14dd3f762da22dc04f7815dd0ba2559a76",
+    "tetragon/process/generic_arg.h": "a89f0c07b5883b24a8249dbebf728cd038e2e892640d2f81fcd0a69569943e70",
+    "tetragon/process/bpf_rate.h": "f8be2a269f1a70b02be949dc13e3acae46e094cde1a768fb8c30e4627b5c7476",
+    "tetragon/process/bpf_enforcer.c": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+    "tetragon/process/bpf_generic_uprobe.c": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2",
+    "tetragon/process/bpf_generic_fexit.c": "5f33b121e34c2a0f922e9eef9bdff832860f6f4ec0a634cde7ec509230ab9f18",
+    "tetragon/process/bpf_process_event.h": "391de1c10e562f209a97395dcb328bdeb16c37c97cccc7d6794c0a5b765998dd",
+    "tetragon/process/cel_expr.h": "fc6146362d8d8519bc29538d4d745096a8c9a813ece9e81be19d387246ac1f4e",
+    "tetragon/process/bpf_prog_iter.c": "c60128df11eea130dd1c0f05be88fe5efd6bff3e86598f156737011c603c18e6",
+    "tetragon/process/bpf_cgroup.c": "1ff6867d6d22a69e20b17ef1184522ec2c8124cdd2408ea6010b635d98f399fe",
+    "tetragon/process/bpf_generic_retkprobe.c": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20",
+    "tetragon/process/bpf_enforcer.h": "4b4d4253cc9eea43b48ae8594c403b037fe191c4375ae7551253dbde5e752168",
+    "tetragon/process/usdt_arg.h": "41259b194883b72181ecd8e8f8f18c34b297f500f9607479653fa196045deb65",
+    "tetragon/process/bpf_generic_usdt.c": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+    "tetragon/process/bpf_fork.c": "5eeaf0ac35d7ce5c92c4f06af1a8ed517988542f11e1fd50acc31c9af293f3ce",
+    "tetragon/process/bpf_execve_bprm_commit_creds.c": "8c888c3ac938aa92603fe83895c55a8ed9bf1c60ba69e49fb7565d55c99a1480",
+    "tetragon/process/bpf_execve_map_update.c": "9383a4a411d087972fcec2e2c684eb649d319c9a5d31a348ac432adfe8510056",
+    "tetragon/process/argfilter_maps.h": "67e3ba39cf014c808656d440a617fd2d164d764d74f795a74bb1cb9ef3b12ae6",
+    "tetragon/process/bpf_lsm_ima.h": "dafa14da7e79941740ada2bb84b01204a6c53069b317151b283b8e4da52ccdb8",
+    "tetragon/process/data_event.h": "6b88ef8ca96a8001e9891f7b6eae06b5e54127359d12969940e17e0728b932f6",
+    "tetragon/process/bpf_generic_lsm_output.c": "627f36c62e7926258ad4f24538e6a2a0d5c458d21d760c4c723142e0149aa3e6",
+    "tetragon/process/string_maps.h": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01",
+    "tetragon/process/bpf_generic_kprobe.c": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+    "tetragon/process/bpf_generic_tracepoint.c": "b399ea9b3d0f47585f3fe75c97555619b8718dac7635d846ea7c9584128a2567",
+    "tetragon/process/generic_maps.h": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54",
+    "tetragon/process/bpf_generic_retuprobe.c": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21",
+    "tetragon/process/bpf_generic_lsm_ima_bprm.c": "8ded6012da763fc16b12c85ee8111607581117a4649cc82d6777dcfcebe9aa51",
+    "tetragon/process/event_config.h": "93e2e9fd0467bbb89c2ffe79dfa8fa60b6d0e1b729dedc69601e26a500c62529",
+    "tetragon/process/policy_filter.h": "64b160fffd7cc73b107a82de9f802f91c120b047af4a12d3a8b0c1f6a66a4aab",
+    "tetragon/process/user_preload.h": "b603fbb5d23eae94e17b80ae1feb92eb7f578f170fc86ff17c8d9d915ad41069",
+    "tetragon/process/bpf_generic_lsm_ima_file.c": "dd0c7a431292c772e2e5178a16cd748fbfe4d59488f366c99a6e61c815f719e2",
+    "tetragon/process/bpf_exit.h": "6d9dd1094083a7a723ab337bc85b7dd3caf05fe6a80e53974e8db7411cec0115",
+    "tetragon/process/uprobe_offload.h": "b70fccdd6b18ef0c3a8f2fef13376a5805cfadc9ad80e9213c82a153d45de07c",
+    "tetragon/errmetrics/fileids.h": "72ff92ea9113f78b2585be12d3b06183a060e34a8d40de686f4146762989071a",
+    "tetragon/errmetrics/get_fileid.h": "bdf1caf3ee856f170b6e8a31e7690110eed345dc8885fe94de6b414c054b60df",
+    "tetragon/include/vmlinux_generated_arm64.h": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae",
+    "tetragon/include/type_mapper.h": "1a8d861923b10ba9f89b3f1fdf153e76c57cfc75fd0f1abaf8e66df339e2fca5",
+    "tetragon/include/compiler.h": "5dba61eae7b8bba7f57b795a1ee49df98ea5ebd1d27ff7c7eeeeab200576fec1",
+    "tetragon/include/errno.h": "6bc3a3456026257fefdaacc5d48ad4cd7876d7253e19ba4d0b5ce7bfee539ee7",
+    "tetragon/include/vmlinux_generated_x86.h": "73fe1217cc39dfb136e107343b2aad6deecfef343672a0945c4c07ac06dfe102",
+    "tetragon/include/bpf_elf.h": "daf53c12bd7e31995b02cd83429cea835f6f1989eea6b39fae6ca1fd04804f61",
+    "tetragon/include/vmlinux.h": "747255472f09b0d9f45a4370966138676aff3b9b95cf0d93134eee0cf549168d",
+    "tetragon/include/api.h": "eee59ea0fb6da85f7c301c2f33a25e20bb0817ca4c0c8abb67d6ccc7d93e003c",
+    "tetragon/include/bpf_ktime.h": "7516751954062bbe08d171d6bb37ae0e72887f4c0135ddd1c7a7a6ead23a9c53",
+    "tetragon/windows/process_monitor.c": "884e43fff45f4725da2ff41ad4a05e033ea4cca24f0902bf2d41876745d56c4a",
+    "tetragon/cgroup/bpf_cgroup_release.c": "00a48c4b9ca1dc0b3edcb6d16b583e28bcac68516ef4e801759f700bbd91e024",
+    "tetragon/cgroup/bpf_cgtracker.c": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268",
+    "tetragon/cgroup/bpf_cgroup_events.h": "0a8854278e935ebb1e468fc3e22eb3b4c9bf1c680a6fecc0a9a772dfb88b3eea",
+    "tetragon/cgroup/bpf_cgroup_rmdir.c": "d1657dd8abd7388731a70e36db1d1f12919a0cece2a5310b725c906fb33c1679",
+    "tetragon/cgroup/bpf_cgroup_mkdir.c": "fed080b1d8ddc0c8b4e6ec3e8660fcc820ecd0e24d502ebc65c3ccccdd73bba5",
+    "tetragon/cgroup/cgtracker.h": "99ff07aeec09a7b45c6003c1620f8ad1d71aaeb0c89b2c8cb51644fa8b0d290e",
+    "tetragon/lib/data_msg.h": "02982cd0f821ee7adce8dca7251c0f2f9b948664bd70b269a651121a60089723",
+    "tetragon/lib/err.h": "195290e4be00315ce04568a76f46b99df0d57d31e6db6928d35b4e5f8ec8565a",
+    "tetragon/lib/policy_conf.h": "4708658f4c6ec99276dd88c9ce6a8370c048b4cb5b60abde5d6165c3077ce76e",
+    "tetragon/lib/policy_stats.h": "3e3ec9ba2e4cd46bcd0500a9276468bd1617ea0f2462903e21195066d92b7c76",
+    "tetragon/lib/config.h": "f2c6270b94c1ec522fbdb884c94daf73a0dae4b24067ae15d7bbf41a93ae5d87",
+    "tetragon/lib/bpf_event.h": "9105138082eba0b5e10d56c434eb09716b733e59bb0adaf0b269e62df4837e44",
+    "tetragon/lib/errmetrics.h": "200edb95c5a874a262b20840e5a788fd20fb371492da665a9479832664c06c0a",
+    "tetragon/lib/generic.h": "646ef8a0b0b5a8342467699346abfa81189e1bb19f0a0f4d9b75cc1f09857b16",
+    "tetragon/lib/bpf_helpers.h": "a4d3142a1a8d7ee71c581f4418aa232b074b333b16e8e108abbd500a8d108a0e",
+    "tetragon/lib/common.h": "0080ce8dd3363a62b22711e0821abef889ec71eca75dd9773dcae5c83156d2a0",
+    "tetragon/lib/bpf_d_path.h": "6f90bf41ef07b6ec11b0c5bedc3711313422a5ab43779b9dc1d95160397acac3",
+    "tetragon/lib/bpf_task.h": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377",
+    "tetragon/lib/msg_types.h": "3289dc1ff42a65a8ccc977cf944ad46d328da38f4e91d87ad37692af260a8e29",
+    "tetragon/lib/bpf_cred.h": "278a169aa89cd820fa8a418ab560f68a604d7b6f87b86ef697f5d86aa03a2f2e",
+    "tetragon/lib/environ_conf.h": "b3500ad4eada42862f2ecbabc5ecee7367bc24fd2b815653c57179799a98b25b",
+    "tetragon/lib/bpf_cgroup.h": "9b5bdd665f24cd126fcfe60421641eabbf51002f4bf3862166d2608f5803b8e6",
+    "tetragon/lib/process.h": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0",
+    "tetragon/libbpf/bpf_tracing.h": "202f08d2d4605537f60e77a81ffb31851455569b1f00d94b2d76a3f86ebd91e8",
+    "tetragon/libbpf/bpf_core_read.h": "8ed6bb4ff7eee627ef35b2020ddc2b73642e35d0e5da8da33f80b07761d10b6b",
+    "tetragon/alignchecker/bpf_alignchecker.c": "e278be7b6f5ab4ecbab48e8148ad4f265364e26a42ea1c80e7f147c512ff4c4e",
+    "tetragon/process/types/tuple.h": "447633e30a81aa91200ee8581aca05dd42193afcb5081cf76293d573d64b0e98",
+    "tetragon/process/types/basic.h": "3fb1e20e97abb1624b4591999b0fdefe644e9f186cecfccd8805ce9e4636518a",
+    "tetragon/process/types/operations.h": "6dbfbc5f12dc7cdaf3b3d7f219cb8725e4a60a15c383191088990a88d4383984",
+    "tetragon/process/types/perfevent.h": "6a1443577807718da2fee6b53182c6cefd3919148558c673097f59305b0a53de",
+    "tetragon/process/types/sockaddr.h": "3f0046d3e44687b2596aee66c54b805f1e2040c9721a695a657f9b5168d983ab",
+    "tetragon/process/types/bpfattr.h": "70168f9bd40860eada24243573244e31e5ec2e2ed2f5953ba9fc8d29c80a06bc",
+    "tetragon/process/types/module.h": "b500387af0a91a2532cbea03f66e75c6ff720a99d3d182a1db7cf76b91af248a",
+    "tetragon/process/types/net_device.h": "1578d70314ae74d49976a1c279d003cab282f61394183092dbe8cac49a1ad0f6",
+    "tetragon/process/types/capabilities.h": "4fb13e18eee1b2e7b876a82fd75c1cd4983bd403cc892c18d531a9dd71650a08",
+    "tetragon/process/types/sock.h": "c89c661b43d7d643bcbef086bac7f7d0791f89a62ce247df60048e42df4a929f",
+    "tetragon/process/types/bpfmap.h": "d8b1eba5ddda9316ec36ae683c25f2efbf04a45c96077e2598c337075fd09476",
+    "tetragon/process/types/socket.h": "a41dc7d9bf889fd03f6b479a77c831589a254b29bcd8410164e2ce80747af1a9",
+    "tetragon/process/types/sockaddr_un.h": "708f2c9ced650e284eb9508dcb87769eb374f21f92e7ab69c105e3f5da05a6ce",
+    "tetragon/process/types/skb.h": "e37ab29ca6f5765bd5f9d24542d2330b2200e09e6a4c1c9fe02a564360856dff"
+  },
+  "target_vmlinux_h_sha256": "dcf102e51b766062340472048621e18e99fd2057d1d528aa6fce0011a0b72604",
+  "application_runtime": "R restored-May29 replay follows",
+  "generated_at_load": "registered specializer",
+  "native_executions": 0
+}
