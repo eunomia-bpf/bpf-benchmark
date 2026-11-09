@@ -28,18 +28,18 @@ ENTRY(entry_post)
     asm volatile("ldr %0,[%1],#8" : "=r"(value),"+r"(base) : : "memory");
     return -(value&1UL);
 }
-#define VECTOR(NAME, REG) ENTRY(NAME) { ADDRESS; unsigned long value,initial=2; asm volatile("fmov d0,%2; ldr " REG ",[ %1 ]; fmov %0,d0" : "=r"(value) : "r"(base),"r"(initial) : "v0","memory");return -(value&1UL); }
+#define VECTOR(NAME, REG) ENTRY(NAME) { ADDRESS; unsigned long value,initial=1; asm volatile("fmov d0,%2; ldr " REG ",[ %1 ]; fmov %0,d0" : "=r"(value) : "r"(base),"r"(initial) : "v0","memory");return -(value&1UL); }
 VECTOR(entry_d0,"d0")
 VECTOR(entry_q0,"q0")
 ENTRY(entry_d0_post)
 {
-    ADDRESS; unsigned long value,initial=2;
+    ADDRESS; unsigned long value,initial=1;
     asm volatile("fmov d0,%2; ldr d0,[%1],#8; fmov %0,d0" : "=r"(value),"+r"(base) : "r"(initial) : "v0","memory");
     return -(value&1UL);
 }
 ENTRY(entry_q0_post)
 {
-    ADDRESS; unsigned long value,initial=2;
+    ADDRESS; unsigned long value,initial=1;
     asm volatile("fmov d0,%2; ldr q0,[%1],#16; fmov %0,d0" : "=r"(value),"+r"(base) : "r"(initial) : "v0","memory");
     return -(value&1UL);
 }
