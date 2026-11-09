@@ -109,6 +109,10 @@ def safety(epoch, suite):
                   STATE / 'loader/trusted-native-loader']})
     if suite == 'selftests315':
         bind(work / 'table', ROOT / 'kprog/selftests/build')
+    for source, name in [(STATE / 'module/kprog_stock.ko', 'kprog_stock.ko'),
+                         (NATIVE_LINK, 'native-link'),
+                         (Path('/var/tmp/kprog-tmp/S17/bp/bound-probe'), 'bound-probe')]:
+        shutil.copy2(source, work / name)
     output = work / 'out'
     output.mkdir(exist_ok=True)
     guest = work / 'guest.sh'
@@ -159,12 +163,12 @@ def census(epoch):
             data['source_head'] = epoch.name
         write(inputs / name, data)
     link(epoch / 'source', inputs / 'source')
-    link(NATIVE_LINK, inputs / 'native-link')
+    shutil.copy2(NATIVE_LINK, inputs / 'native-link')
     runtime = inputs / 'stock-runtime'
     runtime.mkdir(exist_ok=True)
-    link(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
+    shutil.copy2(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
     for name in ['libnative_loader.so', 'trusted-native-loader']:
-        link((STATE / 'loader') / name, runtime / name)
+        shutil.copy2(STATE / 'loader' / name, runtime / name)
     scratch = epoch / 'census'
     scratch.mkdir(exist_ok=True)
     link(epoch / 'source', scratch / 'controller-source')
