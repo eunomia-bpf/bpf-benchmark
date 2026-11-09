@@ -1,0 +1,55 @@
+{
+  "paths": [
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/payload-negative/inputs.tar.gz",
+      "captured_sha256": "5de0902bca89a4a9e1f3784ce6df59504839464c9ae6efb45016e76668e930fc",
+      "published_capture_sha256": "12489d19bd7786e2eb99f9f353f8b3dfe9b97e4445a4a90ed0aa93f107526f41",
+      "preserved": "/var/tmp/kprog-tmp/S19/preserved-tracked-overwrites/corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/payload-negative/inputs.tar.gz",
+      "replay_archive": "kprog/results/kprog_tree_cleanup_20261109/historical-replay-overwrites.tar.gz"
+    },
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/summary.json",
+      "captured_sha256": "445e348efdca732803a3d06f2fbc50937dbb0e08d0a9c1677942e5227d723499",
+      "published_capture_sha256": "c452e2c1b3801935aa98e300cf73a60b47c0c2e6608488472c251172cc3323e9",
+      "preserved": "/var/tmp/kprog-tmp/S19/preserved-tracked-overwrites/corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/summary.json",
+      "replay_archive": "kprog/results/kprog_tree_cleanup_20261109/historical-replay-overwrites.tar.gz"
+    },
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout/trusted-arm64-tetragon-result/summary.json",
+      "captured_sha256": "f9a8d4570d45ebbe59c15a5c6593f11b7ee6872a140af1f87fbdbd592787acbd",
+      "published_capture_sha256": "3d8e3afb2db4fe66b483a31d05b0f88d31b66b9588e001d22ec31ee2ecdb2428",
+      "preserved": "/var/tmp/kprog-tmp/S19/preserved-tracked-overwrites/corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout/trusted-arm64-tetragon-result/summary.json",
+      "replay_archive": "kprog/results/kprog_tree_cleanup_20261109/historical-replay-overwrites.tar.gz"
+    },
+    {
+      "path": "kprog/selftests/results/submissions.json",
+      "captured_sha256": "8d8fa5c8bdab06d332e85d2b1dab98e6f91eb9ed4b03e28da58e3cd019603149",
+      "published_capture_sha256": "e8a70c501375cbec232b3c2726b95338f262e83a7e5611c182c68866ff22ca09",
+      "preserved": "/var/tmp/kprog-tmp/S19/preserved-tracked-overwrites/kprog/selftests/results/submissions.json",
+      "replay_archive": "kprog/results/kprog_tree_cleanup_20261109/historical-replay-overwrites.tar.gz"
+    }
+  ],
+  "raw_tetragon_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tetragon-layout/trusted-arm64-tetragon-result/run-20261108T121729204227Z.tar.gz",
+  "raw_tetragon_sha256": "8440d1427640c1e8c67061d05be2aba5d6465b95057cf4fb3c9e4a8dbf7ada38",
+  "input_tar_member_content": "All member sizes and SHA-256 values match the committed input archive.",
+  "bcc_replay_publication": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/startup-libaio/summary.json",
+  "selftest_replay_counts": {
+    "catalog_rows": 1917,
+    "attempted": 315,
+    "submitted": 0,
+    "installed": 0,
+    "verifier_rejected": 0,
+    "generation_failed": 0,
+    "compilation_failed": 0,
+    "resource_failed": 315,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 0,
+    "failure_agrees": 0,
+    "failure_installed": 0,
+    "success": 0,
+    "success_agrees": 0,
+    "success_installed": 0
+  }
+}
