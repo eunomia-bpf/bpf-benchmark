@@ -1,0 +1,4511 @@
+{
+  "objects": 3,
+  "resident_instances": 72,
+  "resource_instances": {
+    "resources_prepared": 72
+  },
+  "application_source_program_loads": 0,
+  "native_execution_requests": 0,
+  "programs": [
+    {
+      "application": "cilium/agent",
+      "resident_instances": 1,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd.o",
+      "source_sha256": "b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c",
+      "entry": "cil_xdp_entry",
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 0,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 13,
+          "source_func_type_id": 382,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 2,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_xdp_scratch",
+            "map_id": 3,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 4,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 5,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 6,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 7,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 8,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 9,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 10,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 11,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 12,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 13,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 14,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 16,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 18,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 19,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 20,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 22,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 24,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 25,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 26,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 27,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 28,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 29,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 30,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 31,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 32,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 34,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 35,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 36,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 37,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 39,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 40,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 41,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 42,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 43,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 44,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 45,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 46,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 47,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 49,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 50,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 51,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 52,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 53,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 54,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 55,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 57,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 58,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 59,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 60,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 61,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 62,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 63,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 64,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_cidr_v4_fix",
+            "map_id": 65,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_cidr_v4_dyn",
+            "map_id": 66,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_cidr_v6_fix",
+            "map_id": 67,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_cidr_v6_dyn",
+            "map_id": 68,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 70,
+            "value_offset": null
+          },
+          {
+            "name": "__config_cluster_id_bits",
+            "map_id": 70,
+            "value_offset": 0
+          },
+          {
+            "name": "__config_device_mtu",
+            "map_id": 70,
+            "value_offset": 4
+          },
+          {
+            "name": "__config_interface_mac",
+            "map_id": 70,
+            "value_offset": 8
+          },
+          {
+            "name": "__config_interface_ifindex",
+            "map_id": 70,
+            "value_offset": 16
+          },
+          {
+            "name": "__config_enable_jiffies",
+            "map_id": 70,
+            "value_offset": 20
+          },
+          {
+            "name": "__config_kernel_hz",
+            "map_id": 70,
+            "value_offset": 24
+          },
+          {
+            "name": "__config_cilium_net_ifindex",
+            "map_id": 70,
+            "value_offset": 28
+          },
+          {
+            "name": "__config_cilium_net_mac",
+            "map_id": 70,
+            "value_offset": 32
+          },
+          {
+            "name": "__config_cilium_host_ifindex",
+            "map_id": 70,
+            "value_offset": 40
+          },
+          {
+            "name": "__config_cilium_host_mac",
+            "map_id": 70,
+            "value_offset": 48
+          },
+          {
+            "name": "__config_service_loopback_ipv4",
+            "map_id": 70,
+            "value_offset": 56
+          },
+          {
+            "name": "__config_service_loopback_ipv6",
+            "map_id": 70,
+            "value_offset": 60
+          },
+          {
+            "name": "__config_router_ipv6",
+            "map_id": 70,
+            "value_offset": 76
+          },
+          {
+            "name": "__config_trace_payload_len",
+            "map_id": 70,
+            "value_offset": 92
+          },
+          {
+            "name": "__config_trace_payload_len_overlay",
+            "map_id": 70,
+            "value_offset": 96
+          },
+          {
+            "name": "__config_direct_routing_dev_ifindex",
+            "map_id": 70,
+            "value_offset": 100
+          },
+          {
+            "name": "__config_supports_fib_lookup_skip_neigh",
+            "map_id": 70,
+            "value_offset": 104
+          },
+          {
+            "name": "__config_supports_fib_lookup_src",
+            "map_id": 70,
+            "value_offset": 105
+          },
+          {
+            "name": "__config_enable_nodeport_source_lookup",
+            "map_id": 70,
+            "value_offset": 106
+          },
+          {
+            "name": "__config_tracing_ip_option_type",
+            "map_id": 70,
+            "value_offset": 107
+          },
+          {
+            "name": "__config_policy_deny_response_enabled",
+            "map_id": 70,
+            "value_offset": 108
+          },
+          {
+            "name": "__config_cluster_id",
+            "map_id": 70,
+            "value_offset": 112
+          },
+          {
+            "name": "__config_enable_conntrack_accounting",
+            "map_id": 70,
+            "value_offset": 116
+          },
+          {
+            "name": "__config_debug_lb",
+            "map_id": 70,
+            "value_offset": 117
+          },
+          {
+            "name": "__config_nodeport_port_min",
+            "map_id": 70,
+            "value_offset": 118
+          },
+          {
+            "name": "__config_nodeport_port_max",
+            "map_id": 70,
+            "value_offset": 120
+          },
+          {
+            "name": "__config_hash_init4_seed",
+            "map_id": 70,
+            "value_offset": 124
+          },
+          {
+            "name": "__config_hash_init6_seed",
+            "map_id": 70,
+            "value_offset": 128
+          },
+          {
+            "name": "__config_nat_46x64_prefix",
+            "map_id": 70,
+            "value_offset": 132
+          },
+          {
+            "name": "__config_enable_tproxy",
+            "map_id": 70,
+            "value_offset": 136
+          },
+          {
+            "name": "__config_events_map_rate_limit",
+            "map_id": 70,
+            "value_offset": 140
+          },
+          {
+            "name": "__config_events_map_burst_limit",
+            "map_id": 70,
+            "value_offset": 144
+          },
+          {
+            "name": "__config_enable_endpoint_routes",
+            "map_id": 70,
+            "value_offset": 148
+          },
+          {
+            "name": "__config_enable_identity_mark",
+            "map_id": 70,
+            "value_offset": 149
+          },
+          {
+            "name": "__config_enable_xdp_prefilter",
+            "map_id": 70,
+            "value_offset": 150
+          },
+          {
+            "name": "__config_tunnel_protocol",
+            "map_id": 70,
+            "value_offset": 151
+          },
+          {
+            "name": "__config_tunnel_port",
+            "map_id": 70,
+            "value_offset": 152
+          },
+          {
+            "name": "__config_enable_ipv4_fragments",
+            "map_id": 70,
+            "value_offset": 154
+          },
+          {
+            "name": "__config_enable_ipv6_fragments",
+            "map_id": 70,
+            "value_offset": 155
+          },
+          {
+            "name": "__config_enable_extended_ip_protocols",
+            "map_id": 70,
+            "value_offset": 156
+          },
+          {
+            "name": "__config_nat_ipv4_masquerade",
+            "map_id": 70,
+            "value_offset": 160
+          },
+          {
+            "name": "__config_nat_ipv6_masquerade",
+            "map_id": 70,
+            "value_offset": 164
+          },
+          {
+            "name": "__config_enable_remote_node_masquerade",
+            "map_id": 70,
+            "value_offset": 180
+          },
+          {
+            "name": "__config_ephemeral_min",
+            "map_id": 70,
+            "value_offset": 182
+          },
+          {
+            "name": "__config_proxy_redirect_via_cilium_net",
+            "map_id": 70,
+            "value_offset": 184
+          },
+          {
+            "name": "__config_enable_no_service_endpoints_routable",
+            "map_id": 70,
+            "value_offset": 185
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 71,
+            "value_offset": null
+          },
+          {
+            "name": "_aux_stride",
+            "map_id": 71,
+            "value_offset": 0
+          },
+          {
+            "name": "_aux_max_off",
+            "map_id": 71,
+            "value_offset": 8
+          },
+          {
+            "name": "45d3a3d1.bss",
+            "map_id": 72,
+            "value_offset": null
+          },
+          {
+            "name": "device_mac.__zero_mac",
+            "map_id": 72,
+            "value_offset": 0
+          }
+        ]
+      },
+      "resources": {
+        "section": "xdp/entry",
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 2
+          },
+          {
+            "name": "cilium_xdp_scratch",
+            "map_id": 3
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 4
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 5
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 6
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 7
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 8
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 9
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 10
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 11
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 12
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 13
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 14
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 16
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 18
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 19
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 20
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 22
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 24
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 25
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 26
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 27
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 28
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 29
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 30
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 31
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 32
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 34
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 35
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 36
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 37
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 39
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 40
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 41
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 42
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 43
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 44
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 45
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 46
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 47
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 49
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 50
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 51
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 52
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 53
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 54
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 55
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 57
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 58
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 59
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 60
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 61
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 62
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 63
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 64
+          },
+          {
+            "name": "cilium_cidr_v4_fix",
+            "map_id": 65
+          },
+          {
+            "name": "cilium_cidr_v4_dyn",
+            "map_id": 66
+          },
+          {
+            "name": "cilium_cidr_v6_fix",
+            "map_id": 67
+          },
+          {
+            "name": "cilium_cidr_v6_dyn",
+            "map_id": 68
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 70
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 71
+          },
+          {
+            "name": "45d3a3d1.bss",
+            "map_id": 72
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-h3tilq8_",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [
+          "tail_nodeport_rev_dnat_ipv4",
+          "tail_nodeport_nat_ingress_ipv4",
+          "tail_nodeport_nat_egress_ipv4"
+        ],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [
+          {
+            "map": "cilium_events",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 7,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_xdp_scratch",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 13,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 32,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 44,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 52,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_calls",
+            "source": 16,
+            "resource": 0,
+            "structure_id": 63,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv4_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 73,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv6_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 83,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_percpu_trace_id",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 87,
+            "member": 12,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lxc",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 102,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipcache_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 118,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 128,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 132,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 141,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 146,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 150,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 152,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 157,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 159,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_devices",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 167,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 171,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 174,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 182,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 189,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_signals",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 191,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 200,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_alloc_retries",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 204,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 209,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 215,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 223,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 230,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 234,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_throttle",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 242,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 246,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 254,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 258,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 266,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 271,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 277,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 288,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 291,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 298,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 302,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 307,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 311,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 315,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 320,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_affinity_match",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 324,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_act",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 330,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 334,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 338,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_sid",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 340,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 344,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 348,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_cidr_v4_fix",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 352,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_cidr_v4_dyn",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 354,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_cidr_v6_fix",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 356,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_cidr_v6_dyn",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 358,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          }
+        ]
+      },
+      "map_count": 62
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 35,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.o",
+      "source_sha256": "c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8",
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 0,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 14,
+          "source_func_type_id": 452,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 73,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_runtime_config",
+            "map_id": 74,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 75,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 76,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 77,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 78,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 79,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 80,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 81,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 82,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 83,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 84,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_policystats",
+            "map_id": 85,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_policy_v2",
+            "map_id": 86,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egresscall_policy",
+            "map_id": 87,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_call_policy",
+            "map_id": 88,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 89,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 90,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 92,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 94,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 95,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 96,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 98,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 100,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 101,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 102,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 103,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 104,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 105,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 106,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 107,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 108,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 110,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 111,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 112,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 113,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 115,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 116,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 117,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 118,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 119,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 120,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 121,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 122,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 124,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 125,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 126,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 127,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 128,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 129,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 130,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 132,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 133,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 134,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 135,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 136,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 137,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 138,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 139,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_node_map_v2",
+            "map_id": 140,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_encrypt_state",
+            "map_id": 141,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_l2_responder_v4",
+            "map_id": 142,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_l2_responder_v6",
+            "map_id": 143,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_vtep_map",
+            "map_id": 144,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_subnet_map",
+            "map_id": 145,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_tail_call_buffer6",
+            "map_id": 146,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_tail_call_buffer4",
+            "map_id": 147,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 148,
+            "value_offset": null
+          },
+          {
+            "name": "__config_cluster_id_bits",
+            "map_id": 148,
+            "value_offset": 0
+          },
+          {
+            "name": "__config_eth_header_length",
+            "map_id": 148,
+            "value_offset": 4
+          },
+          {
+            "name": "__config_device_mtu",
+            "map_id": 148,
+            "value_offset": 6
+          },
+          {
+            "name": "__config_enable_jiffies",
+            "map_id": 148,
+            "value_offset": 8
+          },
+          {
+            "name": "__config_kernel_hz",
+            "map_id": 148,
+            "value_offset": 12
+          },
+          {
+            "name": "__config_interface_ifindex",
+            "map_id": 148,
+            "value_offset": 16
+          },
+          {
+            "name": "__config_cilium_net_ifindex",
+            "map_id": 148,
+            "value_offset": 20
+          },
+          {
+            "name": "__config_cilium_net_mac",
+            "map_id": 148,
+            "value_offset": 24
+          },
+          {
+            "name": "__config_cilium_host_ifindex",
+            "map_id": 148,
+            "value_offset": 32
+          },
+          {
+            "name": "__config_cilium_host_mac",
+            "map_id": 148,
+            "value_offset": 40
+          },
+          {
+            "name": "__config_service_loopback_ipv4",
+            "map_id": 148,
+            "value_offset": 48
+          },
+          {
+            "name": "__config_service_loopback_ipv6",
+            "map_id": 148,
+            "value_offset": 52
+          },
+          {
+            "name": "__config_router_ipv6",
+            "map_id": 148,
+            "value_offset": 68
+          },
+          {
+            "name": "__config_trace_payload_len",
+            "map_id": 148,
+            "value_offset": 84
+          },
+          {
+            "name": "__config_trace_payload_len_overlay",
+            "map_id": 148,
+            "value_offset": 88
+          },
+          {
+            "name": "__config_direct_routing_dev_ifindex",
+            "map_id": 148,
+            "value_offset": 92
+          },
+          {
+            "name": "__config_supports_fib_lookup_skip_neigh",
+            "map_id": 148,
+            "value_offset": 96
+          },
+          {
+            "name": "__config_supports_fib_lookup_src",
+            "map_id": 148,
+            "value_offset": 97
+          },
+          {
+            "name": "__config_enable_nodeport_source_lookup",
+            "map_id": 148,
+            "value_offset": 98
+          },
+          {
+            "name": "__config_tracing_ip_option_type",
+            "map_id": 148,
+            "value_offset": 99
+          },
+          {
+            "name": "__config_policy_deny_response_enabled",
+            "map_id": 148,
+            "value_offset": 100
+          },
+          {
+            "name": "__config_cluster_id",
+            "map_id": 148,
+            "value_offset": 104
+          },
+          {
+            "name": "__config_enable_conntrack_accounting",
+            "map_id": 148,
+            "value_offset": 108
+          },
+          {
+            "name": "__config_debug_lb",
+            "map_id": 148,
+            "value_offset": 109
+          },
+          {
+            "name": "__config_nodeport_port_min",
+            "map_id": 148,
+            "value_offset": 110
+          },
+          {
+            "name": "__config_nodeport_port_max",
+            "map_id": 148,
+            "value_offset": 112
+          },
+          {
+            "name": "__config_hash_init4_seed",
+            "map_id": 148,
+            "value_offset": 116
+          },
+          {
+            "name": "__config_hash_init6_seed",
+            "map_id": 148,
+            "value_offset": 120
+          },
+          {
+            "name": "__config_nat_46x64_prefix",
+            "map_id": 148,
+            "value_offset": 124
+          },
+          {
+            "name": "__config_enable_tproxy",
+            "map_id": 148,
+            "value_offset": 128
+          },
+          {
+            "name": "__config_events_map_rate_limit",
+            "map_id": 148,
+            "value_offset": 132
+          },
+          {
+            "name": "__config_events_map_burst_limit",
+            "map_id": 148,
+            "value_offset": 136
+          },
+          {
+            "name": "__config_enable_endpoint_routes",
+            "map_id": 148,
+            "value_offset": 140
+          },
+          {
+            "name": "__config_enable_identity_mark",
+            "map_id": 148,
+            "value_offset": 141
+          },
+          {
+            "name": "__config_interface_mac",
+            "map_id": 148,
+            "value_offset": 144
+          },
+          {
+            "name": "__config_security_label",
+            "map_id": 148,
+            "value_offset": 152
+          },
+          {
+            "name": "__config_host_ep_id",
+            "map_id": 148,
+            "value_offset": 156
+          },
+          {
+            "name": "__config_enable_arp_responder",
+            "map_id": 148,
+            "value_offset": 158
+          },
+          {
+            "name": "__config_tunnel_protocol",
+            "map_id": 148,
+            "value_offset": 159
+          },
+          {
+            "name": "__config_tunnel_port",
+            "map_id": 148,
+            "value_offset": 160
+          },
+          {
+            "name": "__config_enable_ipv6_fragments",
+            "map_id": 148,
+            "value_offset": 162
+          },
+          {
+            "name": "__config_enable_ipv4_fragments",
+            "map_id": 148,
+            "value_offset": 163
+          },
+          {
+            "name": "__config_enable_extended_ip_protocols",
+            "map_id": 148,
+            "value_offset": 164
+          },
+          {
+            "name": "__config_allow_icmp_frag_needed",
+            "map_id": 148,
+            "value_offset": 165
+          },
+          {
+            "name": "__config_enable_icmp_rule",
+            "map_id": 148,
+            "value_offset": 166
+          },
+          {
+            "name": "__config_enable_policy_accounting",
+            "map_id": 148,
+            "value_offset": 167
+          },
+          {
+            "name": "__config_enable_netkit",
+            "map_id": 148,
+            "value_offset": 168
+          },
+          {
+            "name": "__config_nat_ipv4_masquerade",
+            "map_id": 148,
+            "value_offset": 172
+          },
+          {
+            "name": "__config_nat_ipv6_masquerade",
+            "map_id": 148,
+            "value_offset": 176
+          },
+          {
+            "name": "__config_enable_remote_node_masquerade",
+            "map_id": 148,
+            "value_offset": 192
+          },
+          {
+            "name": "__config_ephemeral_min",
+            "map_id": 148,
+            "value_offset": 194
+          },
+          {
+            "name": "__config_proxy_redirect_via_cilium_net",
+            "map_id": 148,
+            "value_offset": 196
+          },
+          {
+            "name": "__config_enable_no_service_endpoints_routable",
+            "map_id": 148,
+            "value_offset": 197
+          },
+          {
+            "name": "__config_wg_ifindex",
+            "map_id": 148,
+            "value_offset": 200
+          },
+          {
+            "name": "__config_wg_port",
+            "map_id": 148,
+            "value_offset": 204
+          },
+          {
+            "name": "__config_enable_l2_announcements",
+            "map_id": 148,
+            "value_offset": 206
+          },
+          {
+            "name": "__config_l2_announcements_max_liveness",
+            "map_id": 148,
+            "value_offset": 208
+          },
+          {
+            "name": "__config_vtep_mask",
+            "map_id": 148,
+            "value_offset": 216
+          },
+          {
+            "name": "__config_hybrid_routing_enabled",
+            "map_id": 148,
+            "value_offset": 220
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 149,
+            "value_offset": null
+          },
+          {
+            "name": "_aux_stride",
+            "map_id": 149,
+            "value_offset": 0
+          },
+          {
+            "name": "_aux_max_off",
+            "map_id": 149,
+            "value_offset": 8
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc/tail",
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 73
+          },
+          {
+            "name": "cilium_runtime_config",
+            "map_id": 74
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 75
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 76
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 77
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 78
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 79
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 80
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 81
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 82
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 83
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 84
+          },
+          {
+            "name": "cilium_policystats",
+            "map_id": 85
+          },
+          {
+            "name": "cilium_policy_v2",
+            "map_id": 86
+          },
+          {
+            "name": "cilium_egresscall_policy",
+            "map_id": 87
+          },
+          {
+            "name": "cilium_call_policy",
+            "map_id": 88
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 89
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 90
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 92
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 94
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 95
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 96
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 98
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 100
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 101
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 102
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 103
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 104
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 105
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 106
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 107
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 108
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 110
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 111
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 112
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 113
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 115
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 116
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 117
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 118
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 119
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 120
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 121
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 122
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 124
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 125
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 126
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 127
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 128
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 129
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 130
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 132
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 133
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 134
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 135
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 136
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 137
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 138
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 139
+          },
+          {
+            "name": "cilium_node_map_v2",
+            "map_id": 140
+          },
+          {
+            "name": "cilium_encrypt_state",
+            "map_id": 141
+          },
+          {
+            "name": "cilium_l2_responder_v4",
+            "map_id": 142
+          },
+          {
+            "name": "cilium_l2_responder_v6",
+            "map_id": 143
+          },
+          {
+            "name": "cilium_vtep_map",
+            "map_id": 144
+          },
+          {
+            "name": "cilium_subnet_map",
+            "map_id": 145
+          },
+          {
+            "name": "cilium_tail_call_buffer6",
+            "map_id": 146
+          },
+          {
+            "name": "cilium_tail_call_buffer4",
+            "map_id": 147
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 148
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 149
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-0wpv8xy2",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [
+          "tail_nodeport_rev_dnat_ipv4",
+          "tail_nodeport_nat_ingress_ipv4",
+          "tail_nodeport_nat_egress_ipv4",
+          "tail_handle_nat_fwd_ipv4",
+          "tail_handle_ipv4_cont_from_host",
+          "tail_handle_ipv4_cont_from_netdev"
+        ],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [
+          {
+            "map": "cilium_events",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 7,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_runtime_config",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 21,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_throttle",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 34,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 48,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv6_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 64,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv4_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 70,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 78,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 86,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_calls",
+            "source": 16,
+            "resource": 0,
+            "structure_id": 97,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_percpu_trace_id",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 101,
+            "member": 12,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lxc",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 112,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipcache_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 128,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_policystats",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 138,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_policy_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 146,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egresscall_policy",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 148,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_call_policy",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 150,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 160,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 162,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 169,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 174,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 178,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 180,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 185,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 187,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_devices",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 195,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 199,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 202,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 208,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 215,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_signals",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 217,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 226,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_alloc_retries",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 230,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 235,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 241,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 249,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 256,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 260,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 264,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 272,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 276,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 284,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 289,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 295,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 304,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 307,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 314,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 318,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 323,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 327,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 331,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 336,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_affinity_match",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 340,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_act",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 346,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 350,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 354,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_sid",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 356,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 360,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 364,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_node_map_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 371,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_encrypt_state",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 375,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_l2_responder_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 383,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_l2_responder_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 387,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_vtep_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 395,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_subnet_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 402,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          }
+        ]
+      },
+      "map_count": 69
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 36,
+      "source_object": "/var/tmp/kprog-tmp/C/current-abi-cilium-payload/payloads/cilium/objects/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.o",
+      "source_sha256": "30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28",
+      "entry": "tail_handle_arp",
+      "stage": "resources_prepared",
+      "metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 0,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 15,
+          "source_func_type_id": 472,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 150,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_tail_call_buffer4",
+            "map_id": 151,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 152,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_runtime_config",
+            "map_id": 153,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 154,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 155,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 156,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 157,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_node_map_v2",
+            "map_id": 158,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_auth_map",
+            "map_id": 159,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 160,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 161,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 162,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 163,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 164,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 165,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egresscall_policy",
+            "map_id": 166,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_call_policy",
+            "map_id": 167,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_skip_lb6",
+            "map_id": 168,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_skip_lb4",
+            "map_id": 169,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_policystats",
+            "map_id": 170,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_policy_v2",
+            "map_id": 171,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_mcast_group_outer_v4_map",
+            "map_id": 173,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 174,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 175,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 176,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 177,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 178,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 179,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 181,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 182,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 183,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 184,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 185,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 186,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 187,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 189,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 190,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 191,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 192,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 193,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 194,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 195,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 196,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 197,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 198,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 200,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 202,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 203,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 204,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 206,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 208,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 209,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 210,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 211,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 212,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 213,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 214,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 215,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 217,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 218,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 219,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 220,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 222,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 223,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_vtep_map",
+            "map_id": 224,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_subnet_map",
+            "map_id": 225,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_nodeport_nat_buffer",
+            "map_id": 226,
+            "value_offset": null
+          },
+          {
+            "name": "cilium_tail_call_buffer6",
+            "map_id": 227,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 228,
+            "value_offset": null
+          },
+          {
+            "name": "__config_cluster_id_bits",
+            "map_id": 228,
+            "value_offset": 0
+          },
+          {
+            "name": "__config_device_mtu",
+            "map_id": 228,
+            "value_offset": 4
+          },
+          {
+            "name": "__config_enable_jiffies",
+            "map_id": 228,
+            "value_offset": 6
+          },
+          {
+            "name": "__config_kernel_hz",
+            "map_id": 228,
+            "value_offset": 8
+          },
+          {
+            "name": "__config_interface_ifindex",
+            "map_id": 228,
+            "value_offset": 12
+          },
+          {
+            "name": "__config_cilium_net_ifindex",
+            "map_id": 228,
+            "value_offset": 16
+          },
+          {
+            "name": "__config_cilium_net_mac",
+            "map_id": 228,
+            "value_offset": 24
+          },
+          {
+            "name": "__config_cilium_host_ifindex",
+            "map_id": 228,
+            "value_offset": 32
+          },
+          {
+            "name": "__config_cilium_host_mac",
+            "map_id": 228,
+            "value_offset": 40
+          },
+          {
+            "name": "__config_service_loopback_ipv4",
+            "map_id": 228,
+            "value_offset": 48
+          },
+          {
+            "name": "__config_service_loopback_ipv6",
+            "map_id": 228,
+            "value_offset": 52
+          },
+          {
+            "name": "__config_router_ipv6",
+            "map_id": 228,
+            "value_offset": 68
+          },
+          {
+            "name": "__config_trace_payload_len",
+            "map_id": 228,
+            "value_offset": 84
+          },
+          {
+            "name": "__config_trace_payload_len_overlay",
+            "map_id": 228,
+            "value_offset": 88
+          },
+          {
+            "name": "__config_direct_routing_dev_ifindex",
+            "map_id": 228,
+            "value_offset": 92
+          },
+          {
+            "name": "__config_supports_fib_lookup_skip_neigh",
+            "map_id": 228,
+            "value_offset": 96
+          },
+          {
+            "name": "__config_supports_fib_lookup_src",
+            "map_id": 228,
+            "value_offset": 97
+          },
+          {
+            "name": "__config_enable_nodeport_source_lookup",
+            "map_id": 228,
+            "value_offset": 98
+          },
+          {
+            "name": "__config_tracing_ip_option_type",
+            "map_id": 228,
+            "value_offset": 99
+          },
+          {
+            "name": "__config_policy_deny_response_enabled",
+            "map_id": 228,
+            "value_offset": 100
+          },
+          {
+            "name": "__config_cluster_id",
+            "map_id": 228,
+            "value_offset": 104
+          },
+          {
+            "name": "__config_enable_conntrack_accounting",
+            "map_id": 228,
+            "value_offset": 108
+          },
+          {
+            "name": "__config_debug_lb",
+            "map_id": 228,
+            "value_offset": 109
+          },
+          {
+            "name": "__config_nodeport_port_min",
+            "map_id": 228,
+            "value_offset": 110
+          },
+          {
+            "name": "__config_nodeport_port_max",
+            "map_id": 228,
+            "value_offset": 112
+          },
+          {
+            "name": "__config_hash_init4_seed",
+            "map_id": 228,
+            "value_offset": 116
+          },
+          {
+            "name": "__config_hash_init6_seed",
+            "map_id": 228,
+            "value_offset": 120
+          },
+          {
+            "name": "__config_nat_46x64_prefix",
+            "map_id": 228,
+            "value_offset": 124
+          },
+          {
+            "name": "__config_enable_tproxy",
+            "map_id": 228,
+            "value_offset": 128
+          },
+          {
+            "name": "__config_events_map_rate_limit",
+            "map_id": 228,
+            "value_offset": 132
+          },
+          {
+            "name": "__config_events_map_burst_limit",
+            "map_id": 228,
+            "value_offset": 136
+          },
+          {
+            "name": "__config_enable_endpoint_routes",
+            "map_id": 228,
+            "value_offset": 140
+          },
+          {
+            "name": "__config_enable_identity_mark",
+            "map_id": 228,
+            "value_offset": 141
+          },
+          {
+            "name": "__config_interface_mac",
+            "map_id": 228,
+            "value_offset": 144
+          },
+          {
+            "name": "__config_security_label",
+            "map_id": 228,
+            "value_offset": 152
+          },
+          {
+            "name": "__config_host_ep_id",
+            "map_id": 228,
+            "value_offset": 156
+          },
+          {
+            "name": "__config_enable_arp_responder",
+            "map_id": 228,
+            "value_offset": 158
+          },
+          {
+            "name": "__config_endpoint_id",
+            "map_id": 228,
+            "value_offset": 160
+          },
+          {
+            "name": "__config_endpoint_ipv4",
+            "map_id": 228,
+            "value_offset": 164
+          },
+          {
+            "name": "__config_endpoint_ipv6",
+            "map_id": 228,
+            "value_offset": 168
+          },
+          {
+            "name": "__config_endpoint_netns_cookie",
+            "map_id": 228,
+            "value_offset": 184
+          },
+          {
+            "name": "__config_rt_info",
+            "map_id": 228,
+            "value_offset": 192
+          },
+          {
+            "name": "__config_tunnel_protocol",
+            "map_id": 228,
+            "value_offset": 196
+          },
+          {
+            "name": "__config_tunnel_port",
+            "map_id": 228,
+            "value_offset": 198
+          },
+          {
+            "name": "__config_enable_ipv6_fragments",
+            "map_id": 228,
+            "value_offset": 200
+          },
+          {
+            "name": "__config_enable_ipv4_fragments",
+            "map_id": 228,
+            "value_offset": 201
+          },
+          {
+            "name": "__config_enable_netkit",
+            "map_id": 228,
+            "value_offset": 202
+          },
+          {
+            "name": "__config_enable_extended_ip_protocols",
+            "map_id": 228,
+            "value_offset": 203
+          },
+          {
+            "name": "__config_proxy_redirect_via_cilium_net",
+            "map_id": 228,
+            "value_offset": 204
+          },
+          {
+            "name": "__config_enable_lrp",
+            "map_id": 228,
+            "value_offset": 205
+          },
+          {
+            "name": "__config_allow_icmp_frag_needed",
+            "map_id": 228,
+            "value_offset": 206
+          },
+          {
+            "name": "__config_enable_icmp_rule",
+            "map_id": 228,
+            "value_offset": 207
+          },
+          {
+            "name": "__config_enable_policy_accounting",
+            "map_id": 228,
+            "value_offset": 208
+          },
+          {
+            "name": "__config_nat_ipv4_masquerade",
+            "map_id": 228,
+            "value_offset": 212
+          },
+          {
+            "name": "__config_nat_ipv6_masquerade",
+            "map_id": 228,
+            "value_offset": 216
+          },
+          {
+            "name": "__config_enable_remote_node_masquerade",
+            "map_id": 228,
+            "value_offset": 232
+          },
+          {
+            "name": "__config_ephemeral_min",
+            "map_id": 228,
+            "value_offset": 234
+          },
+          {
+            "name": "__config_enable_no_service_endpoints_routable",
+            "map_id": 228,
+            "value_offset": 236
+          },
+          {
+            "name": "__config_policy_verdict_log_filter",
+            "map_id": 228,
+            "value_offset": 240
+          },
+          {
+            "name": "__config_vtep_mask",
+            "map_id": 228,
+            "value_offset": 244
+          },
+          {
+            "name": "__config_hybrid_routing_enabled",
+            "map_id": 228,
+            "value_offset": 248
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 229,
+            "value_offset": null
+          },
+          {
+            "name": "_aux_stride",
+            "map_id": 229,
+            "value_offset": 0
+          },
+          {
+            "name": "_aux_max_off",
+            "map_id": 229,
+            "value_offset": 8
+          }
+        ]
+      },
+      "resources": {
+        "section": "tc/tail",
+        "maps": [
+          {
+            "name": "cilium_events",
+            "map_id": 150
+          },
+          {
+            "name": "cilium_tail_call_buffer4",
+            "map_id": 151
+          },
+          {
+            "name": "cilium_ipcache_v2",
+            "map_id": 152
+          },
+          {
+            "name": "cilium_runtime_config",
+            "map_id": 153
+          },
+          {
+            "name": "cilium_signals",
+            "map_id": 154
+          },
+          {
+            "name": "cilium_metrics",
+            "map_id": 155
+          },
+          {
+            "name": "cilium_ipv6_frag_datagrams",
+            "map_id": 156
+          },
+          {
+            "name": "cilium_lxc",
+            "map_id": 157
+          },
+          {
+            "name": "cilium_node_map_v2",
+            "map_id": 158
+          },
+          {
+            "name": "cilium_auth_map",
+            "map_id": 159
+          },
+          {
+            "name": "cilium_calls",
+            "map_id": 160
+          },
+          {
+            "name": "cilium_throttle",
+            "map_id": 161
+          },
+          {
+            "name": "cilium_ipv4_frag_datagrams",
+            "map_id": 162
+          },
+          {
+            "name": "cilium_ratelimit",
+            "map_id": 163
+          },
+          {
+            "name": "cilium_ratelimit_metrics",
+            "map_id": 164
+          },
+          {
+            "name": "cilium_percpu_trace_id",
+            "map_id": 165
+          },
+          {
+            "name": "cilium_egresscall_policy",
+            "map_id": 166
+          },
+          {
+            "name": "cilium_call_policy",
+            "map_id": 167
+          },
+          {
+            "name": "cilium_skip_lb6",
+            "map_id": 168
+          },
+          {
+            "name": "cilium_skip_lb4",
+            "map_id": 169
+          },
+          {
+            "name": "cilium_policystats",
+            "map_id": 170
+          },
+          {
+            "name": "cilium_policy_v2",
+            "map_id": 171
+          },
+          {
+            "name": "cilium_mcast_group_outer_v4_map",
+            "map_id": 173
+          },
+          {
+            "name": "cilium_lb6_reverse_nat",
+            "map_id": 174
+          },
+          {
+            "name": "cilium_lb6_services_v2",
+            "map_id": 175
+          },
+          {
+            "name": "cilium_lb6_backends_v3",
+            "map_id": 176
+          },
+          {
+            "name": "cilium_lb6_affinity",
+            "map_id": 177
+          },
+          {
+            "name": "cilium_lb6_source_range",
+            "map_id": 178
+          },
+          {
+            "name": "cilium_lb6_health",
+            "map_id": 179
+          },
+          {
+            "name": "cilium_lb6_maglev",
+            "map_id": 181
+          },
+          {
+            "name": "cilium_lb4_reverse_nat",
+            "map_id": 182
+          },
+          {
+            "name": "cilium_lb4_services_v2",
+            "map_id": 183
+          },
+          {
+            "name": "cilium_lb4_backends_v3",
+            "map_id": 184
+          },
+          {
+            "name": "cilium_lb4_affinity",
+            "map_id": 185
+          },
+          {
+            "name": "cilium_lb4_source_range",
+            "map_id": 186
+          },
+          {
+            "name": "cilium_lb4_health",
+            "map_id": 187
+          },
+          {
+            "name": "cilium_lb4_maglev",
+            "map_id": 189
+          },
+          {
+            "name": "cilium_lb_affinity_match",
+            "map_id": 190
+          },
+          {
+            "name": "cilium_lb_act",
+            "map_id": 191
+          },
+          {
+            "name": "cilium_srv6_vrf_v6",
+            "map_id": 192
+          },
+          {
+            "name": "cilium_srv6_policy_v6",
+            "map_id": 193
+          },
+          {
+            "name": "cilium_srv6_sid",
+            "map_id": 194
+          },
+          {
+            "name": "cilium_srv6_vrf_v4",
+            "map_id": 195
+          },
+          {
+            "name": "cilium_srv6_policy_v4",
+            "map_id": 196
+          },
+          {
+            "name": "cilium_ct6_global",
+            "map_id": 197
+          },
+          {
+            "name": "cilium_ct_any6_global",
+            "map_id": 198
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp6",
+            "map_id": 200
+          },
+          {
+            "name": "cilium_per_cluster_ct_any6",
+            "map_id": 202
+          },
+          {
+            "name": "cilium_ct4_global",
+            "map_id": 203
+          },
+          {
+            "name": "cilium_ct_any4_global",
+            "map_id": 204
+          },
+          {
+            "name": "cilium_per_cluster_ct_tcp4",
+            "map_id": 206
+          },
+          {
+            "name": "cilium_per_cluster_ct_any4",
+            "map_id": 208
+          },
+          {
+            "name": "cilium_devices",
+            "map_id": 209
+          },
+          {
+            "name": "cilium_nodeport_neigh6",
+            "map_id": 210
+          },
+          {
+            "name": "cilium_nodeport_neigh4",
+            "map_id": 211
+          },
+          {
+            "name": "cilium_egress_gw_policy_v4",
+            "map_id": 212
+          },
+          {
+            "name": "cilium_egress_gw_policy_v6",
+            "map_id": 213
+          },
+          {
+            "name": "cilium_snat_v4_external",
+            "map_id": 214
+          },
+          {
+            "name": "cilium_snat_v4_alloc_retries",
+            "map_id": 215
+          },
+          {
+            "name": "cilium_per_cluster_snat_v4_external",
+            "map_id": 217
+          },
+          {
+            "name": "cilium_ipmasq_v4",
+            "map_id": 218
+          },
+          {
+            "name": "cilium_snat_v6_external",
+            "map_id": 219
+          },
+          {
+            "name": "cilium_snat_v6_alloc_retries",
+            "map_id": 220
+          },
+          {
+            "name": "cilium_per_cluster_snat_v6_external",
+            "map_id": 222
+          },
+          {
+            "name": "cilium_ipmasq_v6",
+            "map_id": 223
+          },
+          {
+            "name": "cilium_vtep_map",
+            "map_id": 224
+          },
+          {
+            "name": "cilium_subnet_map",
+            "map_id": 225
+          },
+          {
+            "name": "cilium_nodeport_nat_buffer",
+            "map_id": 226
+          },
+          {
+            "name": "cilium_tail_call_buffer6",
+            "map_id": 227
+          },
+          {
+            "name": ".rodata.config",
+            "map_id": 228
+          },
+          {
+            "name": ".rodata.aux",
+            "map_id": 229
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-jb2dsktt",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [
+          "tail_nodeport_rev_dnat_ipv4",
+          "tail_nodeport_nat_ingress_ipv4",
+          "tail_nodeport_nat_egress_ipv4",
+          "tail_handle_ipv4_cont",
+          "tail_ipv4_ct_egress",
+          "tail_ipv4_policy",
+          "tail_ipv4_ct_ingress_policy_only",
+          "tail_ipv4_ct_ingress"
+        ],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [
+          {
+            "map": "cilium_events",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 7,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipcache_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 48,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_runtime_config",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 57,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_signals",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 59,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 72,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv6_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 82,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lxc",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 93,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_node_map_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 102,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_auth_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 110,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_calls",
+            "source": 16,
+            "resource": 0,
+            "structure_id": 121,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_throttle",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 129,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipv4_frag_datagrams",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 135,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 143,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ratelimit_metrics",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 151,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_percpu_trace_id",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 153,
+            "member": 12,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egresscall_policy",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 155,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_call_policy",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 157,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_skip_lb6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 164,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_skip_lb4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 168,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_policystats",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 178,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_policy_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 184,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_mcast_group_outer_v4_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 195,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 200,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 208,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 212,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 220,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 224,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 230,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb6_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 237,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_reverse_nat",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 241,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_services_v2",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 248,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_backends_v3",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 252,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_affinity",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 257,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_source_range",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 261,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_health",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 265,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb4_maglev",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 270,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_affinity_match",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 274,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_lb_act",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 280,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 284,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 289,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_sid",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 291,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_vrf_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 295,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_srv6_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 299,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 309,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any6_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 311,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 316,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 321,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 324,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ct_any4_global",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 326,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_tcp4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 331,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_ct_any4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 333,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_devices",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 341,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 344,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_nodeport_neigh4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 347,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 353,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_egress_gw_policy_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 360,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 368,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v4_alloc_retries",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 372,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v4_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 377,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v4",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 383,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 390,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_per_cluster_snat_v6_external",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 397,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_ipmasq_v6",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 401,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_vtep_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 409,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          },
+          {
+            "map": "cilium_subnet_map",
+            "source": 1,
+            "resource": 0,
+            "structure_id": 416,
+            "member": 9,
+            "element": 2,
+            "index": 4
+          }
+        ]
+      },
+      "map_count": 71
+    }
+  ]
+}
