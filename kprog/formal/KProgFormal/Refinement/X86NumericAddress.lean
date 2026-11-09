@@ -3494,3 +3494,18 @@ theorem register_frame_refines (env : Environment) (frame : Frame) (arena : Nati
   exact captured_frame_refines env frame arena state width (.low source) nextPc fresh
 
 end KProgFormal.Refinement.X86NumericAddress.SignedDivision
+
+namespace KProgFormal.Refinement.X86NumericAddress.SignedDivision
+
+/-- The existing raw/tag frame body equals the complete word-arithmetic source
+model, including its concrete restoring loop and all direct-width routes. -/
+theorem source_words_frame_matches (env : EntryEnvironment.Environment)
+    (frame : EntryEnvironment.Frame) (arena : NativeWord) (state : RegisterState)
+    (width : Reference.X86.ScalarWidth) (operand nextPc : NativeWord) (fresh : Nat → Bool) :
+    wordStep env frame arena state width operand nextPc fresh =
+      X86Divide.SourceWords.handlerStep width (.immediate operand) nextPc fresh
+        (nativeRegisters env frame arena state) := by
+  rw [X86Divide.SourceWords.handler_matches]
+  exact word_frame_matches env frame arena state width operand nextPc fresh
+
+end KProgFormal.Refinement.X86NumericAddress.SignedDivision

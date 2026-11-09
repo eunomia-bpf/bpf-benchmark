@@ -9,7 +9,7 @@ implementation interface. It currently records70 x86-64 complete current C-model
 AArch64 operation bodies, plus an explicit current RET exit-contract interface
 and two returning-helper interface equalities. LDADD/STADD0x46, LDSET/STSET0x47 and LDCLR/STCLR0x48 share canonical atomic access, typed success laws and unified token bindings. Additional helper macro-routing and two-mode RET control laws retain their
 parametric/source bindings and do not increase the70 complete current x86 bodies.
-Full ISA and compiled-simulator closure remain active work. The production DIV signed AUX1 branch has its canonical signed reference and554 semantic scenes. Signed/unsigned AUXbit0 dispatch and arbitrary fresh flags compose through the generic step/token laws. The complete64-bit word restoring loop and its zero-high fast path now refine captured signed qword outcomes; C-source extraction, compiled-B and physical/ABI transport remain explicit interfaces.
+Full ISA and compiled-simulator closure remain active work. The production DIV signed AUX1 branch has its canonical signed reference and554 semantic scenes. Signed/unsigned AUXbit0 dispatch and arbitrary fresh flags compose through the generic step/token laws. All four widths compose64-bit word arithmetic, the complete restoring loop/zero-high fast path, emitted word-limit comparison and unsigned sign restoration through captured operands, whole state/fresh flags and the raw/tag frame. C-source extraction, compiled-B and physical/ABI transport remain explicit interfaces.
 
 ## Specification and proof scope
 

@@ -890,3 +890,196 @@ theorem source_qword_outcome (s : Reference.X86.State) (operand : Reference.Word
   exact guarded_qword_matches _ _ _ _
 
 end KProgFormal.Refinement.X86Divide.RestoringLoop
+
+namespace KProgFormal.Refinement.X86Divide.SourceWords
+open Reference.X86 (ScalarWidth)
+open KProgFormal.X86SignedDivision
+
+theorem masked_stable (width : ScalarWidth) (value : Reference.Word)
+    (bound : value.toNat < base width) :
+    maskedLimb (X86Scalar.handlerWidth width) value = value := by
+  apply BitVec.eq_of_toNat_eq
+  rw [masked_limb_refines, BitVec.toNat_setWidth, BitVec.toNat_setWidth]
+  have radix : 2 ^ x86WidthBitsSpec (X86Scalar.handlerWidth width) = base width := by
+    cases width <;> rfl
+  rw [radix, Nat.mod_eq_of_lt bound, Nat.mod_eq_of_lt value.isLt]
+
+/-- The narrow branch packs its two bounded limbs into the emitted64-bit word. -/
+def packed (width : ScalarWidth) (high low : Reference.Word) : Reference.Word :=
+  (high <<< width.bits) ||| low
+
+theorem packed_masked (width : ScalarWidth) (high low : Reference.Word)
+    (narrow : width ≠ .w64) :
+    packed width (maskedLimb (X86Scalar.handlerWidth width) high)
+        (maskedLimb (X86Scalar.handlerWidth width) low) =
+      (join (X86Scalar.handlerWidth width) high low).setWidth 64 := by
+  cases width <;> simp [packed, maskedLimb, join, X86Scalar.handlerWidth,
+    x86WidthBitsSpec, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    Reference.Word] at * <;> bv_decide
+
+theorem packed_value (width : ScalarWidth) (high low : Reference.Word)
+    (narrow : width ≠ .w64) (highBound : high.toNat < base width)
+    (lowBound : low.toNat < base width) :
+    (packed width high low).toNat = high.toNat * base width + low.toNat := by
+  have equation : packed width high low =
+      (join (X86Scalar.handlerWidth width) high low).setWidth 64 := by
+    calc
+      packed width high low = packed width
+          (maskedLimb (X86Scalar.handlerWidth width) high)
+          (maskedLimb (X86Scalar.handlerWidth width) low) := by
+        rw [masked_stable width high highBound, masked_stable width low lowBound]
+      _ = _ := packed_masked width high low narrow
+  have radix : 2 ^ x86WidthBitsSpec (X86Scalar.handlerWidth width) = base width := by
+    cases width <;> rfl
+  have size : 2 * x86WidthBitsSpec (X86Scalar.handlerWidth width) ≤ 64 := by
+    cases width <;> simp [X86Scalar.handlerWidth, x86WidthBitsSpec] at *
+  have bound : (join (X86Scalar.handlerWidth width) high low).toNat < 2^64 :=
+    Nat.lt_of_lt_of_le (join (X86Scalar.handlerWidth width) high low).isLt
+      (Nat.pow_le_pow_right (by decide : 1 ≤ 2) size)
+  rw [equation, BitVec.toNat_setWidth, Nat.mod_eq_of_lt bound,
+    join_to_nat, radix, Nat.mod_eq_of_lt highBound, Nat.mod_eq_of_lt lowBound]
+
+/-- All emitted arithmetic routes operate on words: direct narrow division,
+the qword zero-high fast path and the complete descending restoring loop. -/
+def quotRem (width : ScalarWidth) (high low divisor : Reference.Word) :
+    Reference.Word × Reference.Word :=
+  if width = .w64 then RestoringLoop.qword high low divisor else
+    let dividend := packed width high low
+    (dividend.udiv divisor, dividend.umod divisor)
+
+theorem quot_rem_matches (width : ScalarWidth) (high low divisor : Reference.Word)
+    (highBound : high.toNat < base width) (lowBound : low.toNat < base width)
+    (initial : high.toNat < divisor.toNat) :
+    let result := quotRem width high low divisor
+    (result.1.toNat, result.2.toNat) =
+      SignedArithmetic.quotRem width high.toNat low.toNat divisor.toNat := by
+  by_cases wide : width = .w64
+  · subst width
+    simpa only [quotRem, ↓reduceIte] using RestoringLoop.qword_matches high low divisor initial
+  · have dividend := packed_value width high low wide highBound lowBound
+    simp only [quotRem, SignedArithmetic.quotRem, wide, ↓reduceIte]
+    change ((packed width high low).toNat / divisor.toNat,
+      (packed width high low).toNat % divisor.toNat) = _
+    rw [dividend]
+
+/-- The actual unsigned source threshold retains the signed minimum magnitude. -/
+def limitWord (width : ScalarWidth) (negative : Bool) : Reference.Word :=
+  (1 <<< (width.bits - 1)) - (if negative then 0 else 1)
+
+theorem limit_value (width : ScalarWidth) (negative : Bool) :
+    (limitWord width negative).toNat = SignedArithmetic.limit width negative := by
+  cases width <;> cases negative <;> decide
+
+/-- The C body tests the preliminary limbs and then the unsigned sign limit,
+keeping the quotient and remainder as source words until architectural writes. -/
+def guarded (width : ScalarWidth) (negative : Bool)
+    (high low divisor : Reference.Word) : Option (Reference.Word × Reference.Word) :=
+  if divisor = 0 ∨ BitVec.ule divisor high then none else
+    let result := quotRem width high low divisor
+    if BitVec.ult (limitWord width negative) result.1 then none else some result
+
+theorem guarded_matches (width : ScalarWidth) (negative : Bool)
+    (high low divisor : Reference.Word) (highBound : high.toNat < base width)
+    (lowBound : low.toNat < base width) :
+    (guarded width negative high low divisor).map (fun pair => (pair.1.toNat, pair.2.toNat)) =
+      SignedArithmetic.guarded width negative high.toNat low.toNat divisor.toNat := by
+  have zero : divisor = 0 ↔ divisor.toNat = 0 := by
+    constructor
+    · intro h; simp [h]
+    · intro h; apply BitVec.eq_of_toNat_eq; exact h
+  have fields : (divisor = 0 ∨ BitVec.ule divisor high) ↔
+      (divisor.toNat = 0 ∨ divisor.toNat ≤ high.toNat) :=
+    or_congr zero BitVec.ule_iff_toNat_le
+  by_cases early : divisor.toNat = 0 ∨ divisor.toNat ≤ high.toNat
+  · rw [guarded, if_pos (fields.mpr early), SignedArithmetic.guarded, if_pos early]
+    rfl
+  · have initial : high.toNat < divisor.toNat := by omega
+    have result := quot_rem_matches width high low divisor highBound lowBound initial
+    have quotient := congrArg Prod.fst result
+    have remainder := congrArg Prod.snd result
+    dsimp only at quotient remainder
+    simp only [guarded, if_neg (mt fields.mp early), SignedArithmetic.guarded,
+      if_neg early, BitVec.ult_iff_toNat_lt, limit_value, quotient]
+    split
+    · rfl
+    · change some ((quotRem width high low divisor).1.toNat,
+        (quotRem width high low divisor).2.toNat) = _
+      exact congrArg some result
+
+/-- Actual source masks/signs feed the word arithmetic on every emitted width. -/
+def outcome (width : ScalarWidth) (s : Reference.X86.State) (operand : Reference.Word) :
+    Option (Reference.Word × Reference.Word) :=
+  let limbs := sourceMagnitudeLimbs (X86Scalar.handlerWidth width)
+    (Capture.highWord width s) (s.gpr 0)
+  guarded width (Bool.xor (Capture.sourceNegative width (Capture.highWord width s))
+    (Capture.sourceNegative width operand)) limbs.1 limbs.2 (Capture.divisorMagnitude width operand)
+
+theorem outcome_matches (width : ScalarWidth) (s : Reference.X86.State) (operand : Reference.Word) :
+    (outcome width s operand).map (fun pair => (pair.1.toNat, pair.2.toNat)) =
+      SourceState.outcome width s operand := by
+  have bounds := source_limbs_bounds (X86Scalar.handlerWidth width)
+    (Capture.highWord width s) (s.gpr 0)
+  have radix : 2 ^ x86WidthBitsSpec (X86Scalar.handlerWidth width) = base width := by
+    cases width <;> rfl
+  rw [radix] at bounds
+  exact guarded_matches _ _ _ _ _ bounds.1 bounds.2
+
+/-- The actual word quotient/remainder receive unsigned sign restoration and
+the existing byte or wider architectural writes after both fault sites. -/
+def arithmeticStep (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (s : Reference.X86.State) : Reference.Transition Reference.X86.State :=
+  match X86Scalar.read s width source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (operand, reads) =>
+      match outcome width s operand with
+      | none => ⟨s, reads ++ [.fault .divide], some .divide⟩
+      | some (quotient, remainder) =>
+          let negative := Capture.sourceNegative width (Capture.highWord width s)
+          let qnegative := Bool.xor negative (Capture.sourceNegative width operand)
+          let qword := if qnegative then 0 - quotient else quotient
+          let rword := if negative then 0 - remainder else remainder
+          if width = .w8 then
+            let registers := fun r => if r = 0 then
+              write .w16 (s.gpr r) (SourceState.packedBytes qword rword) else s.gpr r
+            ⟨{ s with gpr := registers, pc := nextPc }, reads, none⟩
+          else
+            let registers := fun r => if r = 0 then write width (s.gpr r) qword
+              else if r = 2 then write width (s.gpr r) rword else s.gpr r
+            ⟨{ s with gpr := registers, pc := nextPc }, reads, none⟩
+
+theorem arithmetic_step_matches (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (s : Reference.X86.State) :
+    arithmeticStep width source nextPc s = SourceState.arithmeticStep width source nextPc s := by
+  unfold arithmeticStep SourceState.arithmeticStep
+  cases read : X86Scalar.read s width source with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨operand, reads⟩
+      simp only []
+      rw [← outcome_matches width s operand]
+      cases result : outcome width s operand with
+      | none => rfl
+      | some pair =>
+          rcases pair with ⟨quotient, remainder⟩
+          simp [Option.map, SourceState.restoredWord]
+
+/-- All six source-order flags remain arbitrary fresh choices. -/
+def handlerStep (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (fresh : Nat → Bool) (s : Reference.X86.State) :
+    Reference.Transition Reference.X86.State :=
+  SourceState.refresh fresh (arithmeticStep width source nextPc s)
+
+theorem handler_matches (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (fresh : Nat → Bool) (s : Reference.X86.State) :
+    handlerStep width source nextPc fresh s = SourceState.handlerStep width source nextPc fresh s := by
+  rw [handlerStep, arithmetic_step_matches]
+  rfl
+
+theorem handler_refines (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (fresh : Nat → Bool) (s : Reference.X86.State) :
+    Reference.X86.Step (.signedDivide width source nextPc) s
+      (handlerStep width source nextPc fresh s) := by
+  rw [handler_matches]
+  exact SourceState.handler_refines width source nextPc fresh s
+
+end KProgFormal.Refinement.X86Divide.SourceWords

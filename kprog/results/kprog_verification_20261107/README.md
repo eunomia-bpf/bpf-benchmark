@@ -6188,3 +6188,15 @@ captured qword magnitudes into `SourceState.outcome`. The
 and axiom audit (all0, sorryAx0, nine inherited executable-reduction dependencies); [the unified TODO](../../docs/todo.md) tracks completion and
 the C-source extraction, compiled-B and physical/ABI interfaces. The current
 complete C-model total remains70/75 and compiled scalar families remain13/75.
+
+### DIV complete native-word route composition
+
+`X86Divide.SourceWords` proves the three narrow packing routes and actual64-bit
+unsigned division/modulo, the qword loop/fast path, emitted word-limit comparisons
+and sign restoration. Its complete state handler refines canonical signed DIV
+for every width, scalar-source state, ordered read/fault result and fresh flag
+choice. `SignedDivision.source_words_frame_matches` identifies it with the
+current raw/tag frame body. The [word-route receipt](div-word-routes.log.gz)
+records four compiled modules and11axiom audits (all0, sorryAx0, ten inherited executable-reduction dependencies). The unified TODO marks this layer
+complete and retains actual C-source extraction, compiled-B and physical/ABI
+transport. Current complete C-model70/75 and compiled scalar13/75 retain scope.
