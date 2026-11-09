@@ -1284,8 +1284,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * Typed context/stack/map/packet/readonly routes retain their lifetime premise. */
 #define X86_SIM_L_READ_RECOVERY(BASE, DST) \
     ({ int __x86_read_recovered = 0; \
-       if (X86_SIM_L_REG_TAG(BASE) == X86_SIM_TAG_SCALAR && \
-           (X86_SIM_L_UNSPECIFIED() & 1U)) { \
+       if (KPROG_X86_REG_PRESENT(BASE) && (BASE) != X86_RSP && \
+           X86_SIM_L_REG_TAG(BASE) == X86_SIM_TAG_SCALAR && \
+           (X86_SIM_L_READ_REG(BASE) == 0 || (X86_SIM_L_UNSPECIFIED() & 1U))) { \
            if ((DST)==X86_RSP) X86_SIM_L_ARCHITECTURAL_FAULT(); \
            else X86_SIM_L_WRITE_REG_WIDTH((DST), 0, X86_WIDTH_64); \
            __x86_read_recovered = 1; \
@@ -2141,6 +2142,10 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__x86_l_count = X86_SIM_L_READ_REG(X86_RDX);       \
 		else                                                     \
 			__x86_l_count = (IMM);                            \
+        if ((OP_IS_COPY) && __x86_l_count && \
+            X86_SIM_L_REG_TAG(X86_RSI) == X86_SIM_TAG_SCALAR) { \
+            X86_SIM_L_ARCHITECTURAL_FAULT(); break; \
+        } \
 		for (__x86_l_i = 0; __x86_l_i < __x86_l_count;            \
 		     __x86_l_i++) {                                      \
 			__u64 __x86_l_byte;                               \

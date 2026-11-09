@@ -517,15 +517,16 @@ diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
  
  #include <asm/cpufeature.h>		/* boot_cpu_has, ...		*/
  #include <asm/traps.h>			/* dotraplinkage, ...		*/
-@@ -1253,6 +1254,11 @@
+@@ -1253,6 +1254,12 @@
++	/* Native BPF recovery precedes the user-address mm fault path. */
++	if (!(error_code & X86_PF_USER) &&
++	    search_bpf_extables(regs->ip) &&
++	    fixup_exception(regs, X86_TRAP_PF, error_code, address))
++		return;
++
  	if (unlikely(cpu_feature_enabled(X86_FEATURE_SMAP) &&
  		     !(error_code & X86_PF_USER) &&
  		     !(regs->flags & X86_EFLAGS_AC))) {
-+		/* Native BPF loads carry the stock recovery entry. */
-+		if (search_bpf_extables(regs->ip) &&
-+		    fixup_exception(regs, X86_TRAP_PF, error_code, address))
-+			return;
-+
  		/*
  		 * No extable entry here.  This was a kernel access to an
  		 * invalid pointer.  get_kernel_nofault() will not get here.
