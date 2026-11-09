@@ -16,7 +16,8 @@ module_param(extable_count, ulong, 0444);
 static int __init native_load_fault_init(void)
 {
     struct bpf_prog *prog = bpf_prog_by_id(prog_id);
-    struct file file = { .f_pos = 0x1234abcd };
+    struct inode inode = { .i_ino = 0x1234abcd };
+    struct file file = { .f_pos = 0x1234abcd, .f_inode = &inode };
     unsigned long args[2] = { (unsigned long)&file, 0 };
     if (IS_ERR(prog)) return PTR_ERR(prog);
     extable_count = prog->aux->num_exentries;

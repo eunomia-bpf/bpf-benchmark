@@ -324,6 +324,8 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 		    (OP) == X86_OP_CALL_MEMCPY_REG) {                     \
 			SETPTR(X86_RDI, REP_DST_OFF);                     \
 			SETPTR(X86_RSI, REP_SRC_OFF);                     \
+            if ((OP)==X86_OP_CALL_MEMCPY || (OP)==X86_OP_CALL_MEMCPY_REG) \
+                __x86_rsi_tag=X86_SIM_TAG_MAP_VALUE; \
 			X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, 2,             \
 						  X86_WIDTH_64);          \
 		}                                                         \

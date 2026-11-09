@@ -1284,20 +1284,27 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * exception outcome. The successful arm retains the ordinary memory access;
  * recovery clears the exception table GPR and resumes the following step.
  * Typed context/stack/map/packet/readonly routes retain their lifetime premise. */
-#define X86_SIM_L_READ_RECOVERY(BASE, DST) \
+#define X86_SIM_L_READ_RECOVERY_AT(BASE, DST, ADDRESS) \
     ({ int __x86_read_recovered = 0; \
        if (KPROG_X86_REG_PRESENT(BASE) && (BASE) != X86_RSP && \
            X86_SIM_L_REG_TAG(BASE) == X86_SIM_TAG_SCALAR && \
-           (X86_SIM_L_READ_REG(BASE) == 0 || (X86_SIM_L_UNSPECIFIED() & 1U))) { \
+           ((__u64)(ADDRESS) < 4096U || (X86_SIM_L_UNSPECIFIED() & 1U))) { \
            if ((DST)==X86_RSP) X86_SIM_L_ARCHITECTURAL_FAULT(); \
            else X86_SIM_L_WRITE_REG_WIDTH((DST), 0, X86_WIDTH_64); \
            __x86_read_recovered = 1; \
        } \
        __x86_read_recovered; })
 
+/* Effective addresses include the decoded index, scale and displacement. */
+#define X86_SIM_L_READ_RECOVERY(BASE, DST) \
+    X86_SIM_L_READ_RECOVERY_AT((BASE), (DST), X86_SIM_L_READ_REG(BASE))
+#define X86_SIM_L_READ_RECOVERY_MEM(BASE, DST, AUX, DISP) \
+    X86_SIM_L_READ_RECOVERY_AT((BASE), (DST), \
+        X86_SIM_L_READ_REG(BASE) + (__u64)X86_SIM_L_MEM_OFFSET((AUX), (DISP)))
+
 #define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_write_width =                                 \
 			KPROG_X86_MOV_LOAD_WRITE_WIDTH(FLAGS);             \
 		__u8 __x86_l_mem_width =                                   \
@@ -1472,7 +1479,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_MOVBE_LOAD(DST, SRC, FLAGS, AUX, IMM)               \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width = KPROG_X86_MOVBE_WIDTH(FLAGS);        \
 		__u64 __x86_l_value = X86_SIM_L_READ_MEM_VALUE((SRC),     \
 			(AUX), (IMM), __x86_l_width, 0);                  \
@@ -1507,7 +1514,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_LOAD_XMM0(SRC, AUX, IMM)                             \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                   \
 		__u8 __x86_l_arm = X86_SIM_L_MEM_XMM0_ARM(SRC);           \
@@ -1665,7 +1672,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_ROR_MEM(DST, FLAGS, AUX, IMM) \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_ror_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 		__u32 __x86_ror_aux = (AUX); \
 		__u8 __x86_ror_count = KPROG_X86_MEM_AUX_OP(__x86_ror_aux); \
@@ -1796,7 +1803,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_ALU_MEM(DST, SRC, FLAGS, AUX, IMM)                   \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
@@ -1827,7 +1834,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_ALU_MEM_UNARY(DST, FLAGS, AUX, IMM)                  \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
@@ -1855,7 +1862,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_ALU_MEM_IMM(DST, FLAGS, AUX, IMM)                    \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_store_imm_disp(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
@@ -1900,7 +1907,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_ALU_MEM_REG(DST, SRC, FLAGS, AUX, IMM)               \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
@@ -1951,7 +1958,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  */
 #define X86_SIM_L_EXEC_BZHI_STEP(OP_IS_MEM, DST, SRC, COUNT, AUX, FLAGS, IMM) \
 	do { \
-        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width =                                      \
 			KPROG_X86_BZHI_WRITE_WIDTH(FLAGS);                \
 		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
@@ -1996,7 +2003,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_EXEC_BT_STEP(OP_IS_MEM, INDEX_IS_MEM, INDEX_IS_REG, DST, \
 			       SRC, FLAGS, AUX, IMM)                       \
 	do { \
-        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_store_imm_disp(IMM))) break; \
 		__u8 __x86_l_width =                                      \
 			KPROG_X86_BT_WRITE_WIDTH(FLAGS);                  \
 		__u64 __x86_l_base;                                       \
@@ -2046,7 +2053,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_IMUL_MEM_IMM(DST, SRC, FLAGS, AUX, IMM)              \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);     \
 		if (!__x86_l_mem_width)                                  \
@@ -2126,7 +2133,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		for (__x86_l_i = 0; __x86_l_i < KPROG_X86_REP_MOVS_BOUND; \
 			__x86_l_i++) {                                           \
             if (__x86_l_i < __x86_l_count && \
-                X86_SIM_L_READ_RECOVERY(X86_RSI, X86_RCX)) { \
+                X86_SIM_L_READ_RECOVERY_AT(X86_RSI, X86_RCX, (__u64)(unsigned long)__x86_l_src_ptr + __x86_l_i * __x86_l_width)) { \
                 __x86_l_count = __x86_l_i; break; \
             } \
 			X86_SIM_L_REP_MOVS_ONE(__x86_l_width, __x86_l_i); \
@@ -2199,7 +2206,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  */
 #define X86_SIM_L_EXEC_ANDN_STEP(OP_IS_MEM, DST, SRC, AUX, FLAGS, IMM)      \
 	do { \
-        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY(X86_REG_AUX_GET_SRC_SHIFT(AUX), DST)) break; \
+        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY_MEM(X86_REG_AUX_GET_SRC_SHIFT(AUX), DST, (AUX), x86_store_imm_disp(IMM))) break; \
 		__u8 __x86_l_width =                                      \
 			KPROG_X86_ANDN_WRITE_WIDTH(FLAGS);                \
 		__u64 __x86_l_src1 = X86_SIM_L_READ_REG(SRC);             \
@@ -2242,7 +2249,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				OP_IS_CMP_MEM_REG, DST, SRC, FLAGS, AUX,    \
 				IMM)                                        \
 	do { \
-        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY(DST, X86_REG_NONE)) break; \
+        if ((OP_IS_MEM) && X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), (KPROG_X86_CMPOP_DISP_KIND(OP_IS_CMP_MEM_REG) == KPROG_X86_CMPOP_DISP_STORE ? x86_store_imm_disp(IMM) : x86_simm(IMM)))) break; \
 		__u8 __x86_l_width =                                       \
 			KPROG_X86_CMPOP_WRITE_WIDTH(FLAGS);                \
 		__u32 __x86_l_aux = (AUX);                                 \
@@ -2299,7 +2306,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_CMP_REG_MEM(DST, SRC, FLAGS, AUX, IMM)               \
 	do { \
-        if (X86_SIM_L_READ_RECOVERY(SRC, X86_REG_NONE)) break; \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
@@ -2411,7 +2418,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * A false 32-bit CMOV still clears the destination's upper 32 bits. */
 #define X86_SIM_L_EXEC_CMOV_STEP(RHS_IS_MEM, DST, SRC, FLAGS, AUX, IMM)     \
 	do { \
-        if ((RHS_IS_MEM) && X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+        if ((RHS_IS_MEM) && X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), KPROG_X86_CMOV_MEM_DISP(IMM))) break; \
 		__u32 __x86_l_cc = (RHS_IS_MEM) ?                         \
 			(__u32)KPROG_X86_CMOV_MEM_CONDITION(AUX) :        \
 			(__u32)KPROG_X86_CMOV_CONDITION(AUX);             \
@@ -2559,7 +2566,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * after incrementing RSP. Keep the actual transfer raw, like other memory ops. */
 #define X86_SIM_L_EXEC_PUSH_OP(SRC, FLAGS, AUX, IMM)                         \
 	do { \
-        if (X86_PUSHPOP_AUX_MODE(AUX) == 2U && X86_SIM_L_READ_RECOVERY(SRC, X86_REG_NONE)) break; \
+        if (X86_PUSHPOP_AUX_MODE(AUX) == 2U && X86_SIM_L_READ_RECOVERY_MEM(SRC, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
 		if (X86_PUSHPOP_AUX_MODE(AUX) != 1U && X86_PUSHPOP_AUX_MODE(AUX) != 2U) {                     \
 			X86_SIM_L_EXEC_PUSH((SRC), (FLAGS));               \
 		} else {                                                    \
@@ -2783,7 +2790,7 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 							  __x86_l_width);        \
 			} else if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(OP)) { \
-                if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+                if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
 				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
 					(SRC), (AUX), (IMM), (FLAGS), 0);         \
 				__u64 __x86_l_result = x86_popcount64(            \
@@ -2801,7 +2808,7 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 							  __x86_l_width);        \
 			} else if (KPROG_X86_DISP_SHIFTX_MEM_HANDLED(OP)) { \
-                if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+                if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
 				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
 					(SRC), (AUX), (IMM), (FLAGS), 1);         \
 				__u64 __x86_l_count = X86_SIM_L_READ_REG(         \
@@ -2818,7 +2825,7 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 			} else if (KPROG_X86_DISP_RORX_HANDLED(OP)) {           \
 				X86_SIM_L_EXEC_RORX((DST), (SRC), (FLAGS), (IMM)); \
 			} else if (KPROG_X86_DISP_RORX_MEM_HANDLED(OP)) { \
-                if (X86_SIM_L_READ_RECOVERY(SRC, DST)) break; \
+                if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
 				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
 					(SRC), (AUX), (IMM), (FLAGS), 1);         \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),                  \

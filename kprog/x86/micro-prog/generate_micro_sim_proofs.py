@@ -1377,7 +1377,7 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
     elif insn.mnemonic == "div" and is_mem(insn.operands[0]):
         memory, recovery_dst = insn.operands[0], "X86_RAX"
     if memory is not None:
-        lines.append(f"{indent}if (!X86_SIM_L_READ_RECOVERY({mem_base_reg(memory)}, {recovery_dst})) {{")
+        lines.append(f"{indent}if (!X86_SIM_L_READ_RECOVERY_MEM({mem_base_reg(memory)}, {recovery_dst}, {mem_aux(memory)}, x86_simm({c_u64(mem_disp(memory))}))) {{")
         append_encoded_step(lines, encoded, indent + "\t", step_macro)
         lines.append(f"{indent}}}")
         return

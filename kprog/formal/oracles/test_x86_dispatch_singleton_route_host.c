@@ -1827,6 +1827,8 @@ static void check_callmem(unsigned op, unsigned is_reg, __u64 imm)
 		PLANT_HEAP_BASE(X86_RBX);
 		PLANT_HEAP_BASE(X86_RDI);
 		PLANT_HEAP_BASE(X86_RSI);
+		if (op == X86_OP_CALL_MEMCPY || op == X86_OP_CALL_MEMCPY_REG)
+			__x86_rsi_tag = X86_SIM_TAG_MAP_VALUE;
 		X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, 8U, X86_WIDTH_64);
 		CAPTURE_ALL(&seed);
 		X86_SIM_L_EXEC(op, X86_RAX, X86_REG_NONE, 0U, 0U, imm);

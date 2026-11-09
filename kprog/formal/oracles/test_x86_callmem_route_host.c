@@ -100,7 +100,7 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSI,
 				    op_is_copy ? src_ptr
 					       : (void *)(long)fill_value,
-				    X86_SIM_TAG_SCALAR);
+				    op_is_copy ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR);
 	X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, rdx, X86_WIDTH_64);
 
 	/* ---- independent byte model of the bounded region ---- */
