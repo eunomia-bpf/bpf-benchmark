@@ -1,0 +1,131 @@
+{
+  "inputs": {
+    "source_head": "9f8beb3309b582c23f90eb39824e2bf59b94e3aa",
+    "helpers": [
+      "bpf_probe_read",
+      "bpf_probe_read_str",
+      "bpf_probe_read_user",
+      "bpf_probe_read_kernel",
+      "bpf_probe_read_user_str",
+      "bpf_probe_read_kernel_str",
+      "bpf_get_current_comm",
+      "bpf_get_current_task_btf"
+    ],
+    "model": "exact output range invalidation plus existing readonly caller frame result",
+    "admission_additions": 0
+  },
+  "parent_sha256": "c4fe77f34e6d43746b9aa1f266a606fcc8d8b2ea579560774f35fa43eae10255",
+  "candidate_sha256": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+  "host_results": [
+    {
+      "compiler": "gcc",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/helper-output-range/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/helper-output-range/gcc"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/helper-output-range/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/helper-output-range/clang-18",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "host_observations": {
+    "gcc": "helper output range/caller fullword/partial/raw-memory PASS 1280 cases",
+    "clang-18": "helper output range/caller fullword/partial/raw-memory PASS 1280 cases"
+  },
+  "actual_service_compilations": [
+    {
+      "request_id": 7,
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range/actual-inputs/7",
+      "archive": "/var/tmp/kprog-tmp/C/bcc-frozen-config-scalar-stack-application/candidate-runtime/trusted-state-20261109T085455/requests/7.failure.tar.gz",
+      "entry": "inet_sock_set_state",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/7/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/7/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/7/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920"
+      },
+      "status": "compiled",
+      "fault_stores": 22
+    },
+    {
+      "request_id": 8,
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range/actual-inputs/8",
+      "archive": "/var/tmp/kprog-tmp/C/bcc-frozen-config-scalar-stack-application/candidate-runtime/trusted-state-20261109T085455/requests/8.failure.tar.gz",
+      "entry": "blk_account_io_merge_bio",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/8/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/8/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/8/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d"
+      },
+      "status": "compiled",
+      "fault_stores": 2
+    },
+    {
+      "request_id": 10,
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range/actual-inputs/10",
+      "archive": "/var/tmp/kprog-tmp/C/bcc-frozen-config-scalar-stack-application/candidate-runtime/trusted-state-20261109T085455/requests/10.failure.tar.gz",
+      "entry": "tcp_v4_connect_ret",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/10/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/10/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect_ret",
+        "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1"
+      },
+      "status": "compiled",
+      "fault_stores": 5
+    },
+    {
+      "request_id": 13,
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range/actual-inputs/13",
+      "archive": "/var/tmp/kprog-tmp/C/bcc-frozen-config-scalar-stack-application/candidate-runtime/trusted-state-20261109T085455/requests/13.failure.tar.gz",
+      "entry": "kprobe__cap_capable_exit",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/13/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/13/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/helper-output-range/generated/13/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c"
+      },
+      "status": "compiled",
+      "fault_stores": 2
+    }
+  ],
+  "whole_bcc": {
+    "directory": "/var/tmp/kprog-tmp/C/helper-output-range-application",
+    "pid": 3564189,
+    "queued_after": 3561588
+  },
+  "production_model": "published parent retained for actual utility comparison"
+}

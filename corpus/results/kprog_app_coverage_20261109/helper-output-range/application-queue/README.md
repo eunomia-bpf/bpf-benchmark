@@ -1,0 +1,3 @@
+# Complete BCC utility and original38 queue
+
+Controller3564189 at `/var/tmp/kprog-tmp/C/helper-output-range-application` follows the existing matched four-app controller3561588 serially. It first runs the unchanged original38 through the current matched kernel/native module and the private candidate model, then runs the complete eight-tool canonicalO3 native payload with the unchanged frozen May29 launcher/workload. Negative fixtures use their original load-only behavior. Every actual outcome is retained; terminal archives publish under application. Source, existing predicates and native P preserve their recorded bytes apart from the documented helper representation.

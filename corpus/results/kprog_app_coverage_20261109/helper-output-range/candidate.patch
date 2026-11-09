@@ -1,0 +1,85 @@
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -279,6 +279,9 @@
+ #define X86_SIM_L_STACK_VALUES_ERASE(INDEX, WIDTH) \
+     do { __u64 __x86_sv_index=(INDEX),__x86_sv_width=X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
+          X86_SIM_L_SV_EACH(X86_SIM_L_SV_ERASE_ONE) } while(0)
++#define X86_SIM_L_STACK_VALUES_ERASE_BYTES(INDEX, BYTES) \
++    do { __u64 __x86_sv_index=(INDEX), __x86_sv_width=(BYTES); \
++         if (__x86_sv_width) { X86_SIM_L_SV_EACH(X86_SIM_L_SV_ERASE_ONE) } } while(0)
+ #define X86_SIM_L_SV_SAVE_ONE(I) \
+     do { if (__x86_sv_at==(__u64)(I)*8U) { \
+         if (__x86_sv_tag==X86_SIM_TAG_STACK) X86_SIM_L_SV_PTR(I)=__x86_sv_pointer; \
+@@ -858,6 +861,15 @@
+            X86_SIM_L_STACK_ALIAS_OFFSET(X86_SIM_L_READ_REG_PTR(REG)) < X86_SIM_L_STACK_SP()) \
+            X86_SIM_L_ARCHITECTURAL_FAULT(); \
+        X86_SIM_L_HELPER_ARG_PTR(REG); })
++
++/* Output helpers invalidate precisely their caller-buffer extent. */
++#define X86_SIM_L_HELPER_WRITE_ARG_RANGE(REG, BYTES) \
++    ({ void *__x86_output_ptr=X86_SIM_L_HELPER_WRITE_ARG_PTR(REG); \
++       if (X86_SIM_L_REG_TAG(REG)==X86_SIM_TAG_STACK) \
++           X86_SIM_L_STACK_VALUES_ERASE_BYTES( \
++               (__u64)(long)__x86_output_ptr-(__u64)(long)&__x86_stack_mem.b[0],(BYTES)); \
++       else if (X86_SIM_L_REG_TAG(REG)==X86_SIM_TAG_SCALAR) X86_SIM_L_STACK_VALUES_CLEAR(); \
++       __x86_output_ptr; })
+ 
+ /* Helpers consume the original kernel context, while native context loads
+  * use the expanded pointer-width ABI. Translate only its exact base. */
+@@ -3090,7 +3102,7 @@
+ 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_map_delete_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_ktime_get_ns() \
+ 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ktime_get_ns())
+@@ -3123,7 +3135,7 @@
+ 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_uid_gid())
+ 
+ #define X86_SIM_BPF_CALL_bpf_get_current_comm() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_get_current_comm((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_skb_get_tunnel_key() \
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (struct bpf_tunnel_key *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+@@ -3171,7 +3183,7 @@
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_head((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read_str() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read_str((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_get_socket_cookie() \
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_socket_cookie((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI)))
+@@ -3225,16 +3237,16 @@
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)X86_SIM_L_READ_REG(X86_RDI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read_user() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read_user((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read_kernel() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read_kernel((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read_user_str() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user_str((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read_user_str((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_probe_read_kernel_str() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDI, (__u32)X86_SIM_L_READ_REG(X86_RSI)), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_jiffies64() \
+ 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_jiffies64())
+@@ -3261,7 +3273,7 @@
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect_peer((__u32)X86_SIM_L_READ_REG(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_get_current_task_btf() \
+-	X86_SIM_L_HELPER_POINTER_RESULT(bpf_get_current_task_btf())
++	X86_SIM_L_HELPER_READONLY_POINTER_RESULT(bpf_get_current_task_btf())
+ 
+ #define X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns() \
+ 	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
