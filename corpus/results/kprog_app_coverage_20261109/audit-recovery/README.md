@@ -49,3 +49,9 @@ The final safety/census prepare target stores regular copies of the kernel, modu
 ## Canonical kernel source pin
 
 The parent kernel gitlink selects the combined kinsn-free source 7d6b7d663680309da44f7a1a7904c93db90baffe. It includes the approved x86 six-register frame and A approved ARM full frame, original stock verifier, ordinary subprogram path and existing relocation kinds. The existing CK worktree supplies incremental builds; the existing vendor working files remain available to their readers. Fresh checkouts select this single kernel line. Historical May29 direct-native measurements retain their recorded image/kernel artifacts.
+
+## Replay setup observation at354fdbee9
+
+The first fixed-input replay records ISA48:10 positive infrastructure errors,37 pipeline errors and1 specialization rejection; native risk executions0. The shared diagnostic is an unbound kprog_unspecified_input proof extern. All315 selftest entries were attempted:137 generation failures,149 load failures and29 resource failures. Census27 uses the archived external-thunk P objects and records24 generation failures plus3 transport failures. These rows identify setup and old-input effects; the corrected replay supplies coverage and safety outcomes.
+
+Canonical libnativeloader now adopts the existing stock transport: B loads as an ordinary verifier program, P occupies one submitted extent, and unspecified entry values use the existing ordinary mutable input map. The latest first-load verifier log behavior and original native branch instructions remain. Incremental library/trusted-loader builds return0. The initial six-app installer reached its legacy bpf_x86_alu insertion. The replay bootstrap selects its existing skip-kinsn option after loading the stock module. Frozen workload/framework sources retain9f3855f6f. Complete initial receipts are step5-setup-raw.tar.gz; step5-setup.json holds counts.

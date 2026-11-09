@@ -111,7 +111,7 @@ def replay(epoch):
         'install -d ' + str(alias),
         'mount --bind /mnt ' + str(alias),
         'export CLANG=' + str(alias / 'stock-compile-proxy'),
-        'export PYTHONDONTWRITEBYTECODE=1 BPFREJIT_CORPUS_BPF_STATS=1',
+        'export PYTHONDONTWRITEBYTECODE=1 BPFREJIT_CORPUS_BPF_STATS=1 BPFREJIT_INSTALL_SKIP_KINSN=1',
         'python3 /mnt/guest.py --samples 1 --duration 2 --apps ' +
         'bcc/set,katran,cilium/agent,otelcol-ebpf-profiler/profiling,tracee/monitor,tetragon/observer' +
         ' --state ' + str(V), '',
