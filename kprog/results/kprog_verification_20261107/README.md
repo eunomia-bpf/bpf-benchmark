@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 57/74 |
-| Raw register dispatcher arm composition | 32/75 | 57/74 |
+| Raw register handler refinement | 32/75 | 58/74 |
+| Raw register dispatcher arm composition | 32/75 | 58/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6799,3 +6799,17 @@ Eight new laws and179 prior audits compile with module/root exit0 and
 sorryAx0. The [logical ALU receipt](arm-raw-logical.log.gz) retains diagnostics
 and source identities. Entry-origin establishment, native fields, C/union,
 ghost lifetime and physical/compiler transport retain explicit interfaces.
+
+### ARM raw FMOV bank and tag refinement
+
+FMOV's four directions now capture materialized integer inputs and the selected
+vector low half across all32 banks. Vector writes clear high64 and S_FROM_W
+truncates low32; integer writes apply native width and scalarize the destination
+tag. Production dispatch retains arbitrary ignored bytes/IMM and legacy NONE
+as V0. Vector FLAGS stay arbitrary; integer FLAGS bind their native width.
+
+Seven new laws and187 prior audits compile with module/root exit0 and sorryAx0.
+The [FMOV receipt](arm-raw-fmov.log.gz) records source identities and diagnostics.
+The unified emission theorem covers58 numeric rows and six source families.
+The current scalar producer policy and native/C/entry/physical/compiler
+interfaces retain their domains.

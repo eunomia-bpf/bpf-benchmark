@@ -78697,5 +78697,23 @@
     "archive_sha256": "6abb758498ce696b7205744342ea57ef55554214c7f277080ea905051e7f4764",
     "source_sha256": "62cfba6dbb3ec273be5a309829782435ad5a37c7771815fa94d3c4ce1ee3ab75",
     "scope": "Four logical AUX selectors complete raw ALU_IMM/REG alongside ADD/SUB. Captured raw/tag materialization; actual STACK ORR low-bit path with small RHS and explicit entrySPorigin16 alignment; full architecture/events/fault/PC; native shifts/omitted modifier/SP/ZR/aliases and arbitrary unused immediate SRC2. BIC immediate normalized complement form. Unified57numeric+6source emission preserves prior55 origin domains. Native/C/entry/ghost/physical/compiler interfaces explicit."
+  },
+  "arm64_raw_fmov_refinement": {
+    "operations": [
+      "ARM64_OP_FMOV"
+    ],
+    "raw_operation_count": 58,
+    "source_branch_count": 6,
+    "new_audits": 7,
+    "total_audits": 194,
+    "module_exit": 0,
+    "root_exit": 0,
+    "sorryAx": 0,
+    "theorem": "KProgFormal.Refinement.Arm64RawRegister.VectorMove.emission_step_refines",
+    "production": "KProgFormal.Refinement.Arm64RawRegister.VectorMove.production",
+    "archive": "arm-raw-fmov.log.gz",
+    "archive_sha256": "e6e944ded46be831b585eaa152346d448c2834933b7472dc0efd74af6594f96e",
+    "source_sha256": "3f02ee7f5909131fc76091b42e82260199965025d47ac10700b1bc8cb1f13ac8",
+    "scope": "Raw FMOV all32banks/fourdirections captures full raw/tag materialization; vector high64 clear/S_FROM_W low32 truncate; GPR width/scalar-tag writes and full architectural/tag frame. Full production dispatch retains arbitrary unused integer/SRC3/IMM, NONE255=V0 and arbitrary vector FLAGS or native integer width binding. Unified58numeric+6source emission retains prior origin domains. Current scalar producer and native/C/entry/physical/compiler interfaces explicit."
   }
 }

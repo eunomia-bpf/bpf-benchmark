@@ -62,15 +62,16 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
-ARM raw handler/dispatcher refinement covers57/74 operations: immediate moves,
-multiply/divide, shift/unary, ORN, extract/reverse/extension, conditional select
-bitfields, conditional compare, logical flags, arithmetic flags, MOV_REG, resolved GOT/RODATA addresses, CNT/UADDLV vector reductions ADD/SUB immediate aliases and shared ALU tokens.
-One hundred and eighty-seven laws audit and compile with module/root0 and sorryAx0. All raw64-bit
+ARM raw handler/dispatcher refinement covers58/74 operations: immediate moves,
+multiply/divide, shift/unary, ORN, extract/reverse/extension, conditional select,
+bitfields, conditional compare, logical flags, arithmetic flags, MOV_REG, resolved GOT/RODATA addresses, CNT/UADDLV vector reductions, ADD/SUB immediate aliases, shared ALU tokens and FMOV.
+One hundred and ninety-four laws audit and compile with module/root0 and sorryAx0. All raw64-bit
 words, byte tags, STACK4/RETURN10 materialization, register aliases/XZR and the
-complete architectural image compose through one57-operation emission step theorem.
+complete architectural image compose through one58-operation emission step theorem.
 CSEL/X retains its selected raw word/tag; scalar results use width/scalar-tag
 writes. CNT/UADDLV capture both input halves and retain the complete raw GPR/tag,
-SP, flags, memory, exclusive and other vector-bank frame. Their token laws cover
+SP, flags, memory, exclusive and other vector-bank frame. FMOV covers all32 vector banks and four directions, full raw/tag materialization,
+vector high-half clearing and scalar-tag GPR width writes. Their token laws cover
 all ignored fields; the current scalar producer policy retains its own domain. The six ALU selectors cover the arithmetic and logical domains of ALU_IMM/REG:
 source provenance derives from captured tags, pointer increments commute with
 materialization, and SP32/STACK writes retain their relative coordinates.
@@ -81,7 +82,7 @@ explicit. The ledger retains production dispatcher equalities and arbitrary
 unused-field domains. Entry origin identity, C extraction/union and physical/
 compiler transport remain interfaces independent of B forwarding storage. Six
 additional source-emitted branch families (B/B.cond/CBZ/CBNZ/TBZ/TBNZ) compose
-with these57 numeric operations through one source-emission step theorem.
+with these58 numeric operations through one source-emission step theorem.
 Source/current/next/target label-to-native-address identities stay explicit;
 NZCV/value/bit tests derive the outcome and preserve the entire data/tag frame.
 Their source-operation/token rows retain a separate6/6 raw count.

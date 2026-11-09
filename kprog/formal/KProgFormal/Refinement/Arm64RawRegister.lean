@@ -2996,3 +2996,121 @@ end KProgFormal.Refinement.Arm64RawRegister.Logical
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.register_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.unmodified_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Logical.emission_step_refines
+
+
+namespace KProgFormal.Refinement.Arm64RawRegister.VectorMove
+open Reference
+open Reference.AArch64 (Register Width)
+
+theorem read_vector_projects (origins : Origins) (state : State) (bank : Register) :
+    Reference.AArch64.readVector (image origins state) bank =
+      Reference.AArch64.readVector state.raw bank := rfl
+
+def writeVector (state : State) (bank : Register) (value : BitVec 128) : State :=
+  { state with raw := Reference.AArch64.writeVector state.raw bank value }
+
+theorem write_vector_projects (origins : Origins) (state : State) (bank : Register) (value : BitVec 128) :
+    image origins (writeVector state bank value) =
+      Reference.AArch64.writeVector (image origins state) bank value := by
+  by_cases first : bank.val = 0 <;> simp [writeVector, image, Reference.AArch64.writeVector, first]
+
+/-- DIRECT_BODY_36 captures the selected vector low half and materialized
+integer source. Vector writes clear high64; S_FROM_W also truncates low32.
+Integer writes use the supplied width and scalarize the destination tag. -/
+def body (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (width : Width) (origins : Origins) (state : State) : Transition State :=
+  let code := GeneratedArm64Fmov.code direction
+  let value := GeneratedArm64Fmov.value direction
+    ((Reference.AArch64.readVector state.raw bank).setWidth 64) (readRegister origins state src)
+  let next := if GeneratedArm64FmovDest.vectorDestination code then
+      let low := if code = GeneratedArm64Fmov.code .s_from_w then (value.setWidth 32).setWidth 64 else value
+      writeVector state bank (low.setWidth 128)
+    else writeRegister state dst value width
+  ⟨advance next, [], none⟩
+
+theorem body_projects (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (width : Width) (origins : Origins) (state : State) :
+    observe origins (body bank direction dst src width origins state) =
+      Arm64Fmov.rawStep bank direction dst src width (image origins state) := by
+  cases direction <;>
+    simp only [body, GeneratedArm64Fmov.value, GeneratedArm64Fmov.code,
+      GeneratedArm64FmovDest.vectorDestination, Bool.false_eq_true, ↓reduceIte, observe,
+      advance_refines, write_refines, write_vector_projects, read_refines,
+      Arm64Fmov.rawStep, read_vector_projects, Arm64Register.read_refines, Arm64Register.write_refines]
+  all_goals first
+    | rfl
+    | (by_cases first : bank.val = 0 <;> simp [writeVector, Reference.AArch64.writeVector, first, writeRegister])
+  all_goals rfl
+
+theorem body_refines (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (origins : Origins) (state : State) :
+    observe origins (body bank direction dst src (Arm64Fmov.operandWidth direction) origins state) =
+      Reference.AArch64.step (.fmovBank bank (Arm64Fmov.nativeMove direction dst src)) (image origins state) := by
+  rw [body_projects, Arm64Fmov.raw_step_refines]
+
+theorem body_tag_frame (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (width : Width) (origins : Origins) (state : State) (r : Reference.AArch64.Gpr) :
+    (body bank direction dst src width origins state).state.tags r =
+      if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then state.tags r
+      else if r.val = dst.val then 0 else state.tags r := by
+  cases direction <;> simp [body, advance, writeVector, write_tag_frame,
+    GeneratedArm64Fmov.code, GeneratedArm64FmovDest.vectorDestination]
+
+/-- Full production dispatch retains every vector bank and legacy NONE/V0.
+Unused integer operands, SRC3 and IMM stay arbitrary; vector destinations
+ignore FLAGS, while integer destinations retain their native width binding. -/
+theorem production (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (unusedDst unusedSrc src2 src3 : Byte) (flags : Byte) (aux : BitVec 32) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (origins : Origins) (state : State)
+    (bankCode : Arm64Fmov.vectorIndex src2.toNat = some bank)
+    (directionCode : aux.toNat = GeneratedArm64Fmov.code direction)
+    (encoded : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+      GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code
+        (Arm64Register.handlerWidth (Arm64Fmov.operandWidth direction))) :
+    some (observe origins (body bank direction dst src (Arm64Fmov.operandWidth direction) origins state)) =
+      Arm64Dispatcher.dispatchExec (GeneratedArm64DispatchSingleton.code .fmov) flags aux
+        (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then unusedDst
+          else Arm64Register.registerCode dst)
+        (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then Arm64Register.registerCode src
+          else unusedSrc)
+        src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure (image origins state) := by
+  rw [body_refines, Arm64Dispatcher.exec_fmov_refines bank direction dst src unusedDst unusedSrc src2 src3 flags aux
+    value sourceScalar sourceStack firstScalar secondScalar failure (image origins state) bankCode directionCode encoded]
+
+inductive Emission where
+  | leading (emission : Logical.Emission)
+  | fmov (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .leading emission => Logical.dispatchEmission nativeAddress emission origins state
+  | .fmov bank direction dst src => some (body bank direction dst src (Arm64Fmov.operandWidth direction) origins state)
+
+inductive Binding (origins : Origins) (nativeAddress : Word → Word) (pc : Word) :
+    Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Logical.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Logical.Binding origins nativeAddress pc emission instruction) :
+      Binding origins nativeAddress pc (.leading emission) instruction
+  | fmov (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register) :
+      Binding origins nativeAddress pc (.fmov bank direction dst src) (.fmovBank bank (Arm64Fmov.nativeMove direction dst src))
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding origins nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound =>
+      exact Logical.emission_step_refines nativeAddress emission origins state instruction bound
+  | fmov bank direction dst src =>
+      exact congrArg some (body_refines bank direction dst src origins state)
+
+end KProgFormal.Refinement.Arm64RawRegister.VectorMove
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.read_vector_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.write_vector_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.body_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.body_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.VectorMove.emission_step_refines

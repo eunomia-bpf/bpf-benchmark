@@ -86,7 +86,7 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 57/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 58/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
@@ -116,6 +116,8 @@
 - [ ] **V** raw arithmetic（55数值操作+6源分支）批次完整make check，接续sole full队列并复用增量cache，保留固定源/actual exit。
 - [x] **V** ARM raw ALU_IMM/REG logical AUX：AND/BIC/EOR/ORR与已证ADD/SUB组合；实际STACK ORR raw坐标和小RHS在entrySP origin16对齐前提下物化，四种native shift/omitted amount、immediate unused SRC2/SP与ZR/alias；57数值+六源分支emission，新增8条及前179条审计/模块/root通过（本提交，raw57/74）。先前55操作保留原origin域，BIC-immediate沿用normalized complement形式。
 - [ ] **V** raw logical ALU（57数值操作+6源分支）批次完整make check，接续sole full队列并复用增量cache，保留固定源/actual exit。
+- [x] **V** ARM raw FMOV：四方向/32vector banks、raw/tag物化、vector high64清零/S_FROM_W low32截断、GPR width/scalar tag写回与完整architecture/tag frame；production支持legacy NONE255→V0、任意unused integer/SRC3/IMM及vector FLAGS或integer native-width绑定；58数值+六源分支emission，新增7条及前187条审计/模块/root通过（本提交，raw58/74）。当前scalar producer策略保持既有域。
+- [ ] **V** raw FMOV（58数值操作+6源分支）批次完整make check，接续sole full队列并复用增量cache，保留固定源/actual exit。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
