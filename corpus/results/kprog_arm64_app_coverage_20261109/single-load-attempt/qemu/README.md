@@ -1,0 +1,3 @@
+AArch64 first-attempt loader protected-read replay
+
+The existing native_load_fault_module NULL BTF control runs on the paired f1/e5/3e3f ARM runtime and source555implicit-SP simulator. Its upstream file__nullable hook, original native read and live/null observations remain exact. The same probe source is relinked against the new first-attempt loader static archive; the service and dynamic loader use the matching successor. Original expected low-word results are live0xffffffff and NULL0. Captured source/binary hashes and full input archive accompany the launch. A2GiB guest16-19 shares A CPU allocation with the active paired BCC cohort. Original application work definitions remain frozen. Runtime admission additions:0.
