@@ -1134,91 +1134,16 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     }
 }
 
-fn x86_lookahead_indirect_call_uses_register(
-    bytes: &[u8],
-    next_ip: u64,
-    sym_addr: u64,
-    reg: Register,
-) -> Option<Register> {
-    let start = usize::try_from(next_ip.checked_sub(sym_addr)?).ok()?;
-    if start >= bytes.len() {
-        return None;
-    }
-    let mut decoder = Decoder::with_ip(64, &bytes[start..], next_ip, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let next = decoder.decode();
-        if next.is_invalid() {
-            return None;
-        }
-        if is_alignment_nop(&next) {
-            continue;
-        }
-        if x86_indirect_call_register(&next) == Some(reg) {
-            return Some(reg);
-        }
-        if matches!(
-            next.flow_control(),
-            FlowControl::Call
-                | FlowControl::IndirectCall
-                | FlowControl::Return
-                | FlowControl::UnconditionalBranch
-                | FlowControl::ConditionalBranch
-                | FlowControl::IndirectBranch
-                | FlowControl::Interrupt
-                | FlowControl::XbeginXabortXend
-                | FlowControl::Exception
-        ) {
-            return None;
-        }
-        if x86_written_gpr_family(&next) == Some(reg) {
-            return None;
-        }
-    }
-    None
-}
-
-fn x86_immediate_helper_load_before_call(
-    bytes: &[u8],
-    sym_addr: u64,
-    local_ip: u64,
-    insn: &Instruction,
-) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    if helper_id > 255 {
-        return None;
-    }
-    let insn_len = u64::try_from(insn.len()).ok()?;
-    let next_ip = sym_addr.checked_add(local_ip)?.checked_add(insn_len)?;
-    if x86_lookahead_indirect_call_uses_register(bytes, next_ip, sym_addr, reg) == Some(reg) {
-        Some((reg, helper_id))
-    } else {
-        None
-    }
-}
-
 fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
-    let mut decoder = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let insn = decoder.decode();
+    let instructions: Vec<_> = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE).into_iter().collect();
+    for insn in &instructions {
         if insn.is_invalid() {
-            bail!(
-                "iced bailed while scanning x86 helper ids at IP {:#x}",
-                insn.ip()
-            );
-        }
-        if is_alignment_nop(&insn) {
-            continue;
-        }
-        let local_ip = insn.ip() - sym_addr;
-        if let Some((_, seen)) =
-            x86_immediate_helper_load_before_call(bytes, sym_addr, local_ip, &insn)
-        {
-            if seen == helper_id {
-                return Ok(true);
-            }
+            bail!("iced bailed while scanning x86 helper ids at IP {:#x}", insn.ip());
         }
     }
-    Ok(false)
+    if instructions.is_empty() { return Ok(false); }
+    let targets = x86_callee_flow(&instructions, &HashMap::new(), &HashSet::new(), 0)?;
+    Ok(targets.values().any(|values| values.contains(&X86Callee::Id(helper_id))))
 }
 
 fn scan_x86_got_relocations(
@@ -5278,6 +5203,28 @@ mod tests {
             err.to_string().contains("helper-level map lookup"),
             "unexpected error: {err}"
         );
+    }
+
+    #[test]
+    fn tail_frame_tracks_helper_id_copied_across_argument_setup() -> Result<()> {
+        let bytes = [
+            0xf3, 0x0f, 0x1e, 0xfa, // endbr64
+            0x55, 0x53, 0x50, // push rbp; push rbx; push rax (local slot)
+            0xb8, 12, 0, 0, 0, // mov eax, bpf_tail_call
+            0x8b, 0x14, 0x24, // mov edx, [rsp]
+            0x48, 0x89, 0xdf, // mov rdi, rbx
+            0x49, 0x89, 0xc3, // mov r11, rax
+            0x41, 0xff, 0xd3, // call r11
+            0x48, 0x83, 0xc4, 8, 0x5b, 0x5d, 0xc3,
+        ];
+        assert!(x86_symbol_has_immediate_helper_id(&bytes, 0, 12)?);
+        let frame = plan_x86_entry_abi_strip(&bytes, 0, true, None, true)?;
+        assert_eq!(frame.tail_call_bpf_rbp_rsp_offset, Some(16));
+        assert!(!frame.tail_call_bpf_rbp_is_live);
+        assert_eq!(frame.tail_call_cleanup_bytes, [0x48, 0x83, 0xc4, 8, 0x5b, 0x5d]);
+        let clobbered = [0xb8, 12, 0, 0, 0, 0x31, 0xc0, 0x49, 0x89, 0xc3, 0x41, 0xff, 0xd3, 0xc3];
+        assert!(!x86_symbol_has_immediate_helper_id(&clobbered, 0, 12)?);
+        Ok(())
     }
 
     #[test]
