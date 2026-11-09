@@ -34,7 +34,7 @@ class State:
     maxima: tuple[int | None, ...]
 
 
-def collect_layout(insns, targets, decode):
+def collect_layout(insns, targets, decode, *, scalar_reads=None):
     def ri(operand):
         operand = operand.lower()
         if operand in {'sp', 'wsp'}:
@@ -168,6 +168,8 @@ def collect_layout(insns, targets, decode):
 
         def load(location, width):
             if type(location) is int:
+                if scalar_reads is not None and width == 64 and location % 8 == 0 and any(opaque.get(location+j, 255) != 255 for j in range(8)):
+                    scalar_reads.add(location)
                 return (sum(opaque.get(location+j, 255) << (8*j) for j in range(width//8)),
                         pointers.get(location, False) if width == 64 else False)
             if isinstance(location, PointerAlternatives):

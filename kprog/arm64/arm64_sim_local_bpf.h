@@ -228,9 +228,45 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 /* Packed tag words retain verifier-known bits across field updates. */
 typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define ARM64_SIM_TAG_STORAGE_BYTES(CAPACITY) ((KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)+7U)&~7U)
-#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
+#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
 #define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
-#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __a64_stack_scalar_valid[__ti]=0; __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
+/* Scalar forwarding uses an exact value only while its whole-word cache is live. */
+#ifndef ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS
+#define ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)
+#define ARM64_SIM_L_STACK_SCALAR_HAS(INDEX) 1
+#define ARM64_SIM_L_STACK_SCALAR_INDEX(INDEX) (INDEX)
+#endif
+#ifndef ARM64_SIM_L_STACK_SCALAR_VALID
+#define ARM64_SIM_L_STACK_SCALAR_VALID(INDEX) \
+ ({ __u64 __a64_sv_at=(INDEX); __u64 __a64_sv_value=0; \
+    if (ARM64_SIM_L_STACK_SCALAR_HAS(__a64_sv_at)) { \
+      __u64 __a64_sv_slot=ARM64_SIM_L_STACK_SCALAR_INDEX(__a64_sv_at); \
+      __a64_sv_value=(__a64_stack_scalar_valid[__a64_sv_slot >> 6] >> (__a64_sv_slot & 63U)) & 1U; \
+    } __a64_sv_value; })
+#define ARM64_SIM_L_STACK_SCALAR_LOAD(INDEX) \
+ (__a64_stack_scalar_payload[ARM64_SIM_L_STACK_SCALAR_INDEX(INDEX)])
+#define ARM64_SIM_L_STACK_SCALAR_CLEAR(INDEX) \
+ do { __u64 __a64_sc_at=(INDEX); \
+   if (ARM64_SIM_L_STACK_SCALAR_HAS(__a64_sc_at)) { \
+     __u64 __a64_sc_slot=ARM64_SIM_L_STACK_SCALAR_INDEX(__a64_sc_at); \
+     __a64_stack_scalar_valid[__a64_sc_slot >> 6] &= ~(1ULL << (__a64_sc_slot & 63U)); \
+   } \
+ } while (0)
+#define ARM64_SIM_L_STACK_SCALAR_STORE(INDEX, VALUE) \
+ do { __u64 __a64_ss_at=(INDEX); \
+   if (ARM64_SIM_L_STACK_SCALAR_HAS(__a64_ss_at)) { \
+     __u64 __a64_ss_slot=ARM64_SIM_L_STACK_SCALAR_INDEX(__a64_ss_at); \
+     __a64_stack_scalar_payload[__a64_ss_slot]=(VALUE); \
+     __a64_stack_scalar_valid[__a64_ss_slot >> 6] |= 1ULL << (__a64_ss_slot & 63U); \
+   } \
+ } while (0)
+#endif
+#ifndef ARM64_SIM_L_DECLARE_SCALAR_CACHE
+#define ARM64_SIM_L_DECLARE_SCALAR_CACHE() \
+ __u64 __a64_stack_scalar_payload[ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS]; \
+ __u64 __a64_stack_scalar_valid[(ARM64_SIM_STACK_SCALAR_PAYLOAD_WORDS+63U)/64U] = {};
+#endif
+#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); ARM64_SIM_L_STACK_SCALAR_CLEAR(__ti); __u32 __ts=(__ti&7U)*8U; arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
 #ifndef ARM64_SIM_STACK_PAYLOAD_WORDS
 #define ARM64_SIM_STACK_PAYLOAD_WORDS KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)
 #endif
@@ -244,9 +280,8 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 		__u8 b[ARM64_SIM_STACK_BYTES];                            \
 		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
 	} __a64_stack;                                            \
-	volatile __u64 __a64_stack_payload[ARM64_SIM_STACK_PAYLOAD_WORDS]; \
-	__u64 __a64_stack_scalar_payload[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];\
-	__u8 __a64_stack_scalar_valid[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)] = {};\
+	__u64 __a64_stack_payload[ARM64_SIM_STACK_PAYLOAD_WORDS]; \
+	ARM64_SIM_L_DECLARE_SCALAR_CACHE()\
 	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8))) = {};\
 	__s64 __a64_sp = 0
 #else
@@ -257,7 +292,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	} __a64_stack;                                            \
 	__u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(1U)]; \
 	__u64 __a64_stack_scalar_payload[KPROG_ARM64_STACK_WORDS(1U)]; \
-	__u8 __a64_stack_scalar_valid[KPROG_ARM64_STACK_WORDS(1U)] = {};            \
+	__u64 __a64_stack_scalar_valid[(KPROG_ARM64_STACK_WORDS(1U)+63U)/64U] = {};            \
 	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(1U)] __attribute__((aligned(8))) = {};     \
 	__s64 __a64_sp = 0
 #endif
@@ -668,8 +703,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 				    __a64_str_index))) {                  \
 			__a64_str_value =                                  \
 				__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index)];\
-			if (__a64_stack_scalar_valid[KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index)]) \
-				__a64_str_value=__a64_stack_scalar_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index)];\
+			if (ARM64_SIM_L_STACK_SCALAR_VALID(KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index))) \
+				__a64_str_value=ARM64_SIM_L_STACK_SCALAR_LOAD(KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index));\
 		} else {                                                   \
 			__a64_str_value = (__u64)__a64_stack.b[__a64_str_index];\
 			if (__a64_str_width >= ARM64_WIDTH_16)\
@@ -704,7 +739,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		    KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY) {  \
 			__a64_srt_tag = ARM64_SIM_L_TAG_GET(                    \
 				KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index));\
-			if (__a64_stack_scalar_valid[KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index)]) \
+			if (ARM64_SIM_L_STACK_SCALAR_VALID(KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index))) \
 				__a64_srt_tag=ARM64_SIM_TAG_SCALAR; \
 		}                                                          \
 		__a64_srt_tag;                                             \
@@ -735,8 +770,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			if ((TAG) == ARM64_SIM_TAG_STACK || (TAG) == ARM64_SIM_TAG_RETURN) ARM64_SIM_L_STACK_PAYLOAD_STORE(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ARM64_SIM_L_UNMATERIALIZE(__a64_stw_value, (TAG)));\
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
 			if ((TAG) == ARM64_SIM_TAG_SCALAR) { \
-				__a64_stack_scalar_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)]=__a64_stw_value; \
-				__a64_stack_scalar_valid[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)]=1; \
+				ARM64_SIM_L_STACK_SCALAR_STORE(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), __a64_stw_value); \
 			} \
 		} else {                                                   \
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
