@@ -1,0 +1,50 @@
+{
+  "utc": "2026-11-09T05:44:15.612677+00:00",
+  "owner": "S1",
+  "components": [
+    {
+      "component": "protected-mov-model",
+      "commit": "4839fa1f5d131b085b927f2bf2e75c95bc05bfdb",
+      "private_source": "/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model",
+      "files": [
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-mov-model/README.md",
+          "bytes": 1901,
+          "sha256": "d0b738972dfeae43823756db0306d910d0fca24d050e79975307e70749c117a9"
+        },
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-mov-model/raw.tar.gz",
+          "bytes": 178979,
+          "sha256": "a2e024c8f7bbc2acf9fe436fb2312ea2083605188887c4282339f0dcec30a2dd"
+        },
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-mov-model/summary.json",
+          "bytes": 1757,
+          "sha256": "1235ed7ba02af9c8a570bfa59b67981785e553b82577d20a3ca652706b5389c5"
+        }
+      ]
+    },
+    {
+      "component": "protected-alu-model",
+      "commit": "0b147b972789e3761eb1d0b21979b679ce98ce1e",
+      "private_source": "/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/alu-fault-model",
+      "files": [
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-alu-model/README.md",
+          "bytes": 1524,
+          "sha256": "434ebd802b5a99e727d022035eb3c91548cc178ea80d3291c773ee28b90d0f43"
+        },
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-alu-model/raw.tar.gz",
+          "bytes": 182951,
+          "sha256": "169a17ae762da871fca244d60225c43fc2406a90fa87d8a2e9ebdb23c924d399"
+        },
+        {
+          "path": "corpus/results/kprog_app_coverage_20261109/protected-alu-model/summary.json",
+          "bytes": 6368,
+          "sha256": "f91f6b064d028444fbee13fbac9bd0f786336ca2e678afff72101a2ab38a5de1"
+        }
+      ]
+    }
+  ]
+}
