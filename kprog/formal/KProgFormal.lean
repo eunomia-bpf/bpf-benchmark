@@ -261,3 +261,7 @@ import KProgFormal.Generated.GeneratedX86MulxArm
 import KProgFormal.X86MulxArmHandler
 import KProgFormal.X86RemainingTokenO2
 import KProgFormal.NativeLinkProducerImage
+import KProgFormal.InvocationABI
+import KProgFormal.TailCallBinding
+import KProgFormal.HelperABI
+import KProgFormal.SpillControl
