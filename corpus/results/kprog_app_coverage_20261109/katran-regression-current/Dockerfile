@@ -5,3 +5,6 @@ COPY native_division.so /usr/local/lib/bpfrejit/native/native_division.so
 COPY config /artifacts/kernel/config
 COPY config /artifacts/boot/config-7.0.0-rc2
 COPY config /boot/config-7.0.0-rc2
+
+COPY framework/ /workspaces/repository/
+ENV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1

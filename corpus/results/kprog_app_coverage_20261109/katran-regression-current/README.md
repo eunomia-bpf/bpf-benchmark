@@ -11,3 +11,6 @@ The native XDP context repair uses the existing bpf_cast_to_kern_ctx entry repre
 
 
 The emitted-B compiler diagnostic keeps the rebuilt P and immutable044d model headers fixed, using the existing O2 choice. Compilation succeeds and the largest observed BPF stack offset remains1120, equal to O3. Compiler optimization level alone leaves the actual stack frontier present. Full native P inlining instead folds3hash calls with actual complete payload32dadc6b6; its whole-app successor is queued after original38.
+
+
+Frozen framework runtime correction: caller allocation replay247af4cc8 completed with0registered native requests. The May29 host Docker command omitted the bound-mode variable, while the inherited image still carried its earlier framework modules. The recipe now copies the committed frozen framework code into the image and sets the existing verified-load mode there. Source framework files and workloads retain their published bytes; all changes belong to this external recipe. The prior run remains a route/setup observation, with its unbound BadFD client failures and0specializer requests, rather than a native acceptance result.
