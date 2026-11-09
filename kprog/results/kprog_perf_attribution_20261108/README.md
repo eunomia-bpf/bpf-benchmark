@@ -511,6 +511,32 @@ That also revises the ceiling section below: the earlier 4.03% BPF share and
 the 0.86x-1.02x range were measured with the shim off, and both were
 measuring eBPF.
 
+### OTel's number returns on the same corrected path
+
+Same setting, `SKIP_REJIT=norejit` so the shim is attached. Run
+`x86_kvm_corpus_20261109_160740_247107`, status ok, 3 samples per arm:
+
+| arm | invocations | BPF ns | ns per invocation |
+| --- | ---: | ---: | ---: |
+| JIT | 412,976,260 | 1,340,745,501,286 | **3,246.5** |
+| native | 430,944,362 | 96,301,494,540 | **223.5** |
+
+| comparison | archive | this run |
+| --- | ---: | ---: |
+| JIT ns per invocation | 3,210.4 | **3,246.5** |
+| native ns per invocation | 216.7 | **223.5** |
+| per-invocation speedup | 14.81x | **14.53x** |
+
+The native arm replaced **13 programs**, `native_tracer_e` among them, and
+did 1.0435x the invocations of the JIT arm, so the 14.53x is on more work
+rather than less.
+
+OTel therefore answers the operator's question differently from Katran: its
+program-level speedup was never lost, and it restores to within 2% of the
+archive. What the archive called OTel's 1.824x is a *workload throughput*
+ratio that also needs the no-eBPF arm, which is not in the archived JSON;
+the program-level figure it rests on is reproduced here.
+
 ### The May-29 runs: equal work, and what they can and cannot say
 
 The operator's condition for counting a restored number is that both arms did
