@@ -5579,3 +5579,12 @@ O3 checked events must account for it. Auxiliary AX, arena modes and native
 partial/ALU/SP/pair/vector/exclusive/atomic fault prefixes require their stated
 relations. This supplies B-side semantics, not complete native/B refinement
 or a new runtime check; operation/token totals and O4 partial status stay.
+
+### Published source full check 7bbb5c79f
+
+`make check` on immutable published7bbb5c79f exits0. All1259 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_7bbb5c79f`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-7bbb5c79f.log.gz](full-make-check-7bbb5c79f.log.gz).
