@@ -1,0 +1,39 @@
+{
+  "application": "cilium",
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "programs": [],
+  "summary": {
+    "started": "2026-11-09T08:03:47.719323+00:00",
+    "apps": "cilium",
+    "samples": 1,
+    "duration": 2,
+    "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame/trusted-ulsuja81/requests",
+    "service_state_mode": "0o700",
+    "command": [
+      "make",
+      "-C",
+      "/workspaces/repository",
+      "__runtime-vm-corpus",
+      "PLATFORM=kvm",
+      "ARCH=x86",
+      "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner",
+      "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame/runtime.image.tar",
+      "SAMPLES=1",
+      "WORKLOAD_DURATION=2"
+    ],
+    "returncode": 2,
+    "error": "Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame/runtime.image.tar', 'SAMPLES=1', 'WORKLOAD_DURATION=2']' returned non-zero exit status 2.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame/guest.py\", line 33, in <module>\n    summary['returncode']=done.returncode;done.check_returncode()\n                                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['make', '-C', '/workspaces/repository', '__runtime-vm-corpus', 'PLATFORM=kvm', 'ARCH=x86', 'RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-five-step-tracee:c-runner', 'RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-checksum-caller-frame/runtime.image.tar', 'SAMPLES=1', 'WORKLOAD_DURATION=2']' returned non-zero exit status 2.\n",
+    "retained_service_state": null,
+    "retained_service_files": [],
+    "finished": "2026-11-09T08:07:45.238452+00:00",
+    "corpus_metadata": [],
+    "archive": "corpus-20261109T080757586211Z.tar.gz",
+    "archive_sha256": "df435ff7ccf360609d106f01e563b95c4ced9c7acf6e7a77e7fa90de9966b0f0"
+  },
+  "results": []
+}
