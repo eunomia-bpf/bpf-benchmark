@@ -1,0 +1,908 @@
+{
+  "tetragon_objects": [
+    {
+      "object": "bpf_alignchecker.o",
+      "original_sha256": "7a0ab9319db89ad1c0c920a82db6d8278803b1c654ba18099708676685b0c3a3",
+      "edited_function_references": [],
+      "selected_sha256": "7a0ab9319db89ad1c0c920a82db6d8278803b1c654ba18099708676685b0c3a3",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup.o",
+      "original_sha256": "3c9b34f10d7a1dac5bd771daa6cdbb492de6c97bf4c91cec802b87e6d3e9ee81",
+      "edited_function_references": [],
+      "selected_sha256": "3c9b34f10d7a1dac5bd771daa6cdbb492de6c97bf4c91cec802b87e6d3e9ee81",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_mkdir.o",
+      "original_sha256": "81812294469aa3080e6660680ec7e948a6ab6522fc906aba9b2d8d8ae45d152d",
+      "edited_function_references": [],
+      "selected_sha256": "81812294469aa3080e6660680ec7e948a6ab6522fc906aba9b2d8d8ae45d152d",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_mkdir_v511.o",
+      "original_sha256": "d2b8c1fc0c99b33dc350be8dee2c8bf0cc16990691b2a289ec96da6a1a28d4c6",
+      "edited_function_references": [],
+      "selected_sha256": "d2b8c1fc0c99b33dc350be8dee2c8bf0cc16990691b2a289ec96da6a1a28d4c6",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_release.o",
+      "original_sha256": "e72a6f5ceb76d52192835bbba010445b1904082c2984fffb01817bc55b03fc34",
+      "edited_function_references": [],
+      "selected_sha256": "e72a6f5ceb76d52192835bbba010445b1904082c2984fffb01817bc55b03fc34",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_release_v511.o",
+      "original_sha256": "d5592392d6bed8747fd73c0c2fa928d2be9b6401d5272fbba44c6c7fdc33326f",
+      "edited_function_references": [],
+      "selected_sha256": "d5592392d6bed8747fd73c0c2fa928d2be9b6401d5272fbba44c6c7fdc33326f",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_rmdir.o",
+      "original_sha256": "052c71026748a0077119ea4bbac820dbd6e7c366d41970bf9f6a3e1d96192404",
+      "edited_function_references": [],
+      "selected_sha256": "052c71026748a0077119ea4bbac820dbd6e7c366d41970bf9f6a3e1d96192404",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgroup_rmdir_v511.o",
+      "original_sha256": "ef03bc4af979faaa33db60b877343a51c16671b877353ead9ebe4700dcc2ccf7",
+      "edited_function_references": [],
+      "selected_sha256": "ef03bc4af979faaa33db60b877343a51c16671b877353ead9ebe4700dcc2ccf7",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_cgtracker.o",
+      "original_sha256": "6b8bdb394f4c6141984850f7ba0a3ccc07dd4d67e082f8245b9d459eb351b6cf",
+      "edited_function_references": [],
+      "selected_sha256": "6b8bdb394f4c6141984850f7ba0a3ccc07dd4d67e082f8245b9d459eb351b6cf",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_enforcer.o",
+      "original_sha256": "f04d9023646196739aedf346a33e55fec0fe3ea6be200f05e83549d87a743f27",
+      "edited_function_references": [],
+      "selected_sha256": "f04d9023646196739aedf346a33e55fec0fe3ea6be200f05e83549d87a743f27",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_execve_bprm_commit_creds.o",
+      "original_sha256": "d476e2f8ff675c7267b14e08de6a1fd28a7c371807b015e8e8986924ee4d26f7",
+      "edited_function_references": [],
+      "selected_sha256": "d476e2f8ff675c7267b14e08de6a1fd28a7c371807b015e8e8986924ee4d26f7",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_execve_event.o",
+      "original_sha256": "c376263cc2628f735ad12b1193451d898f0ee836622a570b39ede5704c3ac68d",
+      "edited_function_references": [
+        "__do_str",
+        "data_event_bytes",
+        "data_event_str",
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "f4dd61655100f007a51c43291c034abbb1e6ca5d3ed8e56e7242e489ee5243e5",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_execve_event_v310.o",
+      "original_sha256": "ab905498be96b1af22eb229e1cb63e9c991d25ceedec84094169f4e8e2ac859e",
+      "edited_function_references": [
+        "__do_str",
+        "data_event_bytes",
+        "data_event_str",
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "23d8e56b4b14f05ef612b209c0d2ecb970105fe596c2fc1e9b5dfced9cc1ca83",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_execve_event_v511.o",
+      "original_sha256": "48122b730a843e382d8b84952d91fe1cf0d1b031203ea2fdd6b7f8bd489226c7",
+      "edited_function_references": [
+        "__do_str",
+        "data_event_bytes",
+        "data_event_str",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "363ed217dfed30bd1cc4c10d43e63f0492e55d1ae3109eb4d8be672b827e412e",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_execve_event_v53.o",
+      "original_sha256": "6637ff1f656d3ae65ad6af48e488cc2e5e944a269d78c98ead8c58ecbbe1d0fb",
+      "edited_function_references": [
+        "__do_str",
+        "data_event_bytes",
+        "data_event_str",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "7eeb4f0ccefaa33250e7b8ac46f10f01727e41554c7dcf7d6dce3130a112fe7b",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_execve_event_v61.o",
+      "original_sha256": "5f02b063c93db8e8c737a5778a3860b6cd58b17503a36be3b2671186e7e88b08",
+      "edited_function_references": [
+        "__do_str",
+        "data_event_bytes",
+        "data_event_str",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "03c757a24cbb0dd522c91f87e8fa0bb00933ee6e9899b27b20830662d530a3ec",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_execve_map_update.o",
+      "original_sha256": "7cbcba4315eb5f9d694e5219fdb545f6d54beca2021de2834c4dfb614b3d57b9",
+      "edited_function_references": [],
+      "selected_sha256": "7cbcba4315eb5f9d694e5219fdb545f6d54beca2021de2834c4dfb614b3d57b9",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_execve_map_update_v511.o",
+      "original_sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1",
+      "edited_function_references": [],
+      "selected_sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_execve_map_update_v53.o",
+      "original_sha256": "4738dcd375d5f1200e48b378dd1331464352b190b0cefeb3c31bbd48238eb06f",
+      "edited_function_references": [],
+      "selected_sha256": "4738dcd375d5f1200e48b378dd1331464352b190b0cefeb3c31bbd48238eb06f",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_execve_map_update_v61.o",
+      "original_sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1",
+      "edited_function_references": [],
+      "selected_sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_exit.o",
+      "original_sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26",
+      "edited_function_references": [],
+      "selected_sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_exit_v310.o",
+      "original_sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26",
+      "edited_function_references": [],
+      "selected_sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_exit_v511.o",
+      "original_sha256": "225d351e8f963733677de0aa043be6d84080b3f46c852cd122de20944b54ecf5",
+      "edited_function_references": [],
+      "selected_sha256": "225d351e8f963733677de0aa043be6d84080b3f46c852cd122de20944b54ecf5",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_fmodret_enforcer.o",
+      "original_sha256": "ec146156596837500575fe66f17aaecff4177cb49f048822a04b59981f466d3d",
+      "edited_function_references": [],
+      "selected_sha256": "ec146156596837500575fe66f17aaecff4177cb49f048822a04b59981f466d3d",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_fork.o",
+      "original_sha256": "bff491ddb45c3d5f429d7094aa2de628ed950fbf643bf277dc783329f01e7fbb",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "9ac4fe390b9ce78454d14cd6a7fe4dd9a84d7028f0bf3bb50572d551215440e4",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_fork_v310.o",
+      "original_sha256": "073fac9f5b150ff7b27849c6cd0b0f648cc6793e8ccef078f1729391197d155f",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "21891f253fb413fbe293d67a4c0e51ca6486222b779d2693de5e664bc249e126",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_fork_v511.o",
+      "original_sha256": "6a3b96f21b0bb9b962b1373aa7975ce5e831504cfb53e6a0710d139043419db4",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "401f07e30788e6faca2576b3781e3b281aca6fcd78fc5f4535f4c1f72ed62559",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fentry.o",
+      "original_sha256": "607564bd1b4d507190052f0e09d30d5879b1c9a32754cad9e065d2c5bfeb82e2",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "348941329adf8fa7020125b5856ad93fe54c6396036da9dd166c3cf3238fe4e9",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fentry_v511.o",
+      "original_sha256": "3fa75c8abccf4d4d6b3c21d639fb6a55ee2d863fd88ebc4c54ab80b4a737bd18",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "1e8782587dff67863fab146c651191353081dee230ddc9ea01a3650ee714e335",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fentry_v53.o",
+      "original_sha256": "b4159afd842620926239ff4d9046d83bb6b3456d4fd8aae6e550a4c2fd3d3139",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "4d6e73c647b893cfb143b35e59a2b25c1a4f232572f0d6f5a710bee745145baa",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fentry_v61.o",
+      "original_sha256": "62adb3dcc14f5e247db152b1ff43ad3ce1ddbf8ad7bc3ef8d4eea965dcb3ba69",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "2a99a8722b593cda819e8df499f85c04719011c39b9657e871a3727c54bf9f47",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fexit.o",
+      "original_sha256": "73644832b1e5a0a2077c88afb6bc5dbd92a3fffc3c78f872e695eea27ac4bf76",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "1b7d15ef7f9cb257a877f15e0df79313335214fb04cfae3ea45ef496eacc46eb",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fexit_v511.o",
+      "original_sha256": "602334d1b866cb466ef96c85e3ae5ffa2f68318be29f04717ca9a62f9af423cf",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "7c592e500222318c4451daf2cbc65837ac6f454da24134394b32f564a1f1dcd8",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fexit_v53.o",
+      "original_sha256": "90eaef930b1ebd30e0e0605f5117d26e97cab5d78df7942518be562576f48e48",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "c91acf03ed45c2acb63256b0ee5ebe350d5f88999dd784bef3c09f4feec914dd",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_fexit_v61.o",
+      "original_sha256": "920302cf9c6be727ed8ce0bb1a44f819a4e41fcda3f84b0fcbf9567e08de7610",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "8e214371a4bfc6478c2443cd1d315eb3015765518e97d2f2757b96deb4b83294",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_kprobe.o",
+      "original_sha256": "98ef02471fd1878cb304a6cd30c43bd8f2e62a06370e01c077380c65d9694f12",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "05366a229d36ff03c611aab416b7d222de7c6e566e4fa13a5f9eda8d05c51764",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_kprobe_v511.o",
+      "original_sha256": "03b473b7478126aaf40f702dad58b2c99cf4257a14dbdefe3322f411087e2a9a",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "95d5470c49067d7f694ddb71e7456690f0fd0cf7590e75fe793868f61565c3ce",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_kprobe_v53.o",
+      "original_sha256": "dab0728b6793d4b35eb9476673b02870bd9f3bad074f7acf568da862e4a9867a",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "e7822ccca7926ac41895fa38011be96de8a241c20d973ec7964b0a794be0df84",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_kprobe_v61.o",
+      "original_sha256": "7f938c1f10bf8c23b98bf804db70c47e20838d4201b94b04dc7d6437caf8821d",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "cde079b8f7d0bb2ae3afb32a26a14680f2326f9a9c798ad41b1f3f8f0e70fb08",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_core.o",
+      "original_sha256": "ec4d8fd51c7877ca180b36f65ebd51a5df5e2adccbab5dfded0da8101999236f",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "5eaa0f4bf732ad8fbf47d68dc7ab500d26c2d7c59e6ecdb62744c49a4e3e5413",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_core_v511.o",
+      "original_sha256": "8cb71e9df850cb88c20cfe5e63790a3cdaa6e9acb48e00d8017684c87041d39d",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "bbda9dd691a61ca37653915f69e91f5addce618e7a4fc13502701a53c3b50ba7",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61.o",
+      "original_sha256": "c85bfb4f8798c7a698ce60dbb615332f09961f0351918e9ac5e744bb3dd89894",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "5fc2f6b4444af868b1637b1123bf0d57f405291ee6fc3b6da81e2dfb81786b17",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_ima_bprm_v511.o",
+      "original_sha256": "6657c080d70f9056e34652a3755c11fb77b81292b006bbe06b052b431c079b26",
+      "edited_function_references": [],
+      "selected_sha256": "6657c080d70f9056e34652a3755c11fb77b81292b006bbe06b052b431c079b26",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_generic_lsm_ima_bprm_v61.o",
+      "original_sha256": "3c26a835e4f9ffc60c2ca7de815047bce4a94170160d60fb852c2a5940af4db6",
+      "edited_function_references": [],
+      "selected_sha256": "3c26a835e4f9ffc60c2ca7de815047bce4a94170160d60fb852c2a5940af4db6",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_generic_lsm_ima_file_v511.o",
+      "original_sha256": "8a6e5a95aa5e5a942cb0b37a317146da77dfa08d18584b0e193ae208008b9d29",
+      "edited_function_references": [],
+      "selected_sha256": "8a6e5a95aa5e5a942cb0b37a317146da77dfa08d18584b0e193ae208008b9d29",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_generic_lsm_ima_file_v61.o",
+      "original_sha256": "280a1402fdfd9549a56f361431a71dcd1454c9f93728ef58830345a203c4db03",
+      "edited_function_references": [],
+      "selected_sha256": "280a1402fdfd9549a56f361431a71dcd1454c9f93728ef58830345a203c4db03",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_generic_lsm_output.o",
+      "original_sha256": "fff930834a1ceb5960da6b55d5974abdc9f4201559e787b2767d917f8d2b4195",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "139b29d3df5a3b5312062161685f0bbda261a50e28c44eea737b835e1a157c44",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_output_v511.o",
+      "original_sha256": "8dd3eb13fd94e3d570cf4102f7ecce4e80267f8bc21737540b237375291fe8a6",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "6501674eb087f8733079b321d303466d854a4634e4f4ea09e664eff20efe7ade",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_lsm_output_v61.o",
+      "original_sha256": "8e3777d239228c20037fbe1376898fc1b9791c072daf5551996b59fe42cadd5b",
+      "edited_function_references": [
+        "get_namespaces"
+      ],
+      "selected_sha256": "a22deb4be358520d35063d290403b1e4ada2b6fc37626897b3e08bc099809b71",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_rawtp.o",
+      "original_sha256": "ebc7f2a5d7de073ca3be0bb072c58c1f871a18e0ab348da51bc01720174b34fb",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "8aba8b61be16f62cba28c39ec845192f192e17f91e57ba39f5a2c86633001f7a",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_rawtp_v511.o",
+      "original_sha256": "54f9c026278486f98f1259a79ce7b233dfdcfe36463ddd3ff8bd197782b612f5",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "5fb52c3e73e8a832de5501862f73dbeaeb4bf195587ee41e6638f7391877749c",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_rawtp_v53.o",
+      "original_sha256": "1b7daee69ddd9339b841f12a65e903cbe0a9686f51752aa431ae5c2427d67827",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "0e377aa217d58ad165087e8e6672d67c70044a0e0119435b34c87e0b11d50010",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_rawtp_v61.o",
+      "original_sha256": "005182c5d19ae1dd43bf2228016e0cf390a400152883668dee648314d38c7f1d",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "7e5bef8dc1fb374ac6089d5f295525586f12724a3b0b87de928d1cb5a0de2304",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retkprobe.o",
+      "original_sha256": "2a6bf43a901cb7a7276dddf9afce8b71e11b38aed82cf2a643affc0262b32208",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "9c2475262388017e80b25c4af74b96b813f459284a94ec4df193092e6ac8480f",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retkprobe_v511.o",
+      "original_sha256": "d5ea58b19a2637001bd0a56f3b3ca41f5afa4b39cd80fa9dd765f0ed5abf2446",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "ec5007f39a4f3f4697873263db2bc8f6ea97976ae1ac68691c01e6397d3b5875",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retkprobe_v53.o",
+      "original_sha256": "e2e8b8008d4148d855bcb579900ecdbd205786bdf797c50a61000f1fdbbdc266",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "112f53e4d8e77d533d619f8ac79b7d97405fe10cb2a16e9ea43ab8aa2d4ba309",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retkprobe_v61.o",
+      "original_sha256": "42e1e59cae7763bc2a977861865bc573247a3226829cd80e7fd6cf13460ab403",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "b3429302f649af36de4b858342f7f4e72880a96096d569121af923696bee3fb2",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retuprobe.o",
+      "original_sha256": "b2da7f633c132cd7b8a59b1470ca0c446fd41ddf5ab563500ef9695a5c60b599",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "659eaeb294a36bc820212a9c301b25993834f5701f8d6fd6afeccb7867af0149",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retuprobe_v511.o",
+      "original_sha256": "d367e8c6934023107ee029b824918fca92a81517c74354a9468ea198ae66ba53",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "127b45f63f2ef60abda3610dc98b9a80187d8304d42dabf6ec050166835a938b",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retuprobe_v53.o",
+      "original_sha256": "786884152921eb8af86a31c03e65c516a5e804583d327f0133d2e35ec276544a",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "66d3d412e37e3ee644f3462b7ec9712242ea3f848fb3eb7744c47929e6441fae",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_retuprobe_v61.o",
+      "original_sha256": "2e829660cc89a1f4a2f02a018feccbcdfc623254dc34d1c666bec70c71148f69",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "e7865d1bc35a5ee2f68795f9ff0aaee2adc38e52a3eb7b58a64123eed1d4ca09",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_tracepoint.o",
+      "original_sha256": "dea668a7a916b174d98dfe05d9162eeb26204320738eb32e8c2d8d635e882fc6",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "be678a798ea007ac5ff021a8f812e27d3135c91c58f6d1cb0e05b275bc2b1e11",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_tracepoint_v511.o",
+      "original_sha256": "e71408ec68433853a383b769321db739ac712558bc4f869bb9f78649e261ab91",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "fe6d676eb4f1d0b9aad022a9a536d61d0b4f0df32a064e3a5082e195ad8b163b",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_tracepoint_v53.o",
+      "original_sha256": "30a3a74ab3c686503828198611232fc9322cee5adabade7a33092dac0f95b93d",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "ddc1cb380ee5742fe05415b2a844bc25262ac7c49effcf00b17d665c2ae97c19",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61.o",
+      "original_sha256": "6ec1cbe5915c15f16c65d591207b394961257c5f74b80bc55a1efffbb9f0de28",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "677519182a69ff48214077f1822a49150453950531f7ee75fce02dbc6f1dc2b6",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_uprobe.o",
+      "original_sha256": "bfea05872b0ecf2ce88c504de66a7e05d0dd6d359e4b37113400d7c67758cb99",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "df7424f3b89857c76a97b45f9d9637ba0e1af7dd37d6a0953a5e1eb22cf82d32",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_uprobe_v511.o",
+      "original_sha256": "d8002cef297e348ab4ad8cbae3c5ce8b06a3fe2882babc562b13a21be31af842",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "77c30b865f1c4f8809c90ecca4e3a81f2c4a8a84a8a3c217990de94aa22c3557",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_uprobe_v53.o",
+      "original_sha256": "4d5cce551dc2abf039afba822e71d2f00555698792533e7813e6ad36a0a3d691",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "87a3a10ffd7ed4a06f8175f155a6a435aeffaa352c56c683bbcc19075f9decf0",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_uprobe_v61.o",
+      "original_sha256": "ec46c4438e1efdcf2b2eccdbc16782691c6768c8988db59ae1d048ca6bcc23b7",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "e45ba3b2cfad8ea8c3f77d43dd7f4238c88a11f28c56a2f230d8e16c4b0ad9ac",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_usdt.o",
+      "original_sha256": "4d98444ca00cefd3a7a509475a1b7feeaf3b7a930102355649651ef9b4f4851f",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path"
+      ],
+      "selected_sha256": "4cc3f1708c20b1604f256a3f2569e4d253b388bfe5995871f65462fca82f78b8",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_usdt_v511.o",
+      "original_sha256": "4e60b9105f584ff4dffc923ed55833ae66265492c87db088e1a83a962862a58f",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "5844d4c7803754ee3fa6a68eff6c10ce250840a0d6976d5a9a453ae5ad694d52",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_usdt_v53.o",
+      "original_sha256": "4579e2d7aaec93c62cb6935c7fda07d213f1c525ca08763e230fb0a5d2bc1655",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "244d7226bd52982e8d11641940c75500dc186b4dd1b3ace88c0a1189a96aad7e",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_generic_usdt_v61.o",
+      "original_sha256": "f319853ce3c93e340e33ecf68f0352311b598331ed1201c09532d691db72d827",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "2bc32f149583271e56b164e54b8a6556d278015f224dcae7df3aadce0f711c8a",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_loader.o",
+      "original_sha256": "263f626204577edd5190cce150fb25883799dddc1b8b91d36e9f3543eef9d568",
+      "edited_function_references": [],
+      "selected_sha256": "263f626204577edd5190cce150fb25883799dddc1b8b91d36e9f3543eef9d568",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_loader_v511.o",
+      "original_sha256": "e42fb579438e3dd620825852ac27208cedb70bcbb60e936f56b4a649c4244c67",
+      "edited_function_references": [],
+      "selected_sha256": "e42fb579438e3dd620825852ac27208cedb70bcbb60e936f56b4a649c4244c67",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_lseek.o",
+      "original_sha256": "53b295de6489b662eebbe7d15a853b566213ecfffef26dedf2a991e196f084a0",
+      "edited_function_references": [],
+      "selected_sha256": "53b295de6489b662eebbe7d15a853b566213ecfffef26dedf2a991e196f084a0",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_lseek_v511.o",
+      "original_sha256": "4a38326c43aa315edd97f378cb1af393fb30377385a79ad3c3d3b13444154cfc",
+      "edited_function_references": [],
+      "selected_sha256": "4a38326c43aa315edd97f378cb1af393fb30377385a79ad3c3d3b13444154cfc",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_map_test_p1.o",
+      "original_sha256": "c8a5ea0a0ec43b444288545d8e64b2c4e1d5054830ee940156c71869532eb513",
+      "edited_function_references": [],
+      "selected_sha256": "c8a5ea0a0ec43b444288545d8e64b2c4e1d5054830ee940156c71869532eb513",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_map_test_p2.o",
+      "original_sha256": "7a753313fd446ca74a5ba7484a6eaccfef384e00d22da05dc4fd1ac69d37779f",
+      "edited_function_references": [],
+      "selected_sha256": "7a753313fd446ca74a5ba7484a6eaccfef384e00d22da05dc4fd1ac69d37779f",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_map_test_p3.o",
+      "original_sha256": "189a18850dd83d67f58e4a49899a3945fae7c760c1f304b2b012f2a511167342",
+      "edited_function_references": [],
+      "selected_sha256": "189a18850dd83d67f58e4a49899a3945fae7c760c1f304b2b012f2a511167342",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_multi_enforcer.o",
+      "original_sha256": "5bbb475799fa1cb371dc731ceaee4abe961733965096b4ac3f49f06be9c31b1a",
+      "edited_function_references": [],
+      "selected_sha256": "5bbb475799fa1cb371dc731ceaee4abe961733965096b4ac3f49f06be9c31b1a",
+      "frontend": "upstream object"
+    },
+    {
+      "object": "bpf_multi_kprobe_v511.o",
+      "original_sha256": "54fc33053f0b32f721b4cc688ae7e5e7564778ee50970d2235b2d545bf2cd6c9",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "d437e7d105d9e8b225d5eb6c87d25e779821bfe26b0264f5909905273c3c5e10",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_kprobe_v53.o",
+      "original_sha256": "69cecb9291f5c7fa34dc538b8f1945c690902e9525dda011332e857747d1363d",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "3bf2c03222b0995c1158cbd57559b7244b6640855d35b60270e8aaf0ab15decf",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_kprobe_v61.o",
+      "original_sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "ddbcc7189e432d763b51a3df2212b72b15e51df594e4fd2234c7c65149525323",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_retkprobe_v511.o",
+      "original_sha256": "38c34fec191f6718f404eafc37dfb3c67c5c1b9176ab44f8c0e253316915702e",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "6bdf0ec8bccf9d4f2e93ca9c9aa696c1c069c849bc88380ae1123985cac26a80",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_retkprobe_v53.o",
+      "original_sha256": "fe8d33ff7491717127b561e745c31d6ad969cc773101da1704b5f3575c922097",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "d7f21a3ecbf1b5b35cafc23a0cd74afde3ed979e8878a71c00610806e0f0154e",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_retkprobe_v61.o",
+      "original_sha256": "a05781d19f579115904a0cdaa51011c685335a9688048cc139e4aee4fd339eb4",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "fcdfba070e8b7b99e7f00a7bdd42f6632f5a38e64439139409a87369fdd14730",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_retuprobe_v511.o",
+      "original_sha256": "bcac9206feb366aa89251e11637998ade9747b330579aed0341f46d987cb926f",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "234c2394ea1dac63eca0c77d7fc08c351624ddd61ad056afec5b8cdb66bcbe56",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_retuprobe_v61.o",
+      "original_sha256": "a11e34d0c44ceaa55a02bd2192fb7c8a39fc7ea53f04dc343477448e9fce3154",
+      "edited_function_references": [
+        "prepend_path"
+      ],
+      "selected_sha256": "202889c179e6c87a9553b8fde75bd0413a77847b15784e39658c0ad0050291ba",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_uprobe_v511.o",
+      "original_sha256": "af2be0b331fe5144103c625e37ccb95591049b2d8b54d5bbfa3be49472ef8776",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "1fb0b0bfd6252c7d7764e0d48dd7176f0beeffd55c64daf32a1edc89a78ccda6",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_uprobe_v61.o",
+      "original_sha256": "6510edc5f69b522543c0045e1ab79a1e77f544c8ffcc4dca3878f39e27c0eca4",
+      "edited_function_references": [
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "12af285f90b31fe654949dc32b5a519f4cec9c34a62b82782ba277d0f51d4d19",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_usdt_v511.o",
+      "original_sha256": "b26d5a53d71d3aa5a02fce33aba53286e8613f2a51d7b847ab9b15bb97dda763",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "2a4f05c3b519998552519a6b241b83c9762ebdaf3f46c31336b546a19a8a8365",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_multi_usdt_v61.o",
+      "original_sha256": "e2d22a3fb7a85a882442d57cd7e409a53084b918688b8a865990a6e9cdb629e4",
+      "edited_function_references": [
+        "data_event_bytes",
+        "get_namespaces",
+        "prepend_path",
+        "read_exe"
+      ],
+      "selected_sha256": "9efde44749d9d73fce2e1df4c2376d5d43de9b4f720a41f825806a9e210f8c21",
+      "frontend": "upstream with edited headers"
+    },
+    {
+      "object": "bpf_prog_iter.o",
+      "original_sha256": "2ae855754be64e0aeff67836ab927ff5d8ecfc55b19b1778ca988841f9187e15",
+      "edited_function_references": [],
+      "selected_sha256": "2ae855754be64e0aeff67836ab927ff5d8ecfc55b19b1778ca988841f9187e15",
+      "frontend": "upstream object"
+    }
+  ],
+  "paired_tetragon_units": 62,
+  "upstream_tetragon_units": 32,
+  "upstream_source_head": "8ca052908600a83c4fad7429a3023a921bc15851",
+  "edited_headers": {
+    "include/compiler.h": "5dba61eae7b8bba7f57b795a1ee49df98ea5ebd1d27ff7c7eeeeab200576fec1",
+    "lib/bpf_d_path.h": "01b45f7605f6064ea05b1c3689b27a4a204f0de64185963b46d230e0d9e1d63e",
+    "lib/process.h": "a5c65213063dafa05b9b85e3216d7b9b1666653c0b239f5df631edfd5d562ab0",
+    "process/data_event.h": "6a47fa117ff373a729d19eb339bee3df9a551dc0cfcacf87bb73a7004dc89077",
+    "process/bpf_process_event.h": "391de1c10e562f209a97395dcb328bdeb16c37c97cccc7d6794c0a5b765998dd"
+  },
+  "tracee_main_bpf": {
+    "source": "/var/tmp/kprog-tmp/C/tracee-current-paired-source/dist/tracee.bpf.o",
+    "sha256": "f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca"
+  },
+  "tracee_support": "upstream image lsm_support objects and userspace binary",
+  "workload_revision": "9f3855f6f",
+  "added_runtime_checks": 0
+}
