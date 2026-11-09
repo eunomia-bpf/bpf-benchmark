@@ -1,0 +1,303 @@
+{
+  "parent_producer": "7ccdcff49e9cc87e553d1ad3ad00fc3be0ed7831",
+  "constant_division_pass": "68b47d23849a633b705fbe573ad84bd5516148b7",
+  "bindings": {
+    "capable": {
+      "unique_type": 0,
+      "kernel_stack": 0,
+      "user_stack": 0,
+      "filter_cg": 0,
+      "targ_pid": -1
+    },
+    "biosnoop": {
+      "filter_cg": 0,
+      "targ_queued": 0,
+      "filter_dev": 0,
+      "targ_dev": 0
+    },
+    "vfsstat": {},
+    "opensnoop": {
+      "targ_pid": 0,
+      "targ_tgid": 0,
+      "targ_uid": -1,
+      "targ_failed": 0
+    },
+    "syscount": {
+      "filter_cg": 0,
+      "count_by_process": 0,
+      "measure_latency": 1,
+      "filter_failed": 0,
+      "filter_errno": 0,
+      "filter_pid": 0
+    },
+    "tcpconnect": {
+      "filter_ports_len": 0,
+      "filter_uid": -1,
+      "filter_pid": 0,
+      "do_count": 0,
+      "source_port": 0
+    },
+    "tcplife": {
+      "filter_sport": 0,
+      "filter_dport": 0,
+      "target_pid": 0,
+      "target_family": 0
+    },
+    "runqlat": {
+      "filter_cg": 0,
+      "targ_per_process": 0,
+      "targ_per_thread": 0,
+      "targ_per_pidns": 0,
+      "targ_ms": 0,
+      "targ_tgid": 0
+    }
+  },
+  "objects": [
+    {
+      "tool": "capable",
+      "native_sha256": "700339f744ed1a830da64cea48cd7ded9cbed76369711b1bc1b1fa07d8e2650c",
+      "sections": [
+        {
+          "name": "kprobe/cap_capable",
+          "bytes": 85,
+          "sha256": "be12877f58fdde2fdec78cd2608afd1f04d0b7cbad4342f25c8e616c97bf5780"
+        },
+        {
+          "name": "kretprobe/cap_capable",
+          "bytes": 243,
+          "sha256": "00a67c56bc0bed0909a60b884096838f3ccce2188e1a93910f37d7806fa9eb07"
+        }
+      ],
+      "executable_bytes": 328,
+      "instructions": 96,
+      "division_instructions": []
+    },
+    {
+      "tool": "biosnoop",
+      "native_sha256": "58c158ba1bf89aa12485f54c5a5913103f1e0475ce22df6b1139f1629067521d",
+      "sections": [
+        {
+          "name": "kprobe/blk_account_io_merge_bio",
+          "bytes": 90,
+          "sha256": "82f6ebe78271b8f71693a266b7943bfd974deb92bc711dc9188fc050d76921c9"
+        },
+        {
+          "name": "tp_btf/block_rq_insert",
+          "bytes": 242,
+          "sha256": "2fd38ad730480664f8a4d9292e197af2cbed5ab9bc5910f6e35f1fbe9e8b2dc7"
+        },
+        {
+          "name": "tp_btf/block_rq_issue",
+          "bytes": 317,
+          "sha256": "c37dc6c3d750b5fa66509567500643597fd22480c30dc0ba7a08ad59462ce1fe"
+        },
+        {
+          "name": "tp_btf/block_rq_complete",
+          "bytes": 311,
+          "sha256": "35e43a84c3a762ec1cc142817e7a3df53069bb50a95d030a00ba2a29a828f3ec"
+        }
+      ],
+      "executable_bytes": 960,
+      "instructions": 264,
+      "division_instructions": []
+    },
+    {
+      "tool": "vfsstat",
+      "native_sha256": "09d63e679d94b990443829f7003abb910b6176abe1e5c80ce6d97373e5da248d",
+      "sections": [
+        {
+          "name": "kprobe/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "kprobe/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "kprobe/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "kprobe/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "kprobe/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        },
+        {
+          "name": "fentry/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "fentry/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "fentry/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "fentry/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "fentry/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        }
+      ],
+      "executable_bytes": 148,
+      "instructions": 60,
+      "division_instructions": []
+    },
+    {
+      "tool": "opensnoop",
+      "native_sha256": "a3739ab578c50a6f0c6dfbb5bf667f9ad2e754ebd2538a141bb1e7f730313fe3",
+      "sections": [
+        {
+          "name": "tracepoint/syscalls/sys_enter_open",
+          "bytes": 74,
+          "sha256": "fac074448767bcfe9eeb49f7b369f55d067f5194d5200719844ec621a8250461"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_enter_openat",
+          "bytes": 74,
+          "sha256": "5e2ef87a021778190a19a5283a1eba7703fcfacb3ed67a7935d983a0f11fb677"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_open",
+          "bytes": 244,
+          "sha256": "5d20cd402d947976c8ec8f7212859fe4a87b0f41678925b8398e4dc80a85db48"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_openat",
+          "bytes": 244,
+          "sha256": "5d20cd402d947976c8ec8f7212859fe4a87b0f41678925b8398e4dc80a85db48"
+        }
+      ],
+      "executable_bytes": 636,
+      "instructions": 184,
+      "division_instructions": []
+    },
+    {
+      "tool": "syscount",
+      "native_sha256": "7ee5c98afa579d7932ad480514c21a952143bdcd810afbafe677eca2e714db6a",
+      "sections": [
+        {
+          "name": "tracepoint/raw_syscalls/sys_enter",
+          "bytes": 54,
+          "sha256": "e23d521dedccc2e66985205afb3e3fd49ecafbe42be228e14d5338d51d46b4db"
+        },
+        {
+          "name": "tracepoint/raw_syscalls/sys_exit",
+          "bytes": 182,
+          "sha256": "c9f3ef11ed91b79d3fc40891a7b8852bae41fd523a2adb8c8510d8de79aa5c5d"
+        }
+      ],
+      "executable_bytes": 236,
+      "instructions": 79,
+      "division_instructions": []
+    },
+    {
+      "tool": "tcpconnect",
+      "native_sha256": "55470aa33bfa53bd11dd2faa3f22a8406aaeb17c7ce65f97d823aa13caabd1e1",
+      "sections": [
+        {
+          "name": "kprobe/tcp_v4_connect",
+          "bytes": 58,
+          "sha256": "9445b4a69a074e2f8e0de22951a397f9eae30be8c1b5e9a32eec77ea900d89ee"
+        },
+        {
+          "name": "kretprobe/tcp_v4_connect",
+          "bytes": 375,
+          "sha256": "e2bb818a0810e5209e521f12fb7e84bc36f084d3b04d0cf325123c9493ecea44"
+        },
+        {
+          "name": "kprobe/tcp_v6_connect",
+          "bytes": 58,
+          "sha256": "9445b4a69a074e2f8e0de22951a397f9eae30be8c1b5e9a32eec77ea900d89ee"
+        },
+        {
+          "name": "kretprobe/tcp_v6_connect",
+          "bytes": 379,
+          "sha256": "0a2114d7887061e8e84a5491c2d4ee86332fcf3b64a3c1323dd3cd47525b52c9"
+        }
+      ],
+      "executable_bytes": 870,
+      "instructions": 223,
+      "division_instructions": []
+    },
+    {
+      "tool": "tcplife",
+      "native_sha256": "4b49b318acd2cf4767a49e91680be5633f6e6d6228269631720d168a0bb45920",
+      "sections": [
+        {
+          "name": "tracepoint/sock/inet_sock_set_state",
+          "bytes": 1021,
+          "sha256": "c1920b43169647e342836dd8d113289463a308376ff4fa869199c214e1c90772"
+        }
+      ],
+      "executable_bytes": 1021,
+      "instructions": 255,
+      "division_instructions": []
+    },
+    {
+      "tool": "runqlat",
+      "native_sha256": "cd8086fd3fca394cd5e3ceacebdd463b4c91f30b56e21aeb1731b6d70a77e09e",
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 601,
+          "sha256": "250876d3ca84e8e8de51f7a118335e77980b0c6ee41ce1b958b8fee9ba4d5f9e"
+        },
+        {
+          "name": "tp_btf/sched_wakeup",
+          "bytes": 62,
+          "sha256": "3279f45068805182f2be864f36d210cac1546ae5230d3e64ab9ca5f55478752b"
+        },
+        {
+          "name": "tp_btf/sched_wakeup_new",
+          "bytes": 62,
+          "sha256": "3279f45068805182f2be864f36d210cac1546ae5230d3e64ab9ca5f55478752b"
+        },
+        {
+          "name": "tp_btf/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        },
+        {
+          "name": "raw_tp/sched_wakeup",
+          "bytes": 101,
+          "sha256": "4dd96048492518d23e1baa1d8341a0e2a7d2d030533aa170bf6abc1291d14275"
+        },
+        {
+          "name": "raw_tp/sched_wakeup_new",
+          "bytes": 101,
+          "sha256": "4dd96048492518d23e1baa1d8341a0e2a7d2d030533aa170bf6abc1291d14275"
+        },
+        {
+          "name": "raw_tp/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        }
+      ],
+      "executable_bytes": 969,
+      "instructions": 290,
+      "division_instructions": []
+    }
+  ],
+  "source": "Original captured C; native compiler input freezes34 stable scalar declarations before its existing early division pass/O3",
+  "dynamic_read_retained": "capable.my_pid keeps original volatile declaration and startup-selected value",
+  "kernel": "a28ac7e4238e6577ed50c5f0b9649df1ed4a2248fa639298f22f14f35d31e089",
+  "native_executions": 0
+}

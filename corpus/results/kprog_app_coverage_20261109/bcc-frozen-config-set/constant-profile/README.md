@@ -1,0 +1,5 @@
+# BCC stable configuration before native division lowering
+
+The actual complete-set B compiler receipt83eaec613 has24compiled/1generation diagnostic per arm: runqlat sched_switch reaches signed IDIV emitted by the existing early division pass. This candidate supplies the same34 captured fixed fields to the native frontend before that pass, through private const-initialized declarations. Original upstream/JIT C and workload retain their bytes. The existing defined-constant divisor pass68b47d238 can therefore preserve compile-time positive denominators for LLVM arithmetic lowering, while variable/zero/signed-1 divisions keep its existing guarded route. Capable my_pid retains its original volatile declaration.
+
+All eight native objects and the complete manifest remain present. Full native compiler input projection, field bindings, IR, source hashes and actual P disassembly are retained. This is pre-submission P compilation from stable configuration; original runtime/helper/kernel same-copy emission retain their definitions. Actual service-input B compilation and stock verifier/application work follow separately. Runtime admission additions0.
