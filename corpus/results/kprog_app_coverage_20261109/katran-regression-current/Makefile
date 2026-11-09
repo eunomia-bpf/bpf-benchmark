@@ -38,3 +38,10 @@ producer:
 .PHONY: array-producer
 array-producer:
 	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/map-lookup-native/producer.py
+
+.PHONY: helper-stack-safety helper-stack-application
+helper-stack-safety:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/safety-replay.py $(SOURCE_COMMIT) $(WAIT_PID)
+
+helper-stack-application:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/runtime.py $(SOURCE_COMMIT) /var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/native/katran

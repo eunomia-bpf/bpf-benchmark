@@ -2,7 +2,7 @@ from pathlib import Path
 import sys,subprocess,tarfile,json,os,select,shutil,resource,traceback
 from datetime import datetime,timezone
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-safety');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-safety';G.mkdir(exist_ok=True)
+R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-helper-stack-safety');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-helper-stack-safety';G.mkdir(exist_ok=True)
 def state(**x):(G/'status.json').write_text(json.dumps(x,indent=2)+'\n')
 try:
  if len(sys.argv)>2 and sys.argv[2]=='mount':
@@ -27,7 +27,7 @@ try:
  with(G/'run.log').open('w')as f:p=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
  rows=json.loads((G/'safety/outcomes.json').read_text())if(G/'safety/outcomes.json').exists()else[]
  result=dict(source_commit=h,make_exit=p.returncode,cases=len(rows),stages={s:sum(r['stage']==s for r in rows)for s in sorted({r['stage']for r in rows})},negative_native_executions=0)
- (G/'result.json').write_text(json.dumps(result,indent=2)+'\n');D=O/'original38';D.mkdir(exist_ok=True);shutil.copy2(G/'result.json',D/'summary.json')
+ (G/'result.json').write_text(json.dumps(result,indent=2)+'\n');D=O/'helper-stack-original38';D.mkdir(exist_ok=True);shutil.copy2(G/'result.json',D/'summary.json')
  with tarfile.open(D/'raw.tar.gz','w:gz')as t:
   for n in ['command.json','run.log','safety','canonical-probe']:t.add(G/n,arcname=n)
  (D/'README.md').write_text('# Original38 after XDP native-context repair\n\nPublished fixture bytes, original cases and negative load-only protocol retain their definitions. Current committed source and matched kernel/module/loader run after the functional Katran replay. summary.json holds actual stage counts. Raw logs include every request and application-side outcome.\n')
