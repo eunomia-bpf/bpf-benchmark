@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 40/74 |
-| Raw register dispatcher arm composition | 32/75 | 40/74 |
+| Raw register handler refinement | 32/75 | 48/74 |
+| Raw register dispatcher arm composition | 32/75 | 48/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6686,3 +6686,33 @@ original generated C/object/disassembly, first observer failure, fixed transfer,
 complete suite outputs, and the full make-check log/CPU/exit plus1289 source
 hashes verified against Git. The earlier full2ad receipt remains its actual0
 epoch; the combined later source proceeds through the same full entry point.
+
+### ARM raw flag arithmetic with SP-source materialization
+
+ADDS_IMM, ADDS_REG, SUBS_IMM, SUBS_REG, CMP_IMM, CMP_REG, CMN_IMM and
+CMN_REG compose raw all-tag source capture, the generated operand/modifier
+selector, arithmetic result/NZCV and scalar width/tag writeback or compare-only
+frame. READ_REG models SP32 separately from ZR31 and materializes its relative
+raw SP using the same entry stack origin as tagged GPRs. All64-bit raw words,
+all256 tags, aliases and XZR destinations remain quantified. The complete
+architectural projection preserves memory/events/fault, SP, NZCV-external flag
+bits and unrelated registers; PC advances4. Compare-only operations preserve
+all raw words and tags. Native W/X, shifted-register kinds/amounts, all eight
+extensions and their encoded plain-source choice retain explicit bindings.
+
+Three actual production dispatcher equalities derive writeback SRC/SRC2 and
+compare DST/SRC routing. Immediate compare SRC and every immediate SRC2 retain
+arbitrary bytes; register compare SRC2 and all SRC3/unused IMM retain arbitrary
+domains including NONE255. The normalized emission union adds SP-capable
+arithmetic operands to the preceding40 numeric and six source-branch forms.
+Its step theorem composes all48 raw numeric operations and all six source
+families; source/native label identities remain in their existing bindings.
+
+Twelve new and136 preceding laws audit with module/root checks0, sorryAx0 and
+104 inherited Lean.ofReduceBool dependencies. The
+[raw arithmetic-flags receipt](arm-raw-flagarith.log.gz) retains exact prior
+public source, canonical ISA and generated/C interfaces, compiled module,
+original proof diagnostic and final logs. Entry origin identity, source/C-union
+interpretation, native encoding and physical/compiler transport remain explicit
+generic interfaces. B forwarding and callee-storage work retains its coordinator
+pause. The sole fixed-source full check has its own source identity and outcome.

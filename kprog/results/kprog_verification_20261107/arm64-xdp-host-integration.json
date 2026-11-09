@@ -78486,5 +78486,88 @@
     ],
     "change": "Existing ADD64 affine observer now tracks either pointer+constant operand order.",
     "scope": "Same original suites/assertions and exact99b frozen fixture sources, updated canonical observer only. Existing production/ISA/admission definitions retained."
+  },
+  "arm64_raw_arithmetic_flags_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "b134d28178591b2c4158c26ec802d2dce96f4c90f00fc3d717f998c6826fe790",
+      "sorryAx": 0,
+      "reduction_bridge": 104,
+      "scope": "Eight raw ADDS/SUBS/CMP/CMN operations; SP32/ZR31 and alltag materialization, actual operand roles, native immediate/shift/extend, generated arithmetic result/NZCV, width/tag write or compare-only frame. Eight production dispatcher arms and combined48numeric/sixsource emission step. Entry/C/compiler/physical interfaces retained."
+    },
+    "operations": [
+      "ARM64_OP_ADDS_IMM",
+      "ARM64_OP_ADDS_REG",
+      "ARM64_OP_SUBS_IMM",
+      "ARM64_OP_SUBS_REG",
+      "ARM64_OP_CMP_IMM",
+      "ARM64_OP_CMP_REG",
+      "ARM64_OP_CMN_IMM",
+      "ARM64_OP_CMN_REG"
+    ],
+    "raw_operation_count": 48,
+    "source_branch_count": 6,
+    "new_audits": 12,
+    "total_audits": 148,
+    "archive": "arm-raw-flagarith.log.gz",
+    "source_interfaces": [
+      {
+        "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Reference/Memory.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Refinement/Arm64Arithmetic.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 50794,
+        "sha256": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 331150,
+        "sha256": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Refinement/Arm64Move.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 17070,
+        "sha256": "b40c5d0e25ff16400849f5a688afd0babf9a4f09d6441d7aea235bd56f915590"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64FlagHandler.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 1202,
+        "sha256": "6f60c1113a69ee1ed00a140969e5966671c2df467bf2c8ce3a0413693f4082e4"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64FlagOperand.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 1435,
+        "sha256": "52bde4a588fe8205e61c1c557f4c729e17e6d21b48c885df15a3fb04fcdfc9dc"
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Mod.lean",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 1458,
+        "sha256": "f8286628e6bbd9d8f48c9f82f660aa4b93292f1cf453de1e44008412eb60706c"
+      },
+      {
+        "path": "kprog/arm64/arm64_sim_local_bpf.h",
+        "commit": "0617e22439585916734e079091b139772e981fd1",
+        "bytes": 156664,
+        "sha256": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13"
+      }
+    ],
+    "scope": "Eightflagarith ops:SP32/ZR31/readmaterialization, actualoperandrouting/selector/arithmeticresultNZCV, nativeWXshift/extensions/plainSource, scalarwidthtagwrite orcompareframe. Allaliases/tags/unusedbytesincl255/REGIMM/fullarchitecture. Threeproductiondispatcher equalities/eightnumericstep/normalized48numeric+6sourceemissionstep. Nativeencoding/entry/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
   }
 }
