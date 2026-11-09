@@ -691,6 +691,32 @@ def divideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
           let high := scalarWriteValue (s.gpr 2) (BitVec.ofNat 64 remainder) width (.low 2)
           ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
 
+/-- Intel SDM IDIV (F6/F7 /7) interprets the complete double-width dividend
+and width-sized divisor as signed integers. Its quotient truncates toward zero;
+zero divisors and signed-range overflow raise #DE before any writeback.
+The executable retains an undefined-flags representative, as for DIV. -/
+def signedDivideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
+    (s : State) : Transition State :=
+  match scalarRead s width source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (operand, reads) =>
+      let dividend := (BitVec.ofNat (2 * width.bits) (divideDividend width s)).toInt
+      let divisor := (operand.setWidth width.bits).toInt
+      let quotient := dividend.tdiv divisor
+      let limit : Int := 2 ^ (width.bits - 1)
+      if divisor = 0 ∨ quotient < -limit ∨ limit ≤ quotient then
+        ⟨s, reads ++ [.fault .divide], some .divide⟩
+      else
+        let remainder := dividend.tmod divisor
+        if width = .w8 then
+          let packed := (BitVec.ofInt 8 quotient).toNat + 256 * (BitVec.ofInt 8 remainder).toNat
+          let result := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 packed) .w16 (.low 0)
+          ⟨{ s with gpr := (fun r => if r = 0 then result else s.gpr r), pc := nextPc }, reads, none⟩
+        else
+          let low := scalarWriteValue (s.gpr 0) (BitVec.ofInt 64 quotient) width (.low 0)
+          let high := scalarWriteValue (s.gpr 2) (BitVec.ofInt 64 remainder) width (.low 2)
+          ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
+
 /-- Double-shift status flags; the executable preserves undefined AF/OF
 representatives. `definedFlags` below removes their architectural guarantees. -/
 def doubleShiftFlags (width : CmovWidth) (left : Bool) (destination source count old : Word) : Word :=
@@ -887,6 +913,7 @@ inductive Instruction
   | legacyShift (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination) (count nextPc : Word)
   | lea (width : CmovWidth) (dst : Register) (address nextPc : Word)
   | divide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
+  | signedDivide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | signHigh (width : CmovWidth) (nextPc : Word)
   | extend (sourceWidth targetWidth : ScalarWidth) (signed : Bool) (dst : Register) (source : ScalarSource) (nextPc : Word)
   | popcount (width : CmovWidth) (dst : Register) (source : Source) (nextPc : Word)
@@ -921,7 +948,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .repStos _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
+  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .repStos _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signedDivide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -947,6 +974,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       let result := writeValue width (s.gpr dst) address
       ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, [], none⟩
   | .divide width source nextPc => divideStep width source nextPc s
+  | .signedDivide width source nextPc => signedDivideStep width source nextPc s
   | .signHigh width nextPc =>
       let result := writeValue width (s.gpr 2) (signHighValue width (s.gpr 0))
       ⟨{ s with gpr := (fun r => if r = 2 then result else s.gpr r), pc := nextPc }, [], none⟩
@@ -1049,7 +1077,7 @@ def definedFlags : Instruction → Word
   | .exchange .. => 0xffffffffffffffff
   | .legacyShift width kind _ count _ => legacyDefinedFlags width kind count
   | .lea .. => 0xffffffffffffffff
-  | .divide .. => 0xfffffffffffff72a
+  | .divide .. | .signedDivide .. => 0xfffffffffffff72a
   | .signHigh .. => 0xffffffffffffffff
   | .extend .. => 0xffffffffffffffff
   | .popcount .. => 0xffffffffffffffff
@@ -1348,10 +1376,11 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   if first = 0xf6 ∨ first = 0xf7 then
     let modrm ← byteAt bytes (count + 1)
     let group := (modrm / 8) % 8
-    if group = 6 then
+    if group = 6 ∨ group = 7 then
       let width := scalarWidth p (first == 0xf6)
       let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
-      return .divide width (scalarSource p width source) nextPc
+      return if group = 7 then .signedDivide width (scalarSource p width source) nextPc
+        else .divide width (scalarSource p width source) nextPc
     if group = 2 ∨ group = 3 then
       let width := scalarWidth p (first == 0xf6)
       let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
