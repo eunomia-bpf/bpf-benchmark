@@ -2,6 +2,19 @@
 
 Visited48/48original published cases. Actual stages: {"accepted_finding": 11, "specialization_rejected": 4, "valid_executed": 4, "verifier_rejected": 29}. Existing suite exit:1. Negative native execution requests:0. ARM application replays:0.
 
+All 48 native-input SHA256 values match the published baseline. The four executed positives return the expected value 2. The original harness exits 1 after recording its accepted findings; the guest, QEMU and outer replay each exit 0.
+
+| Classification | Published baseline | Fixed entry frame |
+| --- | ---: | ---: |
+| valid_executed | 4 | 4 |
+| verifier_rejected | 33 | 29 |
+| specialization_rejected | 4 | 4 |
+| accepted_finding | 7 | 11 |
+
+Four cases move from verifier_rejected to accepted_finding: `exit_frame_pointer_map`, `exit_x19`, `below_sp_helper_output` and `below_sp_memset_output`. The exit-register changes accompany the [stock JIT frame preservation](../../README.md); the helper-output changes accompany the requested helper-check rollback. All four retain their original negative annotation and load-only classification. The other 44 stages match the baseline.
+
+The published raw archive contains 314 members and 1,779,420 uncompressed file bytes. Every regular member was reread successfully, and its archived outcomes equal outcomes.json.gz. The tracked archive is 818,317 bytes.
+
 | Case | Published stage | Fixed-frame stage | Original native bytes |
 | --- | --- | --- | --- |
 | valid_control | valid_executed | valid_executed | True |
