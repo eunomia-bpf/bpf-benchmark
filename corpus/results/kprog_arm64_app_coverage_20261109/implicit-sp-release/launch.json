@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-09T08:38:47.930235+00:00",
+  "source_publication": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "fixture_publication": "2f0b3d44b5aa406f4ec599a9a06bb05b474e443b",
+  "safety_fixture_publication": "9bd4222ba",
+  "recipe_archive": "kprog/results/kprog_recovery_safety_20261109/source-and-recipes.tar.gz",
+  "recipe_archive_sha256": "a207ec7ad67aabf54400de2c5e0f9e1d5b73e5241acc5a90941e6678315103fd",
+  "scope": "Existing48-case scalar AArch64 safety suite; original fixtures and native negative load-only protocol",
+  "host_controls": {
+    "compilers": [
+      "GCC",
+      "Clang18"
+    ],
+    "mem_prepost_cases_each": 135170,
+    "pair_cases_each": 122891,
+    "stack_lifetime": "PASS"
+  },
+  "runtime_admission_additions": 0
+}
