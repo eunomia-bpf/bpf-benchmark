@@ -6367,3 +6367,16 @@ Current scalar compiled coverage is16/75; complete flags/tag/GPR-frame, all
 operand mappings, physical ABI and whole-program compiler embedding retain
 explicit interfaces. This batch retains its source identity separately from
 the already-running151-unit full check.
+
+### ROR memory address arithmetic
+
+Source `9208b579d` constructs the memory ROR writeback address with the existing
+64-bit wrapping integer-address macro, matching the other memory ALU writers.
+The original Clang pointer-arithmetic diagnostic identified the absolute-address
+form's zero base plus nonzero displacement. The same committed oracle and all
+its assertions now pass26,547,217 cases under both Clang18 and GCC with UBSan.
+The [source/oracle receipt](ror-memory-address.log.gz) retains exact readonly
+Git exports, expanded compiler inputs, binaries/commands and original diagnostics.
+Existing access barriers, recovery, tags, stack handling and flag paths retain
+their definitions. Complete compiled-B, provenance and physical/O4 transport
+retain their stated interfaces; scalar compiled family totals keep their scope.

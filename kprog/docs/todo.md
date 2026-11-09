@@ -101,7 +101,7 @@
 - [ ] **V** compiled ROR 与前序 RET source 模型合并批次全量检查（本提交；复用共享增量缓存和唯一 full 队列）。
 - [x] **V** compiled ADD_IMM：五个真实 BPF 单元覆盖8位低/高字节及16/32/64位，任意操作数/编码立即数及64位imm32符号扩展，reference scalar写回、完整memory/visit/halt/fault/events；151组合函数保留原146字节（本提交，compiled15/75）。
 - [ ] **V** compiled ADD_IMM 后继全量检查（本提交；在现有RET/ROR批次后复用唯一full槽与增量缓存）。
-- [ ] **V/C** ROR_MEM 绝对地址写回采用现有64位整数地址运算；原有26,547,217-case oracle 的 GCC/Clang UBSan 回放与归档（本提交；C stack-facts 中的原始line892诊断保持）。
+- [x] **V/C** ROR_MEM 绝对地址写回采用现有64位整数地址运算（源9208b579d）；原有26,547,217-case oracle 在 Clang18/GCC UBSan 各通过，原始line892诊断和精确源码/编译输入归档于本提交。
 - [x] **V** compiled ADD_REG：七个真实BPF单元覆盖四种8位源/目的低高字节组合及16/32/64位，任意操作数/fresh/visit、canonical arithmetic与scalar写回、完整memory/exclusive/23输入/halt/fault/events；158组合函数保留原151字节（本提交，compiled16/75）。
 - [ ] **V** compiled ADD_REG 后继全量检查（本提交；在现有151单元/RET批次后复用唯一full槽及增量缓存）。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
