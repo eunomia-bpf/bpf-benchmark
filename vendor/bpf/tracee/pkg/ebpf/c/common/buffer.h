@@ -279,6 +279,7 @@ statfunc int save_str_to_buf(args_buffer_t *buf, void *ptr, u8 index)
     // Data saved to submit buf: [index][size][ ... string ... ]
 
     u32 offset = buf->offset;
+    asm volatile("" : "+r"(offset));
     if (offset > ARGS_BUF_SIZE - 1)
         return 0;
 
@@ -297,6 +298,7 @@ statfunc int save_str_to_buf(args_buffer_t *buf, void *ptr, u8 index)
     if (sz > 0) {
         barrier();
         offset = buf->offset;
+        asm volatile("" : "+r"(offset));
         // Satisfy verifier for probe read
         if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
             return 0;

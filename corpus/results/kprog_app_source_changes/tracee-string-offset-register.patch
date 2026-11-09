@@ -1,0 +1,6 @@
+--- a/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
++++ b/vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
+@@ -281,0 +282 @@
++    asm volatile("" : "+r"(offset));
+@@ -299,0 +301 @@
++        asm volatile("" : "+r"(offset));

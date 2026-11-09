@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T00:04:33.283415+00:00",
+  "utc": "2026-11-09T00:05:33.553014+00:00",
   "base": "20096bb3cfa32408956e5f9d2cf82ff496e5fabf",
   "prior_runtime": "2fe12fb014e1872968da722f743e8146cc846522",
   "edit": "Two empty +r compiler operands on existing checked string offset",
@@ -29,7 +29,7 @@
     "common/namespaces.h": "edc454173c34b9d44123589f08ec6092a49e7a2f5e2efc03f83b144ab2e21372",
     "common/arch.h": "9ed669659b17815ea9e13d6aedba1d626d9a2fa15d9e59f98c419c634c012cfd",
     "common/binprm.h": "3a79441f092d45ba06d5c8625cfd579287c6b8c952da69b33b22c36adebce01d",
-    "common/buffer.h": "7f18e2378b20d5bb2e93a0c4683313f6218a823673f5ec2253f5dfc4e3652755",
+    "common/buffer.h": "4c565317cf45b959660e5817930de539b2bf5c8ab6da4db72fc6542c96461570",
     "common/ksymbols.h": "ff59df76a5dbd409164eb6aecc7bc993d7171e528d83fd69b8d5fbe29710b016",
     "common/memory.h": "37043d37976b67aaf21a7be6a2bdd9d2db88ef05758cb91a39075bedcdbe9e0a",
     "common/filesystem.h": "c230b3933b414881c77cd9783d01e06670a6ce1970dbc55722b9e8f12709433c",
@@ -39,5 +39,7 @@
     "lsmsupport/kprobe_check.bpf.c": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
     "lsmsupport/lsm_check_common.h": "ec798bf3916b0bfe8c9039789d81dc5a0584cdbace6621275a3a848f58539e79"
   },
-  "runtime_admission_additions": 0
+  "runtime_admission_additions": 0,
+  "actual_function_definition_line": 277,
+  "initial_source_record": "9b7e81d8e selected forward declaration and produced empty patch; actual function definition edit in this forward result"
 }
