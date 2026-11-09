@@ -1192,3 +1192,30 @@ one request is left unserved in the broker's queue, so the wrapper and the
 recipe disagree on something the broker's log does not show. That agreement
 is lane C's to settle, since the broker, the wrapper and the frozen service
 are all theirs.
+
+### OTel's native arm binds and then stalls in startup
+
+With the broker served from a supervised process under the mounted state
+directory, OTel's native arm finally binds: **2 of the profiler's programs
+are replaced natively and none fail**. The arm then does not reach its
+measurement phase:
+
+| evidence | native arm | baseline arm |
+| --- | ---: | ---: |
+| `list_progs` shim polls | 3,669 | 21 |
+| `BPF_PROG_LOAD` | 5 | 17 |
+| shim-log lines | 3,828 | 505 |
+| reached `measure_finish` | no | yes (at 225 s) |
+
+The shim is polling the program list while the application never gets to its
+workload, so the 20 s measurement never starts. The baseline arm on the same
+restored workload completes in 225 s.
+
+The mechanism behind the four requirements above, in order, was: C's broker
+down (fixed by serving it), `CLANG` unset (fixed in the recipe's
+environment), the wrapper's two links (added), and four source trees absent
+from the container (added). Each was verified on its own; the stall is what
+remains after all four.
+
+That is a native-path startup failure, which the task assigns to lane C with
+the binding and trusted-service failures.
