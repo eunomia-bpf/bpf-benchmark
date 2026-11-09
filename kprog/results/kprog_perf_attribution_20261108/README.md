@@ -1216,10 +1216,26 @@ BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_nat insn_cnt=6972
 native-loader source-context flags=0 token_fd=-1
 ```
 
-`perf_unwind_nat` is a 6,972-instruction program whose native generation and
-load never returns, so the shim keeps polling `list_progs` and the workload
+`perf_unwind_nat` is a 6,972-instruction program, and the stall is the
+**compile of the native code the specializer generates for it**:
+
+| evidence | value |
+| --- | ---: |
+| generated source | 911,444 bytes, 21,822 lines |
+| compiler resident set | 9.3 GB, flat |
+| compiler CPU | 6,013 ticks per 60 s -- one full core, advancing |
+| wall time with no external timeout | past 5 minutes, not finished |
+| broker compiles that returned | 3 of 4 (`returncode: 0`) |
+
+So generation and the earlier compiles succeed; this one program's generated
+source is large enough that clang takes tens of minutes and the workload
 never starts. The baseline arm on the same restored workload completes in
-225 s, so the stall is in the native path for that one program.
+225 s.
+
+That is a generation-size problem rather than a correctness one: the
+specializer emits one straight-line native body for a 6,972-instruction
+program, and the compiler's cost on it is what the run waits for. It belongs
+to lane C with the generation failures.
 
 The mechanism behind the four requirements above, in order, was: C's broker
 down (fixed by serving it), `CLANG` unset (fixed in the recipe's
