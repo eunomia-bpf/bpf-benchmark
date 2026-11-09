@@ -1,14 +1,14 @@
 {
-  "source_commit": "c3d6523f80887e49e79c786fecc3a166cc4325d4",
-  "build_commit": "fb19625713630768192bdb0ee4a0d6eb48e25be4",
-  "module_sha256": "fad7da641ecf65ddf38cd1bf2dea5bfc7cdf6f611f51d2516b06146d051c4385",
+  "source_commit": "c2b96d6c313fb7bf7e6df48caffa8df694b40b05",
+  "build_commit": "6f8e87e795447a8c779f97b2644a4ac36950430c",
+  "module_sha256": "3b9dd21d253a109a22d36640cebf7d0f8cfa2fcc46c54f74b2184841fe2471ab",
   "state": "/var/tmp/kprog-tmp/C/bcc-katran-constant-division/safety-control",
   "result": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-katran-constant-division/safety-control/approved-copy-boundary.json",
   "controller_pid": 2867244,
   "dependency_pid": 2805722,
   "memory": "existing serial2GiB guest",
   "case_count": 24,
-  "source_ids": "u32max intentionally absent; smaller sizes reach existing source lookup before native allocation",
+  "source_ids": "SUBMIT controls use absent u32max program ID; all sizes retain source-lookup ENOENT",
   "sizes": [
     0,
     64,
@@ -25,5 +25,7 @@
     "CHUNK"
   ],
   "followup": "Guest removes private boundary module, then runs original canonical38 through its captured module",
-  "chunk_source_commit": "15f14ae2e0629dfc5aa7c2b24874a928150d13de"
+  "single_production_bound": "x86 chunk blob.len>=1GiB through existing fail cleanup",
+  "chunk_route": "An active copied one-byte capsule; invalid eight-byte load-site span yields EFAULT below the boundary, E2BIG at or above1GiB before that span is copied",
+  "native_executions": 0
 }
