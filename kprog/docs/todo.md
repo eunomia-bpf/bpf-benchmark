@@ -31,12 +31,14 @@
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
-549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：513 个停在进入生成器之前（选择缺口 275、资源准备 238），36 个进入生成，7 个通过 verifier。资源准备单独重跑后 164 成功、74 失败（3daeea9b2）。
+549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
-- [ ] **A** 这 275 个程序的静态结果，按失败类排序后修最大的一类。
-- [ ] **A/C** 资源准备失败 238 个（Cilium 72、Tracee 151、OTel 13、BCC 2）。
-- [ ] **C** 生成失败 23、verifier 拒绝 4、编译失败 1、context 下沉 1。
+- [ ] **A** 这 275 个程序的静态结果，按失败类排序后修最大的一类。现有 guest 保持运行；已记录 6/275（verifier 拒绝 5、编译失败 1），模型快照 4f5b7ae6d，完整结果与原始日志由现有批次发布。
+- [x] **A/C** 资源准备 238/238 完成：Tracee 151、OTel 13（3daeea9b2），Cilium 72（aba3e9d46），BCC 2（7b4876f7a）；汇总 bc3104df7，本提交补记统一 TODO。通用路径适配局部入口符号、资源专用重定位视图、临时 pinning 生命周期和原应用运行时 map 参数。Cilium 的 CILIUM_PIN_REPLACE=16 与 BCC stackmap 的空模板字段均按实际 loader 语义处理。
+- [x] **A** 23 条数字开头 ELF 名称的元数据语法修复：原始 kernel metadata/facts 全部规范化，23 份 map 声明编译与 ELF 名称保留通过，现有 6 项元数据测试通过（eeec0f52a，本提交补记统一 TODO）。
+- [ ] **A** 用已发布资源和名称修复回放其余 274 行的完整 native 生成、编译及 stock verifier 阶段；逐行记录模型/源码版本，并与上面的 275 行批次分别保留原始记录；回放 harness 位于冻结路径之外。
+- [ ] **C** verifier 拒绝 4（scalar memory access）、编译失败 1、context 下沉 1；23 条名称问题的后续 native 阶段由上述 274 行回放记录。
 - [ ] **C** x86-64 六个应用全部走通 verified 路径。
 - [ ] **A** AArch64 QEMU 上六个应用全部走通（Tracee 启动窗口按 05-29 框架处理）。
 - [ ] **C** 100–100K 规模扫描，verifier 时间和内存。
