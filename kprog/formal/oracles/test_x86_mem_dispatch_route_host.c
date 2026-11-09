@@ -154,6 +154,11 @@ static void check_one(const char *what, __u8 base_reg, __u8 base_tag,
 
 	if (store_disp)
 		imm = ((__u64)(__u32)(__s32)disp) << 32;
+    if (is_rsp) {
+        __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+        imm = store_disp ? (__u64)(__u32)(__s32)(disp + X86_SIM_STACK_BYTES) << 32 :
+            (__u64)(disp + X86_SIM_STACK_BYTES);
+    }
 	routed = X86_SIM_L_READ_MEM_VALUE(base_reg, aux, imm, width,
 					  store_disp);
 
@@ -351,7 +356,9 @@ static void check_mov_load(const char *what, __u8 op, __u8 dst, __u8 src,
 			X86_SIM_L_WRITE_REG_WIDTH(src, src_val, X86_WIDTH_64);
 	}
 
-	X86_SIM_L_EXEC_MOV_LOAD(op, dst, src, flags, aux, (__u64)disp);
+	if (src == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_MOV_LOAD(op, dst, src, flags, aux,
+        (__u64)disp + (src == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	got_value = X86_SIM_L_READ_REG(dst);
 	got_tag = X86_SIM_L_REG_TAG(dst);

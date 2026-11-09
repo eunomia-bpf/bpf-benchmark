@@ -284,7 +284,9 @@ static void check_read(const char *what, __u8 src, __u64 imm, __u8 width)
 		want = le_load(base + (__s64)imm, w);
 	}
 
-	got = X86_SIM_L_READ_MEM_VALUE(src, aux, imm, width, 0);
+	if (src == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    got = X86_SIM_L_READ_MEM_VALUE(src, aux,
+        imm + (src == X86_RSP ? X86_SIM_STACK_BYTES : 0U), width, 0);
 
 	cases++;
 	if (got != want) {
@@ -411,7 +413,9 @@ static void check_movbe_store(const char *what, __u8 dst, __u8 src, __u8 flags,
 		le_store(&exp_heap[(base + disp) - heap], value, w);
 	}
 
-	X86_SIM_L_EXEC_MOVBE_STORE(dst, src, flags, aux, imm);
+	if (dst == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_MOVBE_STORE(dst, src, flags, aux,
+        imm + (dst == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	cases++;
 	for (i = 0; i < sizeof(heap); i++) {
@@ -585,12 +589,19 @@ static void check_alu_mem(const char *what, int kind, __u8 dst, __u8 src,
 		le_store(&exp_heap[(base + off) - heap], result, w);
 	}
 
+    __u64 driven_imm = imm;
+    if (dst == X86_RSP) {
+        __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+        driven_imm = kind == ALU_KIND_IMM ?
+            (__u32)imm | ((__u64)(__u32)(__s32)(off + X86_SIM_STACK_BYTES) << 32) :
+            imm + X86_SIM_STACK_BYTES;
+    }
 	if (kind == ALU_KIND_UNARY)
-		X86_SIM_L_EXEC_ALU_MEM_UNARY(dst, flags, aux, imm);
+		X86_SIM_L_EXEC_ALU_MEM_UNARY(dst, flags, aux, driven_imm);
 	else if (kind == ALU_KIND_IMM)
-		X86_SIM_L_EXEC_ALU_MEM_IMM(dst, flags, aux, imm);
+		X86_SIM_L_EXEC_ALU_MEM_IMM(dst, flags, aux, driven_imm);
 	else
-		X86_SIM_L_EXEC_ALU_MEM_REG(dst, src, flags, aux, imm);
+		X86_SIM_L_EXEC_ALU_MEM_REG(dst, src, flags, aux, driven_imm);
 
 	cases++;
 	for (i = 0; i < sizeof(heap); i++) {

@@ -157,6 +157,9 @@ static void check_mem(unsigned dst, unsigned cc_byte, unsigned mw_byte,
 	for (i = 0; i < 16U; i++) {
 		__u64 v = (__u64)(long)(heap + HEAP_BASE_OFF);
 		__u8 tg = (__u8)(1U + (i % 5U));
+        /* A heap base carries heap/scalar provenance; STACK names this
+         * fixture's private arena, not the unrelated heap allocation. */
+        if (i == dst && dst != X86_RSP) tg = X86_SIM_TAG_SCALAR;
 
 		X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(long)v, tg);
 		mreg[i] = v;

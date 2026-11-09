@@ -215,6 +215,7 @@ static void check_mem(const char *what, __u8 op, __u8 flags, __u8 base_reg,
 		X86_SIM_L_WRITE_REG_PTR_TAG(base_reg, heap + HEAP_ORIGIN,
 					    base_tag);
 
+    if (base_reg == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
 	/* ---- independent model ---- */
 	disp = disp_of(op, imm);
 	off = disp;
@@ -250,11 +251,15 @@ static void check_mem(const char *what, __u8 op, __u8 flags, __u8 base_reg,
 	else
 		model_sub_flags(lhs, rhs, width, &mcf, &mzf, &msf, &mof);
 
+    __u64 driven_imm = imm;
+    if (base_reg == X86_RSP)
+        driven_imm = op == X86_OP_CMP_MEM_REG ? imm + X86_SIM_STACK_BYTES :
+            (__u32)imm | ((__u64)(__u32)(__s32)(disp + X86_SIM_STACK_BYTES) << 32);
 	/* ---- run the real body ---- */
 	if (via_dispatch)
-		X86_SIM_L_EXEC(op, base_reg, src_reg, flags, aux, imm);
+		X86_SIM_L_EXEC(op, base_reg, src_reg, flags, aux, driven_imm);
 	else
-		X86_SIM_L_EXEC_CMP_MEM(op, base_reg, src_reg, flags, aux, imm);
+		X86_SIM_L_EXEC_CMP_MEM(op, base_reg, src_reg, flags, aux, driven_imm);
 
 	/* ---- compare the whole modeled state: no register or memory write ---- */
 	for (i = 0; i < 16U; i++) {

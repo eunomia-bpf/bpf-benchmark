@@ -155,7 +155,9 @@ static void check_load(const char *what, __u8 src, __u64 imm,
 	}
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_LOAD_XMM0(src, aux, imm);
+	if (src == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_LOAD_XMM0(src, aux,
+        imm + (src == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	cases++;
 	if (__x86_xmm0_lo != plant_lo || __x86_xmm0_hi != plant_hi) {
@@ -231,7 +233,9 @@ static void check_store(const char *what, __u8 dst, __u64 imm,
 	}
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_STORE_XMM0(dst, aux, imm);
+	if (dst == X86_RSP) __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+    X86_SIM_L_EXEC_STORE_XMM0(dst, aux,
+        imm + (dst == X86_RSP ? X86_SIM_STACK_BYTES : 0U));
 
 	/* ---- compare the whole modeled state ---- */
 	cases++;

@@ -430,6 +430,7 @@ static union {
 	(void)__x86_xmm0_hi;                                               \
 	(void)__x86_sim_ret_addr;                                          \
 	X86_SIM_L_FOR_EACH_GPR(QUIET_GPR_ONE);                             \
+	__x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES; \
 	memset(__x86_stack_mem.b, 0, X86_SIM_STACK_BYTES)
 
 /* Seed every GPR cell inside the caller's own DECL_STATE() scope, so the
@@ -662,7 +663,7 @@ static void scn_store_stack(__u8 w, struct snap *s)
 	X86_SIM_L_WRITE_REG_WIDTH(X86_RBX, 0x0f0e0d0c0b0a0908ULL,
 				  X86_WIDTH_64);
 	X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBX, w, aux,
-			     (__u64)-8);
+			     (__u64)(X86_SIM_STACK_BYTES - 8U));
 	CAPTURE_ALL(s);
 }
 
@@ -1054,7 +1055,7 @@ static void check_store_stack(__u8 w)
 	le_store(&exp[m], value, eff_of(w));
 	X86_SIM_L_WRITE_REG_WIDTH(X86_RBX, value, X86_WIDTH_64);
 	X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBX, w, aux,
-			     (__u64)-8);
+			     (__u64)(X86_SIM_STACK_BYTES - 8U));
 	cases++;
 	for (i = 0; i < X86_SIM_STACK_BYTES; i++) {
 		if (__x86_stack_mem.b[i] != exp[i]) {

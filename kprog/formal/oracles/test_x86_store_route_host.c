@@ -155,7 +155,14 @@ static void check_store(const char *what, __u8 dst, __u8 src_reg, __u8 flags,
 	}
 
 	/* ---- run the real body ---- */
-	X86_SIM_L_EXEC_STORE(op, dst, src_reg, flags, aux, imm);
+	__u64 driven_imm = imm;
+    if (dst == X86_RSP) {
+        __x86_rsp.ptr = (void *)(long)-(__s64)X86_SIM_STACK_BYTES;
+        driven_imm = is_imm ? (__u32)imm |
+            ((__u64)(__u32)(__s32)(disp + X86_SIM_STACK_BYTES) << 32) :
+            imm + X86_SIM_STACK_BYTES;
+    }
+    X86_SIM_L_EXEC_STORE(op, dst, src_reg, flags, aux, driven_imm);
 
 	/* ---- compare the whole modeled state ---- */
 	cases++;
