@@ -910,7 +910,9 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 		__s64 __a64_l_pp = (__s64)(DELTA);                        \
 		if (__a64_l_pp != 0) {                                    \
 			if ((BASE) == ARM64_SP)                           \
-				__a64_sp += __a64_l_pp;                   \
+				ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP,   \
+					(void *)(long)((__u64)__a64_sp + (__u64)__a64_l_pp), \
+					ARM64_SIM_TAG_STACK);                    \
 			else                                              \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
 					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pp,\
