@@ -1,0 +1,155 @@
+{
+  "commits": [
+    "731a91ee6b87cbad5340976de90f146afa912a25",
+    "1048afc134111aa6a68d46edaf8df345aa3576ad",
+    "165ac41007f5857f46b5acaaa7b6e18c7c5e8d0e",
+    "334996eb80cba1fed806c75783345cb94434663a"
+  ],
+  "implementation": "external thunk and landing flags; same-field kind12 kernel policy relocations; complete tail save mask15",
+  "components": {
+    "rust_tests": 91,
+    "trusted_service_tests": 9,
+    "register_transfer_layouts": 30,
+    "compiled_B_adapters": [
+      "x86",
+      "arm64"
+    ],
+    "patch_idempotence": "passed",
+    "kernel_build_exit": 0,
+    "module_build_exit": 0
+  },
+  "micro": {
+    "x86": {
+      "positive_compiles": 29,
+      "unchecked_read_compile": 0,
+      "batch_exit": 0
+    },
+    "arm64": {
+      "positive_compiles": 29,
+      "unchecked_read_compile": 0,
+      "batch_exit": 0
+    }
+  },
+  "x86": {
+    "cases": 45,
+    "outcomes": {
+      "valid_executed": 9,
+      "verifier_rejected": 33,
+      "specialization_rejected": 1,
+      "accepted_finding": 2
+    },
+    "findings": [
+      "immediate_push_branch",
+      "stack_base_flags"
+    ],
+    "negative_executions": 0
+  },
+  "arm64": {
+    "cases": 42,
+    "original_cases": 41,
+    "original_outcomes": {
+      "valid_executed": 4,
+      "verifier_rejected": 28,
+      "specialization_rejected": 3,
+      "accepted_finding": 6
+    },
+    "outcomes": {
+      "valid_executed": 4,
+      "verifier_rejected": 28,
+      "specialization_rejected": 3,
+      "accepted_finding": 6,
+      "positive_infrastructure_error": 1
+    },
+    "findings": [
+      "unpaired_stxr_failure",
+      "unpaired_stlxr_failure",
+      "paired_stxr_failure",
+      "paired_stlxr_failure",
+      "entry_return_address_flags",
+      "stack_base_flags"
+    ],
+    "compiler_indirect_call_control": "positive_infrastructure_error",
+    "branch_control": "valid_executed",
+    "bti_control_guest_exit": 0,
+    "bti_control_qemu_exit": 0,
+    "negative_executions": 0,
+    "guest_exit": 1,
+    "qemu_exit": 0,
+    "compiler_host_jobs": 33
+  },
+  "controls": {
+    "tc-success": {
+      "observations": [
+        {
+          "jit_stack_depth": 24,
+          "jit_stack_pop": 24
+        },
+        {
+          "route": "stock",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        },
+        {
+          "route": "native",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        }
+      ],
+      "policy": "Mitigation: Retpolines; IBPB: conditional; IBRS_FW; STIBP: disabled; RSB filling; PBRSB-eIBRS: Not affected; BHI: Retpoline",
+      "plain_indirect_branches": 0,
+      "jit_sha256": "e5e059f58c614d689b2fe0121e671b87d692f4e5a8e1d5cd9d7fda85b53d11fa"
+    },
+    "tc-retpoline": {
+      "observations": [
+        {
+          "jit_stack_depth": 24,
+          "jit_stack_pop": 24
+        },
+        {
+          "route": "stock",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        },
+        {
+          "route": "native",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        }
+      ],
+      "policy": "Mitigation: Retpolines; IBPB: conditional; IBRS_FW; STIBP: disabled; RSB filling; PBRSB-eIBRS: Not affected; BHI: Retpoline",
+      "plain_indirect_branches": 0,
+      "jit_sha256": "054abac593e590a689e55704d8af504877424ccb56954f28ff939b440c2b047a",
+      "selected_kernel_symbol_differences": "R11 CALL/JMP, RCX tail JMP and kernel plain-return fallback agree"
+    },
+    "tc-current": {
+      "observations": [
+        {
+          "jit_stack_depth": 24,
+          "jit_stack_pop": 24
+        },
+        {
+          "route": "stock",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        },
+        {
+          "route": "native",
+          "retval": 2,
+          "invocations": 34,
+          "tail_transfers": 33
+        }
+      ],
+      "policy": "Mitigation: Retpolines; IBPB: conditional; IBRS_FW; STIBP: disabled; RSB filling; PBRSB-eIBRS: Not affected; BHI: Retpoline",
+      "plain_indirect_branches": 0,
+      "jit_sha256": "5fc1d378f3c92388717c11a123d5ecb47f1c7a9fb2b10382879812056db0cd20",
+      "selected_kernel_symbol_differences": "R11 CALL/JMP, RCX tail JMP and kernel plain-return fallback agree"
+    }
+  },
+  "o4": "partial-universal-component; V owns physical thunk, compiled source and full composition",
+  "inherited_frontier": "ARM ordinary ADRP+ADD code-address discovery and compiled indirect-call saved-frame equality precision; architectural BTI ADR/BR control executes"
+}

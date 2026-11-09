@@ -1,0 +1,22 @@
+{
+  "base": "6b572b667e0ac83f7a9b725bb02d7490abaf3e59",
+  "current": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "copied": {
+    "arch/arm64/net/bpf_jit_comp.c": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7",
+    "arch/x86/mm/fault.c": "573ab39f293da97c29713fbe79a01fbe0b7c351e398fcad61267f3052a0e85be",
+    "arch/x86/net/bpf_jit_comp.c": "ed4c04fe997eee2eaeb5f119c01b4c31dc27bcc361891450296b292e84d868c1",
+    "include/linux/bpf.h": "f9eec570e4ffc6cad7f0e554c3d3566663dcd9c98a6071a8bb04191ab80c9ab3",
+    "include/linux/bpf_native.h": "removed",
+    "include/linux/bpf_native_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+    "include/linux/bpf_verifier.h": "cc21c8c4da376255ac0f232a4076b3997b847886f43299b0d7b7b0c92e12760a",
+    "include/linux/btf.h": "8dc3ad9f1eb307aff342d03ab1731bc97ce05c837ea13ee70597ba1d1d3654dd",
+    "include/uapi/linux/bpf.h": "901cb52e54e973f56c3f915f6bb9b29d8ff39e8f4a9ccf6edc75ebe4756a888a",
+    "kernel/bpf/btf.c": "4de4039c021f5219987546b239dac28e921d225ea3d77dfe54bde235e1b10934",
+    "kernel/bpf/core.c": "3553ec2f33d57b27924f10801135e5b0734f6a1cca7833a4d7ae7c1e05342086",
+    "kernel/bpf/disasm.c": "bec98f3f7d3be4a4a8667877dca54f423858982ea8f62d6cdfab7dd69590ba5a",
+    "kernel/bpf/offload.c": "48ab9367583285b27e3cc18db80e2dd639997c3ab87ee04582bb1bed0660168f",
+    "kernel/bpf/syscall.c": "1f36abd1ecdc31bf58a1e743d6684a8bbe513bc188f47562c4578d38e279fa26",
+    "kernel/bpf/verifier.c": "d4c17cbe2c157164658b4d20221825bca9a4510df04119a01ca0e4c3f583a9de",
+    "tools/include/uapi/linux/bpf.h": "aa358b8d5acdf641b5a46febe59d1dd3a6cc033b78d58b6add6d476a451ac01d"
+  }
+}
