@@ -1,0 +1,158 @@
+[
+  {
+    "candidate": "inline",
+    "historical_commit": "32dadc6b6",
+    "source": "corpus/results/kprog_app_coverage_20261109/katran-regression-current/inline-producer/payload.tar.gz",
+    "source_sha256": "b4dffc620c063c61f29a2d71fe116c281a57031dd4fb3fda8df835031275cc02",
+    "payload": "inline.tar.gz",
+    "payload_sha256": "b62c2b2a70b39fc817a3a1594685cbeb3c3c1148699868265c1907402fda984e",
+    "members": [
+      {
+        "name": "native/katran/balancer.native.o",
+        "sha256": "d57a7d8cb9c5cb1979095d8605ccfa59410a3c2f1b13aa898f37fa2ef49d6332",
+        "bytes": 65792,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking.native.o",
+        "sha256": "fd2f79a25d305c55a305ddf5469d58d00003fa0bdfdcca57ebc3ca4343012522",
+        "bytes": 21616,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking_ipip.native.o",
+        "sha256": "059b4db38a9eab866d0baa3954b7498dc4b9d2fae270a25a18b6f4313651e2da",
+        "bytes": 10936,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/manifest.json",
+        "sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+        "bytes": 616,
+        "manifest_rows": 4
+      },
+      {
+        "name": "native/katran/xdp_root.native.o",
+        "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+        "bytes": 6104,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      }
+    ]
+  },
+  {
+    "candidate": "array-cleanup",
+    "historical_commit": "4b9805362",
+    "source": "corpus/results/kprog_app_coverage_20261109/map-lookup-native/cleanup/payload.tar.gz",
+    "source_sha256": "3f0da27f2bb3875ceb839641a5b1e1b81ac54747cdb1e06e35cb3e354088ca97",
+    "payload": "array-cleanup.tar.gz",
+    "payload_sha256": "68a2a4167243d09632e6becd2ad0e17144ac7521310c5a95c7689702139ed27f",
+    "members": [
+      {
+        "name": "native/katran/balancer.native.o",
+        "sha256": "161672fa97c903f48a225337762bb81704c089e9cf7800c7cfeaa9b320947407",
+        "bytes": 67352,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking.native.o",
+        "sha256": "143b72578a03ea8a55b4e179584d0242dd244a37eff3ff93e43fc3bd4866160b",
+        "bytes": 21688,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking_ipip.native.o",
+        "sha256": "8e05ea4c1c8f6ba24ff94585dfb80b6dbb0448bffc38b4aac6fea3ad4a7e694c",
+        "bytes": 11216,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/manifest.json",
+        "sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+        "bytes": 616,
+        "manifest_rows": 4
+      },
+      {
+        "name": "native/katran/xdp_root.native.o",
+        "sha256": "1ff98b28a12013d4e076079c71f016ad629ea938f4d625d3b2761c3bd59420e4",
+        "bytes": 6128,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      }
+    ]
+  },
+  {
+    "candidate": "percpu-array",
+    "historical_commit": "469a94426",
+    "source": "corpus/results/kprog_app_coverage_20261109/map-lookup-native/percpu-array/payload.tar.gz",
+    "source_sha256": "9caa0c197f476c05528b3dd1bc141cad01825b4cd08a66c3a51661a9915207cf",
+    "payload": "percpu-array.tar.gz",
+    "payload_sha256": "5dc6d90a22ade743da3d6d919238947f15c911a8fcbf819e42c3b5b8c9b54e5b",
+    "members": [
+      {
+        "name": "native/katran/balancer.native.o",
+        "sha256": "7b119a6269bedb7fec7a56ecf601211eec1c6ef6dff9655cade540686a054ea1",
+        "bytes": 70736,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking.native.o",
+        "sha256": "044911683079a088c62977103d85c29fa5c80236bd448b762ed2aaa4fc5b3ab4",
+        "bytes": 21520,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/healthchecking_ipip.native.o",
+        "sha256": "71c605adab95adfb61394b0493130f5d43f2fe01ff902254d47061ebe8849745",
+        "bytes": 10976,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      },
+      {
+        "name": "native/katran/manifest.json",
+        "sha256": "921157c43c976a26dcb6aadf17f58d6c270c44eb3eb3351ec172ba6204a04611",
+        "bytes": 616,
+        "manifest_rows": 4
+      },
+      {
+        "name": "native/katran/xdp_root.native.o",
+        "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+        "bytes": 6104,
+        "undefined_symbols": [
+          "                 U __x86_indirect_thunk_r11",
+          "                 U __x86_return_thunk"
+        ]
+      }
+    ]
+  }
+]
