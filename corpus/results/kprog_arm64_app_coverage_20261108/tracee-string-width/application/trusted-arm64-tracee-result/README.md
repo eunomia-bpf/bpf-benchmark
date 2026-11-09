@@ -1,0 +1,5 @@
+Tracee64bit string-offset whole runtime
+
+Actual526933c44 source09f40af86 advances beyond the prior string-offset register frontier. The stock JIT baseline now reaches sys_dup_exit_tail B2140 bpf_probe_read_kernel after1579instructions108states: get_unix_sock_addr signed locallen retains a negative lower bound following the existing subtraction and upper clamp. Native requests/generated/compiled/installed counts stay0 at this startup frontier. Full original log/native/JIT/embeddedbinary identities remain archived.
+
+Source61c85aa5f changes thatone local type tou32, retaining the existing upper clamp and every numeric bound/helper/output operation. Valid-length bytes stay equal; unnamed/read-error intermediate lengths use unsigned wrap followed by the existing cap. The source patch and ledger record this error-path behavior. Paired compile283041e2e exits0 for native/JIT/embedded binary from the same complete selected C tree. Its complete123manifest application replay is active with the current92helper/fourvoidkfunc model and freshpairedloader. Original kernel selftests/benchmark framework retain bytes. Runtime admission additions:0.

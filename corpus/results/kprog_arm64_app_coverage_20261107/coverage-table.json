@@ -1,5 +1,5 @@
 {
-  "as_of_utc": "2026-11-09T05:00:45.636273+00:00",
+  "as_of_utc": "2026-11-09T05:31:08.049044+00:00",
   "scope": "Six closed first-pass application cohorts. Load attempts retain probes and retries; resident rows, service requests and application outcomes have separate denominators. Repairs and full-application replays continue.",
   "applications": [
     {
@@ -160,7 +160,7 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-09T05:00:45.636273+00:00",
+    "as_of_utc": "2026-11-09T05:31:08.049044+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
@@ -303,24 +303,26 @@
       },
       {
         "application": "Tracee",
-        "publication": "747723132d980afa66f45c82bbb4de0d847bc156",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-string-register/application/trusted-arm64-tracee-result/coverage.json",
+        "publication": "526933c4457bc899c98210c6df5f7c48f6f9bc4e",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-string-width/application/trusted-arm64-tracee-result/coverage.json",
         "baseline_resident": null,
         "service_source_ids": 0,
         "generated": 0,
         "compiled": 0,
         "stages": {},
         "failure_classes": {
-          "stock_JIT_string_offset_register_relation": 1
+          "stock_JIT_signed_UNIX_length": 1
         },
         "application_status": [
           "error"
         ],
         "host_ok": false,
         "guest_exit": 1,
-        "runtime_epoch": "paired source218/f1/e5, stock baseline startup",
-        "frontier": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-string-register/application/trusted-arm64-tracee-result/frontier.json",
-        "next_source": "09f40af862b46082f9581b6dd4c4086d589e77f4"
+        "runtime_epoch": "paired09f/f1/e5capturedfunctional",
+        "frontier": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-string-width/application/trusted-arm64-tracee-result/frontier.json",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-string-width/application/trusted-arm64-tracee-result/run-20261109T051603061446Z.tar.gz",
+        "raw_archive_sha256": "6cf0b0ed9c0fd72a30f4cead282d212db4c360e36e7e7647c0722025890152ae",
+        "next_source": "61c85aa5febf1b6bd8acf8a37104469d90faa32a"
       }
     ]
   },
