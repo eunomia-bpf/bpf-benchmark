@@ -1,0 +1,330 @@
+{
+  "kernel_head": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "kprobe_identity": "x86 pt_regs identity; arm64 user_pt_regs prefix of pt_regs",
+  "types": [
+    {
+      "prog_type": 1,
+      "name": "SOCKET_FILTER",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11206,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 2,
+      "name": "KPROBE",
+      "public_context": "bpf_user_pt_regs_t",
+      "kernel_context": "struct pt_regs",
+      "dispatch": "raw",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1364,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 3,
+      "name": "SCHED_CLS",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "tc",
+      "source": "net/core/filter.c",
+      "line": 11217,
+      "convert_ctx_access": "tc_cls_act_convert_ctx_access"
+    },
+    {
+      "prog_type": 4,
+      "name": "SCHED_ACT",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11217,
+      "convert_ctx_access": "tc_cls_act_convert_ctx_access"
+    },
+    {
+      "prog_type": 5,
+      "name": "TRACEPOINT",
+      "public_context": "__u64",
+      "kernel_context": "u64",
+      "dispatch": "raw",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1470,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 6,
+      "name": "XDP",
+      "public_context": "struct xdp_md",
+      "kernel_context": "struct xdp_buff",
+      "dispatch": "xdp",
+      "source": "net/core/filter.c",
+      "line": 11230,
+      "convert_ctx_access": "xdp_convert_ctx_access"
+    },
+    {
+      "prog_type": 7,
+      "name": "PERF_EVENT",
+      "public_context": "struct bpf_perf_event_data",
+      "kernel_context": "struct bpf_perf_event_data_kern",
+      "dispatch": "typed handler required",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1907,
+      "convert_ctx_access": "pe_prog_convert_ctx_access"
+    },
+    {
+      "prog_type": 8,
+      "name": "CGROUP_SKB",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "cgroup_skb",
+      "source": "net/core/filter.c",
+      "line": 11242,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 9,
+      "name": "CGROUP_SOCK",
+      "public_context": "struct bpf_sock",
+      "kernel_context": "struct sock",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11292,
+      "convert_ctx_access": "bpf_sock_convert_ctx_access"
+    },
+    {
+      "prog_type": 10,
+      "name": "LWT_IN",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11252,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 11,
+      "name": "LWT_OUT",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11262,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 12,
+      "name": "LWT_XMIT",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11272,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 13,
+      "name": "SOCK_OPS",
+      "public_context": "struct bpf_sock_ops",
+      "kernel_context": "struct bpf_sock_ops_kern",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11310,
+      "convert_ctx_access": "sock_ops_convert_ctx_access"
+    },
+    {
+      "prog_type": 14,
+      "name": "SK_SKB",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11319,
+      "convert_ctx_access": "sk_skb_convert_ctx_access"
+    },
+    {
+      "prog_type": 15,
+      "name": "CGROUP_DEVICE",
+      "public_context": "struct bpf_cgroup_dev_ctx",
+      "kernel_context": "struct bpf_cgroup_dev_ctx",
+      "dispatch": "raw",
+      "source": "kernel/bpf/cgroup.c",
+      "line": 1863,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 16,
+      "name": "SK_MSG",
+      "public_context": "struct sk_msg_md",
+      "kernel_context": "struct sk_msg",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11329,
+      "convert_ctx_access": "sk_msg_convert_ctx_access"
+    },
+    {
+      "prog_type": 17,
+      "name": "RAW_TRACEPOINT",
+      "public_context": "struct bpf_raw_tracepoint_args",
+      "kernel_context": "u64",
+      "dispatch": "raw",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1792,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 18,
+      "name": "CGROUP_SOCK_ADDR",
+      "public_context": "struct bpf_sock_addr",
+      "kernel_context": "struct bpf_sock_addr_kern",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11301,
+      "convert_ctx_access": "sock_addr_convert_ctx_access"
+    },
+    {
+      "prog_type": 19,
+      "name": "LWT_SEG6LOCAL",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct sk_buff",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11283,
+      "convert_ctx_access": "bpf_convert_ctx_access"
+    },
+    {
+      "prog_type": 20,
+      "name": "LIRC_MODE2",
+      "public_context": "__u32",
+      "kernel_context": "u32",
+      "dispatch": "raw",
+      "source": "drivers/media/rc/bpf-lirc.c",
+      "line": 130,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 21,
+      "name": "SK_REUSEPORT",
+      "public_context": "struct sk_reuseport_md",
+      "kernel_context": "struct sk_reuseport_kern",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11679,
+      "convert_ctx_access": "sk_reuseport_convert_ctx_access"
+    },
+    {
+      "prog_type": 22,
+      "name": "FLOW_DISSECTOR",
+      "public_context": "struct __sk_buff",
+      "kernel_context": "struct bpf_flow_dissector",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11339,
+      "convert_ctx_access": "flow_dissector_convert_ctx_access"
+    },
+    {
+      "prog_type": 23,
+      "name": "CGROUP_SYSCTL",
+      "public_context": "struct bpf_sysctl",
+      "kernel_context": "struct bpf_sysctl_kern",
+      "dispatch": "typed handler required",
+      "source": "kernel/bpf/cgroup.c",
+      "line": 2478,
+      "convert_ctx_access": "sysctl_convert_ctx_access"
+    },
+    {
+      "prog_type": 24,
+      "name": "RAW_TRACEPOINT_WRITABLE",
+      "public_context": "struct bpf_raw_tracepoint_args",
+      "kernel_context": "u64",
+      "dispatch": "raw",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1825,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 25,
+      "name": "CGROUP_SOCKOPT",
+      "public_context": "struct bpf_sockopt",
+      "kernel_context": "struct bpf_sockopt_kern",
+      "dispatch": "typed handler required",
+      "source": "kernel/bpf/cgroup.c",
+      "line": 2701,
+      "convert_ctx_access": "cg_sockopt_convert_ctx_access"
+    },
+    {
+      "prog_type": 26,
+      "name": "TRACING",
+      "public_context": "void *",
+      "kernel_context": "void *",
+      "dispatch": "raw",
+      "source": "kernel/trace/bpf_trace.c",
+      "line": 1803,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 27,
+      "name": "STRUCT_OPS",
+      "public_context": "void *",
+      "kernel_context": "void *",
+      "dispatch": "raw",
+      "source": "kernel/bpf/bpf_struct_ops.c",
+      "line": 69,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 28,
+      "name": "EXT",
+      "public_context": "void *",
+      "kernel_context": "void *",
+      "dispatch": "raw",
+      "source": "kernel/bpf/trampoline.c",
+      "line": 18,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 29,
+      "name": "LSM",
+      "public_context": "void *",
+      "kernel_context": "void *",
+      "dispatch": "raw",
+      "source": "kernel/bpf/bpf_lsm.c",
+      "line": 413,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 30,
+      "name": "SK_LOOKUP",
+      "public_context": "struct bpf_sk_lookup",
+      "kernel_context": "struct bpf_sk_lookup_kern",
+      "dispatch": "typed handler required",
+      "source": "net/core/filter.c",
+      "line": 11891,
+      "convert_ctx_access": "sk_lookup_convert_ctx_access"
+    },
+    {
+      "prog_type": 31,
+      "name": "SYSCALL",
+      "public_context": "void *",
+      "kernel_context": "void *",
+      "dispatch": "raw",
+      "source": "kernel/bpf/syscall.c",
+      "line": 6511,
+      "convert_ctx_access": "identity layout"
+    },
+    {
+      "prog_type": 32,
+      "name": "NETFILTER",
+      "public_context": "struct bpf_nf_ctx",
+      "kernel_context": "struct bpf_nf_ctx",
+      "dispatch": "raw",
+      "source": "net/netfilter/nf_bpf_link.c",
+      "line": 329,
+      "convert_ctx_access": "identity layout"
+    }
+  ]
+}
