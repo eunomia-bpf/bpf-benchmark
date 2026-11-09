@@ -1,12 +1,12 @@
 Grouped resident native-body census
 
-7/27 native bodies have an actual representative outcome, covering 231/275 weighted instances.
+8/27 native bodies have an actual representative outcome, covering 232/275 weighted instances.
 
 | Failure class | Native bodies | Weighted instances |
 | --- | ---: | ---: |
+| verifier_scalar_memory_access | 4 | 100 |
 | verifier_stack_access | 3 | 99 |
-| verifier_scalar_memory_access | 3 | 99 |
-| pending | 20 | 44 |
+| pending | 19 | 43 |
 | compiler_stack_storage | 1 | 33 |
 
 Each body is the complete linked native proof ELF with its executable bytes, data and relocation identities. Members retain their resident IDs and original resource/context inputs. The table weights a representative observation by body membership; the source program IDs identify the actual submissions.
