@@ -1180,6 +1180,89 @@ good, and a native body that is 36% smaller in bytes (8,744 against 13,641)
 does not make it cheaper per invocation. Any optimization for Katran has to
 change what the native body does, not how it is stored.
 
+### Tracee: baseline counters, launch fails on kconfig
+
+Tracee's baseline arm produced counters -- 151 programs, 7,269,956,948
+invocations at **339.1 ns per invocation** -- but the app run itself exited
+97, so the arm is not a clean sample. The cause is not the workload:
+
+| observation | value |
+| --- | --- |
+| image has `/boot/config-7.0.0-rc2+` | yes |
+| guest sees `/boot` | no -- the recipe mounts `--rwdir` for the repo and state only |
+| host has `/boot/config-$(uname -r)` | no |
+| Tracee's consequence | `KConfig: could not check enabled kconfig features`, then detectors `TRC-1013` and `TRC-107` fail to register ("requires enrichment environment") |
+
+Placing the release config at `/boot/config-7.0.0-rc2+` on the host -- which
+the guest shares -- removes the kconfig warning entirely: the re-test's error
+text contains no `kconfig` mention at all. What remains is `TRC-1013` and
+`TRC-107` failing to register, which is a different cause and is still open.
+
+Those two detectors want the `exec-env` enrichment, and this build exposes
+it only through `Output.Environment`, which the runner leaves off while
+passing `--output none` (`TRACEE_OUTPUT_MODE = "none"`). Turning it on means
+changing `runner/libs/app_runners/tracee.py`, which the operator's
+instructions freeze, so it needs their word.
+
+The kconfig fix is worth keeping regardless: it is one file on the host, it
+touches no frozen path, and without it Tracee logs a real warning on every
+launch.
+
+### Tetragon: baseline reproduces, native arm refused
+
+Tetragon ran at SAMPLES=3 WORKLOAD_DURATION=180 with stats on. Its baseline
+arm completed all three samples -- 287 programs, 2,911,520,568 invocations
+and 2,159,451,766,761 ns, which is **741.7 ns per invocation** against the
+archive's 748 ns (0.99x). The JIT arm therefore still reproduces on the
+restored workload.
+
+The hot programs, by BPF time:
+
+| program | type | invocations | BPF ns | ns per run |
+| --- | --- | ---: | ---: | ---: |
+| `generic_tracepo...` | tracepoint | 1,336,729,391 | 1,057,926,746,954 | 791.4 |
+| `generic_kprobe_...` | kprobe | 57,008,275 | 348,510,017,600 | 6,113.3 |
+| `generic_kprobe_...` | kprobe | 162,983,229 | 138,676,227,228 | 850.9 |
+| `generic_kprobe_...` | kprobe | 163,748,363 | 137,674,626,617 | 840.8 |
+| `generic_kprobe_...` | kprobe | 237,499,029 | 135,990,511,454 | 572.6 |
+
+The second row is the one the archive's 900.4 ns figure is about: a
+`generic_kprobe_` variant at **6,113 ns per invocation** on 57 million runs,
+which is where a native arm would gain or lose the most.
+
+Its native arm replaced 0 programs; `event_exit_acct` was the first the
+specializer refused.
+
+### Cilium: baseline complete with verdict counters, native arm refused
+
+Cilium ran at SAMPLES=3 WORKLOAD_DURATION=180 with stats on. Its baseline
+arm completed all three samples: 53 programs, 489,297,698 invocations and
+632,773,375,235 ns of BPF time, 1,293.2 ns per invocation.
+
+Work done, from the datapath's own verdict map rather than from a count of
+packets sent:
+
+| counter | per sample |
+| --- | ---: |
+| forwarded, `direction=1` | 165,777,756 packets / 10,609,786,576 bytes |
+| forwarded, `direction=2` | 165,777,759 packets / 10,609,786,786 bytes |
+| dropped, `reason=139` | 2 packets |
+| dropped, `reason=3` | 2 packets |
+
+Both directions carry the same volume to within 3 packets, and the two
+drops are 2 packets each -- so the datapath forwarded essentially
+everything the generator sent. The pktgen components report 82,888,659 and
+82,888,733 packets in each direction with `errors: 0`, on the restored
+random-flow shape (`flows: 65535`, `flowlen: 1`, `Flags: FLOW_RND`).
+
+Its native arm replaced **0** programs and the specializer refused
+`cil_xdp_entry` with `Input/output error` -- the same generation-ABI cause
+as BCC. This run also had to add `native_division.so` to the image: the
+runner image ships it under `/usr/local/lib/bpfrejit/native/`, but the
+`kprog_app_coverage_20261107` Dockerfile does not copy it, so Cilium's
+native compile failed with `unable to load plugin ... No such file or
+directory` before any program reached the specializer.
+
 ### BCC: baseline complete, native arm refused on stale objects
 
 BCC ran on the restored workload at SAMPLES=3 WORKLOAD_DURATION=180 with
