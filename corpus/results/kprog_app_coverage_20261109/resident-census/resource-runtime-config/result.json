@@ -1,0 +1,21 @@
+{
+  "objects": 1,
+  "resident_instances": 2,
+  "resource_instances": {
+    "resource_failed": 2
+  },
+  "application_source_program_loads": 0,
+  "native_execution_requests": 0,
+  "programs": [
+    {
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "source_object": "/workspaces/repository/vendor/build/.bcc-libbpf/none/x86/output/capable.bpf.o",
+      "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
+      "entry": "kprobe__cap_capable_entry",
+      "stage": "resource_failed",
+      "error": "[Errno 22] maps/BTF object prepare: Invalid argument",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/prepare.py\", line 17, in guest\n    metadata,fds,details=resource.load(group[\"snapshot\"])\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 332, in load\n    self.ok(self.lib.bpf_object__prepare(self.obj), \"maps/BTF object prepare\")\n  File \"/workspaces/repository/kprog/selftests/submit.py\", line 303, in ok\n    raise OSError(-rc, operation + \": \" + os.strerror(-rc))\nOSError: [Errno 22] maps/BTF object prepare: Invalid argument\n"
+    }
+  ]
+}
