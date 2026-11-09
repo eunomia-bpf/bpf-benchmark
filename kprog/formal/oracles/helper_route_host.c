@@ -85,6 +85,13 @@ static long capture_probe_kernel(void *dst, __u32 size, const void *src)
 }
 #define bpf_probe_read_kernel capture_probe_kernel
 
+/* The host environment reports the production callback as a failed scene. */
+static void arm64_sim_unsupported_opcode(void)
+{
+    fputs("unexpected helper-route unsupported opcode\n", stderr);
+    exit(1);
+}
+
 static int failures;
 static unsigned long cases;
 
