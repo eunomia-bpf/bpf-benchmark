@@ -1,0 +1,9 @@
+Explicit temporary map pinning for source resources
+
+The common direct-resource path gives every map an explicit pin path inside its temporary request directory. Its resource ELF view expresses that lifecycle with pinning value 0. A private BTF array/pointer pair is appended and each map pinning member points to it; existing shared array types retain their values. Map shape fields, instruction/data bytes, entry function records and prototype IDs retain their original identities. Native P and the original source ELF retain their bytes.
+
+Offline observation opens all 18 source objects covering 274 initially selected resident instances. All 85 original source-open cases recover, every adapted source program keeps autoload=false, instruction/data identities match, and every original function/prototype record matches. The changed existing BTF type records are exactly the map declaration structs recorded in the pinning translation. The private map annotation owns the adaptation; kernel map capabilities still come from actual created/pinned maps. Native execution requests and application source-program loads are zero.
+
+Cilium uses CILIUM_PIN_REPLACE=16 for cilium_calls. The initial snapshot, published producer archive and live source object hashes agree; saved-command reconstruction confirms the same map definitions. The earlier comparison with ordinary LIBBPF_PIN_BY_NAME=1 described a different annotation. The source reconstruction remains a diagnostic result, and this common resource-view translation closes the loader metadata mismatch.
+
+The stock-kernel continuation uses the original three Cilium ELF snapshots for all 72 resident instances. Actual prepare outcomes publish separately as result.json/raw.tar.gz. The earlier maps/BTF view has already prepared OTel 13 and Tracee 151 resources in the stock guest (3daeea9b2); initial generation/compile/verifier counts retain their own actual stages.

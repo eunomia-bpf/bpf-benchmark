@@ -94,14 +94,97 @@ def start_service(arch=1):
     return proc, state
 
 
+def resource_pinning_btf(raw, lib):
+    """Give map pinning to the direct request's explicit temporary pin paths."""
+    for name, result, arguments in [
+        ("btf__new", c.c_void_p, [c.c_void_p, c.c_uint32]),
+        ("btf__free", None, [c.c_void_p]),
+        ("libbpf_get_error", c.c_long, [c.c_void_p]),
+        ("btf__type_cnt", c.c_uint32, [c.c_void_p]),
+        ("btf__type_by_id", c.c_void_p, [c.c_void_p, c.c_uint32]),
+        ("btf__name_by_offset", c.c_char_p, [c.c_void_p, c.c_uint32]),
+        ("btf__add_array", c.c_int, [c.c_void_p, c.c_int, c.c_int, c.c_uint32]),
+        ("btf__add_ptr", c.c_int, [c.c_void_p, c.c_int]),
+        ("btf__raw_data", c.c_void_p, [c.c_void_p, c.POINTER(c.c_uint32)]),
+    ]:
+        function = getattr(lib, name)
+        function.restype, function.argtypes = result, arguments
+    buffer = c.create_string_buffer(raw)
+    btf = lib.btf__new(buffer, len(raw))
+    error = lib.libbpf_get_error(btf)
+    if error or not btf:
+        raise OSError(-error if error else c.get_errno(), "resource BTF parse")
+    def fields(identifier):
+        address = lib.btf__type_by_id(btf, identifier)
+        return c.cast(address, c.POINTER(c.c_uint32 * 3)).contents
+    def resolved(identifier):
+        while ((fields(identifier)[1] >> 24) & 31) in {8, 9, 10, 11, 18}:
+            identifier = fields(identifier)[2]
+        return identifier
+    changes = []
+    try:
+        for identifier in range(1, lib.btf__type_cnt(btf)):
+            section = fields(identifier)
+            if ((section[1] >> 24) & 31) != 15 or lib.btf__name_by_offset(btf, section[0]) != b".maps":
+                continue
+            variables = (c.c_uint32 * (3 * (section[1] & 65535))).from_address(c.addressof(section) + 12)
+            for offset in range(0, len(variables), 3):
+                variable = fields(variables[offset])
+                structure_id = resolved(variable[2])
+                structure = fields(structure_id)
+                if ((structure[1] >> 24) & 31) != 4:
+                    continue
+                members = (c.c_uint32 * (3 * (structure[1] & 65535))).from_address(c.addressof(structure) + 12)
+                for member in range(0, len(members), 3):
+                    if lib.btf__name_by_offset(btf, members[member]) != b"pinning":
+                        continue
+                    pointer = fields(resolved(members[member + 1]))
+                    if ((pointer[1] >> 24) & 31) != 2:
+                        continue
+                    array_id = resolved(pointer[2])
+                    array_header = fields(array_id)
+                    if ((array_header[1] >> 24) & 31) != 3:
+                        continue
+                    array = c.cast(lib.btf__type_by_id(btf, array_id),
+                                   c.POINTER(c.c_uint32 * 6)).contents
+                    if array[5]:
+                        changes.append(dict(map=lib.btf__name_by_offset(btf, variable[0]).decode(),
+                                            source= int(array[5]), resource=0,
+                                            structure_id=structure_id, member=member,
+                                            element=int(array[3]), index=int(array[4])))
+        pointers = {}
+        for change in changes:
+            key = (change["index"], change["element"])
+            if key not in pointers:
+                array_id = lib.btf__add_array(btf, *key, 0)
+                if array_id < 0:
+                    raise OSError(-array_id, "resource BTF pinning array")
+                pointer_id = lib.btf__add_ptr(btf, array_id)
+                if pointer_id < 0:
+                    raise OSError(-pointer_id, "resource BTF pinning pointer")
+                pointers[key] = pointer_id
+            structure = fields(change["structure_id"])
+            members = (c.c_uint32 * (3 * (structure[1] & 65535))).from_address(c.addressof(structure) + 12)
+            members[change["member"] + 1] = pointers[key]
+        if changes:
+            size = c.c_uint32()
+            data = lib.btf__raw_data(btf, c.byref(size))
+            return c.string_at(data, size.value), changes
+        return None, []
+    finally:
+        lib.btf__free(btf)
+
+
 @contextlib.contextmanager
-def libbpf_resource_object(path, directory):
+def libbpf_resource_object(path, directory, lib):
     """Prepare source maps/BTF through a resource-only ELF metadata view."""
     from elftools.elf.elffile import ELFFile
     path = pathlib.Path(path)
     with path.open("rb") as source:
         elf = ELFFile(source)
         program_relocations = elf.get_section_by_name(".BTF.ext") is not None
+        btf = elf.get_section_by_name(".BTF")
+        pinning_btf, pinning = resource_pinning_btf(btf.data(), lib) if btf else (None, [])
         local_entries = [
             symbol.name for symbol in elf.get_section_by_name(".symtab").iter_symbols()
             if symbol["st_info"]["type"] == "STT_FUNC"
@@ -110,18 +193,23 @@ def libbpf_resource_object(path, directory):
             and elf.get_section(symbol["st_shndx"])["sh_flags"] & 4
             and elf.get_section(symbol["st_shndx"]).name != ".text"
         ]
-    if local_entries or program_relocations:
+    if local_entries or program_relocations or pinning:
         with tempfile.TemporaryDirectory(prefix="resource-elf-", dir=directory) as temp:
             resource = pathlib.Path(temp) / path.name
             # Source programs keep autoload=false. Their CO-RE/function/line
             # relocation table belongs to source execution; maps and entry
             # prototypes use the retained .BTF section.
-            subprocess.run(["llvm-objcopy-18", "--remove-section=.BTF.ext",
+            btf_args = []
+            if pinning_btf is not None:
+                btf_file = pathlib.Path(temp) / "resource.btf"
+                btf_file.write_bytes(pinning_btf)
+                btf_args = ["--update-section=.BTF=" + str(btf_file)]
+            subprocess.run(["llvm-objcopy-18", "--remove-section=.BTF.ext", *btf_args,
                             *("--globalize-symbol=" + name for name in local_entries),
                             str(path), str(resource)], check=True)
-            yield resource, local_entries
+            yield resource, local_entries, pinning
     else:
-        yield path, []
+        yield path, [], []
 
 
 class ObjectResources:
@@ -161,8 +249,8 @@ class ObjectResources:
         self.bind("btf__name_by_offset", c.c_char_p, c.c_void_p, c.c_uint32)
         self.bind("btf__find_by_name_kind", c.c_int, c.c_void_p, c.c_char_p, c.c_uint32)
         self.bind("libbpf_find_vmlinux_btf_id", c.c_int, c.c_char_p, c.c_uint32)
-        resource, self.globalized_entries = self.source_stack.enter_context(
-            libbpf_resource_object(path, directory))
+        resource, self.globalized_entries, self.pinning = self.source_stack.enter_context(
+            libbpf_resource_object(path, directory, self.lib))
         self.obj = self.lib.bpf_object__open_file(os.fsencode(resource), None)
         error = self.lib.libbpf_get_error(self.obj)
         if error or not self.obj:
@@ -285,7 +373,7 @@ class ObjectResources:
             section=section, maps=pins, pin_root=str(self.pins),
             attach_target_resolution=target_error,
             resource_globalized_entries=self.globalized_entries,
-            resource_view="maps-and-btf")
+            resource_view="maps-and-btf", resource_pinning=self.pinning)
 
     def close(self):
         if self.obj:
