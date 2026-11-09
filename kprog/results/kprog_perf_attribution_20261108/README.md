@@ -13,7 +13,7 @@ of the same run. Nothing here is a new instrument.
 2. **What the numbers say about the candidates** — the share each
    optimization covers.
 3. **Why the 2026-05-29 numbers were faster** — the question the operator
-   asked. Both arms moved; the native-specific remainder is 8% to 18%.
+   asked. Both arms moved; the native-specific remainder is 0.87x to 1.23x.
 4. **Call sites per program** — what each candidate acts on, from the link
    plans.
 5. **Katran on the verified arm, 2026-11-08** — both stats modes.
@@ -288,9 +288,12 @@ context around the corpus apps did.
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
-`native beyond JIT` column: 8% to 18% per application. Recovering the rest
-requires the shared cause — kernel, workload or measurement state — to be
-restored, and that cause is outside the native compile.
+`native beyond JIT` column: 6% to 23% per application on the four where the
+native arm is the slower one (tetragon 1.061x, otelcol 1.114x, cilium
+1.158x, katran 1.228x), and nothing on bcc, where the native arm is the
+faster one at 0.866x. Recovering the rest requires the shared cause --
+kernel, workload or measurement state -- to be restored, and that cause is
+outside the native compile.
 
 ### Caveats
 
