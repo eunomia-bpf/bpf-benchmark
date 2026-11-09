@@ -34,7 +34,7 @@
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
-- [ ] **A** 这 275 个程序的静态结果，按 native body 分组并行：27 个候选入口组；实际 linked body 27 组，完成 10 组，覆盖 242/275 加权实例。模型 4f5b7ae6d；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。
+- [ ] **A** 这 275 个程序的静态结果，按 native body 分组并行：27 个候选入口组；实际 linked body 27 组，完成 11 组，覆盖 243/275 加权实例。模型 4f5b7ae6d；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。
 - [x] **A/C** 资源准备 238/238 完成：Tracee 151、OTel 13（3daeea9b2），Cilium 72（aba3e9d46），BCC 2（7b4876f7a）；汇总 bc3104df7，本提交补记统一 TODO。通用路径适配局部入口符号、资源专用重定位视图、临时 pinning 生命周期和原应用运行时 map 参数。Cilium 的 CILIUM_PIN_REPLACE=16 与 BCC stackmap 的空模板字段均按实际 loader 语义处理。
 - [x] **A** 23 条数字开头 ELF 名称的元数据语法修复：原始 kernel metadata/facts 全部规范化，23 份 map 声明编译与 ELF 名称保留通过，现有 6 项元数据测试通过（eeec0f52a，本提交补记统一 TODO）。
 - [x] **A** 静态普查合并发布保留 previous-results 路径与 worker PID 各自语义；已完成的 guest 记录可独立发布，运行中的 275 行批次沿用原 guest 和模型。本提交修复 harness 的变量覆盖，代码位于冻结路径之外。 每行携带模型提交号，合并表保留各版本的实际行数。
