@@ -12,10 +12,11 @@ import subprocess
 import sys
 import hashlib
 import tarfile
+import shutil
 import select
 import datetime
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path("/workspaces/repository")
 
 
 def guest(scratch):
@@ -61,6 +62,18 @@ def guest(scratch):
                 result["stage"] = result["submission"]["stage"]
                 result["diagnostic"] = result["submission"].get("diagnostic",
                                       result["submission"].get("error", ""))
+            result["generated"] = result["stage"] in {
+                "installed", "verifier_rejected", "compilation_failed", "load_failed"}
+            result["compiled"] = result["stage"] in {
+                "installed", "verifier_rejected", "load_failed"}
+            service_record = result.get("submission", {}).get("service", {})
+            captured_archive = service_record.get("artifact_archive", service_record.get("failure_archive"))
+            if captured_archive and Path(captured_archive).exists():
+                with tarfile.open(captured_archive) as archive:
+                    names = archive.getnames()
+                    result["generated"] = any(n.endswith("trusted_x86.bpf.c") for n in names)
+                    result["compiled"] = result["stage"] != "compilation_failed" and any(
+                        n.endswith("trusted_x86.bpf.o") for n in names)
             records.append(result)
             payload = dict(model_head=source["source_head"], attempted=len(records),
                            stages=dict(collections.Counter(r["stage"] for r in records)),
@@ -168,13 +181,17 @@ def host(scratch):
     (base / "stock-results.json").write_text(json.dumps(result, indent=2) + "\n")
     apps = sorted({r["application"] for r in result["programs"]})
     table = ["Resident static census: actual stock-verifier outcomes", "",
-             "| Failure class / installed | Programs | " + " | ".join(apps) + " |",
-             "| --- | ---: | " + " | ".join("---:" for _ in apps) + " |"]
+             "| Failure class / installed | Programs | Generated | Compiled | Verifier accepted | Verifier rejected | " + " | ".join(apps) + " |",
+             "| --- | ---: | ---: | ---: | ---: | ---: | " + " | ".join("---:" for _ in apps) + " |"]
     for label, count in classes.most_common():
         counts = [sum(r["failure_class"] == label and r["application"] == app
                       for r in result["programs"]) for app in apps]
+        group = [r for r in result["programs"] if r["failure_class"] == label]
+        stages = [sum(r["generated"] for r in group), sum(r["compiled"] for r in group),
+                  sum(r["stage"] == "installed" for r in group),
+                  sum(r["stage"] == "verifier_rejected" for r in group)]
         table.append("| " + label + " | " + str(count) + " | " +
-                     " | ".join(map(str, counts)) + " |")
+                     " | ".join(map(str, stages + counts)) + " |")
     table += ["", "Every original instance retains its source ID and actual stage. "
               "Native execution requests:0. Source ELF maps/BTF are prepared with "
               "autoload=false; this static pass retains their declared initial resources. "
@@ -183,8 +200,15 @@ def host(scratch):
               "diagnostics accompany each row in stock-results.json. "
               "The immutable model revision is " + result["model_head"] + "."]
     (base / "ranked-failures.md").write_text("\n".join(table) + "\n")
+    request_directory = base / "requests"
+    request_directory.mkdir(exist_ok=True)
+    raw_requests = []
+    for path in sorted((scratch / "stock-state").glob("*.tar.gz")):
+        target = request_directory / path.name
+        shutil.copy2(path, target)
+        raw_requests.append(target)
     with tarfile.open(base / "stock-raw.tar.gz", "w:gz") as archive:
-        for name in ["stock-state", "stock-results.json", "stock-console.log",
+        for name in ["stock-state/requests.jsonl", "stock-results.json", "stock-console.log",
                      "stock-service.log", "stock-host.log", "stock-guest.exit",
                      "stock-command.json", "stock-guest.sh", "resource-index.json",
                      "stock-runtime", "stock-compiler"]:
@@ -195,8 +219,9 @@ def host(scratch):
         "/var/tmp/kprog-tmp/A/publication/publish.py")
     publisher = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(publisher)
-    publication = publisher.publish([str((base / name).relative_to(ROOT))
-        for name in ["stock-results.json", "ranked-failures.md", "stock-raw.tar.gz"]],
+    publication = publisher.publish([str(path.relative_to(ROOT)) for path in
+        [base / name for name in ["stock-results.json", "ranked-failures.md", "stock-raw.tar.gz"]] +
+        raw_requests],
         "Rank all resident x86 static census outcomes", "resident-stock-terminal")
     (scratch / "stock-publication.json").write_text(json.dumps(publication, indent=2) + "\n")
     with Path("/workspaces/.agent-state/kprog-lanes/COORDINATION.md").open("a") as notice:
