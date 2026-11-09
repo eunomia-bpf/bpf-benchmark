@@ -1114,7 +1114,48 @@ native objects under `/opt/bpf-benchmark/native-bpf/x86_64/otel*/`
 work; OTel's do not. Regenerating them is generation work, which belongs to
 lane C with the app's own runtime.
 
-**So the both-arms check is complete for Katran and blocked for OTel.** The
-six-application timing needs OTel's native objects regenerated first, and
-that is the one outstanding item before `SAMPLES=3 WORKLOAD_DURATION=180`
-in both stats modes.
+The OTel service's own request log shows a different failure from Katran's:
+not the specializer rejecting a native program, but the **compile of the
+generated BPF failing**, because the generated source begins
+
+```c
+#include "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h"
+```
+
+and the corpus container mounts only `corpus/results`, so it has no
+`kprog/` directory at all:
+
+```
+fatal error: '/workspaces/repository/kprog/x86/x86_sim_local_bpf.h'
+  file not found
+```
+
+The compiler that hits this is the recipe's `clang`, which in the image
+resolves through `/usr/local/bin/clang-18 -> merlin-bpf-clang`, and in this
+recipe is the wrapper at `C/design-only/remaining-apps/clang`, which submits
+to C's `frozen-python` compile broker (whose `broker/STOP` file is present,
+so it does not serve).
+
+**The compile failure is the stopped compile broker, not the sources.** The
+`clang` the OTel service invokes is a wrapper at
+`C/design-only/remaining-apps/clang` that submits to lane C's
+`frozen-python` compile broker, and that broker is down:
+
+| evidence | value |
+| --- | --- |
+| broker `STOP` file | present |
+| broker process | none running |
+| broker `ready.json` | written 2026-11-08 06:20 |
+| the clang the request names | `C/design-only/remaining-apps/clang` (the wrapper) |
+
+I verified the sources themselves compile in the image once the headers are
+present: with `kprog/x86/`, `kprog/formal/generated/`, `kinsn/module/include/`
+and `vendor/libbpf/` added, the generated BPF compiles to a 41,136-byte
+object with no errors. So the remaining failure is the broker, and the image
+layer needs those four trees as well -- which I added.
+
+**So both-arms is complete for Katran and blocked for OTel on lane C's
+compile broker.** For C: restart the `frozen-python` broker (its `STOP` file
+is present and no process runs), and OTel's native objects then need
+regenerating with the load-site fields. The six-application timing at
+`SAMPLES=3 WORKLOAD_DURATION=180` waits on those.
