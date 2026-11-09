@@ -1369,3 +1369,180 @@ end KProgFormal.Refinement.Arm64RawRegister.Branch
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.zero_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.bit_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.Orn
+open Reference
+open Reference.AArch64 (Register Width ShiftKind)
+
+/-- Incoming tagged operands precede the actual byte1 modifier, byte2 amount,
+generated ORN value and scalarizing width/tag writeback. -/
+def body (aux : BitVec 32) (width : Width) (dst src rhs : Register)
+    (origins : Origins) (state : State) : Transition State :=
+  let modified := GeneratedArm64Mod.value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (readRegister origins state rhs) ((GeneratedArm64Aux.b2 aux).setWidth 64)
+    (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64Orn.value .orn_reg (readRegister origins state src) modified
+    (Arm64Register.handlerWidth width)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem body_projects (aux : BitVec 32) (width : Width) (dst src rhs : Register)
+    (origins : Origins) (state : State) :
+    observe origins (body aux width dst src rhs origins state) =
+      Arm64Dispatcher.ornBody aux width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+        (Arm64Register.registerCode rhs) (image origins state) := by
+  simp only [body, observe, advance_refines, write_refines, read_refines,
+    Arm64Dispatcher.ornBody, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write,
+    Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+theorem body_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src rhs : Register) (lane0 lane3 : Byte) (origins : Origins) (state : State) :
+    observe origins (body (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Shift.modifier kind)
+      (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src rhs origins state) =
+      Reference.AArch64.step (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩) (image origins state) := by
+  rw [body_projects, Arm64Dispatcher.orn_body_refines]
+
+theorem body_unmodified_refines (width : Width) (dst src rhs : Register)
+    (amount lane0 lane3 : Byte) (origins : Origins) (state : State) :
+    observe origins (body (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)
+      width dst src rhs origins state) = Reference.AArch64.step
+        (.logic ⟨width, .disjunction true, .lsl, ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩) (image origins state) := by
+  rw [body_projects, Arm64Dispatcher.orn_body_unmodified]
+  exact Arm64Dispatcher.orn_body_refines width .lsl ⟨0, by cases width <;> decide⟩ dst src rhs lane0 lane3 _
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match Bitfield.dispatch code aux width dst src rhs src3 value origins state with
+  | some result => some result
+  | none => if code = GeneratedArm64Orn.code .orn_reg then some (body aux width dst src rhs origins state) else none
+
+theorem leading_passes (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    Bitfield.dispatch (GeneratedArm64Orn.code .orn_reg) aux width dst src rhs src3 value origins state = none := rfl
+
+theorem reached (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Orn.code .orn_reg) aux width dst src rhs src3 value origins state =
+      some (body aux width dst src rhs origins state) := by
+  simp only [dispatch, leading_passes, if_pos rfl]
+  rfl
+
+theorem production (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register)
+    (unused3 : Byte) (value otherValue : Word) (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Orn.code .orn_reg) aux width dst src rhs src3 value origins state).map (observe origins) =
+      Arm64Dispatcher.dispatchThroughOrn (GeneratedArm64Orn.code .orn_reg) aux width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode rhs)
+        unused3 otherValue sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.orn_reached]
+  exact congrArg some (body_projects aux width dst src rhs origins state)
+
+theorem dispatch_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src rhs src3 : Register) (lane0 lane3 : Byte) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Orn.code .orn_reg) (Arm64Arithmetic.FlagArithmetic.packedAux
+      (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_refines width kind amount dst src rhs lane0 lane3 origins state)
+
+theorem dispatch_unmodified_refines (width : Width) (dst src rhs src3 : Register)
+    (amount lane0 lane3 : Byte) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Orn.code .orn_reg) (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)
+      width dst src rhs src3 value origins state).map (observe origins) = some (Reference.AArch64.step
+        (.logic ⟨width, .disjunction true, .lsl, ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_unmodified_refines width dst src rhs amount lane0 lane3 origins state)
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Bitfield.Binding code aux width dst src rhs src3 value instruction) :
+    (dispatch code aux width dst src rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := Bitfield.step_refines origins state code aux width dst src rhs src3 value instruction binding
+  unfold dispatch
+  cases leading : Bitfield.dispatch code aux width dst src rhs src3 value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Bitfield.Binding code aux width dst src rhs src3 value instruction) :
+      Binding code aux width dst src rhs src3 value instruction
+  | shifted (width : Width) (kind : ShiftKind) (amount : Fin width.bits) (dst src rhs src3 : Register)
+      (lane0 lane3 : Byte) (value : Word) :
+      Binding (GeneratedArm64Orn.code .orn_reg) (Arm64Arithmetic.FlagArithmetic.packedAux
+        (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src rhs src3 value
+        (.logic ⟨width, .disjunction true, kind, amount, dst, src, rhs⟩)
+  | unmodified (width : Width) (dst src rhs src3 : Register) (amount lane0 lane3 : Byte) (value : Word) :
+      Binding (GeneratedArm64Orn.code .orn_reg) (Arm64Arithmetic.FlagArithmetic.packedAux .none amount lane0 lane3)
+        width dst src rhs src3 value (.logic ⟨width, .disjunction true, .lsl, ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩)
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src rhs src3 value instruction) :
+    (dispatch code aux width dst src rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src rhs src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst src rhs src3 value instruction bound
+  | shifted => apply dispatch_refines
+  | unmodified => apply dispatch_unmodified_refines
+
+/-- Extend only the raw numeric execute arm; all source control forms keep
+their established label map and exact data/tag-frame semantics. -/
+def dispatchEmission (nativeAddress : Word → Word) (emission : Branch.Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .execute code aux width dst src src2 src3 value => dispatch code aux width dst src src2 src3 value origins state
+  | _ => Branch.dispatch nativeAddress emission origins state
+
+theorem earlier_emission_step (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : Branch.Binding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases emission with
+  | execute code aux width dst src rhs src3 value =>
+      cases binding with
+      | execute => apply earlier_step; assumption
+  | jump current target => exact Branch.step_refines nativeAddress (.jump current target) origins state instruction binding
+  | condition code current fallthrough target =>
+      exact Branch.step_refines nativeAddress (.condition code current fallthrough target) origins state instruction binding
+  | zero width nonzero src current fallthrough target =>
+      exact Branch.step_refines nativeAddress (.zero width nonzero src current fallthrough target) origins state instruction binding
+  | bit nonzero src bit current fallthrough target =>
+      exact Branch.step_refines nativeAddress (.bit nonzero src bit current fallthrough target) origins state instruction binding
+
+inductive EmissionBinding (nativeAddress : Word → Word) (pc : Word) : Branch.Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : Branch.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : Branch.Binding nativeAddress pc emission instruction) :
+      EmissionBinding nativeAddress pc emission instruction
+  | execute (code : Nat) (aux : BitVec 32) (width : Width) (dst src rhs src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction) (binding : Binding code aux width dst src rhs src3 value instruction) :
+      EmissionBinding nativeAddress pc (.execute code aux width dst src rhs src3 value) instruction
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Branch.Emission)
+    (origins : Origins) (state : State) (instruction : Reference.AArch64.Instruction)
+    (binding : EmissionBinding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound => exact earlier_emission_step nativeAddress emission origins state instruction bound
+  | execute code aux width dst src rhs src3 value instruction bound =>
+      exact step_refines origins state code aux width dst src rhs src3 value instruction bound
+
+end KProgFormal.Refinement.Arm64RawRegister.Orn
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.body_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.body_unmodified_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.leading_passes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.dispatch_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.dispatch_unmodified_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.step_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.earlier_emission_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Orn.emission_step_refines

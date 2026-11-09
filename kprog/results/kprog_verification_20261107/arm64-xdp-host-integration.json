@@ -78349,5 +78349,34 @@
       "vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865"
     },
     "source_stable": true
+  },
+  "arm64_raw_orn_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "ebf45b3a5653ea5b9c32218c4a9301c7bf1f423bd36960426cbaaa437e6d3147",
+      "sorryAx": 0,
+      "reduction_bridge": 68,
+      "scope": "Raw ORN_REG plus prior31 numeric raw operations and six source branches; incoming materialized operands, actual modifier/amount, generated ORN and width/scalar-tag writeback. Native shifted/omitted modifier domains, arbitrary unused AUX0/AUX3/SRC3/IMM, full architecture and combined emission step. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_ORN_REG"
+    ],
+    "raw_operation_count": 32,
+    "source_branch_count": 6,
+    "new_audits": 12,
+    "total_audits": 103,
+    "archive": "arm-raw-orn.log.gz",
+    "source_snapshots": {
+      "source-arm64_mod.h.txt": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+      "source-arm64_orn.h.txt": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "62e1fcdb91fb28c31ded2f264c935fd9eb5f2359aa19d6df137c3120a5886b8e",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-Arm64Logic.lean.txt": "1072c0a29ab3a3580699944f6ea1e271a9c777bbe710786067f234f51a331c56"
+    },
+    "scope": "RawORN_REG and prior31 numericraw/sixsource branches; actualmaterializedoperands/modifier/amount/generatedORN/widthtagwrite/fullarchitecture. Native W/X/shiftbounds andomittedmodifier/arbitraryamount; unusedbytes incl255. Productiondispatcher equality andcombined numeric32+source6 emissionstep. Entry/nativeLabel/data/codeaddress/C extraction/union/physical/compiler interfaces explicit; Bforwarding/calleecomparison independent."
   }
 }

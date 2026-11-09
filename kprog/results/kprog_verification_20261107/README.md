@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 31/74 |
-| Raw register dispatcher arm composition | 32/75 | 31/74 |
+| Raw register handler refinement | 32/75 | 32/74 |
+| Raw register dispatcher arm composition | 32/75 | 32/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6552,9 +6552,9 @@ B forwarding and callee comparison storage stay independent.
 ### ARM raw source-emitted branches
 
 B, B.cond, CBZ/CBNZ and TBZ/TBNZ are emitted outside L_EXEC's numeric catalogue.
-The ledger now gives each source family and source token its own row. Numeric
-raw coverage remains31/74; six source branch families have separate6/6 raw-model
-coverage. `Branch.dispatch` composes the prior31 numeric raw operations with
+The ledger now gives each source family and source token its own row. This source-branch batch recorded31/74 numeric raw operations and separate6/6
+source branch families; later numeric increments compose through the same
+source-emission interface. `Branch.dispatch` composes the prior31 numeric raw operations with
 these producer forms through one source-emission step theorem.
 
 The C-generated forward/backward shape consumes source coordinates, while the
@@ -6586,3 +6586,27 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_2adbd4abd`. Every check retains its exact committed source identity.
 
 Full raw archive: [full-make-check-2adbd4abd.log.gz](full-make-check-2adbd4abd.log.gz).
+
+### ARM raw ORN and extended emission step
+
+ORN_REG now composes incoming raw64-bit word/tag materialization, the actual
+AUX byte1 modifier and byte2 amount, generated complemented disjunction and
+scalarizing width/tag writeback. Native W/X forms cover all four shift kinds,
+encoded amount bounds, all register aliases and XZR. Omitted modifiers ignore
+the entire amount byte; AUX0/AUX3 and unused SRC3/IMM retain arbitrary values,
+including NONE255. Whole architectural state, empty ordered events and fault
+result compose through `Orn.body_projects` and the production ORN dispatcher.
+
+`Orn.step_refines` extends numeric raw coverage31to32/74. Its source-emission
+step retains every prior source branch and composes32 numeric raw operations
+with six source control families. Current/next/target native label identities,
+native modifier fields, entry/data/code-address provenance, C extraction/union
+and physical/compiler transport remain explicit generic interfaces. B layout
+and callee comparison storage stay independent.
+
+Twelve new and91 preceding laws audit with module/root checks0, sorryAx0 and
+68 inherited Lean.ofReduceBool dependencies. The
+[raw ORN receipt](arm-raw-orn.log.gz) retains C/generated and canonical sources,
+exact previous public source prefix, original first-draft diagnostic, final
+compiled module and all proof logs. Source-control ledger rows retain their
+separate6/6 count and selected replay interfaces.

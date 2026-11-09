@@ -79,7 +79,7 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 31/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 32/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
@@ -94,6 +94,7 @@
 - [x] **V** ARM raw BITFIELD：UBFX/SBFX/UBFIZ/BFXIL/BFI五种native形式；输入SRC/旧DST的raw/tag还原、实际AUX字段、width/tag写回、全部别名/XZR、任意unused高字节/SRC2/SRC3/IMM，以及production dispatcher和31操作统一step；新增8条及前69条审计/模块/root通过（本提交，raw31/74），native字段边界与C/物理compiler接口显式。
 - [x] **V** ARM raw源分支B/B.cond/CBZ/CBNZ/TBZ/TBNZ六族：原始tag/GPR/NZCV、W/X zero和low6 bit测试、前/后向源标签选择、current/next/target native地址绑定、NV归一化和完整data/tag frame，production emission等式与前31数值raw操作统一step；新增14条及前77条审计/模块/root通过（本提交），数值31/74与源分支6/6分列。
 - [ ] **V** ARM六族source-control的selected硬件/official-model回放与native标签提取/数据和代码地址对应接口；通用label-map定理已在raw源分支批次给出，数值catalogue保持独立。
+- [x] **V** ARM raw ORN_REG：物化SRC/SRC2、实际modifier/amount、四类native shift与omitted modifier任意amount、width/tag写回、全部别名/XZR和unused字节含255；production ORN dispatcher、32操作raw step以及保留六类源分支的统一emission step；新增12条及前91条审计/模块/root通过（本提交，raw32/74）。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
