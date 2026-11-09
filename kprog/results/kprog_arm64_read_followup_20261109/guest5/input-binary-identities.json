@@ -1,0 +1,37 @@
+[
+  {
+    "path": "source/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+    "bytes": 2759336,
+    "sha256": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955"
+  },
+  {
+    "path": "source/kprog/arm64/build/native-load-recovery/recovery/Image",
+    "bytes": 42674688,
+    "sha256": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5"
+  },
+  {
+    "path": "source/kprog/arm64/build/native-load-recovery/recovery/bpf_arm64_native_lab.ko",
+    "bytes": 1146368,
+    "sha256": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6"
+  },
+  {
+    "path": "source/runner/build-arm64-llvmbpf/native_loader/libnative_loader.a",
+    "bytes": 722710,
+    "sha256": "5a9147dafa3138d9924683e9a7eb58b9a04be6b32b13eca6a3bd2e84f1576dae"
+  },
+  {
+    "path": "source/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so",
+    "bytes": 881704,
+    "sha256": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba"
+  },
+  {
+    "path": "source/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+    "bytes": 813264,
+    "sha256": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d"
+  },
+  {
+    "path": "source/runner/build-arm64-llvmbpf/native_loader/trusted-service-client",
+    "bytes": 813280,
+    "sha256": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb"
+  }
+]

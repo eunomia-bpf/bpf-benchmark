@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/replay.py", line 36, in <module>
+    try:m.check()
+        ^^^^^^^^^
+  File "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py", line 97, in check
+    if findings:raise RuntimeError('inspect completed native-only findings: '+', '.join(row['name']+':'+row['stage'] for row in findings))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: inspect completed native-only findings: scalar_vector_load_clear_high:accepted_finding, unpaired_stxr_failure:accepted_finding, unpaired_stlxr_failure:accepted_finding, paired_stxr_failure:accepted_finding, paired_stlxr_failure:accepted_finding, entry_return_address_flags:accepted_finding, stack_base_flags:accepted_finding

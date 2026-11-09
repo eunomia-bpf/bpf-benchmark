@@ -1,0 +1,138 @@
+{
+  "source_commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+  "host_exit": false,
+  "controller_exit": 2,
+  "guest_archive_sha256": "b1133c40a659e12e8fdbadcb872ec2ce4cfe35cd69a8fe38e3581002029cbf0f",
+  "guest_archive_bytes": 9075534,
+  "form_count": 14,
+  "form_pass_count": 13,
+  "forms": [
+    {
+      "symbol": "entry",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_byte",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":2,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_half",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":3,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_word",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":4,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_signed_byte",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":5,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_signed_half",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":6,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_signed_word",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":7,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_pair",
+      "exit": 1,
+      "observations": "",
+      "diagnostic": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+    },
+    {
+      "symbol": "entry_pre",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":8,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_post",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":9,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_d0",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":10,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":4294967295}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_q0",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":11,\"attach_btf_id\":69911,\"verified_insns\":114,\"extable_entries\":2,\"control\":4294967295,\"null_result\":4294967295}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_d0_post",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":12,\"attach_btf_id\":69911,\"verified_insns\":113,\"extable_entries\":2,\"control\":4294967295,\"null_result\":4294967295}\n",
+      "diagnostic": ""
+    },
+    {
+      "symbol": "entry_q0_post",
+      "exit": 0,
+      "observations": "{\"native_prog_id\":13,\"attach_btf_id\":69911,\"verified_insns\":114,\"extable_entries\":2,\"control\":4294967295,\"null_result\":4294967295}\n",
+      "diagnostic": ""
+    }
+  ],
+  "atomic": [
+    {
+      "stage": "load",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "stage": "narrow_add",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":207456}\n",
+      "stderr": ""
+    },
+    {
+      "stage": "narrow_set",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":121184}\n",
+      "stderr": ""
+    },
+    {
+      "stage": "narrow_clr",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":108400}\n",
+      "stderr": ""
+    }
+  ],
+  "safety_count": 34,
+  "safety_stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 21,
+    "specialization_rejected": 2,
+    "accepted_finding": 7
+  },
+  "accepted_findings": [
+    "scalar_vector_load_clear_high",
+    "unpaired_stxr_failure",
+    "unpaired_stlxr_failure",
+    "paired_stxr_failure",
+    "paired_stlxr_failure",
+    "entry_return_address_flags",
+    "stack_base_flags"
+  ],
+  "positive_diagnostics": []
+}

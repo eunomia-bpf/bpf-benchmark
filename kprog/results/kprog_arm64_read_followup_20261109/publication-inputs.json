@@ -1,0 +1,54 @@
+{
+  "model": {
+    "commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+    "sha256": {
+      "kprog/arm64/arm64_sim_local_bpf.h": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+      "kprog/arm64/arm64_sim_direct.h": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
+      "kprog/formal/oracles/test_arm64_read_followup_host.c": "3ac7f43986dbb2a3f2c460c3a42a03a48ea7198a646e0c25322dcc89562612a2"
+    },
+    "paths": [
+      "kprog/arm64/arm64_sim_local_bpf.h",
+      "kprog/arm64/arm64_sim_direct.h",
+      "kprog/formal/oracles/test_arm64_read_followup_host.c"
+    ],
+    "remote_ancestor_verified": true
+  },
+  "pair_fixture": {
+    "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+    "sha256": {
+      "kprog/test/native_load_fault/arm64.c": "fd4640dbfe428e68b544875f4065a7b51dc0b8c42523a72ffc329790262a46ec",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/summary.json": "8a91d05a8e65cc4f15a3c6878e4b1e7068ba74bb00ed7c40e87e3fb0b140006e",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/forms.json": "637094a784649febca4717a5d0c3ddcb8539ad3c26aa8a6dc75e3947be046ea7",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/entry.c": "3dfa392b6831aeec763e2169cc20c3f660b51ced5d0d5cf6ec29b7307782d6d4",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/arm64.c": "fd4640dbfe428e68b544875f4065a7b51dc0b8c42523a72ffc329790262a46ec",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/disassembly.txt": "c37eef4774051410b663d80f889a62f3131f174de9a8e99a1bd0ba59a3c42b7b",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/compile.log": "28a8831608b756922a7491475432798cc34447da7d816c6f6b2644ffcc4847f6",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/inputs.json": "8097bac1d2e88bf8766bd05e84631b1e96df76420ffb7b84645f3bb671b8e339",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/raw.tar.gz": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220"
+    },
+    "paths": [
+      "kprog/test/native_load_fault/arm64.c",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/summary.json",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/forms.json",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/entry.c",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/arm64.c",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/disassembly.txt",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/compile.log",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/inputs.json",
+      "kprog/results/kprog_arm64_read_followup_20261109/guest6/raw.tar.gz"
+    ],
+    "remote_ancestor_verified": true
+  },
+  "micro": {
+    "commit": "0af1c2904d8beb277d75d06504043e770d8fe3ca",
+    "sha256": {
+      "kprog/results/kprog_arm64_read_followup_20261109/effective-address/micro.json": "a0076480239ba6d63f9332473ac4a3dc8b8b6de9f4cb512e7fa4b737b34b0b36",
+      "kprog/results/kprog_arm64_read_followup_20261109/effective-address/negative-micro.json": "f6909d99b333aaca65e2ace6025212e58dd0c407296f1957a2f700e3329948f1"
+    },
+    "paths": [
+      "kprog/results/kprog_arm64_read_followup_20261109/effective-address/micro.json",
+      "kprog/results/kprog_arm64_read_followup_20261109/effective-address/negative-micro.json"
+    ],
+    "remote_ancestor_verified": true
+  }
+}

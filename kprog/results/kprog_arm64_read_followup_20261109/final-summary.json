@@ -1,0 +1,40 @@
+{
+  "model_commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+  "forms_observed": 14,
+  "forms_guest5_passed": 13,
+  "pair_guest6_passed": true,
+  "safety_count": 34,
+  "safety_stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 21,
+    "specialization_rejected": 2,
+    "accepted_finding": 7
+  },
+  "accepted_findings": [
+    "scalar_vector_load_clear_high",
+    "unpaired_stxr_failure",
+    "unpaired_stlxr_failure",
+    "paired_stxr_failure",
+    "paired_stlxr_failure",
+    "entry_return_address_flags",
+    "stack_base_flags"
+  ],
+  "negative_native_executions": 0,
+  "micro_compiled": 29,
+  "unchecked_read_compiled": 1,
+  "host_suite": {
+    "commands": 116,
+    "passing_banners": 105,
+    "diagnostic_commands": 13
+  },
+  "focused_host_checks_per_compiler": 5711,
+  "lse_width_units": 12,
+  "decoder_words": 10,
+  "pair_metadata_words": 6,
+  "typed_halfword_kernel_test_returns": [
+    2,
+    2,
+    2
+  ],
+  "universal_composition": "partial-C-model-component; universal recovery/O2/compiler/physical extable transport stays with V"
+}
